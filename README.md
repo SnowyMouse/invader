@@ -15,7 +15,7 @@ This program builds cache files. The command line arguments are as follows:
 | `--info` | `-i` | Show credits, source info, and other info. |
 | `--maps <dir>` | `-m` | Use a specific maps directory. |
 | `--no-indexed-tags` | `-n` | Do not index tags. This can speed up build time at the cost of a much larger file size. |
-| `--output <file> | `-o` | Output to a specific file. |
+| `--output <file>` | `-o` | Output to a specific file. |
 | `--quiet` | `-q` | Only output error messages. |
 | `--tags [dir] [...]` | `-t` | Use the specified tags directory(s). Specify directories in order of precedence. |
 | `--with-index <file>` | `-w` | Use an index file for the tags, ensuring the map's tags are ordered in the same way. |
