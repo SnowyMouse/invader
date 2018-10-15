@@ -37,9 +37,9 @@ namespace Invader::HEK {
             float density_scale = tag.density / mass_points_count;
             float density_scale_co = 0.0f;
 
-            float xx = 1e-30;
-            float yy = 1e-30;
-            float zz = 1e-30;
+            float xx = 1e-30f;
+            float yy = 1e-30f;
+            float zz = 1e-30f;
 
             float neg_zx = 0.0f;
             float neg_xy = 0.0f;

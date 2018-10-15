@@ -216,7 +216,7 @@ namespace Invader::HEK {
             if(compressed) {
                 INCREMENT_DATA_PTR(compressed_data_offset);
                 ADD_POINTER_FROM_INT32(reflexive.frame_data.pointer, compiled.data.size());
-                reflexive.frame_data.size = reflexive.frame_data.size - compressed_data_offset;
+                reflexive.frame_data.size = static_cast<std::int32_t>(reflexive.frame_data.size - compressed_data_offset);
                 std::size_t frame_size = reflexive.frame_data.size;
                 compiled.data.insert(compiled.data.end(), data, data + frame_size);
                 INCREMENT_DATA_PTR(frame_size);
@@ -270,7 +270,7 @@ namespace Invader::HEK {
                 if(i != 0 && animation->main_animation_index != 0) {
                     break;
                 }
-                animation->main_animation_index = i;
+                animation->main_animation_index = static_cast<std::int32_t>(i);
                 auto next_animation = static_cast<std::uint16_t>(animation->next_animation.read());
                 if(next_animation == 0xFFFF) {
                     break;
