@@ -11,19 +11,19 @@
 #include "../header.hpp"
 
 namespace Invader::HEK {
-    ENDIAN_TEMPLATE(EndianType) struct FontCharacterTable {
+    ENDIAN_TEMPLATE(EndianType) struct FontCharacterIndex {
         EndianType<std::int16_t> character_index;
 
-        ENDIAN_TEMPLATE(NewType) operator FontCharacterTable<NewType>() const noexcept {
-            FontCharacterTable<NewType> copy;
+        ENDIAN_TEMPLATE(NewType) operator FontCharacterIndex<NewType>() const noexcept {
+            FontCharacterIndex<NewType> copy;
             COPY_THIS(character_index);
             return copy;
         }
     };
-    static_assert(sizeof(FontCharacterTable<BigEndian>) == 0x2);
+    static_assert(sizeof(FontCharacterIndex<BigEndian>) == 0x2);
 
     ENDIAN_TEMPLATE(EndianType) struct FontCharacterTables {
-        TagReflexive<EndianType, FontCharacterTable> character_table;
+        TagReflexive<EndianType, FontCharacterIndex> character_table;
 
         ENDIAN_TEMPLATE(NewType) operator FontCharacterTables<NewType>() const noexcept {
             FontCharacterTables<NewType> copy;
