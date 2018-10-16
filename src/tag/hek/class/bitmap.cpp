@@ -14,15 +14,11 @@ namespace Invader::HEK {
     void compile_bitmap_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         BEGIN_COMPILE(Bitmap);
 
-        if(size < static_cast<std::size_t>(tag.compressed_color_plate_data.size)) {
-            throw OutOfBoundsException();
-        }
+        ASSERT_SIZE(tag.compressed_color_plate_data.size);
         INCREMENT_DATA_PTR(tag.compressed_color_plate_data.size);
 
         auto *processed_data = data;
-        if(size < static_cast<std::size_t>(tag.processed_pixel_data.size)) {
-            throw OutOfBoundsException();
-        }
+        ASSERT_SIZE(tag.processed_pixel_data.size);
         compiled.asset_data.insert(compiled.asset_data.begin(), processed_data, processed_data + tag.processed_pixel_data.size);
         INCREMENT_DATA_PTR(tag.processed_pixel_data.size);
 
