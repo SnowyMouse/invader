@@ -45,7 +45,7 @@ int main(int argc, const char **argv) {
     }
     std::fseek(f, 0, SEEK_END);
     std::size_t size = std::ftell(f);
-    std::unique_ptr<std::byte> map_data(new std::byte[size]);
+    std::unique_ptr<std::byte []> map_data(new std::byte[size]);
     std::fseek(f, 0, SEEK_SET);
     if(std::fread(map_data.get(), size, 1, f) != 1) {
         std::cerr << "Failed to read " << argv[1] << "\n";
@@ -56,7 +56,7 @@ int main(int argc, const char **argv) {
     f = nullptr;
 
     try {
-        Map map(map_data.get(), size);
+        auto map = Map::map_with_pointer(map_data.get(), size);
 
         // Open output
         f = std::fopen(output, "wb");
