@@ -997,24 +997,29 @@ namespace Invader {
                     }
 
                     // Get the offsets of each bitmap, making sure each offset is valid
-                    std::vector<std::size_t> offsets;
+                    std::vector<std::size_t> offsets(bitmaps_count);
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
                         std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
                         if(pixels_offset > tag_asset_data_size) {
                             throw InvalidPointerException();
                         }
-                        if(b != 0 && pixels_offset <= offsets[b - 1]) {
-                            throw InvalidPointerException();
-                        }
-                        offsets.push_back(pixels_offset);
+                        offsets[b] = pixels_offset;
                     }
 
                     // Calculate the sizes of each bitmap
-                    std::vector<std::size_t> sizes;
-                    for(std::size_t b = 0; b < bitmaps_count - 1; b++) {
-                        sizes.push_back(offsets[b + 1] - offsets[b]);
+                    std::vector<std::size_t> sizes(bitmaps_count);
+                    for(std::size_t b = 0; b < bitmaps_count; b++) {
+                        std::size_t size = tag_asset_data_size - offsets[b];
+                        for(std::size_t b2 = 0; b2 < bitmaps_count; b2++) {
+                            if(offsets[b2] > offsets[b]) {
+                                std::size_t potential_size = offsets[b2] - offsets[b];
+                                if(potential_size < size) {
+                                    size = potential_size;
+                                }
+                            }
+                        }
+                        sizes[b] = size;
                     }
-                    sizes.push_back(tag_asset_data_size - offsets[offsets.size() - 1]);
 
                     // Write the data
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
