@@ -286,6 +286,7 @@ namespace Invader {
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
         cache_file_header.file_size = static_cast<std::uint32_t>(file.size());
+        cache_file_header.crc32 = 0x21706156;
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "Invader " INVADER_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 
