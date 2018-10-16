@@ -46,6 +46,7 @@ namespace Invader {
 
         // Add directory separator to the end of each directory
         std::vector<std::string> new_tag_dirs;
+        new_tag_dirs.reserve(tags_directories.size());
         for(const auto &dir : tags_directories) {
             if(dir.size() == 0) {
                 continue;
@@ -234,7 +235,7 @@ namespace Invader {
         #endif
 
         // Add bitmap and sound data
-        file.reserve(file.size() + bitmap_sound_size + vertices.size() + indices.size() + 4);
+        file.reserve(file.size() + bitmap_sound_size + model_data_size + tag_data.size() + 4);
         add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         #ifndef NO_OUTPUT
@@ -278,7 +279,6 @@ namespace Invader {
         // Add tag data
         cache_file_header.tag_data_offset = static_cast<std::uint32_t>(file.size());
         file.insert(file.end(), tag_data.data(), tag_data.data() + tag_data.size());
-        file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
 
         // Add the header
         cache_file_header.head_literal = CACHE_FILE_HEAD;
@@ -564,13 +564,13 @@ namespace Invader {
                         particle.unknown = 1.0f / static_cast<float>(std::pow(static_cast<float>(2.0f), static_cast<float>(bitmap.sprite_budget_size.read())) * 32.0f); // 1/32 if 32x32, 1/64 if 64x64, etc.
 
                         auto bitmap_data_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_data.pointer);
-                        std::vector<std::int16_t> widths;
-                        std::vector<std::int16_t> heights;
+                        std::vector<std::int16_t> widths(bitmap.bitmap_data.count);
+                        std::vector<std::int16_t> heights(bitmap.bitmap_data.count);
                         if(bitmap_data_offset != ~static_cast<std::size_t>(0)) {
                             for(std::size_t i = 0; i < bitmap.bitmap_data.count; i++) {
                                 auto &bitmap_data = reinterpret_cast<BitmapData<LittleEndian> *>(bitmap_tag->data.data() + bitmap_data_offset)[i];
-                                widths.emplace_back(bitmap_data.width);
-                                heights.emplace_back(bitmap_data.height);
+                                widths[i] = bitmap_data.width;
+                                heights[i] = bitmap_data.height;
                             }
                         }
 
@@ -992,7 +992,6 @@ namespace Invader {
                     // Append the asset data if not deduped
                     if(!this->compiled_tags[i]->deduped) {
                         file.insert(file.end(), tag_asset_data, tag_asset_data + tag_asset_data_size);
-                        file.insert(file.end(), REQUIRED_PADDING_32_BIT(tag_asset_data_size), std::byte());
                         data_written = true;
                     }
 
@@ -1035,7 +1034,6 @@ namespace Invader {
                     // Add the asset data if not deduped
                     if(!this->compiled_tags[i]->deduped) {
                         file.insert(file.end(), tag_asset_data, tag_asset_data + tag_asset_data_size);
-                        file.insert(file.end(), REQUIRED_PADDING_32_BIT(tag_asset_data_size), std::byte());
                         data_written = true;
                     }
 
