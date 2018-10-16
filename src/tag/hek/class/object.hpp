@@ -77,7 +77,10 @@ namespace Invader::HEK {
         EndianType<std::int16_t> turn_off_with;
         EndianType<float> scale_by;
         PAD(0xFC);
-        LittleEndian<float> unknown_floats[4];
+        LittleEndian<float> inverse_bounds;
+        LittleEndian<float> unknown_float_2;
+        LittleEndian<float> inverse_step;
+        LittleEndian<float> inverse_period;
         TagString usage;
 
         ENDIAN_TEMPLATE(NewEndian) operator ObjectFunction<NewEndian>() const noexcept {
@@ -100,7 +103,10 @@ namespace Invader::HEK {
             COPY_THIS(bounds);
             COPY_THIS(turn_off_with);
             COPY_THIS(scale_by);
-            COPY_THIS_ARRAY(unknown_floats);
+            COPY_THIS(inverse_bounds);
+            COPY_THIS(unknown_float_2);
+            COPY_THIS(inverse_step);
+            COPY_THIS(inverse_period);
             COPY_THIS(usage);
             return copy;
         }
@@ -230,11 +236,14 @@ namespace Invader::HEK {
                                 DEFAULT_VALUE(tag.render_bounding_radius, tag.bounding_radius); \
                                 ADD_REFLEXIVE_START(tag.functions) { \
                                     DEFAULT_VALUE(reflexive.period, 1.0f); \
-                                    DEFAULT_VALUE(reflexive.unknown_floats[3], 1.0f); \
                                     if(reflexive.bounds.from == 0.0f && reflexive.bounds.to == 0.0f) { \
                                         reflexive.bounds.to = 1.0f; \
                                     } \
-                                    DEFAULT_VALUE(reflexive.unknown_floats[0], 1.0f / (reflexive.bounds.to - reflexive.bounds.from)); \
+                                    reflexive.inverse_bounds = 1.0f / (reflexive.bounds.to - reflexive.bounds.from); \
+                                    if(reflexive.step_count > 1) { \
+                                        reflexive.inverse_step = 1.0f / (reflexive.step_count - 1); \
+                                    } \
+                                    reflexive.inverse_period = 1.0f / reflexive.period; \
                                 } ADD_REFLEXIVE_END; \
                                 ADD_REFLEXIVE_START(tag.change_colors) { \
                                     ADD_REFLEXIVE(reflexive.permutations); \
