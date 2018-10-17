@@ -1,14 +1,15 @@
 # Invader
 
-Invader is an open source map and tag builder for Halo: Custom Edition written in C++.
+Invader is an open source map and tag builder for Halo: Custom Edition written in C++ using the C++17 standard.
 
-In order to build this project, your compiler must support the C++17 standard. GCC version 7.3 or newer has been tested and works with this, though I do plan on implementing std::filesystem - something that is only supported in GCC 8.2 or newer.
+## Programs
 
-This project is current separated into two programs: invader-build and invader-indexer.
+To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
+well as make things easier for me to work with, this project is split into different programs.
 
-## invader-build
+### invader-build
 
-This program builds cache files. The command line arguments are as follows:
+This program builds cache files.
 
 | Argument | Alternate | Description |
 | --- | --- | --- |
@@ -20,6 +21,7 @@ This program builds cache files. The command line arguments are as follows:
 | `--tags [dir] [...]` | `-t` | Use the specified tags directory(s). Specify directories in order of precedence. |
 | `--with-index <file>` | `-w` | Use an index file for the tags, ensuring the map's tags are ordered in the same way. |
 
-## invader-indexer
+### invader-indexer
 
-This program builds index files for usage with `--with-index` with Invader.
+This program builds index files for usage with `--with-index` with invader-build. It takes exactly two arguments:
+`<input map> <output index>`
