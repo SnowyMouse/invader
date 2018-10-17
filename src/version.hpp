@@ -24,5 +24,5 @@
                           std::cout << "    Vaporeon                       - Testing"                                     << std::endl; \
                           std::cout                                                                                       << std::endl; \
                           std::cout << "Other links:"                                                                     << std::endl; \
-                          std::cout << "    Invader source code            - https://github.com/Kavawuvi/Invader (TBD)"   << std::endl; \
+                          std::cout << "    Invader source code            - https://github.com/Kavawuvi/Invader      "   << std::endl; \
                           std::cout << "    Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/"   << std::endl;
