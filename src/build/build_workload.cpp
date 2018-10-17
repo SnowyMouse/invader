@@ -385,7 +385,7 @@ namespace Invader {
                     network_issue = true;
                 }
                 #endif
-                compiled_tag->path = "stub\\" + compiled_tag->path;
+                compiled_tag->path = std::string("stub\\") + tag_class_to_extension(compiled_tag->tag_class_int) + "\\" + compiled_tag->path;
                 compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
                 compiled_tag->data.insert(compiled_tag->data.begin(), 12, std::byte());
             }
