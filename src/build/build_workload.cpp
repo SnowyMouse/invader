@@ -231,7 +231,6 @@ namespace Invader {
         #ifndef NO_OUTPUT
         if(this->verbose) {
             std::printf("Model data:        %.02f MiB\n", BYTES_TO_MiB(model_data_size));
-            std::printf("Deduped models:   -%.02f MiB\n", BYTES_TO_MiB(this->deduped_data));
         }
         #endif
 
@@ -243,8 +242,7 @@ namespace Invader {
         if(this->verbose) {
             std::size_t indexed_count = 0;
             std::size_t reduced_amount = 0;
-            std::size_t deduped_count = 0;
-            std::size_t deduped_amount = 0;
+
             for(auto &t : this->compiled_tags) {
                 if(t->indexed) {
                     indexed_count++;
@@ -253,14 +251,11 @@ namespace Invader {
                         reduced_amount += t->data_size;
                     }
                 }
-                if(t->deduped) {
-                    deduped_count++;
-                    deduped_amount += t->asset_data_size;
-                }
             }
+
             std::printf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
             std::printf("Indexed tags:      %zu (-%.02f MiB)\n", indexed_count, BYTES_TO_MiB(reduced_amount));
-            std::printf("Deduped tags:      %zu (-%.02f MiB)\n", deduped_count, BYTES_TO_MiB(deduped_amount));
+            std::printf("Deduped data:      -%.02f MiB\n", BYTES_TO_MiB(this->deduped_data));
         }
         #endif
 
@@ -959,9 +954,15 @@ namespace Invader {
         return offset;
     }
 
+    struct DedupingAssetData {
+        std::size_t offset;
+        std::size_t size;
+    };
+
     void BuildWorkload::add_bitmap_and_sound_data(std::vector<std::byte> &file, std::vector<std::byte> &tag_data) {
         using namespace HEK;
 
+        std::vector<DedupingAssetData> all_asset_data;
         auto &tag_data_header = *reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data());
         auto *tags = reinterpret_cast<CacheFileTagDataTag *>(tag_data.data() + sizeof(tag_data_header));
         for(std::size_t i = 0; i < this->tag_count; i++) {
@@ -978,14 +979,6 @@ namespace Invader {
 
             // Get the file offset
             auto *tag_asset_data = this->compiled_tags[i]->asset_data.data();
-            std::size_t file_offset;
-            if(this->compiled_tags[i]->deduped) {
-                file_offset = this->compiled_tags[i]->dedupe_file_offset;
-            }
-            else {
-                file_offset = file.size();
-            }
-            bool data_written = false;
 
             // Check what tag we're dealing with
             switch(tag_class) {
@@ -993,12 +986,6 @@ namespace Invader {
                     auto &bitmap_tag_data = *reinterpret_cast<Bitmap<LittleEndian> *>(tag_data.data() + (tag.tag_data - this->tag_data_address));
                     std::size_t bitmaps_count = bitmap_tag_data.bitmap_data.count;
                     auto *bitmaps_data = bitmap_tag_data.bitmap_data.get_structs(tag_data, this->tag_data_address);
-
-                    // Append the asset data if not deduped
-                    if(!this->compiled_tags[i]->deduped) {
-                        file.insert(file.end(), tag_asset_data, tag_asset_data + tag_asset_data_size);
-                        data_written = true;
-                    }
 
                     // Get the offsets of each bitmap, making sure each offset is valid
                     std::vector<std::size_t> offsets(bitmaps_count);
@@ -1029,7 +1016,24 @@ namespace Invader {
                     // Write the data
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
                         bitmaps_data[b].pixels_count = static_cast<std::int32_t>(sizes[b]);
-                        bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(file_offset + offsets[b]);
+
+                        // Make sure it's not duplicate
+                        bool duped = false;
+                        for(auto &asset : all_asset_data) {
+                            if(asset.size == sizes[b] && std::memcmp(tag_asset_data + offsets[b], file.data() + asset.offset, asset.size) == 0) {
+                                bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(asset.offset);
+                                duped = true;
+                                this->deduped_data += asset.size;
+                                break;
+                            }
+                        }
+
+                        if(!duped) {
+                            bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(file.size());
+                            all_asset_data.push_back(DedupingAssetData { file.size(), sizes[b] });
+                            file.insert(file.end(), tag_asset_data + offsets[b], tag_asset_data + offsets[b] + sizes[b]);
+                        }
+
                         bitmaps_data[b].bitmap_class = tag_class;
                         bitmaps_data[b].bitmap_tag_id = tag.tag_id;
                     }
@@ -1037,12 +1041,6 @@ namespace Invader {
                     break;
                 }
                 case TagClassInt::TAG_CLASS_SOUND: {
-                    // Add the asset data if not deduped
-                    if(!this->compiled_tags[i]->deduped) {
-                        file.insert(file.end(), tag_asset_data, tag_asset_data + tag_asset_data_size);
-                        data_written = true;
-                    }
-
                     auto &sound_tag_data = *reinterpret_cast<Sound<LittleEndian> *>(tag_data.data() + (tag.tag_data - this->tag_data_address));
                     std::size_t pitch_range_count = sound_tag_data.pitch_ranges.count;
                     auto *pitch_range_data = sound_tag_data.pitch_ranges.get_structs(tag_data, this->tag_data_address);
@@ -1050,10 +1048,30 @@ namespace Invader {
                         auto &pitch_range = pitch_range_data[p];
                         std::size_t permutation_count = pitch_range.permutations.count;
                         auto *permutation_data = pitch_range.permutations.get_structs(tag_data, this->tag_data_address);
+
+                        // Write the data
                         for(std::size_t r = 0; r < permutation_count; r++) {
                             auto &permutation = permutation_data[r];
+                            std::size_t size = permutation.samples.size;
                             std::size_t offset = permutation.samples.file_offset;
-                            permutation.samples.file_offset = static_cast<std::uint32_t>(file_offset + offset);
+
+                            // Make sure it's not duplicate
+                            bool duped = false;
+                            for(auto &asset : all_asset_data) {
+                                if(asset.size == size && std::memcmp(tag_asset_data + offset, file.data() + asset.offset, asset.size) == 0) {
+                                    permutation.samples.file_offset = static_cast<std::int32_t>(asset.offset);
+                                    duped = true;
+                                    this->deduped_data += asset.size;
+                                    break;
+                                }
+                            }
+
+                            if(!duped) {
+                                permutation.samples.file_offset = static_cast<std::int32_t>(file.size());
+                                all_asset_data.push_back(DedupingAssetData { file.size(), size });
+                                file.insert(file.end(), tag_asset_data + offset, tag_asset_data + offset + size);
+                            }
+
                             permutation.tag_id_0 = tag.tag_id;
                             permutation.tag_id_1 = tag.tag_id;
                         }
@@ -1062,18 +1080,6 @@ namespace Invader {
                 }
                 default:
                     break;
-            }
-
-            // If data was written, check for duplicated data. Also free anything that will no longer be used to minimize memory usage.
-            if(data_written) {
-                for(std::size_t j = i + 1; j < this->tag_count; j++) {
-                    if(this->compiled_tags[j]->asset_data == this->compiled_tags[i]->asset_data && this->compiled_tags[j]->indexed == false) {
-                        this->compiled_tags[j]->dedupe_file_offset = file_offset;
-                        this->compiled_tags[j]->deduped = true;
-                        this->compiled_tags[j]->asset_data.clear();
-                    }
-                }
-                this->compiled_tags[i]->asset_data.clear();
             }
         }
     }

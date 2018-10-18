@@ -163,16 +163,6 @@ namespace Invader {
          * If indexed, this is the index, unless this is a sound tag.
          */
         std::uint32_t index;
-
-        /**
-         * Deduped data, reducing duplicate asset data
-         */
-        bool deduped = false;
-
-        /**
-         * If deduped, this is the offset to where the data is located in the file
-         */
-        std::size_t dedupe_file_offset;
     };
 
     /**
