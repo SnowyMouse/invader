@@ -1138,7 +1138,7 @@ namespace Invader {
                     // Check if indices are duplicated
                     bool duped_indices = false;
                     for(auto &duped_part : deduping_indices) {
-                        if(duped_part.size == index_size && std::memcmp(part_indices, indices.data() + duped_part.offset, index_size) == 0) {
+                        if(duped_part.size >= index_size && std::memcmp(part_indices, indices.data() + duped_part.offset, index_size) == 0) {
                             part.triangle_offset = static_cast<std::uint32_t>(duped_part.offset);
                             part.triangle_offset_2 = static_cast<std::uint32_t>(duped_part.offset);
                             deduped_data += index_size;
