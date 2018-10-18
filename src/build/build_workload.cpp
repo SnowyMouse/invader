@@ -1084,6 +1084,11 @@ namespace Invader {
         }
     }
 
+    struct DedupingIndexData {
+        std::vector<std::byte> data;
+        std::vector<HEK::GBXModelGeometryPart<HEK::LittleEndian> *> parts;
+    };
+
     void BuildWorkload::add_model_tag_data(std::vector<std::byte> &vertices, std::vector<std::byte> &indices, std::vector<std::byte> &tag_data) {
         using namespace HEK;
 
@@ -1091,7 +1096,7 @@ namespace Invader {
         auto *tags = reinterpret_cast<CacheFileTagDataTag *>(tag_data.data() + sizeof(tag_data_header));
 
         std::vector<DedupingAssetData> deduping_vertices;
-        std::vector<DedupingAssetData> deduping_indices;
+        std::vector<DedupingIndexData> deduping_indices;
 
         for(std::size_t i = 0; i < this->tag_count; i++) {
             auto &tag = tags[i];
@@ -1110,7 +1115,7 @@ namespace Invader {
             for(std::size_t g = 0; g < geometry_count; g++) {
                 auto &geometry = geometry_data[g];
                 std::size_t parts_count = geometry.parts.count;
-                auto *parts_data = geometry.parts.get_structs(tag_data, this->tag_data_address);;
+                auto *parts_data = geometry.parts.get_structs(tag_data, this->tag_data_address);
                 tag_data_header.model_part_count = static_cast<std::uint32_t>(tag_data_header.model_part_count + parts_count);
 
                 // Iterate through parts
@@ -1137,21 +1142,32 @@ namespace Invader {
 
                     // Check if indices are duplicated
                     bool duped_indices = false;
-                    for(auto &duped_part : deduping_indices) {
-                        if(duped_part.size >= index_size && std::memcmp(part_indices, indices.data() + duped_part.offset, index_size) == 0) {
-                            part.triangle_offset = static_cast<std::uint32_t>(duped_part.offset);
-                            part.triangle_offset_2 = static_cast<std::uint32_t>(duped_part.offset);
-                            deduped_data += index_size;
+                    for(auto &duped_index : deduping_indices) {
+                        std::size_t duped_size = duped_index.data.size();
+
+                        // Check if this matches the top of something we already found
+                        if(duped_size >= index_size && std::memcmp(part_indices, duped_index.data.data(), index_size) == 0) {
+                            duped_index.parts.push_back(&part);
                             duped_indices = true;
+                            deduped_data += index_size;
+                            break;
+                        }
+
+                        // Check if what we already found matches the beginning. If so, we can expand it
+                        else if(duped_size < index_size && std::memcmp(part_indices, duped_index.data.data(), duped_size) == 0) {
+                            duped_index.parts.push_back(&part);
+                            duped_index.data.insert(duped_index.data.end(), part_indices + duped_size / sizeof(*part_indices), part_indices + index_size / sizeof(*part_indices));
+                            duped_indices = true;
+                            deduped_data += duped_size;
                             break;
                         }
                     }
 
                     if(!duped_indices) {
-                        part.triangle_offset = static_cast<std::uint32_t>(indices.size());
-                        part.triangle_offset_2 = static_cast<std::uint32_t>(indices.size());
-                        deduping_indices.push_back(DedupingAssetData {indices.size(), index_size});
-                        indices.insert(indices.end(), part_indices, part_indices + index_size / sizeof(*part_indices));
+                        DedupingIndexData data;
+                        data.data.insert(data.data.end(), part_indices, part_indices + index_size / sizeof(*part_indices));
+                        data.parts.push_back(&part);
+                        deduping_indices.push_back(std::move(data));
                     }
 
                     // Check if vertices are duplicated
@@ -1175,6 +1191,16 @@ namespace Invader {
 
             // Free data no longer being used.
             this->compiled_tags[i]->asset_data.clear();
+        }
+
+        // Add all of the unique indices
+        for(auto &duped_index : deduping_indices) {
+            std::size_t offset = indices.size();
+            indices.insert(indices.end(), duped_index.data.data(), duped_index.data.data() + duped_index.data.size());
+            for(auto *part : duped_index.parts) {
+                part->triangle_offset = static_cast<std::uint32_t>(offset);
+                part->triangle_offset_2 = part->triangle_offset;
+            }
         }
     }
 }
