@@ -320,57 +320,61 @@ namespace Invader {
         using namespace HEK;
 
         for(auto &tag : this->compiled_tags) {
-            if(tag->tag_class_int == TagClassInt::TAG_CLASS_BITMAP) {
-                for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
-                    if(this->bitmaps[b].data == tag->asset_data) {
-                        tag->indexed = true;
-                        tag->index = static_cast<std::uint32_t>(b + 1);
-                        tag->asset_data.clear();
-                        tag->data.clear();
-                        break;
+            switch(tag->tag_class_int) {
+                case TagClassInt::TAG_CLASS_BITMAP:
+                    for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
+                        if(this->bitmaps[b].data == tag->asset_data) {
+                            tag->indexed = true;
+                            tag->index = static_cast<std::uint32_t>(b + 1);
+                            tag->asset_data.clear();
+                            tag->data.clear();
+                            break;
+                        }
                     }
-                }
-            }
-            else if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
-                for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
-                    if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
-                        tag->indexed = true;
-                        tag->asset_data.clear();
-                        break;
+                    break;
+                case TagClassInt::TAG_CLASS_SOUND:
+                    for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
+                        if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
+                            tag->indexed = true;
+                            tag->asset_data.clear();
+                            break;
+                        }
                     }
-                }
-            }
-            else if(tag->tag_class_int == TagClassInt::TAG_CLASS_FONT) {
-                for(std::size_t l = 0; l < this->loc.size(); l++) {
-                    auto &loc_tag = this->loc[l];
-                    if(loc_tag.name == tag->path) {
-                        auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
-                        auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
+                    break;
+                case TagClassInt::TAG_CLASS_FONT:
+                    for(std::size_t l = 0; l < this->loc.size(); l++) {
+                        auto &loc_tag = this->loc[l];
+                        if(loc_tag.name == tag->path) {
+                            auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
+                            auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
 
-                        std::size_t tag_font_pixel_size = tag_font->pixels.size;
-                        std::size_t loc_font_pixel_size = loc_font->pixels.size;
+                            std::size_t tag_font_pixel_size = tag_font->pixels.size;
+                            std::size_t loc_font_pixel_size = loc_font->pixels.size;
 
-                        // Make sure the size is the same
-                        if(tag_font_pixel_size == loc_font_pixel_size) {
-                            std::size_t tag_font_pixels = tag->resolve_pointer(&tag_font->pixels.pointer);
-                            std::size_t loc_font_pixels = loc_font->pixels.pointer;
+                            // Make sure the size is the same
+                            if(tag_font_pixel_size == loc_font_pixel_size) {
+                                std::size_t tag_font_pixels = tag->resolve_pointer(&tag_font->pixels.pointer);
+                                std::size_t loc_font_pixels = loc_font->pixels.pointer;
 
-                            // And make sure that the pointer in the loc tag points to something
-                            if(loc_font_pixels < loc_tag.data.size() && loc_font_pixels + loc_font_pixel_size <= loc_tag.data.size()) {
-                                auto *tag_font_pixel_data = tag->data.data() + tag_font_pixels;
-                                auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
+                                // And make sure that the pointer in the loc tag points to something
+                                if(loc_font_pixels < loc_tag.data.size() && loc_font_pixels + loc_font_pixel_size <= loc_tag.data.size()) {
+                                    auto *tag_font_pixel_data = tag->data.data() + tag_font_pixels;
+                                    auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
 
-                                if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
-                                    tag->index = l;
-                                    tag->indexed = true;
-                                    tag->data.clear();
+                                    if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
+                                        tag->index = l;
+                                        tag->indexed = true;
+                                        tag->data.clear();
+                                    }
                                 }
                             }
-                        }
 
-                        break;
+                            break;
+                        }
                     }
-                }
+                    break;
+                default:
+                    break;
             }
         }
     }
