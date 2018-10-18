@@ -368,8 +368,33 @@ namespace Invader {
                                     }
                                 }
                             }
-
                             break;
+                        }
+                    }
+                    break;
+                case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                    for(std::size_t l = 0; l < this->loc.size(); l++) {
+                        auto &loc_tag = this->loc[l];
+                        if(loc_tag.name == tag->path) {
+                            // TODO: Compare strings.
+                            if(loc_tag.data.size() == tag->data.size()) {
+                                tag->index = l;
+                                tag->indexed = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                    for(std::size_t l = 0; l < this->loc.size(); l++) {
+                        auto &loc_tag = this->loc[l];
+                        if(loc_tag.name == tag->path) {
+                            // TODO: Compare tag data.
+                            if(loc_tag.data.size() == tag->data.size()) {
+                                tag->index = l;
+                                tag->indexed = true;
+                                break;
+                            }
                         }
                     }
                     break;
