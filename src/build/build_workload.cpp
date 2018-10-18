@@ -1084,20 +1084,14 @@ namespace Invader {
         }
     }
 
-    struct DedupingModelPart {
-        std::size_t index_offset;
-        std::size_t index_size;
-        std::size_t vertex_offset;
-        std::size_t vertex_size;
-    };
-
     void BuildWorkload::add_model_tag_data(std::vector<std::byte> &vertices, std::vector<std::byte> &indices, std::vector<std::byte> &tag_data) {
         using namespace HEK;
 
         auto &tag_data_header = *reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data());
         auto *tags = reinterpret_cast<CacheFileTagDataTag *>(tag_data.data() + sizeof(tag_data_header));
 
-        std::vector<DedupingModelPart> all_parts;
+        std::vector<DedupingAssetData> deduping_vertices;
+        std::vector<DedupingAssetData> deduping_indices;
 
         for(std::size_t i = 0; i < this->tag_count; i++) {
             auto &tag = tags[i];
@@ -1141,30 +1135,40 @@ namespace Invader {
                         throw OutOfBoundsException();
                     }
 
-                    // Check if part is duplicated
-                    bool duped = false;
-                    for(auto &duped_part : all_parts) {
-                        if(duped_part.index_size == index_size && duped_part.vertex_size == vertex_size) {
-                            if(std::memcmp(part_indices, indices.data() + duped_part.index_offset, index_size) == 0 && std::memcmp(part_vertices, vertices.data() + duped_part.vertex_offset, vertex_size) == 0) {
-                                part.vertex_offset = static_cast<std::uint32_t>(duped_part.vertex_offset);
-                                part.triangle_offset = static_cast<std::uint32_t>(duped_part.index_offset);
-                                part.triangle_offset_2 = static_cast<std::uint32_t>(duped_part.index_offset);
-                                deduped_data += vertex_size + index_size;
-                                duped = true;
-                                break;
-                            }
+                    // Check if indices are duplicated
+                    bool duped_indices = false;
+                    for(auto &duped_part : deduping_indices) {
+                        if(duped_part.size == index_size && std::memcmp(part_indices, indices.data() + duped_part.offset, index_size) == 0) {
+                            part.triangle_offset = static_cast<std::uint32_t>(duped_part.offset);
+                            part.triangle_offset_2 = static_cast<std::uint32_t>(duped_part.offset);
+                            deduped_data += index_size;
+                            duped_indices = true;
+                            break;
                         }
                     }
 
-                    if(!duped) {
-                        part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
+                    if(!duped_indices) {
                         part.triangle_offset = static_cast<std::uint32_t>(indices.size());
                         part.triangle_offset_2 = static_cast<std::uint32_t>(indices.size());
-
-                        all_parts.push_back(DedupingModelPart {indices.size(), index_size, vertices.size(), vertex_size});
-
-                        vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size);
+                        deduping_indices.push_back(DedupingAssetData {indices.size(), index_size});
                         indices.insert(indices.end(), part_indices, part_indices + index_size);
+                    }
+
+                    // Check if vertices are duplicated
+                    bool duped_vertices = false;
+                    for(auto &duped_part : deduping_vertices) {
+                        if(duped_part.size == vertex_size && std::memcmp(part_vertices, vertices.data() + duped_part.offset, vertex_size) == 0) {
+                            part.vertex_offset = static_cast<std::uint32_t>(duped_part.offset);
+                            deduped_data += vertex_size;
+                            duped_vertices = true;
+                            break;
+                        }
+                    }
+
+                    if(!duped_vertices) {
+                        part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
+                        deduping_vertices.push_back(DedupingAssetData {vertices.size(), vertex_size});
+                        vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size);
                     }
                 }
             }
