@@ -553,7 +553,7 @@ namespace Invader {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
                     if(particle.bitmap.tag_id.read().id == 0xFFFFFFFF) {
                         #ifndef NO_OUTPUT
-                        std::cerr << tag_ptr->path << ".particle has no bitmap." << std::endl;
+                        std::cerr << tag_ptr->path << ".particle has no bitmap.\n";
                         #endif
                         throw;
                     }
@@ -918,6 +918,7 @@ namespace Invader {
         // Adjust for all pointers
         for(auto &pointer : compiled_tag->pointers) {
             if(pointer.offset + sizeof(std::uint32_t) > compiled_tag->data_size || pointer.offset_pointed > compiled_tag->data_size) {
+                std::cerr << "Invalid pointer for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
                 throw InvalidPointerException();
             }
             std::uint32_t new_offset;
@@ -933,6 +934,7 @@ namespace Invader {
         // Adjust for all dependencies
         for(auto &dependency : compiled_tag->dependencies) {
             if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data_size) {
+                std::cerr << "Invalid dependency offset for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
                 throw InvalidDependencyException();
             }
             auto &dependency_data = *reinterpret_cast<TagDependency<LittleEndian> *>(tag_data_data + dependency.offset);
@@ -940,6 +942,7 @@ namespace Invader {
             // Resolve the dependency
             std::size_t depended_tag_id = dependency_data.tag_id.read().index;
             if(depended_tag_id >= this->tag_count) {
+                std::cerr << "Invalid dependency index for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
                 throw InvalidDependencyException();
             }
 
@@ -1001,7 +1004,8 @@ namespace Invader {
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
                         std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
                         if(pixels_offset > tag_asset_data_size) {
-                            throw InvalidPointerException();
+                            std::cerr << "Invalid pixels offset for bitmap " << b << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                            throw OutOfBoundsException();
                         }
                         offsets[b] = pixels_offset;
                     }
@@ -1110,12 +1114,14 @@ namespace Invader {
 
                     std::size_t vertex_size = part.vertex_count * sizeof(GBXModelVertexUncompressed<LittleEndian>);
                     if(vertex_size + vertex_offset > model_data_size) {
-                        throw InvalidPointerException();
+                        std::cerr << "Invalid vertex size for part " << g << " - " << p << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                        throw OutOfBoundsException();
                     }
 
                     std::size_t index_size = (part.triangle_count + 2) * sizeof(std::uint16_t);
                     if(index_size + index_offset > model_data_size) {
-                        throw InvalidPointerException();
+                        std::cerr << "Invalid index size for part " << g << " - " << p << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                        throw OutOfBoundsException();
                     }
 
                     part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
