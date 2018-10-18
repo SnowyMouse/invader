@@ -1151,7 +1151,7 @@ namespace Invader {
                         part.triangle_offset = static_cast<std::uint32_t>(indices.size());
                         part.triangle_offset_2 = static_cast<std::uint32_t>(indices.size());
                         deduping_indices.push_back(DedupingAssetData {indices.size(), index_size});
-                        indices.insert(indices.end(), part_indices, part_indices + index_size);
+                        indices.insert(indices.end(), part_indices, part_indices + index_size / sizeof(*part_indices));
                     }
 
                     // Check if vertices are duplicated
@@ -1168,7 +1168,7 @@ namespace Invader {
                     if(!duped_vertices) {
                         part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
                         deduping_vertices.push_back(DedupingAssetData {vertices.size(), vertex_size});
-                        vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size);
+                        vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size / sizeof(*part_vertices));
                     }
                 }
             }
