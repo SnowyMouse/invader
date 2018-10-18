@@ -107,17 +107,19 @@ namespace Invader {
          */
         bool stub() const noexcept;
 
+        #define INVALID_POINTER ~static_cast<std::size_t>(0)
+
         /**
          * Convert the pointer at the offset to an offset
          * @param  offset offset to look at
-         * @return        offset where the pointer points to or ~0 if none
+         * @return        offset where the pointer points to or INVALID_POINTER if none
          */
         std::size_t resolve_pointer(std::size_t offset) noexcept;
 
         /**
          * Convert the pointer at the offset to an offset
          * @param  offset offset to look at
-         * @return        offset where the pointer points to or 0 if none
+         * @return        offset where the pointer points to or INVALID_POINTER if none
          */
         std::size_t resolve_pointer(HEK::LittleEndian<HEK::Pointer> *offset) noexcept;
 

@@ -102,7 +102,7 @@ namespace Invader {
                 return pointer.offset_pointed;
             }
         }
-        return ~static_cast<std::size_t>(0);
+        return INVALID_POINTER;
     }
 
     std::size_t CompiledTag::resolve_pointer(HEK::LittleEndian<HEK::Pointer> *offset) noexcept {

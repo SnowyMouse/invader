@@ -93,6 +93,11 @@ namespace Invader {
         std::vector<Resource> sounds;
 
         /**
+         * Sounds.map assets
+         */
+        std::vector<Resource> loc;
+
+        /**
          * Total deduped data with models
          */
         std::size_t deduped_data = 0;

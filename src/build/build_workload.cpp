@@ -16,6 +16,7 @@
 
 #include "../tag/hek/class/bitmap.hpp"
 #include "../tag/hek/class/fog.hpp"
+#include "../tag/hek/class/font.hpp"
 #include "../tag/hek/class/gbxmodel.hpp"
 #include "../tag/hek/class/particle.hpp"
 #include "../tag/hek/class/scenario.hpp"
@@ -101,6 +102,7 @@ namespace Invader {
             };
             workload.bitmaps = load_map(workload.maps_directory + "bitmaps.map");
             workload.sounds = load_map(workload.maps_directory + "sounds.map");
+            workload.loc = load_map(workload.maps_directory + "loc.map");
         }
         workload.verbose = verbose;
 
@@ -329,12 +331,43 @@ namespace Invader {
                     }
                 }
             }
-
-            if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+            else if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
                 for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
                     if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
                         tag->indexed = true;
                         tag->asset_data.clear();
+                        break;
+                    }
+                }
+            }
+            else if(tag->tag_class_int == TagClassInt::TAG_CLASS_FONT) {
+                for(std::size_t l = 0; l < this->loc.size(); l++) {
+                    auto &loc_tag = this->loc[l];
+                    if(loc_tag.name == tag->path) {
+                        auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
+                        auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
+
+                        std::size_t tag_font_pixel_size = tag_font->pixels.size;
+                        std::size_t loc_font_pixel_size = loc_font->pixels.size;
+
+                        // Make sure the size is the same
+                        if(tag_font_pixel_size == loc_font_pixel_size) {
+                            std::size_t tag_font_pixels = tag->resolve_pointer(&tag_font->pixels.pointer);
+                            std::size_t loc_font_pixels = loc_font->pixels.pointer;
+
+                            // And make sure that the pointer in the loc tag points to something
+                            if(loc_font_pixels < loc_tag.data.size() && loc_font_pixels + loc_font_pixel_size <= loc_tag.data.size()) {
+                                auto *tag_font_pixel_data = tag->data.data() + tag_font_pixels;
+                                auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
+
+                                if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
+                                    tag->index = l;
+                                    tag->indexed = true;
+                                    tag->data.clear();
+                                }
+                            }
+                        }
+
                         break;
                     }
                 }
@@ -494,14 +527,14 @@ namespace Invader {
                     auto *bsp_data = tag_ptr->data.data();
                     auto &bsp_header = *reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(bsp_data);
                     std::size_t bsp_offset = tag_ptr->resolve_pointer(&bsp_header.pointer);
-                    if(bsp_offset != ~static_cast<std::size_t>(0)) {
+                    if(bsp_offset != INVALID_POINTER) {
                         auto &bsp = *reinterpret_cast<ScenarioStructureBSP<LittleEndian> *>(bsp_data + bsp_offset);
 
                         std::size_t fog_palette_offset = tag_ptr->resolve_pointer(&bsp.fog_palette.pointer);
                         std::size_t fog_region_offset = tag_ptr->resolve_pointer(&bsp.fog_regions.pointer);
                         std::size_t fog_plane_offset = tag_ptr->resolve_pointer(&bsp.fog_planes.pointer);
 
-                        if(fog_palette_offset != ~static_cast<std::size_t>(0) && fog_region_offset != ~static_cast<std::size_t>(0) && fog_plane_offset != ~static_cast<std::size_t>(0)) {
+                        if(fog_palette_offset != INVALID_POINTER && fog_region_offset != INVALID_POINTER && fog_plane_offset != INVALID_POINTER) {
                             auto *fog_planes = reinterpret_cast<ScenarioStructureBSPFogPlane<LittleEndian> *>(bsp_data + fog_plane_offset);
                             auto *fog_regions = reinterpret_cast<ScenarioStructureBSPFogRegion<LittleEndian> *>(bsp_data + fog_region_offset);
                             auto *fog_palette = reinterpret_cast<ScenarioStructureBSPFogPalette<LittleEndian> *>(bsp_data + fog_palette_offset);
@@ -563,7 +596,7 @@ namespace Invader {
                         auto bitmap_data_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_data.pointer);
                         std::vector<std::int16_t> widths(bitmap.bitmap_data.count);
                         std::vector<std::int16_t> heights(bitmap.bitmap_data.count);
-                        if(bitmap_data_offset != ~static_cast<std::size_t>(0)) {
+                        if(bitmap_data_offset != INVALID_POINTER) {
                             for(std::size_t i = 0; i < bitmap.bitmap_data.count; i++) {
                                 auto &bitmap_data = reinterpret_cast<BitmapData<LittleEndian> *>(bitmap_tag->data.data() + bitmap_data_offset)[i];
                                 widths[i] = bitmap_data.width;
@@ -572,7 +605,7 @@ namespace Invader {
                         }
 
                         auto sequence_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_group_sequence.pointer);
-                        if(sequence_offset != ~static_cast<std::size_t>(0)) {
+                        if(sequence_offset != INVALID_POINTER) {
                             float max_difference = 0.0f;
                             for(std::size_t sequence_index = 0; sequence_index < bitmap.bitmap_group_sequence.count; sequence_index++) {
                                 auto &sequence = reinterpret_cast<BitmapGroupSequence<LittleEndian> *>(bitmap_tag->data.data() + sequence_offset)[sequence_index];
@@ -580,7 +613,7 @@ namespace Invader {
 
                                 // We'll need to iterate through all of the sprites
                                 std::size_t sprite_count = sequence.sprites.count;
-                                if(first_sprite_offset != ~static_cast<std::size_t>(0)) {
+                                if(first_sprite_offset != INVALID_POINTER) {
                                     for(std::size_t i = 0; i < sprite_count; i++) {
                                         auto &sprite = reinterpret_cast<BitmapGroupSprite<LittleEndian> *>(bitmap_tag->data.data() + first_sprite_offset)[i];
 
@@ -1149,7 +1182,7 @@ namespace Invader {
                         if(duped_size >= index_size && std::memcmp(part_indices, duped_index.data.data(), index_size) == 0) {
                             duped_index.parts.push_back(&part);
                             duped_indices = true;
-                            deduped_data += index_size;
+                            this->deduped_data += index_size;
                             break;
                         }
 
@@ -1158,7 +1191,7 @@ namespace Invader {
                             duped_index.parts.push_back(&part);
                             duped_index.data.insert(duped_index.data.end(), part_indices + duped_size / sizeof(*part_indices), part_indices + index_size / sizeof(*part_indices));
                             duped_indices = true;
-                            deduped_data += duped_size;
+                            this->deduped_data += duped_size;
                             break;
                         }
                     }
@@ -1175,7 +1208,7 @@ namespace Invader {
                     for(auto &duped_part : deduping_vertices) {
                         if(duped_part.size == vertex_size && std::memcmp(part_vertices, vertices.data() + duped_part.offset, vertex_size) == 0) {
                             part.vertex_offset = static_cast<std::uint32_t>(duped_part.offset);
-                            deduped_data += vertex_size;
+                            this->deduped_data += vertex_size;
                             duped_vertices = true;
                             break;
                         }

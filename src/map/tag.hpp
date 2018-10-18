@@ -91,28 +91,28 @@ namespace Invader {
             return const_cast<Tag *>(this)->resolve_reflexive(reflexive);
         }
 
-       /**
-        * Resolve the reflexive at the given offset and return a referenced to the desired struct
-        * @param reflexive the reflexive
-        * @param index     the index
-        */
-       template <template<template<typename> typename> typename StructType>
-       StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) {
-           if(reflexive.count <= index) {
-               throw OutOfBoundsException();
-           }
-           return this->resolve_reflexive(reflexive)[index];
-       }
+        /**
+         * Resolve the reflexive at the given offset and return a referenced to the desired struct
+         * @param reflexive the reflexive
+         * @param index     the index
+         */
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) {
+            if(reflexive.count <= index) {
+                throw OutOfBoundsException();
+            }
+            return this->resolve_reflexive(reflexive)[index];
+        }
 
-      /**
-       * Resolve the reflexive at the given offset and return a const referenced to the desired struct
-       * @param reflexive the reflexive
-       * @param index     the index
-       */
-      template <template<template<typename> typename> typename StructType>
-      StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) const {
-          return const_cast<Tag *>(this)->get_struct_from_reflexive(reflexive, index);
-      }
+        /**
+         * Resolve the reflexive at the given offset and return a const referenced to the desired struct
+         * @param reflexive the reflexive
+         * @param index     the index
+         */
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) const {
+            return const_cast<Tag *>(this)->get_struct_from_reflexive(reflexive, index);
+        }
 
     private:
         /** Map reference */

@@ -482,7 +482,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> size;
         LittleEndian<std::int32_t> external;
         LittleEndian<std::int32_t> file_offset;
-        LittleEndian<std::int32_t> pointer;
+        LittleEndian<Pointer> pointer;
         PAD(0x4);
 
         ENDIAN_TEMPLATE(OtherType) operator TagDataOffset<OtherType>() const noexcept {
