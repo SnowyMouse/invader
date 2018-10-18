@@ -225,18 +225,19 @@ namespace Invader {
         vertices.reserve(model_size);
         indices.reserve(model_size / 3);
 
-        add_model_tag_data(vertices, indices, tag_data);
+        this->add_model_tag_data(vertices, indices, tag_data);
         auto model_data_size = vertices.size() + indices.size();
 
         #ifndef NO_OUTPUT
         if(this->verbose) {
             std::printf("Model data:        %.02f MiB\n", BYTES_TO_MiB(model_data_size));
+            std::printf("Deduped models:   -%.02f MiB\n", BYTES_TO_MiB(this->deduped_data));
         }
         #endif
 
         // Add bitmap and sound data
         file.reserve(file.size() + bitmap_sound_size + model_data_size + tag_data.size() + 4);
-        add_bitmap_and_sound_data(file, tag_data);
+        this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         #ifndef NO_OUTPUT
         if(this->verbose) {
@@ -1077,11 +1078,21 @@ namespace Invader {
         }
     }
 
+    struct DedupingModelPart {
+        std::size_t index_offset;
+        std::size_t index_size;
+        std::size_t vertex_offset;
+        std::size_t vertex_size;
+    };
+
     void BuildWorkload::add_model_tag_data(std::vector<std::byte> &vertices, std::vector<std::byte> &indices, std::vector<std::byte> &tag_data) {
         using namespace HEK;
 
         auto &tag_data_header = *reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data());
         auto *tags = reinterpret_cast<CacheFileTagDataTag *>(tag_data.data() + sizeof(tag_data_header));
+
+        std::vector<DedupingModelPart> all_parts;
+
         for(std::size_t i = 0; i < this->tag_count; i++) {
             auto &tag = tags[i];
             if(tag.primary_class != TagClassInt::TAG_CLASS_GBXMODEL) {
@@ -1124,12 +1135,31 @@ namespace Invader {
                         throw OutOfBoundsException();
                     }
 
-                    part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
-                    part.triangle_offset = static_cast<std::uint32_t>(indices.size());
-                    part.triangle_offset_2 = static_cast<std::uint32_t>(indices.size());
+                    // Check if part is duplicated
+                    bool duped = false;
+                    for(auto &duped_part : all_parts) {
+                        if(duped_part.index_size == index_size && duped_part.vertex_size == vertex_size) {
+                            if(std::memcmp(part_indices, indices.data() + duped_part.index_offset, index_size) == 0 && std::memcmp(part_vertices, vertices.data() + duped_part.vertex_offset, vertex_size) == 0) {
+                                part.vertex_offset = static_cast<std::uint32_t>(duped_part.vertex_offset);
+                                part.triangle_offset = static_cast<std::uint32_t>(duped_part.index_offset);
+                                part.triangle_offset_2 = static_cast<std::uint32_t>(duped_part.index_offset);
+                                deduped_data += vertex_size + index_size;
+                                duped = true;
+                                break;
+                            }
+                        }
+                    }
 
-                    vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size);
-                    indices.insert(indices.end(), part_indices, part_indices + index_size);
+                    if(!duped) {
+                        part.vertex_offset = static_cast<std::uint32_t>(vertices.size());
+                        part.triangle_offset = static_cast<std::uint32_t>(indices.size());
+                        part.triangle_offset_2 = static_cast<std::uint32_t>(indices.size());
+
+                        all_parts.push_back(DedupingModelPart {indices.size(), index_size, vertices.size(), vertex_size});
+
+                        vertices.insert(vertices.end(), part_vertices, part_vertices + vertex_size);
+                        indices.insert(indices.end(), part_indices, part_indices + index_size);
+                    }
                 }
             }
 

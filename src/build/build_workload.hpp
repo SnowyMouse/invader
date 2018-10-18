@@ -93,6 +93,11 @@ namespace Invader {
         std::vector<Resource> sounds;
 
         /**
+         * Total deduped data with models
+         */
+        std::size_t deduped_data = 0;
+
+        /**
          * Compile and load all required tags
          */
         void load_required_tags();
