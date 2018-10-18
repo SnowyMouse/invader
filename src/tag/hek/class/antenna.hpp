@@ -21,7 +21,7 @@ namespace Invader::HEK {
         ColorARGB<EndianType> color;
         ColorARGB<EndianType> lod_color;
         PAD(0x28);
-        PAD(0xC);
+        Point3D<LittleEndian> offset;
 
         ENDIAN_TEMPLATE(NewType) operator AntennaVertex<NewType>() const noexcept {
             AntennaVertex<NewType> copy = {};
@@ -31,6 +31,7 @@ namespace Invader::HEK {
             COPY_THIS(sequence_index);
             COPY_THIS(color);
             COPY_THIS(lod_color);
+            COPY_THIS(offset);
             return copy;
         }
     };
@@ -44,7 +45,8 @@ namespace Invader::HEK {
         EndianType<Fraction> spring_strength_coefficient;
         EndianType<float> falloff_pixels;
         EndianType<float> cutoff_pixels;
-        PAD(0x28);
+        EndianType<float> length;
+        PAD(0x24);
         TagReflexive<EndianType, AntennaVertex> vertices;
 
         ENDIAN_TEMPLATE(NewType) operator Antenna<NewType>() const noexcept {
@@ -55,6 +57,7 @@ namespace Invader::HEK {
             COPY_THIS(spring_strength_coefficient);
             COPY_THIS(falloff_pixels);
             COPY_THIS(cutoff_pixels);
+            COPY_THIS(length);
             COPY_THIS(vertices);
             return copy;
         }
