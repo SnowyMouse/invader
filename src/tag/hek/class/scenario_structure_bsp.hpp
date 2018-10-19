@@ -314,7 +314,8 @@ namespace Invader::HEK {
         EndianType<std::int16_t> sound_environment;
         EndianType<std::int16_t> weather;
         EndianType<std::int16_t> transition_structure_bsp;
-        LittleEndian<std::uint32_t> unknown_a;
+        LittleEndian<std::int16_t> first_decal_index;
+        LittleEndian<std::int16_t> decal_count;
         PAD(0x18);
         TagReflexive<EndianType, PredictedResource> predicted_resources;
         TagReflexive<EndianType, ScenarioStructureBSPSubcluster> subclusters;
@@ -332,7 +333,6 @@ namespace Invader::HEK {
             COPY_THIS(sound_environment);
             COPY_THIS(weather);
             COPY_THIS(transition_structure_bsp);
-            COPY_THIS(unknown_a);
             COPY_THIS(predicted_resources);
             COPY_THIS(subclusters);
             COPY_THIS(first_lens_flare_marker_index);

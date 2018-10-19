@@ -699,11 +699,80 @@ namespace Invader {
                                     continue;
                                 }
 
+                                // Allocate runtime decal space
                                 auto *bsp_data = reinterpret_cast<ScenarioStructureBSP<LittleEndian> *>(bsp_tag->data.data() + bsp_data_offset);
-                                bsp_data->runtime_decals.count = decal_count;
-                                std::size_t bsp_runtime_decal_offset = reinterpret_cast<std::byte *>(&bsp_data->runtime_decals.pointer) - bsp_tag->data.data();
-                                bsp_tag->pointers.push_back(CompiledTagPointer { bsp_runtime_decal_offset, bsp_tag->data.size() });
-                                bsp_tag->data.insert(bsp_tag->data.end(), reinterpret_cast<std::byte *>(decals.data()), reinterpret_cast<std::byte *>(decals.data() + decal_count));
+                                std::vector<ScenarioStructureBSPRuntimeDecal<LittleEndian>> runtime_decals;
+
+                                // Make sure we know which decals we used for this BSP so we don't reuse them
+                                std::vector<bool> used(decals.size(), false);
+                                std::size_t bsp_cluster_offset = bsp_tag->resolve_pointer(&bsp_data->clusters.pointer);
+                                std::size_t bsp_cluster_count = bsp_data->clusters.count;
+                                if(bsp_cluster_offset == INVALID_POINTER) {
+                                    continue;
+                                }
+
+                                // Get clusters
+                                auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster<LittleEndian> *>(bsp_tag->data.data() + bsp_cluster_offset);
+                                for(std::size_t c = 0; c < bsp_cluster_count; c++) {
+                                    auto &cluster = clusters[c];
+                                    std::vector possible(decal_count, false);
+                                    std::size_t subcluster_offset = bsp_tag->resolve_pointer(&cluster.subclusters.pointer);
+                                    std::size_t subcluster_count = cluster.subclusters.count;
+                                    auto *subclusters = reinterpret_cast<ScenarioStructureBSPSubcluster<LittleEndian> *>(bsp_tag->data.data() + subcluster_offset);
+                                    if(subcluster_offset == INVALID_POINTER) {
+                                        continue;
+                                    }
+
+                                    // Go through subclusters to see which one can hold a decal
+                                    for(std::size_t s = 0; s < subcluster_count; s++) {
+                                        auto &subcluster = subclusters[s];
+                                        for(std::size_t d = 0; d < decal_count; d++) {
+                                            if(used[d]) {
+                                                continue;
+                                            }
+                                            auto &decal = decals[d];
+                                            float x = decal.position.x;
+                                            float y = decal.position.y;
+                                            float z = decal.position.z;
+                                            if(x >= subcluster.world_bounds_x.from && x <= subcluster.world_bounds_x.to &&
+                                               y >= subcluster.world_bounds_y.from && y <= subcluster.world_bounds_y.to &&
+                                               z >= subcluster.world_bounds_z.from && z <= subcluster.world_bounds_z.to) {
+                                                possible[d] = true;
+                                            }
+                                        }
+                                    }
+
+                                    // Now add all of the decals that we found
+                                    std::size_t runtime_decal_count_first = runtime_decals.size();
+                                    std::size_t cluster_decal_count = 0;
+
+                                    for(std::size_t p = 0; p < decal_count; p++) {
+                                        if(possible[p]) {
+                                            runtime_decals.push_back(decals[p]);
+                                            cluster_decal_count++;
+                                            used[p] = true;
+                                        }
+                                    }
+
+                                    // Set the decal count
+                                    if(cluster_decal_count != 0) {
+                                        cluster.first_decal_index = static_cast<std::int16_t>(runtime_decal_count_first);
+                                        cluster.decal_count = static_cast<std::int16_t>(cluster_decal_count);
+                                    }
+                                    else {
+                                        cluster.first_decal_index = -1;
+                                        cluster.decal_count = 0;
+                                    }
+                                }
+
+                                // Set the decal count to the number of decals we used and add it to the end of the BSP
+                                bsp_data->runtime_decals.count = runtime_decals.size();
+
+                                if(runtime_decals.size() != 0) {
+                                    std::size_t bsp_runtime_decal_offset = reinterpret_cast<std::byte *>(&bsp_data->runtime_decals.pointer) - bsp_tag->data.data();
+                                    bsp_tag->pointers.push_back(CompiledTagPointer { bsp_runtime_decal_offset, bsp_tag->data.size() });
+                                    bsp_tag->data.insert(bsp_tag->data.end(), reinterpret_cast<std::byte *>(runtime_decals.data()), reinterpret_cast<std::byte *>(runtime_decals.data() + runtime_decals.size()));
+                                }
                             }
                         }
                     }

@@ -62,6 +62,8 @@ namespace Invader::HEK {
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.lens_flares, lens);
         ADD_REFLEXIVE(tag.lens_flare_markers);
         ADD_REFLEXIVE_START(tag.clusters) {
+            reflexive.first_decal_index = -1;
+            reflexive.decal_count = 0;
             ADD_REFLEXIVE(reflexive.predicted_resources);
             ADD_REFLEXIVE_START(reflexive.subclusters) {
                 ADD_REFLEXIVE(reflexive.surface_indices);
@@ -116,7 +118,12 @@ namespace Invader::HEK {
             ADD_REFLEXIVE(reflexive.counts);
             ADD_REFLEXIVE(reflexive.z_reference_vectors);
         } ADD_REFLEXIVE_END
+
+        skip_data = true;
         ADD_REFLEXIVE(tag.runtime_decals);
+        tag.runtime_decals.count = 0;
+        skip_data = false;
+
         ADD_REFLEXIVE_START(tag.leaf_map_leaves) {
             ADD_REFLEXIVE_START(reflexive.faces) {
                 ADD_REFLEXIVE(reflexive.vertices);
