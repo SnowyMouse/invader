@@ -77,19 +77,9 @@ namespace Invader {
         std::vector<std::byte> data;
 
         /**
-         * Size of the tag data
-         */
-        std::size_t data_size = 0;
-
-        /**
          * Raw asset data, such as sound, bitmap, or model data
          */
         std::vector<std::byte> asset_data;
-
-        /**
-         * Size of the asset data
-         */
-        std::size_t asset_data_size = 0;
 
         /**
          * All tags this tag depends upon

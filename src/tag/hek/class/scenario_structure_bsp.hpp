@@ -314,7 +314,7 @@ namespace Invader::HEK {
         EndianType<std::int16_t> sound_environment;
         EndianType<std::int16_t> weather;
         EndianType<std::int16_t> transition_structure_bsp;
-        PAD(0x4);
+        LittleEndian<std::uint32_t> unknown_a;
         PAD(0x18);
         TagReflexive<EndianType, PredictedResource> predicted_resources;
         TagReflexive<EndianType, ScenarioStructureBSPSubcluster> subclusters;
@@ -332,6 +332,7 @@ namespace Invader::HEK {
             COPY_THIS(sound_environment);
             COPY_THIS(weather);
             COPY_THIS(transition_structure_bsp);
+            COPY_THIS(unknown_a);
             COPY_THIS(predicted_resources);
             COPY_THIS(subclusters);
             COPY_THIS(first_lens_flare_marker_index);
@@ -670,10 +671,17 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSPDetailObjectData<BigEndian>) == 0x40);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPRuntimeDecal {
-        PAD(0x10);
+        Point3D<EndianType> position;
+        EndianType<std::int16_t> decal_type;
+        std::int8_t yaw;
+        std::int8_t pitch;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPRuntimeDecal<NewType>() const noexcept {
-            ScenarioStructureBSPRuntimeDecal<NewType> copy = {};
+            ScenarioStructureBSPRuntimeDecal<NewType> copy;
+            COPY_THIS(decal_type);
+            COPY_THIS(yaw);
+            COPY_THIS(pitch);
+            COPY_THIS(position);
             return copy;
         }
     };
@@ -860,7 +868,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSP<BigEndian>) == 0x288);
 
     struct ScenarioStructureBSPCompiledHeader {
-        LittleEndian<std::uint32_t> pointer;
+        LittleEndian<HEK::Pointer> pointer;
         PAD(0x10);
         LittleEndian<HEK::TagClassInt> signature;
     };

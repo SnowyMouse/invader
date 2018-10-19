@@ -341,9 +341,6 @@ namespace Invader {
             default:
                 throw UnknownTagClassException();
         }
-
-        this->data_size = this->data.size();
-        this->asset_data_size = this->asset_data.size();
     }
 
     bool CompiledTag::stub() const noexcept {

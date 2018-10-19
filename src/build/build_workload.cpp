@@ -172,7 +172,7 @@ namespace Invader {
         for(std::size_t i = 0; i < this->tag_count; i++) {
             auto &tag = compiled_tags[i];
             if(tag->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                auto size = tag->data_size;
+                auto size = tag->data.size();
                 total_bsp_size += size;
                 bsp_count++;
                 if(size > largest_bsp_size) {
@@ -192,7 +192,7 @@ namespace Invader {
         if(this->verbose) {
             std::printf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
             for(auto bsp : bsps) {
-                std::printf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
+                std::printf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data.size()), (bsp == largest_bsp) ? "*" : "");
             }
             std::printf("Tag data:          %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
         }
@@ -243,20 +243,15 @@ namespace Invader {
         #ifndef NO_OUTPUT
         if(this->verbose) {
             std::size_t indexed_count = 0;
-            std::size_t reduced_amount = 0;
 
             for(auto &t : this->compiled_tags) {
                 if(t->indexed) {
                     indexed_count++;
-                    reduced_amount += t->asset_data_size;
-                    if(t->tag_class_int != TagClassInt::TAG_CLASS_SOUND) {
-                        reduced_amount += t->data_size;
-                    }
                 }
             }
 
             std::printf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
-            std::printf("Indexed tags:      %zu (-%.02f MiB)\n", indexed_count, BYTES_TO_MiB(reduced_amount));
+            std::printf("Indexed tags:      %zu\n", indexed_count);
         }
         #endif
 
@@ -283,7 +278,7 @@ namespace Invader {
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
         cache_file_header.file_size = static_cast<std::uint32_t>(file.size());
-        cache_file_header.crc32 = 0x21706156;
+        cache_file_header.crc32 = 0x7E706156;
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "Invader " INVADER_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 
@@ -668,8 +663,54 @@ namespace Invader {
                     }
                 }
 
+                // Scenario-related things
+                else if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO) {
+                    auto *scenario_data = tag_ptr->data.data();
+                    auto &scenario = *reinterpret_cast<Scenario<LittleEndian> *>(scenario_data);
+
+                    // Get decals
+                    std::size_t decal_offset = tag_ptr->resolve_pointer(&scenario.decals.pointer);
+                    std::size_t decal_count = scenario.decals.count;
+                    std::vector<ScenarioStructureBSPRuntimeDecal<LittleEndian>> decals;
+                    if(decal_offset != INVALID_POINTER && decal_count > 0) {
+                        auto *decals_ptr = reinterpret_cast<ScenarioDecal<LittleEndian> *>(scenario_data + decal_offset);
+                        for(std::size_t i = 0; i < decal_count; i++) {
+                            ScenarioStructureBSPRuntimeDecal<LittleEndian> copy = {};
+                            copy.position = decals_ptr[i].position;
+                            copy.decal_type = decals_ptr[i].decal_type;
+                            copy.yaw = decals_ptr[i].yaw;
+                            copy.pitch = decals_ptr[i].pitch;
+                            decals.push_back(copy);
+                        }
+                    }
+
+                    // Add all the decals to all the bsps all the time
+                    std::size_t bsp_offset = tag_ptr->resolve_pointer(&scenario.structure_bsps.pointer);
+                    std::size_t bsp_count = scenario.structure_bsps.count;
+                    if(bsp_offset != INVALID_POINTER && decal_count > 0) {
+                        auto *bsps = reinterpret_cast<ScenarioBSP<LittleEndian> *>(scenario_data + bsp_offset);
+                        for(std::size_t bsp = 0; bsp < bsp_count; bsp++) {
+                            auto bsp_id = bsps[bsp].structure_bsp.tag_id.read().index;
+                            if(bsp_id < this->compiled_tags.size()) {
+                                auto &bsp_tag = this->compiled_tags[bsp_id];
+                                auto *bsp_header = reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(bsp_tag->data.data());
+                                std::size_t bsp_data_offset = bsp_tag->resolve_pointer(&bsp_header->pointer);
+                                if(bsp_data_offset == INVALID_POINTER) {
+                                    continue;
+                                }
+
+                                auto *bsp_data = reinterpret_cast<ScenarioStructureBSP<LittleEndian> *>(bsp_tag->data.data() + bsp_data_offset);
+                                bsp_data->runtime_decals.count = decal_count;
+                                std::size_t bsp_runtime_decal_offset = reinterpret_cast<std::byte *>(&bsp_data->runtime_decals.pointer) - bsp_tag->data.data();
+                                bsp_tag->pointers.push_back(CompiledTagPointer { bsp_runtime_decal_offset, bsp_tag->data.size() });
+                                bsp_tag->data.insert(bsp_tag->data.end(), reinterpret_cast<std::byte *>(decals.data()), reinterpret_cast<std::byte *>(decals.data() + decal_count));
+                            }
+                        }
+                    }
+                }
+
                 // If we need predicted resources, let's get them
-                if(IS_OBJECT_TAG(tag_ptr->tag_class_int)) {
+                else if(IS_OBJECT_TAG(tag_ptr->tag_class_int)) {
                     // Set this in case we get cyclical references (references that directly or indirectly reference themself)
                     std::vector<bool> tags_read(this->compiled_tags.size(), false);
 
@@ -721,7 +762,7 @@ namespace Invader {
                     std::size_t size_of_resources = predicted_resources.size() * sizeof(*predicted_resources.data());
                     if(IS_OBJECT_TAG(tag_ptr->tag_class_int)) {
                         // Find where we want to add the pointer
-                        std::size_t offset_to_add = tag_ptr->data_size;
+                        std::size_t offset_to_add = tag_ptr->data.size();
                         for(std::size_t p = tag_ptr->pointers.size() - 1; p < tag_ptr->pointers.size(); p--) {
                             auto &ptr = tag_ptr->pointers[p];
                             if(ptr.offset < 0x170) {
@@ -750,7 +791,6 @@ namespace Invader {
                         // Insert data
                         auto *begin = reinterpret_cast<const std::byte *>(predicted_resources.data());
                         tag_ptr->data.insert(tag_ptr->data.begin() + offset_to_add, begin, begin + size_of_resources);
-                        tag_ptr->data_size += size_of_resources;
 
                         // Apply offsets
                         auto *resource_reference = reinterpret_cast<TagReflexive<LittleEndian, PredictedResource> *>(tag_ptr->data.data() + 0x170);
@@ -972,7 +1012,7 @@ namespace Invader {
                     }
 
                     // Add it
-                    bsp_struct.bsp_size = static_cast<std::uint32_t>(bsp_compiled_tag->data_size);
+                    bsp_struct.bsp_size = static_cast<std::uint32_t>(bsp_compiled_tag->data.size());
                     bsp_struct.bsp_address = this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - bsp_struct.bsp_size;
                     bsp_struct.bsp_start = static_cast<std::uint32_t>(add_tag_data_for_tag(file, tag_array.data(), bsp_index));
                     bsp_compiled_tag->data.clear();
@@ -991,19 +1031,19 @@ namespace Invader {
 
         auto &compiled_tag = this->compiled_tags[tag];
         auto offset = tag_data.size();
-        tag_data.insert(tag_data.end(), compiled_tag->data.data(), compiled_tag->data.data() + compiled_tag->data_size);
+        tag_data.insert(tag_data.end(), compiled_tag->data.data(), compiled_tag->data.data() + compiled_tag->data.size());
         auto *tag_data_data = tag_data.data() + offset;
         auto *tag_array_cast = reinterpret_cast<CacheFileTagDataTag *>(tag_array);
 
         // Adjust for all pointers
         for(auto &pointer : compiled_tag->pointers) {
-            if(pointer.offset + sizeof(std::uint32_t) > compiled_tag->data_size || pointer.offset_pointed > compiled_tag->data_size) {
+            if(pointer.offset + sizeof(std::uint32_t) > compiled_tag->data.size() || pointer.offset_pointed > compiled_tag->data.size()) {
                 std::cerr << "Invalid pointer for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
                 throw InvalidPointerException();
             }
             std::uint32_t new_offset;
             if(compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                new_offset = static_cast<std::uint32_t>(this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - compiled_tag->data_size + pointer.offset_pointed);
+                new_offset = static_cast<std::uint32_t>(this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - compiled_tag->data.size() + pointer.offset_pointed);
             }
             else {
                 new_offset = static_cast<std::uint32_t>(this->tag_data_address + offset + pointer.offset_pointed);
@@ -1013,7 +1053,7 @@ namespace Invader {
 
         // Adjust for all dependencies
         for(auto &dependency : compiled_tag->dependencies) {
-            if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data_size) {
+            if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data.size()) {
                 std::cerr << "Invalid dependency offset for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
                 throw InvalidDependencyException();
             }
