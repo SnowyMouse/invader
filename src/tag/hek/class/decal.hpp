@@ -24,6 +24,16 @@ namespace Invader::HEK {
         DECAL_LAYER_ALPHA_TESTED,
         DECAL_LAYER_WATER
     };
+    enum DecalBlendFunction : TagEnum {
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_ADD,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
+        DECAL_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
+    };
 
     struct DecalFlags {
         std::uint16_t geometry_inherited_by_next_decal_in_chain : 1;
@@ -58,7 +68,7 @@ namespace Invader::HEK {
         PAD(0x28);
         PAD(0x2);
         PAD(0x2);
-        EndianType<FunctionType2> framebuffer_blend_function;
+        EndianType<DecalBlendFunction> framebuffer_blend_function;
         PAD(0x2);
         PAD(0x14);
         TagDependency<EndianType> map; // bitmap
