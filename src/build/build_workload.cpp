@@ -824,6 +824,11 @@ namespace Invader {
         return map_name;
     }
 
+    struct DedupingAssetData {
+        std::size_t offset;
+        std::size_t size;
+    };
+
     void BuildWorkload::populate_tag_array(std::vector<std::byte> &tag_data) {
         using namespace HEK;
 
@@ -832,6 +837,9 @@ namespace Invader {
         tag_data_header.scenario_tag = tag_id_from_index(this->scenario_index);
         reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data())->tag_array_address = this->tag_data_address + sizeof(tag_data_header);
         tag_data_header.tag_count = static_cast<std::uint32_t>(this->tag_count);
+
+        std::vector<DedupingAssetData> deduping_tag_paths;
+        deduping_tag_paths.reserve(this->compiled_tags.size());
 
         // Do tag paths and the tag array
         for(std::size_t i = 0; i < this->tag_count; i++) {
@@ -883,11 +891,26 @@ namespace Invader {
             // Write the tag ID
             tag_data_tag.tag_id = tag_id_from_index(i);
 
-            // Write and then insert the tag path
-            tag_data_tag.tag_path = static_cast<std::uint32_t>(this->tag_data_address + tag_data.size());
-            const auto *compiled_tag_path = reinterpret_cast<std::byte *>(compiled_tag->path.data());
-            tag_data.insert(tag_data.end(), compiled_tag_path, compiled_tag_path + compiled_tag->path.length());
-            tag_data.insert(tag_data.end(), std::byte());
+            // Check to see if we already have the tag path written
+            bool deduped = false;
+            std::size_t path_length = compiled_tag->path.length();
+            for(auto &duped_path : deduping_tag_paths) {
+                if(duped_path.size == path_length && std::memcmp(tag_data.data() + duped_path.offset, compiled_tag->path.data(), path_length) == 0) {
+                    tag_data_tag.tag_path = static_cast<Pointer>(this->tag_data_address + duped_path.offset);
+                    deduped = true;
+                    break;
+                }
+            }
+
+            // Write the tag path if not
+            if(!deduped) {
+                std::size_t offset = tag_data.size();
+                deduping_tag_paths.push_back(DedupingAssetData { offset, path_length });
+                tag_data_tag.tag_path = static_cast<Pointer>(this->tag_data_address + offset);
+                const auto *compiled_tag_path = reinterpret_cast<std::byte *>(compiled_tag->path.data());
+                tag_data.insert(tag_data.end(), compiled_tag_path, compiled_tag_path + path_length);
+                tag_data.insert(tag_data.end(), std::byte());
+            }
         }
 
         // Add any required padding to 32-bit align it
@@ -1015,11 +1038,6 @@ namespace Invader {
 
         return offset;
     }
-
-    struct DedupingAssetData {
-        std::size_t offset;
-        std::size_t size;
-    };
 
     void BuildWorkload::add_bitmap_and_sound_data(std::vector<std::byte> &file, std::vector<std::byte> &tag_data) {
         using namespace HEK;
