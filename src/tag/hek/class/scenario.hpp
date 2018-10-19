@@ -1200,7 +1200,7 @@ namespace Invader::HEK {
         EndianType<ScenarioCommandListFlags> flags;
         PAD(0x8);
         EndianType<std::int16_t> manual_bsp_index;
-        PAD(0x2);
+        EndianType<std::int16_t> unknown;
         TagReflexive<EndianType, ScenarioCommand> commands;
         TagReflexive<EndianType, ScenarioCommandPoint> points;
         PAD(0x18);
@@ -1210,6 +1210,7 @@ namespace Invader::HEK {
             COPY_THIS(name);
             COPY_THIS(flags);
             COPY_THIS(manual_bsp_index);
+            COPY_THIS(unknown);
             COPY_THIS(commands);
             COPY_THIS(points);
             return copy;
@@ -1347,8 +1348,8 @@ namespace Invader::HEK {
         EndianType<float> trigger_distance;
         EndianType<float> run_to_player_dist;
         PAD(0x24);
-        TagReflexive<BigEndian, ScenarioAIConversationParticipant> participants;
-        TagReflexive<BigEndian, ScenarioAIConversationLine> lines;
+        TagReflexive<EndianType, ScenarioAIConversationParticipant> participants;
+        TagReflexive<EndianType, ScenarioAIConversationLine> lines;
         PAD(0xC);
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioAIConversation<NewType>() const noexcept {
