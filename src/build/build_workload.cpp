@@ -257,7 +257,6 @@ namespace Invader {
 
             std::printf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
             std::printf("Indexed tags:      %zu (-%.02f MiB)\n", indexed_count, BYTES_TO_MiB(reduced_amount));
-            std::printf("Deduped data:      -%.02f MiB\n", BYTES_TO_MiB(this->deduped_data));
         }
         #endif
 
@@ -1103,7 +1102,6 @@ namespace Invader {
                             if(asset.size == sizes[b] && std::memcmp(tag_asset_data + offsets[b], file.data() + asset.offset, asset.size) == 0) {
                                 bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(asset.offset);
                                 duped = true;
-                                this->deduped_data += asset.size;
                                 break;
                             }
                         }
@@ -1141,7 +1139,6 @@ namespace Invader {
                                 if(asset.size == size && std::memcmp(tag_asset_data + offset, file.data() + asset.offset, asset.size) == 0) {
                                     permutation.samples.file_offset = static_cast<std::int32_t>(asset.offset);
                                     duped = true;
-                                    this->deduped_data += asset.size;
                                     break;
                                 }
                             }
@@ -1229,7 +1226,6 @@ namespace Invader {
                         if(duped_size >= index_size && std::memcmp(part_indices, duped_index.data.data(), index_size) == 0) {
                             duped_index.parts.push_back(&part);
                             duped_indices = true;
-                            this->deduped_data += index_size;
                             break;
                         }
 
@@ -1238,7 +1234,6 @@ namespace Invader {
                             duped_index.parts.push_back(&part);
                             duped_index.data.insert(duped_index.data.end(), part_indices + duped_size / sizeof(*part_indices), part_indices + index_size / sizeof(*part_indices));
                             duped_indices = true;
-                            this->deduped_data += duped_size;
                             break;
                         }
                     }
@@ -1255,7 +1250,6 @@ namespace Invader {
                     for(auto &duped_part : deduping_vertices) {
                         if(duped_part.size == vertex_size && std::memcmp(part_vertices, vertices.data() + duped_part.offset, vertex_size) == 0) {
                             part.vertex_offset = static_cast<std::uint32_t>(duped_part.offset);
-                            this->deduped_data += vertex_size;
                             duped_vertices = true;
                             break;
                         }
