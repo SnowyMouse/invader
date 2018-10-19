@@ -361,7 +361,7 @@ namespace Invader {
                                     auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
 
                                     if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
-                                        tag->index = l;
+                                        tag->index = static_cast<std::uint32_t>(l);
                                         tag->indexed = true;
                                         tag->data.clear();
                                     }
@@ -377,7 +377,7 @@ namespace Invader {
                         if(loc_tag.name == tag->path) {
                             // TODO: Compare strings.
                             if(loc_tag.data.size() == tag->data.size()) {
-                                tag->index = l;
+                                tag->index = static_cast<std::uint32_t>(l);
                                 tag->indexed = true;
                                 break;
                             }
@@ -390,7 +390,7 @@ namespace Invader {
                         if(loc_tag.name == tag->path) {
                             // TODO: Compare tag data.
                             if(loc_tag.data.size() == tag->data.size()) {
-                                tag->index = l;
+                                tag->index = static_cast<std::uint32_t>(l);
                                 tag->indexed = true;
                                 break;
                             }

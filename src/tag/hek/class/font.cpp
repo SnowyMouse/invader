@@ -61,7 +61,7 @@ namespace Invader::HEK {
         }
 
         // Write character table
-        tag.characters.count = characters.size();
+        tag.characters.count = static_cast<Pointer>(characters.size());
         ADD_POINTER_FROM_INT32(tag.characters.pointer, compiled.data.size());
         compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(characters.data()), reinterpret_cast<std::byte *>(characters.data() + characters.size()));
 
