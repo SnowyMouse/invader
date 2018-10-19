@@ -157,7 +157,14 @@ namespace Invader {
         #ifndef NO_OUTPUT
         if(this->verbose) {
             std::printf("Scenario name:     %s\n", cache_file_header.name.string);
-            std::printf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, tag_data.size() / 1024.0 / 1024.0);
+
+            std::size_t total_tag_size = 0;
+            for(auto &tag : this->compiled_tags) {
+                if(!tag->indexed) {
+                    total_tag_size += tag->data_size;
+                }
+            }
+            std::printf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
         }
         #endif
 
@@ -172,7 +179,7 @@ namespace Invader {
         for(std::size_t i = 0; i < this->tag_count; i++) {
             auto &tag = compiled_tags[i];
             if(tag->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                auto size = tag->data.size();
+                auto size = tag->data_size;
                 total_bsp_size += size;
                 bsp_count++;
                 if(size > largest_bsp_size) {
@@ -192,9 +199,9 @@ namespace Invader {
         if(this->verbose) {
             std::printf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
             for(auto bsp : bsps) {
-                std::printf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data.size()), (bsp == largest_bsp) ? "*" : "");
+                std::printf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
             }
-            std::printf("Tag data:          %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
+            std::printf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
         }
         #endif
 
@@ -1099,6 +1106,7 @@ namespace Invader {
         using namespace HEK;
 
         auto &compiled_tag = this->compiled_tags[tag];
+        compiled_tag->data_size = compiled_tag->data.size();
         auto offset = tag_data.size();
         tag_data.insert(tag_data.end(), compiled_tag->data.data(), compiled_tag->data.data() + compiled_tag->data.size());
         auto *tag_data_data = tag_data.data() + offset;

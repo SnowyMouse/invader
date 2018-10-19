@@ -155,6 +155,16 @@ namespace Invader {
          * If indexed, this is the index, unless this is a sound tag.
          */
         std::uint32_t index;
+
+        /**
+         * Size of data
+         */
+        std::size_t data_size = 0;
+
+        /**
+         * Size of asset data
+         */
+        std::size_t asset_data_size = 0;
     };
 
     /**
