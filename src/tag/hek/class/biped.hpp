@@ -92,14 +92,15 @@ namespace Invader::HEK {
         EndianType<float> collision_radius;
         PAD(0x28);
         EndianType<float> autoaim_width;
-        PAD(0x70);
+        PAD(0x6C);
+        LittleEndian<float> cosine_stationary_turning_threshold;
         LittleEndian<float> crouch_camera_velocity;
         LittleEndian<float> cosine_maximum_slope_angle;
         LittleEndian<float> negative_sine_downhill_falloff_angle;
         LittleEndian<float> negative_sine_downhill_cutoff_angle;
         LittleEndian<float> sine_uphill_falloff_angle;
         LittleEndian<float> sine_uphill_cutoff_angle;
-        PAD(0x4);
+        LittleEndian<std::uint32_t> unknown_long_thing;
         TagReflexive<EndianType, BipedContactPoint> contact_point;
 
         ENDIAN_TEMPLATE(NewType) operator Biped<NewType>() const noexcept {
@@ -146,6 +147,7 @@ namespace Invader::HEK {
             COPY_THIS(crouching_collision_height);
             COPY_THIS(collision_radius);
             COPY_THIS(autoaim_width);
+            COPY_THIS(cosine_stationary_turning_threshold);
             COPY_THIS(crouch_camera_velocity);
             COPY_THIS(cosine_maximum_slope_angle);
             COPY_THIS(negative_sine_downhill_falloff_angle);
