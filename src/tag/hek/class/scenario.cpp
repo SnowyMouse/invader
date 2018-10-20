@@ -4,6 +4,7 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
+#include "../../../hek/constants.hpp"
 #include "../compile.hpp"
 
 #include "scenario.hpp"
@@ -164,7 +165,11 @@ namespace Invader::HEK {
 
         ADD_REFLEXIVE(tag.cutscene_flags);
         ADD_REFLEXIVE(tag.cutscene_camera_points);
-        ADD_REFLEXIVE(tag.cutscene_titles);
+        ADD_REFLEXIVE_START(tag.cutscene_titles) {
+            reflexive.fade_in_time = reflexive.fade_in_time * TICK_RATE;
+            reflexive.fade_out_time = reflexive.fade_out_time * TICK_RATE;
+            reflexive.up_time = reflexive.up_time * TICK_RATE;
+        } ADD_REFLEXIVE_END
 
         ADD_DEPENDENCY_ADJUST_SIZES(tag.custom_object_names);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.ingame_help_text);
