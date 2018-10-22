@@ -924,7 +924,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioActorStartingLocation {
         Point3D<EndianType> position;
         EndianType<Angle> facing;
-        PAD(0x2);
+        EndianType<std::uint16_t> unknown;
         std::int8_t sequence_id;
         EndianType<ScenarioActorStartingLocationFlags> flags;
         EndianType<ScenarioReturnState> return_state;
@@ -936,6 +936,7 @@ namespace Invader::HEK {
             ScenarioActorStartingLocation<NewType> copy = {};
             COPY_THIS(position);
             COPY_THIS(facing);
+            COPY_THIS(unknown);
             COPY_THIS(sequence_id);
             COPY_THIS(flags);
             COPY_THIS(return_state);
