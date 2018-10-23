@@ -44,7 +44,21 @@ namespace Invader {
         std::vector<HEK::ScenarioPlayerStartingLocation<HEK::BigEndian>> player_starting_locations;
         std::vector<HEK::ScenarioNetgameFlags<HEK::BigEndian>> netgame_flags;
         std::vector<HEK::ScenarioNetgameEquipment<HEK::BigEndian>> netgame_equipment;
+        std::vector<std::string> netgame_equipment_items;
     };
 
-    SalamanderScenario scenario_from_file(const std::vector<char> &file);
+    /**
+     * Parse the scenario data
+     * @param  data data for the scenario data
+     * @return      the parsed data
+     * @throws      std::exception if data is invalid
+     */
+    SalamanderScenario parse_scenario_data(const std::vector<char> &data);
+
+    /**
+     * Write the scenario data to the tag
+     * @param scenario_tag scenario tag data from Halo Editing Kit
+     * @param scenario     scenario data from parse_scenario_data
+     */
+    std::vector<std::byte> scenario_to_tag(const std::vector<std::byte> &scenario_tag, const SalamanderScenario &scenario);
 }
