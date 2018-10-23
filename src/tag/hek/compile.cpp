@@ -9,7 +9,7 @@
 #include "compile.hpp"
 
 namespace Invader {
-    std::size_t add_dependency(CompiledTag &compiled, HEK::TagDependency<HEK::LittleEndian> &dependency, std::size_t offset, const std::byte *path, std::size_t max_path_size, bool skip_data, const char *name) {
+    std::size_t add_dependency(CompiledTag &compiled, HEK::TagDependency<HEK::LittleEndian> &dependency, std::size_t offset, const std::byte *path, std::size_t max_path_size, bool skip_data) {
         std::size_t path_size = dependency.path_size;
 
         // Zero stuff out
@@ -18,13 +18,14 @@ namespace Invader {
 
         // If the size > 0, there's a dependency
         if(path_size > 0) {
-            // Max size is too small or path is not null terminated?
-            if(max_path_size <= path_size || reinterpret_cast<const unsigned char *>(path)[path_size] != 0x00) {
-                if(name) {
-                    #ifndef NO_OUTPUT
-                    std::cerr << "Could not parse dependency for " << name << "\n";
-                    #endif
-                }
+            // Max size is too small
+            if(max_path_size <= path_size) {
+                std::cerr << "path length exceeds the remaining tag data length" << "\n";
+            }
+
+            // Path is not null terminated
+            if(reinterpret_cast<const unsigned char *>(path)[path_size] != 0x00) {
+                std::cerr << "path is not null-terminated or is too long" << "\n";
                 throw InvalidDependencyException();
             }
 
@@ -34,7 +35,14 @@ namespace Invader {
                 *reinterpret_cast<std::uint32_t *>(dependency.tag_id.value) = 0xFFFFFFFF;
             }
             else {
-                compiled.dependencies.push_back(CompiledTagDependency { offset, reinterpret_cast<const char *>(path), dependency.tag_class_int });
+                std::string path_str(reinterpret_cast<const char *>(path));
+
+                // Make sure the length is correct
+                if(path_str.length() != path_size) {
+                    std::cerr << "path length is wrong (expected " << path_size << "; got " << path_str.length() << ")\n";
+                    throw InvalidDependencyException();
+                }
+                compiled.dependencies.push_back(CompiledTagDependency { offset, path_str, dependency.tag_class_int });
             }
 
             // Set the return value to the size of the path, including the null byte

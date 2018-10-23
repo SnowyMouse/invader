@@ -39,7 +39,15 @@ namespace Invader::HEK {
      * Single 20 character string
      */
     struct TagString {
-        char string[0x20];
+        char string[0x20] = {};
+
+        TagString() {}
+        TagString(const std::string &copy) {
+            if(copy.length() >= sizeof(string)) {
+                throw OutOfBoundsException();
+            }
+            std::strcpy(string, copy.data());
+        }
     };
 
     /**

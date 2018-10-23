@@ -483,9 +483,9 @@ namespace Invader::HEK {
     SINGLE_DEPENDENCY_PADDED_STRUCT(ScenarioVehiclePalette, name, 0x20); // vehicle
 
     struct ScenarioItemFlags {
-        std::uint16_t initially_at_rest_doesn_t_fall : 1;
+        std::uint16_t initially_at_rest : 1;
         std::uint16_t obsolete : 1;
-        std::uint16_t does_accelerate_moves_due_to_explosions : 1;
+        std::uint16_t does_accelerate : 1;
     };
     static_assert(sizeof(ScenarioItemFlags) == sizeof(std::uint16_t));
 
@@ -552,8 +552,8 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioDeviceGroup<BigEndian>) == 0x34);
 
     struct ScenarioDeviceFlags {
-        std::uint32_t initially_open_1_0 : 1;
-        std::uint32_t initially_off_0_0 : 1;
+        std::uint32_t initially_open : 1;
+        std::uint32_t initially_off : 1;
         std::uint32_t can_change_only_once : 1;
         std::uint32_t position_reversed : 1;
         std::uint32_t not_usable_from_any_side : 1;

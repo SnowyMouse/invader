@@ -23,7 +23,10 @@ namespace Invader {
      * Assert that the variable, size, is greater than or equal to compare_size
      * @param  compare_size size to check
      */
-    #define ASSERT_SIZE(compare_size) if(size < static_cast<std::size_t>(compare_size)) { throw OutOfBoundsException(); }
+    #define ASSERT_SIZE(compare_size) if(size < static_cast<std::size_t>(compare_size)) { \
+        std::cerr << "ASSERT_SIZE failed: " << size << " < " # compare_size "(" << compare_size << ")" << "\n"; \
+        throw OutOfBoundsException(); \
+    }
 
     /**
      * Assert sizeof(type<BigEndian>) as well as reserve size bytes in the compiled variable.
@@ -62,36 +65,51 @@ namespace Invader {
      * @param  reflexive_struct reflexive to add
      */
     #define ADD_REFLEXIVE_START(reflexive_struct) \
-        reflexive_struct .pointer = 0; \
-        reflexive_struct .unknown = 0; \
-        if(reflexive_struct .count > 0) { \
-            using ref_type = decltype(reflexive_struct)::struct_type_little; \
-            auto count = reflexive_struct .count.read(); \
-            auto ref_size = sizeof(ref_type) * count; \
-            auto first_struct_offset = compiled.data.size(); \
-            ASSERT_SIZE(ref_size); \
-            std::uint8_t padding = REQUIRED_PADDING_32_BIT(ref_size); \
-            if(skip_data) { \
-                reflexive_struct.count = 0;\
-            }\
-            else {\
-                ADD_POINTER_FROM_INT32(reflexive_struct .pointer.value, first_struct_offset) \
-                compiled.data.insert(compiled.data.end(), ref_size + padding, std::byte()); \
-            }\
-            auto *reflexives_big = reinterpret_cast<const decltype(reflexive_struct)::struct_type_big *>(data); \
-            INCREMENT_DATA_PTR(ref_size); \
-            for(std::size_t i = 0; i < count; i++) { \
-                ref_type reflexive = reflexives_big[i]; \
-                auto current_struct_offset = first_struct_offset + i * sizeof(reflexive);\
-                auto current_struct_address = reinterpret_cast<std::uintptr_t>(&reflexive);
+        {\
+            const char *struct_name = # reflexive_struct; \
+            try { \
+                reflexive_struct .pointer = 0; \
+                reflexive_struct .unknown = 0; \
+                if(reflexive_struct .count > 0) { \
+                    using ref_type = decltype(reflexive_struct)::struct_type_little; \
+                    auto count = reflexive_struct .count.read(); \
+                    auto ref_size = sizeof(ref_type) * count; \
+                    auto first_struct_offset = compiled.data.size(); \
+                    ASSERT_SIZE(ref_size); \
+                    std::uint8_t padding = REQUIRED_PADDING_32_BIT(ref_size); \
+                    if(skip_data) { \
+                        reflexive_struct.count = 0;\
+                    }\
+                    else {\
+                        ADD_POINTER_FROM_INT32(reflexive_struct .pointer.value, first_struct_offset) \
+                        compiled.data.insert(compiled.data.end(), ref_size + padding, std::byte()); \
+                    }\
+                    auto *reflexives_big = reinterpret_cast<const decltype(reflexive_struct)::struct_type_big *>(data); \
+                    INCREMENT_DATA_PTR(ref_size); \
+                    for(std::size_t i = 0; i < count; i++) { \
+                        ref_type reflexive = reflexives_big[i]; \
+                        try {\
+                            auto current_struct_offset = first_struct_offset + i * sizeof(reflexive);\
+                            auto current_struct_address = reinterpret_cast<std::uintptr_t>(&reflexive);
 
-    /**
-     * Finish adding reflexive and copy reflexive data to compiled.data
-     */
-    #define ADD_REFLEXIVE_END \
-                if(!skip_data) { \
-                    std::copy(reinterpret_cast<std::byte *>(current_struct_address), reinterpret_cast<std::byte *>(current_struct_address + sizeof(reflexive)), compiled.data.data() + current_struct_offset); \
-                } \
+        /**
+         * Finish adding reflexive and copy reflexive data to compiled.data
+         */
+        #define ADD_REFLEXIVE_END \
+                            if(!skip_data) { \
+                                std::copy(reinterpret_cast<std::byte *>(current_struct_address), reinterpret_cast<std::byte *>(current_struct_address + sizeof(reflexive)), compiled.data.data() + current_struct_offset); \
+                            } \
+                        }\
+                        catch(std::exception &e) {\
+                            std::cerr << "error adding reflexive #" << i << " for " << struct_name << "\n"; \
+                            throw; \
+                        }\
+                    }\
+                }\
+            }\
+            catch(std::exception &) { \
+                std::cerr << "error adding reflexive " << struct_name << "\n"; \
+                throw; \
             }\
         }
 
@@ -124,7 +142,10 @@ namespace Invader {
      */
     #define FINISH_COMPILE \
         FINISH_COMPILE_COPY \
-        if(size != 0) { throw ExtraTagDataException(); }
+        if(size != 0) { \
+            std::cerr << "unexpected extra " << size << " bytes"; \
+            throw ExtraTagDataException();\
+        }
 
     /**
      * Add a dependency from a reflexive and copy all of the other reflexive's data
@@ -148,8 +169,14 @@ namespace Invader {
      * @throws throw an exception if the dependency is not valid
      */
     #define ADD_DEPENDENCY_ADJUST_SIZES(dependency) {\
-        auto amt = add_dependency(compiled, dependency, reinterpret_cast<std::uintptr_t>(&dependency) - current_struct_address + current_struct_offset, data, size, skip_data, TOSTR(dependency)); \
-        INCREMENT_DATA_PTR(amt); \
+        try { \
+            auto amt = add_dependency(compiled, dependency, reinterpret_cast<std::uintptr_t>(&dependency) - current_struct_address + current_struct_offset, data, size, skip_data); \
+            INCREMENT_DATA_PTR(amt); \
+        } \
+        catch(std::exception &) { \
+            std::cerr << "error adding dependency " # dependency << "\n"; \
+            throw; \
+        } \
     }
 
     /**
@@ -170,7 +197,7 @@ namespace Invader {
      * @param  name          name of dependency (used for errors)
      * @return               size of path, including null terminator or 0 if no dependency
      */
-    std::size_t add_dependency(CompiledTag &compiled, HEK::TagDependency<HEK::LittleEndian> &dependency, std::size_t offset, const std::byte *path, std::size_t max_path_size, bool skip_data, const char *name);
+    std::size_t add_dependency(CompiledTag &compiled, HEK::TagDependency<HEK::LittleEndian> &dependency, std::size_t offset, const std::byte *path, std::size_t max_path_size, bool skip_data);
 
     /**
      * Add a pointer to a compiled tag.
