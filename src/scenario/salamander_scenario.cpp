@@ -217,6 +217,8 @@ namespace Invader {
         for(int i = 0; i < weapon_count; i++) {
             HEK::ScenarioWeapon<HEK::BigEndian> ss = {};
             READ_STRUCT_BASE(ss);
+            ss.rounds_left = read_int();
+            ss.rounds_loaded = read_int();
             HEK::ScenarioItemFlags flags = {};
             flags.initially_at_rest = read_int();
             flags.obsolete = read_int();
