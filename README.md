@@ -25,3 +25,8 @@ This program builds cache files.
 
 This program builds index files for usage with `--with-index` with invader-build. It takes exactly two arguments:
 `<input map> <output index>`
+
+### invader-scenario
+
+This program takes Salamander-exported scenario data files and applies them to a scenario tag. It takes exactly two
+arguments: `<scenario tag> <scenario file>`
