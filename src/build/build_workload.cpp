@@ -439,8 +439,7 @@ namespace Invader {
         #ifndef NO_OUTPUT
         bool network_issue = false;
         #endif
-        int seed = this->compiled_tags.size();
-        std::srand(seed);
+        bool path_too_long = false;
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
                 #ifndef NO_OUTPUT
@@ -456,24 +455,14 @@ namespace Invader {
 
             if(compiled_tag->path.length() > MAX_PATH_LENGTH) {
                 #ifndef NO_OUTPUT
-                std::cerr << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << " was shortened to " << MAX_PATH_LENGTH << " characters\n";
+                std::cerr << "ERROR! " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "'s path exceeds " << MAX_PATH_LENGTH << " characters\n";
                 #endif
-                for(;;) {
-                    compiled_tag->path = compiled_tag->path.substr(0, MAX_PATH_LENGTH);
-                    std::snprintf(compiled_tag->path.data() + MAX_PATH_LENGTH - 8, 9, "%x", static_cast<std::uint32_t>(std::rand() * std::rand() * std::rand() * std::rand()) % 0xefffffff + 0x10000000);
-                    bool copy_found = false;
-                    for(auto &tag2 : this->compiled_tags) {
-                        if(tag2->tag_class_int == compiled_tag->tag_class_int && tag2.get() != compiled_tag.get() && tag2->path == compiled_tag->path) {
-                            copy_found = true;
-                            break;
-                        }
-                    }
-
-                    if(!copy_found) {
-                        break;
-                    }
-                }
+                path_too_long = true;
             }
+        }
+
+        if(path_too_long) {
+            throw TagErrorException();
         }
 
         #ifndef NO_OUTPUT
