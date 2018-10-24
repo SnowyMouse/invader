@@ -332,7 +332,7 @@ namespace Invader::HEK {
         PAD(0x20);
 
         ENDIAN_TEMPLATE(NewType) operator GameDataInputReference<NewType>() const noexcept {
-            GameDataInputReference<NewType> copy;
+            GameDataInputReference<NewType> copy = {};
             COPY_THIS(function);
             return copy;
         }
@@ -363,7 +363,7 @@ namespace Invader::HEK {
         TagString script;
 
         ENDIAN_TEMPLATE(NewType) operator EventHandlerReference<NewType>() const noexcept {
-            EventHandlerReference<NewType> copy;
+            EventHandlerReference<NewType> copy = {};
             COPY_THIS(flags);
             COPY_THIS(event_type);
             COPY_THIS(function);
@@ -400,7 +400,7 @@ namespace Invader::HEK {
         PAD(0x1A);
 
         ENDIAN_TEMPLATE(NewType) operator ConditionalWidgetReference<NewType>() const noexcept {
-            ConditionalWidgetReference<NewType> copy;
+            ConditionalWidgetReference<NewType> copy = {};
             COPY_THIS(widget_tag);
             COPY_THIS(name);
             COPY_THIS(flags);
@@ -424,7 +424,7 @@ namespace Invader::HEK {
         PAD(0x16);
 
         ENDIAN_TEMPLATE(NewType) operator ChildWidgetReference<NewType>() const noexcept {
-            ChildWidgetReference<NewType> copy;
+            ChildWidgetReference<NewType> copy = {};
             COPY_THIS(widget_tag);
             COPY_THIS(name);
             COPY_THIS(flags);
@@ -508,7 +508,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, ChildWidgetReference> child_widgets;
 
         ENDIAN_TEMPLATE(NewType) operator UIWidgetDefinition<NewType>() const noexcept {
-            UIWidgetDefinition<NewType> copy;
+            UIWidgetDefinition<NewType> copy = {};
             COPY_THIS(widget_type);
             COPY_THIS(controller_index);
             COPY_THIS(name);

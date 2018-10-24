@@ -54,7 +54,7 @@ namespace Invader::HEK {
         PAD(0x4);
 
         ENDIAN_TEMPLATE(NewType) operator Device<NewType>() const noexcept {
-            Device<NewType> copy;
+            Device<NewType> copy = {};
             COPY_OBJECT_DATA
             COPY_THIS(device_flags);
             COPY_THIS(power_transition_time);
