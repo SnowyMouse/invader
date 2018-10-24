@@ -14,6 +14,9 @@
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
+// This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
+#define MAX_PATH_LENGTH 254
+
 #include "../tag/hek/class/bitmap.hpp"
 #include "../tag/hek/class/fog.hpp"
 #include "../tag/hek/class/font.hpp"
@@ -436,6 +439,8 @@ namespace Invader {
         #ifndef NO_OUTPUT
         bool network_issue = false;
         #endif
+        int seed = this->compiled_tags.size();
+        std::srand(seed);
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
                 #ifndef NO_OUTPUT
@@ -447,6 +452,27 @@ namespace Invader {
                 compiled_tag->path = std::string("stub\\") + tag_class_to_extension(compiled_tag->tag_class_int) + "\\" + compiled_tag->path;
                 compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
                 compiled_tag->data.insert(compiled_tag->data.begin(), 12, std::byte());
+            }
+
+            if(compiled_tag->path.length() > MAX_PATH_LENGTH) {
+                #ifndef NO_OUTPUT
+                std::cerr << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << " was shortened to " << MAX_PATH_LENGTH << " characters\n";
+                #endif
+                for(;;) {
+                    compiled_tag->path = compiled_tag->path.substr(0, MAX_PATH_LENGTH);
+                    std::snprintf(compiled_tag->path.data() + MAX_PATH_LENGTH - 8, 9, "%x", static_cast<std::uint32_t>(std::rand() * std::rand() * std::rand() * std::rand()) % 0xefffffff + 0x10000000);
+                    bool copy_found = false;
+                    for(auto &tag2 : this->compiled_tags) {
+                        if(tag2->tag_class_int == compiled_tag->tag_class_int && tag2.get() != compiled_tag.get() && tag2->path == compiled_tag->path) {
+                            copy_found = true;
+                            break;
+                        }
+                    }
+
+                    if(!copy_found) {
+                        break;
+                    }
+                }
             }
         }
 
