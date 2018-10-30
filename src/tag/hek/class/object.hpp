@@ -191,6 +191,7 @@ namespace Invader::HEK {
                              COPY_THIS(bounding_offset); \
                              COPY_THIS(origin_offset); \
                              COPY_THIS(acceleration_scale); \
+                             COPY_THIS(has_change_colors); \
                              COPY_THIS(model); \
                              COPY_THIS(animation_graph); \
                              COPY_THIS(collision_model); \
@@ -248,6 +249,7 @@ namespace Invader::HEK {
                                 ADD_REFLEXIVE_START(tag.change_colors) { \
                                     ADD_REFLEXIVE(reflexive.permutations); \
                                 } ADD_REFLEXIVE_END; \
+                                tag.has_change_colors = tag.change_colors.count != 0; \
                                 ADD_REFLEXIVE(tag.predicted_resources);
 
     ENDIAN_TEMPLATE(EndianType) struct Object {
@@ -257,7 +259,7 @@ namespace Invader::HEK {
         Point3D<EndianType> bounding_offset;
         Point3D<EndianType> origin_offset;
         EndianType<float> acceleration_scale;
-        PAD(0x4);
+        LittleEndian<std::uint32_t> has_change_colors;
         TagDependency<EndianType> model; // gbxmodel
         TagDependency<EndianType> animation_graph; // animation
         PAD(0x28);
