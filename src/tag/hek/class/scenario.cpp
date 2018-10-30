@@ -62,6 +62,8 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END;
 
         ADD_REFLEXIVE(tag.player_starting_locations);
+
+        std::size_t trigger_volume_offset = compiled.data.size();
         ADD_REFLEXIVE(tag.trigger_volumes);
 
         ADD_REFLEXIVE_START(tag.recorded_animations) {
@@ -84,7 +86,50 @@ namespace Invader::HEK {
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.item_collection_6);
         } ADD_REFLEXIVE_END
 
+        skip_data = true;
         ADD_REFLEXIVE(tag.bsp_switch_trigger_volumes);
+        skip_data = false;
+
+        std::vector<ScenarioBSPSwitchTriggerVolume<LittleEndian>> switch_volumes;
+        auto *volumes = reinterpret_cast<ScenarioTriggerVolume<LittleEndian> *>(compiled.data.data() + trigger_volume_offset);
+        for(std::size_t i = 0; i < tag.trigger_volumes.count; i++) {
+            auto &volume = volumes[i];
+
+            // Check if it starts with "bsp" and it's null terminated
+            if(volume.name.string[sizeof(volume.name.string) - 1] == 0 && std::memcmp(volume.name.string, "bsp", 3) == 0) {
+                char *end = nullptr;
+
+                // Get the first BSP index
+                long bsp_1 = std::strtol(volume.name.string + 3, &end, 10);
+                if(end && *end == ',' && end + 1 < volume.name.string + sizeof(volume.name.string) - 1) {
+                    end++;
+                    char *end2 = nullptr;
+
+                    // Second BSP index
+                    long bsp_2 = std::strtol(end, &end2, 10);
+                    if(end2 && *end2 == 0) {
+                        ScenarioBSPSwitchTriggerVolume<LittleEndian> new_volume = {};
+                        new_volume.source = bsp_1;
+                        new_volume.destination = bsp_2;
+                        new_volume.trigger_volume = i;
+                        switch_volumes.push_back(new_volume);
+                    }
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+
+        // Add the volumes we found
+        auto switch_trigger_count = switch_volumes.size();
+        tag.bsp_switch_trigger_volumes.count = static_cast<std::uint32_t>(switch_trigger_count);
+        if(switch_trigger_count > 0) {
+            ADD_POINTER_FROM_INT32(tag.bsp_switch_trigger_volumes.pointer, compiled.data.size());
+            std::cout << switch_trigger_count << std::endl;
+            compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(switch_volumes.data()), reinterpret_cast<std::byte *>(switch_volumes.data() + switch_volumes.size()));
+        }
+
         ADD_REFLEXIVE(tag.decals);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.decal_palette, reference);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.detail_object_collection_palette, reference);
