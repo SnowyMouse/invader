@@ -97,7 +97,8 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct LensFlare {
         EndianType<Angle> falloff_angle;
         EndianType<Angle> cutoff_angle;
-        PAD(0x8);
+        LittleEndian<float> cos_falloff_angle;
+        LittleEndian<float> cos_cutoff_angle;
         EndianType<float> occlusion_radius;
         EndianType<LensFlareOcclusionOffsetDirection> occlusion_offset_direction;
         PAD(0x2);
@@ -121,6 +122,8 @@ namespace Invader::HEK {
             LensFlare<NewType> copy = {};
             COPY_THIS(falloff_angle);
             COPY_THIS(cutoff_angle);
+            COPY_THIS(cos_falloff_angle);
+            COPY_THIS(cos_cutoff_angle);
             COPY_THIS(occlusion_radius);
             COPY_THIS(occlusion_offset_direction);
             COPY_THIS(near_fade_distance);

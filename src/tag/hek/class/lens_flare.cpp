@@ -4,6 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
+#include <cmath>
+
 #include "../compile.hpp"
 #include "lens_flare.hpp"
 
@@ -17,6 +19,8 @@ namespace Invader::HEK {
         ADD_REFLEXIVE_START(tag.reflections) {
             DEFAULT_VALUE(reflexive.animation_period, 1.0f);
         } ADD_REFLEXIVE_END
+        tag.cos_falloff_angle = std::cos(tag.falloff_angle);
+        tag.cos_cutoff_angle = std::cos(tag.cutoff_angle);
         FINISH_COMPILE
     }
 }
