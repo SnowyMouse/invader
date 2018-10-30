@@ -126,7 +126,6 @@ namespace Invader::HEK {
         tag.bsp_switch_trigger_volumes.count = static_cast<std::uint32_t>(switch_trigger_count);
         if(switch_trigger_count > 0) {
             ADD_POINTER_FROM_INT32(tag.bsp_switch_trigger_volumes.pointer, compiled.data.size());
-            std::cout << switch_trigger_count << std::endl;
             compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(switch_volumes.data()), reinterpret_cast<std::byte *>(switch_volumes.data() + switch_volumes.size()));
         }
 
