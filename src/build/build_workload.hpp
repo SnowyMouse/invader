@@ -98,6 +98,11 @@ namespace Invader {
         std::vector<Resource> loc;
 
         /**
+         * Tag buffer for compiling tags
+         */
+        std::vector<std::byte> tag_buffer;
+
+        /**
          * Compile and load all required tags
          */
         void load_required_tags();

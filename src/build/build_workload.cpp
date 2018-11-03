@@ -530,13 +530,17 @@ namespace Invader {
             if(!file) {
                 continue;
             }
+
             std::fseek(file, 0, SEEK_END);
             std::size_t file_length = std::ftell(file);
             std::fseek(file, 0, SEEK_SET);
 
+            if(file_length > this->tag_buffer.size()) {
+                this->tag_buffer.resize(file_length, std::byte());
+            }
+
             // Read the file
-            std::vector<std::byte> tag_file_data(file_length);
-            if(std::fread(tag_file_data.data(), file_length, 1, file) != 1) {
+            if(std::fread(this->tag_buffer.data(), file_length, 1, file) != 1) {
                 std::fclose(file);
                 break;
             }
@@ -546,7 +550,7 @@ namespace Invader {
 
             try {
                 // Compile the tag
-                std::unique_ptr<CompiledTag> tag(std::make_unique<CompiledTag>(path, tag_class_int, tag_file_data.data(), tag_file_data.size(), this->cache_file_type));
+                std::unique_ptr<CompiledTag> tag(std::make_unique<CompiledTag>(path, tag_class_int, this->tag_buffer.data(), file_length, this->cache_file_type));
                 CompiledTag *tag_ptr = tag.get();
 
                 // Insert into the tag array
