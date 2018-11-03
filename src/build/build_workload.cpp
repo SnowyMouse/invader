@@ -118,14 +118,12 @@ namespace Invader {
         }
         workload.verbose = verbose;
 
-        std::string scenario_backslash = scenario;
-        for(std::size_t i = 0; i < scenario_backslash.length(); i++) {
-            if(scenario_backslash[i] == '/') {
-                scenario_backslash[i] = '\\';
+        workload.scenario = std::move(scenario);
+        for(std::size_t i = 0; i < scenario.length(); i++) {
+            if(scenario[i] == '/') {
+                scenario[i] = '\\';
             }
         }
-
-        workload.scenario = scenario_backslash;
 
         return workload.build_cache_file();
     }
