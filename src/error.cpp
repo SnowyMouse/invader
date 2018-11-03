@@ -54,4 +54,8 @@ namespace Invader {
     const char *InvalidMapException::what() const noexcept {
         return "tried to open an invalid map";
     }
+
+    const char *InvalidTagPathException::what() const noexcept {
+        return "tag path is too long";
+    }
 }

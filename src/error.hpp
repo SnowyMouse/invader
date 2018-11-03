@@ -116,4 +116,13 @@ namespace Invader {
         /** What happened? */
         const char *what() const noexcept;
     };
+
+    /**
+     * This is thrown when a tag path is too long
+     */
+    class InvalidTagPathException : public std::exception {
+    public:
+        /** What happened? */
+        const char *what() const noexcept;
+    };
 }

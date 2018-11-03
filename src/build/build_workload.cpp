@@ -439,7 +439,6 @@ namespace Invader {
         #ifndef NO_OUTPUT
         bool network_issue = false;
         #endif
-        bool path_too_long = false;
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
                 #ifndef NO_OUTPUT
@@ -452,17 +451,6 @@ namespace Invader {
                 compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
                 compiled_tag->data.insert(compiled_tag->data.begin(), 12, std::byte());
             }
-
-            if(compiled_tag->path.length() > MAX_PATH_LENGTH) {
-                #ifndef NO_OUTPUT
-                std::cerr << "ERROR! " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "'s path exceeds " << MAX_PATH_LENGTH << " characters\n";
-                #endif
-                path_too_long = true;
-            }
-        }
-
-        if(path_too_long) {
-            throw TagErrorException();
         }
 
         #ifndef NO_OUTPUT
@@ -503,14 +491,18 @@ namespace Invader {
         }
 
         // Get the tag path, replacing all backslashes with forward slashes if not on Win32
-        std::string tag_base_path;
+        constexpr auto path_size = MAX_PATH_LENGTH + 1;
+        if(this->tag_buffer.size() < path_size) {
+            this->tag_buffer.resize(path_size);
+        }
+        char *tag_base_path = reinterpret_cast<char *>(this->tag_buffer.data());
+        auto actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path.data(), tag_class_to_extension(tag_class_int));
+        if(actual_path_size >= path_size) {
+            throw InvalidTagPathException();
+        }
 
-        #ifdef _WIN32
-        tag_base_path = path;
-        #else
-        std::size_t length = path.length();
-        tag_base_path.resize(length);
-        for(std::size_t i = 0; i < length; i++) {
+        #ifndef _WIN32
+        for(std::size_t i = 0; i < actual_path_size; i++) {
             char c = path[i];
             if(c == '\\') {
                 tag_base_path[i] = '/';
@@ -519,11 +511,12 @@ namespace Invader {
                 tag_base_path[i] = c;
             }
         }
+        tag_base_path[actual_path_size] = 0;
         #endif
 
         for(const auto &tag_dir : this->tags_directories) {
             // Concatenate the tag path
-            std::string tag_path = tag_dir + tag_base_path + "." + tag_class_to_extension(tag_class_int);
+            std::string tag_path = tag_dir + tag_base_path;
 
             // Open the tag file
             std::FILE *file = std::fopen(tag_path.data(), "rb");
