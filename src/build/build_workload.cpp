@@ -496,22 +496,18 @@ namespace Invader {
             this->tag_buffer.resize(path_size);
         }
         char *tag_base_path = reinterpret_cast<char *>(this->tag_buffer.data());
-        auto actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path.data(), tag_class_to_extension(tag_class_int));
+        std::size_t actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path.data(), tag_class_to_extension(tag_class_int));
         if(actual_path_size >= path_size) {
             throw InvalidTagPathException();
         }
 
         #ifndef _WIN32
         for(std::size_t i = 0; i < actual_path_size; i++) {
-            char c = path[i];
+            char &c = tag_base_path[i];
             if(c == '\\') {
-                tag_base_path[i] = '/';
-            }
-            else {
-                tag_base_path[i] = c;
+                c = '/';
             }
         }
-        tag_base_path[actual_path_size] = 0;
         #endif
 
         for(const auto &tag_dir : this->tags_directories) {
