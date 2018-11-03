@@ -113,7 +113,7 @@ namespace Invader {
          * @param  tag_class_int class of tag
          * @return               tag index of compiled tag
          */
-        std::size_t compile_tag_recursively(const std::string &path, HEK::TagClassInt tag_class_int);
+        std::size_t compile_tag_recursively(const char *path, HEK::TagClassInt tag_class_int);
 
         /**
          * Build a cache file

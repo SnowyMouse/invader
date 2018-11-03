@@ -418,7 +418,7 @@ namespace Invader {
     void BuildWorkload::load_required_tags() {
         using namespace HEK;
 
-        this->scenario_index = this->compile_tag_recursively(scenario, TagClassInt::TAG_CLASS_SCENARIO);
+        this->scenario_index = this->compile_tag_recursively(this->scenario.data(), TagClassInt::TAG_CLASS_SCENARIO);
         this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(this->compiled_tags[this->scenario_index]->data.data())->type;
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
@@ -467,7 +467,7 @@ namespace Invader {
         #endif
     }
 
-    std::size_t BuildWorkload::compile_tag_recursively(const std::string &path, HEK::TagClassInt tag_class_int) {
+    std::size_t BuildWorkload::compile_tag_recursively(const char *path, HEK::TagClassInt tag_class_int) {
         using namespace HEK;
 
         bool adding = true;
@@ -503,7 +503,7 @@ namespace Invader {
             this->tag_buffer.resize(path_size);
         }
         char *tag_base_path = reinterpret_cast<char *>(this->tag_buffer.data());
-        std::size_t actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path.data(), tag_class_to_extension(tag_class_int));
+        std::size_t actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path, tag_class_to_extension(tag_class_int));
         if(actual_path_size >= path_size) {
             throw InvalidTagPathException();
         }
@@ -563,7 +563,7 @@ namespace Invader {
                         dependency.tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
                     }
                     auto *dependency_in_tag = reinterpret_cast<TagDependency<LittleEndian> *>(tag_ptr->data.data() + dependency.offset);
-                    dependency_in_tag->tag_id = tag_id_from_index(this->compile_tag_recursively(dependency.path, dependency.tag_class_int));
+                    dependency_in_tag->tag_id = tag_id_from_index(this->compile_tag_recursively(dependency.path.data(), dependency.tag_class_int));
                     dependency_in_tag->tag_class_int = dependency.tag_class_int;
                 }
 
