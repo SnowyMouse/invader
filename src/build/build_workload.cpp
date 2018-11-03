@@ -105,6 +105,7 @@ namespace Invader {
                     #ifndef NO_OUTPUT
                     std::cerr << "Failed to open " << path << "\n";
                     #endif
+                    std::fclose(f);
                     return std::vector<Resource>();
                 }
 
