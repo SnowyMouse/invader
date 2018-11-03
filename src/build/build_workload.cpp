@@ -83,7 +83,9 @@ namespace Invader {
             }
             #endif
 
-            auto load_map = [](const std::string &path) -> std::vector<Resource> {
+            std::vector<std::byte> resource_data_buffer;
+
+            auto load_map = [&resource_data_buffer](const std::string &path) -> std::vector<Resource> {
                 std::FILE *f = std::fopen(path.data(), "rb");
                 if(!f) {
                     #ifndef NO_OUTPUT
@@ -94,14 +96,20 @@ namespace Invader {
                 std::fseek(f, 0, SEEK_END);
                 std::size_t data_size = std::ftell(f);
                 std::fseek(f, 0, SEEK_SET);
-                std::unique_ptr<std::byte> data(new std::byte[data_size]);
-                if(std::fread(data.get(), data_size, 1, f) != 1) {
+
+                if(data_size > resource_data_buffer.size()) {
+                    resource_data_buffer.resize(data_size);
+                }
+
+                if(std::fread(resource_data_buffer.data(), data_size, 1, f) != 1) {
                     #ifndef NO_OUTPUT
                     std::cerr << "Failed to open " << path << "\n";
                     #endif
                     return std::vector<Resource>();
                 }
-                return load_resource_map(data.get(), data_size);
+
+                std::fclose(f);
+                return load_resource_map(resource_data_buffer.data(), data_size);
             };
             workload.bitmaps = load_map(workload.maps_directory + "bitmaps.map");
             workload.sounds = load_map(workload.maps_directory + "sounds.map");
