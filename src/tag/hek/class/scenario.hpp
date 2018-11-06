@@ -1118,7 +1118,7 @@ namespace Invader::HEK {
         TagString name;
         EndianType<ScenarioEncounterFlags> flags;
         EndianType<ScenarioTeamIndex> team_index;
-        EndianType<std::int16_t> unknown;
+        EndianType<std::int16_t> one;
         EndianType<ScenarioSearchBehavior> search_behavior;
         EndianType<std::int16_t> manual_bsp_index;
         Bounds<EndianType<float>> respawn_delay;
@@ -1133,7 +1133,7 @@ namespace Invader::HEK {
             COPY_THIS(name);
             COPY_THIS(flags);
             COPY_THIS(team_index);
-            COPY_THIS(unknown);
+            COPY_THIS(one);
             COPY_THIS(search_behavior);
             COPY_THIS(manual_bsp_index);
             COPY_THIS(respawn_delay);

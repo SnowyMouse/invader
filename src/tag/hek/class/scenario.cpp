@@ -147,6 +147,7 @@ namespace Invader::HEK {
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.actor_palette, reference);
 
         ADD_REFLEXIVE_START(tag.encounters) {
+            reflexive.one = 1;
             ADD_REFLEXIVE_START(reflexive.squads) {
                 ADD_REFLEXIVE(reflexive.move_positions);
                 ADD_REFLEXIVE(reflexive.starting_locations);
