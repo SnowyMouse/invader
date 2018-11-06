@@ -7,9 +7,10 @@
 #pragma once
 
 #include "../../../hek/map.hpp"
-#include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
+#include "../../compiled_tag.hpp"
 #include "../header.hpp"
+#include "object.hpp"
 
 namespace Invader::HEK {
     enum ScenarioSpawnType : TagEnum {
@@ -350,12 +351,14 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioObjectName {
         TagString name;
-        LittleEndian<std::uint32_t> unknown;
+        LittleEndian<ObjectType> object_type;
+        LittleEndian<std::uint16_t> object_index;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioObjectName<NewType>() const noexcept {
             ScenarioObjectName<NewType> copy = {};
             COPY_THIS(name);
-            COPY_THIS(unknown);
+            COPY_THIS(object_type);
+            COPY_THIS(object_index);
             return copy;
         }
     };

@@ -35,25 +35,37 @@ namespace Invader::HEK {
             INCREMENT_DATA_PTR(comment_size);
         } ADD_REFLEXIVE_END;
 
+        std::size_t object_names_offset = compiled.data.size();
         ADD_REFLEXIVE(tag.object_names);
-        ADD_REFLEXIVE(tag.scenery);
+
+        #define ADD_REFLEXIVE_SCENARIO_OBJECT(ref, type) \
+            ADD_REFLEXIVE_START(ref) { \
+                std::size_t object_name_index = static_cast<std::size_t>(reflexive.name.read()); \
+                if(object_name_index < tag.object_names.count) { \
+                    auto &object_name = reinterpret_cast<ScenarioObjectName<BigEndian> *>(compiled.data.data() + object_names_offset)[object_name_index]; \
+                    object_name.object_type = type; \
+                    object_name.object_index = i; \
+                } \
+            } ADD_REFLEXIVE_END
+
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.scenery, ObjectType::OBJECT_TYPE_SCENERY);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.scenery_palette, name);
-        ADD_REFLEXIVE(tag.bipeds);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.bipeds, ObjectType::OBJECT_TYPE_BIPED);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.biped_palette, name);
-        ADD_REFLEXIVE(tag.vehicles);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.vehicles, ObjectType::OBJECT_TYPE_VEHICLE);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.vehicle_palette, name);
-        ADD_REFLEXIVE(tag.equipment);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.equipment, ObjectType::OBJECT_TYPE_EQUIPMENT);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.equipment_palette, name);
-        ADD_REFLEXIVE(tag.weapons);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.weapons, ObjectType::OBJECT_TYPE_WEAPON);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.weapon_palette, name);
         ADD_REFLEXIVE(tag.device_groups);
-        ADD_REFLEXIVE(tag.machines);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.machines, ObjectType::OBJECT_TYPE_DEVICE_MACHINE);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.machine_palette, name);
-        ADD_REFLEXIVE(tag.controls);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.controls, ObjectType::OBJECT_TYPE_DEVICE_CONTROL);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.control_palette, name);
-        ADD_REFLEXIVE(tag.light_fixtures);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.light_fixtures, ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.light_fixture_palette, name);
-        ADD_REFLEXIVE(tag.sound_scenery);
+        ADD_REFLEXIVE_SCENARIO_OBJECT(tag.sound_scenery, ObjectType::OBJECT_TYPE_SOUND_SCENERY);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.sound_scenery_palette, name);
 
         ADD_REFLEXIVE_START(tag.player_starting_profile) {
