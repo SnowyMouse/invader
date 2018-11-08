@@ -48,6 +48,7 @@ namespace Invader::HEK {
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.test_3);
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.video_scanline_map);
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.video_noise_map);
+            ADD_DEPENDENCY_ADJUST_SIZES(reflexive.distance_attenuation_2d);
         } ADD_REFLEXIVE_END
 
         ADD_REFLEXIVE_START(tag.interface_bitmaps) {

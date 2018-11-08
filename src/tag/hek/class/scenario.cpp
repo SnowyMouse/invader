@@ -150,7 +150,9 @@ namespace Invader::HEK {
             reflexive.one = 1;
             ADD_REFLEXIVE_START(reflexive.squads) {
                 ADD_REFLEXIVE(reflexive.move_positions);
-                ADD_REFLEXIVE(reflexive.starting_locations);
+                ADD_REFLEXIVE_START(reflexive.starting_locations) {
+                    reflexive.unknown = 0;
+                } ADD_REFLEXIVE_END;
             } ADD_REFLEXIVE_END
             ADD_REFLEXIVE(reflexive.platoons);
             ADD_REFLEXIVE(reflexive.firing_positions);
@@ -158,6 +160,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
 
         ADD_REFLEXIVE_START(tag.command_lists) {
+            reflexive.unknown = 0;
             ADD_REFLEXIVE(reflexive.commands);
             ADD_REFLEXIVE(reflexive.points);
         } ADD_REFLEXIVE_END
