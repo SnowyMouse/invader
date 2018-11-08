@@ -21,6 +21,7 @@ namespace Invader {
             // Max size is too small
             if(max_path_size <= path_size) {
                 std::cerr << "path length exceeds the remaining tag data length" << "\n";
+                throw InvalidDependencyException();
             }
 
             // Path is not null terminated
