@@ -54,8 +54,6 @@ namespace Invader::HEK {
 
         bool no_sounds = tag.sound_references.count == 0;
         std::size_t animations_offset = compiled.data.size();
-        std::vector<DedupingAnimationData> deduped_frame_data;
-        std::vector<DedupingAnimationData> deduped_default_data;
 
         ADD_REFLEXIVE_START(tag.animations) {
             // Get the required frame size for sanity checking
@@ -215,28 +213,9 @@ namespace Invader::HEK {
                 }
                 INCREMENT_DATA_PTR(reflexive.default_data.size);
 
-                // Check to see if we can dedupe the default data
-                bool duped = false;
-                for(auto &duped_animation : deduped_default_data) {
-                    std::size_t deduped_data_size = duped_animation.data.size();
-                    if(default_data_size <= deduped_data_size && std::memcmp(duped_animation.data.data(), default_data.data(), default_data_size) == 0) {
-                        duped_animation.animations.push_back(i);
-                        duped = true;
-                        break;
-                    }
-                    else if(default_data_size > deduped_data_size && std::memcmp(duped_animation.data.data(), default_data.data(), deduped_data_size) == 0) {
-                        duped_animation.animations.push_back(i);
-                        duped = true;
-                        duped_animation.data.insert(duped_animation.data.end(), default_data.data() + deduped_data_size, default_data.data() + default_data_size);
-                        break;
-                    }
-                }
-                if(!duped) {
-                    DedupingAnimationData d;
-                    d.data = std::move(default_data);
-                    d.animations.push_back(i);
-                    deduped_default_data.push_back(std::move(d));
-                }
+                // Add default data
+                ADD_POINTER_FROM_INT32(reflexive.default_data.pointer, compiled.data.size());
+                compiled.data.insert(compiled.data.end(), default_data.data(), default_data.data() + default_data.size());
             }
             else {
                 INCREMENT_DATA_PTR(reflexive.default_data.size);
@@ -287,53 +266,14 @@ namespace Invader::HEK {
                     }
                     INCREMENT_DATA_PTR(frame_data_size);
 
-                    // Check to see if we can dedupe the animation data
-                    bool duped = false;
-                    for(auto &duped_animation : deduped_frame_data) {
-                        std::size_t deduped_data_size = duped_animation.data.size();
-                        if(frame_data_size <= deduped_data_size && std::memcmp(duped_animation.data.data(), frame_data.data(), frame_data_size) == 0) {
-                            duped_animation.animations.push_back(i);
-                            duped = true;
-                            break;
-                        }
-                        else if(frame_data_size > deduped_data_size && std::memcmp(duped_animation.data.data(), frame_data.data(), deduped_data_size) == 0) {
-                            duped_animation.animations.push_back(i);
-                            duped = true;
-                            duped_animation.data.insert(duped_animation.data.end(), frame_data.data() + deduped_data_size, frame_data.data() + frame_data_size);
-                            break;
-                        }
-                    }
-                    if(!duped) {
-                        DedupingAnimationData d;
-                        d.data = std::move(frame_data);
-                        d.animations.push_back(i);
-                        deduped_frame_data.push_back(std::move(d));
-                    }
+                    // Add default data
+                    ADD_POINTER_FROM_INT32(reflexive.frame_data.pointer, compiled.data.size());
+                    compiled.data.insert(compiled.data.end(), frame_data.data(), frame_data.data() + frame_data.size());
                 }
             }
 
             reflexive.main_animation_index = 0;
         } ADD_REFLEXIVE_END;
-
-        // Go through all animations
-        for(auto &duped_animation : deduped_frame_data) {
-            std::size_t offset = compiled.data.size();
-            compiled.data.insert(compiled.data.end(), duped_animation.data.data(), duped_animation.data.data() + duped_animation.data.size());
-
-            for(std::size_t animation : duped_animation.animations) {
-                add_pointer(compiled, animations_offset + animation * sizeof(ModelAnimationAnimation<LittleEndian>) + 0xA0 + 0xC, offset);
-            }
-        }
-
-        // Go through all animations
-        for(auto &duped_animation : deduped_default_data) {
-            std::size_t offset = compiled.data.size();
-            compiled.data.insert(compiled.data.end(), duped_animation.data.data(), duped_animation.data.data() + duped_animation.data.size());
-
-            for(std::size_t animation : duped_animation.animations) {
-                add_pointer(compiled, animations_offset + animation * sizeof(ModelAnimationAnimation<LittleEndian>) + 0x8C + 0xC, offset);
-            }
-        }
 
         // Go through to set main_animation_index
         auto *animations = reinterpret_cast<ModelAnimationAnimation<LittleEndian> *>(compiled.data.data() + animations_offset);
