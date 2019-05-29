@@ -47,17 +47,44 @@ namespace Invader {
         return map;
     }
 
-    std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size) {
-        if(offset >= this->data_length || offset + minimum_size > this->data_length) {
+    std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {
+        std::size_t max_length;
+        std::byte *data_ptr;
+        switch(map_type) {
+            case DATA_MAP_CACHE:
+                max_length = this->data_length;
+                data_ptr = this->data;
+                break;
+
+            case DATA_MAP_BITMAP:
+                max_length = this->bitmap_data_length;
+                data_ptr = this->bitmap_data;
+                break;
+
+            case DATA_MAP_SOUND:
+                max_length = this->sound_data_length;
+                data_ptr = this->sound_data;
+                break;
+
+            case DATA_MAP_LOC:
+                max_length = this->loc_data_length;
+                data_ptr = this->loc_data;
+                break;
+
+            default:
+                throw OutOfBoundsException();
+        }
+
+        if(offset >= max_length || offset + minimum_size > max_length) {
             throw OutOfBoundsException();
         }
         else {
-            return this->data + offset;
+            return data_ptr + offset;
         }
     }
 
-    const std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size) const {
-        return const_cast<Map *>(this)->get_data_at_offset(offset, minimum_size);
+    const std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) const {
+        return const_cast<Map *>(this)->get_data_at_offset(offset, minimum_size, map_type);
     }
 
     std::byte *Map::get_tag_data_at_offset(std::size_t offset, std::size_t minimum_size) {
@@ -96,6 +123,10 @@ namespace Invader {
 
     const Tag &Map::get_tag(std::size_t index) const {
         return const_cast<Map *>(this)->get_tag(index);
+    }
+
+    std::size_t Map::get_scenario_tag_id() const noexcept {
+        return this->scenario_tag_id;
     }
 
     void Map::load_map() {

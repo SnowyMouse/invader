@@ -50,23 +50,41 @@ namespace Invader {
         const std::byte *data(std::size_t minimum = 0) const;
 
         /**
+         * Get the base pointer
+         * @return base pointer
+         */
+        inline HEK::Pointer get_base_pointer() const noexcept {
+            return this->p_base_address;
+        }
+
+        /**
          * Get a reference to the struct at the given offset.
          * @return a reference to the base struct
          * @throws throw if out of bounds
          */
-         template <template<template<typename> typename> typename StructType>
-         StructType<HEK::LittleEndian> &get_struct_at_offset(std::size_t offset, std::size_t minimum_size = sizeof(StructType<HEK::LittleEndian>)) {
-             return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(sizeof(StructType<HEK::LittleEndian>) + offset + minimum_size) + offset);
-         }
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_struct_at_offset(std::size_t offset, std::size_t minimum_size = sizeof(StructType<HEK::LittleEndian>)) {
+            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(sizeof(StructType<HEK::LittleEndian>) + offset + minimum_size) + offset);
+        }
+
+        /**
+         * Get a reference to the struct at the given offset.
+         * @return a reference to the base struct
+         * @throws throw if out of bounds
+         */
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_struct_at_pointer(std::uint32_t pointer, std::size_t minimum_size = sizeof(StructType<HEK::LittleEndian>)) {
+            return this->get_struct_at_offset<StructType>(pointer - this->p_base_address, minimum_size);
+        }
 
         /**
          * Get a reference to the base struct, throwing an exception if out of bounds.
          * @return a reference to the base struct
          */
-         template <template<template<typename> typename> typename StructType>
-         StructType<HEK::LittleEndian> &get_base_struct() {
-             return get_struct_at_offset<StructType>(0);
-         }
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_base_struct() {
+            return get_struct_at_offset<StructType>(0);
+        }
 
         /**
          * Resolve the reflexive.

@@ -4,8 +4,8 @@
 # This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
 #
 
-# Require at least version 3.11
-cmake_minimum_required(VERSION 3.11)
+# Require at least version 3.10
+cmake_minimum_required(VERSION 3.10)
 
 # Use C++
 enable_language(CXX)

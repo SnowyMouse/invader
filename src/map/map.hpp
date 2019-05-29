@@ -21,6 +21,13 @@ namespace Invader {
     class Map {
     friend class Tag;
     public:
+        enum DataMapType {
+            DATA_MAP_CACHE,
+            DATA_MAP_BITMAP,
+            DATA_MAP_SOUND,
+            DATA_MAP_LOC
+        };
+
         /**
          * Create a Map by copying the given data, bitmaps, loc, and sound data.
          *
@@ -38,23 +45,23 @@ namespace Invader {
                                  const std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
                                  const std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
 
-         /**
-          * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
-          * responsible for ensuring that these pointers are valid for the lifespan of the Map.
-          *
-          * @param data              pointer to map data
-          * @param data_size         length of map data
-          * @param bitmaps_data      pointer to bitmaps data
-          * @param bitmaps_data_size length of bitmaps data
-          * @param loc_data          pointer to loc data
-          * @param loc_data_size     length of loc data
-          * @param sounds_data       pointer to sounds data
-          * @param sounds_data_size  length of sounds data
-          */
-         static Map map_with_pointer(std::byte *data, std::size_t data_size,
-                                     std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
-                                     std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
-                                     std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
+        /**
+         * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
+         * responsible for ensuring that these pointers are valid for the lifespan of the Map.
+         *
+         * @param data              pointer to map data
+         * @param data_size         length of map data
+         * @param bitmaps_data      pointer to bitmaps data
+         * @param bitmaps_data_size length of bitmaps data
+         * @param loc_data          pointer to loc data
+         * @param loc_data_size     length of loc data
+         * @param sounds_data       pointer to sounds data
+         * @param sounds_data_size  length of sounds data
+         */
+        static Map map_with_pointer(std::byte *data, std::size_t data_size,
+                                    std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
+                                    std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
+                                    std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
 
         /**
          * Get the data at the specified offset
@@ -63,7 +70,7 @@ namespace Invader {
          * @return              pointer to the data
          * @throws              OutOfBoundsException if data is out of bounds
          */
-        std::byte *get_data_at_offset(std::size_t offset, std::size_t minimum_size = 0);
+        std::byte *get_data_at_offset(std::size_t offset, std::size_t minimum_size = 0, DataMapType map_type = DATA_MAP_CACHE);
 
         /**
          * Get the data at the specified offset
@@ -72,7 +79,7 @@ namespace Invader {
          * @return              pointer to the data
          * @throws              OutOfBoundsException if data is out of bounds
          */
-        const std::byte *get_data_at_offset(std::size_t offset, std::size_t minimum_size = 0) const;
+        const std::byte *get_data_at_offset(std::size_t offset, std::size_t minimum_size = 0, DataMapType map_type = DATA_MAP_CACHE) const;
 
         /**
          * Get the tag data at the specified offset
@@ -120,7 +127,7 @@ namespace Invader {
          * Get the tag at the specified index
          * @param index the tag index
          * @return      the tag
-         * @throws      OutOfBoudnsException if index is invalid
+         * @throws      OutOfBoundsException if index is invalid
          */
         Tag &get_tag(std::size_t index);
 
@@ -128,9 +135,15 @@ namespace Invader {
          * Get the tag at the specified index
          * @param index the tag index
          * @return      the tag
-         * @throws      OutOfBoudnsException if index is invalid
+         * @throws      OutOfBoundsException if index is invalid
          */
         const Tag &get_tag(std::size_t index) const;
+
+        /**
+         * Get the scenario tag ID
+         * @return The scenario tag ID
+         */
+        std::size_t get_scenario_tag_id() const noexcept;
 
         /**
          * Copy constructor for Map
