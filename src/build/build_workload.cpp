@@ -52,10 +52,12 @@ namespace Invader {
         std::vector<std::string> new_tag_dirs;
         new_tag_dirs.reserve(tags_directories.size());
         for(const auto &dir : tags_directories) {
+            // Skip empty paths
             if(dir.size() == 0) {
                 continue;
             }
 
+            // End with a directory separator
             std::string new_dir = dir;
             #ifdef _WIN32
             if(new_dir[new_dir.size() - 1] != '\\' || new_dir[new_dir.size() - 1] != '/') {
@@ -67,12 +69,15 @@ namespace Invader {
             }
             #endif
 
+            // Add to the tags directory list
             new_tag_dirs.emplace_back(new_dir);
         }
 
+        // Load resource maps if we need to do so
         workload.tags_directories = new_tag_dirs;
         workload.maps_directory = maps_directory;
         if(indexed_tags && workload.maps_directory != "") {
+            // End with a directory separator if not already done so
             #ifdef _WIN32
             if(workload.maps_directory[workload.maps_directory.size() - 1] != '\\' || workload.maps_directory[workload.maps_directory.size() - 1] != '/') {
                 workload.maps_directory += "\\";
@@ -85,6 +90,7 @@ namespace Invader {
 
             std::vector<std::byte> resource_data_buffer;
 
+            // Load all resource maps
             auto load_map = [&resource_data_buffer](const std::string &path) -> std::vector<Resource> {
                 std::FILE *f = std::fopen(path.data(), "rb");
                 if(!f) {
@@ -417,9 +423,12 @@ namespace Invader {
 
         this->scenario_index = this->compile_tag_recursively(this->scenario.data(), TagClassInt::TAG_CLASS_SCENARIO);
         this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(this->compiled_tags[this->scenario_index]->data.data())->type;
+
+        // We'll need to load these tags for all map types
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
 
+        // Load the correct tag collection tag
         switch(this->cache_file_type) {
             case CacheFileType::CACHE_FILE_SINGLEPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
@@ -432,6 +441,7 @@ namespace Invader {
                 break;
         }
 
+        // These are required for UI elements and other things
         this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
         this->compile_tag_recursively("sound\\sfx\\ui\\back", TagClassInt::TAG_CLASS_SOUND);
         this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
@@ -440,17 +450,21 @@ namespace Invader {
         this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagClassInt::TAG_CLASS_BITMAP);
         this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
 
+        // If we're using an indexed list of tags to maintain the same tag order as another map, check to make sure bad things won't happen when using this map due to missing tags.
         #ifndef NO_OUTPUT
         bool network_issue = false;
         #endif
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
+                // Damage effects and object tags that are not in the correct location will break things
                 #ifndef NO_OUTPUT
                 if(this->cache_file_type == CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
                     std::cerr << "Network object " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << " missing.\n";
                     network_issue = true;
                 }
                 #endif
+
+                // Stub the tag
                 compiled_tag->path = std::string("stub\\") + tag_class_to_extension(compiled_tag->tag_class_int) + "\\" + compiled_tag->path;
                 compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
                 compiled_tag->data.insert(compiled_tag->data.begin(), 12, std::byte());
@@ -646,6 +660,7 @@ namespace Invader {
                             }
                         }
 
+                        // Make sure the sequence offset is correct. If so, calculate the value. I don't know what it does but it's required for the correct particle size and I'm probably doing it wrong.
                         auto sequence_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_group_sequence.pointer);
                         if(sequence_offset != INVALID_POINTER) {
                             float max_difference = 0.0f;
