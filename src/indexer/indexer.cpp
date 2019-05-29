@@ -12,6 +12,7 @@ using clock_type = std::chrono::steady_clock;
 
 #include <vector>
 #include <cstring>
+#include <regex>
 
 #include "../map/map.hpp"
 #include "../tag/compiled_tag.hpp"
@@ -69,7 +70,11 @@ int main(int argc, const char **argv) {
         std::fprintf(f, "%zu\n", tag_count);
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map.get_tag(i);
-            std::fprintf(f, "%u\t%s\n", tag.tag_class_int(), tag.path().data());
+
+            // Replace double slashes (or more) with one slash
+            std::string path = std::regex_replace(tag.path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
+
+            std::fprintf(f, "%u\t%s\n", tag.tag_class_int(), path.data());
         }
 
         std::fclose(f);
