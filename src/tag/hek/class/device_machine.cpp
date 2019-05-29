@@ -12,6 +12,7 @@ namespace Invader::HEK {
         BEGIN_COMPILE(DeviceMachine)
         COMPILE_DEVICE_DATA
         tag.object_type = ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
+        tag.door_open_time_ticks = static_cast<std::uint32_t>(tag.door_open_time * TICK_RATE);
         FINISH_COMPILE
     }
 }

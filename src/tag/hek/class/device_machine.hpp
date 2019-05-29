@@ -34,7 +34,7 @@ namespace Invader::HEK {
         EndianType<MachineCollisionResponse> collision_response;
         EndianType<std::int16_t> elevator_node;
         PAD(0x34);
-        PAD(0x4);
+        LittleEndian<std::uint32_t> door_open_time_ticks;
 
         ENDIAN_TEMPLATE(NewType) operator DeviceMachine<NewType>() const noexcept {
             DeviceMachine<NewType> copy = {};
