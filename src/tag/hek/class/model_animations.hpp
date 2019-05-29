@@ -478,7 +478,7 @@ namespace Invader::HEK {
         std::int8_t left_foot_frame_index;
         std::int8_t right_foot_frame_index;
         LittleEndian<std::uint16_t> main_animation_index;
-        LittleEndian<float> unknown_float;
+        EndianType<float> unknown_float;
         TagDataOffset<EndianType> frame_info;
         ModelAnimationArrayNodeTransformFlagData<EndianType> node_transform_flag_data[2];
         PAD(0x8);
