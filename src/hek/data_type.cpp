@@ -34,15 +34,15 @@ namespace Invader::HEK {
     Quaternion<NativeEndian> euler_to_quaternion(const Euler3D<NativeEndian> &rotation) noexcept {
         Quaternion<NativeEndian> returned_quaternion;
         float cy = std::cos(rotation.yaw * 0.5f);
-    	float sy = std::sin(rotation.yaw * 0.5f);
-    	float cr = std::cos(rotation.roll * 0.5f);
-    	float sr = std::sin(rotation.roll * 0.5f);
-    	float cp = std::cos(rotation.pitch * 0.5f);
-    	float sp = std::sin(rotation.pitch * 0.5f);
-    	returned_quaternion.w = cy * cr * cp + sy * sr * sp;
-    	returned_quaternion.i = cy * sr * cp - sy * cr * sp;
-    	returned_quaternion.j = cy * cr * sp + sy * sr * cp;
-    	returned_quaternion.k = sy * cr * cp - cy * sr * sp;
+        float sy = std::sin(rotation.yaw * 0.5f);
+        float cr = std::cos(rotation.roll * 0.5f);
+        float sr = std::sin(rotation.roll * 0.5f);
+        float cp = std::cos(rotation.pitch * 0.5f);
+        float sp = std::sin(rotation.pitch * 0.5f);
+        returned_quaternion.w = cy * cr * cp + sy * sr * sp;
+        returned_quaternion.i = cy * sr * cp - sy * cr * sp;
+        returned_quaternion.j = cy * cr * sp + sy * sr * cp;
+        returned_quaternion.k = sy * cr * cp - cy * sr * sp;
         return returned_quaternion;
     }
 

@@ -11,7 +11,7 @@
 #include "../header.hpp"
 
 namespace Invader::HEK {
-	struct LightFlags {
+    struct LightFlags {
         std::uint32_t dynamic : 1;
         std::uint32_t no_specular : 1;
         std::uint32_t don_t_light_own_object : 1;
@@ -26,46 +26,46 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct Light {
-		EndianType<LightFlags> flags;
+        EndianType<LightFlags> flags;
         EndianType<float> radius;
-		Bounds<EndianType<float>> radius_modifer;
-		EndianType<Angle> falloff_angle;
-		EndianType<Angle> cutoff_angle;
-		EndianType<float> lens_flare_only_radius;
-		EndianType<float> cos_falloff_angle;
-		EndianType<float> cos_cutoff_angle;
-		EndianType<float> unknown_two;
-		EndianType<float> sin_cutoff_angle;
-		PAD(0x8);
-		EndianType<LightInterpolationFlags> interpolation_flags;
-		ColorARGB<EndianType> color_lower_bound;
-		ColorARGB<EndianType> color_upper_bound;
-		PAD(0xC);
-		TagDependency<EndianType> primary_cube_map; // bitmap
-		PAD(0x2);
-		EndianType<FunctionType2> texture_animation_function;
-		EndianType<float> texture_animation_period;
-		TagDependency<EndianType> secondary_cube_map; // bitmap
-		PAD(0x2);
-		EndianType<FunctionType2> yaw_function;
-		EndianType<float> yaw_period;
-		PAD(0x2);
-		EndianType<FunctionType2> roll_function;
-		EndianType<float> roll_period;
-		PAD(0x2);
-		EndianType<FunctionType2> pitch_function;
-		EndianType<float> pitch_period;
-		PAD(0x8);
-		TagDependency<EndianType> lens_flare; // lens_flare
-		PAD(0x18);
-		EndianType<float> intensity;
-		ColorRGB<EndianType> color;
-		PAD(0x10);
-		EndianType<float> duration;
-		PAD(0x2);
-		EndianType<FunctionType> falloff_function;
-		PAD(0x8);
-		PAD(0x5C);
+        Bounds<EndianType<float>> radius_modifer;
+        EndianType<Angle> falloff_angle;
+        EndianType<Angle> cutoff_angle;
+        EndianType<float> lens_flare_only_radius;
+        EndianType<float> cos_falloff_angle;
+        EndianType<float> cos_cutoff_angle;
+        EndianType<float> unknown_two;
+        EndianType<float> sin_cutoff_angle;
+        PAD(0x8);
+        EndianType<LightInterpolationFlags> interpolation_flags;
+        ColorARGB<EndianType> color_lower_bound;
+        ColorARGB<EndianType> color_upper_bound;
+        PAD(0xC);
+        TagDependency<EndianType> primary_cube_map; // bitmap
+        PAD(0x2);
+        EndianType<FunctionType2> texture_animation_function;
+        EndianType<float> texture_animation_period;
+        TagDependency<EndianType> secondary_cube_map; // bitmap
+        PAD(0x2);
+        EndianType<FunctionType2> yaw_function;
+        EndianType<float> yaw_period;
+        PAD(0x2);
+        EndianType<FunctionType2> roll_function;
+        EndianType<float> roll_period;
+        PAD(0x2);
+        EndianType<FunctionType2> pitch_function;
+        EndianType<float> pitch_period;
+        PAD(0x8);
+        TagDependency<EndianType> lens_flare; // lens_flare
+        PAD(0x18);
+        EndianType<float> intensity;
+        ColorRGB<EndianType> color;
+        PAD(0x10);
+        EndianType<float> duration;
+        PAD(0x2);
+        EndianType<FunctionType> falloff_function;
+        PAD(0x8);
+        PAD(0x5C);
 
         ENDIAN_TEMPLATE(NewType) operator Light<NewType>() const noexcept {
             Light<NewType> copy = {};
@@ -97,11 +97,11 @@ namespace Invader::HEK {
             COPY_THIS(color);
             COPY_THIS(duration);
             COPY_THIS(falloff_function);
-			COPY_THIS(unknown_two);
+            COPY_THIS(unknown_two);
 
             return copy;
         }
-	};
+    };
     static_assert(sizeof(Light<BigEndian>) == 0x160);
 
     void compile_light_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
