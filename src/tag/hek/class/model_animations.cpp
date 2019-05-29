@@ -60,8 +60,6 @@ namespace Invader::HEK {
             auto frame_type = reflexive.frame_info_type.read();
             auto frame_count = static_cast<std::size_t>(reflexive.frame_count.read());
 
-            DEFAULT_VALUE(reflexive.unknown_float, 1.0f);
-
             if(no_sounds) {
                 reflexive.sound = -1;
             }
@@ -275,16 +273,15 @@ namespace Invader::HEK {
             reflexive.main_animation_index = 0;
         } ADD_REFLEXIVE_END;
 
-        // Go through to set main_animation_index
+        // Go through to set main_animation_index as well as the animation_progress value
         auto *animations = reinterpret_cast<ModelAnimationAnimation<LittleEndian> *>(compiled.data.data() + animations_offset);
         std::size_t animation_count = tag.animations.count;
         for(std::size_t i = 0; i < animation_count; i++) {
             auto *animation = animations + i;
+            std::size_t animations_this_animation = 1;
             while(animation != nullptr) {
-                if(i != 0 && animation->main_animation_index != 0) {
-                    break;
-                }
                 animation->main_animation_index = static_cast<std::int32_t>(i);
+                animation->animation_progress = 1.0F;
                 auto next_animation = static_cast<std::uint16_t>(animation->next_animation.read());
                 if(next_animation == 0xFFFF) {
                     break;
@@ -294,7 +291,26 @@ namespace Invader::HEK {
                 }
                 else {
                     animation = animations + next_animation;
+                    animations_this_animation++;
                 }
+            }
+
+            // We will need to go down the rabbit hole here if we have multiple animations
+            if(animations_this_animation > 1) {
+                animation = animations + i;
+                std::size_t p = 0;
+
+                while(animation != nullptr) {
+                    animation->animation_progress = static_cast<float>(++p) / static_cast<float>(animations_this_animation);
+                    auto next_animation = static_cast<std::uint16_t>(animation->next_animation.read());
+                    if(next_animation == 0xFFFF) {
+                        break;
+                    }
+                    else {
+                        animation = animations + next_animation;
+                    }
+                }
+
             }
         }
 
