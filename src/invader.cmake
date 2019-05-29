@@ -31,6 +31,7 @@ add_library(invader STATIC
     src/tag/hek/class/garbage.cpp
     src/tag/hek/class/gbxmodel.cpp
     src/tag/hek/class/globals.cpp
+    src/tag/hek/class/glow.cpp
     src/tag/hek/class/grenade_hud_interface.cpp
     src/tag/hek/class/hud_globals.cpp
     src/tag/hek/class/hud_message_text.cpp

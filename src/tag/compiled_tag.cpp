@@ -44,6 +44,7 @@
 #include "hek/class/garbage.hpp"
 #include "hek/class/gbxmodel.hpp"
 #include "hek/class/globals.hpp"
+#include "hek/class/glow.hpp"
 #include "hek/class/grenade_hud_interface.hpp"
 #include "hek/class/hud_globals.hpp"
 #include "hek/class/hud_message_text.hpp"
@@ -193,6 +194,9 @@ namespace Invader {
                 break;
             case TagClassInt::TAG_CLASS_GLOBALS:
                 compile_globals_tag(*this, data + sizeof(header), size - sizeof(header), type);
+                break;
+            case TagClassInt::TAG_CLASS_GLOW:
+                compile_glow_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
             case TagClassInt::TAG_CLASS_GRENADE_HUD_INTERFACE:
                 compile_grenade_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
