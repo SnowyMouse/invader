@@ -294,7 +294,7 @@ namespace Invader {
         cache_file_header.foot_literal = CACHE_FILE_FOOT;
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
-        cache_file_header.file_size = static_cast<std::uint32_t>(file.size());
+        cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
         cache_file_header.crc32 = 0x7E706156;
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "Invader " INVADER_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
@@ -314,13 +314,10 @@ namespace Invader {
             }
         }
 
-        // Check if we've exceeded the maximum file size
+        // Output the file size
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("File size:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0 / CACHE_FILE_MAXIMUM_FILE_LENGTH);
-            if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
-                std::cerr << "Warning: File size exceeds Halo's limit. Map may require a mod to load.\n";
-            }
+            std::printf("File size:         %.02f MiB\n", BYTES_TO_MiB(file.size()));
         }
         #endif
 
