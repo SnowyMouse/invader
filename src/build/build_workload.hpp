@@ -28,7 +28,7 @@ namespace Invader {
          * @param verbose           output non-error messages to console
          */
         static std::vector<std::byte> compile_map(
-            std::string scenario,
+            const char *scenario,
             std::vector<std::string> tags_directories,
             std::string maps_directory,
             const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),

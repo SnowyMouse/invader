@@ -33,7 +33,7 @@
 
 namespace Invader {
     std::vector<std::byte> BuildWorkload::compile_map(
-        std::string scenario,
+        const char *scenario,
         std::vector<std::string> tags_directories,
         std::string maps_directory,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
@@ -124,10 +124,11 @@ namespace Invader {
         }
         workload.verbose = verbose;
 
-        workload.scenario = std::move(scenario);
-        for(std::size_t i = 0; i < scenario.length(); i++) {
-            if(scenario[i] == '/') {
-                scenario[i] = '\\';
+        // Replace forward slashes in scenario tag path with backslashes
+        workload.scenario = scenario;
+        for(char &c : workload.scenario) {
+            if(c == '/') {
+                c = '\\';
             }
         }
 
