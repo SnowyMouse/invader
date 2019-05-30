@@ -28,12 +28,13 @@ namespace Invader::HEK {
         GLOW_TRAILING_PARTICLE_DISTRIBUTION_EMIT_RANDOMLY,
     };
 
+    // Increase by 1 if BigEndian.
     enum GlowAttachment : std::uint16_t {
-        GLOW_ATTACHMENT_NONE,
-        GLOW_ATTACHMENT_A_OUT,
-        GLOW_ATTACHMENT_B_OUT,
-        GLOW_ATTACHMENT_C_OUT,
-        GLOW_ATTACHMENT_D_OUT,
+        GLOW_ATTACHMENT_NONE = 0xFFFF,
+        GLOW_ATTACHMENT_A_OUT = 0,
+        GLOW_ATTACHMENT_B_OUT = 1,
+        GLOW_ATTACHMENT_C_OUT = 2,
+        GLOW_ATTACHMENT_D_OUT = 3,
     };
 
     struct GlowFlags {
