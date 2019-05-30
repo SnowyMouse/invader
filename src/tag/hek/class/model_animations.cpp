@@ -278,10 +278,20 @@ namespace Invader::HEK {
         std::size_t animation_count = tag.animations.count;
         for(std::size_t i = 0; i < animation_count; i++) {
             auto *animation = animations + i;
-            std::size_t animations_this_animation = 1;
+            bool multiple_animations = false;
+            float total_weight = 0.0F;
+
+            // Go through each animation. Make sure the weights are all correct.
             while(animation != nullptr) {
                 animation->main_animation_index = static_cast<std::int32_t>(i);
-                animation->animation_progress = 1.0F;
+
+                // Set weight to a default value
+                animation->relative_weight = 1.0F;
+
+                // Increment total weight
+                total_weight += animation->weight > 0.0F ? animation->weight : 1.0F;
+
+                // Get the next animation if there is one
                 auto next_animation = static_cast<std::uint16_t>(animation->next_animation.read());
                 if(next_animation == 0xFFFF) {
                     break;
@@ -291,17 +301,21 @@ namespace Invader::HEK {
                 }
                 else {
                     animation = animations + next_animation;
-                    animations_this_animation++;
+                    multiple_animations = true;
                 }
             }
 
             // We will need to go down the rabbit hole here if we have multiple animations
-            if(animations_this_animation > 1) {
+            if(multiple_animations) {
                 animation = animations + i;
-                std::size_t p = 0;
+                float total_weight_second_pass = 0.0F;
 
                 while(animation != nullptr) {
-                    animation->animation_progress = static_cast<float>(++p) / static_cast<float>(animations_this_animation);
+                    // Set the weight
+                    total_weight_second_pass += animation->weight > 0.0F ? animation->weight : 1.0F;
+                    animation->relative_weight = total_weight_second_pass / total_weight;
+
+                    // Get the next animation if there is one
                     auto next_animation = static_cast<std::uint16_t>(animation->next_animation.read());
                     if(next_animation == 0xFFFF) {
                         break;

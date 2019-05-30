@@ -478,7 +478,7 @@ namespace Invader::HEK {
         std::int8_t left_foot_frame_index;
         std::int8_t right_foot_frame_index;
         LittleEndian<std::uint16_t> main_animation_index;
-        LittleEndian<float> animation_progress;
+        LittleEndian<float> relative_weight;
         TagDataOffset<EndianType> frame_info;
         ModelAnimationArrayNodeTransformFlagData<EndianType> node_transform_flag_data[2];
         PAD(0x8);
@@ -510,7 +510,7 @@ namespace Invader::HEK {
             COPY_THIS(left_foot_frame_index);
             COPY_THIS(right_foot_frame_index);
             COPY_THIS(main_animation_index);
-            COPY_THIS(animation_progress);
+            COPY_THIS(relative_weight);
             COPY_THIS(frame_info);
             COPY_THIS_ARRAY(node_transform_flag_data);
             COPY_THIS_ARRAY(node_rotation_flag_data);
