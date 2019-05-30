@@ -74,6 +74,7 @@ add_library(invader STATIC
     src/tag/hek/class/vehicle.cpp
     src/tag/hek/class/weapon.cpp
     src/tag/hek/class/weapon_hud_interface.cpp
+    src/tag/hek/class/weather_particle_system.cpp
     src/tag/hek/class/wind.cpp
     src/tag/hek/class/virtual_keyboard.cpp
     src/tag/compiled_tag.cpp

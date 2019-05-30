@@ -122,8 +122,8 @@ namespace Invader::HEK {
             return "point_physics";
         case TagClassInt::TAG_CLASS_PROJECTILE:
             return "projectile";
-        case TagClassInt::TAG_CLASS_WEATHER:
-            return "weather";
+        case TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM:
+            return "weather_particle_system";
         case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
             return "scenario_structure_bsp";
         case TagClassInt::TAG_CLASS_SCENERY:
@@ -360,8 +360,8 @@ namespace Invader::HEK {
         else if(EQUAL(extension,"projectile")) {
             return TagClassInt::TAG_CLASS_PROJECTILE;
         }
-        else if(EQUAL(extension,"weather")) {
-            return TagClassInt::TAG_CLASS_WEATHER;
+        else if(EQUAL(extension,"weather_particle_system")) {
+            return TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM;
         }
         else if(EQUAL(extension,"scenario_structure_bsp")) {
             return TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;

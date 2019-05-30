@@ -87,6 +87,7 @@
 #include "hek/class/vehicle.hpp"
 #include "hek/class/weapon.hpp"
 #include "hek/class/weapon_hud_interface.hpp"
+#include "hek/class/weather_particle_system.hpp"
 #include "hek/class/wind.hpp"
 #include "hek/class/virtual_keyboard.hpp"
 
@@ -338,6 +339,9 @@ namespace Invader {
                 break;
             case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
                 compile_weapon_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
+                break;
+            case TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM:
+                compile_weather_particle_system_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
             case TagClassInt::TAG_CLASS_WIND:
                 compile_wind_tag(*this, data + sizeof(header), size - sizeof(header));
