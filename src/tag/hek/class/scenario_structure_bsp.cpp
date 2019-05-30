@@ -70,6 +70,7 @@ namespace Invader::HEK {
             } ADD_REFLEXIVE_END
             ADD_REFLEXIVE(reflexive.surface_indices);
             ADD_REFLEXIVE_START(reflexive.mirrors) {
+                ADD_DEPENDENCY_ADJUST_SIZES(reflexive.shader);
                 ADD_REFLEXIVE(reflexive.vertices);
             } ADD_REFLEXIVE_END
             ADD_REFLEXIVE(reflexive.portals);
