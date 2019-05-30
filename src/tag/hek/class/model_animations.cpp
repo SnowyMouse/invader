@@ -290,7 +290,7 @@ namespace Invader::HEK {
             float total_weight = 0.0F;
 
             // Go through each animation. Make sure the weights are all correct.
-            while(animation != nullptr) {
+            while(true) {
                 // Set the main animation index
                 animation->main_animation_index = static_cast<std::int32_t>(i);
 
