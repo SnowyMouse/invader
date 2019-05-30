@@ -60,6 +60,8 @@ namespace Invader::HEK {
             auto frame_type = reflexive.frame_info_type.read();
             auto frame_count = static_cast<std::size_t>(reflexive.frame_count.read());
 
+            reflexive.main_animation_index = 0;
+
             if(no_sounds) {
                 reflexive.sound = -1;
             }
@@ -278,11 +280,18 @@ namespace Invader::HEK {
         std::size_t animation_count = tag.animations.count;
         for(std::size_t i = 0; i < animation_count; i++) {
             auto *animation = animations + i;
+
+            // Check if we already did things to this
+            if(animation->main_animation_index) {
+                continue;
+            }
+
             bool multiple_animations = false;
             float total_weight = 0.0F;
 
             // Go through each animation. Make sure the weights are all correct.
             while(animation != nullptr) {
+                // Set the main animation index
                 animation->main_animation_index = static_cast<std::int32_t>(i);
 
                 // Set weight to a default value
