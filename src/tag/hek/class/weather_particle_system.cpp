@@ -6,6 +6,7 @@
 
 #include "../compile.hpp"
 
+#include "../../../hek/constants.hpp"
 #include "weather_particle_system.hpp"
 
 namespace Invader::HEK {
@@ -15,6 +16,7 @@ namespace Invader::HEK {
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.physics);
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.sprite_bitmap);
             ADD_DEPENDENCY_ADJUST_SIZES(reflexive.bitmap);
+            reflexive.not_broken = 1;
         } ADD_REFLEXIVE_END
         FINISH_COMPILE
     }

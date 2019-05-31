@@ -109,12 +109,14 @@ namespace Invader::HEK {
         PAD(0x20);
         ColorARGB<EndianType> color_lower_bound;
         ColorARGB<EndianType> color_upper_bound;
-        PAD(0x40);
+        EndianType<float> unknown;
+        PAD(0x3C);
 
         TagDependency<EndianType> sprite_bitmap; // .bitmap
         EndianType<WeatherParticleSystemRenderMode> render_mode;
         EndianType<WeatherParticleSystemRenderDirectionSource> render_direction_source;
-        PAD(0x28);
+        PAD(0x24);
+        LittleEndian<std::uint32_t> not_broken;
         EndianType<WeatherParticleSystemParticleTypeShaderFlags> shader_flags;
         EndianType<WeatherParticleSystemFramebufferBlendFunction> framebuffer_blend_function;
         EndianType<WeatherParticleSystemFramebufferFadeMode> framebuffer_fade_mode;
@@ -169,6 +171,7 @@ namespace Invader::HEK {
             COPY_THIS(sprite_bitmap);
             COPY_THIS(render_mode);
             COPY_THIS(render_direction_source);
+            COPY_THIS(not_broken);
             COPY_THIS(shader_flags);
             COPY_THIS(framebuffer_blend_function);
             COPY_THIS(framebuffer_fade_mode);

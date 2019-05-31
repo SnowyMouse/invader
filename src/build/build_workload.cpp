@@ -24,6 +24,7 @@
 #include "../tag/hek/class/particle.hpp"
 #include "../tag/hek/class/scenario.hpp"
 #include "../tag/hek/class/scenario_structure_bsp.hpp"
+#include "../tag/hek/class/weather_particle_system.hpp"
 #include "../tag/hek/class/sound.hpp"
 #include "../version.hpp"
 #include "../error.hpp"
@@ -142,7 +143,9 @@ namespace Invader {
         this->load_required_tags();
         this->tag_count = this->compiled_tags.size();
         if(this->tag_count > CACHE_FILE_MAX_TAG_COUNT) {
+            #ifndef NO_OUTPUT
             std::cerr << "Tag count exceeds maximum of " << CACHE_FILE_MAX_TAG_COUNT << ".\n";
+            #endif
             throw MaximumTagDataSizeException();
         }
 
@@ -556,6 +559,55 @@ namespace Invader {
             // Close the file
             std::fclose(file);
 
+            // Calculate pixel size for particles and weather particles
+            auto get_bitmap_tag_pixel_size = [](std::unique_ptr<CompiledTag> &bitmap_tag) {
+                auto &bitmap_tag_data = *reinterpret_cast<Bitmap<LittleEndian> *>(bitmap_tag->data.data());
+                float pixel_size = 1.0F;
+
+                // Get the dimensions of the bitmaps
+                std::uint32_t bitmap_count = bitmap_tag_data.bitmap_data.count;
+                std::vector<std::pair<std::uint16_t, std::uint16_t>> bitmap_dimensions(bitmap_count);
+                auto *bitmap_data = reinterpret_cast<BitmapData<LittleEndian> *>(bitmap_tag->data.data() + bitmap_tag->resolve_pointer(&bitmap_tag_data.bitmap_data.pointer));
+                for(std::uint32_t b = 0; b < bitmap_count; b++) {
+                    bitmap_dimensions[b].first = bitmap_data[b].width;
+                    bitmap_dimensions[b].second = bitmap_data[b].height;
+                }
+
+                // Get sequences
+                auto sequence_offset = bitmap_tag->resolve_pointer(&bitmap_tag_data.bitmap_group_sequence.pointer);
+                if(sequence_offset != INVALID_POINTER) {
+                    for(std::size_t sequence_index = 0; sequence_index < bitmap_tag_data.bitmap_group_sequence.count; sequence_index++) {
+                        auto &sequence = reinterpret_cast<BitmapGroupSequence<LittleEndian> *>(bitmap_tag->data.data() + sequence_offset)[sequence_index];
+                        auto first_sprite_offset = bitmap_tag->resolve_pointer(&sequence.sprites.pointer);
+
+                        // We'll need to iterate through all of the sprites
+                        std::size_t sprite_count = sequence.sprites.count;
+                        if(first_sprite_offset != INVALID_POINTER) {
+                            for(std::size_t i = 0; i < sprite_count; i++) {
+                                auto &sprite = reinterpret_cast<BitmapGroupSprite<LittleEndian> *>(bitmap_tag->data.data() + first_sprite_offset)[i];
+
+                                // If the bitmap index is invalid, complain
+                                if(static_cast<std::size_t>(sprite.bitmap_index) >= bitmap_count) {
+                                    #ifndef NO_OUTPUT
+                                    std::cerr << "Invalid bitmap index for sprite: " << bitmap_count << "\n";
+                                    #endif
+                                    throw OutOfBoundsException();
+                                }
+
+                                // Get yer values here. Get 'em while they're hot.
+                                float width_bitmap = 1.0F / std::fabs(sprite.left - sprite.right) / bitmap_dimensions[sprite.bitmap_index].first;
+                                float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
+                                float smallest = (width_bitmap < height_bitmap) ? width_bitmap : height_bitmap;
+                                if(pixel_size > smallest) {
+                                    pixel_size = smallest;
+                                }
+                            }
+                        }
+                    }
+                }
+                return pixel_size;
+            };
+
             try {
                 // Compile the tag
                 std::unique_ptr<CompiledTag> tag(std::make_unique<CompiledTag>(path, tag_class_int, this->tag_buffer.data(), file_length, this->cache_file_type));
@@ -644,56 +696,28 @@ namespace Invader {
                         throw;
                     }
                     else {
-                        auto &bitmap_tag = this->compiled_tags[particle.bitmap.tag_id.read().index];
-                        auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(bitmap_tag->data.data());
+                        particle.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[particle.bitmap.tag_id.read().index]);
+                    }
+                }
 
-                        // Calculating this value requires looking at the bitmap's sprite(s)
-                        particle.unknown = 1.0f / static_cast<float>(std::pow(static_cast<float>(2.0f), static_cast<float>(bitmap.sprite_budget_size.read())) * 32.0f); // 1/32 if 32x32, 1/64 if 64x64, etc.
-
-                        auto bitmap_data_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_data.pointer);
-                        std::vector<std::int16_t> widths(bitmap.bitmap_data.count);
-                        std::vector<std::int16_t> heights(bitmap.bitmap_data.count);
-                        if(bitmap_data_offset != INVALID_POINTER) {
-                            for(std::size_t i = 0; i < bitmap.bitmap_data.count; i++) {
-                                auto &bitmap_data = reinterpret_cast<BitmapData<LittleEndian> *>(bitmap_tag->data.data() + bitmap_data_offset)[i];
-                                widths[i] = bitmap_data.width;
-                                heights[i] = bitmap_data.height;
+                // Weather-related things
+                else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM) {
+                    auto &weather_particle_system = *reinterpret_cast<WeatherParticleSystem<LittleEndian> *>(tag_ptr->data.data());
+                    std::uint32_t particle_count = weather_particle_system.particle_types.count;
+                    if(particle_count > 0) {
+                        std::size_t offset = tag_ptr->resolve_pointer(&weather_particle_system.particle_types.pointer);
+                        auto *types = reinterpret_cast<WeatherParticleSystemParticleType<LittleEndian> *>(tag_ptr->data.data() + offset);
+                        for(std::uint32_t p = 0; p < particle_count; p++) {
+                            auto &type = types[p];
+                            if(type.sprite_bitmap.tag_id.read().id == 0xFFFFFFFF) {
+                                #ifndef NO_OUTPUT
+                                std::cerr << tag_ptr->path << ".weather_particle_system particle # " << p << " has no sprite bitmap.\n";
+                                #endif
+                                throw;
                             }
-                        }
-
-                        // Make sure the sequence offset is correct. If so, calculate the value. I don't know what it does but it's required for the correct particle size and I'm probably doing it wrong.
-                        auto sequence_offset = bitmap_tag->resolve_pointer(&bitmap.bitmap_group_sequence.pointer);
-                        if(sequence_offset != INVALID_POINTER) {
-                            float max_difference = 0.0f;
-                            for(std::size_t sequence_index = 0; sequence_index < bitmap.bitmap_group_sequence.count; sequence_index++) {
-                                auto &sequence = reinterpret_cast<BitmapGroupSequence<LittleEndian> *>(bitmap_tag->data.data() + sequence_offset)[sequence_index];
-                                auto first_sprite_offset = bitmap_tag->resolve_pointer(&sequence.sprites.pointer);
-
-                                // We'll need to iterate through all of the sprites
-                                std::size_t sprite_count = sequence.sprites.count;
-                                if(first_sprite_offset != INVALID_POINTER) {
-                                    for(std::size_t i = 0; i < sprite_count; i++) {
-                                        auto &sprite = reinterpret_cast<BitmapGroupSprite<LittleEndian> *>(bitmap_tag->data.data() + first_sprite_offset)[i];
-
-                                        if(static_cast<std::size_t>(sprite.bitmap_index) > widths.size()) {
-                                            continue;
-                                        }
-
-                                        float difference_a = (sprite.right - sprite.left) * widths[sprite.bitmap_index];
-                                        float difference_b = (sprite.bottom - sprite.top) * heights[sprite.bitmap_index];
-
-                                        if(difference_a > max_difference) {
-                                            max_difference = difference_a;
-                                        }
-                                        if(difference_b > max_difference) {
-                                            max_difference = difference_b;
-                                        }
-                                    }
-                                }
+                            else {
+                                type.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[type.sprite_bitmap.tag_id.read().index]);
                             }
-
-                            // Divide by the maximum length (or width) we got out of all of the sprites
-                            particle.unknown = 1.0f / max_difference;
                         }
                     }
                 }
@@ -1143,7 +1167,9 @@ namespace Invader {
         // Adjust for all pointers
         for(auto &pointer : compiled_tag->pointers) {
             if(pointer.offset + sizeof(std::uint32_t) > compiled_tag->data.size() || pointer.offset_pointed > compiled_tag->data.size()) {
+                #ifndef NO_OUTPUT
                 std::cerr << "Invalid pointer for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
+                #endif
                 throw InvalidPointerException();
             }
             std::uint32_t new_offset;
@@ -1159,7 +1185,9 @@ namespace Invader {
         // Adjust for all dependencies
         for(auto &dependency : compiled_tag->dependencies) {
             if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data.size()) {
+                #ifndef NO_OUTPUT
                 std::cerr << "Invalid dependency offset for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
+                #endif
                 throw InvalidDependencyException();
             }
             auto &dependency_data = *reinterpret_cast<TagDependency<LittleEndian> *>(tag_data_data + dependency.offset);
@@ -1167,7 +1195,9 @@ namespace Invader {
             // Resolve the dependency
             std::size_t depended_tag_id = dependency_data.tag_id.read().index;
             if(depended_tag_id >= this->tag_count) {
+                #ifndef NO_OUTPUT
                 std::cerr << "Invalid dependency index for " << compiled_tag->path << "." << tag_class_to_extension(compiled_tag->tag_class_int) << "\n";
+                #endif
                 throw InvalidDependencyException();
             }
 
@@ -1216,7 +1246,9 @@ namespace Invader {
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
                         std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
                         if(pixels_offset > tag_asset_data_size) {
+                            #ifndef NO_OUTPUT
                             std::cerr << "Invalid pixels offset for bitmap " << b << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                            #endif
                             throw OutOfBoundsException();
                         }
                         offsets[b] = pixels_offset;
@@ -1352,13 +1384,17 @@ namespace Invader {
 
                     std::size_t vertex_size = part.vertex_count * sizeof(GBXModelVertexUncompressed<LittleEndian>);
                     if(vertex_size + vertex_offset > model_data_size) {
+                        #ifndef NO_OUTPUT
                         std::cerr << "Invalid vertex size for part " << g << " - " << p << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                        #endif
                         throw OutOfBoundsException();
                     }
 
                     std::size_t index_size = (part.triangle_count + 2) * sizeof(std::uint16_t);
                     if(index_size + index_offset > model_data_size) {
+                        #ifndef NO_OUTPUT
                         std::cerr << "Invalid index size for part " << g << " - " << p << " for " << this->compiled_tags[i]->path << "." << tag_class_to_extension(this->compiled_tags[i]->tag_class_int) << "\n";
+                        #endif
                         throw OutOfBoundsException();
                     }
 
