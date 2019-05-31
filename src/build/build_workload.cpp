@@ -1522,33 +1522,35 @@ namespace Invader {
                     continue;
             }
 
-            // If it's not something we can adjust/fix, continue;
-            if(tag_class == HEK::TAG_CLASS_NONE) {
-                continue;
-            }
+            if(tag_class != HEK::TAG_CLASS_NONE) {
+                // Check if we should leave it alone
+                auto flags = script_nodes[c].flags.read();
+                if(flags.is_global || flags.is_script_call) {
+                    continue;
+                }
 
-            // Get the string
-            bool found = false;
-            const char *string = script_string_data + script_nodes[c].string_offset.read();
+                // Get the string
+                bool found = false;
+                const char *string = script_string_data + script_nodes[c].string_offset.read();
 
-            // Get and write the tag ID
-            for(std::size_t t = 0; t < this->compiled_tags.size(); t++) {
-                auto &tag = this->compiled_tags[t];
-                if((tag->tag_class_int == tag_class || (tag_class == HEK::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag->tag_class_int))) && tag->path == string) {
-                    script_nodes[c].data = tag_id_from_index(t);
-                    found = true;
-                    break;
+                // Get and write the tag ID
+                for(std::size_t t = 0; t < this->compiled_tags.size(); t++) {
+                    auto &tag = this->compiled_tags[t];
+                    if((tag->tag_class_int == tag_class || (tag_class == HEK::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag->tag_class_int))) && tag->path == string) {
+                        script_nodes[c].data = tag_id_from_index(t);
+                        found = true;
+                        break;
+                    }
+                }
+
+                // If we didn't find it, fail
+                if(!found) {
+                    #ifndef NO_OUTPUT
+                    std::cerr << "Cannot resolve script reference " << string << "." << tag_class_to_extension(tag_class) << ".\n";
+                    #endif
+                    throw;
                 }
             }
-
-            // If we didn't find it, fail
-            if(!found) {
-                #ifndef NO_OUTPUT
-                std::cerr << "Cannot resolve script reference " << string << ".\n";
-                #endif
-                throw;
-            }
         }
-
     }
 }

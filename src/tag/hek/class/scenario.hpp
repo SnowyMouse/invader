@@ -1405,17 +1405,17 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ScenarioGlobal<BigEndian>) == 0x5C);
 
-    ENDIAN_TEMPLATE(EndianType) struct ScenarioReferences {
+    ENDIAN_TEMPLATE(EndianType) struct ScenarioReference {
         PAD(0x18);
         TagDependency<EndianType> reference;
 
-        ENDIAN_TEMPLATE(NewType) operator ScenarioReferences<NewType>() const noexcept {
-            ScenarioReferences<NewType> copy = {};
+        ENDIAN_TEMPLATE(NewType) operator ScenarioReference<NewType>() const noexcept {
+            ScenarioReference<NewType> copy = {};
             COPY_THIS(reference);
             return copy;
         }
     };
-    static_assert(sizeof(ScenarioReferences<BigEndian>) == 0x28);
+    static_assert(sizeof(ScenarioReference<BigEndian>) == 0x28);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioSourceFile {
         TagString name;
@@ -1588,12 +1588,19 @@ namespace Invader::HEK {
         }
     };
 
+    struct ScenarioScriptNodeFlags {
+        std::uint16_t is_primitive : 1;
+        std::uint16_t is_script_call : 1;
+        std::uint16_t is_global : 1;
+        std::uint16_t is_garbage_collectable : 1;
+    };
+
     // TODO: Figure out what this is
     ENDIAN_TEMPLATE(EndianType) struct ScenarioScriptNode {
         EndianType<std::uint16_t> salt;
         EndianType<std::uint16_t> index_union;
         EndianType<ScenarioScriptValueType> type;
-        EndianType<std::uint16_t> flags;
+        EndianType<ScenarioScriptNodeFlags> flags;
         EndianType<std::uint32_t> next_node;
         EndianType<std::uint32_t> string_offset;
         EndianType<ScenarioScriptNodeValue> data;
@@ -1702,7 +1709,7 @@ namespace Invader::HEK {
         TagDataOffset<EndianType> script_string_data;
         TagReflexive<EndianType, ScenarioScript> scripts;
         TagReflexive<EndianType, ScenarioGlobal> globals;
-        TagReflexive<EndianType, ScenarioReferences> references;
+        TagReflexive<EndianType, ScenarioReference> references;
         TagReflexive<EndianType, ScenarioSourceFile> source_files;
         PAD(0x18);
         TagReflexive<EndianType, ScenarioCutsceneFlag> cutscene_flags;
