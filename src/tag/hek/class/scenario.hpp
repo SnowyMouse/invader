@@ -1541,6 +1541,51 @@ namespace Invader::HEK {
         std::uint32_t long_int;
         float real;
         TagID tag_id;
+
+        ScenarioScriptNodeValue() = default;
+        ScenarioScriptNodeValue(const ScenarioScriptNodeValue &copy) = default;
+
+        ScenarioScriptNodeValue(std::uint8_t v) {
+            this->bool_int = v;
+        }
+
+        ScenarioScriptNodeValue(std::uint16_t v) {
+            this->short_int = v;
+        }
+
+        ScenarioScriptNodeValue(std::uint32_t v) {
+            this->long_int = v;
+        }
+
+        ScenarioScriptNodeValue(float v) {
+            this->real = v;
+        }
+
+        ScenarioScriptNodeValue(TagID v) {
+            this->tag_id = v;
+        }
+
+        void operator=(std::uint8_t v) {
+            this->long_int = 0xFFFFFFFF;
+            this->bool_int = v;
+        }
+
+        void operator=(std::uint16_t v) {
+            this->long_int = 0xFFFFFFFF;
+            this->short_int = v;
+        }
+
+        void operator=(std::uint32_t v) {
+            this->long_int = v;
+        }
+
+        void operator=(float v) {
+            this->real = v;
+        }
+
+        void operator=(TagID v) {
+            this->tag_id = v;
+        }
     };
 
     // TODO: Figure out what this is

@@ -168,11 +168,11 @@ namespace Invader {
         // Populate the tag array
         this->populate_tag_array(tag_data);
 
-        // Fix the scripts
-        this->fix_scenario_tag_scripts();
-
         // Add tag data
         this->add_tag_data(tag_data, file);
+
+        // Fix the scripts
+        this->fix_scenario_tag_scripts(tag_data);
 
         // Get the tag data header
         auto &tag_data_header = *reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data());
@@ -1462,16 +1462,23 @@ namespace Invader {
         }
     }
 
-    void BuildWorkload::fix_scenario_tag_scripts() {
-        auto &scenario_tag = this->compiled_tags[this->scenario_index];
-        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag->data.data());
+    void BuildWorkload::fix_scenario_tag_scripts(std::vector<std::byte> &tag_data) {
+        // Get the header and tag array
+        auto &header = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(tag_data.data());
+        #define TRANSLATE_TAG_DATA_PTR(pointer) (tag_data.data() + (pointer - this->tag_data_address))
+        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TRANSLATE_TAG_DATA_PTR(header.tag_array_address));
+
+        // Get the scenario tag
+        auto *scenario_tag_data = TRANSLATE_TAG_DATA_PTR(tag_array[this->scenario_index].tag_data);
+        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
 
         // Let's-a-go
-        auto *script_syntax_data = reinterpret_cast<std::byte *>(scenario_tag->data.data() + scenario_tag->resolve_pointer(&scenario.script_syntax_data.pointer));
-        auto *script_string_data = reinterpret_cast<char *>(scenario_tag->data.data() + scenario_tag->resolve_pointer(&scenario.script_string_data.pointer));
+        auto *script_syntax_data = TRANSLATE_TAG_DATA_PTR(scenario.script_syntax_data.pointer);
+        HEK::Pointer script_string_data_ptr = scenario.script_string_data.pointer;
+        auto *script_string_data = reinterpret_cast<const char *>(TRANSLATE_TAG_DATA_PTR(script_string_data_ptr));
         auto &script_node_table = *reinterpret_cast<HEK::ScenarioScriptNodeTable<HEK::LittleEndian> *>(script_syntax_data);
         auto *script_nodes = reinterpret_cast<HEK::ScenarioScriptNode<HEK::LittleEndian> *>(script_syntax_data + sizeof(script_node_table));
-        std::uint16_t count = script_node_table.count.read();
+        std::uint16_t count = script_node_table.maximum_count.read();
 
         // Iterate through this
         for(std::uint16_t c = 0; c < count; c++) {
@@ -1521,16 +1528,14 @@ namespace Invader {
             }
 
             // Get the string
-            char *string = script_string_data + script_nodes[c].string_offset.read();
             bool found = false;
+            const char *string = script_string_data + script_nodes[c].string_offset.read();
 
             // Get and write the tag ID
             for(std::size_t t = 0; t < this->compiled_tags.size(); t++) {
                 auto &tag = this->compiled_tags[t];
                 if((tag->tag_class_int == tag_class || (tag_class == HEK::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag->tag_class_int))) && tag->path == string) {
-                    HEK::ScenarioScriptNodeValue value;
-                    value.tag_id = tag_id_from_index(t);
-                    script_nodes[c].data = value;
+                    script_nodes[c].data = tag_id_from_index(t);
                     found = true;
                     break;
                 }
