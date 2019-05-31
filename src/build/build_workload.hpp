@@ -168,5 +168,10 @@ namespace Invader {
          * @param tag_data tag data to use
          */
         void add_model_tag_data(std::vector<std::byte> &vertices, std::vector<std::byte> &indices, std::vector<std::byte> &tag_data);
+
+        /**
+         * Fix the scripts in the scenario tag
+         */
+        void fix_scenario_tag_scripts();
     };
 }

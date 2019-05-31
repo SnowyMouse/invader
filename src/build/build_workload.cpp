@@ -168,6 +168,9 @@ namespace Invader {
         // Populate the tag array
         this->populate_tag_array(tag_data);
 
+        // Fix the scripts
+        this->fix_scenario_tag_scripts();
+
         // Add tag data
         this->add_tag_data(tag_data, file);
 
@@ -1457,5 +1460,90 @@ namespace Invader {
                 part->triangle_offset_2 = part->triangle_offset;
             }
         }
+    }
+
+    void BuildWorkload::fix_scenario_tag_scripts() {
+        auto &scenario_tag = this->compiled_tags[this->scenario_index];
+        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag->data.data());
+
+        // Let's-a-go
+        auto *script_syntax_data = reinterpret_cast<std::byte *>(scenario_tag->data.data() + scenario_tag->resolve_pointer(&scenario.script_syntax_data.pointer));
+        auto *script_string_data = reinterpret_cast<char *>(scenario_tag->data.data() + scenario_tag->resolve_pointer(&scenario.script_string_data.pointer));
+        auto &script_node_table = *reinterpret_cast<HEK::ScenarioScriptNodeTable<HEK::LittleEndian> *>(script_syntax_data);
+        auto *script_nodes = reinterpret_cast<HEK::ScenarioScriptNode<HEK::LittleEndian> *>(script_syntax_data + sizeof(script_node_table));
+        std::uint16_t count = script_node_table.count.read();
+
+        // Iterate through this
+        for(std::uint16_t c = 0; c < count; c++) {
+            // Check if we know the class
+            HEK::TagClassInt tag_class = HEK::TAG_CLASS_NONE;
+
+            switch(script_nodes[c].type.read()) {
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
+                    tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
+                    tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
+                    tag_class = HEK::TAG_CLASS_OBJECT;
+                    break;
+
+                default:
+                    continue;
+            }
+
+            // If it's not something we can adjust/fix, continue;
+            if(tag_class == HEK::TAG_CLASS_NONE) {
+                continue;
+            }
+
+            // Get the string
+            char *string = script_string_data + script_nodes[c].string_offset.read();
+            bool found = false;
+
+            // Get and write the tag ID
+            for(std::size_t t = 0; t < this->compiled_tags.size(); t++) {
+                auto &tag = this->compiled_tags[t];
+                if((tag->tag_class_int == tag_class || (tag_class == HEK::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag->tag_class_int))) && tag->path == string) {
+                    HEK::ScenarioScriptNodeValue value;
+                    value.tag_id = tag_id_from_index(t);
+                    script_nodes[c].data = value;
+                    found = true;
+                    break;
+                }
+            }
+
+            // If we didn't find it, fail
+            if(!found) {
+                #ifndef NO_OUTPUT
+                std::cerr << "Cannot resolve script reference " << string << ".\n";
+                #endif
+                throw;
+            }
+        }
+
     }
 }
