@@ -6,7 +6,7 @@
 
 // TODO: Use std::filesystem
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #define PATH_BUFFER_LENGTH MAX_PATH
 #else
 #include <linux/limits.h>
