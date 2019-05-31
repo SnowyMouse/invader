@@ -1537,15 +1537,23 @@ namespace Invader::HEK {
 
     // TODO: Figure out what this is
     ENDIAN_TEMPLATE(EndianType) struct ScenarioScriptNode {
-        EndianType<std::uint16_t> unknown1[4];
-        EndianType<std::uint32_t> unknown2[2];
-        EndianType<std::uint32_t> some_id;
+        EndianType<std::uint16_t> salt;
+        EndianType<std::uint16_t> index_union;
+        EndianType<std::uint16_t> type;
+        EndianType<std::uint16_t> flags;
+        EndianType<std::uint32_t> next_node;
+        EndianType<std::uint32_t> string_offset;
+        EndianType<std::uint32_t> data;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioScriptNode<NewType>() const noexcept {
             ScenarioScriptNode<NewType> copy = {};
-            COPY_THIS_ARRAY(unknown1);
-            COPY_THIS_ARRAY(unknown2);
-            COPY_THIS(some_id);
+            COPY_THIS(salt);
+            COPY_THIS(index_union);
+            COPY_THIS(type);
+            COPY_THIS(flags);
+            COPY_THIS(next_node);
+            COPY_THIS(string_offset);
+            COPY_THIS(data);
             return copy;
         }
     };
