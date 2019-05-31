@@ -410,8 +410,8 @@ namespace Invader::HEK {
         }
 
         Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
-        Point3D(const Point3D<EndianType> &copy) : x(copy.x), y(copy.y), z(copy.z) {}
-        Point3D() {}
+        Point3D(const Point3D<EndianType> &copy) = default;
+        Point3D() = default;
     };
     static_assert(sizeof(Point3D<BigEndian>) == 0xC);
 
