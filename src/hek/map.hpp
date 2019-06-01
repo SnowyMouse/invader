@@ -27,9 +27,9 @@ namespace Invader::HEK {
         CACHE_FILE_TAGS = 0x74616773
     };
 
-    enum CacheFileLimits : std::size_t {
+    enum CacheFileLimits : std::uint64_t {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0x18000000,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0x100000000,
         CACHE_FILE_MAX_TAG_COUNT = 65535
     };
 

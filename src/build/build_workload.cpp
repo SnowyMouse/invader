@@ -13,7 +13,6 @@
 #endif
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
-#define MAX_FILE_SIZE static_cast<std::uint64_t>(0x100000000)
 
 // This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
 #define MAX_PATH_LENGTH 254
@@ -331,12 +330,12 @@ namespace Invader {
         // Output the file size
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(MAX_FILE_SIZE), file.size() * 100.0F / MAX_FILE_SIZE);
+            std::printf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
         }
         #endif
 
         // Check if we've exceeded the max file size.
-        if(file.size() > MAX_FILE_SIZE) {
+        if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
             #ifndef NO_OUTPUT
             std::cerr << "Maximum file size exceeds budget.\n";
             #endif
