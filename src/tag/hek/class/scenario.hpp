@@ -727,7 +727,8 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioPlayerStartingLocation<BigEndian>) == 0x34);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioTriggerVolume {
-        LittleEndian<std::uint32_t> unknown;
+        LittleEndian<std::uint16_t> unknown;
+        PAD(0x2);
         TagString name;
         EndianType<float> values[15];
 
@@ -1118,7 +1119,7 @@ namespace Invader::HEK {
         TagString name;
         EndianType<ScenarioEncounterFlags> flags;
         EndianType<ScenarioTeamIndex> team_index;
-        EndianType<std::int16_t> one;
+        LittleEndian<std::int16_t> one;
         EndianType<ScenarioSearchBehavior> search_behavior;
         EndianType<std::int16_t> manual_bsp_index;
         Bounds<EndianType<float>> respawn_delay;

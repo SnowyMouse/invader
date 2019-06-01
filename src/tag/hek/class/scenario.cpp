@@ -106,6 +106,7 @@ namespace Invader::HEK {
         auto *volumes = reinterpret_cast<ScenarioTriggerVolume<LittleEndian> *>(compiled.data.data() + trigger_volume_offset);
         for(std::size_t i = 0; i < tag.trigger_volumes.count; i++) {
             auto &volume = volumes[i];
+            volume.unknown = 1;
 
             // Check if it starts with "bsp" and it's null terminated
             if(volume.name.string[sizeof(volume.name.string) - 1] == 0 && std::memcmp(volume.name.string, "bsp", 3) == 0) {
