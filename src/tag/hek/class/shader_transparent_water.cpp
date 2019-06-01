@@ -16,8 +16,9 @@ namespace Invader::HEK {
         ADD_DEPENDENCY_ADJUST_SIZES(tag.ripple_maps);
         ADD_REFLEXIVE_START(tag.ripples) {
             DEFAULT_VALUE(reflexive.map_repeats, 1);
-        } ADD_REFLEXIVE_END
+        } ADD_REFLEXIVE_END;
         DEFAULT_VALUE(tag.ripple_scale, 1.0F);
+        DEFAULT_VALUE(tag.ripple_mipmap_levels, 1);
         FINISH_COMPILE
     }
 }
