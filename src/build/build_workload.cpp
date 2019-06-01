@@ -1478,7 +1478,7 @@ namespace Invader {
         auto *script_string_data = reinterpret_cast<const char *>(TRANSLATE_TAG_DATA_PTR(script_string_data_ptr));
         auto &script_node_table = *reinterpret_cast<HEK::ScenarioScriptNodeTable<HEK::LittleEndian> *>(script_syntax_data);
         auto *script_nodes = reinterpret_cast<HEK::ScenarioScriptNode<HEK::LittleEndian> *>(script_syntax_data + sizeof(script_node_table));
-        std::uint16_t count = script_node_table.maximum_count.read();
+        std::uint16_t count = script_node_table.size.read();
 
         // Iterate through this
         for(std::uint16_t c = 0; c < count; c++) {
