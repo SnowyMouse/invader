@@ -122,7 +122,9 @@ namespace Invader::HEK {
         EndianType<float> combat_perception_time;
         EndianType<float> guard_perception_time;
         EndianType<float> non_combat_perception_time;
-        PAD(0xC);
+        LittleEndian<float> inverse_combat_perception_time;
+        LittleEndian<float> inverse_guard_perception_time;
+        LittleEndian<float> inverse_non_combat_perception_time;
         PAD(0x8);
 
         EndianType<float> dive_into_cover_chance;
@@ -154,7 +156,8 @@ namespace Invader::HEK {
         Bounds<EndianType<float>> combat_idle_aiming;
         Bounds<EndianType<float>> combat_idle_looking;
         PAD(0x8);
-        PAD(0x10);
+        Vector2D<LittleEndian> cosine_maximum_aiming_deviation;
+        Vector2D<LittleEndian> cosine_maximum_looking_deviation;
         TagDependency<EndianType> do_not_use; // weapon
         PAD(0x10C);
         TagDependency<EndianType> do_not_use_1; // projectile
