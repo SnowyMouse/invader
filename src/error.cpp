@@ -23,6 +23,10 @@ namespace Invader {
         return "maximum tag data size exceeded";
     }
 
+    const char *MaximumFileSizeException::what() const noexcept {
+        return "maximum file size exceeded";
+    }
+
     const char *OutOfBoundsException::what() const noexcept {
         return "data is out of bounds";
     }

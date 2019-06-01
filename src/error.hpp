@@ -46,6 +46,15 @@ namespace Invader {
     };
 
     /**
+     * This is thrown when tag data exceeds the maximum file size
+     */
+    class MaximumFileSizeException : public std::exception {
+    public:
+        /** What happened? */
+        const char *what() const noexcept;
+    };
+
+    /**
      * This is thrown when tag data is out of bounds.
      */
     class OutOfBoundsException : public std::exception {
