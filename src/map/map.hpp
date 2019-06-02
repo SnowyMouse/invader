@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "../resource/resource_map.hpp"
+#include "../hek/map.hpp"
 #include "tag.hpp"
 
 namespace Invader {
@@ -203,7 +204,7 @@ namespace Invader {
         std::size_t tag_data_length;
 
         /** Base memory address */
-        std::uint32_t base_memory_address = 0x40440000;
+        std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
 
 
         /** Load the map now */

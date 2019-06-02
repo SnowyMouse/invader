@@ -80,7 +80,7 @@ namespace Invader {
         /**
          * Tag data address to use
          */
-        std::uint32_t tag_data_address = 0x40440000;
+        std::uint32_t tag_data_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
 
         /**
          * Bitmaps.map assets
