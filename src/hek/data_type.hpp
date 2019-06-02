@@ -489,8 +489,8 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct TagDataOffset {
         EndianType<std::int32_t> size;
         LittleEndian<std::int32_t> external;
-        LittleEndian<std::int32_t> file_offset;
-        LittleEndian<Pointer> pointer;
+        EndianType<std::int32_t> file_offset;
+        EndianType<Pointer> pointer;
         PAD(0x4);
 
         ENDIAN_TEMPLATE(OtherType) operator TagDataOffset<OtherType>() const noexcept {

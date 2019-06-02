@@ -863,13 +863,14 @@ namespace Invader::HEK {
         EndianType<std::int16_t> trigger_volume;
         EndianType<std::int16_t> source;
         EndianType<std::int16_t> destination;
-        PAD(0x2);
+        LittleEndian<std::uint16_t> unknown;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioBSPSwitchTriggerVolume<NewType>() const noexcept {
             ScenarioBSPSwitchTriggerVolume<NewType> copy = {};
             COPY_THIS(trigger_volume);
             COPY_THIS(source);
             COPY_THIS(destination);
+            COPY_THIS(unknown);
             return copy;
         }
     };

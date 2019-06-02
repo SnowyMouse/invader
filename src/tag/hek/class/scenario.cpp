@@ -125,6 +125,7 @@ namespace Invader::HEK {
                         new_volume.source = bsp_1;
                         new_volume.destination = bsp_2;
                         new_volume.trigger_volume = i;
+                        new_volume.unknown = 0xFFFF;
                         switch_volumes.push_back(new_volume);
                     }
                 }
