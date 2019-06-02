@@ -30,7 +30,7 @@ int main(int argc, const char **argv) {
 
     if(argc < 3) {
         #ifndef NO_OUTPUT
-        std::cout << "invader-indexer <input map> <output map>"                                         << std::endl;
+        std::cout << "invader-indexer <input map> <output index>"                                       << std::endl;
         #endif
         return RETURN_FAILED_NOTHING_TO_DO;
     }
