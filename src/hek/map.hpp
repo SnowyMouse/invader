@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include "data_type.hpp"
 
 namespace Invader::HEK {
@@ -27,9 +28,13 @@ namespace Invader::HEK {
         CACHE_FILE_TAGS = 0x74616773
     };
 
-    enum CacheFileLimits : std::uint64_t {
+    enum CacheFileLimits : std::size_t {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
+        #if SIZE_MAX > 0xFFFFFFFF
         CACHE_FILE_MAXIMUM_FILE_LENGTH = 0x100000000,
+        #else
+        CACHE_FILE_MAXIMUM_FILE_LENGTH = SIZE_MAX,
+        #endif
         CACHE_FILE_MAX_TAG_COUNT = 65535
     };
 
