@@ -33,7 +33,7 @@ namespace Invader {
             // Add our dependency if we aren't skipping
             if(skip_data) {
                 dependency.tag_class_int = HEK::TagClassInt::TAG_CLASS_NONE;
-                *reinterpret_cast<std::uint32_t *>(dependency.tag_id.value) = 0xFFFFFFFF;
+                dependency.tag_id = HEK::TagID::null_tag_id();
             }
             else {
                 std::string path_str(reinterpret_cast<const char *>(path));
@@ -50,7 +50,7 @@ namespace Invader {
             return path_size + 1;
         }
         else {
-            *reinterpret_cast<std::uint32_t *>(dependency.tag_id.value) = 0xFFFFFFFF;
+            dependency.tag_id = HEK::TagID::null_tag_id();
             return 0;
         }
     }

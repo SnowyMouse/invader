@@ -31,8 +31,32 @@ namespace Invader::HEK {
      * This refers to a tag ID when compiled.
      */
     union TagID {
-        std::uint16_t index;
+        /**
+         * Full ID
+         */
         std::uint32_t id;
+
+        /**
+         * Index of the tag ID in the tag array
+         */
+        std::uint16_t index;
+
+        /**
+         * If the full ID is this value, then the tag ID is null
+         */
+        static const std::uint32_t NULL_ID = 0xFFFFFFFF;
+
+        /**
+         * Check if the tag ID is null
+         * @return true if the tag ID is null
+         */
+        inline bool is_null() const {
+            return this->id == NULL_ID;
+        }
+
+        static inline TagID null_tag_id() {
+            return { NULL_ID };
+        }
     };
 
     /**

@@ -680,7 +680,7 @@ namespace Invader {
                                     continue;
                                 }
                                 const auto &fog_id = fog_palette[palette_index].fog.tag_id.read();
-                                if(fog_id.id == 0xFFFFFFFF) {
+                                if(fog_id.is_null()) {
                                     continue;
                                 }
                                 auto &fog_tag = this->compiled_tags[fog_id.index];
@@ -700,7 +700,7 @@ namespace Invader {
                 // Particle-related things
                 else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_PARTICLE) {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
-                    if(particle.bitmap.tag_id.read().id == 0xFFFFFFFF) {
+                    if(particle.bitmap.tag_id.read().is_null()) {
                         #ifndef NO_OUTPUT
                         std::cerr << tag_ptr->path << ".particle has no bitmap.\n";
                         #endif
@@ -720,7 +720,7 @@ namespace Invader {
                         auto *types = reinterpret_cast<WeatherParticleSystemParticleType<LittleEndian> *>(tag_ptr->data.data() + offset);
                         for(std::uint32_t p = 0; p < particle_count; p++) {
                             auto &type = types[p];
-                            if(type.sprite_bitmap.tag_id.read().id == 0xFFFFFFFF) {
+                            if(type.sprite_bitmap.tag_id.read().is_null()) {
                                 #ifndef NO_OUTPUT
                                 std::cerr << tag_ptr->path << ".weather_particle_system particle # " << p << " has no sprite bitmap.\n";
                                 #endif
