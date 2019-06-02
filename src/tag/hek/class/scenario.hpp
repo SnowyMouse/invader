@@ -1124,7 +1124,8 @@ namespace Invader::HEK {
         EndianType<ScenarioSearchBehavior> search_behavior;
         EndianType<std::int16_t> manual_bsp_index;
         Bounds<EndianType<float>> respawn_delay;
-        PAD(0x4C);
+        PAD(0x4A);
+        LittleEndian<std::uint16_t> precomputed_bsp_index;
         TagReflexive<EndianType, ScenarioSquad> squads;
         TagReflexive<EndianType, ScenarioPlatoon> platoons;
         TagReflexive<EndianType, ScenarioFiringPosition> firing_positions;
@@ -1139,6 +1140,7 @@ namespace Invader::HEK {
             COPY_THIS(search_behavior);
             COPY_THIS(manual_bsp_index);
             COPY_THIS(respawn_delay);
+            COPY_THIS(precomputed_bsp_index);
             COPY_THIS(squads);
             COPY_THIS(platoons);
             COPY_THIS(firing_positions);
