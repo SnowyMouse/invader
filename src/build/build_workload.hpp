@@ -172,6 +172,6 @@ namespace Invader {
         /**
          * Fix the scripts in the scenario tag
          */
-        void fix_scenario_tag_scripts(std::vector<std::byte> &tag_data);
+        void fix_scenario_tag_scripts();
     };
 }
