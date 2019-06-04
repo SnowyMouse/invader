@@ -398,6 +398,15 @@ namespace Invader::HEK {
             copy.x = this->y + add.y;
             return copy;
         }
+
+        /**
+         * Get the distance from the plane
+         * @param  cmp Plane to check
+         * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
+         */
+        float distance_from_plane(const Plane2D<EndianType> &plane) const {
+            return ((plane.x * this->x) + (plane.y * this->y)) - plane.w;
+        }
     };
     static_assert(sizeof(Point2D<BigEndian>) == 0x8);
 
@@ -431,6 +440,24 @@ namespace Invader::HEK {
             copy.x = this->y + add.y;
             copy.z = this->z + add.z;
             return copy;
+        }
+
+        /**
+         * Get the distance from the plane
+         * @param  cmp Plane to check
+         * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
+         */
+        float distance_from_plane(const Plane3D<EndianType> &plane) const {
+            return ((plane.x * this->x) + (plane.y * this->y) + (plane.z * this->z)) - plane.w;
+        }
+
+        /**
+         * Get the distance from the plane, ignoring the 2D vector
+         * @param  cmp Plane to check
+         * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
+         */
+        float distance_from_plane(const Plane2D<EndianType> &plane) const {
+            return ((plane.x * this->x) + (plane.y * this->y)) - plane.w;
         }
 
         Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
