@@ -444,8 +444,8 @@ namespace Invader::HEK {
 
         /**
          * Get the distance from the plane
-         * @param  cmp Plane to check
-         * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
+         * @param  plane Plane to check
+         * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
          */
         float distance_from_plane(const Plane3D<EndianType> &plane) const {
             return ((plane.x * this->x) + (plane.y * this->y) + (plane.z * this->z)) - plane.w;
@@ -453,8 +453,8 @@ namespace Invader::HEK {
 
         /**
          * Get the distance from the plane, ignoring the 2D vector
-         * @param  cmp Plane to check
-         * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
+         * @param  plane Plane to check
+         * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
          */
         float distance_from_plane(const Plane2D<EndianType> &plane) const {
             return ((plane.x * this->x) + (plane.y * this->y)) - plane.w;
