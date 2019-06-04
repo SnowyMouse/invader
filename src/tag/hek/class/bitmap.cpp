@@ -4,8 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#include <iostream>
-
 #include "../compile.hpp"
 
 #include "bitmap.hpp"

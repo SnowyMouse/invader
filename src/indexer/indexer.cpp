@@ -5,9 +5,9 @@
  */
 
 #ifndef NO_OUTPUT
-#include <iostream>
 #include <chrono>
 using clock_type = std::chrono::steady_clock;
+#include <iostream>
 #endif
 
 #include <vector>

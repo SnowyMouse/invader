@@ -4,8 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#include <iostream>
-
 #include "compile.hpp"
 
 namespace Invader {
@@ -20,13 +18,13 @@ namespace Invader {
         if(path_size > 0) {
             // Max size is too small
             if(max_path_size <= path_size) {
-                std::cerr << "path length exceeds the remaining tag data length" << "\n";
+                eprintf("path length exceeds the remaining tag data length\n");
                 throw InvalidDependencyException();
             }
 
             // Path is not null terminated
             if(reinterpret_cast<const unsigned char *>(path)[path_size] != 0x00) {
-                std::cerr << "path is not null-terminated or is too long" << "\n";
+                eprintf("path is not null-terminated or is too long\n");
                 throw InvalidDependencyException();
             }
 
@@ -40,7 +38,7 @@ namespace Invader {
 
                 // Make sure the length is correct
                 if(path_str.length() != path_size) {
-                    std::cerr << "path length is wrong (expected " << path_size << "; got " << path_str.length() << ")\n";
+                    eprintf("path length is wrong (expected %zu; got %zu)\n", path_size, path_str.length());
                     throw InvalidDependencyException();
                 }
                 compiled.dependencies.push_back(CompiledTagDependency { offset, path_str, dependency.tag_class_int });

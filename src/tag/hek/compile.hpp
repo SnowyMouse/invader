@@ -6,12 +6,9 @@
 
 #pragma once
 
-#ifndef NO_OUTPUT
-#include <iostream>
-#endif
-
 #include <cstring>
 
+#include "../../eprintf.hpp"
 #include "../../version.hpp"
 #include "../../hek/data_type.hpp"
 #include "../../error.hpp"
@@ -24,7 +21,7 @@ namespace Invader {
      * @param  compare_size size to check
      */
     #define ASSERT_SIZE(compare_size) if(size < static_cast<std::size_t>(compare_size)) { \
-        std::cerr << "ASSERT_SIZE failed: " << size << " < " # compare_size "(" << compare_size << ")" << "\n"; \
+        eprintf("ASSERT_SIZE failed: %zu < " # compare_size " (%zu)\n", static_cast<std::size_t>(size), static_cast<std::size_t>(compare_size)); \
         throw OutOfBoundsException(); \
     }
 
@@ -101,14 +98,14 @@ namespace Invader {
                             } \
                         }\
                         catch(std::exception &e) {\
-                            std::cerr << "error adding reflexive #" << i << " for " << struct_name << "\n"; \
+                            eprintf("error adding reflexive #%zu for %s\n", i, struct_name); \
                             throw; \
                         }\
                     }\
                 }\
             }\
             catch(std::exception &) { \
-                std::cerr << "error adding reflexive " << struct_name << "\n"; \
+                eprintf("error adding reflexive for %s\n", struct_name); \
                 throw; \
             }\
         }
@@ -143,7 +140,7 @@ namespace Invader {
     #define FINISH_COMPILE \
         FINISH_COMPILE_COPY \
         if(size != 0) { \
-            std::cerr << "unexpected extra " << size << " bytes"; \
+            eprintf("unexpected extra %zu bytes\n", size); \
             throw ExtraTagDataException();\
         }
 
@@ -174,7 +171,7 @@ namespace Invader {
             INCREMENT_DATA_PTR(amt); \
         } \
         catch(std::exception &) { \
-            std::cerr << "error adding dependency " # dependency << "\n"; \
+            eprintf("error adding dependency " # dependency "\n"); \
             throw; \
         } \
     }

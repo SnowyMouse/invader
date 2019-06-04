@@ -188,9 +188,7 @@ namespace Invader::HEK {
         // Make sure we don't have any stragglers
         for(std::size_t n = 0; n < nodes_count; n++) {
             if(!node_done[n]) {
-                #ifndef NO_OUTPUT
-                std::cerr << "Orphaned model node " << n << "\n";
-                #endif
+                eprintf("orphaned model node %zu\n", n);
                 throw OutOfBoundsException();
             }
         }

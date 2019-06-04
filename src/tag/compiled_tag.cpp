@@ -13,10 +13,6 @@
 #define PATH_BUFFER_LENGTH PATH_MAX
 #endif
 
-#ifndef NO_OUTPUT
-#include <iostream>
-#endif
-
 #include <memory>
 #include <cstdio>
 
