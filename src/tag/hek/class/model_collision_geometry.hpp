@@ -110,7 +110,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelCollisionGeometrySphere<BigEndian>) == 0x20);
 
-    struct ModelCollisionGeometryBSP3DNodeIndex {
+    struct ModelCollisionGeometryBSPNodeIndex {
         std::uint32_t index : 31;
         std::uint32_t is_leaf : 1;
 
@@ -125,8 +125,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP3DNode {
         EndianType<std::int32_t> plane;
-        EndianType<ModelCollisionGeometryBSP3DNodeIndex> back_child;
-        EndianType<ModelCollisionGeometryBSP3DNodeIndex> front_child;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> back_child;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> front_child;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP3DNode<NewType>() const noexcept {
             ModelCollisionGeometryBSP3DNode<NewType> copy = {};
@@ -170,7 +170,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP2DReference {
         EndianType<std::int32_t> plane;
-        EndianType<std::int32_t> bsp2d_node;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> bsp2d_node;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP2DReference<NewType>() const noexcept {
             ModelCollisionGeometryBSP2DReference<NewType> copy;
@@ -183,8 +183,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP2DNode {
         Plane2D<EndianType> plane;
-        EndianType<std::int32_t> left_child;
-        EndianType<std::int32_t> right_child;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> left_child;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> right_child;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP2DNode<NewType>() const noexcept {
             ModelCollisionGeometryBSP2DNode<NewType> copy;
