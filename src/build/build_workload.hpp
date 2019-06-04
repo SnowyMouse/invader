@@ -173,5 +173,10 @@ namespace Invader {
          * Fix the scripts in the scenario tag
          */
         void fix_scenario_tag_scripts();
+
+        /**
+         * Fix the encounters in the scenario tag
+         */
+        void fix_scenario_tag_encounters();
     };
 }

@@ -150,9 +150,6 @@ namespace Invader::HEK {
 
         ADD_REFLEXIVE_START(tag.encounters) {
             reflexive.one = 1;
-            if(reflexive.flags.read().manual_bsp_index_specified) {
-                reflexive.precomputed_bsp_index = reflexive.manual_bsp_index;
-            }
             ADD_REFLEXIVE_START(reflexive.squads) {
                 ADD_REFLEXIVE(reflexive.move_positions);
                 ADD_REFLEXIVE_START(reflexive.starting_locations) {
