@@ -178,5 +178,13 @@ namespace Invader {
          * Fix the encounters in the scenario tag
          */
         void fix_scenario_tag_encounters();
+
+        /**
+         * Check if the point is in the bsp
+         * @param bsp   bsp index to check
+         * @param point point to check
+         * @return      true if point is inside the bsp
+         */
+        bool point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point);
     };
 }

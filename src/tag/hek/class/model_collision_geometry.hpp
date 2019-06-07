@@ -112,14 +112,14 @@ namespace Invader::HEK {
 
     struct ModelCollisionGeometryBSPNodeIndex {
         std::uint32_t index : 31;
-        std::uint32_t is_leaf : 1;
+        std::uint32_t flag : 1;
 
         inline operator std::uint32_t() const {
             return this->index;
         }
 
         inline bool is_null() const {
-            return this->index == 0x7FFFFFFF && this->is_leaf;
+            return this->index == 0x7FFFFFFF && this->flag;
         }
     };
 
@@ -169,7 +169,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelCollisionGeometryLeaf<BigEndian>) == 0x8);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP2DReference {
-        EndianType<std::int32_t> plane;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> plane;
         EndianType<ModelCollisionGeometryBSPNodeIndex> bsp2d_node;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP2DReference<NewType>() const noexcept {
@@ -204,7 +204,7 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometrySurface {
-        EndianType<std::int32_t> plane;
+        EndianType<ModelCollisionGeometryBSPNodeIndex> plane;
         EndianType<std::int32_t> first_edge;
         ModelCollisionGeometrySurfaceFlags flags;
         std::int8_t breakable_surface;

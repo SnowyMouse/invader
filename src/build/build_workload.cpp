@@ -1516,17 +1516,11 @@ namespace Invader {
     #define TRANSLATE_SBSP_TAG_DATA_PTR(pointer) (sbsp_tag_data + sbsp_tag->resolve_pointer(&pointer))
 
     void BuildWorkload::fix_scenario_tag_encounters() {
-        // Get the scenario tag
+        // Get the scenario tag and some BSP information
         auto &scenario_tag = this->compiled_tags[this->scenario_index];
         auto *scenario_tag_data = scenario_tag->data.data();
         auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
-
-        // Get the BSPs
         std::uint32_t sbsp_count = scenario.structure_bsps.count;
-        auto *sbsps = reinterpret_cast<HEK::ScenarioBSP<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.structure_bsps.pointer));
-
-        // Keep track of how many are in what BSP
-        std::vector<std::uint32_t> count_in_bsp(sbsp_count);
 
         // Get encounters
         std::uint32_t encounters_count = scenario.encounters.count;
@@ -1542,156 +1536,217 @@ namespace Invader {
                 continue;
             }
 
-            // Reset this
-            std::uint32_t highest_count = 0;
-            std::fill(count_in_bsp.data(), count_in_bsp.data() + count_in_bsp.size(), 0);
+            // Highest number of hits in a BSP and current number of hits
+            std::size_t highest_count = 0;
+            std::size_t current_count = 0;
+
+            // How many BSPs we've found the highest count
+            std::uint32_t bsps_found_in = 0;
+
+            // Maximum number of hits
+            std::size_t max_hits = 0;
 
             // Get pointers
             std::uint32_t squad_count = encounter->squads.count;
             auto *squads = reinterpret_cast<HEK::ScenarioSquad<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->squads.pointer));
             auto *squad_end = squads + squad_count;
-
             std::uint32_t firing_position_count = encounter->firing_positions.count;
             auto *firing_positions = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->firing_positions.pointer));
             auto *firing_position_end = firing_positions + firing_position_count;
 
-            // Look for which BSPs the encounter is in
-            for(std::size_t b = 0; b < sbsp_count; b++) {
-                // Get current BSP
-                auto &sbsp_scenario_entry = sbsps[b];
-                auto sbsp_tag_id = sbsp_scenario_entry.structure_bsp.tag_id.read();
-                if(sbsp_tag_id.is_null()) {
-                    continue;
-                }
-
-                // Get current BSP data
-                auto &sbsp_tag = this->compiled_tags[sbsp_tag_id.index];
-                auto *sbsp_tag_data = sbsp_tag->data.data();
-                auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
-                auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
-
-                // Make sure we have a collision BSPsquad
-                if(sbsp.collision_bsp.count == 0) {
-                    continue;
-                }
-                auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
-
-                // Get BSP3D nodes and planes
-                auto *bsp3d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP3DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp3d_nodes.pointer));
-                std::uint32_t bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count;
-
-                auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
-                std::uint32_t planes_count = collision_bsp.planes.count;
-
-                auto point_in_bsp = [&bsp3d_nodes_count, &bsp3d_nodes, &planes, &planes_count, &b](const HEK::Point3D<HEK::LittleEndian> &point) -> bool {
-                    auto point_in_tree = [&bsp3d_nodes_count, &bsp3d_nodes, &planes, &planes_count, &b](std::uint32_t node, const HEK::Point3D<HEK::LittleEndian> &point, auto &point_in_tree_recursion) -> bool {
-                        auto point_in_front_of_plane = [&planes, &planes_count, &b](std::uint32_t plane_index, const HEK::Point3D<HEK::LittleEndian> &point) {
-                            // Check if the plane index is bullshit
-                            if(plane_index >= planes_count) {
-                                eprintf("Invalid plane %zu for BSP %zu\n", static_cast<std::size_t>(plane_index), b);
-                                throw OutOfBoundsException();
-                            }
-
-                            // Dot product
-                            auto dot = [](const auto &a, const auto &b) -> float {
-                                return a.x * b.x + a.y * b.y + a.z * b.z;
-                            };
-                            auto &plane = planes[plane_index];
-                            float delta = dot(plane.plane, point) - plane.plane.w;
-                            return delta >= 0;
-                        };
-
-                        while(true) {
-                            auto &nodes = bsp3d_nodes[node];
-                            if(point_in_front_of_plane(nodes.plane, point)) {
-                                auto front_child = nodes.front_child.read();
-
-                                // Stop at leaf
-                                if(front_child.is_leaf) {
-                                    return true;
-                                }
-                                else {
-                                    return point_in_tree_recursion(front_child.index, point, point_in_tree_recursion);
-                                }
-                            }
-
-                            // Did we run out?
-                            auto back_child = nodes.back_child.read();
-                            if(back_child.is_null()) {
-                                return false;
-                            }
-
-                            // Is it bullshit?
-                            if(back_child.index >= bsp3d_nodes_count) {
-                                eprintf("Invalid plane %zu for BSP %zu\n", static_cast<std::size_t>(back_child.index), b);
-                                throw OutOfBoundsException();
-                            }
-
-                            // Continue
-                            node = back_child.index;
-                        }
-                    };
-                    return point_in_tree(0, point, point_in_tree);
-                };
-
-                // Iterate through squads
-                for(auto *squad = squads; squad < squad_end; squad++) {
-                    // Get starting locations
-                    std::uint32_t starting_locations_count = squad->starting_locations.count;
-                    auto *starting_locations = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
-                    auto *last_starting_location = starting_locations + starting_locations_count;
-                    for(auto *starting_location = starting_locations; starting_location < last_starting_location; starting_location++) {
-                        if(point_in_bsp(starting_location->position)) {
-                            if(++count_in_bsp[b] > highest_count) {
-                                highest_count = count_in_bsp[b];
-                            }
-                        }
-                    }
-                }
-
-                // Iterate through firing positions too
-                for(auto *firing_position = firing_positions; firing_position < firing_position_end; firing_position++) {
-                    if(point_in_bsp(firing_position->position)) {
-                        if(++count_in_bsp[b] > highest_count) {
-                            highest_count = count_in_bsp[b];
-                        }
-                    }
-                }
-            }
-
-            // Check if we have any in no BSPs
-            if(highest_count == 0) {
-                eprintf("Warning: Could not find the BSP for encounter #%zu\n", static_cast<std::size_t>(encounter - encounters));
-                warnings_given++;
-                continue;
-            }
-
-            // Check if it's across multiple BSPs
-            std::size_t bsps_placed_in = 0;
-            std::uint32_t bsp_placed = 0;
-
-            // Do it
+            // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
-                if(highest_count == count_in_bsp[b]) {
-                    if(!bsps_placed_in) {
-                        encounter->precomputed_bsp_index = b;
-                        bsp_placed = b;
+                current_count = 0;
+
+                // Check if the squad spawn positions are in the BSP
+                for(auto *squad = squads; squad < squad_end; squad++) {
+                    auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
+                    auto *spawn_point_end = spawn_point + squad->starting_locations.count.read();
+
+                    // Add 'em up
+                    for(auto *spawn = spawn_point; spawn < spawn_point_end; spawn++) {
+                        if(b == 0) {
+                            max_hits++;
+                        }
+                        if(this->point_in_bsp(b, spawn->position)) {
+                            current_count++;
+                        }
                     }
-                    bsps_placed_in++;
+                }
+
+                // Check if the firing positions are in the BSP
+                for(auto *firing_position = firing_positions; firing_position < firing_position_end; firing_position++) {
+                    if(b == 0) {
+                        max_hits++;
+                    }
+                    if(this->point_in_bsp(b, firing_position->position)) {
+                        current_count++;
+                    }
+                }
+
+                // Check if we got something
+                if(current_count) {
+                    if(current_count == highest_count) {
+                        bsps_found_in++;
+                    }
+                    else if(current_count > highest_count) {
+                        encounter->precomputed_bsp_index = static_cast<std::uint16_t>(b);
+                        bsps_found_in = 1;
+                        highest_count = current_count;
+                    }
                 }
             }
 
-            if(bsps_placed_in > 1) {
-                eprintf("Warning: Encounter #%zu was found in %zu BSPs (will place in #%zu).\n", static_cast<std::size_t>(encounter - encounters), bsps_placed_in, static_cast<std::size_t>(bsp_placed));
+            if(bsps_found_in > 1) {
+                eprintf("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in #%u).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
+                warnings_given++;
+            }
+            else if(bsps_found_in == 0) {
+                eprintf("Warning: Encounter #%zu (%s) was found in 0 BSPs.\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string);
                 warnings_given++;
             }
         }
+    }
 
-        if(warnings_given == 1) {
-            eprintf("Use a manual BSP index or move the encounter to get rid of this warning.\n");
+    bool BuildWorkload::point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
+        // Get current BSP
+        auto &scenario_tag = this->compiled_tags[this->scenario_index];
+        auto *scenario_tag_data = scenario_tag->data.data();
+        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
+        auto *sbsps = reinterpret_cast<HEK::ScenarioBSP<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.structure_bsps.pointer));
+        auto &sbsp_scenario_entry = sbsps[bsp];
+        auto sbsp_tag_id = sbsp_scenario_entry.structure_bsp.tag_id.read();
+        if(sbsp_tag_id.is_null()) {
+            return false;
         }
-        else if(warnings_given > 1) {
-            eprintf("Use manual BSP indices or move the encounters to get rid of these warnings.\n");
+
+        // Get current BSP data
+        auto &sbsp_tag = this->compiled_tags[sbsp_tag_id.index];
+        auto *sbsp_tag_data = sbsp_tag->data.data();
+        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+        auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
+
+        // Make sure we have a collision BSP
+        if(sbsp.collision_bsp.count == 0) {
+            return false;
         }
+        auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
+
+        // Get BSP3D nodes and planes
+        auto *bsp3d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP3DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp3d_nodes.pointer));
+        auto bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count.read();
+        auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
+        auto planes_count = collision_bsp.planes.count.read();
+
+        // Get whether the point is in front of a 3D plane
+        auto point_in_front_of_plane = [&planes, &planes_count, &bsp](std::uint32_t plane_index, const HEK::Point3D<HEK::LittleEndian> &point) {
+            if(plane_index >= planes_count) {
+                eprintf("Invalid plane index %u / %u in BSP #%u.\n", plane_index, planes_count, bsp);
+                throw OutOfBoundsException();
+            }
+            return point.distance_from_plane(planes[plane_index].plane) >= 0;
+        };
+
+        // Get leaves, nodes, and references
+        auto *leaves = reinterpret_cast<HEK::ModelCollisionGeometryLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.leaves.pointer));
+        auto leaves_count = collision_bsp.leaves.count.read();
+        auto *bsp2d_references = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DReference<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_references.pointer));
+        auto bsp2d_references_count = collision_bsp.bsp2d_references.count.read();
+        auto *surfaces = reinterpret_cast<HEK::ModelCollisionGeometrySurface<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.surfaces.pointer));
+        auto surfaces_count = collision_bsp.surfaces.count.read();
+
+        auto point_in_leaf = [&leaves, &leaves_count, &bsp2d_references, &bsp2d_references_count, &surfaces, &surfaces_count, &point_in_front_of_plane, &bsp](std::uint32_t leaf_index, const HEK::Point3D<HEK::LittleEndian> &point) -> bool {
+            if(leaf_index >= leaves_count) {
+                eprintf("Invalid leaf index %u / %u in BSP #%u.\n", leaf_index, leaves_count, bsp);
+                throw OutOfBoundsException();
+            }
+
+            // Check if the references are bullshit
+            auto &leaf = leaves[leaf_index];
+            std::size_t reference_count = leaf.bsp2d_reference_count.read();
+            std::size_t first_reference_index = leaf.first_bsp2d_reference.read();
+            std::size_t end_reference_index = first_reference_index + reference_count;
+
+            // Check if the count is not 0
+            if(reference_count != 0) {
+                if((first_reference_index >= bsp2d_references_count || end_reference_index > bsp2d_references_count)) {
+                    eprintf("Invalid BSP2D reference range %zu-%zu / %u\n", first_reference_index, end_reference_index, bsp2d_references_count);
+                    throw OutOfBoundsException();
+                }
+
+                // Iterate through BSP2D references
+                auto *first_reference = bsp2d_references + first_reference_index;
+                auto *end_reference = bsp2d_references + end_reference_index;
+
+                for(auto *reference = first_reference; reference < end_reference; reference++) {
+                    auto plane = reference->plane.read();
+                    auto node2d = reference->bsp2d_node.read();
+
+                    if(node2d.flag) {
+                        if(node2d.index >= surfaces_count) {
+                            eprintf("Invalid surface %u / %u in BSP #%u.\n", node2d.index, surfaces_count, bsp);
+                            throw OutOfBoundsException();
+                        }
+
+                        if(!surfaces[node2d.index].plane.read().flag && !point_in_front_of_plane(surfaces[node2d.index].plane.read(), point)) {
+                            return false;
+                        }
+                    }
+                    else if(!point_in_front_of_plane(plane, point)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        auto point_in_3d_tree = [&bsp3d_nodes, &bsp3d_nodes_count, &point_in_front_of_plane, &point_in_leaf, &bsp](std::uint32_t node_index, const HEK::Point3D<HEK::LittleEndian> &point, auto &point_in_tree_recursion) -> bool {
+            while(true) {
+                if(node_index >= bsp3d_nodes_count) {
+                    eprintf("Invalid BSP2D node %u / %u in BSP #%u.\n", node_index, bsp3d_nodes_count, bsp);
+                    throw OutOfBoundsException();
+                }
+
+                // Get the node as well as front/back child info
+                auto &node = bsp3d_nodes[node_index];
+                auto front_child = node.front_child.read();
+                auto back_child = node.back_child.read();
+
+                // Let's see if it's in front of the plane
+                if(point_in_front_of_plane(node.plane, point)) {
+                    // Stop at null
+                    if(front_child.is_null()) {
+                        return true;
+                    }
+
+                    // Stop at leaf
+                    if(front_child.flag) {
+                        return point_in_leaf(front_child.index, point);
+                    }
+
+                    // Or try its front child
+                    else {
+                        return point_in_tree_recursion(front_child.index, point, point_in_tree_recursion);
+                    }
+                }
+
+                // If it's not, let's keep going
+                // First, is the back child null? If so, there's nowhere to go.
+                if(back_child.is_null()) {
+                    return false;
+                }
+
+                // If it's a leaf, well... give it a shot
+                if(back_child.flag) {
+                    return point_in_leaf(back_child.index, point);
+                }
+
+                // Lastly, let's see if we can continue traversing
+                node_index = back_child.index;
+            }
+        };
+
+        return point_in_3d_tree(0, point, point_in_3d_tree);
     }
 }

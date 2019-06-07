@@ -299,22 +299,6 @@ namespace Invader::HEK {
     static_assert(sizeof(Euler2D<BigEndian>) == 0x8);
 
     /**
-     * 2D Vector
-     */
-    ENDIAN_TEMPLATE(EndianType) struct Vector2D {
-        EndianType<float> i;
-        EndianType<float> j;
-
-        ENDIAN_TEMPLATE(OtherEndian) operator Vector2D<OtherEndian>() const {
-            Vector2D<OtherEndian> copy;
-            COPY_THIS(i);
-            COPY_THIS(j);
-            return copy;
-        }
-    };
-    static_assert(sizeof(Vector2D<BigEndian>) == 0x8);
-
-    /**
      * 3D Vector
      */
     ENDIAN_TEMPLATE(EndianType) struct Vector3D {
@@ -341,19 +325,39 @@ namespace Invader::HEK {
     static_assert(sizeof(Vector3D<BigEndian>) == 0xC);
 
     /**
+     * 2D Vector
+     */
+    ENDIAN_TEMPLATE(EndianType) struct Vector2D {
+        EndianType<float> i;
+        EndianType<float> j;
+
+        ENDIAN_TEMPLATE(OtherEndian) operator Vector2D<OtherEndian>() const {
+            Vector2D<OtherEndian> copy;
+            COPY_THIS(i);
+            COPY_THIS(j);
+            return copy;
+        }
+
+        ENDIAN_TEMPLATE(OtherEndian) operator Vector3D<OtherEndian>() const {
+            Vector3D<OtherEndian> copy;
+            COPY_THIS(i);
+            COPY_THIS(j);
+            copy.k = 0.0F;
+            return copy;
+        }
+    };
+    static_assert(sizeof(Vector2D<BigEndian>) == 0x8);
+
+    /**
      * 3D Plane
      */
     ENDIAN_TEMPLATE(EndianType) struct Plane3D {
-        EndianType<float> x;
-        EndianType<float> y;
-        EndianType<float> z;
+        Vector3D<EndianType> vector;
         EndianType<float> w;
 
         ENDIAN_TEMPLATE(OtherEndian) operator Plane3D<OtherEndian>() const {
             Plane3D<OtherEndian> copy;
-            COPY_THIS(x);
-            COPY_THIS(y);
-            COPY_THIS(z);
+            COPY_THIS(vector);
             COPY_THIS(w);
             return copy;
         }
@@ -364,14 +368,12 @@ namespace Invader::HEK {
      * 2D Plane
      */
     ENDIAN_TEMPLATE(EndianType) struct Plane2D {
-        EndianType<float> x;
-        EndianType<float> y;
+        Vector2D<EndianType> vector;
         EndianType<float> w;
 
         ENDIAN_TEMPLATE(OtherEndian) operator Plane2D<OtherEndian>() const {
             Plane2D<OtherEndian> copy;
-            COPY_THIS(x);
-            COPY_THIS(y);
+            COPY_THIS(vector);
             COPY_THIS(w);
             return copy;
         }
@@ -448,16 +450,7 @@ namespace Invader::HEK {
          * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
          */
         float distance_from_plane(const Plane3D<EndianType> &plane) const {
-            return ((plane.x * this->x) + (plane.y * this->y) + (plane.z * this->z)) - plane.w;
-        }
-
-        /**
-         * Get the distance from the plane, ignoring the 2D vector
-         * @param  plane Plane to check
-         * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
-         */
-        float distance_from_plane(const Plane2D<EndianType> &plane) const {
-            return ((plane.x * this->x) + (plane.y * this->y)) - plane.w;
+            return ((plane.vector.i * this->x) + (plane.vector.j * this->y) + (plane.vector.k * this->z)) - plane.w;
         }
 
         Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
