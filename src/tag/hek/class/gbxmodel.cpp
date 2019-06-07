@@ -199,6 +199,31 @@ namespace Invader::HEK {
                 std::size_t markers_count = reflexive.markers.count;
                 INCREMENT_DATA_PTR(sizeof(const GBXModelRegionPermutationMarker<BigEndian>) * markers_count);
                 reflexive.markers.count = 0;
+
+                // Set this value
+                reflexive.permutation_number = 0;
+                const char *last_hyphen = nullptr;
+                bool null_terminated = false;
+                for(const char &c : reflexive.name.string) {
+                    if(c == 0) {
+                        null_terminated = true;
+                        break;
+                    }
+                    else if(c == '-') {
+                        last_hyphen = &c + 1;
+                    }
+                }
+
+                // If null terminated, do this
+                if(last_hyphen) {
+                    if(null_terminated) {
+                        reflexive.permutation_number = static_cast<std::uint16_t>(std::strtol(last_hyphen, nullptr, 10));
+                    }
+                    else {
+                        eprintf("model permutation which contains a hyphen in its name is not null terminated\n");
+                        throw OutOfBoundsException();
+                    }
+                }
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
 

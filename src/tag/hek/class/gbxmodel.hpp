@@ -106,7 +106,9 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GBXModelRegionPermutation {
         TagString name;
         EndianType<GBXModelRegionPermutationFlags> flags;
-        PAD(0x1C);
+        LittleEndian<std::uint16_t> permutation_number;
+        PAD(0x2);
+        PAD(0x18);
         EndianType<std::int16_t> super_low;
         EndianType<std::int16_t> low;
         EndianType<std::int16_t> medium;
@@ -119,6 +121,7 @@ namespace Invader::HEK {
             GBXModelRegionPermutation<NewType> copy = {};
             COPY_THIS(name);
             COPY_THIS(flags);
+            COPY_THIS(permutation_number);
             COPY_THIS(super_low);
             COPY_THIS(low);
             COPY_THIS(medium);
