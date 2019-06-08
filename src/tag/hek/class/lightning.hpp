@@ -84,13 +84,15 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct LightningShader {
-        PAD(0x28);
+        PAD(0x24);
+        LittleEndian<std::uint32_t> make_it_work;
         EndianType<LightningShaderFlags> shader_flags;
         EndianType<LightningFramebufferBlendFunction> framebuffer_blend_function;
         EndianType<LightningFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<LightningShaderMapFlags> map_flags;
         PAD(0x1C);
-        PAD(0x10);
+        PAD(0xC);
+        LittleEndian<std::uint32_t> some_more_stuff_that_should_be_set_for_some_reason;
         PAD(0x2);
         PAD(0x2);
         PAD(0x38);
@@ -98,10 +100,12 @@ namespace Invader::HEK {
 
         ENDIAN_TEMPLATE(NewType) operator LightningShader<NewType>() const noexcept {
             LightningShader<NewType> copy = {};
+            COPY_THIS(make_it_work);
             COPY_THIS(shader_flags);
             COPY_THIS(framebuffer_blend_function);
             COPY_THIS(framebuffer_fade_mode);
             COPY_THIS(map_flags);
+            COPY_THIS(some_more_stuff_that_should_be_set_for_some_reason);
             return copy;
         }
     };

@@ -13,7 +13,10 @@ namespace Invader::HEK {
         BEGIN_COMPILE(Lightning);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.bitmap);
         ADD_REFLEXIVE(tag.markers);
-        ADD_REFLEXIVE(tag.shader);
+        ADD_REFLEXIVE_START(tag.shader) {
+            reflexive.make_it_work = 1;
+            reflexive.some_more_stuff_that_should_be_set_for_some_reason = 0xFFFFFFFF;
+        } ADD_REFLEXIVE_END
         FINISH_COMPILE
     }
 }
