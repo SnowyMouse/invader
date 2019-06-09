@@ -123,8 +123,9 @@ namespace Invader {
 
         /**
          * Index tags that can be indexed
+         * @return  tag data removed
          */
-        void index_tags() noexcept;
+        std::size_t index_tags() noexcept;
 
         /**
          * Get the scenario name

@@ -141,7 +141,7 @@ namespace Invader {
         }
 
         // Remove anything we don't need
-        this->index_tags();
+        std::size_t total_indexed_data = this->index_tags();
 
         // Initialize our header and file data vector, also grabbing scenario information
         CacheFileHeader cache_file_header = {};
@@ -183,7 +183,7 @@ namespace Invader {
         }
         #endif
 
-        // Get the largest BSP tag
+        // Get the largest BSP tag as well as usage of the indexed tag space
         std::size_t largest_bsp_size = 0;
         #ifndef NO_OUTPUT
         std::size_t largest_bsp = 0;
@@ -207,7 +207,7 @@ namespace Invader {
             }
         }
 
-        std::size_t max_tag_data_size = tag_data.size() + largest_bsp_size;
+        std::size_t max_tag_data_size = tag_data.size() + largest_bsp_size + total_indexed_data;
 
         // Output BSP info
         #ifndef NO_OUTPUT
@@ -333,8 +333,11 @@ namespace Invader {
         return file;
     }
 
-    void BuildWorkload::index_tags() noexcept {
+    std::size_t BuildWorkload::index_tags() noexcept {
         using namespace HEK;
+
+        // Get the amount of data removed
+        std::size_t total_removed_data = 0;
 
         for(auto &tag : this->compiled_tags) {
             switch(tag->tag_class_int) {
@@ -344,6 +347,7 @@ namespace Invader {
                             tag->indexed = true;
                             tag->index = static_cast<std::uint32_t>(b + 1);
                             tag->asset_data.clear();
+                            total_removed_data += this->bitmaps[b + 1].data.size();
                             tag->data.clear();
                             break;
                         }
@@ -381,6 +385,7 @@ namespace Invader {
                                     if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
                                         tag->index = static_cast<std::uint32_t>(l);
                                         tag->indexed = true;
+                                        total_removed_data += loc_tag.data.size();
                                         tag->data.clear();
                                     }
                                 }
@@ -397,6 +402,8 @@ namespace Invader {
                             if(loc_tag.data.size() == tag->data.size()) {
                                 tag->index = static_cast<std::uint32_t>(l);
                                 tag->indexed = true;
+                                total_removed_data += loc_tag.data.size();
+                                tag->data.clear();
                                 break;
                             }
                         }
@@ -410,6 +417,8 @@ namespace Invader {
                             if(loc_tag.data.size() == tag->data.size()) {
                                 tag->index = static_cast<std::uint32_t>(l);
                                 tag->indexed = true;
+                                total_removed_data += loc_tag.data.size();
+                                tag->data.clear();
                                 break;
                             }
                         }
@@ -419,6 +428,8 @@ namespace Invader {
                     break;
             }
         }
+
+        return total_removed_data;
     }
 
     void BuildWorkload::load_required_tags() {
