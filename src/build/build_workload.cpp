@@ -1597,7 +1597,10 @@ namespace Invader {
                 }
             }
 
-            if(bsps_found_in > 1) {
+            if(max_hits == 0) {
+                encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
+            }
+            else if(bsps_found_in > 1) {
                 eprintf("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in #%u).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
                 warnings_given++;
             }
