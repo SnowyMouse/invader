@@ -1558,6 +1558,11 @@ namespace Invader {
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
                 current_count = 0;
 
+                // Don't check for stuff here if there's nothing to check
+                if(b > 0 && !max_hits) {
+                    break;
+                }
+
                 // Check if the squad spawn positions are in the BSP
                 for(auto *squad = squads; squad < squad_end; squad++) {
                     auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
