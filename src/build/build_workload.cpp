@@ -14,6 +14,7 @@
 #define MAX_PATH_LENGTH 254
 
 #include "../eprintf.hpp"
+#include "../tag/hek/class/biped.hpp"
 #include "../tag/hek/class/bitmap.hpp"
 #include "../tag/hek/class/fog.hpp"
 #include "../tag/hek/class/font.hpp"
@@ -939,6 +940,35 @@ namespace Invader {
                         }
                         if(add_to_end) {
                             tag_ptr->pointers.push_back(ptr_to_add);
+                        }
+                    }
+
+                    // If it's a biped, set this value
+                    if(tag_ptr->tag_class_int == HEK::TAG_CLASS_BIPED) {
+                        auto &biped = *reinterpret_cast<HEK::Biped<HEK::LittleEndian> *>(tag_ptr->data.data());
+                        auto biped_model = biped.model.tag_id.read();
+                        if(biped_model.is_null()) {
+                            // If no model, set to 0xFFFF
+                            biped.head_model_node_index = static_cast<std::uint16_t>(0xFFFF);
+                        }
+                        else {
+                            auto &model_tag = this->compiled_tags[biped_model.index];
+                            if(model_tag->tag_class_int == HEK::TAG_CLASS_GBXMODEL) {
+                                auto &model = *reinterpret_cast<HEK::GBXModel<HEK::LittleEndian> *>(model_tag->data.data());
+                                auto *nodes = reinterpret_cast<HEK::GBXModelNode<HEK::LittleEndian> *>(model_tag->data.data() + model_tag->resolve_pointer(&model.nodes.pointer));
+                                std::size_t node_count = model.nodes.count.read();
+                                for(std::size_t node = 0; node < node_count; node++) {
+                                    if(nodes[node].name.string[31] == 0 && std::strcmp(nodes[node].name.string, "bip01 head") == 0) {
+                                        biped.head_model_node_index = static_cast<std::uint16_t>(node);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // If for some reason this isn't a model tag we can recognize, set to 0xFFFF
+                            else {
+                                biped.head_model_node_index = static_cast<std::uint16_t>(0xFFFF);
+                            }
                         }
                     }
                 }

@@ -25,7 +25,6 @@ namespace Invader::HEK {
         tag.negative_sine_downhill_cutoff_angle = static_cast<float>(-std::sin(tag.downhill_cutoff_angle));
         tag.sine_uphill_falloff_angle = static_cast<float>(std::sin(tag.uphill_falloff_angle));
         tag.sine_uphill_cutoff_angle = static_cast<float>(std::sin(tag.uphill_cutoff_angle));
-        tag.unknown_long_thing = 0xC0000;
         tag.object_type = OBJECT_TYPE_BIPED;
         FINISH_COMPILE
     }

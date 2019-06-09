@@ -100,7 +100,8 @@ namespace Invader::HEK {
         LittleEndian<float> negative_sine_downhill_cutoff_angle;
         LittleEndian<float> sine_uphill_falloff_angle;
         LittleEndian<float> sine_uphill_cutoff_angle;
-        LittleEndian<std::uint32_t> unknown_long_thing;
+        PAD(0x2);
+        LittleEndian<std::uint16_t> head_model_node_index;
         TagReflexive<EndianType, BipedContactPoint> contact_point;
 
         ENDIAN_TEMPLATE(NewType) operator Biped<NewType>() const noexcept {
@@ -154,6 +155,7 @@ namespace Invader::HEK {
             COPY_THIS(negative_sine_downhill_cutoff_angle);
             COPY_THIS(sine_uphill_falloff_angle);
             COPY_THIS(sine_uphill_cutoff_angle);
+            COPY_THIS(head_model_node_index);
             COPY_THIS(contact_point);
             return copy;
         }
