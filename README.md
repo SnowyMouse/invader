@@ -21,6 +21,12 @@ This program builds cache files.
 | `--tags [dir] [...]` | `-t` | Use the specified tags directory(s). Specify directories in order of precedence. |
 | `--with-index <file>` | `-w` | Use an index file for the tags, ensuring the map's tags are ordered in the same way. |
 
+### invader-crc
+
+This program gets and/or modifies the calculated CRC32 of a map file. It takes one or two arguments: `<map> [new crc]`.
+Not specifying a CRC32 value will only calculate the CRC32 value of the cache file without modifying it. Otherwise, it
+will modify it and then calculate the CRC32.
+
 ### invader-indexer
 
 This program builds index files for usage with `--with-index` with invader-build. It takes exactly two arguments:
