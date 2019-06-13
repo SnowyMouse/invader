@@ -147,6 +147,30 @@ namespace Invader {
         std::size_t get_scenario_tag_id() const noexcept;
 
         /**
+         * Get the tag data header
+         * @return reference to the tag data header
+         */
+        HEK::CacheFileTagDataHeader &get_tag_data_header() noexcept;
+
+        /**
+         * Get the tag data header
+         * @return reference to the tag data header
+         */
+        const HEK::CacheFileTagDataHeader &get_tag_data_header() const noexcept;
+
+        /**
+         * Get the cache file header
+         * @return reference to the cache file header
+         */
+        HEK::CacheFileHeader &get_cache_file_header() noexcept;
+
+        /**
+         * Get the cache file header
+         * @return reference to the cache file header
+         */
+        const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
+
+        /**
          * Copy constructor for Map
          */
         Map(const Map &copy);

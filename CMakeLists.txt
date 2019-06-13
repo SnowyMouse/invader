@@ -29,5 +29,6 @@ endif()
 
 include(src/invader.cmake)
 include(src/build/build.cmake)
+include(src/crc/crc.cmake)
 include(src/indexer/indexer.cmake)
 include(src/scenario/scenario.cmake)

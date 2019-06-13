@@ -129,6 +129,22 @@ namespace Invader {
         return this->scenario_tag_id;
     }
 
+    HEK::CacheFileTagDataHeader &Map::get_tag_data_header() noexcept {
+        return *reinterpret_cast<HEK::CacheFileTagDataHeader *>(this->tag_data);
+    }
+
+    const HEK::CacheFileTagDataHeader &Map::get_tag_data_header() const noexcept {
+        return const_cast<Map *>(this)->get_tag_data_header();
+    }
+
+    HEK::CacheFileHeader &Map::get_cache_file_header() noexcept {
+        return *reinterpret_cast<HEK::CacheFileHeader *>(this->data);
+    }
+
+    const HEK::CacheFileHeader &Map::get_cache_file_header() const noexcept {
+        return const_cast<Map *>(this)->get_cache_file_header();
+    }
+
     void Map::load_map() {
         using namespace Invader::HEK;
 
