@@ -89,8 +89,23 @@ int main(int argc, const char **argv) {
 
     // Overwrite with new CRC32
     if(argc == 3) {
+        // Make sure the CRC32 given is actually valid
+        std::size_t given_crc32_length = std::strlen(argv[2]);
+        if(given_crc32_length > 8 || given_crc32_length < 1) {
+            eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
+            return 1;
+        }
+        for(std::size_t i = 0; i < given_crc32_length; i++) {
+            char c = std::tolower(argv[2][i]);
+            if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
+                eprintf("Invalid CRC32 %s (must be hexadecimal)\n", argv[2]);
+                return 1;
+            }
+        }
+
         FakeFileHandle handle = { reinterpret_cast<std::uint8_t *>(data_crc.data()), data_crc.size(), 0 };
-        std::uint32_t newcrc = ~crc_spoof_reverse_bits(static_cast<std::uint32_t>(std::strtol(argv[2], nullptr, 16)));
+        std::uint32_t desired_crc = static_cast<std::uint32_t>(std::strtol(argv[2], nullptr, 16));
+        std::uint32_t newcrc = ~crc_spoof_reverse_bits(desired_crc);
         crc_spoof_modify_file_crc32(&handle, random_number_offset_in_memory, newcrc, false);
 
         f = std::fopen(argv[1], "r+");
@@ -108,4 +123,5 @@ int main(int argc, const char **argv) {
 
     // Calculate CRC32
     printf("%08X\n", ~crc32(0, data_crc.data(), data_crc.size()));
+    return 0;
 }
