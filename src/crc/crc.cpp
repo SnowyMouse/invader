@@ -89,7 +89,7 @@ int main(int argc, const char **argv) {
 
     // Overwrite with new CRC32
     if(argc == 3) {
-        FakeFileHandle handle = { reinterpret_cast<char *>(data_crc.data()), data_crc.size(), 0 };
+        FakeFileHandle handle = { reinterpret_cast<std::uint8_t *>(data_crc.data()), data_crc.size(), 0 };
         std::uint32_t newcrc = ~crc_spoof_reverse_bits(static_cast<std::uint32_t>(std::strtol(argv[2], nullptr, 16)));
         crc_spoof_modify_file_crc32(&handle, random_number_offset_in_memory, newcrc, false);
 

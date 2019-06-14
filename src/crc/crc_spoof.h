@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 typedef struct FakeFileHandle {
-    char *data;
+    uint8_t *data;
     uint64_t size;
     uint64_t offset;
 } FakeFileHandle;
