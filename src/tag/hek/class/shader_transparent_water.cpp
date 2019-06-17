@@ -19,6 +19,8 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END;
         DEFAULT_VALUE(tag.ripple_scale, 1.0F);
         DEFAULT_VALUE(tag.ripple_mipmap_levels, 1);
+        DEFAULT_VALUE(tag.view_parallel_brightness, 1.0F);
+        tag.shader_type = SHADER_TYPE_SHADER_TRANSPARENT_WATER;
         FINISH_COMPILE
     }
 }
