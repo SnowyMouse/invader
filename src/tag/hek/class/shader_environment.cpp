@@ -20,6 +20,8 @@ namespace Invader::HEK {
         ADD_DEPENDENCY_ADJUST_SIZES(tag.reflection_cube_map);
         MAKE_WHITE_IF_BLACK(tag.material_color);
         DEFAULT_VALUE(tag.bump_map_scale, 1.0f);
+        tag.bump_map_scale_xy.x = tag.bump_map_scale;
+        tag.bump_map_scale_xy.y = tag.bump_map_scale;
         DEFAULT_VALUE(tag.u_animation_period, 1.0f);
         DEFAULT_VALUE(tag.u_animation_scale, 1.0f);
         DEFAULT_VALUE(tag.v_animation_period, 1.0f);

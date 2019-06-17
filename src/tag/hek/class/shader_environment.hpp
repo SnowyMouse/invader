@@ -78,7 +78,7 @@ namespace Invader::HEK {
         PAD(0xC);
         EndianType<float> bump_map_scale;
         TagDependency<EndianType> bump_map; // bitmap
-        LittleEndian<float> bump_map_stuff[2];
+        Point2D<LittleEndian> bump_map_scale_xy;
         PAD(0x10);
         EndianType<FunctionType2> u_animation_function;
         PAD(0x2);
@@ -156,7 +156,7 @@ namespace Invader::HEK {
             COPY_THIS(material_color);
             COPY_THIS(bump_map_scale);
             COPY_THIS(bump_map);
-            COPY_THIS_ARRAY(bump_map_stuff);
+            COPY_THIS(bump_map_scale_xy);
             COPY_THIS(u_animation_function);
             COPY_THIS(u_animation_period);
             COPY_THIS(u_animation_scale);
