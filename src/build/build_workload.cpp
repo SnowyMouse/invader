@@ -620,6 +620,11 @@ namespace Invader {
                 std::unique_ptr<CompiledTag> tag(std::make_unique<CompiledTag>(path, tag_class_int, this->tag_buffer.data(), file_length, this->cache_file_type));
                 CompiledTag *tag_ptr = tag.get();
 
+                // If it's a scenario tag, set this
+                if(tag->tag_class_int == HEK::TAG_CLASS_SCENARIO) {
+                    this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(tag->data.data())->type;
+                }
+
                 // Insert into the tag array
                 if(adding) {
                     this->compiled_tags.emplace_back(std::move(tag));

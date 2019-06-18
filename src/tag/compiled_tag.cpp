@@ -147,9 +147,16 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_COLOR_TABLE:
                 compile_color_table_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
-            case TagClassInt::TAG_CLASS_DAMAGE_EFFECT:
-                compile_damage_effect_tag(*this, data + sizeof(header), size - sizeof(header));
+            case TagClassInt::TAG_CLASS_DAMAGE_EFFECT: {
+                DamageEffectJasonJones jason_jones = DAMAGE_EFFECT_JASON_JONES_NONE;
+                if(type == CACHE_FILE_SINGLEPLAYER) {
+                    if(path == "weapons\\pistol\\bullet") {
+                        jason_jones = DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER;
+                    }
+                }
+                compile_damage_effect_tag(*this, data + sizeof(header), size - sizeof(header), jason_jones);
                 break;
+            }
             case TagClassInt::TAG_CLASS_DECAL:
                 compile_decal_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
@@ -330,9 +337,19 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD:
                 compile_virtual_keyboard_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
-            case TagClassInt::TAG_CLASS_WEAPON:
-                compile_weapon_tag(*this, data + sizeof(header), size - sizeof(header));
+            case TagClassInt::TAG_CLASS_WEAPON: {
+                WeaponJasonJones jason_jones = WEAPON_JASON_JONES_NONE;
+                if(type == CACHE_FILE_SINGLEPLAYER) {
+                    if(path == "weapons\\pistol\\pistol") {
+                        jason_jones = WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER;
+                    }
+                    else if(path == "weapons\\plasma rifle\\plasma rifle") {
+                        jason_jones = WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER;
+                    }
+                }
+                compile_weapon_tag(*this, data + sizeof(header), size - sizeof(header), jason_jones);
                 break;
+            }
             case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
                 compile_weapon_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;

@@ -411,5 +411,11 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(Weapon<BigEndian>) == 0x508);
 
-    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
+    enum WeaponJasonJones {
+        WEAPON_JASON_JONES_NONE = 0,
+        WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER,
+        WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER
+    };
+
+    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, WeaponJasonJones jason_jones);
 }

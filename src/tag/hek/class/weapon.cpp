@@ -10,7 +10,7 @@
 #include "weapon.hpp"
 
 namespace Invader::HEK {
-    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
+    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, WeaponJasonJones jason_jones) {
         BEGIN_COMPILE(Weapon);
         COMPILE_ITEM_DATA
         ADD_DEPENDENCY_ADJUST_SIZES(tag.ready_effect);
@@ -53,6 +53,22 @@ namespace Invader::HEK {
 
             reflexive.error_acceleration_rate = 1.0f / TICK_RATE / reflexive.error_acceleration_time;
             reflexive.error_deceleration_rate = 1.0f / TICK_RATE / reflexive.error_deceleration_time;
+
+            // Jason Jones the accuracy of the weapon
+            switch(jason_jones) {
+                case WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER:
+                    reflexive.minimum_error = DEGREES_TO_RADIANS(0.2F);
+                    reflexive.error_angle.from = DEGREES_TO_RADIANS(0.2F);
+                    reflexive.error_angle.to = DEGREES_TO_RADIANS(0.4F);
+                    break;
+                case WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER:
+                    reflexive.error_angle.from = DEGREES_TO_RADIANS(0.25F);
+                    reflexive.error_angle.to = DEGREES_TO_RADIANS(2.5F);
+                    break;
+                default:
+                    break;
+            }
+
         } ADD_REFLEXIVE_END
         tag.object_type = OBJECT_TYPE_WEAPON;
         FINISH_COMPILE

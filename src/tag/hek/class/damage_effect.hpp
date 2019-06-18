@@ -283,15 +283,17 @@ namespace Invader::HEK {
             COPY_THIS(damage_maximum_stun);
             COPY_THIS(damage_stun_time);
             COPY_THIS(damage_instantaneous_acceleration);
-
-            for(std::size_t i = 0; i < sizeof(damage_modifiers) / sizeof(damage_modifiers[0]); i++) {
-                COPY_THIS(damage_modifiers[i]);
-            }
+            COPY_THIS_ARRAY(damage_modifiers);
 
             return copy;
         }
     };
     static_assert(sizeof(DamageEffect<BigEndian>) == 0x2A0);
 
-    void compile_damage_effect_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
+    enum DamageEffectJasonJones {
+        DAMAGE_EFFECT_JASON_JONES_NONE = 0,
+        DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER
+    };
+
+    void compile_damage_effect_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, DamageEffectJasonJones jason_jones);
 }

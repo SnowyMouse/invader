@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "../error.hpp"
 #include "pad.hpp"
 #include "class_int.hpp"
@@ -20,6 +23,20 @@
  * @return      padding required
  */
 #define REQUIRED_PADDING_32_BIT(size) static_cast<std::size_t>((~(size - 1)) & 3)
+
+/**
+ * Convert degrees to radians
+ * @param  deg Degrees to convert from
+ * @return     Radians
+ */
+#define DEGREES_TO_RADIANS(deg) (deg * M_PI / 180.0)
+
+/**
+ * Convert radians to degrees
+ * @param  rad Radians to convert from
+ * @return     Degrees
+ */
+#define RADIANS_TO_DEGREES(rad) (rad * 180.0 / M_PI)
 
 namespace Invader::HEK {
     using Pointer = std::uint32_t;
