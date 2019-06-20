@@ -1003,18 +1003,13 @@ namespace Invader {
 
         // Error if greater than 31 characters.
         if(map_name_length > 31) {
-            eprintf("Scenario name %s exceeds 32 characters.\n", map_name.data());
+            eprintf("Scenario name %s exceeds 31 characters.\n", map_name.data());
             throw InvalidScenarioNameException();
         }
 
-        // Copy, erroring if a capital letter is detected
-        for(std::size_t i = 0; i < map_name_length; i++) {
-            char character = map_name[i];
-            char lowercase = std::tolower(character);
-            if(character != lowercase) {
-                eprintf("Scenario name %s contains a capital letter.\n", map_name.data());
-                throw InvalidScenarioNameException();
-            }
+        // Lowercase everything
+        for(char &c : map_name) {
+            c = std::tolower(c);
         }
 
         return map_name;
