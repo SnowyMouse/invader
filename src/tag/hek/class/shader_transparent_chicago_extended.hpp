@@ -19,7 +19,7 @@ namespace Invader::HEK {
         PAD(0x2);
         EndianType<float> lens_flare_spacing;
         TagDependency<EndianType> lens_flare; // lens_flare
-        TagReflexive<EndianType, ShaderTransparentChicagoTransparentLayer> extra_layers;
+        TagReflexive<EndianType, ShaderTransparentExtraLayer> extra_layers;
         TagReflexive<EndianType, ShaderTransparentChicagoMap> maps_4_stage;
         TagReflexive<EndianType, ShaderTransparentChicagoMap> maps_2_stage;
         EndianType<ShaderTransparentChicagoExtraFlags> extra_flags;

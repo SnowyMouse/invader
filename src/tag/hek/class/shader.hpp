@@ -11,6 +11,8 @@
 #include "../header.hpp"
 
 namespace Invader::HEK {
+    SINGLE_DEPENDENCY_STRUCT(ShaderTransparentExtraLayer, shader); //shader
+
     struct ShaderFlags {
         std::uint16_t simple_parameterization : 1;
         std::uint16_t ignore_normals : 1;

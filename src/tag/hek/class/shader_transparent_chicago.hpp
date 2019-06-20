@@ -9,8 +9,6 @@
 #include "shader.hpp"
 
 namespace Invader::HEK {
-    SINGLE_DEPENDENCY_STRUCT(ShaderTransparentChicagoTransparentLayer, shader); //shader
-
     struct ShaderTransparentChicagoMapFlags {
         std::uint16_t unfiltered : 1;
         std::uint16_t alpha_replicate : 1;
@@ -116,7 +114,7 @@ namespace Invader::HEK {
         PAD(0x2);
         EndianType<float> lens_flare_spacing;
         TagDependency<EndianType> lens_flare; // lens_flare
-        TagReflexive<EndianType, ShaderTransparentChicagoTransparentLayer> extra_layers;
+        TagReflexive<EndianType, ShaderTransparentExtraLayer> extra_layers;
         TagReflexive<EndianType, ShaderTransparentChicagoMap> maps;
         EndianType<ShaderTransparentChicagoExtraFlags> extra_flags;
         PAD(0x8);
