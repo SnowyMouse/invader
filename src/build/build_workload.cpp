@@ -1012,7 +1012,7 @@ namespace Invader {
             char character = map_name[i];
             char lowercase = std::tolower(character);
             if(character != lowercase) {
-                eprintf("Scenario name %s exceeds contains a capital letter.\n", map_name.data());
+                eprintf("Scenario name %s contains a capital letter.\n", map_name.data());
                 throw InvalidScenarioNameException();
             }
         }
