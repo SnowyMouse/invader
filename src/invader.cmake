@@ -59,6 +59,7 @@ add_library(invader STATIC
     src/tag/hek/class/shader_model.cpp
     src/tag/hek/class/shader_transparent_chicago.cpp
     src/tag/hek/class/shader_transparent_chicago_extended.cpp
+    src/tag/hek/class/shader_transparent_generic.cpp
     src/tag/hek/class/shader_transparent_glass.cpp
     src/tag/hek/class/shader_transparent_meter.cpp
     src/tag/hek/class/shader_transparent_plasma.cpp

@@ -69,6 +69,7 @@
 #include "hek/class/shader_transparent_chicago.hpp"
 #include "hek/class/shader_transparent_chicago_extended.hpp"
 #include "hek/class/shader_transparent_glass.hpp"
+#include "hek/class/shader_transparent_generic.hpp"
 #include "hek/class/shader_transparent_meter.hpp"
 #include "hek/class/shader_transparent_plasma.hpp"
 #include "hek/class/shader_transparent_water.hpp"
@@ -285,6 +286,9 @@ namespace Invader {
                 break;
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
                 compile_shader_transparent_chicago_extended_tag(*this, data + sizeof(header), size - sizeof(header));
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+                compile_shader_transparent_generic_tag(*this, data + sizeof(header), size - sizeof(header));
                 break;
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
                 compile_shader_transparent_glass_tag(*this, data + sizeof(header), size - sizeof(header));
