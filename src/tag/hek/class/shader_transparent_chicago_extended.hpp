@@ -10,7 +10,7 @@
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentChicagoExtended : Shader<EndianType> {
-        std::int8_t numeric_counter_limit;
+        std::uint8_t numeric_counter_limit;
         ShaderTransparentChicagoFlags shader_transparent_chicago_extended_flags;
         EndianType<ShaderFirstMapType> first_map_type;
         EndianType<ShaderFramebufferBlendFunction> framebuffer_blend_function;
