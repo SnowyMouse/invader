@@ -4,7 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-// TODO: Use std::filesystem
 #ifdef _WIN32
 #include <windows.h>
 #define PATH_BUFFER_LENGTH MAX_PATH
@@ -16,81 +15,276 @@
 #include <memory>
 #include <cstdio>
 
-#include "hek/header.hpp"
-#include "hek/class/actor.hpp"
-#include "hek/class/actor_variant.hpp"
-#include "hek/class/antenna.hpp"
-#include "hek/class/biped.hpp"
-#include "hek/class/bitmap.hpp"
-#include "hek/class/camera_track.hpp"
-#include "hek/class/color_table.hpp"
-#include "hek/class/contrail.hpp"
-#include "hek/class/damage_effect.hpp"
-#include "hek/class/decal.hpp"
-#include "hek/class/detail_object_collection.hpp"
-#include "hek/class/device_control.hpp"
-#include "hek/class/device_light_fixture.hpp"
-#include "hek/class/device_machine.hpp"
-#include "hek/class/dialogue.hpp"
-#include "hek/class/effect.hpp"
-#include "hek/class/equipment.hpp"
-#include "hek/class/flag.hpp"
-#include "hek/class/fog.hpp"
-#include "hek/class/font.hpp"
-#include "hek/class/garbage.hpp"
-#include "hek/class/gbxmodel.hpp"
-#include "hek/class/globals.hpp"
-#include "hek/class/glow.hpp"
-#include "hek/class/grenade_hud_interface.hpp"
-#include "hek/class/hud_globals.hpp"
-#include "hek/class/hud_message_text.hpp"
-#include "hek/class/hud_number.hpp"
-#include "hek/class/input_device_defaults.hpp"
-#include "hek/class/item_collection.hpp"
-#include "hek/class/lens_flare.hpp"
-#include "hek/class/light.hpp"
-#include "hek/class/lightning.hpp"
-#include "hek/class/light_volume.hpp"
-#include "hek/class/material_effects.hpp"
-#include "hek/class/meter.hpp"
-#include "hek/class/model_animations.hpp"
-#include "hek/class/model_collision_geometry.hpp"
-#include "hek/class/multiplayer_scenario_description.hpp"
-#include "hek/class/object.hpp"
-#include "hek/class/particle.hpp"
-#include "hek/class/particle_system.hpp"
-#include "hek/class/point_physics.hpp"
-#include "hek/class/physics.hpp"
-#include "hek/class/projectile.hpp"
-#include "hek/class/scenario.hpp"
-#include "hek/class/scenario_structure_bsp.hpp"
-#include "hek/class/shader_environment.hpp"
-#include "hek/class/shader_model.hpp"
-#include "hek/class/shader_transparent_chicago.hpp"
-#include "hek/class/shader_transparent_chicago_extended.hpp"
-#include "hek/class/shader_transparent_glass.hpp"
-#include "hek/class/shader_transparent_generic.hpp"
-#include "hek/class/shader_transparent_meter.hpp"
-#include "hek/class/shader_transparent_plasma.hpp"
-#include "hek/class/shader_transparent_water.hpp"
-#include "hek/class/sky.hpp"
-#include "hek/class/sound.hpp"
-#include "hek/class/sound_environment.hpp"
-#include "hek/class/sound_looping.hpp"
-#include "hek/class/tag_collection.hpp"
-#include "hek/class/ui_widget_definition.hpp"
-#include "hek/class/unicode_string_list.hpp"
-#include "hek/class/unit_hud_interface.hpp"
-#include "hek/class/vehicle.hpp"
-#include "hek/class/weapon.hpp"
-#include "hek/class/weapon_hud_interface.hpp"
-#include "hek/class/weather_particle_system.hpp"
-#include "hek/class/wind.hpp"
-#include "hek/class/virtual_keyboard.hpp"
+#include "compiled_tag.hpp"
 
 #include "../error.hpp"
+#include "hek/header.hpp"
+#include "hek/class/globals.hpp"
+#include "hek/class/damage_effect.hpp"
+#include "hek/class/object.hpp"
+#include "hek/class/weapon.hpp"
 
-#include "compiled_tag.hpp"
+namespace Invader::HEK {
+    /**
+     * Compile the tag
+     * @param compiled  CompiledTag reference
+     * @param data      pointer to tag data
+     * @param size      size of the data
+     * @param class_int tag type to compile
+     * @param type      cache file type
+     * @param path      path of the tag
+     */
+    static inline void compile_tag_fn(CompiledTag &compiled, const std::byte *data, std::size_t size, TagClassInt class_int, CacheFileType type, const std::string &path) {
+        #define COMPILE_EXTERN_TAG_FN(function_name) {\
+            extern void function_name(CompiledTag &compiled, const std::byte *data, std::size_t size); \
+            function_name(compiled, data, size);\
+        }
+
+        switch(class_int) {
+            case TagClassInt::TAG_CLASS_DAMAGE_EFFECT: {
+                DamageEffectJasonJones jason_jones = DAMAGE_EFFECT_JASON_JONES_NONE;
+                if(type == CACHE_FILE_SINGLEPLAYER) {
+                    if(path == "weapons\\pistol\\bullet") {
+                        jason_jones = DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER;
+                    }
+                }
+                compile_damage_effect_tag(compiled, data, size, jason_jones);
+                break;
+            }
+            case TagClassInt::TAG_CLASS_ACTOR:
+                COMPILE_EXTERN_TAG_FN(compile_actor_tag);
+                break;
+            case TagClassInt::TAG_CLASS_ACTOR_VARIANT:
+                COMPILE_EXTERN_TAG_FN(compile_actor_variant_tag);
+                break;
+            case TagClassInt::TAG_CLASS_ANTENNA:
+                COMPILE_EXTERN_TAG_FN(compile_antenna_tag);
+                break;
+            case TagClassInt::TAG_CLASS_BIPED:
+                COMPILE_EXTERN_TAG_FN(compile_biped_tag);
+                break;
+            case TagClassInt::TAG_CLASS_BITMAP:
+                COMPILE_EXTERN_TAG_FN(compile_bitmap_tag);
+                break;
+            case TagClassInt::TAG_CLASS_CAMERA_TRACK:
+                COMPILE_EXTERN_TAG_FN(compile_camera_track_tag);
+                break;
+            case TagClassInt::TAG_CLASS_CONTRAIL:
+                COMPILE_EXTERN_TAG_FN(compile_contrail_tag);
+                break;
+            case TagClassInt::TAG_CLASS_COLOR_TABLE:
+                COMPILE_EXTERN_TAG_FN(compile_color_table_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DECAL:
+                COMPILE_EXTERN_TAG_FN(compile_decal_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION:
+                COMPILE_EXTERN_TAG_FN(compile_detail_object_collection_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DEVICE_CONTROL:
+                COMPILE_EXTERN_TAG_FN(compile_device_control_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE:
+                COMPILE_EXTERN_TAG_FN(compile_device_light_fixture_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DEVICE_MACHINE:
+                COMPILE_EXTERN_TAG_FN(compile_device_machine_tag);
+                break;
+            case TagClassInt::TAG_CLASS_DIALOGUE:
+                COMPILE_EXTERN_TAG_FN(compile_dialogue_tag);
+                break;
+            case TagClassInt::TAG_CLASS_EFFECT:
+                COMPILE_EXTERN_TAG_FN(compile_effect_tag);
+                break;
+            case TagClassInt::TAG_CLASS_EQUIPMENT:
+                COMPILE_EXTERN_TAG_FN(compile_equipment_tag);
+                break;
+            case TagClassInt::TAG_CLASS_FLAG:
+                COMPILE_EXTERN_TAG_FN(compile_flag_tag);
+                break;
+            case TagClassInt::TAG_CLASS_FOG:
+                COMPILE_EXTERN_TAG_FN(compile_fog_tag);
+                break;
+            case TagClassInt::TAG_CLASS_FONT:
+                COMPILE_EXTERN_TAG_FN(compile_font_tag);
+                break;
+            case TagClassInt::TAG_CLASS_GARBAGE:
+                COMPILE_EXTERN_TAG_FN(compile_garbage_tag);
+                break;
+            case TagClassInt::TAG_CLASS_GBXMODEL:
+                COMPILE_EXTERN_TAG_FN(compile_gbxmodel_tag);
+                break;
+            case TagClassInt::TAG_CLASS_GLOBALS:
+                compile_globals_tag(compiled, data, size, type);
+                break;
+            case TagClassInt::TAG_CLASS_GLOW:
+                COMPILE_EXTERN_TAG_FN(compile_glow_tag);
+                break;
+            case TagClassInt::TAG_CLASS_GRENADE_HUD_INTERFACE:
+                COMPILE_EXTERN_TAG_FN(compile_grenade_hud_interface_tag);
+                break;
+            case TagClassInt::TAG_CLASS_HUD_GLOBALS:
+                COMPILE_EXTERN_TAG_FN(compile_hud_globals_tag);
+                break;
+            case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                COMPILE_EXTERN_TAG_FN(compile_hud_message_text_tag);
+                break;
+            case TagClassInt::TAG_CLASS_HUD_NUMBER:
+                COMPILE_EXTERN_TAG_FN(compile_hud_number_tag);
+                break;
+            case TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS:
+                COMPILE_EXTERN_TAG_FN(compile_input_device_defaults_tag);
+                break;
+            case TagClassInt::TAG_CLASS_ITEM_COLLECTION:
+                COMPILE_EXTERN_TAG_FN(compile_item_collection_tag);
+                break;
+            case TagClassInt::TAG_CLASS_LENS_FLARE:
+                COMPILE_EXTERN_TAG_FN(compile_lens_flare_tag);
+                break;
+            case TagClassInt::TAG_CLASS_LIGHT:
+                COMPILE_EXTERN_TAG_FN(compile_light_tag);
+                break;
+            case TagClassInt::TAG_CLASS_LIGHTNING:
+                COMPILE_EXTERN_TAG_FN(compile_lightning_tag);
+                break;
+            case TagClassInt::TAG_CLASS_LIGHT_VOLUME:
+                COMPILE_EXTERN_TAG_FN(compile_light_volume_tag);
+                break;
+            case TagClassInt::TAG_CLASS_MATERIAL_EFFECTS:
+                COMPILE_EXTERN_TAG_FN(compile_material_effects_tag);
+                break;
+            case TagClassInt::TAG_CLASS_METER:
+                COMPILE_EXTERN_TAG_FN(compile_meter_tag);
+                break;
+            case TagClassInt::TAG_CLASS_MODEL_ANIMATIONS:
+                COMPILE_EXTERN_TAG_FN(compile_model_animations_tag);
+                break;
+            case TagClassInt::TAG_CLASS_MODEL_COLLISION_GEOMETRY:
+                COMPILE_EXTERN_TAG_FN(compile_model_collision_geometry_tag);
+                break;
+            case TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION:
+                COMPILE_EXTERN_TAG_FN(compile_multiplayer_scenario_description_tag);
+                break;
+            case TagClassInt::TAG_CLASS_PARTICLE:
+                COMPILE_EXTERN_TAG_FN(compile_particle_tag);
+                break;
+            case TagClassInt::TAG_CLASS_PARTICLE_SYSTEM:
+                COMPILE_EXTERN_TAG_FN(compile_particle_system_tag);
+                break;
+            case TagClassInt::TAG_CLASS_PLACEHOLDER:
+                compile_object_tag(compiled, data, size, ObjectType::OBJECT_TYPE_PLACEHOLDER);
+                break;
+            case TagClassInt::TAG_CLASS_PROJECTILE:
+                COMPILE_EXTERN_TAG_FN(compile_projectile_tag);
+                break;
+            case TagClassInt::TAG_CLASS_POINT_PHYSICS:
+                COMPILE_EXTERN_TAG_FN(compile_point_physics_tag);
+                break;
+            case TagClassInt::TAG_CLASS_PHYSICS:
+                COMPILE_EXTERN_TAG_FN(compile_physics_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SCENARIO:
+                COMPILE_EXTERN_TAG_FN(compile_scenario_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
+                COMPILE_EXTERN_TAG_FN(compile_scenario_structure_bsp_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SCENERY:
+                compile_object_tag(compiled, data, size, ObjectType::OBJECT_TYPE_SCENERY);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
+                COMPILE_EXTERN_TAG_FN(compile_shader_environment_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_MODEL:
+                COMPILE_EXTERN_TAG_FN(compile_shader_model_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_chicago_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_chicago_extended_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_generic_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_glass_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_meter_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_plasma_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+                COMPILE_EXTERN_TAG_FN(compile_shader_transparent_water_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SKY:
+                COMPILE_EXTERN_TAG_FN(compile_sky_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SOUND:
+                COMPILE_EXTERN_TAG_FN(compile_sound_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT:
+                COMPILE_EXTERN_TAG_FN(compile_sound_environment_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SOUND_LOOPING:
+                COMPILE_EXTERN_TAG_FN(compile_sound_looping_tag);
+                break;
+            case TagClassInt::TAG_CLASS_SOUND_SCENERY:
+                compile_object_tag(compiled, data, size, ObjectType::OBJECT_TYPE_SOUND_SCENERY);
+                break;
+            case TagClassInt::TAG_CLASS_STRING_LIST:
+                COMPILE_EXTERN_TAG_FN(compile_unicode_string_list_tag);
+                break;
+            case TagClassInt::TAG_CLASS_TAG_COLLECTION:
+                COMPILE_EXTERN_TAG_FN(compile_tag_collection_tag);
+                break;
+            case TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION:
+                COMPILE_EXTERN_TAG_FN(compile_tag_collection_tag);
+                break;
+            case TagClassInt::TAG_CLASS_UI_WIDGET_DEFINITION:
+                COMPILE_EXTERN_TAG_FN(compile_ui_widget_definition_tag);
+                break;
+            case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                COMPILE_EXTERN_TAG_FN(compile_unicode_string_list_tag);
+                break;
+            case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
+                COMPILE_EXTERN_TAG_FN(compile_unit_hud_interface_tag);
+                break;
+            case TagClassInt::TAG_CLASS_VEHICLE:
+                COMPILE_EXTERN_TAG_FN(compile_vehicle_tag);
+                break;
+            case TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD:
+                COMPILE_EXTERN_TAG_FN(compile_virtual_keyboard_tag);
+                break;
+            case TagClassInt::TAG_CLASS_WEAPON: {
+                WeaponJasonJones jason_jones = WEAPON_JASON_JONES_NONE;
+                if(type == CACHE_FILE_SINGLEPLAYER) {
+                    if(path == "weapons\\pistol\\pistol") {
+                        jason_jones = WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER;
+                    }
+                    else if(path == "weapons\\plasma rifle\\plasma rifle") {
+                        jason_jones = WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER;
+                    }
+                }
+                compile_weapon_tag(compiled, data, size, jason_jones);
+                break;
+            }
+            case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
+                COMPILE_EXTERN_TAG_FN(compile_weapon_hud_interface_tag);
+                break;
+            case TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM:
+                COMPILE_EXTERN_TAG_FN(compile_weather_particle_system_tag);
+                break;
+            case TagClassInt::TAG_CLASS_WIND:
+                COMPILE_EXTERN_TAG_FN(compile_wind_tag);
+                break;
+            default:
+                throw UnknownTagClassException();
+        }
+    }
+}
 
 namespace Invader {
     using namespace Invader::HEK;
@@ -116,256 +310,14 @@ namespace Invader {
         }
     }
 
-    CompiledTag::CompiledTag(const std::string &path, const std::byte *data, std::size_t size, CacheFileType type) : path(path) {
+    Invader::CompiledTag::CompiledTag(const std::string &path, const std::byte *data, std::size_t size, CacheFileType type) : path(path) {
         if(size < sizeof(HEK::TagFileHeader)) {
             throw OutOfBoundsException();
         }
 
         auto &header = *reinterpret_cast<const HEK::TagFileHeader *>(data);
         this->tag_class_int = header.tag_class_int;
-        switch(header.tag_class_int) {
-            case TagClassInt::TAG_CLASS_ACTOR:
-                compile_actor_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_ACTOR_VARIANT:
-                compile_actor_variant_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_ANTENNA:
-                compile_antenna_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_BIPED:
-                compile_biped_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_BITMAP:
-                compile_bitmap_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_CAMERA_TRACK:
-                compile_camera_track_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_CONTRAIL:
-                compile_contrail_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_COLOR_TABLE:
-                compile_color_table_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DAMAGE_EFFECT: {
-                DamageEffectJasonJones jason_jones = DAMAGE_EFFECT_JASON_JONES_NONE;
-                if(type == CACHE_FILE_SINGLEPLAYER) {
-                    if(path == "weapons\\pistol\\bullet") {
-                        jason_jones = DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER;
-                    }
-                }
-                compile_damage_effect_tag(*this, data + sizeof(header), size - sizeof(header), jason_jones);
-                break;
-            }
-            case TagClassInt::TAG_CLASS_DECAL:
-                compile_decal_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION:
-                compile_detail_object_collection_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DEVICE_CONTROL:
-                compile_device_control_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE:
-                compile_device_light_fixture_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DEVICE_MACHINE:
-                compile_device_machine_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_DIALOGUE:
-                compile_dialogue_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_EFFECT:
-                compile_effect_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_EQUIPMENT:
-                compile_equipment_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_FLAG:
-                compile_flag_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_FOG:
-                compile_fog_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_FONT:
-                compile_font_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_GARBAGE:
-                compile_garbage_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_GBXMODEL:
-                compile_gbxmodel_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_GLOBALS:
-                compile_globals_tag(*this, data + sizeof(header), size - sizeof(header), type);
-                break;
-            case TagClassInt::TAG_CLASS_GLOW:
-                compile_glow_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_GRENADE_HUD_INTERFACE:
-                compile_grenade_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_HUD_GLOBALS:
-                compile_hud_globals_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                compile_hud_message_text_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_HUD_NUMBER:
-                compile_hud_number_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS:
-                compile_input_device_defaults_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_ITEM_COLLECTION:
-                compile_item_collection_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_LENS_FLARE:
-                compile_lens_flare_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_LIGHT:
-                compile_light_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_LIGHTNING:
-                compile_lightning_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_LIGHT_VOLUME:
-                compile_light_volume_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_MATERIAL_EFFECTS:
-                compile_material_effects_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_METER:
-                compile_meter_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_MODEL_ANIMATIONS:
-                compile_model_animations_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_MODEL_COLLISION_GEOMETRY:
-                compile_model_collision_geometry_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION:
-                compile_multiplayer_scenario_description_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_PARTICLE:
-                compile_particle_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_PARTICLE_SYSTEM:
-                compile_particle_system_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_PLACEHOLDER:
-                compile_object_tag(*this, data + sizeof(header), size - sizeof(header), ObjectType::OBJECT_TYPE_PLACEHOLDER);
-                break;
-            case TagClassInt::TAG_CLASS_PROJECTILE:
-                compile_projectile_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_POINT_PHYSICS:
-                compile_point_physics_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_PHYSICS:
-                compile_physics_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SCENARIO:
-                compile_scenario_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
-                compile_scenario_structure_bsp_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SCENERY:
-                compile_object_tag(*this, data + sizeof(header), size - sizeof(header), ObjectType::OBJECT_TYPE_SCENERY);
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
-                compile_shader_environment_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_MODEL:
-                compile_shader_model_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
-                compile_shader_transparent_chicago_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
-                compile_shader_transparent_chicago_extended_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
-                compile_shader_transparent_generic_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
-                compile_shader_transparent_glass_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
-                compile_shader_transparent_meter_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
-                compile_shader_transparent_plasma_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
-                compile_shader_transparent_water_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SKY:
-                compile_sky_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SOUND:
-                compile_sound_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT:
-                compile_sound_environment_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SOUND_LOOPING:
-                compile_sound_looping_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_SOUND_SCENERY:
-                compile_object_tag(*this, data + sizeof(header), size - sizeof(header), ObjectType::OBJECT_TYPE_SOUND_SCENERY);
-                break;
-            case TagClassInt::TAG_CLASS_STRING_LIST:
-                compile_unicode_string_list_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_TAG_COLLECTION:
-                compile_tag_collection_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION:
-                compile_tag_collection_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_UI_WIDGET_DEFINITION:
-                compile_ui_widget_definition_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                compile_unicode_string_list_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
-                compile_unit_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_VEHICLE:
-                compile_vehicle_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD:
-                compile_virtual_keyboard_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_WEAPON: {
-                WeaponJasonJones jason_jones = WEAPON_JASON_JONES_NONE;
-                if(type == CACHE_FILE_SINGLEPLAYER) {
-                    if(path == "weapons\\pistol\\pistol") {
-                        jason_jones = WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER;
-                    }
-                    else if(path == "weapons\\plasma rifle\\plasma rifle") {
-                        jason_jones = WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER;
-                    }
-                }
-                compile_weapon_tag(*this, data + sizeof(header), size - sizeof(header), jason_jones);
-                break;
-            }
-            case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
-                compile_weapon_hud_interface_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM:
-                compile_weather_particle_system_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            case TagClassInt::TAG_CLASS_WIND:
-                compile_wind_tag(*this, data + sizeof(header), size - sizeof(header));
-                break;
-            default:
-                throw UnknownTagClassException();
-        }
+        compile_tag_fn(*this, data + sizeof(header), size - sizeof(header), this->tag_class_int, type, path);
         this->data_size = this->data.size();
         this->asset_data_size = this->asset_data.size();
     }
