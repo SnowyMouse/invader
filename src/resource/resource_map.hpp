@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__RESOURCE__RESOURCE_MAP_HPP
+#define INVADER__RESOURCE__RESOURCE_MAP_HPP
 
 #include <cstddef>
 #include <string>
@@ -25,3 +26,4 @@ namespace Invader {
      */
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size);
 }
+#endif

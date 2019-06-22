@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__BUILD__BUILD_WORKLOAD_HPP
+#define INVADER__BUILD__BUILD_WORKLOAD_HPP
 
 #include <vector>
 #include <string>
@@ -189,3 +190,4 @@ namespace Invader {
         bool point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point);
     };
 }
+#endif

@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__ITEM_HPP
+#define INVADER__TAG__HEK__CLASS__ITEM_HPP
 
 #include "object.hpp"
 
@@ -82,3 +83,4 @@ namespace Invader::HEK {
                               ADD_DEPENDENCY_ADJUST_SIZES(tag.detonating_effect);\
                               ADD_DEPENDENCY_ADJUST_SIZES(tag.detonation_effect);
 }
+#endif

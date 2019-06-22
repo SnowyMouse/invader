@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__VERSION_HPP
+#define INVADER__VERSION_HPP
 
 #define TOSTR2(str) # str
 #define TOSTR(str) TOSTR2(str)
@@ -26,3 +27,4 @@
                           std::cout << "Other links:"                                                                     << std::endl; \
                           std::cout << "    Invader source code            - https://github.com/Kavawuvi/Invader      "   << std::endl; \
                           std::cout << "    Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/"   << std::endl;
+#endif

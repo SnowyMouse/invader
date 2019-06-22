@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__RESOURCE__HEK__RESOURCE_MAP_HPP
+#define INVADER__RESOURCE__HEK__RESOURCE_MAP_HPP
 
 #include "../../hek/data_type.hpp"
 
@@ -50,3 +51,4 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ResourceMapResource) == 0xC);
 }
+#endif

@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__COMPILE_HPP
+#define INVADER__TAG__HEK__COMPILE_HPP
 
 #include <cstring>
 
@@ -204,3 +205,4 @@ namespace Invader {
      */
     void add_pointer(CompiledTag &compiled, std::size_t offset, std::size_t point_to);
 }
+#endif

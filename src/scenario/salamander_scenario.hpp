@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__SCENARIO__SALAMANDER_SCENARIO_HPP
+#define INVADER__SCENARIO__SALAMANDER_SCENARIO_HPP
 
 #include <vector>
 
@@ -62,3 +63,4 @@ namespace Invader {
      */
     std::vector<std::byte> scenario_to_tag(const std::vector<std::byte> &scenario_tag, const SalamanderScenario &scenario);
 }
+#endif

@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__ERROR_HPP
+#define INVADER__ERROR_HPP
 
 #include <exception>
 
@@ -135,3 +136,4 @@ namespace Invader {
         const char *what() const noexcept;
     };
 }
+#endif

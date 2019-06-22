@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__HUD_INTERFACE_TYPES_HPP
+#define INVADER__TAG__HEK__CLASS__HUD_INTERFACE_TYPES_HPP
 
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
@@ -201,3 +202,4 @@ namespace Invader::HEK {
                                                                 ADD_REFLEXIVE(reflexive.effectors); \
                                                            } ADD_REFLEXIVE_END
 }
+#endif

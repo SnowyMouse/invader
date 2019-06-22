@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_WATER_HPP
+#define INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_WATER_HPP
 
 #include "shader.hpp"
 
@@ -91,3 +92,4 @@ namespace Invader::HEK {
 
     void compile_shader_transparent_water_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
 }
+#endif

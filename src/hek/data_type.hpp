@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__HEK__DATA_TYPE_HPP
+#define INVADER__HEK__DATA_TYPE_HPP
 
 #include <string>
 #include <vector>
@@ -658,3 +659,4 @@ namespace Invader::HEK {
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Quaternion<NativeEndian> &rotation) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Matrix<NativeEndian> &rotation) noexcept;
 }
+#endif

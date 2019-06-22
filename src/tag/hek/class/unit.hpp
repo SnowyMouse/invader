@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__UNIT_HPP
+#define INVADER__TAG__HEK__CLASS__UNIT_HPP
 
 #include "object.hpp"
 
@@ -311,3 +312,4 @@ namespace Invader::HEK {
                                   ADD_DEPENDENCY_ADJUST_SIZES(reflexive.built_in_gunner); \
                               } ADD_REFLEXIVE_END
 }
+#endif

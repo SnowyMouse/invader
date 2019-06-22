@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__DEVICE_LIGHT_FIXTURE_HPP
+#define INVADER__TAG__HEK__CLASS__DEVICE_LIGHT_FIXTURE_HPP
 
 #include "device.hpp"
 
@@ -21,3 +22,4 @@ namespace Invader::HEK {
 
     void compile_device_light_fixture_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
 }
+#endif

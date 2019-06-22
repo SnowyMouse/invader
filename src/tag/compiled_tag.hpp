@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__COMPILED_TAG_HPP
+#define INVADER__TAG__COMPILED_TAG_HPP
 
 #include <memory>
 #include <string>
@@ -174,3 +175,4 @@ namespace Invader {
      */
     HEK::TagID tag_id_from_index(std::size_t index) noexcept;
 }
+#endif

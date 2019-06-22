@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__TAG__HEK__CLASS__ANTENNA_HPP
+#define INVADER__TAG__HEK__CLASS__ANTENNA_HPP
 
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
@@ -66,3 +67,4 @@ namespace Invader::HEK {
 
     void compile_antenna_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
 }
+#endif

@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__HEK__MAP_HPP
+#define INVADER__HEK__MAP_HPP
 
 #include <cstdint>
 #include "data_type.hpp"
@@ -90,3 +91,4 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileTagDataTag) == 0x20);
 }
+#endif

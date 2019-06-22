@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__MAP__TAG_HPP
+#define INVADER__MAP__TAG_HPP
 
 #include <vector>
 #include <string>
@@ -155,3 +156,4 @@ namespace Invader {
         Tag(Map &map);
     };
 }
+#endif

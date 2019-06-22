@@ -4,7 +4,8 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#pragma once
+#ifndef INVADER__HEK__ENDIAN_HPP
+#define INVADER__HEK__ENDIAN_HPP
 
 #include <cstring>
 #include <cstddef>
@@ -113,3 +114,4 @@ namespace Invader::HEK {
         #define BigEndian SwappedEndian
     #endif
 }
+#endif
