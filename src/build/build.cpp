@@ -63,7 +63,7 @@ int main(int argc, char * const argv[]) {
     };
 
     // Go through every argument
-    while((opt = getopt_long(argc, argv, "nqhiw:m:t:o:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "nqhiw:m:t:o:g:", options, &longindex)) != -1) {
         switch(opt) {
             case 'n':
                 no_indexed_tags = true;
