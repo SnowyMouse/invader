@@ -14,10 +14,13 @@ using clock_type = std::chrono::steady_clock;
 #include <vector>
 #include <cstring>
 
+#include <getopt.h>
+
 #include "build_workload.hpp"
 #include "../map/map.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
+#include "../eprintf.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -28,140 +31,104 @@ enum ReturnValue : int {
     RETURN_FAILED_EXCEPTION_ERROR = 5
 };
 
-int main(int argc, const char **argv) {
+int main(int argc, char * const argv[]) {
     using namespace Invader;
     using namespace Invader::HEK;
 
     // Default parameters
-    const char *maps = nullptr;
+    std::string maps = "maps";
     std::vector<std::string> tags;
-    const char *output = nullptr;
-    const char *scenario = nullptr;
-    const char *last_argument = nullptr;
-    const char *index = nullptr;
+    std::string output;
+    std::string scenario;
+    std::string last_argument;
+    std::string index;
+    std::string engine = "ce";
     bool no_indexed_tags = false;
     bool handled = true;
     bool quiet = false;
-    std::uint32_t engine = 0x261;
 
-    // Iterate through arguments
-    for(int i = 1; i < argc; i++) {
-        if(!handled) {
-            if(std::strcmp(last_argument, "--maps") == 0) {
-                maps = argv[i];
-            }
+    int opt;
+    int longindex = 0;
+    static struct option options[] = {
+        {"help",  no_argument, 0, 'h'},
+        {"no-indexed-tags", no_argument, 0, 'n' },
+        {"quiet", no_argument, 0, 'q' },
+        {"info", no_argument, 0, 'i' },
+        {"game-engine",  required_argument, 0, 'g' },
+        {"with-index",  required_argument, 0, 'w' },
+        {"maps", required_argument, 0, 'm' },
+        {"tags", required_argument, 0, 't' },
+        {"output", required_argument, 0, 'o' },
+        {0, 0, 0, 0 }
+    };
 
-            else if(std::strcmp(last_argument, "--output") == 0) {
-                output = argv[i];
-            }
-
-            else if(std::strcmp(last_argument, "--tags") == 0) {
-                tags.emplace_back(argv[i]);
-            }
-
-            else if(std::strcmp(last_argument, "--with-index") == 0) {
-                index = argv[i];
-            }
-
-            else if(std::strcmp(last_argument, "--game-engine") == 0) {
-                engine = std::strtol(argv[i], nullptr, 10);
-            }
-
-            handled = true;
-            continue;
-        }
-
-        if(handled) {
-            if(std::strcmp(argv[i], "--info") == 0 || std::strcmp(argv[i], "-i") == 0) {
-                #ifndef NO_OUTPUT
-                INVADER_SHOW_INFO
-                #endif
-                return RETURN_OK;
-            }
-
-            else if(std::strcmp(argv[i], "--maps") == 0 || std::strcmp(argv[i], "-m") == 0) {
-                last_argument = "--maps";
-                handled = false;
-            }
-
-            else if(std::strcmp(argv[i], "--tags") == 0 || std::strcmp(argv[i], "-t") == 0) {
-                last_argument = "--tags";
-                handled = false;
-            }
-
-            else if(std::strcmp(argv[i], "--output") == 0 || std::strcmp(argv[i], "-o") == 0) {
-                last_argument = "--output";
-                handled = false;
-            }
-
-            else if(std::strcmp(argv[i], "--with-index") == 0 || std::strcmp(argv[i], "-w") == 0) {
-                last_argument = "--with-index";
-                handled = false;
-            }
-
-            else if(std::strcmp(argv[i], "--game-engine") == 0 || std::strcmp(argv[i], "-g") == 0) {
-                last_argument = "--game-engine";
-                handled = false;
-            }
-
-            else if(std::strcmp(argv[i], "--no-indexed-tags") == 0 || std::strcmp(argv[i], "-n") == 0) {
+    // Go through every argument
+    while((opt = getopt_long(argc, argv, "nqhiw:m:t:o:", options, &longindex)) != -1) {
+        switch(opt) {
+            case 'n':
                 no_indexed_tags = true;
-                last_argument = "";
-            }
-
-            else if(std::strcmp(argv[i], "--quiet") == 0 || std::strcmp(argv[i], "-q") == 0) {
+                break;
+            case 'q':
                 quiet = true;
-                last_argument = "";
-            }
-
-            else if(last_argument && std::strcmp(last_argument, "--tags") == 0) {
-                tags.emplace_back(argv[i]);
-            }
-
-            else if(!scenario) {
-                scenario = argv[i];
-            }
-
-            else {
-                #ifndef NO_OUTPUT
-                std::cerr << "Unknown argument: " << argv[i] << "\n";
-                #endif
-                return RETURN_FAILED_UNKNOWN_ARGUMENT;
-            }
+                break;
+            case 'w':
+                index = std::string(optarg);
+                break;
+            case 't':
+                tags.emplace_back(optarg);
+                break;
+            case 'o':
+                output = std::string(optarg);
+                break;
+            case 'm':
+                maps = std::string(optarg);
+                break;
+            case 'g':
+                engine = std::string(optarg);
+                if(engine != "ce" && engine != "retail") {
+                    eprintf("%s: Invalid engine. Expected ce or retail.\n", argv[0]);
+                    return EXIT_FAILURE;
+                }
+                // Implicitly -n them
+                if(engine == "retail") {
+                    no_indexed_tags = true;
+                }
+                break;
+            case 'i':
+                INVADER_SHOW_INFO
+                return EXIT_FAILURE;
+            case 'h':
+                eprintf("Usage: %s [options] <scenario>\n", argv[0]);
+                eprintf("Options:");
+                eprintf("  --game-engine <id>                Specify the game engine. Valid engines are:\n");
+                eprintf("  -g                                ce (default), retail\n\n");
+                eprintf("  --info                            Show credits, source info, and other info.\n");
+                eprintf("  -i\n\n");
+                eprintf("  --maps <dir>                      Use a specific maps directory.\n");
+                eprintf("  -m\n\n");
+                eprintf("  --no-indexed-tags                 Do not index tags. This can speed up build\n");
+                eprintf("  -n                                time at the cost of a much larger file size.\n\n");
+                eprintf("  --output <file>                   Output to a specific file.\n");
+                eprintf("  -o\n\n");
+                eprintf("  --quiet                           Only output error messages.\n");
+                eprintf("  -q\n\n");
+                eprintf("  --tags [dir1] [dir2] [...]        Use the specified tags directory(s). Specify\n");
+                eprintf("  -t                                directories in order of precedence.\n\n");
+                eprintf("  --with-index <file>               Use an index file for the tags, ensuring the\n");
+                eprintf("  -w                                map's tags are ordered in the same way.\n");
+                return EXIT_FAILURE;
+            default:
+                return EXIT_FAILURE;
         }
     }
 
-    // If no scenario was given, show help
-    if(!scenario) {
-        #ifndef NO_OUTPUT
-        std::cout << "invader-build [scenario] [options]"                                               << std::endl;
-        std::cout << "Options:"                                                                         << std::endl;
-        std::cout << "  --game-engine <id>                Specify the game engine. By default, Custom"  << std::endl;
-        std::cout << "  -g                                Edition (609) is used."                       << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --info                            Show credits, source info, and other info."   << std::endl;
-        std::cout << "  -i"                                                                             << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --maps <dir>                      Use a specific maps directory."               << std::endl;
-        std::cout << "  -m"                                                                             << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --no-indexed-tags                 Do not index tags. This can speed up build"   << std::endl;
-        std::cout << "  -n                                time at the cost of a much larger file size." << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --output <file>                   Output to a specific file."                   << std::endl;
-        std::cout << "  -o"                                                                             << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --quiet                           Only output error messages."                  << std::endl;
-        std::cout << "  -q"                                                                             << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --tags [dir1] [dir2] [...]        Use the specified tags directory(s). Specify" << std::endl;
-        std::cout << "  -t                                directories in order of precedence."          << std::endl;
-        std::cout                                                                                       << std::endl;
-        std::cout << "  --with-index <file>               Use an index file for the tags, ensuring the" << std::endl;
-        std::cout << "  -w                                map's tags are ordered in the same way."      << std::endl;
-        std::cout                                                                                       << std::endl;
-        #endif
-        return RETURN_FAILED_NOTHING_TO_DO;
+    // Check if there's a scenario tag
+    if(optind != argc - 1) {
+        eprintf("%s: A scenario tag path is required. Use -h for help.\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    else {
+        scenario = argv[optind];
     }
 
     // If something is missing, let the user know
@@ -172,12 +139,9 @@ int main(int argc, const char **argv) {
         return RETURN_FAILED_UNHANDLED_ARGUMENT;
     }
 
-    // Use defaults
+    // By default, just use tags
     if(tags.size() == 0) {
         tags.emplace_back("tags");
-    }
-    if(!maps || *maps == 0) {
-        maps = "maps";
     }
 
     try {
@@ -188,7 +152,7 @@ int main(int argc, const char **argv) {
 
         // Get the index
         std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
-        if(index) {
+        if(index.size()) {
             std::fstream index_file(index, std::ios_base::in);
             std::size_t tag_count;
 
@@ -209,8 +173,11 @@ int main(int argc, const char **argv) {
             }
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario, tags, maps, with_index, !no_indexed_tags, !quiet);
-        reinterpret_cast<Invader::HEK::CacheFileHeader *>(map.data())->engine = static_cast<Invader::HEK::CacheFileEngine>(engine);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, !no_indexed_tags, !quiet);
+
+        if(engine == "retail") {
+            reinterpret_cast<Invader::HEK::CacheFileHeader *>(map.data())->engine = Invader::HEK::CACHE_FILE_RETAIL;
+        }
 
         char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
         #ifdef _WIN32
@@ -221,8 +188,8 @@ int main(int argc, const char **argv) {
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
-        if(!output) {
-            final_file = std::string(maps) + (maps[std::strlen(maps) - 1] != *separator ? separator : "") + map_name + ".map";
+        if(!output.size()) {
+            final_file = std::string(maps) + (maps[maps.size() - 1] != *separator ? separator : "") + map_name + ".map";
         }
         else {
             final_file = output;

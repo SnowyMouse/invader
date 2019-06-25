@@ -1,4 +1,4 @@
-# Indexer executable
+# CRC executable
 add_executable(invader-crc
     src/crc/crc.cpp
     src/crc/crc32.c
