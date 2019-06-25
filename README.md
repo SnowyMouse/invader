@@ -18,7 +18,7 @@ This program builds cache files.
 | `--no-indexed-tags` | `-n` | Do not index tags. This can speed up build time at the cost of a much larger file size. |
 | `--output <file>` | `-o` | Output to a specific file. |
 | `--quiet` | `-q` | Only output error messages. |
-| `--tags [dir] [...]` | `-t` | Use the specified tags directory(s). Specify directories in order of precedence. |
+| `--tags <dir>` | `-t` | Set tags directory. Use multiple times to add tags directories ordered by precedence. |
 | `--with-index <file>` | `-w` | Use an index file for the tags, ensuring the map's tags are ordered in the same way. |
 
 ### invader-crc

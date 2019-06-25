@@ -99,23 +99,23 @@ int main(int argc, char * const argv[]) {
                 return EXIT_FAILURE;
             case 'h':
                 eprintf("Usage: %s [options] <scenario>\n", argv[0]);
-                eprintf("Options:");
-                eprintf("  --game-engine <id>                Specify the game engine. Valid engines are:\n");
-                eprintf("  -g                                ce (default), retail\n\n");
-                eprintf("  --info                            Show credits, source info, and other info.\n");
+                eprintf("Options:\n");
+                eprintf("  --game-engine <id>   Specify the game engine. Valid engines are: ce (default),\n");
+                eprintf("  -g                   retail\n\n");
+                eprintf("  --info               Show credits, source info, and other info.\n");
                 eprintf("  -i\n\n");
-                eprintf("  --maps <dir>                      Use a specific maps directory.\n");
+                eprintf("  --maps <dir>         Use a specific maps directory.\n");
                 eprintf("  -m\n\n");
-                eprintf("  --no-indexed-tags                 Do not index tags. This can speed up build\n");
-                eprintf("  -n                                time at the cost of a much larger file size.\n\n");
-                eprintf("  --output <file>                   Output to a specific file.\n");
+                eprintf("  --no-indexed-tags    Do not index tags. This can speed up build time at the\n");
+                eprintf("  -n                   cost of a much larger file size.\n\n");
+                eprintf("  --output <file>      Output to a specific file.\n");
                 eprintf("  -o\n\n");
-                eprintf("  --quiet                           Only output error messages.\n");
+                eprintf("  --quiet              Only output error messages.\n");
                 eprintf("  -q\n\n");
-                eprintf("  --tags [dir1] [dir2] [...]        Use the specified tags directory(s). Specify\n");
-                eprintf("  -t                                directories in order of precedence.\n\n");
-                eprintf("  --with-index <file>               Use an index file for the tags, ensuring the\n");
-                eprintf("  -w                                map's tags are ordered in the same way.\n");
+                eprintf("  --tags <dir>         Use the specified tags directory. Use multiple times to\n");
+                eprintf("  -t                   add more directories, ordered by precedence.\n\n");
+                eprintf("  --with-index <file>  Use an index file for the tags, ensuring the map's tags\n");
+                eprintf("  -w                   are ordered in the same way.\n");
                 return EXIT_FAILURE;
             default:
                 return EXIT_FAILURE;
