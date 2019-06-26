@@ -23,13 +23,13 @@ namespace Invader::HEK {
         /** 8-bit alpha */
         BITMAP_FORMAT_A8,
 
-        /** 8-bit grayscale */
+        /** 8-bit luminosity */
         BITMAP_FORMAT_Y8,
 
-        /** 8-bit alpha & grayscale (grayscale = alpha) */
+        /** 8-bit alpha & luminosity (luminosity = alpha) */
         BITMAP_FORMAT_AY8,
 
-        /** 8-bit alpha, 8-bit grayscale */
+        /** 8-bit alpha, 8-bit luminosity */
         BITMAP_FORMAT_A8Y8,
 
         /** Unused */
