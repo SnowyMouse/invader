@@ -8,6 +8,7 @@ add_library(invader STATIC
     src/map/tag.cpp
 
     src/tag/hek/compile.cpp
+    src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
     src/tag/hek/class/actor_variant.cpp
     src/tag/hek/class/antenna.cpp
