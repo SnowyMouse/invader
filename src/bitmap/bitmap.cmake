@@ -12,7 +12,7 @@ if(${ImageMagick_FOUND})
         PUBLIC ${ImageMagick_Magick++_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap ${ImageMagick_LIBRARIES})
+    target_link_libraries(invader-bitmap invader ${ImageMagick_LIBRARIES})
 
     target_compile_definitions(invader-bitmap
         PUBLIC MAGICKCORE_QUANTUM_DEPTH=8
