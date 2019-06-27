@@ -4,6 +4,7 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
+#include <cstring>
 #include "header.hpp"
 
 namespace Invader::HEK {
@@ -81,6 +82,10 @@ namespace Invader::HEK {
     }
 
     TagFileHeader::TagFileHeader(TagClassInt tag_class_int) {
+        // Clear everything
+        std::memset(this, 0, sizeof(*this));
+
+        // Set values
         this->tag_class_int = tag_class_int;
         this->blam = BLAM;
         this->header_size = sizeof(*this);
