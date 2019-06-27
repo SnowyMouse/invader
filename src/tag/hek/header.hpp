@@ -16,7 +16,9 @@ namespace Invader::HEK {
      * This header takes up the first 64 bytes of a Halo Editing Kit tag file.
      */
     struct TagFileHeader {
-        static const std::uint32_t BLAM = 0x626C616D;
+        enum : std::uint32_t {
+            BLAM = 0x626C616D
+        };
 
         PAD(0x24);
 
