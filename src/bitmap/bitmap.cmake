@@ -15,7 +15,7 @@ if(${ImageMagick_FOUND})
     target_link_libraries(invader-bitmap ${ImageMagick_LIBRARIES})
 
     target_compile_definitions(invader-bitmap
-        PUBLIC MAGICKCORE_QUANTUM_DEPTH=16
+        PUBLIC MAGICKCORE_QUANTUM_DEPTH=8
         PUBLIC MAGICKCORE_HDRI_ENABLE=0
     )
 
