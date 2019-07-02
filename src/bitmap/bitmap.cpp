@@ -8,6 +8,8 @@
 
 #endif
 
+#include <filesystem>
+
 #include "../eprintf.hpp"
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
@@ -94,22 +96,13 @@ int main(int argc, char *argv[]) {
         eprintf("%s: Expected a bitmap tag path. Use -h for help.\n", argv[0]);
         return EXIT_FAILURE;
     }
-    const char *bitmap_tag = argv[argc - 1];
-
-    // Get the data and tag paths to have a directory separator at the end
-    std::string data_path = data;
-    if(data_path[data_path.length()] != '/') {
-        data_path += "/";
-    }
-    std::string tags_path = tags;
-    if(tags_path[tags_path.length()] != '/') {
-        tags_path += "/";
-    }
+    std::string bitmap_tag = argv[argc - 1];
+    std::filesystem::path data_path = data;
 
     InitializeMagick(*argv);
 
     // Load the bitmap file
-    Image bitmap_file(bitmap_tag);
+    Image bitmap_file(data_path / (bitmap_tag + "." + input_format));
 
     // Make a blob
     PixelData bitmap_file_blob(bitmap_file, "BGRA", StorageType::CharPixel);
@@ -210,10 +203,26 @@ int main(int argc, char *argv[]) {
     // Add the struct in
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
 
+    // Get the path
+    std::filesystem::path tags_path(tags);
+    auto tag_path = tags_path / bitmap_tag;
+
     // Write it all
-    std::FILE *f2 = std::fopen("../haloce/tags/test.bitmap", "wb");
-    std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, f2);
-    std::fclose(f2);
+    std::filesystem::create_directories(tag_path.parent_path());
+    auto final_path = std::string(tag_path) + ".bitmap";
+    std::FILE *tag_write = std::fopen(final_path.data(), "wb");
+    if(!tag_write) {
+        eprintf("Error: Failed to open %s for writing.\n", final_path.data());;
+        return EXIT_FAILURE;
+    }
+
+    if(std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, tag_write) != 1) {
+        eprintf("Error: Failed to write to %s.\n", final_path.data());
+        std::fclose(tag_write);
+        return EXIT_FAILURE;
+    }
+
+    std::fclose(tag_write);
 
     return 0;
 }
