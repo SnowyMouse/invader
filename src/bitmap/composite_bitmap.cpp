@@ -71,12 +71,23 @@ namespace Invader {
             return -1;
         }
 
-        // Make sure the right and bottom borders are blue. We don't need to check the top or left because, if there was something there, this would have errored then.
+        // Make sure the left, right, and bottom borders are blue. We don't need to check the top because, if there was something there, this would have errored then.
         if(right < width) {
             // Check along the right edge
             for(std::size_t check_y = y; check_y < bitmap_height; check_y++) {
                 if(!GET_PIXEL(right, check_y).solid_blue()) {
-                    eprintf("Error: Bitmap does not have a blue border on the right edge (x=%zu, y=%zu)\n", right, check_y);
+                    eprintf("Error: Bitmap does not have a blue border on the right edge\n");
+                    return -1;
+                }
+            }
+        }
+
+        if(x > 0) {
+            // Check the left edge
+            std::size_t left = x - 1;
+            for(std::size_t check_y = y; check_y < bitmap_height; check_y++) {
+                if(!GET_PIXEL(left, check_y).solid_blue()) {
+                    eprintf("Error: Bitmap does not have a blue border on the left edge\n");
                     return -1;
                 }
             }
