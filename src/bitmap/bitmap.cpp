@@ -1,13 +1,6 @@
 #include <Magick++.h>
 #include <getopt.h>
 #include <zlib.h>
-
-#ifdef __linux__
-#include <sys/stat.h>
-#else
-
-#endif
-
 #include <filesystem>
 
 #include "../eprintf.hpp"
@@ -27,9 +20,6 @@ int main(int argc, char *argv[]) {
     // Tags directory
     const char *tags = "tags/";
 
-    // Should we use LZMA?
-    bool use_lzma = false;
-
     // File format
     const char *input_format = "tif";
 
@@ -38,7 +28,6 @@ int main(int argc, char *argv[]) {
     static struct option options[] = {
         {"about",  no_argument, 0, 'h'},
         {"help",  no_argument, 0, 'a'},
-        {"lzma-tiff", no_argument, 0, 'L' },
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'f' },
@@ -47,7 +36,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ahLd:t:i:f:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "ahd:t:i:f:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -55,10 +44,6 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 tags = optarg;
-                break;
-
-            case 'L':
-                use_lzma = true;
                 break;
 
             case 'i':
@@ -84,9 +69,6 @@ int main(int argc, char *argv[]) {
                 eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
                 eprintf("    --input-type,-i <type>     Input file format. Can be extension or \"tag\".\n");
                 eprintf("                               Default: tif\n");
-                eprintf("    --lzma-tiff,-L <type>      Compress TIFF data using LZMA. This may not work\n");
-                eprintf("                               with the original HEK, but it results in much\n");
-                eprintf("                               smaller .bitmap tag files without quality loss.\n");
                 return EXIT_FAILURE;
         }
     }
