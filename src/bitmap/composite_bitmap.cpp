@@ -26,12 +26,58 @@ namespace Invader {
         return true;
     }
 
+    #define GET_PIXEL(x,y) pixels[width * y + x]
+
+    /**
+     * Recursively calculate the number of mipmaps
+     * @param  pixels        pointer to pixels in image
+     * @param  height        height of image
+     * @param  width         width of image
+     * @param  x             x position of the image
+     * @param  y             y position of the image
+     * @param  bitmap_width  width of the main bitmap found
+     * @param  bitmap_height height of the main bitmap found
+     * @return               -1 if no image was found, 0 if only a main image was found, 1+ if mipmaps are present
+     */
+    static int mipmaps_at_position(const CompositeBitmapPixel *pixels, std::size_t height, std::size_t width, std::size_t x, std::size_t y, std::size_t &bitmap_width, std::size_t &bitmap_height) {
+        std::size_t right;
+        for(right = x + 1; right < width; right++) {
+            if(GET_PIXEL(right, y).solid_blue()) {
+                break;
+            }
+        }
+
+        // Figure out what the width of this bitmap is
+        bitmap_width = right - x;
+        if(!is_power_of_two(bitmap_width)) {
+            eprintf("Error: Non power-of-two width: %zu\n", bitmap_width);
+            return -1;
+        }
+
+        // Now figure out the height
+        right--;
+        std::size_t bottom;
+        for(bottom = y + 1; bottom < height; bottom++) {
+            if(GET_PIXEL(right, bottom).solid_blue()) {
+                break;
+            }
+        }
+
+        // Check if it's a power of two
+        bitmap_height = bottom - y;
+        if(!is_power_of_two(bitmap_height)) {
+            eprintf("Error: Non power-of-two height %zu\n", bitmap_height);
+            return -1;
+        }
+
+        return 0;
+    }
+
     CompositeBitmap::CompositeBitmap(const CompositeBitmapPixel *pixels, std::size_t height, std::size_t width) {
         std::vector<Rectangle> ignore_rectangles;
 
         for(std::size_t y = 0; y < height; y++) {
             for(std::size_t x = 0; x < width; x++) {
-                #define GET_PIXEL(x,y) pixels[width * y + x]
                 const auto &pixel = GET_PIXEL(x,y);
 
                 // Check if it's solid blue
@@ -52,40 +98,16 @@ namespace Invader {
                     continue;
                 }
 
-                // Let's see if we can figure out the width
-                std::size_t right;
-                for(right = x + 1; right < width; right++) {
-                    if(GET_PIXEL(right, y).solid_blue()) {
-                        break;
-                    }
-                }
-
-                // Figure out what the width of this bitmap is
-                std::size_t bitmap_width = right - x;
-                if(!is_power_of_two(bitmap_width)) {
-                    eprintf("Error: Non power-of-two width: %zu\n", bitmap_width);
+                // Figure out the number if mipmaps
+                std::size_t bitmap_width = 0;
+                std::size_t bitmap_height = 0;
+                int mipmap_count = mipmaps_at_position(pixels, height, width, x, y, bitmap_width, bitmap_height);
+                if(mipmap_count < 0) {
                     this->bitmaps.clear();
                     return;
                 }
 
-                // Now figure out the height
-                right--;
-                std::size_t bottom;
-                for(bottom = y + 1; bottom < height; bottom++) {
-                    if(GET_PIXEL(right, bottom).solid_blue()) {
-                        break;
-                    }
-                }
-
-                // Check if it's a power of two
-                std::size_t bitmap_height = bottom - y;
-                if(!is_power_of_two(bitmap_height)) {
-                    eprintf("Error: Non power-of-two height %zu\n", bitmap_height);
-                    this->bitmaps.clear();
-                    return;
-                }
-
-                // Add it
+                // Add it to the list
                 this->bitmaps.emplace_back(pixels, width, x, y, bitmap_width, bitmap_height);
                 ignore_rectangles.emplace_back(Rectangle { x, x + bitmap_width, y, y + bitmap_height });
 
