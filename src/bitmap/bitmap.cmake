@@ -1,5 +1,5 @@
 # Check if we can build invader-bitmap
-if(${TIFF_FOUND} AND ${ZLIB_FOUND})
+if(${TIFF_FOUND} AND ${ZLIB_FOUND} AND ${PNG_FOUND})
     # Bitmap executable
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
@@ -7,10 +7,10 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
     )
 
     target_include_directories(invader-bitmap
-        PUBLIC ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}
+        PUBLIC ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES})
+    target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES} ${PNG_LIBRARIES})
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(invader-bitmap

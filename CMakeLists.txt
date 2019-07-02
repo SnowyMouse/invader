@@ -29,6 +29,7 @@ endif()
 
 # Find some packages
 find_package(TIFF)
+find_package(PNG)
 find_package(ZLIB)
 
 include(src/invader.cmake)
