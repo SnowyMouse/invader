@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     InitializeMagick(*argv);
 
     // Load the bitmap file
-    Image bitmap_file(data_path / (bitmap_tag + "." + input_format));
+    Image bitmap_file((data_path / (bitmap_tag + "." + input_format)).string());
 
     // Make a blob
     PixelData bitmap_file_blob(bitmap_file, "BGRA", StorageType::CharPixel);
@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
 
     // Write it all
     std::filesystem::create_directories(tag_path.parent_path());
-    auto final_path = std::string(tag_path) + ".bitmap";
+    auto final_path = tag_path.string() + ".bitmap";
     std::FILE *tag_write = std::fopen(final_path.data(), "wb");
     if(!tag_write) {
         eprintf("Error: Failed to open %s for writing.\n", final_path.data());;
