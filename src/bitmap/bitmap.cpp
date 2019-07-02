@@ -68,8 +68,8 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
-                eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
-                eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
+                //eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
+                //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
                 eprintf("    --input-type,-i <type>     Input format. Can be: tif or png. Default: tif\n");
                 return EXIT_FAILURE;
         }
