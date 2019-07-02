@@ -62,6 +62,7 @@ namespace Invader {
                 break;
             }
         }
+        right++;
 
         // Check if it's a power of two
         bitmap_height = bottom - y;
@@ -70,6 +71,54 @@ namespace Invader {
             return -1;
         }
 
+        // Make sure the right and bottom borders are blue. We don't need to check the top or left because, if there was something there, this would have errored then.
+        if(right < width) {
+            // Check along the right edge
+            for(std::size_t check_y = y; check_y < bitmap_height; check_y++) {
+                if(!GET_PIXEL(right, check_y).solid_blue()) {
+                    eprintf("Error: Bitmap does not have a blue border on the right edge (x=%zu, y=%zu)\n", right, check_y);
+                    return -1;
+                }
+            }
+        }
+
+        if(bottom < height) {
+            // Check along the right half of the bottom edge. If there is anything here, it is wrong
+            for(std::size_t check_x = x + bitmap_width / 2; check_x < right; check_x++) {
+                if(!GET_PIXEL(check_x, bottom).solid_blue()) {
+                    eprintf("Error: Bitmap does not have a blue border on the bottom edge\n");
+                    return -1;
+                }
+            }
+
+            // Check along the left half of the bottom edge. If there is anything here, then every pixel must not be blue. Otherwise, every pixel must be blue.
+            bool mipmap_not_preset = GET_PIXEL(x, bottom).solid_blue();
+            for(std::size_t check_x = x; check_x < bitmap_width / 2; check_x++) {
+                if(GET_PIXEL(check_x, bottom).solid_blue() != mipmap_not_preset) {
+                    eprintf("Error: Bitmap does not have a blue border on the bottom edge or bad mipmap\n");
+                    return -1;
+                }
+            }
+
+            // If there are mipmaps here, check for them
+            if(!mipmap_not_preset) {
+                std::size_t mip_width;
+                std::size_t mip_height;
+                int mips_here = mipmaps_at_position(pixels, height, width, x, bottom, mip_width, mip_height);
+                if(mips_here == -1) {
+                    return -1;
+                }
+                else if(mip_height != bitmap_height / 2) {
+                    eprintf("Error: Bad mipmap. Mipmaps must be half the height of the previous mipmap.\n");
+                    return -1;
+                }
+                else {
+                    return 1 + mips_here;
+                }
+            }
+        }
+
+        // No mipmaps? No problem
         return 0;
     }
 
@@ -109,7 +158,17 @@ namespace Invader {
 
                 // Add it to the list
                 this->bitmaps.emplace_back(pixels, width, x, y, bitmap_width, bitmap_height);
-                ignore_rectangles.emplace_back(Rectangle { x, x + bitmap_width, y, y + bitmap_height });
+
+                // Ignore images
+                std::size_t mip_y = y;
+                std::size_t mip_width = bitmap_width;
+                std::size_t mip_height = bitmap_height;
+                for(int i = 0; i <= mipmap_count; i++) {
+                    ignore_rectangles.emplace_back(Rectangle { x, x + mip_width, mip_y, mip_y + mip_height });
+                    mip_y += mip_height;
+                    mip_width /= 2;
+                    mip_height /= 2;
+                }
 
                 x += bitmap_width;
             }
