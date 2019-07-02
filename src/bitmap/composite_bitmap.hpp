@@ -100,8 +100,6 @@ namespace Invader {
                 mip_height /= 2;
                 mip_width /= 2;
             }
-
-
         }
 
     private:
@@ -158,6 +156,6 @@ namespace Invader {
          */
         std::vector<CompositeBitmapBitmap> bitmaps;
     };
-};
+}
 
 #endif
