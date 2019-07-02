@@ -27,8 +27,14 @@ if(NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
 endif()
 
+# Find some packages
+find_package(TIFF)
+find_package(PNG)
+find_package(ZLIB)
+
 include(src/invader.cmake)
 include(src/build/build.cmake)
 include(src/crc/crc.cmake)
 include(src/indexer/indexer.cmake)
 # include(src/scenario/scenario.cmake)
+include(src/bitmap/bitmap.cmake)
