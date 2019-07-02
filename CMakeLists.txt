@@ -27,6 +27,10 @@ if(NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
 endif()
 
+# Find some packages
+find_package(ImageMagick COMPONENTS Magick++)
+find_package(ZLIB)
+
 include(src/invader.cmake)
 include(src/build/build.cmake)
 include(src/crc/crc.cmake)

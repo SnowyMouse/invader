@@ -1,7 +1,4 @@
-# Find ImageMagick
-find_package(ImageMagick COMPONENTS Magick++)
-find_package(ZLIB)
-
+# Add this if ImageMagick and zlib exist
 if(${ImageMagick_FOUND})
     if(${ZLIB_FOUND})
         # Bitmap executable
