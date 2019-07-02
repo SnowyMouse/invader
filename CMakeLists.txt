@@ -28,7 +28,7 @@ if(NO_OUTPUT)
 endif()
 
 # Find some packages
-find_package(ImageMagick COMPONENTS Magick++)
+find_package(TIFF)
 find_package(ZLIB)
 
 include(src/invader.cmake)

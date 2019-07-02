@@ -1,7 +1,7 @@
-#include <Magick++.h>
 #include <getopt.h>
 #include <zlib.h>
 #include <filesystem>
+#include <tiffio.h>
 
 #include "../eprintf.hpp"
 #include "../version.hpp"
@@ -9,7 +9,6 @@
 #include "composite_bitmap.hpp"
 
 int main(int argc, char *argv[]) {
-    using namespace Magick;
     using namespace Invader::HEK;
     using namespace Invader;
     int opt;
@@ -19,9 +18,6 @@ int main(int argc, char *argv[]) {
 
     // Tags directory
     const char *tags = "tags/";
-
-    // File format
-    const char *input_format = "tif";
 
     // Long options
     int longindex = 0;
@@ -36,7 +32,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ahd:t:i:f:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "ahd:t:f:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -44,10 +40,6 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 tags = optarg;
-                break;
-
-            case 'i':
-                input_format = optarg;
                 break;
 
             case 'a':
@@ -67,8 +59,6 @@ int main(int argc, char *argv[]) {
                 eprintf("Bitmap options:\n");
                 eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
                 eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
-                eprintf("    --input-type,-i <type>     Input file format. Can be extension or \"tag\".\n");
-                eprintf("                               Default: tif\n");
                 return EXIT_FAILURE;
         }
     }
@@ -81,16 +71,32 @@ int main(int argc, char *argv[]) {
     std::string bitmap_tag = argv[argc - 1];
     std::filesystem::path data_path = data;
 
-    InitializeMagick(*argv);
-
     // Load the bitmap file
-    Image bitmap_file((data_path / (bitmap_tag + "." + input_format)).string());
+    std::string image_path = (data_path / (bitmap_tag + ".tif")).string();
+    TIFF *image_tiff = TIFFOpen(image_path.data(), "r");
+    if(!image_tiff) {
+        eprintf("Cannot open %s\n", image_path.data());
+        return EXIT_FAILURE;
+    }
+    std::uint32_t image_width, image_height;
+    TIFFGetField(image_tiff, TIFFTAG_IMAGEWIDTH, &image_width);
+    TIFFGetField(image_tiff, TIFFTAG_IMAGELENGTH, &image_height);
 
-    // Make a blob
-    PixelData bitmap_file_blob(bitmap_file, "BGRA", StorageType::CharPixel);
+    // Read it all
+    std::size_t image_size = image_width * image_height * sizeof(CompositeBitmapPixel);
+    CompositeBitmapPixel *image_pixels = reinterpret_cast<CompositeBitmapPixel *>(std::calloc(image_size, 1));
+    TIFFReadRGBAImageOriented(image_tiff, image_width, image_height, reinterpret_cast<std::uint32_t *>(image_pixels), ORIENTATION_TOPLEFT);
+
+    // Swap alpha and green channels
+    for(std::size_t i = 0; i < image_size / 4; i++) {
+        CompositeBitmapPixel swapped = image_pixels[i];
+        swapped.green = image_pixels[i].alpha;
+        swapped.alpha = image_pixels[i].green;
+        image_pixels[i] = swapped;
+    }
 
     // Generate the thing
-    CompositeBitmap bitmaps(reinterpret_cast<const CompositeBitmapPixel *>(bitmap_file_blob.data()), bitmap_file.columns(), bitmap_file.rows());
+    CompositeBitmap bitmaps(image_pixels, image_width, image_height);
     auto &bitmaps_array = bitmaps.get_bitmaps();
     if(bitmaps_array.size() == 0) {
         eprintf("No bitmaps found in input.\n");
@@ -108,9 +114,9 @@ int main(int argc, char *argv[]) {
         deflate_stream.zalloc = Z_NULL;
         deflate_stream.zfree = Z_NULL;
         deflate_stream.opaque = Z_NULL;
-        deflate_stream.avail_in = bitmap_file_blob.length();
-        deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(bitmap_file_blob.data()));
-        std::vector<std::byte> compressed_data(bitmap_file_blob.length() * 4);
+        deflate_stream.avail_in = image_size;
+        deflate_stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(image_pixels));
+        std::vector<std::byte> compressed_data(image_size * 4);
         deflate_stream.avail_out = compressed_data.size();
         deflate_stream.next_out = reinterpret_cast<Bytef *>(compressed_data.data());
 
@@ -120,12 +126,12 @@ int main(int argc, char *argv[]) {
         deflateEnd(&deflate_stream);
 
         // Set fields
-        new_tag_header.color_plate_width = bitmap_file.columns();
-        new_tag_header.color_plate_height = bitmap_file.rows();
+        new_tag_header.color_plate_width = image_width;
+        new_tag_header.color_plate_height = image_height;
 
         // Set decompressed size
         BigEndian<std::uint32_t> decompressed_size;
-        decompressed_size = static_cast<std::uint32_t>(bitmap_file_blob.length());
+        decompressed_size = static_cast<std::uint32_t>(image_size);
 
         // Set compressed size
         new_tag_header.compressed_color_plate_data.size = sizeof(decompressed_size) + deflate_stream.total_out;
