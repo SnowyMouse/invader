@@ -50,6 +50,14 @@ namespace Invader {
         }
 
         /**
+         * Get the number of mipmaps
+         * @return number of mipmaps
+         */
+        std::size_t get_mipmap_count() const {
+            return this->mipmap_count;
+        }
+
+        /**
          * Get the pixel given an x and y coordinate
          * @param x x coordinate (column)
          * @param y y coordinate (row)
@@ -75,13 +83,25 @@ namespace Invader {
          * @param y             y position of the bitmap
          * @param width         width of the bitmap
          * @param height        height of the bitmap
+         * @param mipmap_count  the number of mipmaps
          */
-        CompositeBitmapBitmap(const CompositeBitmapPixel *source_pixels, std::size_t source_width, std::size_t x, std::size_t y, std::size_t width, std::size_t height) : height(height), width(width) {
-            // Read line by line
-            for(std::size_t y_read = y; y_read < y + height; y_read++) {
-                auto *first_pixel = source_pixels + x + y_read * source_width;
-                this->pixels.insert(this->pixels.end(), first_pixel, first_pixel + width);
+        CompositeBitmapBitmap(const CompositeBitmapPixel *source_pixels, std::size_t source_width, std::size_t x, std::size_t y, std::size_t width, std::size_t height, std::size_t mipmap_count) : height(height), width(width), mipmap_count(mipmap_count) {
+            std::size_t mip_height = height;
+            std::size_t mip_y = y;
+            std::size_t mip_width = width;
+            for(std::size_t m = 0; m <= mipmap_count; m++) {
+                // Read line by line
+                for(std::size_t y_read = mip_y; y_read < mip_y + mip_height; y_read++) {
+                    auto *first_pixel = source_pixels + x + y_read * source_width;
+                    this->pixels.insert(this->pixels.end(), first_pixel, first_pixel + mip_width);
+                }
+
+                mip_y += mip_height;
+                mip_height /= 2;
+                mip_width /= 2;
             }
+
+
         }
 
     private:
@@ -99,6 +119,11 @@ namespace Invader {
          * Width of the bitmap
          */
         std::size_t width;
+
+        /**
+         * Number of mipmaps
+         */
+        std::size_t mipmap_count;
     };
 
     class CompositeBitmap {

@@ -157,7 +157,7 @@ namespace Invader {
                 }
 
                 // Add it to the list
-                this->bitmaps.emplace_back(pixels, width, x, y, bitmap_width, bitmap_height);
+                this->bitmaps.emplace_back(pixels, width, x, y, bitmap_width, bitmap_height, mipmap_count);
 
                 // Ignore images
                 std::size_t mip_y = y;
