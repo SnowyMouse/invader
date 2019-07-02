@@ -73,7 +73,7 @@ namespace Invader {
         return 0;
     }
 
-    CompositeBitmap::CompositeBitmap(const CompositeBitmapPixel *pixels, std::size_t height, std::size_t width) {
+    CompositeBitmap::CompositeBitmap(const CompositeBitmapPixel *pixels, std::size_t width, std::size_t height) {
         std::vector<Rectangle> ignore_rectangles;
 
         for(std::size_t y = 0; y < height; y++) {
