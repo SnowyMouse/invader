@@ -7,6 +7,17 @@ Invader is an open source map and tag builder for Halo: Custom Edition written i
 To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
 well as make things easier for me to work with, this project is split into different programs.
 
+### invader-bitmap
+
+This program generates bitmap files. It takes the following arguments:
+
+| Argument | Alternate | Description |
+| --- | --- | --- |
+| `--info` | `-i` | Show credits, source info, and other info. |
+| `--data <dir>` | `-d` | Set data directory. |
+| `--tags <dir>` | `-t` | Set tags directory. |
+| `--input-format <format>` | `-I` | Set input format. Can be `tif` (default) or `png`. |
+
 ### invader-build
 
 This program builds cache files.
@@ -31,8 +42,3 @@ will modify it and then calculate the CRC32.
 
 This program builds index files for usage with `--with-index` with invader-build. It takes exactly two arguments:
 `<input map> <output index>`
-
-### invader-scenario
-
-This program takes Salamander-exported scenario data files and applies them to a scenario tag. It takes exactly two
-arguments: `<scenario tag> <scenario file>`
