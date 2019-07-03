@@ -29,17 +29,17 @@ int main(int argc, char *argv[]) {
     // Long options
     int longindex = 0;
     static struct option options[] = {
-        {"about",  no_argument, 0, 'h'},
-        {"help",  no_argument, 0, 'a'},
+        {"info",  no_argument, 0, 'i'},
+        {"help",  no_argument, 0, 'h'},
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'f' },
-        {"input-type", required_argument, 0, 'i' },
+        {"input-format", required_argument, 0, 'I' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ahd:t:f:i:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "ihd:t:f:I:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -49,11 +49,11 @@ int main(int argc, char *argv[]) {
                 tags = optarg;
                 break;
 
-            case 'i':
+            case 'I':
                 input_type = optarg;
                 break;
 
-            case 'a':
+            case 'i':
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
                 eprintf("Create or modify a bitmap tag. If the format is \"tag\", the tag must exist in the\n");
                 eprintf("tags folder. Otherwise, the image must exist in the data folder.\n\n");
                 eprintf("Options:\n");
-                eprintf("    --about,-a                 Show license and credits.\n");
+                eprintf("    --info,-i                  Show license and credits.\n");
                 eprintf("    --help,-h                  Show help\n\n");
                 eprintf("Directory options:\n");
                 eprintf("    --data,-d <path>           Set the data directory.\n");
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
                 eprintf("Bitmap options:\n");
                 //eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
                 //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
-                eprintf("    --input-type,-i <type>     Input format. Can be: tif or png. Default: tif\n");
+                eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 return EXIT_FAILURE;
         }
     }
