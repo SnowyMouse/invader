@@ -14,10 +14,10 @@ This program generates bitmap files. It takes the following arguments:
 | Argument | Alternate | Description |
 | --- | --- | --- |
 | `--info` | `-i` | Show credits, source info, and other info. |
-| `--data <dir>` | `-d` | Set data directory. |
-| `--tags <dir>` | `-t` | Set tags directory. |
-| `--input-format <format>` | `-I` | Set input format. Can be `tif` (default) or `png`. |
-| `--mipmap-fade <factor>` | `-f` | Set fade-to-gray factor for mipmaps. |
+| `--data <dir>` | `-d` | Data directory. |
+| `--tags <dir>` | `-t` | Tags directory. |
+| `--input-format <format>` | `-I` | Input format. Can be `tif` (default) or `png`. |
+| `--mipmap-fade <factor>` | `-f` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale <type>` | `-s` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 
 ### invader-build
@@ -28,11 +28,11 @@ This program builds cache files.
 | --- | --- | --- |
 | `--info` | `-i` | Show credits, source info, and other info. |
 | `--maps <dir>` | `-m` | Use a specific maps directory. |
-| `--no-indexed-tags` | `-n` | Do not index tags. This can speed up build time at the cost of a much larger file size. |
+| `--no-indexed-tags` | `-n` | Do not index tags with resource maps. |
 | `--output <file>` | `-o` | Output to a specific file. |
 | `--quiet` | `-q` | Only output error messages. |
-| `--tags <dir>` | `-t` | Set tags directory. Use multiple times to add tags directories ordered by precedence. |
-| `--with-index <file>` | `-w` | Use an index file for the tags, ensuring the map's tags are ordered in the same way. |
+| `--tags <dir>` | `-t` | Tags directory. Use multiple times to add tags directories. |
+| `--with-index <file>` | `-w` | Use an index file for the tags. |
 
 ### invader-crc
 
