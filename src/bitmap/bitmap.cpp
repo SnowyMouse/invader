@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
 
-            case 's':
+            case 'f':
                 mipmap_fade = std::strtof(optarg, nullptr);
                 if(mipmap_fade < 0.0F || mipmap_fade > 1.0F) {
                     eprintf("Mipmap fade must be between 0-1\n");
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
-            case 'f':
+            case 's':
                 if(std::strcmp(optarg, "linear") == 0) {
                     mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
                 }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
                 //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
-                eprintf("    --mipmap-scale,-s          Mipmap scale type. Can be: linear, nearest, none\n");
+                eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest, none\n");
                 eprintf("                               Default (new tag): linear\n");
 
                 return EXIT_FAILURE;
