@@ -12,10 +12,10 @@
 
 namespace Invader {
     struct CompositeBitmapPixel {
-        std::uint8_t alpha;
-        std::uint8_t red;
-        std::uint8_t green;
         std::uint8_t blue;
+        std::uint8_t green;
+        std::uint8_t red;
+        std::uint8_t alpha;
 
         /**
          * Get if this color is solid blue

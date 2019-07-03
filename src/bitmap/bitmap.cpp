@@ -239,11 +239,11 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
     // Close the TIFF
     TIFFClose(image_tiff);
 
-    // Swap alpha and green channels
+    // Swap red and blue channels
     for(std::size_t i = 0; i < image_size / 4; i++) {
         Invader::CompositeBitmapPixel swapped = image_pixels[i];
-        swapped.green = image_pixels[i].alpha;
-        swapped.alpha = image_pixels[i].green;
+        swapped.red = image_pixels[i].blue;
+        swapped.blue = image_pixels[i].red;
         image_pixels[i] = swapped;
     }
 
@@ -300,11 +300,11 @@ static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &
     // Free
     std::free(row_pointers);
 
-    // Swap alpha and green channels
+    // Swap red and blue channels
     for(std::size_t i = 0; i < image_size / 4; i++) {
         Invader::CompositeBitmapPixel swapped = image_pixels[i];
-        swapped.green = image_pixels[i].alpha;
-        swapped.alpha = image_pixels[i].green;
+        swapped.red = image_pixels[i].blue;
+        swapped.blue = image_pixels[i].red;
         image_pixels[i] = swapped;
     }
 
