@@ -13,9 +13,19 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
 static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
 enum MipmapScaleType {
+    /** Guess based on what the tag says */
     MIPMAP_SCALE_TYPE_TAG,
+
+    /** Interpolate colors */
     MIPMAP_SCALE_TYPE_LINEAR,
+
+    /** Interpolate RGB only */
+    MIPMAP_SCALE_TYPE_NEAREST_ALPHA,
+
+    /** Do not interpolate colors */
     MIPMAP_SCALE_TYPE_NEAREST,
+
+    /** No mipmap */
     MIPMAP_SCALE_TYPE_NONE
 };
 
@@ -87,6 +97,9 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "nearest") == 0) {
                     mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST;
                 }
+                else if(std::strcmp(optarg, "nearest-alpha") == 0) {
+                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA;
+                }
                 else if(std::strcmp(optarg, "none") == 0) {
                     mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NONE;
                 }
@@ -110,8 +123,8 @@ int main(int argc, char *argv[]) {
                 //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
-                eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest, none\n");
-                eprintf("                               Default (new tag): linear\n");
+                eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
+                eprintf("                               nearest, none. Default (new tag): linear\n");
 
                 return EXIT_FAILURE;
         }
@@ -255,8 +268,18 @@ int main(int argc, char *argv[]) {
                         // Average the pixels
                         switch(mipmap_scale_type) {
                             case MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR:
+                            case MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA:
                                 #define AVERAGE_CHANNEL_VALUE(channel) static_cast<std::uint8_t>(static_cast<std::size_t>(pixels[0].channel + pixels[1].channel + pixels[2].channel + pixels[3].channel) / 4)
-                                pixel.alpha = AVERAGE_CHANNEL_VALUE(alpha);
+
+                                // Determine whether or not to interpolate the alpha
+                                if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA) {
+                                    pixel.alpha = pixels[0].alpha;
+                                }
+                                else {
+                                    pixel.alpha = AVERAGE_CHANNEL_VALUE(alpha);
+                                }
+
+                                // Interpolate RGB
                                 pixel.red = AVERAGE_CHANNEL_VALUE(red);
                                 pixel.green = AVERAGE_CHANNEL_VALUE(green);
                                 pixel.blue = AVERAGE_CHANNEL_VALUE(blue);
