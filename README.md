@@ -18,7 +18,7 @@ This program generates bitmap files. It takes the following arguments:
 | `--tags <dir>` | `-t` | Set tags directory. |
 | `--input-format <format>` | `-I` | Set input format. Can be `tif` (default) or `png`. |
 | `--mipmap-fade <factor>` | `-f` | Set fade-to-gray factor for mipmaps. |
-| `--mipmap-scale <type>` | `-s` | Set mipmap scale type. Can be `linear` (default, interpolate colors), `nearest-alpha` (interpolate alpha only), `nearest` (do not interpolate colors), `none` (do not generate mipmaps). |
+| `--mipmap-scale <type>` | `-s` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 
 ### invader-build
 
