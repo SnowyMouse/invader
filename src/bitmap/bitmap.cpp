@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
                         if(mipmap_fade > 0.0F) {
                             // Alpha -> white
                             std::uint32_t alpha_delta = pixel.alpha * mipmap_fade + 1;
-                            if(0xFF - pixel.alpha < alpha_delta) {
+                            if(static_cast<std::uint32_t>(0xFF - pixel.alpha) < alpha_delta) {
                                 pixel.alpha = 0xFF;
                             }
                             else {
