@@ -12,6 +12,13 @@
 static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
+enum MipmapScaleType {
+    MIPMAP_SCALE_TYPE_TAG,
+    MIPMAP_SCALE_TYPE_LINEAR,
+    MIPMAP_SCALE_TYPE_NEAREST,
+    MIPMAP_SCALE_TYPE_NONE
+};
+
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
     using namespace Invader;
@@ -26,6 +33,12 @@ int main(int argc, char *argv[]) {
     // Input type
     const char *input_type = "tif";
 
+    // Scale type?
+    MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
+
+    // Mipmap fade factor
+    float mipmap_fade = -1.0F;
+
     // Long options
     int longindex = 0;
     static struct option options[] = {
@@ -35,11 +48,13 @@ int main(int argc, char *argv[]) {
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'f' },
         {"input-format", required_argument, 0, 'I' },
+        {"mipmap-fade", required_argument, 0, 'f' },
+        {"mipmap-scale", required_argument, 0, 's' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ihd:t:f:I:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "ihd:t:f:I:s:f:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -57,10 +72,33 @@ int main(int argc, char *argv[]) {
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
 
+            case 's':
+                mipmap_fade = std::strtof(optarg, nullptr);
+                if(mipmap_fade < 0.0F || mipmap_fade > 1.0F) {
+                    eprintf("Mipmap fade must be between 0-1\n");
+                    return EXIT_FAILURE;
+                }
+                break;
+
+            case 'f':
+                if(std::strcmp(optarg, "linear") == 0) {
+                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
+                }
+                else if(std::strcmp(optarg, "nearest") == 0) {
+                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST;
+                }
+                else if(std::strcmp(optarg, "none") == 0) {
+                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NONE;
+                }
+                else {
+                    eprintf("Unknown mipmap scale type %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                break;
+
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
-                eprintf("Create or modify a bitmap tag. If the format is \"tag\", the tag must exist in the\n");
-                eprintf("tags folder. Otherwise, the image must exist in the data folder.\n\n");
+                eprintf("Create or modify a bitmap tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("    --info,-i                  Show license and credits.\n");
                 eprintf("    --help,-h                  Show help\n\n");
@@ -71,6 +109,10 @@ int main(int argc, char *argv[]) {
                 //eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
                 //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
+                eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
+                eprintf("    --mipmap-scale,-s          Mipmap scale type. Can be: linear, nearest, none\n");
+                eprintf("                               Default (new tag): linear\n");
+
                 return EXIT_FAILURE;
         }
     }
@@ -152,6 +194,14 @@ int main(int argc, char *argv[]) {
     std::vector<std::byte> bitmap_data_pixels;
     std::vector<BitmapData<BigEndian>> bitmap_data(bitmaps_array.size());
 
+    // Default mipmap parameters
+    if(mipmap_fade == -1.0F) {
+        mipmap_fade = 0.0F;
+    }
+    if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_TAG) {
+        mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
+    }
+
     // Add our bitmap data
     for(std::size_t i = 0; i < bitmaps_array.size(); i++) {
         // Write all of the fields here
@@ -165,7 +215,6 @@ int main(int argc, char *argv[]) {
         bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
-        bitmap.mipmap_count = bitmap_pixels.get_mipmap_count();
 
         // Calculate how big the bitmap is
         std::size_t total_size = 0;
@@ -177,9 +226,82 @@ int main(int argc, char *argv[]) {
             mipmap_height /= 2;
             mipmap_width /= 2;
         }
-        bitmap.pixels_count = total_size;
+
+        // Generate mipmaps?
         const auto *pixels_start = reinterpret_cast<const std::byte *>(bitmap_pixels.get_pixels());
         bitmap_data_pixels.insert(bitmap_data_pixels.end(), pixels_start, pixels_start + total_size);
+
+        if(mipmap_scale_type != MipmapScaleType::MIPMAP_SCALE_TYPE_NONE) {
+            while(mipmap_height > 0 && mipmap_width > 0) {
+                // Get the last mipmap
+                const auto *last_mipmap = reinterpret_cast<const CompositeBitmapPixel *>(bitmap_data_pixels.data() + bitmap_data_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(CompositeBitmapPixel));
+
+                // Allocate data to hold the new mipmap data
+                std::vector<std::byte> this_mipmap_v(mipmap_height * mipmap_width * sizeof(CompositeBitmapPixel));
+                auto *this_mipmap = reinterpret_cast<CompositeBitmapPixel *>(this_mipmap_v.data());
+                for(std::size_t y = 0; y < mipmap_height; y++) {
+                    for(std::size_t x = 0; x < mipmap_width; x++) {
+                        // Get the pixels
+                        CompositeBitmapPixel pixels[4] = {
+                            last_mipmap[x * 2 + y * 2 * mipmap_width * 2],
+                            last_mipmap[x * 2 + 1 + y * 2 * mipmap_width * 2],
+                            last_mipmap[x * 2 + (y * 2 + 1) * mipmap_width * 2],
+                            last_mipmap[x * 2 + 1 + (y * 2 + 1) * mipmap_width * 2]
+                        };
+
+                        // Get this mipmap pixel
+                        CompositeBitmapPixel &pixel = this_mipmap[y * mipmap_width + x];
+
+                        // Average the pixels
+                        switch(mipmap_scale_type) {
+                            case MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR:
+                                #define AVERAGE_CHANNEL_VALUE(channel) static_cast<std::uint8_t>(static_cast<std::size_t>(pixels[0].channel + pixels[1].channel + pixels[2].channel + pixels[3].channel) / 4)
+                                pixel.alpha = AVERAGE_CHANNEL_VALUE(alpha);
+                                pixel.red = AVERAGE_CHANNEL_VALUE(red);
+                                pixel.green = AVERAGE_CHANNEL_VALUE(green);
+                                pixel.blue = AVERAGE_CHANNEL_VALUE(blue);
+                                break;
+
+                            case MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST:
+                                pixel = pixels[0];
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        // Fade to gray?
+                        if(mipmap_fade > 0.0F) {
+                            // Alpha -> white
+                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade + 1;
+                            if(0xFF - pixel.alpha < alpha_delta) {
+                                pixel.alpha = 0xFF;
+                            }
+                            else {
+                                pixel.alpha += alpha_delta;
+                            }
+
+                            // RGB -> gray
+                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade;
+                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade;
+                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade;
+                        }
+                    }
+                }
+
+                // Add the new mipmap
+                total_size += this_mipmap_v.size();
+                bitmap_data_pixels.insert(bitmap_data_pixels.end(), this_mipmap_v.begin(), this_mipmap_v.end());
+
+                // Halve both dimensions and add mipmap count
+                mipmap_height /= 2;
+                mipmap_width /= 2;
+                mipmap_count++;
+            }
+        }
+
+        bitmap.mipmap_count = mipmap_count;
+        bitmap.pixels_count = total_size;
 
         eprintf("Bitmap #%zu: %zux%zu, %zu mipmap%s\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s");
     }
@@ -194,6 +316,10 @@ int main(int argc, char *argv[]) {
     const auto *bitmap_data_end = reinterpret_cast<const std::byte *>(bitmap_data.data() + bitmap_data.size());
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_start, bitmap_data_end);
     new_tag_header.bitmap_data.count = bitmap_data.size();
+
+    // Set more parameters
+    new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
+    new_tag_header.detail_fade_factor = mipmap_fade;
 
     // Add the struct in
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
