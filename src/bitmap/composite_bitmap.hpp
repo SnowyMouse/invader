@@ -28,6 +28,8 @@ namespace Invader {
         bool operator==(const CompositeBitmapPixel &other) const {
             return this->blue == other.blue && this->green == other.green && this->red == other.red && this->alpha == other.alpha;
         }
+
+        std::uint16_t to_16_bit(std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue) const;
     };
     static_assert(sizeof(CompositeBitmapPixel) == 4);
 

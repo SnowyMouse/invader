@@ -185,4 +185,23 @@ namespace Invader {
             }
         }
     }
+
+    std::uint16_t CompositeBitmapPixel::to_16_bit(std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue) const {
+        std::uint16_t color = 0;
+
+        #define SET_CHANNEL_VALUE_FOR_COLOR(channel) \
+            if(channel) { \
+                color <<= channel; \
+                std::uint8_t channel_max = (1 << (channel)) - 1; \
+                std::uint16_t color_value = static_cast<std::uint16_t>(this->channel) * channel_max / 255; \
+                color |= color_value; \
+            }
+
+        SET_CHANNEL_VALUE_FOR_COLOR(alpha);
+        SET_CHANNEL_VALUE_FOR_COLOR(red);
+        SET_CHANNEL_VALUE_FOR_COLOR(green);
+        SET_CHANNEL_VALUE_FOR_COLOR(blue);
+
+        return color;
+    }
 }

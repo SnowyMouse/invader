@@ -29,6 +29,26 @@ enum MipmapScaleType {
     MIPMAP_SCALE_TYPE_NONE
 };
 
+enum BitmapFormatType {
+    /** Guess based on what the tag says */
+    BITMAP_FORMAT_TYPE_TAG,
+
+    /** 32-bit uncompressed */
+    BITMAP_FORMAT_TYPE_32_BIT,
+
+    /** 16-bit uncompressed */
+    BITMAP_FORMAT_TYPE_16_BIT,
+
+    /** DXT1 compression */
+    BITMAP_FORMAT_TYPE_DXT1,
+
+    /** DXT3 compression */
+    BITMAP_FORMAT_TYPE_DXT3,
+
+    /** DXT5 compression */
+    BITMAP_FORMAT_TYPE_DXT5
+};
+
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
     using namespace Invader;
@@ -46,6 +66,9 @@ int main(int argc, char *argv[]) {
     // Scale type?
     MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
 
+    // Format?
+    BitmapFormatType format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
+
     // Mipmap fade factor
     float mipmap_fade = -1.0F;
 
@@ -58,13 +81,14 @@ int main(int argc, char *argv[]) {
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'f' },
         {"input-format", required_argument, 0, 'I' },
+        {"output-format", required_argument, 0, 'O' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ihd:t:f:I:s:f:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "ihd:t:f:I:s:f:O:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -109,6 +133,24 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
+            case 'O':
+                if(std::strcmp(optarg, "32-bit") == 0) {
+                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
+                }
+                else if(std::strcmp(optarg, "16-bit") == 0) {
+                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_16_BIT;
+                }
+                else if(std::strcmp(optarg, "dxt5") == 0) {
+                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT5;
+                }
+                else if(std::strcmp(optarg, "dxt3") == 0) {
+                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT3;
+                }
+                else if(std::strcmp(optarg, "dxt1") == 0) {
+                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT1;
+                }
+                break;
+
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -119,8 +161,8 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
-                //eprintf("    --format,-f <type>         Format used in tag. Can be: dxt, 32bit, 16bit,\n");
-                //eprintf("                               p8, or monochrome. Default (new tag): 32bit\n");
+                eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit or 16-bit.\n");
+                eprintf("                               Default (new tag): 32-bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
@@ -214,6 +256,9 @@ int main(int argc, char *argv[]) {
     if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_TAG) {
         mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
     }
+    if(format == BitmapFormatType::BITMAP_FORMAT_TYPE_TAG) {
+        format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
+    }
 
     // Add our bitmap data
     for(std::size_t i = 0; i < bitmaps_array.size(); i++) {
@@ -225,7 +270,6 @@ int main(int argc, char *argv[]) {
         bitmap.height = bitmap_pixels.get_height();
         bitmap.depth = 1;
         bitmap.type = BitmapDataType::BITMAP_TYPE__2D_TEXTURE;
-        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
 
@@ -242,12 +286,13 @@ int main(int argc, char *argv[]) {
 
         // Generate mipmaps?
         const auto *pixels_start = reinterpret_cast<const std::byte *>(bitmap_pixels.get_pixels());
-        bitmap_data_pixels.insert(bitmap_data_pixels.end(), pixels_start, pixels_start + total_size);
+        std::vector<std::byte> current_bitmap_pixels(pixels_start, pixels_start + total_size);
 
+        // Process mipmaps
         if(mipmap_scale_type != MipmapScaleType::MIPMAP_SCALE_TYPE_NONE) {
             while(mipmap_height > 0 && mipmap_width > 0) {
                 // Get the last mipmap
-                const auto *last_mipmap = reinterpret_cast<const CompositeBitmapPixel *>(bitmap_data_pixels.data() + bitmap_data_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(CompositeBitmapPixel));
+                const auto *last_mipmap = reinterpret_cast<const CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(CompositeBitmapPixel));
 
                 // Allocate data to hold the new mipmap data
                 std::vector<std::byte> this_mipmap_v(mipmap_height * mipmap_width * sizeof(CompositeBitmapPixel));
@@ -312,9 +357,12 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
+                // Handle compression
+                bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
+
                 // Add the new mipmap
                 total_size += this_mipmap_v.size();
-                bitmap_data_pixels.insert(bitmap_data_pixels.end(), this_mipmap_v.begin(), this_mipmap_v.end());
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), this_mipmap_v.begin(), this_mipmap_v.end());
 
                 // Halve both dimensions and add mipmap count
                 mipmap_height /= 2;
@@ -323,8 +371,129 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        // Determine if there is any alpha present
+        enum AlphaType {
+            ALPHA_TYPE_NONE,
+            ALPHA_TYPE_ONE_BIT,
+            ALPHA_TYPE_MULTI_BIT
+        };
+        AlphaType alpha_present = ALPHA_TYPE_NONE;
+        auto *first_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data());
+        auto *last_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size());
+        std::size_t pixel_count = last_pixel - first_pixel;
+
+        for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
+            if(pixel->alpha != 0xFF) {
+                if(pixel->alpha == 0) {
+                    alpha_present = ALPHA_TYPE_ONE_BIT;
+                }
+                else {
+                    alpha_present = ALPHA_TYPE_MULTI_BIT;
+                    break;
+                }
+            }
+        }
+
+        // Set the format
+        switch(format) {
+            case BITMAP_FORMAT_TYPE_TAG:
+            case BITMAP_FORMAT_TYPE_32_BIT:
+                bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
+                break;
+            case BITMAP_FORMAT_TYPE_16_BIT:
+                switch(alpha_present) {
+                    case ALPHA_TYPE_NONE:
+                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_R5G6B5;
+                        break;
+                    case ALPHA_TYPE_ONE_BIT:
+                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5;
+                        break;
+                    case ALPHA_TYPE_MULTI_BIT:
+                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4;
+                        break;
+                }
+                break;
+            case BITMAP_FORMAT_TYPE_DXT1:
+                bitmap.format = BitmapDataFormat::BITMAP_FORMAT_DXT1;
+                break;
+            case BITMAP_FORMAT_TYPE_DXT3:
+                bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT3;
+                break;
+            case BITMAP_FORMAT_TYPE_DXT5:
+                bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT5;
+                break;
+        }
+
+        // Depending on the format, do something
+        auto bitmap_format = bitmap.format.read();
+        switch(bitmap_format) {
+            // If it's 32-bit, this is a no-op.
+            case BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8:
+            case BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8:
+                break;
+
+            // If it's 16-bit, there is stuff we will need to do
+            case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
+            case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
+            case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
+                // Figure out what we'll be doing
+                std::uint8_t alpha, red, green, blue;
+
+                switch(bitmap_format) {
+                    case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
+                        alpha = 1;
+                        red = 5;
+                        green = 5;
+                        blue = 5;
+                        break;
+                    case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
+                        alpha = 4;
+                        red = 4;
+                        green = 4;
+                        blue = 4;
+                        break;
+                    case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
+                        alpha = 0;
+                        red = 5;
+                        green = 6;
+                        blue = 5;
+                        break;
+                    default:
+                        std::terminate();
+                        break;
+                }
+
+                // Begin
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
+                auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
+                for(CompositeBitmapPixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                    *pixel_16_bit = pixel_32_bit->to_16_bit(alpha, red, green, blue);
+                }
+
+                // Replace buffers
+                current_bitmap_pixels.clear();
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+
+                break;
+            }
+
+            // If it's DXTn, tell them to shove it
+            case BitmapDataFormat::BITMAP_FORMAT_DXT1:
+            case BitmapDataFormat::BITMAP_FORMAT_DXT3:
+            case BitmapDataFormat::BITMAP_FORMAT_DXT5:
+                eprintf("DTXn compression is not currently supported.\n");
+                return EXIT_FAILURE;
+
+            default:
+                bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
+                break;
+        }
+
+        // Add pixel data to the end
+        bitmap_data_pixels.insert(bitmap_data_pixels.end(), current_bitmap_pixels.begin(), current_bitmap_pixels.end());
+
         bitmap.mipmap_count = mipmap_count;
-        bitmap.pixels_count = total_size;
+        bitmap.pixels_count = current_bitmap_pixels.size();
 
         eprintf("Bitmap #%zu: %zux%zu, %zu mipmap%s\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s");
     }
