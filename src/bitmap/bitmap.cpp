@@ -29,26 +29,6 @@ enum MipmapScaleType {
     MIPMAP_SCALE_TYPE_NONE
 };
 
-enum BitmapFormatType {
-    /** Guess based on what the tag says */
-    BITMAP_FORMAT_TYPE_TAG,
-
-    /** 32-bit uncompressed */
-    BITMAP_FORMAT_TYPE_32_BIT,
-
-    /** 16-bit uncompressed */
-    BITMAP_FORMAT_TYPE_16_BIT,
-
-    /** DXT1 compression */
-    BITMAP_FORMAT_TYPE_DXT1,
-
-    /** DXT3 compression */
-    BITMAP_FORMAT_TYPE_DXT3,
-
-    /** DXT5 compression */
-    BITMAP_FORMAT_TYPE_DXT5
-};
-
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
     using namespace Invader;
@@ -67,7 +47,7 @@ int main(int argc, char *argv[]) {
     MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
 
     // Format?
-    BitmapFormatType format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
+    BitmapFormat format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
 
     // Mipmap fade factor
     float mipmap_fade = -1.0F;
@@ -135,19 +115,19 @@ int main(int argc, char *argv[]) {
 
             case 'O':
                 if(std::strcmp(optarg, "32-bit") == 0) {
-                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
+                    format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
                 }
                 else if(std::strcmp(optarg, "16-bit") == 0) {
-                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_16_BIT;
+                    format = BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR;
                 }
                 else if(std::strcmp(optarg, "dxt5") == 0) {
-                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT5;
+                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA;
                 }
                 else if(std::strcmp(optarg, "dxt3") == 0) {
-                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT3;
+                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA;
                 }
                 else if(std::strcmp(optarg, "dxt1") == 0) {
-                    format = BitmapFormatType::BITMAP_FORMAT_TYPE_DXT1;
+                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
                 break;
 
@@ -255,9 +235,6 @@ int main(int argc, char *argv[]) {
     }
     if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_TAG) {
         mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
-    }
-    if(format == BitmapFormatType::BITMAP_FORMAT_TYPE_TAG) {
-        format = BitmapFormatType::BITMAP_FORMAT_TYPE_32_BIT;
     }
 
     // Add our bitmap data
@@ -396,11 +373,10 @@ int main(int argc, char *argv[]) {
 
         // Set the format
         switch(format) {
-            case BITMAP_FORMAT_TYPE_TAG:
-            case BITMAP_FORMAT_TYPE_32_BIT:
+            case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
                 break;
-            case BITMAP_FORMAT_TYPE_16_BIT:
+            case BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR:
                 switch(alpha_present) {
                     case ALPHA_TYPE_NONE:
                         bitmap.format = BitmapDataFormat::BITMAP_FORMAT_R5G6B5;
@@ -413,15 +389,19 @@ int main(int argc, char *argv[]) {
                         break;
                 }
                 break;
-            case BITMAP_FORMAT_TYPE_DXT1:
+            case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY:
                 bitmap.format = BitmapDataFormat::BITMAP_FORMAT_DXT1;
                 break;
-            case BITMAP_FORMAT_TYPE_DXT3:
+            case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT3;
                 break;
-            case BITMAP_FORMAT_TYPE_DXT5:
+            case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT5;
                 break;
+
+            default:
+                eprintf("Unsupported bitmap format.\n");
+                return EXIT_FAILURE;
         }
 
         // Depending on the format, do something
@@ -503,6 +483,7 @@ int main(int argc, char *argv[]) {
     // Set more parameters
     new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
     new_tag_header.detail_fade_factor = mipmap_fade;
+    new_tag_header.format = static_cast<BitmapFormat>(format);
 
     // Add the struct in
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
