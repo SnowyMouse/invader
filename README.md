@@ -11,30 +11,30 @@ well as make things easier for me to work with, this project is split into diffe
 
 This program generates bitmap files. It takes the following arguments:
 
-| Argument | Alternate | Description |
-| --- | --- | --- |
-| `--info` | `-i` | Show credits, source info, and other info. |
-| `--data <dir>` | `-d` | Data directory. |
-| `--tags <dir>` | `-t` | Tags directory. |
-| `--dithering` | `-D` | Apply dithering. Only works on `dxt1` and `dxt5` for now. |
-| `--input-format <format>` | `-I` | Input format. Can be `tif` (default) or `png`. |
-| `--output-format <format>` | `-O` | Output format. Can be `32-bit` (default), `16-bit`, `dxt1`, or `dxt5`. |
-| `--mipmap-fade <factor>` | `-f` | Fade-to-gray factor for mipmaps. |
-| `--mipmap-scale <type>` | `-s` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
+| Argument | Description |
+| --- | --- |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--data,-d <dir>` | Data directory. |
+| `--tags,-t <dir>` | Tags directory. |
+| `--dithering,-D` | Apply dithering. Only works on `dxt1` and `dxt5` for now. |
+| `--input-format,-I <format>` | Input format. Can be `tif` (default) or `png`. |
+| `--output-format,-O <format>` | Output format. Can be `32-bit` (default), `16-bit`, `dxt1`, or `dxt5`. |
+| `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
+| `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 
 ### invader-build
 
 This program builds cache files.
 
-| Argument | Alternate | Description |
-| --- | --- | --- |
-| `--info` | `-i` | Show credits, source info, and other info. |
-| `--maps <dir>` | `-m` | Use a specific maps directory. |
-| `--no-indexed-tags` | `-n` | Do not index tags with resource maps. |
-| `--output <file>` | `-o` | Output to a specific file. |
-| `--quiet` | `-q` | Only output error messages. |
-| `--tags <dir>` | `-t` | Tags directory. Use multiple times to add tags directories. |
-| `--with-index <file>` | `-w` | Use an index file for the tags. |
+| Argument | Description |
+| --- | --- |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--maps,-m <dir>` | Use a specific maps directory. |
+| `--no-indexed-tags,-n` | Do not index tags with resource maps. |
+| `--output,-o <file>` | Output to a specific file. |
+| `--quiet,-q` | Only output error messages. |
+| `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
+| `--with-index,-w <file>` | Use an index file for the tags. |
 
 ### invader-crc
 
