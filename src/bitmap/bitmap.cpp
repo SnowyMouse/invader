@@ -5,6 +5,7 @@
 #include <png.h>
 
 #define STB_DXT_IMPLEMENTATION
+#define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
 #include "../eprintf.hpp"
 #include "../version.hpp"
