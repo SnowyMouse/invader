@@ -6,6 +6,8 @@
 
 #include "composite_bitmap.hpp"
 #include "../eprintf.hpp"
+#include <cstring>
+#include <cmath>
 
 namespace Invader {
     struct Rectangle {
@@ -192,7 +194,7 @@ namespace Invader {
         #define SET_CHANNEL_VALUE_FOR_COLOR(channel) { \
             color <<= channel; \
             std::uint16_t channel_max = (1 << (channel)) - 1; \
-            std::uint16_t channel_value = static_cast<std::uint16_t>(this->channel) * channel_max / UINT8_MAX; \
+            std::uint16_t channel_value = (static_cast<std::uint16_t>(this->channel) * channel_max + (UINT8_MAX + 1) / 2) / UINT8_MAX; \
             color |= channel_value; \
         }
 
