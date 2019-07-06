@@ -55,11 +55,15 @@ int main(int argc, char *argv[]) {
     // Mipmap fade factor
     float mipmap_fade = -1.0F;
 
+    // Dithering?
+    bool dithering = false;
+
     // Long options
     int longindex = 0;
     static struct option options[] = {
         {"info",  no_argument, 0, 'i'},
         {"help",  no_argument, 0, 'h'},
+        {"dithering",  no_argument, 0, 'D'},
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'f' },
@@ -71,7 +75,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "ihd:t:f:I:s:f:O:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "Dihd:t:f:I:s:f:O:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -134,6 +138,10 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
+            case 'D':
+                dithering = true;
+                break;
+
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -144,6 +152,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
+                eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
                 eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5, or\n");
                 eprintf("                               dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
@@ -489,7 +498,7 @@ int main(int argc, char *argv[]) {
                                     }
                                 }
 
-                                stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_alpha, STB_DXT_HIGHQUAL);
+                                stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_alpha, STB_DXT_HIGHQUAL | (dithering ? STB_DXT_DITHER : 0));
                                 compressed_pixel += BLOCK_LENGTH * pixel_size * 2;
                             }
                         }
