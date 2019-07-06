@@ -29,7 +29,26 @@ namespace Invader {
             return this->blue == other.blue && this->green == other.green && this->red == other.red && this->alpha == other.alpha;
         }
 
-        std::uint16_t to_16_bit(std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue) const;
+        template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
+        static std::uint16_t convert_to_16_bit(const CompositeBitmapPixel *color) {
+            static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");
+
+            std::uint16_t color_output = 0;
+
+            #define COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(channel) if(channel) { \
+                color_output <<= channel; \
+                color_output |= (static_cast<std::uint16_t>(color->channel) * ((1 << (channel)) - 1) + (UINT8_MAX + 1) / 2) / UINT8_MAX; \
+            }
+
+            COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(alpha);
+            COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(red);
+            COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(green);
+            COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(blue);
+
+            #undef COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR
+
+            return color_output;
+        }
     };
     static_assert(sizeof(CompositeBitmapPixel) == 4);
 

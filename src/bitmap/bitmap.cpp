@@ -437,26 +437,17 @@ int main(int argc, char *argv[]) {
             case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
             case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
-                std::uint8_t alpha, red, green, blue;
+                uint16_t (*conversion_function)(const CompositeBitmapPixel *);
 
                 switch(bitmap_format) {
                     case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
-                        alpha = 1;
-                        red = 5;
-                        green = 5;
-                        blue = 5;
+                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<1,5,5,5>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
-                        alpha = 4;
-                        red = 4;
-                        green = 4;
-                        blue = 4;
+                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<4,4,4,4>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
-                        alpha = 0;
-                        red = 5;
-                        green = 6;
-                        blue = 5;
+                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<0,5,6,5>;
                         break;
                     default:
                         std::terminate();
@@ -467,7 +458,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(CompositeBitmapPixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
-                    *pixel_16_bit = pixel_32_bit->to_16_bit(alpha, red, green, blue);
+                    *pixel_16_bit = conversion_function(pixel_32_bit);
                 }
 
                 // Replace buffers
