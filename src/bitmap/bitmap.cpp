@@ -456,7 +456,7 @@ int main(int argc, char *argv[]) {
                 // Begin
                 int use_alpha = bitmap.format != BitmapDataFormat::BITMAP_FORMAT_DXT1;
                 std::size_t pixel_size = (use_alpha) ? 2 : 1;
-                std::vector<std::byte> new_bitmap_pixels(pixel_count * pixel_size);
+                std::vector<std::byte> new_bitmap_pixels(pixel_count * pixel_size / 2);
                 auto *compressed_pixel = new_bitmap_pixels.data();
 
                 std::size_t mipmap_width = bitmap.width;
@@ -466,28 +466,35 @@ int main(int argc, char *argv[]) {
 
                 #define BLOCK_LENGTH 4
 
+                std::size_t mipmaps_reduced = 0;
+
                 // Go through each 4x4 block and make them compressed
-                for(std::size_t i = 0; i <= mipmap_count && mipmap_width >= BLOCK_LENGTH && mipmap_height >= BLOCK_LENGTH; i++) {
-                    for(std::size_t y = 0; y < mipmap_height; y += BLOCK_LENGTH) {
-                        for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
-                            // Let's make the 4x4 block
-                            CompositeBitmapPixel block[BLOCK_LENGTH * BLOCK_LENGTH];
-                            for(int i = 0; i < BLOCK_LENGTH; i++) {
-                                std::size_t offset = ((y + i) * mipmap_width + x);
-                                auto *first_block_pixel = block + i * BLOCK_LENGTH;
-                                auto *first_uncompressed_pixel = uncompressed_pixel + offset;
+                for(std::size_t i = 0; i <= mipmap_count; i++) {
+                    if(mipmap_width >= BLOCK_LENGTH && mipmap_height >= BLOCK_LENGTH) {
+                        for(std::size_t y = 0; y < mipmap_height; y += BLOCK_LENGTH) {
+                            for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
+                                // Let's make the 4x4 block
+                                CompositeBitmapPixel block[BLOCK_LENGTH * BLOCK_LENGTH];
+                                for(int i = 0; i < BLOCK_LENGTH; i++) {
+                                    std::size_t offset = ((y + i) * mipmap_width + x);
+                                    auto *first_block_pixel = block + i * BLOCK_LENGTH;
+                                    auto *first_uncompressed_pixel = uncompressed_pixel + offset;
 
-                                for(std::size_t j = 0; j < 4; j++) {
-                                    first_block_pixel[j].alpha = first_uncompressed_pixel[j].alpha;
-                                    first_block_pixel[j].red = first_uncompressed_pixel[j].blue;
-                                    first_block_pixel[j].green = first_uncompressed_pixel[j].green;
-                                    first_block_pixel[j].blue = first_uncompressed_pixel[j].red;
+                                    for(std::size_t j = 0; j < 4; j++) {
+                                        first_block_pixel[j].alpha = first_uncompressed_pixel[j].alpha;
+                                        first_block_pixel[j].red = first_uncompressed_pixel[j].blue;
+                                        first_block_pixel[j].green = first_uncompressed_pixel[j].green;
+                                        first_block_pixel[j].blue = first_uncompressed_pixel[j].red;
+                                    }
                                 }
-                            }
 
-                            stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_alpha, STB_DXT_HIGHQUAL);
-                            compressed_pixel += BLOCK_LENGTH * pixel_size * 2;
+                                stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_alpha, STB_DXT_HIGHQUAL);
+                                compressed_pixel += BLOCK_LENGTH * pixel_size * 2;
+                            }
                         }
+                    }
+                    else {
+                        mipmaps_reduced++;
                     }
 
                     uncompressed_pixel += mipmap_width * mipmap_height;
@@ -496,7 +503,9 @@ int main(int argc, char *argv[]) {
                 }
 
                 current_bitmap_pixels.clear();
-                current_bitmap_pixels.insert(current_bitmap_pixels.end(), new_bitmap_pixels.begin(), new_bitmap_pixels.end());
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), new_bitmap_pixels.data(), reinterpret_cast<std::byte *>(compressed_pixel));
+
+                mipmap_count -= mipmaps_reduced;
 
                 #undef BLOCK_LENGTH
 
