@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
-                eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5, or\n");
-                eprintf("                               dxt1. Default (new tag): 32-bit\n");
+                eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5,\n");
+                eprintf("                               dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
@@ -462,10 +462,13 @@ int main(int argc, char *argv[]) {
 
             // Do DisguXTing compression
             case BitmapDataFormat::BITMAP_FORMAT_DXT1:
+            case BitmapDataFormat::BITMAP_FORMAT_DXT3:
             case BitmapDataFormat::BITMAP_FORMAT_DXT5: {
                 // Begin
-                int use_alpha = bitmap.format != BitmapDataFormat::BITMAP_FORMAT_DXT1;
-                std::size_t pixel_size = (use_alpha) ? 2 : 1;
+                bool use_dxt1 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT1;
+                bool use_dxt3 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT3;
+                bool use_dxt5 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT5;
+                std::size_t pixel_size = (!use_dxt1) ? 2 : 1;
                 std::vector<std::byte> new_bitmap_pixels(pixel_count * pixel_size / 2);
                 auto *compressed_pixel = new_bitmap_pixels.data();
 
@@ -478,6 +481,8 @@ int main(int argc, char *argv[]) {
 
                 std::size_t mipmaps_reduced = 0;
 
+                std::size_t pixel_increment = BLOCK_LENGTH * (use_dxt3 ? 1 : pixel_size) * 2;
+
                 // Go through each 4x4 block and make them compressed
                 for(std::size_t i = 0; i <= mipmap_count; i++) {
                     if(mipmap_width >= BLOCK_LENGTH && mipmap_height >= BLOCK_LENGTH) {
@@ -485,6 +490,8 @@ int main(int argc, char *argv[]) {
                             for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
                                 // Let's make the 4x4 block
                                 CompositeBitmapPixel block[BLOCK_LENGTH * BLOCK_LENGTH];
+
+                                // Get the block
                                 for(int i = 0; i < BLOCK_LENGTH; i++) {
                                     std::size_t offset = ((y + i) * mipmap_width + x);
                                     auto *first_block_pixel = block + i * BLOCK_LENGTH;
@@ -498,8 +505,24 @@ int main(int argc, char *argv[]) {
                                     }
                                 }
 
-                                stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_alpha, STB_DXT_HIGHQUAL | (dithering ? STB_DXT_DITHER : 0));
-                                compressed_pixel += BLOCK_LENGTH * pixel_size * 2;
+                                // If we're using DXT3, put the alpha in here
+                                if(use_dxt3) {
+                                    std::uint64_t dxt3_alpha = 0;
+
+                                    // Alpha is stored in order from the first ones being the least significant bytes, and the last ones being the most significant bytes
+                                    for(int i = 0; i < BLOCK_LENGTH * BLOCK_LENGTH; i++) {
+                                        dxt3_alpha <<= 4;
+                                        dxt3_alpha |= (block[BLOCK_LENGTH * BLOCK_LENGTH - i - 1].alpha * 15 + UINT8_MAX + 1) / UINT8_MAX / 2;
+                                    }
+
+                                    auto &compressed_alpha = *reinterpret_cast<LittleEndian<std::uint64_t> *>(compressed_pixel);
+                                    compressed_alpha = dxt3_alpha;
+                                    compressed_pixel += sizeof(compressed_alpha);
+                                }
+
+                                // Compress
+                                stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_dxt5, STB_DXT_HIGHQUAL | (dithering ? STB_DXT_DITHER : 0));
+                                compressed_pixel += pixel_increment;
                             }
                         }
                     }
@@ -515,17 +538,13 @@ int main(int argc, char *argv[]) {
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), new_bitmap_pixels.data(), reinterpret_cast<std::byte *>(compressed_pixel));
 
+                // If we had to cut out mipmaps due to them being less than 4x4, here we go
                 mipmap_count -= mipmaps_reduced;
 
                 #undef BLOCK_LENGTH
 
                 break;
             }
-
-            // We don't support your kind 'round these parts
-            case BitmapDataFormat::BITMAP_FORMAT_DXT3:
-                eprintf("DXT3 is not supported.\n");
-                return EXIT_FAILURE;
 
             default:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
