@@ -12,6 +12,22 @@
 #include "../tag/hek/class/bitmap.hpp"
 #include "composite_bitmap.hpp"
 
+enum SUPPORTED_FORMATS_INT {
+    SUPPORTED_FORMATS_TIF = 0,
+    SUPPORTED_FORMATS_TIFF,
+    SUPPORTED_FORMATS_PNG,
+
+    SUPPORTED_FORMATS_INT_COUNT
+};
+
+const char *SUPPORTED_FORMATS[] = {
+    ".tif",
+    ".tiff",
+    ".png"
+};
+
+static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
+
 static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
@@ -42,9 +58,6 @@ int main(int argc, char *argv[]) {
 
     // Tags directory
     const char *tags = "tags/";
-
-    // Input type
-    const char *input_type = "tif";
 
     // Scale type?
     MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
@@ -79,7 +92,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "Dihd:t:f:I:s:f:O:m:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "Dihd:t:f:s:f:O:m:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -87,10 +100,6 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 tags = optarg;
-                break;
-
-            case 'I':
-                input_type = optarg;
                 break;
 
             case 'i':
@@ -163,7 +172,6 @@ int main(int argc, char *argv[]) {
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
                 eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5,\n");
                 eprintf("                               dxt3, or dxt1. Default (new tag): 32-bit\n");
-                eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
                 eprintf("                               <count> mipmaps, instead.\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
@@ -183,21 +191,35 @@ int main(int argc, char *argv[]) {
     std::filesystem::path data_path = data;
 
     // Have these variables handy
-    std::uint32_t image_width, image_height;
-    std::size_t image_size;
-    CompositeBitmapPixel *image_pixels;
+    std::uint32_t image_width = 0, image_height = 0;
+    std::size_t image_size = 0;
+    CompositeBitmapPixel *image_pixels = nullptr;
 
     // Load the bitmap file
-    std::string image_path = (data_path / (bitmap_tag + "." + input_type)).string();
+    for(auto i = SUPPORTED_FORMATS_TIF; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SUPPORTED_FORMATS_INT>(i + 1)) {
+        std::string image_path = (data_path / (bitmap_tag + SUPPORTED_FORMATS[i])).string();
+        if(std::filesystem::exists(image_path)) {
+            switch(i) {
+                case SUPPORTED_FORMATS_TIF:
+                case SUPPORTED_FORMATS_TIFF:
+                    image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
+                    break;
+                case SUPPORTED_FORMATS_PNG:
+                    image_pixels = load_png(image_path.data(), image_width, image_height, image_size);
+                    break;
+                case SUPPORTED_FORMATS_INT_COUNT:
+                    std::terminate();
+                    break;
+            }
+            break;
+        }
+    }
 
-    if(std::strcmp(input_type, "tif") == 0) {
-        image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
-    }
-    else if(std::strcmp(input_type, "png") == 0) {
-        image_pixels = load_png(image_path.data(), image_width, image_height, image_size);
-    }
-    else {
-        eprintf("Unrecognized input-type %s\n", input_type);
+    if(image_pixels == nullptr) {
+        eprintf("Failed to find %s in %s\nValid formats are:\n", bitmap_tag.data(), data);
+        for(auto *format : SUPPORTED_FORMATS) {
+            eprintf("    %s\n", format);
+        }
         return EXIT_FAILURE;
     }
 
