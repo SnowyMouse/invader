@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
     // Dithering?
     bool dithering = false;
 
+    // Generate this many mipmaps
+    std::int16_t max_mipmap_count = INT16_MAX;
+
     // Long options
     int longindex = 0;
     static struct option options[] = {
@@ -69,13 +72,14 @@ int main(int argc, char *argv[]) {
         {"format", required_argument, 0, 'f' },
         {"input-format", required_argument, 0, 'I' },
         {"output-format", required_argument, 0, 'O' },
+        {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "Dihd:t:f:I:s:f:O:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "Dihd:t:f:I:s:f:O:m:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -142,6 +146,10 @@ int main(int argc, char *argv[]) {
                 dithering = true;
                 break;
 
+            case 'm':
+                max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
+                break;
+
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -156,6 +164,8 @@ int main(int argc, char *argv[]) {
                 eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5,\n");
                 eprintf("                               dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --input-format,-I <type>   Input format. Can be: tif or png. Default: tif\n");
+                eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
+                eprintf("                               <count> mipmaps, instead.\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest, none. Default (new tag): linear\n");
@@ -266,11 +276,38 @@ int main(int argc, char *argv[]) {
         std::size_t total_size = 0;
         std::size_t mipmap_width = bitmap_pixels.get_width();
         std::size_t mipmap_height = bitmap_pixels.get_height();
+        std::size_t *smaller_dimension = mipmap_width > mipmap_height ? &mipmap_height : &mipmap_width;
+
+        // Calculate how many mipmaps we can make
+        std::size_t bitmap_maximum_mipmap_count = 0;
+        for(std::size_t s = *smaller_dimension >> 1; s > 0; s >>= 1) {
+            bitmap_maximum_mipmap_count++;
+        }
+
+        // If we're removing mipmaps, let's see how many
+        if(max_mipmap_count < 0) {
+            std::size_t mipmaps_discarded = -max_mipmap_count;
+            if(bitmap_maximum_mipmap_count > mipmaps_discarded) {
+                bitmap_maximum_mipmap_count -= mipmaps_discarded;
+            }
+            else {
+                bitmap_maximum_mipmap_count = 0; // more mipmaps than we have, so we'll just remove all of them
+            }
+        }
+        else if(static_cast<std::size_t>(max_mipmap_count) < bitmap_maximum_mipmap_count) {
+            bitmap_maximum_mipmap_count = static_cast<std::size_t>(max_mipmap_count);
+        }
+
+        // Calculate the lowest-resolution mipmap we have
         std::size_t mipmap_count = bitmap_pixels.get_mipmap_count();
-        for(std::size_t i = 0; i <= mipmap_count; i++) {
+        for(std::size_t i = 0; i <= mipmap_count && i <= bitmap_maximum_mipmap_count; i++) {
             total_size += mipmap_width * mipmap_height * 4;
             mipmap_height /= 2;
             mipmap_width /= 2;
+        }
+
+        if(mipmap_count > bitmap_maximum_mipmap_count) {
+            mipmap_count = bitmap_maximum_mipmap_count;
         }
 
         // Generate mipmaps?
@@ -279,7 +316,7 @@ int main(int argc, char *argv[]) {
 
         // Process mipmaps
         if(mipmap_scale_type != MipmapScaleType::MIPMAP_SCALE_TYPE_NONE) {
-            while(mipmap_height > 0 && mipmap_width > 0) {
+            while(*smaller_dimension > 0 && mipmap_count < bitmap_maximum_mipmap_count) {
                 // Get the last mipmap
                 const auto *last_mipmap = reinterpret_cast<const CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(CompositeBitmapPixel));
 
@@ -580,6 +617,15 @@ int main(int argc, char *argv[]) {
     new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
     new_tag_header.detail_fade_factor = mipmap_fade;
     new_tag_header.format = static_cast<BitmapFormat>(format);
+    if(max_mipmap_count == INT16_MAX) {
+        new_tag_header.mipmap_count = 0;
+    }
+    else if(max_mipmap_count >= 0) {
+        new_tag_header.mipmap_count = max_mipmap_count + 1;
+    }
+    else {
+        new_tag_header.mipmap_count = max_mipmap_count;
+    }
 
     // Add the struct in
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
