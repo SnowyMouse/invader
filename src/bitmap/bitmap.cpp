@@ -689,6 +689,9 @@ int main(int argc, char *argv[]) {
         flags.power_of_two_dimensions = 1;
         bitmap.flags = flags;
 
+        bitmap.registration_point.x = bitmap.width.read() / 2;
+        bitmap.registration_point.y = bitmap.height.read() / 2;
+
         #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
         printf("    Bitmap #%zu: %zux%zu, %zu mipmap%s, %s - %.02f MiB\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
