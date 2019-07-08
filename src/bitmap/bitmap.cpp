@@ -702,6 +702,13 @@ int main(int argc, char *argv[]) {
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());
     new_tag_header.processed_pixel_data.size = bitmap_data_pixels.size();
 
+    // Add a sequence
+    BitmapGroupSequence<BigEndian> bgs = {};
+    bgs.first_bitmap_index = 0;
+    bgs.bitmap_count = bitmap_data.size();
+    bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<const std::byte *>(&bgs), reinterpret_cast<const std::byte *>(&bgs + 1));
+    new_tag_header.bitmap_group_sequence.count = 1;
+
     // Add the bitmap tag data
     const auto *bitmap_data_start = reinterpret_cast<const std::byte *>(bitmap_data.data());
     const auto *bitmap_data_end = reinterpret_cast<const std::byte *>(bitmap_data.data() + bitmap_data.size());
