@@ -20,7 +20,7 @@ enum SUPPORTED_FORMATS_INT {
     SUPPORTED_FORMATS_INT_COUNT
 };
 
-const char *SUPPORTED_FORMATS[] = {
+static const char *SUPPORTED_FORMATS[] = {
     ".tif",
     ".tiff",
     ".png"
@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
 
     // Format?
     BitmapFormat format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+    bool format_set = false;
 
     // Mipmap fade factor
     float mipmap_fade = -1.0F;
@@ -74,10 +75,14 @@ int main(int argc, char *argv[]) {
     // Generate this many mipmaps
     std::int16_t max_mipmap_count = INT16_MAX;
 
+    // Ignore the tag data?
+    bool ignore_tag_data = false;
+
     // Long options
     int longindex = 0;
     static struct option options[] = {
         {"info",  no_argument, 0, 'i'},
+        {"ignore-tag",  no_argument, 0, 'I'},
         {"help",  no_argument, 0, 'h'},
         {"dithering",  no_argument, 0, 'D'},
         {"data",  required_argument, 0, 'd' },
@@ -92,7 +97,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "Dihd:t:f:s:f:O:m:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:O:m:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -105,6 +110,10 @@ int main(int argc, char *argv[]) {
             case 'i':
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
+
+            case 'I':
+                ignore_tag_data = true;
+                break;
 
             case 'f':
                 mipmap_fade = std::strtof(optarg, nullptr);
@@ -149,6 +158,7 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "dxt1") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
+                format_set = true;
                 break;
 
             case 'D':
@@ -170,10 +180,11 @@ int main(int argc, char *argv[]) {
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
+                eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5,\n");
                 eprintf("                               dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
-                eprintf("                               <count> mipmaps, instead.\n");
+                eprintf("                               <count> mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest, none. Default (new tag): linear\n");
@@ -189,6 +200,62 @@ int main(int argc, char *argv[]) {
     }
     std::string bitmap_tag = argv[argc - 1];
     std::filesystem::path data_path = data;
+
+    // Get the path
+    std::filesystem::path tags_path(tags);
+    auto tag_path = tags_path / bitmap_tag;
+    auto final_path = tag_path.string() + ".bitmap";
+
+    // See if we can get anything out of this
+    std::FILE *tag_read;
+    if(!ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
+        // Here's in case we do fail. It cleans up and exits.
+        auto exit_on_failure = [&tag_read, &final_path]() {
+            eprintf("%s could not be read.\n", final_path.data());
+            eprintf("Use --ignore-tag or -I to override.\n");
+            std::fclose(tag_read);
+            exit(EXIT_FAILURE);
+        };
+
+        // Attempt to get the header
+        TagFileHeader header;
+        if(std::fread(&header, sizeof(header), 1, tag_read) != 1) {
+            exit_on_failure();
+        }
+
+        // Make sure it's valid
+        if(header.tag_class_int != TagClassInt::TAG_CLASS_BITMAP) {
+            exit_on_failure();
+        }
+
+        // Get the main tag struct
+        Bitmap<BigEndian> bitmap_tag_header;
+        if(std::fread(&bitmap_tag_header, sizeof(bitmap_tag_header), 1, tag_read) != 1) {
+            exit_on_failure();
+        }
+
+        // Set some default values
+        if(!format_set) {
+            format = bitmap_tag_header.format;
+        }
+        if(mipmap_fade < 0.0F) {
+            mipmap_fade = bitmap_tag_header.detail_fade_factor;
+        }
+        if(max_mipmap_count == INT16_MAX) {
+            std::int16_t mipmap_count = bitmap_tag_header.mipmap_count.read();
+            if(mipmap_count == 0) {
+                max_mipmap_count = INT16_MAX;
+            }
+            else if(mipmap_count < 0) {
+                max_mipmap_count = mipmap_count;
+            }
+            else {
+                max_mipmap_count = mipmap_count - 1;
+            }
+        }
+
+        std::fclose(tag_read);
+    }
 
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
@@ -655,13 +722,8 @@ int main(int argc, char *argv[]) {
     // Add the struct in
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
 
-    // Get the path
-    std::filesystem::path tags_path(tags);
-    auto tag_path = tags_path / bitmap_tag;
-
     // Write it all
     std::filesystem::create_directories(tag_path.parent_path());
-    auto final_path = tag_path.string() + ".bitmap";
     std::FILE *tag_write = std::fopen(final_path.data(), "wb");
     if(!tag_write) {
         eprintf("Error: Failed to open %s for writing.\n", final_path.data());;
