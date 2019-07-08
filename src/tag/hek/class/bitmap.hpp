@@ -75,6 +75,8 @@ namespace Invader::HEK {
         BITMAP_FORMAT_P8_BUMP
     };
 
+    const char *bitmap_data_format_name(BitmapDataFormat format);
+
     enum BitmapType : TagEnum {
         BITMAP_TYPE_1__2D_TEXTURES,
         BITMAP_TYPE_1__3D_TEXTURES,

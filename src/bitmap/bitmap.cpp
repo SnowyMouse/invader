@@ -282,6 +282,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Add our bitmap data
+    printf("Found %zu bitmap%s:\n", bitmaps_array.size(), bitmaps_array.size() == 1 ? "" : "s");
     for(std::size_t i = 0; i < bitmaps_array.size(); i++) {
         // Write all of the fields here
         auto &bitmap = bitmap_data[i];
@@ -621,9 +622,11 @@ int main(int argc, char *argv[]) {
         flags.power_of_two_dimensions = 1;
         bitmap.flags = flags;
 
-        eprintf("Bitmap #%zu: %zux%zu, %zu mipmap%s\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s");
+        #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
+
+        printf("    Bitmap #%zu: %zux%zu, %zu mipmap%s, %s - %.02f MiB\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
     }
-    printf("Found %zu bitmap%s total. (%.02f MiB)\n", bitmaps_array.size(), bitmaps_array.size() == 1 ? "" : "s", bitmap_data_pixels.size() / 1024.0F / 1024.0F);
+    printf("Total: %.02f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());
