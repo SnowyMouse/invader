@@ -1,3 +1,9 @@
+/*
+ * Invader (c) 2018 Kavawuvi
+ *
+ * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
+ */
+
 #include <getopt.h>
 #include <zlib.h>
 #include <filesystem>
