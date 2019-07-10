@@ -155,6 +155,9 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "16-bit") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR;
                 }
+                else if(std::strcmp(optarg, "monochrome") == 0) {
+                    format = BitmapFormat::BITMAP_FORMAT_MONOCHROME;
+                }
                 else if(std::strcmp(optarg, "dxt5") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA;
                 }
@@ -187,8 +190,8 @@ int main(int argc, char *argv[]) {
                 eprintf("Bitmap options:\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
-                eprintf("    --output-format,-O <type>  Output format. Can be: 32-bit, 16-bit, dxt5,\n");
-                eprintf("                               dxt3, or dxt1. Default (new tag): 32-bit\n");
+                eprintf("    --output-format,-O <type>  Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
+                eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
                 eprintf("                               <count> mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
@@ -499,19 +502,48 @@ int main(int argc, char *argv[]) {
             ALPHA_TYPE_ONE_BIT,
             ALPHA_TYPE_MULTI_BIT
         };
+
+        bool alpha_equals_luminosity = true;
+        bool luminosity_set = false;
+
         AlphaType alpha_present = ALPHA_TYPE_NONE;
         auto *first_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data());
         auto *last_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size());
         std::size_t pixel_count = last_pixel - first_pixel;
 
-        for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
-            if(pixel->alpha != 0xFF) {
-                if(pixel->alpha == 0) {
-                    alpha_present = ALPHA_TYPE_ONE_BIT;
+        // If we need to do monochrome, check if the alpha equals luminosity
+        if(format == BitmapFormat::BITMAP_FORMAT_MONOCHROME) {
+            for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
+                std::uint8_t luminosity = CompositeBitmapPixel::convert_to_y8(pixel);
+
+                // First, check if the luminosity is the same as alpha. If not, AY8 is not an option.
+                if(luminosity != pixel->alpha) {
+                    alpha_equals_luminosity = false;
+
+                    // Next, check if luminosity is not 0xFF. If so, A8 is not an option
+                    if(luminosity != 0xFF) {
+                        luminosity_set = true;
+                    }
+
+                    // Next, check if the alpha is set. If so, A8Y8 or A8 are options. Otherwise, Y8 is what we can do.
+                    if(pixel->alpha != 0xFF) {
+                        alpha_present = ALPHA_TYPE_MULTI_BIT;
+                    }
                 }
-                else {
-                    alpha_present = ALPHA_TYPE_MULTI_BIT;
-                    break;
+            }
+        }
+
+        // If we aren't doing monochrome, then we the bitness of the alpha
+        else {
+            for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
+                if(pixel->alpha != 0xFF) {
+                    if(pixel->alpha == 0) {
+                        alpha_present = ALPHA_TYPE_ONE_BIT;
+                    }
+                    else {
+                        alpha_present = ALPHA_TYPE_MULTI_BIT;
+                        break;
+                    }
                 }
             }
         }
@@ -534,6 +566,23 @@ int main(int argc, char *argv[]) {
                         break;
                 }
                 break;
+            case BitmapFormat::BITMAP_FORMAT_MONOCHROME:
+                if(alpha_equals_luminosity) {
+                    bitmap.format = BitmapDataFormat::BITMAP_FORMAT_AY8;
+                }
+                else if(alpha_present == ALPHA_TYPE_MULTI_BIT) {
+                    if(luminosity_set) {
+                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8Y8;
+                    }
+                    else {
+                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8;
+                    }
+                }
+                else {
+                    bitmap.format = BitmapDataFormat::BITMAP_FORMAT_Y8;
+                }
+                break;
+
             case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY:
                 bitmap.format = BitmapDataFormat::BITMAP_FORMAT_DXT1;
                 break;
@@ -590,6 +639,39 @@ int main(int argc, char *argv[]) {
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
 
+                break;
+            }
+
+            // If it's monochrome, it depends
+            case BitmapDataFormat::BITMAP_FORMAT_A8:
+            case BitmapDataFormat::BITMAP_FORMAT_AY8: {
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint8_t));
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                    *pixel_8_bit = pixel->alpha;
+                }
+                current_bitmap_pixels.clear();
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                break;
+            }
+            case BitmapDataFormat::BITMAP_FORMAT_Y8: {
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint8_t));
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                    *pixel_8_bit = CompositeBitmapPixel::convert_to_y8(pixel);
+                }
+                current_bitmap_pixels.clear();
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                break;
+            }
+            case BitmapDataFormat::BITMAP_FORMAT_A8Y8: {
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
+                auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
+                    *pixel_16_bit = CompositeBitmapPixel::convert_to_a8y8(pixel);
+                }
+                current_bitmap_pixels.clear();
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
                 break;
             }
 

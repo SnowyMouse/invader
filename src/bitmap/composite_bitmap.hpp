@@ -49,6 +49,34 @@ namespace Invader {
 
             return color_output;
         }
+
+        static std::uint8_t convert_to_y8(const CompositeBitmapPixel *color) {
+            // Based on Luma
+            static const std::uint8_t RED_WEIGHT = 54;
+            static const std::uint8_t GREEN_WEIGHT = 182;
+            static const std::uint8_t BLUE_WEIGHT = 19;
+            static_assert(RED_WEIGHT + GREEN_WEIGHT + BLUE_WEIGHT == UINT8_MAX, "red + green + blue weights (grayscale) must equal 255");
+
+            std::uint8_t grayscale_output = 0;
+            #define COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(channel, weight) \
+                grayscale_output += (color->channel * weight + (UINT8_MAX + 1) / 2) / UINT8_MAX;
+
+            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(red, RED_WEIGHT)
+            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(green, GREEN_WEIGHT)
+            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(blue, BLUE_WEIGHT)
+
+            #undef COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR
+
+            return grayscale_output;
+        }
+
+        static std::uint8_t convert_to_a8(const CompositeBitmapPixel *color) {
+            return color->alpha;
+        }
+
+        static std::uint16_t convert_to_a8y8(const CompositeBitmapPixel *color) {
+            return (color->alpha << 8) | convert_to_y8(color);
+        }
     };
     static_assert(sizeof(CompositeBitmapPixel) == 4);
 
