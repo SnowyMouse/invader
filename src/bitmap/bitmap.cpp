@@ -93,9 +93,7 @@ int main(int argc, char *argv[]) {
         {"dithering",  no_argument, 0, 'D'},
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
-        {"format", required_argument, 0, 'f' },
-        {"input-format", required_argument, 0, 'I' },
-        {"output-format", required_argument, 0, 'O' },
+        {"format", required_argument, 0, 'F' },
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
@@ -103,7 +101,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:O:m:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -148,7 +146,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
-            case 'O':
+            case 'F':
                 if(std::strcmp(optarg, "32-bit") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
                 }
@@ -190,7 +188,7 @@ int main(int argc, char *argv[]) {
                 eprintf("Bitmap options:\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
-                eprintf("    --output-format,-O <type>  Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
+                eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
                 eprintf("                               <count> mipmaps. Default (new tag): 32767\n");
