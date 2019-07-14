@@ -18,7 +18,7 @@ This program generates bitmap files. It takes the following arguments:
 | `--tags,-t <dir>` | Tags directory. |
 | `--dithering,-D` | Apply dithering. Only works on `dxt1`, `dxt3`, and `dxt5` for now. |
 | `--ignore-tag,-I` | Ignore the tag data if the tag exists. |
-| `--format,-F <format>` | Output format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |
+| `--format,-F <format>` | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |
 | `--mipmap-count,-m <count>` | Set maximum mipmap count. Negative numbers discard `<count>` mipmaps, instead. |
 | `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
