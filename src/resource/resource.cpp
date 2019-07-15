@@ -6,8 +6,13 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
+#include <filesystem>
 #include <getopt.h>
+#include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
+#include "../tag/hek/class/sound.hpp"
+#include "resource_map.hpp"
 #include "hek/resource_map.hpp"
 #include "list/resource_list.hpp"
 
@@ -94,4 +99,170 @@ int main(int argc, char *argv[]) {
         eprintf("No resource map type was given. Use --help for more information.\n");
         return EXIT_FAILURE;
     }
+
+    // Get all the tags
+    std::vector<std::string> tags_list;
+    for(const char **i = default_fn(); *i; i++) {
+        tags_list.insert(tags_list.end(), *i);
+    }
+
+    ResourceMapHeader header = {};
+    header.type = type;
+    header.resource_count = tags_list.size();
+
+    // Read the amazing fun happy stuff
+    std::vector<std::byte> resource_data(sizeof(ResourceMapHeader));
+    std::vector<std::size_t> offsets;
+    std::vector<std::size_t> sizes;
+    std::vector<std::string> paths;
+
+
+    for(const std::string &tag : tags_list) {
+        // First let's open it
+        Invader::HEK::TagClassInt tag_class_int;
+        std::vector<std::byte> tag_data;
+
+        std::string tag_path = tag;
+        for(char &c : tag_path) {
+            if(c == '\\') {
+                c = std::filesystem::path::preferred_separator;
+            }
+        }
+
+        auto tag_path_str = (std::filesystem::path(tags) / tag_path).string();
+
+        #define ATTEMPT_TO_OPEN(extension) { \
+            tag_path_str += extension; \
+            std::FILE *f = std::fopen(tag_path_str.data(), "rb"); \
+            if(!f) { \
+                eprintf("Failed to open %s.\n", tag_path.data()); \
+                return EXIT_FAILURE; \
+            } \
+            std::fseek(f, 0, SEEK_END); \
+            tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
+            std::fseek(f, 0, SEEK_SET); \
+            if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
+                eprintf("Failed to read %s.\n", tag_path_str.data()); \
+                return EXIT_FAILURE; \
+            } \
+            std::fclose(f); \
+        }
+
+        switch(type) {
+            case ResourceMapType::RESOURCE_MAP_BITMAP:
+                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_BITMAP;
+                ATTEMPT_TO_OPEN(".bitmap")
+                break;
+            case ResourceMapType::RESOURCE_MAP_SOUND:
+                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_SOUND;
+                ATTEMPT_TO_OPEN(".sound")
+                break;
+            case ResourceMapType::RESOURCE_MAP_LOC:
+                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_FONT;
+                #define DO_THIS_FOR_ME_PLEASE(tci, extension) if(tag_data.size() == 0) { \
+                    tag_class_int = tci; \
+                    std::string tag_path_temp_str = tag_path_str + extension; \
+                    std::FILE *f = std::fopen(tag_path_temp_str.data(), "rb"); \
+                    if(f) { \
+                        std::fseek(f, 0, SEEK_END); \
+                        tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
+                        std::fseek(f, 0, SEEK_SET); \
+                        if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
+                            eprintf("Failed to read %s.\n", tag_path_str.data()); \
+                            return EXIT_FAILURE; \
+                        } \
+                        std::fclose(f); \
+                    } \
+                }
+                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_FONT, ".font")
+                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
+                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
+                break;
+        }
+
+        #undef ATTEMPT_TO_OPEN
+
+        // Compile the tags
+        try {
+            Invader::CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
+
+            // Now, adjust stuff for pointers
+            switch(type) {
+                case ResourceMapType::RESOURCE_MAP_BITMAP:
+                    for(auto &ptr : compiled_tag.pointers) {
+                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
+                    }
+                    break;
+                case ResourceMapType::RESOURCE_MAP_SOUND:
+                    for(auto &ptr : compiled_tag.pointers) {
+                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
+                    }
+
+                    break;
+                case ResourceMapType::RESOURCE_MAP_LOC:
+                    for(auto &ptr : compiled_tag.pointers) {
+                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
+                    }
+                    offsets.push_back(resource_data.size());
+                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                    paths.push_back(tag);
+                    sizes.push_back(compiled_tag.data.size());
+                    break;
+            }
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to compile %s.%s due to an exception: %s\n", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
+            return EXIT_FAILURE;
+        }
+    }
+
+    // Get the final path of the map
+    const char *map;
+    switch(type) {
+        case ResourceMapType::RESOURCE_MAP_BITMAP:
+            map = "bitmaps.map";
+            break;
+        case ResourceMapType::RESOURCE_MAP_SOUND:
+            map = "sounds.map";
+            break;
+        case ResourceMapType::RESOURCE_MAP_LOC:
+            map = "loc.map";
+            break;
+        default:
+            std::terminate();
+    }
+    auto map_path = std::filesystem::path(maps) / map;
+
+    // Finish up building up the map
+    std::size_t resource_count = paths.size();
+    assert(resource_count == offsets.size());
+    assert(resource_count == sizes.size());
+    std::vector<ResourceMapResource> resource_indices(resource_count);
+    std::vector<std::byte> resource_names_arr;
+    for(std::size_t i = 0; i < resource_count; i++) {
+        auto &index = resource_indices[i];
+        index.size = sizes[i];
+        index.data_offset = offsets[i];
+        index.path_offset = resource_names_arr.size();
+        resource_names_arr.insert(resource_names_arr.end(), reinterpret_cast<std::byte *>(paths[i].data()), reinterpret_cast<std::byte *>(paths[i].data()) + paths[i].size() + 1);
+    }
+    header.resource_count = resource_count;
+    header.paths = resource_data.size();
+    header.resources = resource_names_arr.size() + resource_data.size();
+    *reinterpret_cast<ResourceMapHeader *>(resource_data.data()) = header;
+
+    // Open the file
+    std::FILE *f = std::fopen(map_path.string().data(), "wb");
+    if(!f) {
+        eprintf("Failed to open %s for writing.\n", map_path.string().data());
+        return EXIT_FAILURE;
+    }
+
+    // Write everything
+    std::fwrite(resource_data.data(), resource_data.size(), 1, f);
+    std::fwrite(resource_names_arr.data(), resource_names_arr.size(), 1, f);
+    std::fwrite(resource_indices.data(), resource_indices.size() * sizeof(*resource_indices.data()), 1, f);
+
+    // Done!
+    std::fclose(f);
 }
