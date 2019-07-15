@@ -11,6 +11,7 @@
 #include <getopt.h>
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
+#include "../tag/hek/class/bitmap.hpp"
 #include "../tag/hek/class/sound.hpp"
 #include "resource_map.hpp"
 #include "hek/resource_map.hpp"
@@ -177,6 +178,7 @@ int main(int argc, char *argv[]) {
                 DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_FONT, ".font")
                 DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
                 DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
+                #undef DO_THIS_FOR_ME_PLEASE
                 break;
         }
 
@@ -188,11 +190,40 @@ int main(int argc, char *argv[]) {
 
             // Now, adjust stuff for pointers
             switch(type) {
-                case ResourceMapType::RESOURCE_MAP_BITMAP:
+                case ResourceMapType::RESOURCE_MAP_BITMAP: {
                     for(auto &ptr : compiled_tag.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
                     }
+
+                    // Push the asset data first
+                    std::size_t bitmap_data_offset = resource_data.size();
+                    offsets.push_back(bitmap_data_offset);
+                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                    paths.push_back(tag + "__pixels");
+                    sizes.push_back(compiled_tag.asset_data.size());
+
+                    // Do stuff to the tag data
+                    auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag.data.data());
+                    std::size_t bitmap_count = bitmap.bitmap_data.count;
+                    if(bitmap_count) {
+                        auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&bitmap.bitmap_data.pointer));
+                        auto *bitmaps_end = bitmaps + bitmap_count;
+                        for(auto *bitmap = bitmaps; bitmap < bitmaps_end; bitmap++) {
+                            auto flags = bitmap->flags.read();
+                            flags.external = 1;
+                            bitmap->flags = flags;
+                            bitmap->pixels_offset = bitmap_data_offset + bitmap->pixels_offset;
+                        }
+                    }
+
+                    // Push the tag data
+                    offsets.push_back(resource_data.size());
+                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                    paths.push_back(tag);
+                    sizes.push_back(compiled_tag.data.size());
+
                     break;
+                }
                 case ResourceMapType::RESOURCE_MAP_SOUND:
                     for(auto &ptr : compiled_tag.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
