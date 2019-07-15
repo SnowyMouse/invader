@@ -30,6 +30,72 @@ namespace Invader::HEK {
             flags.external = 0;
             flags.make_it_actually_work = 1;
             reflexive.flags.write(flags);
+
+            std::size_t total_pixel_count = 0;
+            std::size_t total_pixel_count_dxt = 0;
+            std::size_t total_mipmap_count = reflexive.mipmap_count.read();
+
+            // Calculate number of pixels
+            std::size_t mipmap_width = reflexive.width;
+            std::size_t mipmap_height = reflexive.height;
+            for(std::size_t mipmap = 0; mipmap <= total_mipmap_count; mipmap++) {
+                total_pixel_count += mipmap_height * mipmap_width;
+                total_pixel_count_dxt += (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height);
+
+                mipmap_height /= 2;
+                mipmap_width /= 2;
+            }
+
+            // Now, set the size based on number of pixels
+            switch(reflexive.format.read()) {
+                // 8-bit
+                case BITMAP_FORMAT_A8:
+                case BITMAP_FORMAT_Y8:
+                case BITMAP_FORMAT_P8_BUMP:
+                case BITMAP_FORMAT_AY8:
+                    reflexive.pixels_count = total_pixel_count;
+                    break;
+
+                // 8-bit DXT (4x4 blocks)
+                case BITMAP_FORMAT_DXT3:
+                case BITMAP_FORMAT_DXT5:
+                    reflexive.pixels_count = total_pixel_count_dxt;
+                    break;
+
+                // 16-bit
+                case BITMAP_FORMAT_A8Y8:
+                case BITMAP_FORMAT_R5G6B5:
+                case BITMAP_FORMAT_A1R5G5B5:
+                case BITMAP_FORMAT_A4R4G4B4:
+                    reflexive.pixels_count = total_pixel_count * 2;
+                    break;
+
+                // 32-bit
+                case BITMAP_FORMAT_X8R8G8B8:
+                case BITMAP_FORMAT_A8R8G8B8:
+                    reflexive.pixels_count = total_pixel_count * 4;
+                    break;
+
+                // 4-bit DXT (4x4 blocks)
+                case BITMAP_FORMAT_DXT1:
+                    reflexive.pixels_count = total_pixel_count_dxt / 2;
+                    break;
+
+                // lol
+                default:
+                    reflexive.pixels_count = 0;
+            }
+
+            switch(reflexive.type.read()) {
+                case BitmapDataType::BITMAP_TYPE_CUBE_MAP:
+                    reflexive.pixels_count = reflexive.pixels_count * 6;
+                    break;
+                case BitmapDataType::BITMAP_TYPE__3D_TEXTURE:
+                    reflexive.pixels_count = reflexive.pixels_count * reflexive.depth.read();
+                    break;
+                default:
+                    break;
+            }
         } ADD_REFLEXIVE_END
 
         FINISH_COMPILE;
