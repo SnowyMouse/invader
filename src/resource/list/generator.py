@@ -37,6 +37,7 @@ with open(sys.argv[4], "w") as f:
         f.write("    static const char *array[] = {\n")
         for i in list:
             f.write("        \"{}\",\n".format(i.rstrip("\n").replace("\\", "\\\\")))
+        f.write("        nullptr\n")
         f.write("    };\n")
         f.write("    return array;\n")
         f.write("}\n")

@@ -9,6 +9,7 @@
 #include <getopt.h>
 #include "../version.hpp"
 #include "hek/resource_map.hpp"
+#include "list/resource_list.hpp"
 
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
@@ -32,6 +33,7 @@ int main(int argc, char *argv[]) {
 
     // Resource map type
     ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
+    const char **(*default_fn)() = get_default_bitmap_resources;
     bool resource_map_set = false;
 
     int opt;
@@ -54,12 +56,15 @@ int main(int argc, char *argv[]) {
             case 'T':
                 if(std::strcmp(optarg, "bitmaps") == 0) {
                     type = ResourceMapType::RESOURCE_MAP_BITMAP;
+                    default_fn = get_default_bitmap_resources;
                 }
                 else if(std::strcmp(optarg, "sounds") == 0) {
                     type = ResourceMapType::RESOURCE_MAP_SOUND;
+                    default_fn = get_default_sound_resources;
                 }
                 else if(std::strcmp(optarg, "loc") == 0) {
                     type = ResourceMapType::RESOURCE_MAP_LOC;
+                    default_fn = get_default_loc_resources;
                 }
                 else {
                     eprintf("Invalid type %s. Use --help for more information.\n", optarg);
