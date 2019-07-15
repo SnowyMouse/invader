@@ -10,11 +10,17 @@
 #include "../../hek/data_type.hpp"
 
 namespace Invader::HEK {
+    enum ResourceMapType : std::uint32_t {
+        RESOURCE_MAP_BITMAP = 1,
+        RESOURCE_MAP_SOUND = 2,
+        RESOURCE_MAP_LOC = 3
+    };
+
     struct ResourceMapHeader {
         /**
          * Type of resource map
          */
-        LittleEndian<std::uint32_t> type;
+        LittleEndian<ResourceMapType> type;
 
         /**
          * Offset to paths
