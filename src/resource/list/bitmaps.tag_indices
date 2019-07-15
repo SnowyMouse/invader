@@ -1,0 +1,1471 @@
+1470
+sky\space\bitmaps\star mask
+sky\space\bitmaps\stars
+sky\sky_x10\bitmaps\space
+sky\planets\threshold space
+sky\planets\basis space
+sky\sky_x10\bitmaps\galaxy
+effects\particles\lens flare\bitmaps\flares_generic
+scenery\halo\bitmaps\halo inner ring
+scenery\halo\bitmaps\halo inner ring multi
+scenery\halo\bitmaps\cubemap halo
+scenery\halo\bitmaps\halo outer ring
+scenery\halo\bitmaps\halo outer ring multi
+characters\cyborg\bitmaps\detail corroded metal light
+scenery\halo\bitmaps\halo ring inner shadow
+ui\hud\bitmaps\combined\hud_weapon_backgrounds
+ui\hud\bitmaps\combined\hud_ammo_outlines
+ui\hud\bitmaps\combined\hud_ammo_type_icons
+weapons\frag grenade\bitmaps\frag grenade
+weapons\frag grenade\bitmaps\frag grenade multipurpose
+weapons\assault rifle\fp\bitmaps\diffuse gunmetal
+weapons\frag grenade\bitmaps\frag grenade decal
+effects\particles\flash\bitmaps\fire cloud
+effects\particles\air\bitmaps\smoke cloud
+effects\decals\bullet holes\bitmaps\dirt pistol
+effects\particles\lens flare\bitmaps\flares_generic2
+effects\particles\air\bitmaps\smoke tank cannon
+effects\particles\air\bitmaps\smoke warthog gun
+effects\zmaps\zmap_noisy_small
+effects\particles\solid\bitmaps\dirt burst
+effects\zmaps\zmap_noisy_large
+effects\particles\solid\bitmaps\water burst
+effects\particles\solid\bitmaps\blood burst
+effects\decals\blood splats\bitmaps\blood splat elite
+effects\zmaps\zmap_noisy_medium
+effects\particles\solid\bitmaps\gravel
+effects\particles\solid\bitmaps\stone bunch
+effects\particles\solid\bitmaps\snow impact
+effects\particles\solid\bitmaps\snow burst
+effects\particles\solid\bitmaps\wood chips
+effects\particles\lens flare\bitmaps\flares weapon lens
+effects\particles\flash\bitmaps\sparks impact
+effects\particles\flash\bitmaps\sparks
+effects\particles\flash\bitmaps\flash h shield impact
+effects\particles\solid\bitmaps\metal chips
+effects\particles\solid\bitmaps\rubber impact
+effects\particles\flash\bitmaps\flash h generic muzzle
+effects\particles\energy\bitmaps\shield jackal bolt
+effects\particles\energy\bitmaps\shield c generic
+effects\particles\energy\bitmaps\shield jackal spark
+effects\particles\energy\bitmaps\flash c generic muzzle
+effects\particles\solid\bitmaps\grass impact
+weapons\plasma grenade\bitmaps\plasma grenade
+weapons\plasma grenade\bitmaps\plasma grenade multipurpose
+weapons\plasma rifle\bitmaps\cubemap plasma rifle
+effects\particles\energy\bitmaps\smoke c generic
+effects\particles\energy\bitmaps\plasma electric bolts
+effects\particles\air\bitmaps\bubbles
+effects\particles\energy\bitmaps\cloud c fire
+effects\decals\bullet holes\bitmaps\plasma burn outer glow
+effects\decals\bullet holes\bitmaps\plasma burn inner glow
+effects\decals\bullet holes\bitmaps\plasma burn large
+effects\particles\lens flare\bitmaps\flares pr overcharge
+effects\particles\energy\bitmaps\tracers c generic
+rasterizer\distance attenuation
+rasterizer\vector normalization
+rasterizer\atmospheric fog density
+rasterizer\planar fog density
+rasterizer\linear corner fade
+rasterizer\active camouflage distortion
+rasterizer\glow
+rasterizer\default 2d
+rasterizer\default 3d
+rasterizer\default cube map
+rasterizer\water_ff
+levels\a10\bitmaps\cryo glass
+rasterizer\video mask
+rasterizer\video noise
+ui\hud\bitmaps\combined\hud_msg_icons
+ui\hud\bitmaps\combined\hud_waypoints
+ui\hud\bitmaps\combined\hud_reticles
+ui\hud\bitmaps\combined\hud_reticle_warnings
+ui\hud\bitmaps\combined\hud_damage_arrows
+ui\shell\bitmaps\postgame_carnage_report
+ui\hud\bitmaps\hud_sweeper
+ui\hud\bitmaps\hud_sweeper_mask
+ui\hud\bitmaps\hud_multiplayer
+ui\hud\bitmaps\combined\hud_counter_numbers
+ui\hud\bitmaps\hud_sensor_blip
+ui\hud\bitmaps\hud_sensor_blip_custom
+ui\hud\bitmaps\hud_msg_icons_sm
+characters\jackal\bitmaps\shield noise
+effects\particles\flash\bitmaps\shield charge rings
+effects\particles\flash\bitmaps\shield charge flares
+characters\cyborg\fp\bitmaps\cyborg hands
+characters\cyborg\fp\bitmaps\cyborg hands multipurpose
+characters\cyborg\bitmaps\cyborg reflection armor
+ui\hud\bitmaps\hud_health_base
+ui\shell\bitmaps\white
+ui\shell\bitmaps\cursor
+ui\shell\bitmaps\background
+ui\shell\bitmaps\trouble_brewing
+ui\bkd_virtual_keyboard
+ui\kbd_hilite1
+ui\kbd_select1
+ui\kbd_hilite3
+ui\kbd_select3
+ui\kbd_engaged3
+ui\kbd_hilite4
+ui\kbd_select4
+ui\kbd_hilite2
+ui\kbd_select2
+ui\kbd_hilite6
+ui\kbd_select6
+ui\mp_map_ui\beaver_creek
+ui\mp_map_ui\bloodgulch
+ui\mp_map_ui\boardingaction
+ui\mp_map_ui\carousel
+ui\mp_map_ui\chillout
+ui\mp_map_ui\hangemhigh
+ui\mp_map_ui\prisoner
+ui\mp_map_ui\ratrace
+ui\mp_map_ui\ruinedpain
+ui\mp_map_ui\sidewinder
+ui\mp_map_ui\wizard
+ui\mp_map_ui\bonus_level
+ui\shell\bitmaps\alert_bkd
+ui\shell\bitmaps\text_button_background
+ui\shell\main_menu\halo_logo
+ui\shell\main_menu\menu_load_campaign
+ui\shell\bitmaps\gradient
+ui\shell\bitmaps\list_field
+ui\shell\main_menu\difficulty_select\difficulty_options
+ui\shell\bitmaps\list_item_bkd_top
+ui\shell\bitmaps\list_item_bkd
+ui\shell\main_menu\multiplayer_type_select\server_settings\header_server_settings
+ui\shell\bitmaps\option_bkds
+ui\shell\bitmaps\arrow_sm_left
+ui\shell\bitmaps\arrow_sm_right
+ui\shell\main_menu\difficulty_select\header_choose_difficulty
+ui\shell\main_menu\campaign_select\item_continue
+ui\shell\main_menu\campaign_select\item_new_campaign
+ui\shell\bitmaps\sel_list_desc_bkd
+ui\shell\bitmaps\spinner_list_3_wide_item_background
+ui\shell\bitmaps\sp_levels
+ui\shell\main_menu\difficulty_select\difficulty_options_small
+ui\shell\bitmaps\sel_list_item_bkd_top
+ui\shell\bitmaps\option_bkds_sm
+ui\shell\bitmaps\arrow_sm_up
+ui\shell\bitmaps\arrow_sm_down
+ui\shell\bitmaps\sel_list_item_bkd
+ui\shell\main_menu\solo_level_select\header_load_level
+ui\shell\main_menu\campaign_select\item_load_game
+ui\shell\bitmaps\semi_transparent_grey
+ui\shell\main_menu\campaign_select\header_load_game
+ui\shell\main_menu\campaign_select\item_back
+ui\shell\main_menu\menu_multiplayer
+ui\shell\main_menu\multiplayer_type_select\header_multiplayer
+ui\shell\main_menu\multiplayer_type_select\mp_options
+ui\shell\bitmaps\gradient_big
+ui\shell\main_menu\multiplayer_type_select\join_game\header_internet
+ui\shell\main_menu\multiplayer_type_select\join_game\header_lan
+ui\shell\main_menu\multiplayer_type_select\join_game\gamespy_logo
+ui\shell\bitmaps\join_game_border
+ui\shell\bitmaps\option_bkds_sm2
+ui\shell\bitmaps\server_header_background_0
+ui\shell\main_menu\multiplayer_type_select\join_game\locked_icon
+ui\shell\main_menu\multiplayer_type_select\join_game\dedicated_icon
+ui\shell\bitmaps\server_header_background_3
+ui\shell\bitmaps\server_header_background_2
+ui\shell\main_menu\multiplayer_type_select\join_game\classic_icon
+ui\shell\bitmaps\server_header_background_1
+ui\shell\bitmaps\server_item_bkds
+ui\shell\bitmaps\black
+ui\shell\main_menu\multiplayer_type_select\join_game\filters\header_filters
+ui\shell\main_menu\multiplayer_type_select\direct_ip\header_direct_ip
+ui\shell\bitmaps\game_type_grafix
+ui\shell\bitmaps\locked_gametype
+ui\shell\main_menu\gametype_select\header_select_gametype
+ui\shell\bitmaps\mp_map_grafix
+ui\shell\main_menu\multiplayer_type_select\mp_map_select\header_select_map
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\header_edit_multiplayer_gametype
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\gametype_options
+ui\shell\main_menu\settings_select\multiplayer_setup\name_edit\header_gametype_name
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\game_type_select\header_rules
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\game_type_select\rules_options
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\header_set_options
+ui\shell\main_menu\settings_select\multiplayer_setup\player_options_edit\header_player_options
+ui\shell\main_menu\settings_select\multiplayer_setup\item_options_edit\header_item_options
+ui\shell\main_menu\settings_select\multiplayer_setup\vehicle_options_edit\header_vehicle_options
+ui\shell\main_menu\settings_select\multiplayer_setup\indicator_options_edit\header_indicator_options
+ui\shell\main_menu\settings_select\multiplayer_setup\teamplay_options_edit\header_teamplay_options
+ui\shell\main_menu\settings_select\multiplayer_setup\playlist_select\header_select_gametype_to_edit
+ui\shell\bitmaps\blue
+ui\shell\main_menu\menu_profile
+ui\shell\bitmaps\colors_sm
+ui\shell\main_menu\player_profiles_select\header_select_profile
+ui\shell\main_menu\menu_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\header_edit_profile_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\profile_options
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\name_edit\header_profile_name
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\controls_setup\header_profile_controls_settings
+ui\shell\bitmaps\controller_border
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\controller_edit\header_profile_controller_setting
+ui\shell\bitmaps\device_border
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\mouse_settings\header_profile_mouse_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\audio_settings\header_profile_audio_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\video_settings\header_profile_video_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\network_setup\header_profile_network_settings
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\color_edit\player_color_marine_large
+ui\shell\main_menu\settings_select\player_setup\player_profile_edit\color_edit\header_profile_color
+ui\shell\main_menu\menu_credits
+ui\shell\main_menu\menu_quit
+ui\shell\main_menu\multiplayer_type_select\connected\pregame\header_enlisted_players
+ui\shell\main_menu\multiplayer_type_select\split_screen\pregame\pregame_message_field_split
+ui\shell\main_menu\multiplayer_type_select\split_screen\pregame\pregame_field
+ui\shell\bitmaps\console_grafix
+ui\shell\bitmaps\controller_graphix
+ui\shell\main_menu\multiplayer_type_select\split_screen\pregame\pregame_list_field
+ui\shell\bitmaps\a_butn
+ui\shell\bitmaps\x_butn
+ui\shell\bitmaps\b_butn
+ui\shell\bitmaps\xdemos_wait
+sky\planets\threshold clear afternoon
+sky\planets\basis clear afternoon
+sky\ring\ring clear afternoon
+sky\clear afternoon\bitmaps\detail star twinkle
+sky\clear afternoon\bitmaps\stars
+sky\clear afternoon\bitmaps\sky clear blue
+sky\clear afternoon\bitmaps\cloud mask
+sky\clear afternoon\bitmaps\clouds puffy light
+scenery\trees\tree_leafy\bitmaps\tree_leafy_trunk
+scenery\trees\tree_leafy\bitmaps\detail_tree_leafy
+scenery\trees\tree_leafy\bitmaps\tree_leafy_leaves
+scenery\trees\tree_leafy\bitmaps\tree_leafy_leaves_multi
+scenery\plants\plant_broadleaf_tall\bitmaps\plant_broadleaf_trunk
+scenery\plants\plant_broadleaf_tall\bitmaps\plant_broadleaf_leaf
+scenery\plants\plant_broadleaf_tall\bitmaps\plant_broadleaf_leaf_multi
+vehicles\warthog\bitmaps\reflection diffuse metal
+scenery\plants\plant fern\bitmaps\plant fern
+scenery\teleporter_shield\bitmaps\teleporter_shield_dust
+scenery\teleporter_shield\bitmaps\teleporter_shield_mask
+levels\b40\scenery\b40_doorblinker\bitmaps\doorblinker
+levels\b30\bitmaps\metal strips decorative wide
+levels\b30\bitmaps\detail tech panels
+levels\b30\bitmaps\metal strips decorative wide bump
+levels\b30\bitmaps\cube map forerunner interiors
+scenery\flag_base\bitmaps\flag_base
+levels\b30\bitmaps\detail brushed metal
+levels\b30\bitmaps\metal flat generic
+levels\b30\bitmaps\detail metal sratches
+levels\b30\bitmaps\metal flat generic bump
+scenery\trees\tree_pine\bitmaps\tree_pine_trunk
+scenery\trees\tree_pine\bitmaps\tree_pine_bough
+powerups\healthpack\bitmaps\healthpack
+powerups\healthpack\bitmaps\healthpack_multi
+weapons\assault rifle\bitmaps\assault rifle_card
+weapons\assault rifle\bitmaps\assault rifle_card_multipurpose
+weapons\assault rifle\fp\bitmaps\assault rifle_fp
+weapons\assault rifle\fp\bitmaps\assault rifle multipurpose
+weapons\assault rifle\fp\bitmaps\display_fp
+weapons\assault rifle\fp\bitmaps\display multipurpose
+weapons\assault rifle\fp\bitmaps\compass_plate
+weapons\assault rifle\fp\bitmaps\numbers_plate
+weapons\assault rifle\bitmaps\bolt
+characters\cyborg\bitmaps\spotlight cyborg
+ui\hud\bitmaps\combined\hud_ammo_alphas
+ui\hud\bitmaps\combined\hud_ammo_meters
+powerups\assault rifle ammo\bitmaps\ar ammo
+powerups\assault rifle ammo\bitmaps\ar ammo multipurpose
+weapons\pistol\bitmaps\pistol cubemap
+weapons\assault rifle\bitmaps\tracer contrail
+effects\particles\air\bitmaps\dirt impact
+effects\particles\air\bitmaps\sand impact burst
+effects\decals\bullet holes\bitmaps\stone
+effects\decals\bullet holes\bitmaps\snow
+effects\particles\solid\bitmaps\snow bunch
+effects\decals\bullet holes\bitmaps\metal
+effects\decals\blood splats\bitmaps\blood splat
+effects\decals\bullet holes\bitmaps\unbreakable glass
+effects\decals\blood splats\bitmaps\blood splat grunt
+effects\particles\solid\bitmaps\blood generic burst
+effects\particles\solid\bitmaps\blood engineer
+effects\decals\blood splats\bitmaps\blood splat hunter glow
+effects\decals\blood splats\bitmaps\blood splat hunter
+effects\particles\solid\bitmaps\impact bits hunter
+effects\particles\solid\bitmaps\blood elite impact burst
+effects\particles\solid\bitmaps\flood debris
+effects\particles\solid\bitmaps\blood h impact
+effects\particles\solid\bitmaps\water ripple
+effects\decals\bullet holes\bitmaps\ice
+effects\particles\solid\bitmaps\glass breakable large
+effects\particles\solid\bitmaps\glass breakable mask large
+effects\particles\flash\bitmaps\flash h ar fp
+effects\particles\solid\bitmaps\casings h ar
+powerups\active camoflage\bitmaps\powerups
+powerups\active camoflage\bitmaps\powerups multi
+vehicles\banshee\bitmaps\detail banshee
+scenery\c_field_generator\bitmaps\c_field_generator_dust
+powerups\active camoflage\bitmaps\camoflage
+weapons\plasma rifle\bitmaps\plasma rifle_card
+weapons\plasma rifle\bitmaps\plasma rifle_card multipurpose
+weapons\plasma rifle\fp\bitmaps\heat gauge
+weapons\plasma rifle\fp\bitmaps\plasma rifle_fp
+weapons\plasma rifle\fp\bitmaps\plasma rifle multipurpose
+characters\grunt\bitmaps\reflection grunt diffuse
+effects\particles\lens flare\bitmaps\soft flares
+effects\particles\energy\bitmaps\smoke white c generic
+weapons\plasma rifle\bitmaps\plasma rifle contrail
+effects\decals\bullet holes\bitmaps\plasma burn
+effects\particles\energy\bitmaps\sparks c energy
+effects\decals\blood splats\bitmaps\blood splat engineer
+weapons\needler\bitmaps\needler needles 3p
+weapons\needler\bitmaps\needler_card
+weapons\needler\bitmaps\needler
+weapons\needler\bitmaps\needler multipurpose map
+vehicles\banshee\bitmaps\cubemap banshee
+levels\b30\bitmaps\glass
+weapons\needler\bitmaps\needle plasma offset
+weapons\needler\bitmaps\needle plasma mask
+powerups\needler ammo\bitmaps\needler ammo
+powerups\needler ammo\bitmaps\needler ammo glow offset
+powerups\needler ammo\bitmaps\needler ammo glow
+weapons\needler\bitmaps\needler needles
+weapons\needler\bitmaps\needler contrail
+effects\particles\solid\bitmaps\needler spike debris
+effects\particles\flash\bitmaps\flash h pistol detonate
+weapons\sniper rifle\bitmaps\sniper rifle
+weapons\sniper rifle\bitmaps\sniper rifle multipurpose
+weapons\sniper rifle\bitmaps\sr bolt
+weapons\sniper rifle\bitmaps\sr decal
+weapons\sniper rifle\bitmaps\sr decal multipurpose
+weapons\sniper rifle\bitmaps\sr subscreen decal
+weapons\sniper rifle\bitmaps\sr subscreen ghost
+weapons\sniper rifle\bitmaps\angle_ticks_black
+weapons\sniper rifle\bitmaps\angle_ticks_mask
+weapons\sniper rifle\bitmaps\angle_ticks
+weapons\sniper rifle\bitmaps\angle_ticks2
+ui\hud\bitmaps\sniper\hud_reticles_scope
+ui\hud\bitmaps\sniper\sniper_scope_crosshairs2
+ui\hud\bitmaps\sniper\sniper_scope_crosshairs_sm
+ui\hud\bitmaps\sniper\caption
+ui\hud\bitmaps\sniper\sniper_scope_mask2
+ui\hud\bitmaps\sniper\sniper_scope_mask_sm
+powerups\sniper rifle ammo\bitmaps\sr ammo
+powerups\sniper rifle ammo\bitmaps\sr ammo multipurpose
+weapons\sniper rifle\bitmaps\sniper contrail
+vehicles\warthog\bitmaps\casings
+weapons\rocket launcher\bitmaps\rocket launcher
+weapons\rocket launcher\bitmaps\rocket launcher multipurpose
+weapons\rocket launcher\bitmaps\rocket launcher ends
+weapons\rocket launcher\bitmaps\rocket launcher decal
+ui\hud\bitmaps\pistol\pistol_scope_mask
+ui\hud\bitmaps\pistol\pistol_scope_mask split
+powerups\rocket launcher ammo\bitmaps\rocket launcher ammo
+powerups\rocket launcher ammo\bitmaps\rocket launcher ammo multipurpose
+weapons\rocket launcher\projectile\bitmaps\rocket
+weapons\rocket launcher\projectile\bitmaps\rocket multipuropse
+effects\particles\flash\bitmaps\flash h pistol
+weapons\rocket launcher\bitmaps\exhaust contrail
+powerups\over shield\bitmaps\overshield
+weapons\pistol\bitmaps\pistol_card
+weapons\pistol\bitmaps\pistol_card multipurpose
+weapons\pistol\fp\bitmaps\pistol
+weapons\pistol\fp\bitmaps\pistol multipurpose
+weapons\pistol\fp\bitmaps\bullet
+powerups\pistol ammo\bitmaps\p ammo
+powerups\pistol ammo\bitmaps\p ammo multipurpose
+weapons\pistol\bitmaps\casings
+weapons\plasma pistol\bitmaps\plasma pistol_card
+weapons\plasma pistol\bitmaps\plasma pistol_card multipurpose
+weapons\plasma pistol\bitmaps\plasma pistol
+weapons\plasma pistol\bitmaps\plasma pistol multipurpose
+weapons\plasma pistol\bitmaps\pp display
+effects\decals\bullet holes\bitmaps\plasma green inner glow
+weapons\plasma pistol\bitmaps\pistol charged contrail
+levels\b30\decals-environment\bitmaps\decal fore symb red
+levels\b30\decals-environment\bitmaps\decal fore symb blue
+levels\test\sidewinder\decals-environment\bitmaps\fore_stripe_plate_red
+levels\test\sidewinder\decals-environment\bitmaps\fore_stripe_plate_blue
+weapons\flamethrower\bitmaps\flamethrower
+weapons\flamethrower\bitmaps\flamethrower multipurpose
+vehicles\rwarthog\bitmaps\rwarthog_detail_metal
+weapons\flamethrower\bitmaps\cloud fire
+effects\particles\flash\bitmaps\burning flame
+weapons\flamethrower\bitmaps\flamethrower_screen
+weapons\flamethrower\bitmaps\flamethrower_numbers
+weapons\flamethrower\bitmaps\flamethrower_heat_display
+powerups\flamethrower ammo\bitmaps\flamethrower ammo
+powerups\flamethrower ammo\bitmaps\flamethrower ammo multipurpose
+effects\decals\bullet holes\bitmaps\impact flame thrower char
+weapons\gravity rifle\bitmaps\gravity rifle
+weapons\gravity rifle\bitmaps\gravity rifle multipurpose
+weapons\shotgun\bitmaps\shotgun_card
+weapons\shotgun\bitmaps\shotgun_card multipurpose
+weapons\shotgun\bitmaps\shotgun bolt
+weapons\shotgun\bitmaps\sg loading port
+weapons\shotgun\bitmaps\sg loading port multipurpose
+weapons\shotgun\bitmaps\shotgun
+weapons\shotgun\bitmaps\shotgun multipurpose
+weapons\shotgun\bitmaps\shotshell
+weapons\shotgun\bitmaps\shotshell multipurpose
+powerups\shotgun ammo\bitmaps\sg ammo
+powerups\shotgun ammo\bitmaps\sg ammo multipurpose
+weapons\shotgun\bitmaps\casings
+weapons\ball\bitmaps\gameball_l00
+weapons\ball\bitmaps\gameball_l00 multipurpose
+weapons\ball\bitmaps\gameball_l00 detail
+weapons\flag\bitmaps\flag
+weapons\flag\bitmaps\flag multipurpose
+characters\cyborg\bitmaps\cubemap mirror surface
+weapons\flag\bitmaps\flag_red
+weapons\flag\bitmaps\flags_blue
+weapons\flag\fp\bitmaps\flag fp
+weapons\flag\fp\bitmaps\flag fp multipurpose
+weapons\plasma_cannon\bitmaps\wrld_plasmacannon
+weapons\plasma_cannon\bitmaps\wrld_plasmacannon_multipurpose
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon_metal
+weapons\plasma_cannon\bitmaps\wrld_plasmacannon_electron
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon_multipurpose
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon_electronics
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon_ammo_display
+weapons\plasma_cannon\fp\bitmaps\fp_plasmacannon_heat_display
+weapons\fuel rod gun\bitmaps\fuelrod gun
+weapons\fuel rod gun\bitmaps\fuel rod gun multipurpose
+weapons\fuel rod gun\bitmaps\shadow beam contrail
+effects\particles\energy\bitmaps\charge c energy
+characters\jackal\bitmaps\shield mask
+characters\cyborg\bitmaps\cyborg
+characters\cyborg\bitmaps\cyborg multipurpose
+effects\particles\energy\bitmaps\shield jackal depletion
+characters\elite\bitmaps\plasma shield noise
+ui\hud\bitmaps\combined\hud_unit_backgrounds
+ui\hud\bitmaps\combined\hud_unit_meters
+vehicles\warthog\bitmaps\warthog tires
+vehicles\warthog\bitmaps\warthog tires multipurpose
+vehicles\warthog\bitmaps\warthog
+vehicles\warthog\bitmaps\warthog multipurpose
+vehicles\warthog\bitmaps\warthog chaingun
+vehicles\warthog\bitmaps\warthog chaingun multipurpose
+characters\elite\bitmaps\cubemap dark gray
+vehicles\warthog\bitmaps\warthog reflection mask
+vehicles\warthog\bitmaps\warthog diplays
+vehicles\warthog\bitmaps\meter speedometer
+vehicles\warthog\bitmaps\meter sensor
+vehicles\warthog\bitmaps\chain gun_blur
+vehicles\scorpion\bitmaps\headlight_lens_flare
+vehicles\warthog\bitmaps\headlights gel warthog
+vehicles\warthog\bitmaps\headlight flares
+vehicles\warthog\bitmaps\antenna
+effects\particles\solid\bitmaps\debris shirt
+effects\decals\vehicle marks\bitmaps\snow treadmarks
+vehicles\ghost\bitmaps\ghost
+vehicles\ghost\bitmaps\ghost multi
+vehicles\ghost\bitmaps\ghost_destroyed
+vehicles\ghost\bitmaps\ghost_destroyed_multi
+vehicles\wraith\bitmaps\blown_open_damage
+vehicles\wraith\bitmaps\wraith_destroyed_multi
+vehicles\scorpion\bitmaps\scorpion_body
+vehicles\scorpion\bitmaps\scorpion_multipurpose
+vehicles\scorpion\bitmaps\scorpion_treads
+vehicles\scorpion\bitmaps\scorpion_treads_multipurpose
+vehicles\scorpion\bitmaps\headlights gel scorpion
+vehicles\scorpion\bitmaps\shell dirt burst
+effects\particles\flash\bitmaps\shell flash
+vehicles\scorpion\bitmaps\smoke cannon
+vehicles\banshee\bitmaps\banshee
+vehicles\banshee\bitmaps\banshee multi
+vehicles\banshee\bitmaps\banshee_burned
+vehicles\banshee\bitmaps\banshee_burned multi
+characters\elite\bitmaps\cubemap blue tone
+effects\particles\lens flare\bitmaps\flares weapon lens1
+vehicles\banshee\bitmaps\banshee contrail
+vehicles\c gun turret\bitmaps\gun turret base
+vehicles\c gun turret\bitmaps\gun turret base multi
+vehicles\c gun turret\bitmaps\gun turret weapon
+vehicles\c gun turret\bitmaps\gun turret weapon multi
+levels\c20\devices\index platform\bitmaps\energy tendril mask
+vehicles\c gun turret\bitmaps\c_gun_turret_contrail
+effects\particles\energy\bitmaps\light ring expand
+vehicles\rwarthog\bitmaps\rwarthog_tires
+vehicles\rwarthog\bitmaps\rwarthog
+vehicles\rwarthog\bitmaps\rwarthog_rl
+vehicles\rwarthog\bitmaps\rwarthog_rl_multipurpose
+scenery\hilltop\bitmaps\hilltop
+levels\b30\devices\interior tech objects\holo control\bitmaps\holo readout
+ui\shell\bitmaps\pausebox5_left
+ui\shell\bitmaps\pausebox5_center
+ui\shell\bitmaps\pausebox5_right
+ui\shell\bitmaps\menu_bkds
+ui\shell\bitmaps\b_butn_sm
+ui\shell\bitmaps\a_butn_sm
+ui\shell\bitmaps\team_background
+ui\shell\bitmaps\team_icon_ctf
+ui\shell\bitmaps\team_icon_king
+ui\shell\bitmaps\team_icon_oddball
+ui\shell\bitmaps\team_icon_race
+ui\shell\bitmaps\team_icon_slayer
+levels\test\beavercreek\beavercreek
+levels\test\beavercreek\bitmaps\beavercreek cliffs
+levels\b30\bitmaps\detail cliff rock
+levels\b30\bitmaps\detail cliff rock smooth
+levels\a30\bitmaps\cliff rock bump
+levels\test\beavercreek\bitmaps\beavercreek boulder
+levels\b30\bitmaps\detail rock sandstone
+levels\test\beavercreek\bitmaps\beavercreek ground
+levels\b30\bitmaps\detail sand
+levels\a30\bitmaps\detail grass
+levels\b30\bitmaps\detail ground
+levels\b30\bitmaps\metal panels generic
+levels\b30\bitmaps\dirt splotch detail
+levels\b30\bitmaps\metal panels generic bump
+levels\test\beavercreek\bitmaps\beavercreek bridge
+levels\test\beavercreek\bitmaps\beaver ladder
+levels\test\beavercreek\bitmaps\beaver ladder bump
+levels\b30\bitmaps\metal strips narrow ext
+levels\b30\bitmaps\cubemap beach
+levels\b30\bitmaps\metal plate floor ext
+levels\b30\bitmaps\metal plate floor bump
+levels\b30\bitmaps\metal strips wide
+levels\b30\bitmaps\metal strips wide bump
+levels\b30\bitmaps\metal panels generic ext clean
+levels\b30\bitmaps\metal panels generic ext
+levels\b30\bitmaps\metal panels ext unearthed
+levels\b30\bitmaps\lights small strips
+levels\test\beavercreek\bitmaps\beavercreek_flow
+levels\a30\bitmaps\reflection noise1
+levels\b30\bitmaps\waves bump
+levels\c10\bitmaps\c10_inv
+sky\planets\threshold dusk
+sky\planets\basis dusk
+sky\ring\ring dusk
+sky\dusk\bitmaps\detail star twinkle
+sky\dusk\bitmaps\stars
+sky\dusk\bitmaps\sky dusk
+scenery\rocks\b40_snowrocks\bitmaps\snowrock
+scenery\teleporter_base\bitmaps\teleporter_base
+scenery\teleporter_base\bitmaps\teleporter_base bump
+scenery\teleporter_base\bitmaps\base volumetric dust
+scenery\teleporter_base\bitmaps\teleporter_dust
+levels\b30\devices\light fixtures\light fixture ceiling1\bitmaps\light fixtures
+levels\b30\devices\light fixtures\light fixture ceiling1\bitmaps\light fixtures multi
+scenery\trees\tree_pine_snow\bitmaps\snowpine_bark
+scenery\trees\tree_pine_snow\bitmaps\snowpine_detail
+scenery\trees\tree_pine_snow\bitmaps\snowpine_leaf
+scenery\trees\tree_pine_tall\bitmaps\pine_tree_multi
+levels\test\timberland\scenery\mp_beacon_red\bitmaps\mp_beacon_light_base
+levels\test\timberland\scenery\mp_beacon_blue\bitmaps\mp_beacon_blue_light
+levels\test\timberland\scenery\mp_beacon_red\bitmaps\mp_beacon_red_light
+levels\test\sidewinder\sidewinder
+levels\b30\bitmaps\metal strips narrow
+levels\b30\bitmaps\metal strips narrow bump
+levels\b30\bitmaps\metal panels generator
+levels\b30\bitmaps\metal panels generator bump
+levels\b30\bitmaps\metal panels generator glow
+levels\test\sidewinder\bitmaps\sw_ice_cliff
+levels\b40\bitmaps\b40_cliff_snow_detail
+levels\b40\bitmaps\b40_cliff_wall_bump
+levels\test\sidewinder\bitmaps\sidewinder_ground
+levels\b40\bitmaps\b40_cliff_snow_bump
+levels\b40\bitmaps\b40_cliffs_ice_bump
+sky\sky_a30\skydusk0\bitmaps\cubemap sky_dusk
+levels\test\timberland\bitmaps\player_clip
+levels\test\dangercanyon\bitmaps\dangercanyon_arrow_red
+levels\test\dangercanyon\bitmaps\dangercanyon_arrow_white
+levels\test\dangercanyon\bitmaps\dangercanyon_arrow_blue
+levels\test\sidewinder\bitmaps\sidewinder lights
+levels\test\sidewinder\bitmaps\sidewinder_base_stripes
+sky\dusk\bitmaps\threshold dusk
+sky\dusk\bitmaps\basis dusk
+sky\dusk\bitmaps\ring dusk
+sky\dusk\bitmaps\water dusk
+sky\dusk\bitmaps\reflection water dusk
+levels\a30\bitmaps\waves bump
+levels\a30\bitmaps\detail ground
+sky\dusk\bitmaps\horizon land
+sky\dusk\bitmaps\clouds dusk
+effects\particles\solid\bitmaps\glowingdrip bits
+effects\decals\blood splats\bitmaps\glowingdrip splat
+scenery\c_storage\bitmaps\c_storage
+scenery\c_storage\bitmaps\c_storage_multi
+scenery\c_uplink\bitmaps\c_uplink
+scenery\c_uplink\bitmaps\c_uplink_multi
+levels\a50\devices\light_ceiling\bitmaps\light fixture metal
+levels\a50\devices\light_ceiling\bitmaps\light fixture metal multi
+levels\a50\devices\light_ceiling\bitmaps\volumetric dust
+levels\a50\devices\light_ceiling\bitmaps\volumetric gradient
+levels\b40\bitmaps\b40_metal panels generator bump
+levels\b40\bitmaps\b40_metal panels generator glow
+levels\b40\bitmaps\b40_volumelight
+levels\test\damnation\damnation
+levels\a50\bitmaps\covenant metal generic
+levels\a50\bitmaps\covenant plate floor bump
+levels\a50\bitmaps\covenant metal generic bump
+levels\a50\bitmaps\covenant metal strips narrow
+levels\a50\bitmaps\covenant metal strips narrow bump
+levels\a50\bitmaps\covenant metal strips wide
+levels\a50\bitmaps\covenant metal strips wide bump
+levels\a50\bitmaps\covenant metal strips wide glow
+levels\a50\bitmaps\covenant rounded caripace
+levels\a50\bitmaps\covenant rounded caripace bump
+levels\a50\bitmaps\covenant rounded caripace glow
+levels\a50\bitmaps\covenant circuits
+levels\a50\bitmaps\covenant circuits bump
+levels\a50\bitmaps\covenant circuits glow
+levels\a50\bitmaps\covenant cor floor
+levels\a50\bitmaps\covenant metal panel
+levels\a50\bitmaps\covenant metal panel bump
+levels\a50\bitmaps\covenant alpha grate
+levels\a50\bitmaps\covenant alpha grate bump
+levels\a30\bitmaps\waterfallc_mask
+levels\a30\bitmaps\waterfall_color
+levels\a50\bitmaps\covenant lights strip
+scenery\c_field_generator\bitmaps\c_field_generator
+scenery\c_field_generator\bitmaps\c_field_generator_multi
+scenery\c_field_generator\bitmaps\shield mask
+levels\test\ratrace\ratrace
+levels\b30\bitmaps\metal plate floor
+levels\b30\bitmaps\tech dense circuits
+levels\b30\bitmaps\tech dense circuits bump
+levels\b30\bitmaps\tech dense circuits glow
+levels\b30\bitmaps\metal strips wide 1
+levels\b30\bitmaps\metal strips wide 1 bump
+levels\b30\bitmaps\alpha grate
+levels\b30\bitmaps\alpha grate bump
+levels\a10\bitmaps\panel generic
+levels\a10\bitmaps\panel generic bump
+levels\a10\bitmaps\cube map pillar controls
+levels\a10\bitmaps\steel
+levels\a10\bitmaps\steel bump
+levels\test\ratrace\bitmaps\rat_cave_floor
+levels\test\prisoner\bitmaps\black light
+levels\test\prisoner\prisoner
+levels\test\prisoner\bitmaps\prisoner floor indicator
+levels\test\prisoner\bitmaps\prisoner floor indicator bump
+levels\test\prisoner\bitmaps\prisoner floor indicator glow
+levels\test\hangemhigh\hangemhigh
+levels\b30\bitmaps\metal strips decorative circle
+levels\b30\bitmaps\metal strips decorative circle bump
+levels\test\chillout\chillout
+levels\test\chillout\bitmaps\chillout metal flat
+levels\test\chillout\bitmaps\chillout metal grate bump
+levels\a50\bitmaps\covenant plate floor
+levels\test\chillout\bitmaps\chillout glass
+levels\b40\scenery\b40_metal_wide\bitmaps\b40_metaldamaged
+levels\test\carousel\carousel
+levels\b40\bitmaps\b40_bridgeramp
+levels\b40\bitmaps\b40_bridgeramp_bump
+levels\b40\bitmaps\b40_bridgeramp_glow
+levels\b30\bitmaps\cubemap metal tone
+levels\b40\bitmaps\b40_bridgeramp_mid
+levels\b40\bitmaps\b40_bridgeramp_mid_bump
+levels\b30\bitmaps\alpha grate b
+levels\b30\bitmaps\alpha grate b bump
+levels\test\carousel\bitmaps\car_circlelight
+levels\a30\bitmaps\lights small strips
+levels\a10\bitmaps\tech rack plate
+levels\a10\bitmaps\tech rack plate bump
+levels\a10\bitmaps\panel scuff
+levels\a10\bitmaps\obj oxy tank
+levels\a10\bitmaps\obj oxy tank multi
+levels\a10\bitmaps\detail strips
+levels\a10\bitmaps\detail strips bump
+levels\test\boardingaction\decals-environment\bitmaps\1_blue
+levels\test\boardingaction\decals-environment\bitmaps\2_red
+levels\test\boardingaction\decals-environment\bitmaps\5_red
+levels\test\boardingaction\decals-environment\bitmaps\1_red
+levels\test\boardingaction\decals-environment\bitmaps\2_blue
+levels\test\boardingaction\decals-environment\bitmaps\3_blue
+levels\test\boardingaction\decals-environment\bitmaps\3_red
+levels\test\boardingaction\decals-environment\bitmaps\4_blue
+levels\test\boardingaction\decals-environment\bitmaps\4_red
+levels\test\boardingaction\decals-environment\bitmaps\5_blue
+levels\a10\decals-environment\bitmaps\decal danger biohazard
+levels\a10\decals-environment\bitmaps\decal danger electric
+levels\test\boardingaction\boardingaction
+scenery\vehicles\poa\bitmaps\poa-tile
+scenery\vehicles\poa\bitmaps\poa-tile bump
+levels\a10\bitmaps\cube map space
+levels\test\bloodgulch\bitmaps\mp lights small strips
+levels\a10\bitmaps\panel strip
+levels\a10\bitmaps\panel strip bump
+levels\test\boardingaction\bitmaps\poa3
+levels\a10\bitmaps\light
+levels\a10\bitmaps\light glow
+levels\test\boardingaction\bitmaps\deckdecals
+scenery\rocks\boulder\bitmaps\boulder
+scenery\rocks\boulder_crouch\bitmaps\boulder_crouch
+scenery\rocks\boulder_crouch\bitmaps\boulder_crouch_multipurpose
+scenery\rocks\boulder_doublewide\bitmaps\boulder_doublewide
+scenery\rocks\boulder_doublewide\bitmaps\boulder_doublewide_multipurpose
+scenery\rocks\boulder_large_grey\bitmaps\boulder_large_grey
+scenery\trees\tree_leafy_stump\bitmaps\tree_leafy_stump
+scenery\trees\tree_desert_dead\bitmaps\tree_desert_dead_trunk
+scenery\trees\tree_desert_whitebark\bitmaps\whitebark_trunk
+scenery\trees\tree_desert_whitebark\bitmaps\whitebark_leaves
+scenery\rocks\a50_rock_large\bitmaps\a50_rock_large
+levels\b40\scenery\b40_doorblinker\bitmaps\doorblinker2
+levels\b30\decals-environment\bitmaps\decal fore symb blue b
+levels\b30\decals-environment\bitmaps\decal fore symb red b
+levels\test\bloodgulch\bloodgulch
+levels\test\bloodgulch\bitmaps\blood cliff rock
+levels\test\bloodgulch\bitmaps\cap_metal
+levels\test\bloodgulch\bitmaps\cap_ramp01
+levels\test\bloodgulch\bitmaps\blood ground
+levels\test\bloodgulch\bitmaps\cap_ramp02
+levels\test\bloodgulch\bitmaps\cap_moss01b
+levels\test\bloodgulch\bitmaps\mp lights small strips red
+levels\a10\bitmaps\steel-light
+levels\a10\devices\alert_light\bitmaps\cubemap alert_light
+levels\test\wizard\wizard
+levels\test\putput\putput
+levels\a10\bitmaps\heated ceramic
+levels\a10\bitmaps\heated ceramic glow
+levels\test\longest\longest
+sky\clear afternoon\bitmaps\fog band
+levels\b30\bitmaps\reflection water
+sky\bitmaps\crap water0
+sky\bitmaps\crap water1
+scenery\rocks\boulder_granite_large\bitmaps\boulder_granite_large
+scenery\rocks\boulder_granite_large\bitmaps\boulder_granite_large_multi
+levels\test\timberland\scenery\mp_tree_pine_tall\bitmaps\mp_pine_tree
+levels\test\timberland\scenery\mp_tree_pine_tall\bitmaps\mp_pine_tree_multi
+levels\test\timberland\scenery\mp_tree_pine_tall\bitmaps\mp_pine_bark
+levels\test\timberland\scenery\mp_tree_pine_tall\bitmaps\mp_pine_bark_detail
+levels\a50\devices\interior tech objects\holo control\bitmaps\holo control
+levels\a50\devices\interior tech objects\holo control\bitmaps\static covenant
+levels\b30\devices\interior tech objects\holo control\bitmaps\holo control
+levels\a50\devices\interior tech objects\holo control\bitmaps\holo control readout
+levels\b40\devices\holo halo control\bitmaps\holo halo control
+levels\b30\devices\light fixtures\light fixture ceiling1\bitmaps\light fixture vol
+levels\test\dangercanyon\dangercanyon
+levels\test\dangercanyon\bitmaps\dangercanyon_metal_panels
+levels\test\dangercanyon\bitmaps\dangercanyon_metal_decorative
+levels\test\dangercanyon\bitmaps\dangercanyon_mtl_decor_glow
+levels\test\dangercanyon\bitmaps\dangercanyon_tubes_ext
+levels\test\dangercanyon\bitmaps\dangercanyon_decor_strip_red
+levels\test\dangercanyon\bitmaps\dangercanyon_decor_strip_bump
+levels\test\dangercanyon\bitmaps\dangercanyon_strip_red_glow
+levels\test\dangercanyon\bitmaps\dangercanyon_decor_strip_blue
+levels\test\dangercanyon\bitmaps\dangercanyon_strip_blue_glow
+levels\test\dangercanyon\bitmaps\dangercanyon_emblem
+levels\test\dangercanyon\bitmaps\dangercanyon_emblem_bump
+levels\test\dangercanyon\bitmaps\dangercanyon_ground
+levels\a30\bitmaps\detail cliff rock smooth
+levels\test\dangercanyon\bitmaps\dangercanyon_cliff_walls
+levels\test\dangercanyon\bitmaps\flagstand
+levels\test\dangercanyon\bitmaps\flagstand_bump
+levels\test\dangercanyon\bitmaps\dangercanyon_lights_red
+levels\test\dangercanyon\bitmaps\dangercanyon_lights_blue
+levels\test\icefields\bitmaps\icefields_symbol_red
+levels\test\icefields\bitmaps\icefields_symbol_blue
+scenery\trees\tree_leafydense_doublewide\bitmaps\tree_leafydense_leaves
+scenery\trees\tree_leafydense_doublewide\bitmaps\tree_leafydense_leaves_multi
+scenery\trees\tree_leafydense_doublewide\bitmaps\tree_leafydense_bark
+effects\particles\solid\bitmaps\panel impact
+effects\particles\solid\bitmaps\panel debris
+effects\particles\solid\bitmaps\stone debris
+characters\jackal\bitmaps\jackal shield
+levels\a10\devices\command display\bitmaps\static blue-v
+levels\b30\bitmaps\lights strip1
+levels\test\deathisland\deathisland
+levels\test\deathisland\bitmaps\new_death_beach
+levels\test\infinity\bitmaps\metal panels generator-red
+levels\c20\bitmaps\metal panels generator-copper bump
+levels\b30\bitmaps\underwater
+levels\b30\bitmaps\cliffs
+levels\b30\bitmaps\detail cliff rock bump
+levels\test\gephyrophobia\bitmaps\geph_symbol_blue
+levels\test\gephyrophobia\bitmaps\geph_symbol_red
+levels\b30\bitmaps\waves mask
+levels\b30\bitmaps\waves
+levels\b30\bitmaps\waves water detail
+levels\b30\bitmaps\water mask
+levels\test\deathisland\bitmaps\distant water mask
+levels\test\deathisland\bitmaps\banshee_symbol
+levels\test\deathisland\bitmaps\turret_symbol
+levels\c10\bitmaps\fog_noise
+sky\planets\threshold night
+sky\ring\ring night
+sky\sky_a30\skydusk0\bitmaps\star mask
+sky\sky_a30\skydusk0\bitmaps\star twinkle
+sky\sky_a50\skynight0\bitmaps\stars
+sky\sky_a50\skynight0\bitmaps\sky night
+levels\a50\devices\light_ground\bitmaps\light fixture ground
+levels\a50\devices\light_ground\bitmaps\light fixture ground multi
+levels\test\gephyrophobia\gephyrophobia
+levels\test\gephyrophobia\bitmaps\geph_bridgeramp_blue
+levels\b40\bitmaps\b40_energyrope
+levels\b40\bitmaps\b40_energyrope2
+levels\b30\bitmaps\metal strips decorative narrow
+levels\b30\bitmaps\metal strips decorative narrow bump
+levels\test\gephyrophobia\bitmaps\geph_bridgeramp_red
+levels\test\gephyrophobia\bitmaps\geph_grate_walkway
+levels\a10\bitmaps\alpha test bump
+levels\b40\bitmaps\b40_cliff_wall
+levels\b40\bitmaps\b40_cliff_wall_detail
+levels\b40\bitmaps\b40_cliff_snow
+levels\test\gephyrophobia\bitmaps\geph_metalpanels_generic
+levels\test\gephyrophobia\bitmaps\geph_purple_lights
+levels\test\gephyrophobia\bitmaps\geph_lights_blue
+levels\test\gephyrophobia\bitmaps\geph_lights_red
+scenery\rocks\boulder_snow_large\bitmaps\boulder_snow_large
+levels\test\icefields\icefields
+levels\test\icefields\bitmaps\icefields_ground
+levels\test\icefields\bitmaps\icefields_cliff_walls
+levels\test\icefields\bitmaps\icefields_base_roof
+levels\test\icefields\bitmaps\icefields_base_lights_red
+levels\test\icefields\bitmaps\icefields_base_stripes
+levels\test\icefields\bitmaps\icefields_base_lights_blue
+levels\test\timberland\scenery\simple_beacon_blue\bitmaps\simple_beacon_blue_marker
+levels\test\timberland\scenery\simple_beacon_red\bitmaps\simple_beacon_red_marker
+levels\test\infinity\bitmaps\beam shield red
+levels\test\infinity\bitmaps\static red-v
+effects\particles\energy\bitmaps\smoke red generic
+levels\test\infinity\infinity
+levels\test\infinity\bitmaps\infinity cliff
+levels\a30\bitmaps\detail cliff rock
+levels\test\infinity\bitmaps\infinity ground
+levels\c20\bitmaps\metal flat generic-copper
+levels\c20\bitmaps\bump generic pattern
+levels\a30\bitmaps\tubes ext
+levels\a30\bitmaps\reflection water
+levels\test\infinity\bitmaps\infinity sign red
+levels\test\infinity\bitmaps\infinity_sign_bump
+levels\test\infinity\bitmaps\infinity sign red glow
+levels\test\infinity\bitmaps\infinity sign blue
+levels\test\infinity\bitmaps\infinity sign blue glow
+levels\test\infinity\bitmaps\infinity arrow blue
+levels\test\infinity\bitmaps\infinity arrow glow
+levels\test\infinity\bitmaps\infinity arrow red
+levels\test\timberland\bitmaps\timberland_base_stripes
+sky\sky_timberland\bitmaps\timberland_threshold_dusk
+sky\sky_timberland\bitmaps\timberland_basis_dusk
+sky\sky_timberland\bitmaps\timberland_ring_dusk
+sky\sky_timberland\bitmaps\timberland_star_twinkle
+sky\sky_timberland\bitmaps\timberland_stars
+sky\sky_timberland\bitmaps\timberland_sky_dusk
+sky\sky_timberland\bitmaps\timberland_clouds_dusk
+scenery\rocks\boulder_moss_large\bitmaps\boulder_moss_large
+scenery\waterfalls\spray_emitter_medium\bitmaps\waterfall_mist
+levels\test\timberland\timberland
+levels\test\timberland\bitmaps\timberland_ground
+levels\test\timberland\bitmaps\timberland_metal_panels_generic
+levels\test\timberland\bitmaps\timberland_treesclump_filler
+levels\test\timberland\bitmaps\timberland_treesclump_filler_bump
+levels\test\timberland\bitmaps\timberland_trees_filler
+levels\test\timberland\bitmaps\timberland_trees_filler_bump
+levels\test\timberland\bitmaps\timberland_base_lights_red
+levels\test\timberland\bitmaps\timberland_stream
+levels\test\timberland\bitmaps\timberland_base_lights_blue
+levels\test\timberland\bitmaps\timberland_waterfall_mask
+levels\test\timberland\bitmaps\timberland_waterfall
+effects\debris objects\forerunner light structure\bitmaps\forerunner light structure
+effects\debris objects\forerunner light structure\bitmaps\forerunner light multi
+effects\debris objects\forerunner dark structure\bitmaps\forerunner dark multi
+effects\debris objects\forerunner dark structure\bitmaps\forerunner dark structure
+effects\decals\blood splats\bitmaps\blood smear elite lg
+effects\decals\blood splats\bitmaps\blood smear grunt sm
+effects\decals\blood splats\bitmaps\blood smear grunt lg
+effects\decals\blood splats\bitmaps\blood smear grunt med
+effects\decals\blood splats\bitmaps\blood smear elite sm
+effects\decals\blood splats\bitmaps\blood smear elite med
+effects\decals\bullet holes\bitmaps\impact flame thrower glow
+effects\detail_objects\rocks\bitmaps\rocks
+effects\detail_objects\d20_rocks_and_grass\d20_rocks and grass
+effects\detail_objects\fungus buds\bitmaps\fungus buds
+effects\detail_objects\snow_grass\bitmaps\snow_grass
+effects\detail_objects\swamp pods\bitmaps\swamp pods
+effects\detail_objects\grass_small\grass_small
+effects\detail_objects\grass_field\grass_field
+effects\particles\solid\bitmaps\snow flakes
+effects\particles\solid\bitmaps\black beetle
+effects\particles\solid\bitmaps\covenant coolant burst
+effects\particles\solid\bitmaps\snow flakes_alpha
+effects\particles\solid\bitmaps\large insect
+effects\particles\solid\bitmaps\bubbleburst
+effects\particles\solid\bitmaps\covenant coolant burst small
+effects\particles\solid\bitmaps\rain
+effects\particles\solid\bitmaps\water debris
+effects\particles\solid\bitmaps\skin burst
+effects\particles\energy\bitmaps\lightning rings
+effects\particles\energy\bitmaps\smoke dense energy
+effects\particles\energy\bitmaps\monitor glow rings
+effects\particles\air\bitmaps\condensation
+effects\particles\air\bitmaps\bigbubble
+effects\particles\air\bitmaps\steam cloud
+effects\particles\lens flare\bitmaps\soft flare square
+effects\particles\lens flare\bitmaps\soft flare large
+effects\lightning\bitmaps\lightning noisy
+levels\a30\devices\torpedo_bridge\bitmaps\metal strips narrow bridge
+levels\a30\devices\torpedo_bridge\bitmaps\bridge energy field
+levels\a30\devices\torpedo_bridge\bitmaps\metal flat generic bridge_multi
+levels\a30\devices\torpedo_bridge\bitmaps\metal strips narrow bridge_multi
+levels\a30\devices\torpedo_bridge\bitmaps\metal flat generic bridge
+levels\a30\devices\torpedo_bridge\bitmaps\bridge energy pulse
+levels\a30\a30_a
+levels\a30\a30_b
+levels\a30\bitmaps\cell02_ground
+levels\a30\bitmaps\bluelights small strips
+levels\a30\bitmaps\cliff rock tiled
+levels\a30\bitmaps\river_b
+levels\a30\bitmaps\filtrator
+levels\a30\bitmaps\cliff rock
+levels\a30\bitmaps\river_central hub
+levels\a30\bitmaps\cell01_ground
+levels\a30\bitmaps\river_cell01
+levels\a30\bitmaps\waterfalla_mask
+levels\a30\bitmaps\cliff rock fallen
+levels\a30\bitmaps\trees_filler
+levels\a30\bitmaps\river_a
+levels\a30\bitmaps\trees_filler_bump
+levels\a30\bitmaps\river_fronta top
+levels\a30\bitmaps\treesclump_filler
+levels\a30\bitmaps\river_falls start
+levels\a30\bitmaps\river_c
+levels\a30\bitmaps\treesclump_filler_bump
+levels\c10\c10_interiord
+levels\c10\c10_interiorc
+levels\c10\c10_exteriorb
+levels\c10\scenery\c10_lilypad\bitmaps\c10_lilypad
+levels\c10\bitmaps\swamp_a
+levels\c10\bitmaps\swamp waves bump
+levels\c10\bitmaps\swamp pipes
+levels\c10\bitmaps\c10_fungal
+levels\c10\bitmaps\cubemap swamp
+levels\c10\bitmaps\detail mud
+levels\c10\bitmaps\detail fungal moss
+levels\c10\bitmaps\c10_canopy_bump
+levels\c10\bitmaps\c10_fungal_glow
+levels\c10\bitmaps\c10_beasttree
+levels\c10\bitmaps\swamp_a_water
+levels\c10\bitmaps\mud bump
+levels\c10\bitmaps\c10_treetrunk
+levels\c10\bitmaps\c10 moss1
+levels\c10\bitmaps\c10_treeline_bump
+levels\c10\bitmaps\swamp_b_water
+levels\c10\bitmaps\bump swamp bark
+levels\c10\bitmaps\swamp_b
+levels\c10\bitmaps\c10_crashtree
+levels\c10\bitmaps\detail swamp bark
+levels\c10\bitmaps\c10_canopy
+levels\c10\bitmaps\c10_fallentree
+levels\c10\bitmaps\detail swamp underwater
+levels\c10\c10_interiorb
+levels\c10\c10_exteriora
+levels\c10\c10_interiora
+levels\a10\x10hangar
+levels\a10\a10a
+levels\a10\devices\command display\bitmaps\command nos
+levels\a10\devices\command display\bitmaps\command display
+levels\a10\devices\shield charge\bitmaps\shield charge force
+levels\a10\a10_space
+levels\a10\a10e
+levels\a10\a10c
+levels\a10\a10f
+levels\a10\a10b
+levels\a10\bitmaps\tech rack mount glow
+levels\a10\bitmaps\burn panels
+levels\a10\bitmaps\monitors
+levels\a10\bitmaps\tech rack mount bump
+levels\a10\bitmaps\burn panel scuff bump
+levels\a10\bitmaps\monitor glass
+levels\a10\bitmaps\c_boarding ship int bump
+levels\a10\bitmaps\door small-multi
+levels\a10\bitmaps\burn tech mount bump
+levels\a10\bitmaps\burn monitor huge
+levels\a10\bitmaps\monitors bands
+levels\a10\bitmaps\hushed casket display
+levels\a10\bitmaps\burn detail strips
+levels\a10\bitmaps\vending machines glow
+levels\a10\bitmaps\tech rack mount
+levels\a10\bitmaps\obj-tech rack multi
+levels\a10\bitmaps\debris pile
+levels\a10\bitmaps\chair
+levels\a10\bitmaps\c_boarding ship glow
+levels\a10\bitmaps\cube map hazard light
+levels\a10\bitmaps\burn panels bump
+levels\a10\bitmaps\burn panel generic bump
+levels\a10\bitmaps\decal bulletin board
+levels\a10\bitmaps\elevator shaft
+levels\a10\bitmaps\burn detail strips bump
+levels\a10\bitmaps\c_boarding ship int
+levels\a10\bitmaps\burn panel scuff
+levels\a10\bitmaps\door cryo
+levels\a10\bitmaps\decal bulletin board multi
+levels\a10\bitmaps\volume light hot
+levels\a10\bitmaps\burn monitors
+levels\a10\bitmaps\hot steel glow
+levels\a10\bitmaps\monitors bump
+levels\a10\bitmaps\door small
+levels\a10\bitmaps\door cryo-multi
+levels\a10\bitmaps\burn panel generic
+levels\a10\bitmaps\vending machines bump
+levels\a10\bitmaps\cube map glass
+levels\a10\bitmaps\burn steel
+levels\a10\bitmaps\burn monitors bump
+levels\a10\bitmaps\burn tech mount
+levels\a10\bitmaps\vending machines
+levels\a10\bitmaps\obj-chair multi
+levels\a10\bitmaps\burn poa-bridge
+levels\a10\bitmaps\hot steel
+levels\a10\bitmaps\burn alpha test
+levels\a10\bitmaps\panels airlock
+levels\a10\bitmaps\elevator shaft glow
+levels\a10\bitmaps\engine piston
+levels\a10\bitmaps\monitor huge
+levels\a10\bitmaps\alpha test
+levels\a10\bitmaps\monitors glow
+levels\a10\decals-environment\bitmaps\decal lg 3
+levels\a10\decals-environment\bitmaps\decal arrow up 3
+levels\a10\decals-environment\bitmaps\decal floor maint
+levels\a10\decals-environment\bitmaps\decal lg 4
+levels\a10\decals-environment\bitmaps\decal lg 2
+levels\a10\decals-environment\bitmaps\decal symbol stairs
+levels\a10\decals-environment\bitmaps\decal symbol airlock
+levels\a10\decals-environment\bitmaps\decal floor cryo b
+levels\a10\decals-environment\bitmaps\decal floor armory
+levels\a10\decals-environment\bitmaps\decal caution current
+levels\a10\decals-environment\bitmaps\decal floor lifepod
+levels\a10\decals-environment\bitmaps\decal symbol maintenance
+levels\a10\decals-environment\bitmaps\decal arrow up 2
+levels\a10\decals-environment\bitmaps\decal nav
+levels\a10\decals-environment\bitmaps\decal tac
+levels\a10\decals-environment\bitmaps\decal floor stair
+levels\a10\decals-environment\bitmaps\decal symbol bridge
+levels\a10\decals-environment\bitmaps\decal lg 5
+levels\a10\decals-environment\bitmaps\decal lg 1
+levels\a10\decals-environment\bitmaps\decal symbol lifepod
+levels\a10\decals-environment\bitmaps\decal com
+levels\a10\decals-environment\bitmaps\decal floor bridge
+levels\a10\decals-environment\bitmaps\decal floor airlock
+levels\a10\decals-environment\bitmaps\decal danger flammable
+levels\a10\decals-environment\bitmaps\decal symbol cryo
+levels\a10\decals-environment\bitmaps\decal eng
+levels\a10\decals-environment\bitmaps\decal floor engine
+levels\a10\decals-environment\bitmaps\decal grate
+levels\a10\decals-environment\bitmaps\decal arrow down 1
+levels\a10\decals-environment\bitmaps\decal lg 6
+levels\a10\decals-environment\bitmaps\decal arrow down 2
+levels\a10\decals-environment\bitmaps\decal lpod
+levels\a10\a10d
+levels\a10\a10g
+levels\b40\b40_c
+levels\b40\b40_c1
+levels\b40\b40_b
+levels\b40\b40_b3
+levels\b40\devices\holo halo ring\bitmaps\holo halo ring markers
+levels\b40\devices\b40_generator_fx\bitmaps\generator field
+levels\b40\devices\b40_outerdoor\bitmaps\b40_doorlock_glow
+levels\b40\devices\b40_outerdoor\bitmaps\b40_doorlock
+levels\b40\devices\holo halo solar system\bitmaps\solar system
+levels\b40\b40_a3
+levels\b40\scenery\b40_snowbush\bitmaps\b40_snowbush
+levels\b40\scenery\b40_ctorch\bitmaps\ctorch
+levels\b40\b40_a
+levels\b40\bitmaps\b40_bridgeglass
+levels\b40\bitmaps\b40_ctrlmirror
+levels\b40\bitmaps\b40_cliff_cmap
+levels\b40\bitmaps\b40_ctrlglass
+levels\b40\bitmaps\b40_ctrlmirrorb
+levels\b40\bitmaps\b40_ctrlmirrorb_bump
+levels\b40\bitmaps\b40_foglamp
+levels\b40\bitmaps\b40_unearthed
+levels\b40\bitmaps\b40_cubemap_outside
+levels\b40\bitmaps\b40_cliff_cmapb
+levels\b40\bitmaps\b40_icefall_bump
+levels\b40\bitmaps\b40_cliff_ladder
+levels\b40\bitmaps\b40_ctrlmirror_bump
+levels\b40\bitmaps\b40_fog_noise
+levels\b40\bitmaps\b40_landingpad
+levels\b40\bitmaps\b40_pitlights_glow
+levels\b40\bitmaps\b40_icefall
+levels\b40\b40_b4
+levels\b40\b40_a2
+levels\b40\b40_a1
+levels\b40\b40_b5
+levels\d20\d20_muster
+levels\d20\d20_start
+levels\d20\d20_control
+levels\d20\bitmaps\d20_ground
+levels\d20\bitmaps\d20_coolant_flow
+levels\d20\bitmaps\d20_inv
+levels\d20\bitmaps\detail_crackedmud
+levels\d20\bitmaps\d20_coolant_drain
+levels\d20\bitmaps\d20_reflection_coolant
+levels\d20\bitmaps\grav lift energy broken
+levels\d20\d20_hangar
+levels\d20\d20_exterior
+levels\b30\b30b
+levels\b30\devices\doors\door small\bitmaps\door lock light multi
+levels\b30\devices\doors\door small\bitmaps\door lock light
+levels\b30\devices\interior tech objects\holo control room display\bitmaps\volumetric light
+levels\b30\devices\interior tech objects\holo control room display\bitmaps\self illuminated edge
+levels\b30\devices\interior tech objects\holo control room display\bitmaps\cubemap hologram
+levels\b30\devices\interior tech objects\holo control room display\bitmaps\hologram markers
+levels\b30\devices\interior tech objects\bitmaps\static blue band vert
+levels\b30\devices\interior tech objects\bitmaps\static blue vertical
+levels\b30\devices\interior tech objects\holo beam tube\bitmaps\cubemap holo beam tube
+levels\b30\bitmaps\beach
+levels\b30\bitmaps\glass grimy
+levels\b30\bitmaps\water choppy
+levels\b30\bitmaps\cube map lift
+levels\b30\bitmaps\glass strip-mirror
+levels\b30\bitmaps\reflection noise1
+levels\b30\bitmaps\c20 platform
+levels\b30\bitmaps\c20 platform multi
+levels\b30\decals-environment\bitmaps\decal fore symb cyan
+levels\b30\decals-environment\bitmaps\decal fore symb green b
+levels\b30\decals-environment\bitmaps\decal fore symb cyan b
+levels\b30\decals-environment\bitmaps\decal fore symb purple b
+levels\b30\decals-environment\bitmaps\decal fore symb orange
+levels\b30\decals-environment\bitmaps\decal fore symb purple
+levels\b30\decals-environment\bitmaps\decal fore symb orange b
+levels\b30\decals-environment\bitmaps\decal fore symb green
+levels\b30\b30a
+levels\a50\devices\shuttle bay doors\bitmaps\shuttle bay doors
+levels\a50\devices\shuttle bay doors\bitmaps\shuttle bay doors offset
+levels\a50\devices\mustering_door\bitmaps\mustering door
+levels\a50\devices\mustering_door\bitmaps\mustering door multi
+levels\a50\devices\prison door\bitmaps\prison energy door offset
+levels\a50\devices\prison door\bitmaps\prison energy door
+levels\a50\devices\prison door\bitmaps\energy plasma
+levels\a50\devices\prison door\bitmaps\prison energy door off
+levels\a50\devices\grav_lift_particles\bitmaps\grav lift particles
+levels\a50\devices\small door\bitmaps\small door
+levels\a50\devices\small door\bitmaps\floor level symbols
+levels\a50\devices\small door\bitmaps\small door multi
+levels\a50\devices\interior tech objects\holo control\bitmaps\holo map
+levels\a50\devices\interior tech objects\holo control\bitmaps\holo scrambled
+levels\a50\a50_hangar
+levels\a50\bitmaps\c_mothership1_bump
+levels\a50\bitmaps\c_mothership2_bump
+levels\a50\bitmaps\reflection_desert_night
+levels\a50\bitmaps\c_mothership3_bump
+levels\a50\bitmaps\a50 cliff rock_inner
+levels\a50\bitmaps\forerunner text
+levels\a50\bitmaps\c_mothership2_illum
+levels\a50\bitmaps\c_mothership3_illum
+levels\a50\bitmaps\c_mothership3
+levels\a50\bitmaps\c_mothership2
+levels\a50\bitmaps\a50 cliff rock
+levels\a50\bitmaps\a50 cell01_ground
+levels\a50\bitmaps\covenant plasma streams
+levels\a50\bitmaps\volumetric energy
+levels\a50\bitmaps\c_mothership1
+levels\a50\bitmaps\ship opening
+levels\a50\bitmaps\grav lift energy
+levels\a50\a50_muster
+levels\a50\a50_exterior
+levels\a50\a50_control
+levels\c20\c20_4
+levels\c20\devices\door_mainshaft\bitmaps\door_mainshaft multi
+levels\c20\devices\door_mainshaft\bitmaps\door_mainshaft
+levels\c20\devices\index platform\bitmaps\light trail
+levels\c20\devices\index platform\bitmaps\c20 light vol
+levels\c20\devices\index platform\bitmaps\index beam
+levels\c20\devices\index platform\bitmaps\energy tendril offset
+levels\c20\devices\holo control\bitmaps\holo control
+levels\c20\c20_2
+levels\c20\c20_3
+levels\c20\bitmaps\metal flat generic x bump
+levels\c20\bitmaps\column_strip bump
+levels\c20\bitmaps\plasma panel
+levels\c20\bitmaps\metal flat generic-x
+levels\c20\bitmaps\column_strip
+levels\c20\bitmaps\plasma panel mask
+levels\c20\bitmaps\metal strips wide 02
+levels\c20\bitmaps\plasma panel bump
+levels\c20\bitmaps\metal strips wide 02 bump
+levels\c20\bitmaps\metal panels generator-copper
+levels\c20\c20_1
+levels\c40\c40_c
+levels\c40\c40_b3
+levels\c40\c40_c2
+levels\c40\c40_a3
+levels\c40\c40_a
+levels\c40\devices\index insertion\bitmaps\index readout1
+levels\c40\c40_c1
+levels\c40\c40_b2
+levels\c40\c40_b1
+levels\c40\c40_b5
+levels\c40\c40_b4
+levels\c40\c40_b
+levels\d40\d40h
+levels\d40\d40g
+levels\d40\d40b
+levels\d40\d40e
+levels\d40\d40d
+levels\d40\d40f
+levels\d40\bitmaps\sd numbers
+levels\d40\bitmaps\d40_cross_supports_bump
+levels\d40\bitmaps\d40_airlock
+levels\d40\bitmaps\reflection water-d40
+levels\d40\bitmaps\temp critical
+levels\d40\bitmaps\sd text
+levels\d40\bitmaps\chrome pipes
+levels\d40\bitmaps\detail d40_ ground
+levels\d40\bitmaps\lt steel
+levels\d40\bitmaps\large lt steel
+levels\d40\bitmaps\d40_water
+levels\d40\bitmaps\large lt steel_bump
+levels\d40\bitmaps\d40_airlock_bump
+levels\d40\bitmaps\d40_terrain
+levels\d40\bitmaps\lg bolted pipe
+levels\d40\bitmaps\cube map pillar metal
+levels\d40\bitmaps\d40_cross_supports
+levels\d40\bitmaps\sd background
+levels\d40\d40_terrain
+levels\d40\d40a
+levels\d40\d40c
+characters\jackal\bitmaps\jackal head
+characters\jackal\bitmaps\jackal_head multipurpose
+characters\jackal\bitmaps\jackal torso
+characters\jackal\bitmaps\jackal_torso multipurpose
+characters\jackal\bitmaps\jackal_arms multipurpose
+characters\jackal\bitmaps\jackal_legs multipurpose
+characters\jackal\bitmaps\jackal arms
+characters\jackal\bitmaps\jackal legs
+characters\marine_armored\bitmaps\marine_helmet_multipurpose
+characters\marine_armored\bitmaps\marine_helmet
+characters\marine_armored\bitmaps\marine_arms_multipurpose
+characters\marine_armored\bitmaps\marine_helmet_hud_hires
+characters\marine_armored\bitmaps\face_johnson_sarge
+characters\marine_armored\bitmaps\marine_legs
+characters\marine_armored\bitmaps\marine_torso
+characters\marine_armored\bitmaps\gutted torso
+characters\marine_armored\bitmaps\marine_helmet_hires_multipurpose
+characters\marine_armored\bitmaps\marine_arms
+characters\marine_armored\bitmaps\marine_arms_johnson
+characters\marine_armored\bitmaps\marine_helmet_hires
+characters\marine_armored\bitmaps\marine_helmet_hud
+characters\marine_armored\bitmaps\marine_torso_multipurpose
+characters\marine_armored\bitmaps\marine_legs_multipurpose
+characters\marine_armored\bitmaps\gutted torso multi
+characters\flood_infection\bitmaps\flood_infection multi
+characters\flood_infection\bitmaps\infection_tentacles
+characters\flood_infection\bitmaps\flood_infection
+characters\captain\bitmaps\captain_body_multi
+characters\captain\bitmaps\captain_eyes_multi
+characters\captain\bitmaps\captain_body
+characters\captain\bitmaps\capn_patches_decal
+characters\captain\bitmaps\captain_head
+characters\captain\bitmaps\captain_eyes
+characters\hunter\bitmaps\fuel_gun multipurpose
+characters\hunter\bitmaps\hunter head multi
+characters\hunter\bitmaps\hunter torso
+characters\hunter\bitmaps\hunter arm huge multi
+characters\hunter\bitmaps\hunter torso multi
+characters\hunter\bitmaps\hunter head
+characters\hunter\bitmaps\fuelrod flare
+characters\hunter\bitmaps\fuel_gun
+characters\hunter\bitmaps\hunter legs and arm multi
+characters\hunter\bitmaps\hunter legs and arm
+characters\hunter\bitmaps\hunter arm huge
+characters\elite\elite_special\bitmaps\elite special emblem
+characters\elite\elite_special\bitmaps\elite special multi
+characters\elite\elite_special\bitmaps\elite special
+characters\elite\elite_corpse\bitmaps\gutted elite torso
+characters\elite\elite_corpse\bitmaps\gutted elite torso multi
+characters\elite\bitmaps\elite head1
+characters\elite\bitmaps\elite legs1 multi
+characters\elite\bitmaps\elite head1 multi
+characters\elite\bitmaps\elite torso
+characters\elite\bitmaps\elite teeth
+characters\elite\bitmaps\elite legs multi
+characters\elite\bitmaps\elite legs1
+characters\elite\bitmaps\elite head multi
+characters\elite\bitmaps\cubemaps
+characters\elite\bitmaps\elite legs
+characters\elite\bitmaps\elite arms multi
+characters\elite\bitmaps\elite arms
+characters\elite\bitmaps\elite torso multi
+characters\elite\bitmaps\elite head
+characters\crewman\bitmaps\crewman_body
+characters\crewman\bitmaps\crewman_body_multipurpose
+characters\crewman\bitmaps\crewman_body_flesh_multipurpose
+characters\floodcombat elite\bitmaps\floodcombat elite_damaged
+characters\floodcombat elite\bitmaps\floodcombat_elite_mutipurpose
+characters\floodcombat elite\bitmaps\floodcombat elite_damaged_multi
+characters\floodcombat elite\bitmaps\flood tentacles
+characters\floodcombat elite\bitmaps\floodcombat elite
+characters\sentinel\bitmaps\sentinel contrail
+characters\sentinel\bitmaps\sentinel
+characters\sentinel\bitmaps\sentinel_multipurpose
+characters\floodcarrier\bitmaps\floodcarrier multi
+characters\floodcarrier\bitmaps\floodcarrier
+characters\monitor\bitmaps\monitor_multipurpose
+characters\monitor\bitmaps\cube map projection
+characters\monitor\bitmaps\cube map monitor
+characters\monitor\bitmaps\monitor_base
+characters\marine\bitmaps\face_chris_multipurpose
+characters\marine\bitmaps\face_paul
+characters\marine\bitmaps\marine_hats
+characters\marine\bitmaps\marine_body
+characters\marine\bitmaps\face_charles_multipurpose
+characters\marine\bitmaps\face_shiek
+characters\marine\bitmaps\face_charles
+characters\marine\bitmaps\face_shiek_multipurpose
+characters\marine\bitmaps\face_marcus_multipurpose
+characters\marine\bitmaps\face_paul multipurpose
+characters\marine\bitmaps\face_marcus
+characters\marine\bitmaps\face_matt
+characters\marine\bitmaps\marine_body johnson
+characters\marine\bitmaps\face_matt_multipurpose
+characters\marine\bitmaps\face_chris
+characters\marine\bitmaps\face_rob
+characters\marine\bitmaps\face_rob_multipurpose
+characters\marine\bitmaps\face_fred
+characters\pilot\bitmaps\pilot_body multi
+characters\pilot\bitmaps\teeth pilot
+characters\pilot\bitmaps\pilot_body
+characters\floodcombat_human\bitmaps\floodhuman_damaged
+characters\floodcombat_human\bitmaps\floodhuman
+characters\floodcombat_human\bitmaps\floodhuman_multipurpose
+characters\engineer\bitmaps\engineer
+characters\engineer\bitmaps\engineer multi
+characters\grunt\bitmaps\grunt torso multi
+characters\grunt\bitmaps\grunt arms and legs multi
+characters\grunt\bitmaps\grunt torso
+characters\grunt\bitmaps\grunt detail
+characters\grunt\bitmaps\grunt head and back
+characters\grunt\bitmaps\grunt head and back multi
+characters\grunt\bitmaps\grunt arms and legs
+characters\cortana\halo_enhanced\bitmaps\cortana_body_he
+characters\cortana\halo_enhanced\bitmaps\cortana_hair_he
+characters\cortana\bitmaps\cortana_teeth
+characters\cortana\bitmaps\cortana_noise_mask
+characters\cortana\bitmaps\particle_stream
+characters\cortana\bitmaps\cortana_hair
+characters\cortana\bitmaps\cortana_body
+characters\cortana\bitmaps\scanlines2
+characters\flood_captain\bitmaps\detail flood capn
+characters\flood_captain\bitmaps\flood_captain_multi
+characters\flood_captain\bitmaps\flood_captain
+sky\sky_a50\skynight0\bitmaps\desert_night
+sky\sky_a50\skynight0\bitmaps\fog band
+sky\sky_d40\skyofdoom\bitmaps\cloud mask doom
+sky\sky_d40\skyofdoom\bitmaps\fog band doom
+sky\sky_d40\skyofdoom\bitmaps\d40_land
+sky\sky_d40\skyofdoom\bitmaps\clouds doom tiled
+sky\sky_d40\skyofdoom\bitmaps\sky doom
+sky\ring\ring doom
+sky\sky_a30\skydusk0\bitmaps\horizon land
+sky\sky_a30\skydusk0\bitmaps\clouds dusk
+sky\sky_a30\skydusk0\bitmaps\water dusk
+sky\sky_a30\skydusk0\bitmaps\waves bump
+sky\sky_d20\sky_exterior\bitmaps\canyons_d20
+sky\planets\basis doom
+sky\planets\threshold doom
+vehicles\lifepod_entry\bitmaps\lifepod_burn
+vehicles\fighterbomber\bitmaps\fb_monitor
+vehicles\fighterbomber\bitmaps\afterburners
+vehicles\fighterbomber\bitmaps\fighterbomber-multi
+vehicles\fighterbomber\bitmaps\fb_cockpit
+vehicles\fighterbomber\bitmaps\fb_computers_multi
+vehicles\fighterbomber\bitmaps\fighterbomber
+vehicles\fighterbomber\bitmaps\fb_bay_multi
+vehicles\fighterbomber\bitmaps\fb_cockpit_multi
+vehicles\fighterbomber\bitmaps\fb_computers
+vehicles\fighterbomber\bitmaps\fb_bay
+vehicles\pelican\bitmaps\detail boilerplate
+vehicles\pelican\bitmaps\pelican
+vehicles\pelican\bitmaps\pelican_bay
+vehicles\pelican\bitmaps\pelican decals
+vehicles\pelican\bitmaps\pelican_multi
+vehicles\pelican\bitmaps\pelican_bay_multi
+vehicles\wraith\bitmaps\wraith_burned
+vehicles\wraith\bitmaps\wraith multipurpose
+vehicles\wraith\bitmaps\wraith
+vehicles\wraith\bitmaps\wraith_burned_multi
+vehicles\lifepod\bitmaps\cubemap lifepod
+vehicles\lifepod\bitmaps\lifepod_interior
+vehicles\lifepod\bitmaps\lifepod_interior_multi
+vehicles\lifepod\bitmaps\detail_plastic_wall
+vehicles\lifepod\bitmaps\lifepod_multi
+vehicles\lifepod\bitmaps\detail_leather_seat
+vehicles\lifepod\bitmaps\lifepod
+vehicles\c_dropship\bitmaps\c_dropship_multi
+vehicles\c_dropship\bitmaps\c_dropship
+vehicles\c_dropship\bitmaps\shield mask border
+vehicles\c_dropship\bitmaps\shield mask
+cinematics\effects\lights\covenant blast bolt\bitmaps\covenant blast bolt
+cinematics\effects\lights\covenant blast bolt\bitmaps\cov blast bolt vol
+cinematics\effects\lights\shaft open lens\bitmaps\shaft open lens
+cinematics\effects\teleportation\bitmaps\teleport ring
+cinematics\effects\cortana powerup fx\bitmaps\cortana halo powerup
+cinematics\effects\cortana powerup fx\bitmaps\info contrail
+cinematics\effects\cortana effects\bitmaps\cortana projections
+cinematics\effects\cortana effects\bitmaps\cortana vol
+cinematics\effects\cortana effects\bitmaps\cortana base
+cinematics\scenery\pipe\bitmaps\pipe_multi
+cinematics\scenery\pipe\bitmaps\pipe
+cinematics\scenery\planets\halo_closeup\bitmaps\blastoff1
+scenery\index\bitmaps\index
+scenery\index\bitmaps\index_multi
+scenery\index\bitmaps\index_lock
+scenery\rocks\rock_sharpcurly\bitmaps\rock_sharp
+scenery\baton\bitmaps\baton multi
+scenery\baton\bitmaps\baton
+scenery\trees\tree_pine_tall\bitmaps\pine_bark
+scenery\trees\tree_pine_tall\bitmaps\pine_tree
+scenery\trees\tree_pine_tall\bitmaps\pinebark detail
+scenery\trees\tree_wall1\bitmaps\tree_wall_leaf
+scenery\trees\tree_wall1\bitmaps\tree_wall_bark
+scenery\helmet_chip\bitmaps\helmetchip_multipurpose
+scenery\helmet_chip\bitmaps\helmetchip
+scenery\blood_pool\bitmaps\blood_pool
+scenery\captain_implant\bitmaps\implantdrop
+scenery\captain_implant\bitmaps\nastyimplant
+scenery\captain_implant\bitmaps\nastyimplant_multi
+scenery\tubewire\bitmaps\tubewire black
+scenery\halo_destroyed\bitmaps\halo_burning_debris
+scenery\halo_destroyed\bitmaps\halo inner ring destroyed
+scenery\halo_destroyed\bitmaps\poa_shockwave
+scenery\halo_destroyed\bitmaps\shockwave_surface
+scenery\halo_destroyed\bitmaps\halo_explosion_flares
+scenery\halo_destroyed\bitmaps\halo outer ring destroyed multi
+scenery\halo_destroyed\bitmaps\halo outer ring destroyed
+scenery\halo_destroyed\bitmaps\halo inner ring destroyed multi
+scenery\halo\bitmaps\halo inner ring red
+scenery\halo\bitmaps\halo inner ring mask
+scenery\vehicles\poa\bitmaps\poa-registry bump
+scenery\vehicles\poa\bitmaps\poa-c burnt
+scenery\vehicles\poa\bitmaps\poa-c
+scenery\vehicles\poa\bitmaps\poa-d bump
+scenery\vehicles\poa\bitmaps\poa-registry burnt
+scenery\vehicles\poa\bitmaps\poa-registry
+scenery\vehicles\poa\bitmaps\poa-c bump
+scenery\vehicles\poa\bitmaps\poa-a burnt
+scenery\vehicles\poa\bitmaps\poa-marathon bump
+scenery\vehicles\poa\bitmaps\poa-b glow
+scenery\vehicles\poa\bitmaps\poa-b burnt
+scenery\vehicles\poa\bitmaps\poa-d burnt
+scenery\vehicles\poa\bitmaps\poa-a bump
+scenery\vehicles\poa\bitmaps\poa-d glow
+scenery\vehicles\poa\bitmaps\poa-b bump
+scenery\vehicles\poa\bitmaps\poa-tile burnt
+scenery\vehicles\poa\bitmaps\poa-b
+scenery\vehicles\poa\bitmaps\poa-a
+scenery\vehicles\poa\bitmaps\poa-marathon
+scenery\vehicles\poa\bitmaps\poa-c glow
+scenery\vehicles\poa\bitmaps\poa-a glow
+scenery\vehicles\poa\bitmaps\poa-d
+scenery\vehicles\lifepod_crashed\bitmaps\lifepod_crashed
+scenery\vehicles\lifepod_crashed\bitmaps\lifepod_crashed_multi
+scenery\vehicles\lifepod_atmosphere_entry\bitmaps\lifepod reentry flame
+scenery\plants\plant_yellowbig\bitmaps\plant_yellowleaf
+scenery\plants\vines_hanging\bitmaps\vines_hanging
+scenery\cortana_chip\bitmaps\cortana_chip
+scenery\cortana_chip\bitmaps\cortana_chip_multipupose
+scenery\lockpick\bitmaps\lockpick_light
+scenery\lockpick\bitmaps\lockpick
+scenery\lockpick\bitmaps\lockpick multi
+scenery\c_metalwide\bitmaps\c_metaldamaged
+scenery\cutscene_small_rock\bitmaps\smallrock
+scenery\cutscene_small_rock\bitmaps\smallrock multi
+scenery\debris\banshee_crashed\bitmaps\banshee_crashed
+scenery\debris\banshee_crashed\bitmaps\banshee_crashed_multi
+weapons\energy sword\bitmaps\energy sword
+rasterizer\glow sprite
+ui\shell\bitmaps\helpbox_left
+ui\shell\bitmaps\pausebox3_right
+ui\shell\bitmaps\loc_menu_bkds
+ui\shell\bitmaps\loc_menu_bkds_sm
+ui\shell\bitmaps\helpbox_right
+ui\shell\bitmaps\pausebox3_left
+ui\shell\bitmaps\pausebox3_center
+ui\shell\bitmaps\loading
+ui\shell\bitmaps\helpbox_center
