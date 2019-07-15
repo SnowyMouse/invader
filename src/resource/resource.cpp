@@ -191,6 +191,7 @@ int main(int argc, char *argv[]) {
             // Now, adjust stuff for pointers
             switch(type) {
                 case ResourceMapType::RESOURCE_MAP_BITMAP: {
+                    // Pointers are stored as offsets here
                     for(auto &ptr : compiled_tag.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
                     }
@@ -224,13 +225,48 @@ int main(int argc, char *argv[]) {
 
                     break;
                 }
-                case ResourceMapType::RESOURCE_MAP_SOUND:
+                case ResourceMapType::RESOURCE_MAP_SOUND: {
+                    // Sounds subtract the size of the header from the offset
                     for(auto &ptr : compiled_tag.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
                     }
 
+                    // Push the asset data first
+                    std::size_t bitmap_data_offset = resource_data.size();
+                    offsets.push_back(bitmap_data_offset);
+                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                    paths.push_back(tag + "__permutations");
+                    sizes.push_back(compiled_tag.asset_data.size());
+
+                    // Do stuff to the tag data
+                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag.data.data());
+                    std::size_t pitch_range_count = sound.pitch_ranges.count;
+                    if(pitch_range_count) {
+                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&sound.pitch_ranges.pointer));
+                        auto *pitch_ranges_end = pitch_ranges + pitch_range_count;
+                        for(auto *pitch_range = pitch_ranges; pitch_range < pitch_ranges_end; pitch_range++) {
+                            std::size_t permutation_count = pitch_range->permutations.count;
+                            if(permutation_count) {
+                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&pitch_range->permutations.pointer));
+                                auto *permutations_end = permutations + permutation_count;
+                                for(auto *permutation = permutations; permutation < permutations_end; permutation++) {
+                                    permutation->samples.external = 1;
+                                    permutation->samples.file_offset = bitmap_data_offset + permutation->samples.file_offset;
+                                }
+                            }
+                        }
+                    }
+
+                    // Push the tag data
+                    offsets.push_back(resource_data.size());
+                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                    paths.push_back(tag);
+                    sizes.push_back(compiled_tag.data.size());
+
                     break;
+                }
                 case ResourceMapType::RESOURCE_MAP_LOC:
+                    // Pointers are stored as offsets here
                     for(auto &ptr : compiled_tag.pointers) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
                     }
