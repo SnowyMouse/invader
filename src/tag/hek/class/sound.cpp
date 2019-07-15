@@ -69,6 +69,7 @@ namespace Invader::HEK {
                 reflexive.samples.external = 0;
 
                 DEFAULT_VALUE(reflexive.gain, 1.0f);
+                PAD_32_BIT
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
         FINISH_COMPILE
