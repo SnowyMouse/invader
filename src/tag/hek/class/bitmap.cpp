@@ -20,9 +20,51 @@ namespace Invader::HEK {
         compiled.asset_data.insert(compiled.asset_data.begin(), processed_data, processed_data + tag.processed_pixel_data.size);
         INCREMENT_DATA_PTR(tag.processed_pixel_data.size);
 
+        // Get all of the data. We'll need to comb over it in a bit.
+        std::vector<BitmapGroupSequence<LittleEndian>> sequence_data;
+        std::vector<BitmapGroupSprite<LittleEndian>> sprite_data;
+        skip_data = true;
         ADD_REFLEXIVE_START(tag.bitmap_group_sequence) {
-            ADD_REFLEXIVE(reflexive.sprites);
+            sequence_data.push_back(reflexive);
+            ADD_REFLEXIVE_START(reflexive.sprites) {
+                sprite_data.push_back(reflexive);
+            } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
+        skip_data = false;
+
+        // Check the data
+        std::size_t last_sequence;
+        for(last_sequence = 0; last_sequence < sequence_data.size(); last_sequence++) {
+            auto &sequence = sequence_data[last_sequence];
+            if(sequence.first_bitmap_index == -1) {
+                break;
+            }
+        }
+
+        // Remove anything at and after last_sequence
+        while(last_sequence < sequence_data.size()) {
+            sequence_data.erase(sequence_data.end() - 1);
+        }
+
+        // Next, calculate the offsets of the sequence and sprite data that's used
+        std::size_t sequence_offset = compiled.data.size();
+        std::size_t sprite_offset = compiled.data.size() + sizeof(*sequence_data.data()) * last_sequence;
+        std::size_t sprite_index = 0;
+        for(std::size_t s = 0; s < last_sequence; s++) {
+            auto &sequence = sequence_data[s];
+            std::size_t sprite_count = sequence.sprites.count;
+            if(sprite_count) {
+                add_pointer(compiled, sequence_offset + s * sizeof(sequence) + (reinterpret_cast<std::byte *>(&sequence.sprites.pointer) - reinterpret_cast<std::byte *>(&sequence)), sprite_offset);
+                sprite_index += sprite_count;
+                sprite_offset += sizeof(*sprite_data.data()) * sprite_count;
+            }
+        }
+
+        // Add all the data and make the pointer a reality
+        compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(sequence_data.data()), reinterpret_cast<std::byte *>(sequence_data.data() + sequence_data.size()));
+        compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(sprite_data.data()), reinterpret_cast<std::byte *>(sprite_data.data() + sprite_data.size()));
+        tag.bitmap_group_sequence.count = last_sequence;
+        add_pointer(compiled, reinterpret_cast<std::byte *>(&tag.bitmap_group_sequence.pointer) - reinterpret_cast<std::byte *>(&tag), sequence_offset);
 
         ADD_REFLEXIVE_START(tag.bitmap_data) {
             reflexive.pointer = -1;
