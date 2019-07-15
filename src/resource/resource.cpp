@@ -184,6 +184,9 @@ int main(int argc, char *argv[]) {
 
         #undef ATTEMPT_TO_OPEN
 
+        // This may be needed
+        #define PAD_RESOURCES_32_BIT resource_data.insert(resource_data.end(), REQUIRED_PADDING_32_BIT(resource_data.size()), std::byte());
+
         // Compile the tags
         try {
             Invader::CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
@@ -202,6 +205,8 @@ int main(int argc, char *argv[]) {
                     resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
                     paths.push_back(tag + "__pixels");
                     sizes.push_back(compiled_tag.asset_data.size());
+
+                    PAD_RESOURCES_32_BIT
 
                     // Do stuff to the tag data
                     auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag.data.data());
@@ -223,6 +228,8 @@ int main(int argc, char *argv[]) {
                     paths.push_back(tag);
                     sizes.push_back(compiled_tag.data.size());
 
+                    PAD_RESOURCES_32_BIT
+
                     break;
                 }
                 case ResourceMapType::RESOURCE_MAP_SOUND: {
@@ -237,6 +244,8 @@ int main(int argc, char *argv[]) {
                     resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
                     paths.push_back(tag + "__permutations");
                     sizes.push_back(compiled_tag.asset_data.size());
+
+                    PAD_RESOURCES_32_BIT
 
                     // Do stuff to the tag data
                     auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag.data.data());
@@ -263,6 +272,8 @@ int main(int argc, char *argv[]) {
                     paths.push_back(tag);
                     sizes.push_back(compiled_tag.data.size());
 
+                    PAD_RESOURCES_32_BIT
+
                     break;
                 }
                 case ResourceMapType::RESOURCE_MAP_LOC:
@@ -274,6 +285,9 @@ int main(int argc, char *argv[]) {
                     resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
                     paths.push_back(tag);
                     sizes.push_back(compiled_tag.data.size());
+
+                    PAD_RESOURCES_32_BIT
+
                     break;
             }
         }
@@ -281,6 +295,8 @@ int main(int argc, char *argv[]) {
             eprintf("Failed to compile %s.%s due to an exception: %s\n", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
             return EXIT_FAILURE;
         }
+
+        #undef PAD_RESOURCES_32_BIT
     }
 
     // Get the final path of the map
