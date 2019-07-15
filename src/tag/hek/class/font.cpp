@@ -71,6 +71,8 @@ namespace Invader::HEK {
         compiled.data.insert(compiled.data.end(), data, data + pixels_size);
         INCREMENT_DATA_PTR(pixels_size);
 
+        PAD_32_BIT
+
         FINISH_COMPILE
     }
 }
