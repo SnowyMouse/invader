@@ -31,6 +31,7 @@ endif()
 find_package(TIFF)
 find_package(PNG)
 find_package(ZLIB)
+find_package(Python3)
 
 include(src/invader.cmake)
 include(src/build/build.cmake)

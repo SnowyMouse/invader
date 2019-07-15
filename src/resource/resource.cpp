@@ -8,8 +8,11 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "../version.hpp"
+#include "hek/resource_map.hpp"
 
 int main(int argc, char *argv[]) {
+    using namespace Invader::HEK;
+
     // Long options
     int longindex = 0;
     static struct option options[] = {
@@ -26,6 +29,10 @@ int main(int argc, char *argv[]) {
 
     // Maps directory
     const char *maps = "maps/";
+
+    // Resource map type
+    ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
+    bool resource_map_set = false;
 
     int opt;
 
@@ -44,6 +51,23 @@ int main(int argc, char *argv[]) {
                 maps = optarg;
                 break;
 
+            case 'T':
+                if(std::strcmp(optarg, "bitmaps") == 0) {
+                    type = ResourceMapType::RESOURCE_MAP_BITMAP;
+                }
+                else if(std::strcmp(optarg, "sounds") == 0) {
+                    type = ResourceMapType::RESOURCE_MAP_SOUND;
+                }
+                else if(std::strcmp(optarg, "loc") == 0) {
+                    type = ResourceMapType::RESOURCE_MAP_LOC;
+                }
+                else {
+                    eprintf("Invalid type %s. Use --help for more information.\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                resource_map_set = true;
+                break;
+
             default:
                 eprintf("Usage: %s <options>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -59,5 +83,10 @@ int main(int argc, char *argv[]) {
                 eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n\n");
                 return EXIT_FAILURE;
         }
+    }
+
+    if(!resource_map_set) {
+        eprintf("No resource map type was given. Use --help for more information.\n");
+        return EXIT_FAILURE;
     }
 }
