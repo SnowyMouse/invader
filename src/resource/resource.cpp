@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Tags directory
-    const char *tags = "tags/";
+    std::vector<const char *> tags;
 
     // Maps directory
     const char *maps = "maps/";
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
 
             case 't':
-                tags = optarg;
+                tags.push_back(optarg);
                 break;
 
             case 'm':
@@ -101,6 +101,11 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // If we don't have any tags directories, use a default one
+    if(tags.size() == 0) {
+        tags.push_back("tags/");
+    }
+
     // Get all the tags
     std::vector<std::string> tags_list;
     for(const char **i = default_fn(); *i; i++) {
@@ -117,12 +122,12 @@ int main(int argc, char *argv[]) {
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
 
-
     for(const std::string &tag : tags_list) {
         // First let's open it
         Invader::HEK::TagClassInt tag_class_int;
         std::vector<std::byte> tag_data;
 
+        // Convert backslashes if needed
         std::string tag_path = tag;
         for(char &c : tag_path) {
             if(c == '\\') {
@@ -130,20 +135,29 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        auto tag_path_str = (std::filesystem::path(tags) / tag_path).string();
+        // Function to open a file
+        auto open_tag = [&tags, &tag_path](const char *extension) -> std::FILE * {
+            for(auto &tags_folder : tags) {
+                auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string() + extension;
+                std::FILE *f = std::fopen(tag_path_str.data(), "rb");
+                if(f) {
+                    return f;
+                }
+            }
+            return nullptr;
+        };
 
         #define ATTEMPT_TO_OPEN(extension) { \
-            tag_path_str += extension; \
-            std::FILE *f = std::fopen(tag_path_str.data(), "rb"); \
+            std::FILE *f = open_tag(extension); \
             if(!f) { \
-                eprintf("Failed to open %s.\n", tag_path.data()); \
+                eprintf("Failed to open %s" extension "\n", tag_path.data()); \
                 return EXIT_FAILURE; \
             } \
             std::fseek(f, 0, SEEK_END); \
             tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
             std::fseek(f, 0, SEEK_SET); \
             if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                eprintf("Failed to read %s.\n", tag_path_str.data()); \
+                eprintf("Failed to read %s" extension "\n", tag_path.data()); \
                 return EXIT_FAILURE; \
             } \
             std::fclose(f); \
@@ -162,14 +176,13 @@ int main(int argc, char *argv[]) {
                 tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_FONT;
                 #define DO_THIS_FOR_ME_PLEASE(tci, extension) if(tag_data.size() == 0) { \
                     tag_class_int = tci; \
-                    std::string tag_path_temp_str = tag_path_str + extension; \
-                    std::FILE *f = std::fopen(tag_path_temp_str.data(), "rb"); \
+                    std::FILE *f = open_tag(extension); \
                     if(f) { \
                         std::fseek(f, 0, SEEK_END); \
                         tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
                         std::fseek(f, 0, SEEK_SET); \
                         if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                            eprintf("Failed to read %s.\n", tag_path_str.data()); \
+                            eprintf("Failed to read %s" extension "\n", tag_path.data()); \
                             return EXIT_FAILURE; \
                         } \
                         std::fclose(f); \
@@ -179,6 +192,11 @@ int main(int argc, char *argv[]) {
                 DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
                 DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
                 #undef DO_THIS_FOR_ME_PLEASE
+
+                if(tag_data.size() == 0) {
+                    eprintf("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.\n", tag_path.data());
+                }
+
                 break;
         }
 
