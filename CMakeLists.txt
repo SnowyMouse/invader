@@ -29,7 +29,6 @@ endif()
 
 # Find some packages
 find_package(TIFF)
-find_package(PNG)
 find_package(ZLIB)
 find_package(Python3)
 

@@ -8,11 +8,10 @@
 #include <zlib.h>
 #include <filesystem>
 #include <tiffio.h>
-#include <png.h>
 
-#define STB_DXT_IMPLEMENTATION
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
+#include "stb/stb_image.h"
 #include "../eprintf.hpp"
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
@@ -35,7 +34,7 @@ static const char *SUPPORTED_FORMATS[] = {
 static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
 
 static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
-static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
+static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
 enum MipmapScaleType {
     /** Guess based on what the tag says */
@@ -279,7 +278,7 @@ int main(int argc, char *argv[]) {
                     image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_PNG:
-                    image_pixels = load_png(image_path.data(), image_width, image_height, image_size);
+                    image_pixels = load_image(image_path.data(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_INT_COUNT:
                     std::terminate();
@@ -837,6 +836,49 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+#define ALLOCATE_PIXELS(count) reinterpret_cast<Invader::CompositeBitmapPixel *>(calloc(sizeof(Invader::CompositeBitmapPixel) * pixel_count, 1))
+
+static Invader::CompositeBitmapPixel *rgba_to_pixel(const std::uint8_t *data, std::size_t pixel_count) {
+    auto *pixel_data = ALLOCATE_PIXELS(pixel_count);
+
+    for(std::size_t i = 0; i < pixel_count; i++) {
+        pixel_data[i].alpha = data[3];
+        pixel_data[i].red = data[0];
+        pixel_data[i].green = data[1];
+        pixel_data[i].blue = data[2];
+        data += 4;
+    }
+
+    return pixel_data;
+}
+
+#undef ALLOCATE_PIXELS
+
+static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
+    // Load it
+    int x = 0, y = 0, channels = 0;
+    auto *image_buffer = stbi_load(path, &x, &y, &channels, 4);
+    if(!image_buffer) {
+        eprintf("Failed to load %s. Error was: %s\n", path, stbi_failure_reason());
+        exit(EXIT_FAILURE);
+    }
+
+    // Get the width and height
+    image_width = static_cast<std::uint32_t>(x);
+    image_height = static_cast<std::uint32_t>(y);
+    image_size = image_width * image_height * sizeof(Invader::CompositeBitmapPixel);
+
+    // Do the thing
+    Invader::CompositeBitmapPixel *return_value = rgba_to_pixel(reinterpret_cast<std::uint8_t *>(image_buffer), image_width * image_height);
+
+    // Free the buffer
+    stbi_image_free(image_buffer);
+
+    eprintf("finished load_image(). got a %ix%i image\n", x, y);
+
+    return return_value;
+}
+
 static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
     TIFF *image_tiff = TIFFOpen(path, "r");
     if(!image_tiff) {
@@ -853,67 +895,6 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
 
     // Close the TIFF
     TIFFClose(image_tiff);
-
-    // Swap red and blue channels
-    for(std::size_t i = 0; i < image_size / 4; i++) {
-        Invader::CompositeBitmapPixel swapped = image_pixels[i];
-        swapped.red = image_pixels[i].blue;
-        swapped.blue = image_pixels[i].red;
-        image_pixels[i] = swapped;
-    }
-
-    return image_pixels;
-}
-
-static Invader::CompositeBitmapPixel *load_png(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
-    FILE *image_png_file = fopen(path, "r");
-    if(!image_png_file) {
-        eprintf("Cannot open %s\n", path);
-        exit(EXIT_FAILURE);
-    }
-
-    // Check the header
-    char header[8] = {};
-    std::fread(header, sizeof(header), 1, image_png_file);
-    if(png_sig_cmp(reinterpret_cast<png_const_bytep>(header), 0, 8)) {
-        eprintf("Invalid PNG file %s\n", path);
-        exit(EXIT_FAILURE);
-    }
-
-    // Get metadata
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    png_init_io(png, image_png_file);
-    png_set_sig_bytes(png, 8);
-    png_infop png_info = png_create_info_struct(png);
-    png_read_info(png, png_info);
-    image_width = png_get_image_width(png, png_info);
-    image_height = png_get_image_height(png, png_info);
-
-    if(png_get_bit_depth(png, png_info) != 8) {
-        eprintf("Unsupported at this time...\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Read it
-    png_bytep *row_pointers = reinterpret_cast<png_bytep *>(malloc(sizeof(png_bytep) * image_height));
-    image_size = 0;
-    std::size_t rowbytes_size = png_get_rowbytes(png, png_info);
-    for(std::size_t y = 0; y < image_height; y++) {
-        row_pointers[y] = reinterpret_cast<png_byte *>(malloc(rowbytes_size));
-        image_size += rowbytes_size;
-    }
-    png_read_image(png, row_pointers);
-    fclose(image_png_file);
-
-    // Now allocate and copy stuff
-    auto *image_pixels = reinterpret_cast<Invader::CompositeBitmapPixel *>(std::calloc(image_size, 1));
-    for(std::size_t y = 0; y < image_height; y++) {
-        std::memcpy(image_pixels + y * rowbytes_size / sizeof(*image_pixels), row_pointers[y], rowbytes_size);
-        std::free(row_pointers[y]);
-    }
-
-    // Free
-    std::free(row_pointers);
 
     // Swap red and blue channels
     for(std::size_t i = 0; i < image_size / 4; i++) {
