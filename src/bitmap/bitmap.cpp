@@ -888,6 +888,10 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
     TIFFGetField(image_tiff, TIFFTAG_IMAGEWIDTH, &image_width);
     TIFFGetField(image_tiff, TIFFTAG_IMAGELENGTH, &image_height);
 
+    // Force associated alpha so alpha doesn't get multiplied in TIFFReadRGBAImageOriented
+    uint16_t ua[] = { EXTRASAMPLE_ASSOCALPHA };
+    TIFFSetField(image_tiff, TIFFTAG_EXTRASAMPLES, 1, ua);
+
     // Read it all
     image_size = image_width * image_height * sizeof(Invader::CompositeBitmapPixel);
     auto *image_pixels = reinterpret_cast<Invader::CompositeBitmapPixel *>(std::calloc(image_size, 1));
