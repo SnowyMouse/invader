@@ -279,11 +279,11 @@ int main(int argc, char *argv[]) {
             switch(i) {
                 case SUPPORTED_FORMATS_TIF:
                 case SUPPORTED_FORMATS_TIFF:
-                case SUPPORTED_FORMATS_TGA:
-                case SUPPORTED_FORMATS_BMP:
                     image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_PNG:
+                case SUPPORTED_FORMATS_TGA:
+                case SUPPORTED_FORMATS_BMP:
                     image_pixels = load_image(image_path.data(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_INT_COUNT:
