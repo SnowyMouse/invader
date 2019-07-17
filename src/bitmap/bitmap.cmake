@@ -7,6 +7,8 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
         src/bitmap/stb/stb_impl.c
     )
 
+    set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
+
     target_include_directories(invader-bitmap
         PUBLIC ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}
     )

@@ -21,6 +21,8 @@ enum SUPPORTED_FORMATS_INT {
     SUPPORTED_FORMATS_TIF = 0,
     SUPPORTED_FORMATS_TIFF,
     SUPPORTED_FORMATS_PNG,
+    SUPPORTED_FORMATS_TGA,
+    SUPPORTED_FORMATS_BMP,
 
     SUPPORTED_FORMATS_INT_COUNT
 };
@@ -28,7 +30,9 @@ enum SUPPORTED_FORMATS_INT {
 static const char *SUPPORTED_FORMATS[] = {
     ".tif",
     ".tiff",
-    ".png"
+    ".png",
+    ".tga",
+    ".bmp"
 };
 
 static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
@@ -275,6 +279,8 @@ int main(int argc, char *argv[]) {
             switch(i) {
                 case SUPPORTED_FORMATS_TIF:
                 case SUPPORTED_FORMATS_TIFF:
+                case SUPPORTED_FORMATS_TGA:
+                case SUPPORTED_FORMATS_BMP:
                     image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_PNG:
