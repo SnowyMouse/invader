@@ -6,7 +6,8 @@ To remove the reliance of one huge executable, something that has caused issues 
 well as make things easier for me to work with, this project is split into different programs.
 
 ### invader-bitmap
-This program generates bitmap files.
+This program generates bitmap tags from images. For source images, .tif, .tiff, .png, .tga, and .bmp extensions are
+supported.
 
 #### Usage
 `invader-bitmap [options] <bitmap-tag>`
