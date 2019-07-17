@@ -40,6 +40,7 @@ This program builds cache files.
 | `--info,-i` | Show credits, source info, and other info. |
 | `--help,-h` | Show help. |
 | `--maps,-m <dir>` | Use a specific maps directory. |
+| `--always-index-tags,-a` | Always index tags with resource maps when possible. |
 | `--no-indexed-tags,-n` | Do not index tags with resource maps. |
 | `--output,-o <file>` | Output to a specific file. |
 | `--quiet,-q` | Only output error messages. |

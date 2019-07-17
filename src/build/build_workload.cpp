@@ -36,10 +36,13 @@ namespace Invader {
         std::vector<std::string> tags_directories,
         std::string maps_directory,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
-        bool indexed_tags,
+        bool no_indexed_tags,
+        bool always_index_tags,
         bool verbose
     ) {
         BuildWorkload workload;
+
+        workload.always_index_tags = always_index_tags;
 
         // First set up indexed tags
         workload.compiled_tags.reserve(with_index.size());
@@ -75,7 +78,7 @@ namespace Invader {
         // Load resource maps if we need to do so
         workload.tags_directories = new_tag_dirs;
         workload.maps_directory = maps_directory;
-        if(indexed_tags && workload.maps_directory != "") {
+        if(!no_indexed_tags && workload.maps_directory != "") {
             // End with a directory separator if not already done so
             #ifdef _WIN32
             if(workload.maps_directory[workload.maps_directory.size() - 1] != '\\' || workload.maps_directory[workload.maps_directory.size() - 1] != '/') {
@@ -340,93 +343,139 @@ namespace Invader {
         // Get the amount of data removed
         std::size_t total_removed_data = 0;
 
-        for(auto &tag : this->compiled_tags) {
-            switch(tag->tag_class_int) {
-                case TagClassInt::TAG_CLASS_BITMAP:
-                    for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
-                        if(this->bitmaps[b].data == tag->asset_data) {
-                            tag->indexed = true;
-                            tag->index = static_cast<std::uint32_t>(b + 1);
-                            tag->asset_data.clear();
-                            total_removed_data += this->bitmaps[b + 1].data.size();
-                            tag->data.clear();
-                            break;
+        // If we're always indexing tags when possible, match by path
+        if(this->always_index_tags) {
+            for(auto &tag : this->compiled_tags) {
+                switch(tag->tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        for(std::size_t b = 1; b < this->bitmaps.size(); b+=2) {
+                            if(this->bitmaps[b].name == tag->path) {
+                                total_removed_data += tag->data.size();
+                                tag->indexed = true;
+                                tag->index = b;
+                                tag->asset_data.clear();
+                                tag->data.clear();
+                                break;
+                            }
                         }
-                    }
-                    break;
-                case TagClassInt::TAG_CLASS_SOUND:
-                    for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
-                        if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
-                            tag->indexed = true;
-                            tag->asset_data.clear();
-                            break;
+                        break;
+                    case TagClassInt::TAG_CLASS_SOUND:
+                        for(std::size_t s = 1; s < this->sounds.size(); s+=2) {
+                            if(this->sounds[s].name == tag->path) {
+                                tag->indexed = true;
+                                tag->asset_data.clear();
+                                break;
+                            }
                         }
-                    }
-                    break;
-                case TagClassInt::TAG_CLASS_FONT:
-                    for(std::size_t l = 0; l < this->loc.size(); l++) {
-                        auto &loc_tag = this->loc[l];
-                        if(loc_tag.name == tag->path) {
-                            auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
-                            auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
+                        break;
+                    case TagClassInt::TAG_CLASS_FONT:
+                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                        for(std::size_t l = 0; l < this->loc.size(); l++) {
+                            if(this->loc[l].name == tag->path) {
+                                tag->indexed = true;
+                                tag->data.clear();
+                                tag->index = static_cast<std::uint32_t>(l);
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
-                            std::size_t tag_font_pixel_size = tag_font->pixels.size;
-                            std::size_t loc_font_pixel_size = loc_font->pixels.size;
+        // Otherwise, do this:
+        else {
+            for(auto &tag : this->compiled_tags) {
+                switch(tag->tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
+                            if(this->bitmaps[b].data == tag->asset_data) {
+                                tag->indexed = true;
+                                tag->index = static_cast<std::uint32_t>(b + 1);
+                                tag->asset_data.clear();
+                                total_removed_data += this->bitmaps[b + 1].data.size();
+                                tag->data.clear();
+                                break;
+                            }
+                        }
+                        break;
+                    case TagClassInt::TAG_CLASS_SOUND:
+                        for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
+                            if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
+                                tag->indexed = true;
+                                tag->asset_data.clear();
+                                break;
+                            }
+                        }
+                        break;
+                    case TagClassInt::TAG_CLASS_FONT:
+                        for(std::size_t l = 0; l < this->loc.size(); l++) {
+                            auto &loc_tag = this->loc[l];
+                            if(loc_tag.name == tag->path) {
+                                auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
+                                auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
 
-                            // Make sure the size is the same
-                            if(tag_font_pixel_size == loc_font_pixel_size) {
-                                std::size_t tag_font_pixels = tag->resolve_pointer(&tag_font->pixels.pointer);
-                                std::size_t loc_font_pixels = loc_font->pixels.pointer;
+                                std::size_t tag_font_pixel_size = tag_font->pixels.size;
+                                std::size_t loc_font_pixel_size = loc_font->pixels.size;
 
-                                // And make sure that the pointer in the loc tag points to something
-                                if(loc_font_pixels < loc_tag.data.size() && loc_font_pixels + loc_font_pixel_size <= loc_tag.data.size()) {
-                                    auto *tag_font_pixel_data = tag->data.data() + tag_font_pixels;
-                                    auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
+                                // Make sure the size is the same
+                                if(tag_font_pixel_size == loc_font_pixel_size) {
+                                    std::size_t tag_font_pixels = tag->resolve_pointer(&tag_font->pixels.pointer);
+                                    std::size_t loc_font_pixels = loc_font->pixels.pointer;
 
-                                    if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
-                                        tag->index = static_cast<std::uint32_t>(l);
-                                        tag->indexed = true;
-                                        total_removed_data += loc_tag.data.size();
-                                        tag->data.clear();
+                                    // And make sure that the pointer in the loc tag points to something
+                                    if(loc_font_pixels < loc_tag.data.size() && loc_font_pixels + loc_font_pixel_size <= loc_tag.data.size()) {
+                                        auto *tag_font_pixel_data = tag->data.data() + tag_font_pixels;
+                                        auto *loc_font_pixel_data = loc_tag.data.data() + loc_font_pixels;
+
+                                        if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
+                                            tag->index = static_cast<std::uint32_t>(l);
+                                            tag->indexed = true;
+                                            total_removed_data += loc_tag.data.size();
+                                            tag->data.clear();
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        }
-                    }
-                    break;
-                case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                    for(std::size_t l = 0; l < this->loc.size(); l++) {
-                        auto &loc_tag = this->loc[l];
-                        if(loc_tag.name == tag->path) {
-                            // TODO: Compare strings.
-                            if(loc_tag.data.size() == tag->data.size()) {
-                                tag->index = static_cast<std::uint32_t>(l);
-                                tag->indexed = true;
-                                total_removed_data += loc_tag.data.size();
-                                tag->data.clear();
                                 break;
                             }
                         }
-                    }
-                    break;
-                case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                    for(std::size_t l = 0; l < this->loc.size(); l++) {
-                        auto &loc_tag = this->loc[l];
-                        if(loc_tag.name == tag->path) {
-                            // TODO: Compare tag data.
-                            if(loc_tag.data.size() == tag->data.size()) {
-                                tag->index = static_cast<std::uint32_t>(l);
-                                tag->indexed = true;
-                                total_removed_data += loc_tag.data.size();
-                                tag->data.clear();
-                                break;
+                        break;
+                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                        for(std::size_t l = 0; l < this->loc.size(); l++) {
+                            auto &loc_tag = this->loc[l];
+                            if(loc_tag.name == tag->path) {
+                                // TODO: Compare strings.
+                                if(loc_tag.data.size() == tag->data.size()) {
+                                    tag->index = static_cast<std::uint32_t>(l);
+                                    tag->indexed = true;
+                                    total_removed_data += loc_tag.data.size();
+                                    tag->data.clear();
+                                    break;
+                                }
                             }
                         }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                        for(std::size_t l = 0; l < this->loc.size(); l++) {
+                            auto &loc_tag = this->loc[l];
+                            if(loc_tag.name == tag->path) {
+                                // TODO: Compare tag data.
+                                if(loc_tag.data.size() == tag->data.size()) {
+                                    tag->index = static_cast<std::uint32_t>(l);
+                                    tag->indexed = true;
+                                    total_removed_data += loc_tag.data.size();
+                                    tag->data.clear();
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

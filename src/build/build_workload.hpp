@@ -26,6 +26,7 @@ namespace Invader {
          * @param maps_directory    maps directory to use
          * @param with_index        tag index to use
          * @param no_indexed_tags   do not use cached tags
+         * @param always_index_tags always use cached tags
          * @param verbose           output non-error messages to console
          */
         static std::vector<std::byte> compile_map(
@@ -34,6 +35,7 @@ namespace Invader {
             std::string maps_directory,
             const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),
             bool no_indexed_tags = false,
+            bool always_index_tags = false,
             bool verbose = false
         );
 
@@ -57,6 +59,11 @@ namespace Invader {
          * Cache file type
          */
         HEK::CacheFileType cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
+
+        /**
+         * Always index tags when possible
+         */
+        bool always_index_tags;
 
         /**
          * Maps directory to use

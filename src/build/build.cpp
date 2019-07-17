@@ -46,12 +46,14 @@ int main(int argc, char * const argv[]) {
     bool no_indexed_tags = false;
     bool handled = true;
     bool quiet = false;
+    bool always_index_tags = false;
 
     int opt;
     int longindex = 0;
     static struct option options[] = {
         {"help",  no_argument, 0, 'h'},
         {"no-indexed-tags", no_argument, 0, 'n' },
+        {"always-index-tags", no_argument, 0, 'a' },
         {"quiet", no_argument, 0, 'q' },
         {"info", no_argument, 0, 'i' },
         {"game-engine",  required_argument, 0, 'g' },
@@ -63,7 +65,7 @@ int main(int argc, char * const argv[]) {
     };
 
     // Go through every argument
-    while((opt = getopt_long(argc, argv, "nqhiw:m:t:o:g:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "naqhiw:m:t:o:g:", options, &longindex)) != -1) {
         switch(opt) {
             case 'n':
                 no_indexed_tags = true;
@@ -82,6 +84,9 @@ int main(int argc, char * const argv[]) {
                 break;
             case 'm':
                 maps = std::string(optarg);
+                break;
+            case 'a':
+                always_index_tags = true;
                 break;
             case 'g':
                 engine = std::string(optarg);
@@ -108,6 +113,8 @@ int main(int argc, char * const argv[]) {
                 eprintf("  -m\n\n");
                 eprintf("  --no-indexed-tags    Do not index tags. This can speed up build time at the\n");
                 eprintf("  -n                   cost of a much larger file size.\n\n");
+                eprintf("  --always-index-tags  Always index tags when possible. This can speed up build\n");
+                eprintf("  -a                   time, but modified stock bitmap tags may not apply.\n\n");
                 eprintf("  --output <file>      Output to a specific file.\n");
                 eprintf("  -o\n\n");
                 eprintf("  --quiet              Only output error messages.\n");
@@ -120,6 +127,11 @@ int main(int argc, char * const argv[]) {
             default:
                 return EXIT_FAILURE;
         }
+    }
+
+    if(always_index_tags && no_indexed_tags) {
+        eprintf("%s: --no-index-tags conflicts with --always-index-tags.\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
     // Check if there's a scenario tag
@@ -173,7 +185,7 @@ int main(int argc, char * const argv[]) {
             }
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, !no_indexed_tags, !quiet);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, no_indexed_tags, always_index_tags, !quiet);
 
         if(engine == "retail") {
             reinterpret_cast<Invader::HEK::CacheFileHeader *>(map.data())->engine = Invader::HEK::CACHE_FILE_RETAIL;
