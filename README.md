@@ -26,7 +26,6 @@ This program generates bitmap files.
 
 #### Requirements
 * libtiff
-* libpng
 * libzlib
 
 ### invader-build
