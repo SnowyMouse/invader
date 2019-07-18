@@ -35,6 +35,12 @@ namespace Invader {
         HEK::TagClassInt tag_class_int() const noexcept;
 
         /**
+         * Get whether this is an indexed tag that is not in the map
+         * @return true if this is an indexed tag that is not in the map
+         */
+        bool is_indexed() const noexcept;
+
+        /**
          * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
          * @param  minimum minimum number of bytes to guarantee to be valid
          * @return         pointer to the data; nullptr if no data and minimum is not set
@@ -151,6 +157,9 @@ namespace Invader {
 
         /** Base address of tag */
         std::uint32_t p_base_address = 0;
+
+        /** This is indexed and not in the map? */
+        bool indexed = false;
 
         /** Initialize the tag */
         Tag(Map &map);

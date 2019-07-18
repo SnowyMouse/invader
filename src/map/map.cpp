@@ -188,6 +188,7 @@ namespace Invader {
             }
             else if(tags[i].indexed) {
                 // TODO: Handle indexed tags
+                tag.indexed = true;
             }
             else {
                 tag.p_data = this->resolve_tag_data_pointer(tags[i].tag_data);
