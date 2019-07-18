@@ -12,6 +12,10 @@ namespace Invader {
         return this->p_path;
     }
 
+    bool Tag::is_indexed() const noexcept {
+        return this->indexed;
+    }
+
     HEK::TagClassInt Tag::tag_class_int() const noexcept {
         return this->p_tag_class_int;
     }
