@@ -352,6 +352,11 @@ int main(int argc, char *argv[]) {
     header.resources = resource_names_arr.size() + resource_data.size();
     *reinterpret_cast<ResourceMapHeader *>(resource_data.data()) = header;
 
+    if(resource_data.size() >= 0x100000000) {
+        eprintf("Resource map exceeds 4 GiB.\n");
+        return EXIT_FAILURE;
+    }
+
     // Open the file
     std::FILE *f = std::fopen(map_path.string().data(), "wb");
     if(!f) {
