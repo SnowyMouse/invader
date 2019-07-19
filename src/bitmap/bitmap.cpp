@@ -880,8 +880,6 @@ static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t
     // Free the buffer
     stbi_image_free(image_buffer);
 
-    eprintf("finished load_image(). got a %ix%i image\n", x, y);
-
     return return_value;
 }
 
