@@ -93,13 +93,15 @@ namespace Invader::HEK {
     };
 
     /**
-     * Integer that uses the signed bit as a flag
+     * Unsigned integer that uses the high-order bit as a flag
      */
     template<typename T> struct FlaggedInt {
         /**
          * Raw value
          */
         T value;
+
+        static_assert(std::is_signed<T>() == false, "FlaggedInt takes an unsigned integer.");
 
         /**
          * Flag value
