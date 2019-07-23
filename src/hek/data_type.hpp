@@ -93,6 +93,73 @@ namespace Invader::HEK {
     };
 
     /**
+     * Integer that uses the signed bit as a flag
+     */
+    template<typename T> struct FlaggedInt {
+        /**
+         * Raw value
+         */
+        T value;
+
+        /**
+         * Flag value
+         */
+        static constexpr T FLAG_BIT = (1 << (sizeof(T) * 8 - 1));
+
+        /**
+         * Maximum value of the integer
+         */
+        static constexpr T MAX_VALUE = FLAG_BIT - 1;
+
+        /**
+         * Return true if the flag is set
+         * @return true if flag is set
+         */
+        inline bool flag_value() const noexcept {
+            return this->value & FLAG_BIT;
+        }
+
+        /**
+         * Return true if this is a null value
+         * @return true if this is a null value
+         */
+        inline bool is_null() const noexcept {
+            return this->value == (FLAG_BIT | MAX_VALUE);
+        }
+
+        /**
+         * Get the value of the integer
+         * @return value of the integer
+         */
+        inline T int_value() const noexcept {
+            return this->value | FLAG_BIT;
+        }
+
+        /**
+         * Set the flag of the integer
+         * @param new_flag_value value of the flag to set
+         */
+        inline void set_flag(bool new_flag_value) {
+            this->value = this->int_value() | (FLAG_BIT * new_flag_value);
+        }
+
+        /**
+         * Set the flag of the integer
+         * @param new_int_value value of the integer to set
+         */
+        inline void set_value(T new_int_value) {
+            this->value = (new_int_value & MAX_VALUE) | (this->flag_value());
+        }
+
+        inline operator T() const {
+            return this->int_value();
+        }
+    };
+    static_assert(sizeof(FlaggedInt<std::uint32_t>) == sizeof(std::uint32_t));
+    static_assert(FlaggedInt<std::uint32_t>::MAX_VALUE == 0x7FFFFFFF);
+    static_assert(FlaggedInt<std::uint32_t>::FLAG_BIT == FlaggedInt<std::uint32_t>::MAX_VALUE + 1);
+
+    /**
      * Dependencies allow tags to reference other tags.
      */
     ENDIAN_TEMPLATE(EndianType) struct TagDependency {

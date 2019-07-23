@@ -1780,13 +1780,13 @@ namespace Invader {
                     auto plane = reference->plane.read();
                     auto node2d = reference->bsp2d_node.read();
 
-                    if(node2d.flag) {
-                        if(node2d.index >= surfaces_count) {
-                            eprintf("Invalid surface %u / %u in BSP #%u.\n", node2d.index, surfaces_count, bsp);
+                    if(node2d.flag_value()) {
+                        if(node2d.int_value() >= surfaces_count) {
+                            eprintf("Invalid surface %u / %u in BSP #%u.\n", node2d.int_value(), surfaces_count, bsp);
                             throw OutOfBoundsException();
                         }
 
-                        if(!surfaces[node2d.index].plane.read().flag && !point_in_front_of_plane(surfaces[node2d.index].plane.read(), point)) {
+                        if(!surfaces[node2d.int_value()].plane.read().flag_value() && !point_in_front_of_plane(surfaces[node2d.int_value()].plane.read(), point)) {
                             return false;
                         }
                     }
@@ -1819,13 +1819,13 @@ namespace Invader {
                     }
 
                     // Stop at leaf
-                    if(front_child.flag) {
-                        return point_in_leaf(front_child.index, point);
+                    if(front_child.flag_value()) {
+                        return point_in_leaf(front_child.int_value(), point);
                     }
 
                     // Or try its front child
                     else {
-                        return point_in_tree_recursion(front_child.index, point, point_in_tree_recursion);
+                        return point_in_tree_recursion(front_child.int_value(), point, point_in_tree_recursion);
                     }
                 }
 
@@ -1836,12 +1836,12 @@ namespace Invader {
                 }
 
                 // If it's a leaf, well... give it a shot
-                if(back_child.flag) {
-                    return point_in_leaf(back_child.index, point);
+                if(back_child.flag_value()) {
+                    return point_in_leaf(back_child.int_value(), point);
                 }
 
                 // Lastly, let's see if we can continue traversing
-                node_index = back_child.index;
+                node_index = back_child.int_value();
             }
         };
 

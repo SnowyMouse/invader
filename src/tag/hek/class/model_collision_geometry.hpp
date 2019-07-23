@@ -111,23 +111,10 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelCollisionGeometrySphere<BigEndian>) == 0x20);
 
-    struct ModelCollisionGeometryBSPNodeIndex {
-        std::uint32_t index : 31;
-        std::uint32_t flag : 1;
-
-        inline operator std::uint32_t() const {
-            return this->index;
-        }
-
-        inline bool is_null() const {
-            return this->index == 0x7FFFFFFF && this->flag;
-        }
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP3DNode {
         EndianType<std::int32_t> plane;
-        EndianType<ModelCollisionGeometryBSPNodeIndex> back_child;
-        EndianType<ModelCollisionGeometryBSPNodeIndex> front_child;
+        EndianType<FlaggedInt<std::uint32_t>> back_child;
+        EndianType<FlaggedInt<std::uint32_t>> front_child;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP3DNode<NewType>() const noexcept {
             ModelCollisionGeometryBSP3DNode<NewType> copy = {};
@@ -170,8 +157,8 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelCollisionGeometryLeaf<BigEndian>) == 0x8);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP2DReference {
-        EndianType<ModelCollisionGeometryBSPNodeIndex> plane;
-        EndianType<ModelCollisionGeometryBSPNodeIndex> bsp2d_node;
+        EndianType<FlaggedInt<std::uint32_t>> plane;
+        EndianType<FlaggedInt<std::uint32_t>> bsp2d_node;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP2DReference<NewType>() const noexcept {
             ModelCollisionGeometryBSP2DReference<NewType> copy;
@@ -184,8 +171,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryBSP2DNode {
         Plane2D<EndianType> plane;
-        EndianType<ModelCollisionGeometryBSPNodeIndex> left_child;
-        EndianType<ModelCollisionGeometryBSPNodeIndex> right_child;
+        EndianType<FlaggedInt<std::uint32_t>> left_child;
+        EndianType<FlaggedInt<std::uint32_t>> right_child;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryBSP2DNode<NewType>() const noexcept {
             ModelCollisionGeometryBSP2DNode<NewType> copy;
@@ -205,7 +192,7 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometrySurface {
-        EndianType<ModelCollisionGeometryBSPNodeIndex> plane;
+        EndianType<FlaggedInt<std::uint32_t>> plane;
         EndianType<std::int32_t> first_edge;
         ModelCollisionGeometrySurfaceFlags flags;
         std::int8_t breakable_surface;
