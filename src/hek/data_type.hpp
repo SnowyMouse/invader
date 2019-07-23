@@ -134,7 +134,7 @@ namespace Invader::HEK {
          * @return value of the integer
          */
         inline T int_value() const noexcept {
-            return this->value | FLAG_BIT;
+            return this->value & MAX_VALUE;
         }
 
         /**
