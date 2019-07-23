@@ -139,7 +139,7 @@ namespace Invader::HEK {
          * Set the flag of the integer
          * @param new_flag_value value of the flag to set
          */
-        inline void set_flag(bool new_flag_value) {
+        inline void set_flag(bool new_flag_value) noexcept {
             this->value = this->int_value() | (FLAG_BIT * new_flag_value);
         }
 
@@ -147,11 +147,11 @@ namespace Invader::HEK {
          * Set the flag of the integer
          * @param new_int_value value of the integer to set
          */
-        inline void set_value(T new_int_value) {
+        inline void set_value(T new_int_value) noexcept {
             this->value = (new_int_value & MAX_VALUE) | (this->flag_value());
         }
 
-        inline operator T() const {
+        inline operator T() const noexcept {
             return this->int_value();
         }
     };
