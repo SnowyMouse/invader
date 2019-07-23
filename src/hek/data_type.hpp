@@ -159,7 +159,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(FlaggedInt<std::uint32_t>) == sizeof(std::uint32_t));
     static_assert(FlaggedInt<std::uint32_t>::MAX_VALUE == 0x7FFFFFFF);
-    static_assert(FlaggedInt<std::uint32_t>::FLAG_BIT == FlaggedInt<std::uint32_t>::MAX_VALUE + 1);
+    static_assert(FlaggedInt<std::uint32_t>::FLAG_BIT == 0x80000000);
 
     /**
      * Dependencies allow tags to reference other tags.
