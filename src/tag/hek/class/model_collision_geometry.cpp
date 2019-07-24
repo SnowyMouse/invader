@@ -92,7 +92,7 @@ namespace Invader::HEK {
             return true;
         };
 
-        auto point_in_leaf = [&point, &leaves, &leaf_count, &point_in_bsp2d_reference](std::uint32_t leaf_index) -> bool {
+        auto point_in_leaf = [&leaves, &leaf_count, &point_in_bsp2d_reference](std::uint32_t leaf_index) -> bool {
             // Make sure it's a valid index
             if(leaf_index >= leaf_count) {
                 eprintf("Invalid leaf %u / %u in BSP.\n", leaf_index, leaf_count);
