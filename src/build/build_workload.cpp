@@ -1735,116 +1735,13 @@ namespace Invader {
         auto bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count.read();
         auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
         auto planes_count = collision_bsp.planes.count.read();
-
-        // Get whether the point is in front of a 3D plane
-        auto point_in_front_of_plane = [&planes, &planes_count, &bsp](std::uint32_t plane_index, const HEK::Point3D<HEK::LittleEndian> &point) {
-            if(plane_index >= planes_count) {
-                eprintf("Invalid plane index %u / %u in BSP #%u.\n", plane_index, planes_count, bsp);
-                throw OutOfBoundsException();
-            }
-            return point.distance_from_plane(planes[plane_index].plane) >= 0;
-        };
-
-        // Get leaves, nodes, and references
         auto *leaves = reinterpret_cast<HEK::ModelCollisionGeometryLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.leaves.pointer));
         auto leaves_count = collision_bsp.leaves.count.read();
         auto *bsp2d_references = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DReference<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_references.pointer));
-        auto bsp2d_references_count = collision_bsp.bsp2d_references.count.read();
+        auto bsp2d_reference_count = collision_bsp.bsp2d_references.count.read();
         auto *surfaces = reinterpret_cast<HEK::ModelCollisionGeometrySurface<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.surfaces.pointer));
-        auto surfaces_count = collision_bsp.surfaces.count.read();
+        auto surface_count = collision_bsp.surfaces.count.read();
 
-        auto point_in_leaf = [&leaves, &leaves_count, &bsp2d_references, &bsp2d_references_count, &surfaces, &surfaces_count, &point_in_front_of_plane, &bsp](std::uint32_t leaf_index, const HEK::Point3D<HEK::LittleEndian> &point) -> bool {
-            if(leaf_index >= leaves_count) {
-                eprintf("Invalid leaf index %u / %u in BSP #%u.\n", leaf_index, leaves_count, bsp);
-                throw OutOfBoundsException();
-            }
-
-            // Check if the references are bullshit
-            auto &leaf = leaves[leaf_index];
-            std::size_t reference_count = leaf.bsp2d_reference_count.read();
-            std::size_t first_reference_index = leaf.first_bsp2d_reference.read();
-            std::size_t end_reference_index = first_reference_index + reference_count;
-
-            // Check if the count is not 0
-            if(reference_count != 0) {
-                if((first_reference_index >= bsp2d_references_count || end_reference_index > bsp2d_references_count)) {
-                    eprintf("Invalid BSP2D reference range %zu-%zu / %u\n", first_reference_index, end_reference_index, bsp2d_references_count);
-                    throw OutOfBoundsException();
-                }
-
-                // Iterate through BSP2D references
-                auto *first_reference = bsp2d_references + first_reference_index;
-                auto *end_reference = bsp2d_references + end_reference_index;
-
-                for(auto *reference = first_reference; reference < end_reference; reference++) {
-                    auto plane = reference->plane.read();
-                    auto node2d = reference->bsp2d_node.read();
-
-                    if(node2d.flag_value()) {
-                        if(node2d.int_value() >= surfaces_count) {
-                            eprintf("Invalid surface %u / %u in BSP #%u.\n", node2d.int_value(), surfaces_count, bsp);
-                            throw OutOfBoundsException();
-                        }
-
-                        if(!surfaces[node2d.int_value()].plane.read().flag_value() && !point_in_front_of_plane(surfaces[node2d.int_value()].plane.read(), point)) {
-                            return false;
-                        }
-                    }
-                    else if(!point_in_front_of_plane(plane, point)) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        };
-
-        auto point_in_3d_tree = [&bsp3d_nodes, &bsp3d_nodes_count, &point_in_front_of_plane, &point_in_leaf, &bsp](std::uint32_t node_index, const HEK::Point3D<HEK::LittleEndian> &point, auto &point_in_tree_recursion) -> bool {
-            while(true) {
-                if(node_index >= bsp3d_nodes_count) {
-                    eprintf("Invalid BSP2D node %u / %u in BSP #%u.\n", node_index, bsp3d_nodes_count, bsp);
-                    throw OutOfBoundsException();
-                }
-
-                // Get the node as well as front/back child info
-                auto &node = bsp3d_nodes[node_index];
-                auto front_child = node.front_child.read();
-                auto back_child = node.back_child.read();
-
-                // Let's see if it's in front of the plane
-                if(point_in_front_of_plane(node.plane, point)) {
-                    // Stop at null
-                    if(front_child.is_null()) {
-                        return true;
-                    }
-
-                    // Stop at leaf
-                    if(front_child.flag_value()) {
-                        return point_in_leaf(front_child.int_value(), point);
-                    }
-
-                    // Or try its front child
-                    else {
-                        return point_in_tree_recursion(front_child.int_value(), point, point_in_tree_recursion);
-                    }
-                }
-
-                // If it's not, let's keep going
-                // First, is the back child null? If so, there's nowhere to go.
-                if(back_child.is_null()) {
-                    return false;
-                }
-
-                // If it's a leaf, well... give it a shot
-                if(back_child.flag_value()) {
-                    return point_in_leaf(back_child.int_value(), point);
-                }
-
-                // Lastly, let's see if we can continue traversing
-                node_index = back_child.int_value();
-            }
-        };
-
-        return point_in_3d_tree(0, point, point_in_3d_tree);
+        return HEK::point_inside_bsp(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count, leaves, leaves_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count);
     }
 }

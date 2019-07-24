@@ -269,6 +269,20 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelCollisionGeometryBSP<BigEndian>) == 0x60);
 
+    bool point_inside_bsp(
+        const Point3D<LittleEndian> &point,
+        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+        std::uint32_t bsp3d_node_count,
+        const ModelCollisionGeometryPlane<LittleEndian> *planes,
+        std::uint32_t plane_count,
+        const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+        std::uint32_t leaf_count,
+        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+        std::uint32_t bsp2d_reference_count,
+        const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+        std::uint32_t surface_count
+    );
+
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryNode {
         TagString name;
         EndianType<std::int16_t> region;
