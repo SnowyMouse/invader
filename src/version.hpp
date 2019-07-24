@@ -11,12 +11,16 @@
 
 #define TOSTR2(str) # str
 #define TOSTR(str) TOSTR2(str)
-#define INVADER_VERSION_MAJOR 0
-#define INVADER_VERSION_MINOR 1
-#define INVADER_VERSION_BUILD 0
-#define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_BUILD)
 
-#define INVADER_SHOW_INFO eprintf("Invader Version %s\n\n", INVADER_VERSION_STRING); \
+#ifndef INVADER_VERSION_MAJOR
+#define INVADER_VERSION_MAJOR 0
+#define INVADER_VERSION_MINOR 0
+#define INVADER_VERSION_PATCH 0
+#endif
+
+#define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_PATCH)
+
+#define INVADER_SHOW_INFO eprintf("Invader Version " INVADER_VERSION_STRING "\n\n"); \
                           eprintf("This program is licensed under the GNU General Public License v3.0 or later.\n\n"); \
                           eprintf("Credits:\n"); \
                           eprintf("    Kavawuvi                       - Developer\n"); \

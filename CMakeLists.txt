@@ -8,10 +8,13 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name
-project(Invader)
+project(Invader
+    VERSION 0.1.0
+    DESCRIPTION "Modding toolkit for Halo Custom Edition"
+    LANGUAGES C CXX
+)
 
-# Use C++
-enable_language(CXX)
+# Use C++17
 set(CMAKE_CXX_STANDARD 17)
 
 # Do stuff depending on the compiler
@@ -34,6 +37,9 @@ endif()
 find_package(TIFF)
 find_package(ZLIB)
 find_package(Python3)
+
+# Define some version stuff
+add_definitions(-DINVADER_VERSION_MAJOR=${Invader_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${Invader_VERSION_MINOR} -DINVADER_VERSION_PATCH=${Invader_VERSION_PATCH})
 
 include(src/invader.cmake)
 include(src/build/build.cmake)
