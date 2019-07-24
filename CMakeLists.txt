@@ -7,6 +7,9 @@
 # Require at least version 3.10
 cmake_minimum_required(VERSION 3.10)
 
+# Project name
+project(Invader)
+
 # Use C++
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
