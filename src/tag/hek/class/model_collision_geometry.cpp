@@ -61,7 +61,7 @@ namespace Invader::HEK {
         auto point_in_front_of_surface = [&surfaces, &surface_count, &point_in_front_of_plane](std::uint32_t surface_index) {
             // Make sure it's a valid index
             if(surface_index >= surface_count) {
-                eprintf("Invalid leaf %u / %u in BSP.\n", surface_index, surface_count);
+                eprintf("Invalid surface %u / %u in BSP.\n", surface_index, surface_count);
                 throw OutOfBoundsException();
             }
 

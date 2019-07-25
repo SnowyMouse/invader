@@ -1696,13 +1696,21 @@ namespace Invader {
                 encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
             }
             else if(bsps_found_in > 1) {
-                eprintf("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in #%u).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
+                eprintf("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in BSP #%u).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
                 warnings_given++;
             }
             else if(bsps_found_in == 0) {
                 eprintf("Warning: Encounter #%zu (%s) was found in 0 BSPs.\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string);
                 warnings_given++;
             }
+            if(max_hits > highest_count) {
+                eprintf("Warning: Encounter #%zu (%s) is partially outside of the BSP (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, highest_count, max_hits);
+                warnings_given++;
+            }
+        }
+
+        if(warnings_given) {
+            eprintf("Note: You can use manual BSP indices to silence %s.\n", warnings_given == 1 ? "this warning" : "these warnings");
         }
     }
 
