@@ -69,23 +69,26 @@ namespace Invader::HEK {
         };
 
         auto point_in_bsp2d_reference = [&bsp2d_references, &bsp2d_reference_count, &point_in_front_of_plane, &point_in_front_of_surface](std::uint32_t bsp2d_index, std::uint32_t bsp2d_count) -> bool {
-            // Make sure it's a valid index
-            std::uint32_t bsp2d_end = bsp2d_index + bsp2d_count;
-            if((bsp2d_index > bsp2d_reference_count) || (bsp2d_end > bsp2d_reference_count)) {
-                eprintf("Invalid BSP2D reference range (%u - %u) / %u in BSP.\n", bsp2d_index, bsp2d_end, bsp2d_reference_count);
-                throw OutOfBoundsException();
-            }
+            // Make sure the BSP2D count > 0 before doing anything.
+            if(bsp2d_count > 0) {
+                // Make sure it's a valid index
+                std::uint32_t bsp2d_end = bsp2d_index + bsp2d_count;
+                if((bsp2d_index > bsp2d_reference_count) || (bsp2d_end > bsp2d_reference_count)) {
+                    eprintf("Invalid BSP2D reference range (%u - %u) / %u in BSP.\n", bsp2d_index, bsp2d_end, bsp2d_reference_count);
+                    throw OutOfBoundsException();
+                }
 
-            for(std::uint32_t i = bsp2d_index; i < bsp2d_end; i++) {
-                auto plane = bsp2d_references[i].plane.read();
-                auto plane_index = plane.int_value();
-                if(plane.flag_value()) {
-                    if(!point_in_front_of_surface(plane_index)) {
+                for(std::uint32_t i = bsp2d_index; i < bsp2d_end; i++) {
+                    auto plane = bsp2d_references[i].plane.read();
+                    auto plane_index = plane.int_value();
+                    if(plane.flag_value()) {
+                        if(!point_in_front_of_surface(plane_index)) {
+                            return false;
+                        }
+                    }
+                    else if(!point_in_front_of_plane(plane_index)) {
                         return false;
                     }
-                }
-                else if(!point_in_front_of_plane(plane_index)) {
-                    return false;
                 }
             }
 
