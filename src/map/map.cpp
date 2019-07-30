@@ -100,12 +100,12 @@ namespace Invader {
         return const_cast<Map *>(this)->get_tag_data_at_offset(offset, minimum_size);
     }
 
-    std::byte *Map::resolve_tag_data_pointer(std::uint32_t offset, std::size_t minimum_size) {
-        return this->get_tag_data_at_offset(offset - this->base_memory_address, minimum_size);
+    std::byte *Map::resolve_tag_data_pointer(HEK::Pointer pointer, std::size_t minimum_size) {
+        return this->get_tag_data_at_offset(pointer - this->base_memory_address, minimum_size);
     }
 
-    const std::byte *Map::resolve_tag_data_pointer(std::uint32_t offset, std::size_t minimum_size) const {
-        return const_cast<Map *>(this)->resolve_tag_data_pointer(offset, minimum_size);
+    const std::byte *Map::resolve_tag_data_pointer(HEK::Pointer pointer, std::size_t minimum_size) const {
+        return const_cast<Map *>(this)->resolve_tag_data_pointer(pointer, minimum_size);
     }
 
     std::size_t Map::tag_count() const noexcept {
@@ -191,10 +191,7 @@ namespace Invader {
                 tag.indexed = true;
             }
             else {
-                tag.p_data = this->resolve_tag_data_pointer(tags[i].tag_data);
-                std::size_t offset = tag.p_data - this->data;
-                tag.p_data_size = this->tag_data_length - offset;
-                tag.p_base_address = tags[i].tag_data;
+                tag.base_struct_pointer = tags[i].tag_data;
             }
         }
 
@@ -217,9 +214,9 @@ namespace Invader {
             }
 
             auto &bsp_tag = this->tags[bsp_id];
-            bsp_tag.p_data_size = bsp.bsp_size;
-            bsp_tag.p_data = this->get_data_at_offset(bsp.bsp_start, bsp_tag.p_data_size);
-            bsp_tag.p_base_address = bsp.bsp_address;
+            bsp_tag.tag_data_size = bsp.bsp_size;
+            bsp_tag.base_struct_offset = bsp.bsp_start;
+            bsp_tag.base_struct_pointer = bsp.bsp_address;
         }
     }
 }

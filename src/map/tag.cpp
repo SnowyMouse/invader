@@ -20,20 +20,40 @@ namespace Invader {
         return this->p_tag_class_int;
     }
 
-    std::byte *Tag::data(std::size_t minimum) {
-        if(this->p_data_size >= minimum) {
-            return this->p_data;
-        }
-        else if(minimum == 0) {
-            return nullptr;
+    std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
+        using namespace HEK;
+
+        if(this->indexed || this->p_tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+            auto edge = this->base_struct_offset + this->base_struct_offset;
+            auto offset = pointer - this->base_struct_pointer;
+
+            if((offset >= edge) || (offset + minimum > edge)) {
+                throw OutOfBoundsException();
+            }
+
+            Map::DataMapType type;
+            if(this->indexed) {
+                switch(this->p_tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        type = Map::DataMapType::DATA_MAP_BITMAP;
+                        break;
+                    case TagClassInt::TAG_CLASS_SOUND:
+                        type = Map::DataMapType::DATA_MAP_SOUND;
+                        break;
+                    default:
+                        type = Map::DataMapType::DATA_MAP_LOC;
+                        break;
+                }
+            }
+            else {
+                type = Map::DataMapType::DATA_MAP_CACHE;
+            }
+
+            return this->p_map.get_data_at_offset(pointer - this->base_struct_pointer, minimum, type);
         }
         else {
-            throw OutOfBoundsException();
+            return this->p_map.resolve_tag_data_pointer(pointer, minimum);
         }
-    }
-
-    const std::byte *Tag::data(std::size_t minimum) const {
-        return const_cast<Tag *>(this)->data(minimum);
     }
 
     Tag::Tag(Map &map) : p_map(map) {}

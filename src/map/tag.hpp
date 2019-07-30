@@ -42,46 +42,34 @@ namespace Invader {
 
         /**
          * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
+         * @param  pointer Halo pointer where the data is
          * @param  minimum minimum number of bytes to guarantee to be valid
          * @return         pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        std::byte *data(std::size_t minimum = 0);
+        std::byte *data(HEK::Pointer pointer, std::size_t minimum = 0);
 
         /**
          * Get a const pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
+         * @param  pointer Halo pointer where the data is
          * @param  minimum minimum number of bytes to guarantee to be valid
          * @return         const pointer to the data; nullptr if no data and minimum is not set
          * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
          */
-        const std::byte *data(std::size_t minimum = 0) const;
-
-        /**
-         * Get the base pointer
-         * @return base pointer
-         */
-        inline HEK::Pointer get_base_pointer() const noexcept {
-            return this->p_base_address;
+        const std::byte *data(HEK::Pointer pointer, std::size_t minimum = 0) const {
+            return const_cast<Tag *>(this)->data(pointer, minimum);
         }
 
         /**
          * Get a reference to the struct at the given offset.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
          * @return a reference to the base struct
          * @throws throw if out of bounds
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_at_offset(std::size_t offset, std::size_t minimum_size = sizeof(StructType<HEK::LittleEndian>)) {
-            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(sizeof(StructType<HEK::LittleEndian>) + offset + minimum_size) + offset);
-        }
-
-        /**
-         * Get a reference to the struct at the given offset.
-         * @return a reference to the base struct
-         * @throws throw if out of bounds
-         */
-        template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_at_pointer(std::uint32_t pointer, std::size_t minimum_size = sizeof(StructType<HEK::LittleEndian>)) {
-            return this->get_struct_at_offset<StructType>(pointer - this->p_base_address, minimum_size);
+        StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) {
+            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(pointer, minimum));
         }
 
         /**
@@ -90,7 +78,7 @@ namespace Invader {
          */
         template <template<template<typename> typename> typename StructType>
         StructType<HEK::LittleEndian> &get_base_struct() {
-            return get_struct_at_offset<StructType>(0);
+            return get_struct_at_pointer<StructType>(this->base_struct_pointer);
         }
 
         /**
@@ -103,7 +91,7 @@ namespace Invader {
             if(reflexive.count == 0) {
                 return nullptr;
             }
-            return &get_struct_at_offset<StructType>(reflexive.pointer.read() - this->p_base_address, sizeof(StructType<HEK::LittleEndian>) * reflexive.count);
+            return &get_struct_at_pointer<StructType>(reflexive.pointer.read(), sizeof(StructType<HEK::LittleEndian>) * reflexive.count);
         }
 
         /**
@@ -149,17 +137,17 @@ namespace Invader {
         /** Class of tag */
         HEK::TagClassInt p_tag_class_int;
 
-        /** Offset of tag in the map file */
-        std::byte *p_data = nullptr;
-
-        /** Remaining size after the offset */
-        std::size_t p_data_size = 0;
-
-        /** Base address of tag */
-        std::uint32_t p_base_address = 0;
-
         /** This is indexed and not in the map? */
         bool indexed = false;
+
+        /** Base struct pointer */
+        HEK::Pointer base_struct_pointer;
+
+        /** Base struct offset */
+        std::size_t base_struct_offset = 0;
+
+        /** Tag data size */
+        std::size_t tag_data_size = 0;
 
         /** Initialize the tag */
         Tag(Map &map);
