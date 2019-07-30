@@ -19,9 +19,13 @@ namespace Invader {
                            const std::byte *sounds_data, std::size_t sounds_data_size) {
         Map map;
         map.data_m.insert(map.data_m.end(), data, data + data_size);
+        map.data = map.data_m.data();
         map.bitmap_data_m.insert(map.bitmap_data_m.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
+        map.bitmap_data = map.bitmap_data_m.data();
         map.sound_data_m.insert(map.sound_data_m.end(), sounds_data, sounds_data + sounds_data_size);
+        map.sound_data = map.sound_data_m.data();
         map.loc_data_m.insert(map.loc_data_m.end(), loc_data, loc_data + loc_data_size);
+        map.loc_data = map.loc_data_m.data();
         map.data_length = data_size;
         map.bitmap_data_length = bitmaps_data_size;
         map.loc_data_length = loc_data_size;
