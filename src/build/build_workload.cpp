@@ -1617,9 +1617,34 @@ namespace Invader {
         auto *encounters = reinterpret_cast<HEK::ScenarioEncounter<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.encounters.pointer));
         auto *encounters_end = encounters + encounters_count;
 
+        // Set some stuff up
+        const std::size_t VECTOR_SIZE = 65536;
+        auto clear_array = [](std::unique_ptr<std::uint8_t []> &arr) {
+            std::fill(arr.get(), arr.get() + VECTOR_SIZE, 0);
+        };
+        auto copy_array = [](const std::unique_ptr<std::uint8_t []> &from, std::unique_ptr<std::uint8_t []> &to) {
+            std::copy(from.get(), from.get() + VECTOR_SIZE, to.get());
+        };
+        auto set_flag_for_array = [](std::unique_ptr<std::uint8_t []> &arr, std::size_t offset, std::uint8_t flag) {
+            if(offset < VECTOR_SIZE) {
+                arr[offset] = flag;
+            }
+        };
+
+        // This is an array that holds 0's and 1's depending on a hit or miss. Best means the best for a given encounter. Current means for a given BSP.
+        // Ideally you want everything to be 1's up to the total count. 0 means it wasn't found in a BSP.
+        auto best_firing_position = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
+        auto best_squad = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
+        auto current_firing_position = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
+        auto current_squad = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
+
         // Iterate
         std::size_t warnings_given = 0;
         for(auto *encounter = encounters; encounter < encounters_end; encounter++) {
+            // Clear the best arrays
+            clear_array(best_firing_position);
+            clear_array(best_squad);
+
             // If the BSP index was manually specified, use that.
             if(encounter->flags.read().manual_bsp_index_specified) {
                 encounter->precomputed_bsp_index = encounter->manual_bsp_index;
@@ -1628,7 +1653,6 @@ namespace Invader {
 
             // Highest number of hits in a BSP and current number of hits
             std::size_t highest_count = 0;
-            std::size_t current_count = 0;
 
             // How many BSPs we've found the highest count
             std::uint32_t bsps_found_in = 0;
@@ -1640,46 +1664,59 @@ namespace Invader {
             std::uint32_t squad_count = encounter->squads.count;
             auto *squads = reinterpret_cast<HEK::ScenarioSquad<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->squads.pointer));
             auto *squad_end = squads + squad_count;
-            std::uint32_t firing_position_count = encounter->firing_positions.count;
             auto *firing_positions = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->firing_positions.pointer));
-            auto *firing_position_end = firing_positions + firing_position_count;
+
+            std::uint32_t squad_max_hits = 0;
+            std::uint32_t squad_total = 0;
+            std::uint32_t firing_position_max_hits = 0;
+            std::uint32_t firing_position_total = encounter->firing_positions.count.read();
 
             // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
-                current_count = 0;
+                // Clear the current arrays
+                clear_array(current_firing_position);
+                clear_array(current_squad);
 
                 // Don't check for stuff here if there's nothing to check
-                if(b > 0 && !max_hits) {
+                if(b > 0 && max_hits == 0) {
                     break;
                 }
 
                 // Check if the squad spawn positions are in the BSP
+                std::uint32_t squad_count = 0;
+                std::uint32_t squad_offset = 0;
                 for(auto *squad = squads; squad < squad_end; squad++) {
-                    auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
-                    auto *spawn_point_end = spawn_point + squad->starting_locations.count.read();
-
                     // Add 'em up
-                    for(auto *spawn = spawn_point; spawn < spawn_point_end; spawn++) {
-                        if(b == 0) {
-                            max_hits++;
-                        }
-                        if(this->point_in_bsp(b, spawn->position)) {
-                            current_count++;
+                    auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
+                    std::size_t spawn_point_count = squad->starting_locations.count.read();
+                    for(std::size_t i = 0; i < spawn_point_count; i++) {
+                        if(this->point_in_bsp(b, spawn_point[i].position)) {
+                            squad_count++;
+                            set_flag_for_array(current_squad, squad_offset + i, 1);
                         }
                     }
+                    squad_offset += spawn_point_count;
+                }
+                if(b == 0) {
+                    squad_total = squad_offset;
                 }
 
                 // Check if the firing positions are in the BSP
-                for(auto *firing_position = firing_positions; firing_position < firing_position_end; firing_position++) {
-                    if(b == 0) {
-                        max_hits++;
-                    }
-                    if(this->point_in_bsp(b, firing_position->position)) {
-                        current_count++;
+                std::uint32_t firing_position_count = 0;
+                for(std::size_t i = 0; i < firing_position_total; i++) {
+                    if(this->point_in_bsp(b, firing_positions[i].position)) {
+                        firing_position_count++;
+                        set_flag_for_array(current_firing_position, i, 1);
                     }
                 }
 
+                // Add the totals together
+                if(b == 0) {
+                    max_hits = squad_total + firing_position_total;
+                }
+
                 // Check if we got something
+                std::uint32_t current_count = squad_count + firing_position_count;
                 if(current_count) {
                     if(current_count == highest_count) {
                         bsps_found_in++;
@@ -1688,6 +1725,10 @@ namespace Invader {
                         encounter->precomputed_bsp_index = static_cast<std::uint16_t>(b);
                         bsps_found_in = 1;
                         highest_count = current_count;
+                        squad_max_hits = squad_count;
+                        firing_position_max_hits = firing_position_count;
+                        copy_array(current_firing_position, best_firing_position);
+                        copy_array(current_squad, best_squad);
                     }
                 }
             }
@@ -1704,8 +1745,38 @@ namespace Invader {
                 warnings_given++;
             }
             if(max_hits > highest_count) {
-                eprintf("Warning: Encounter #%zu (%s) is partially outside of the BSP (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, highest_count, max_hits);
+                eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
                 warnings_given++;
+
+                // Show some information
+                auto print_info_for_encounter = [](const char *name, std::size_t max, std::size_t total, const std::unique_ptr<std::uint8_t []> &best) {
+                    char indices_list[256] = {};
+                    char *indices_list_offset = indices_list;
+                    char *indices_list_end = indices_list + sizeof(indices_list) - 1;
+                    int counted = 0;
+                    for(std::size_t i = 0; i < total && i < VECTOR_SIZE; i++) {
+                        if(!best.get()[i]) {
+                            if(counted == 5) {
+                                std::snprintf(indices_list_offset, indices_list_end - indices_list_offset, ", ...");
+                                break;
+                            }
+                            else {
+                                const char *comma = ", ";
+                                if(counted == 0) {
+                                    comma = "";
+                                }
+                                indices_list_offset += std::snprintf(indices_list_offset, indices_list_end - indices_list_offset, "%s%zu", comma, i);
+                                counted++;
+                            }
+                        }
+                    }
+                    char counter[16] = {};
+                    std::snprintf(counter, sizeof(counter), "%zu/%zu", max, total);
+                    eprintf("    %-20s Count: %-16s Indices: [%s]\n", name, counter, indices_list);
+                };
+
+                print_info_for_encounter("squads", squad_max_hits, squad_total, best_squad);
+                print_info_for_encounter("firing positions", firing_position_max_hits, firing_position_total, best_firing_position);
             }
         }
 
