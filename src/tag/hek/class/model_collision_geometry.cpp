@@ -50,8 +50,8 @@ namespace Invader::HEK {
 
         // Loop until we get outta here
         while(true) {
-            //  If it's null or it's a leaf, return it
-            if(node_index.is_null() || node_index.flag_value()) {
+            // If it's a leaf or it's null, return it
+            if(node_index.flag_value() || node_index.is_null()) {
                 return node_index;
             }
 
