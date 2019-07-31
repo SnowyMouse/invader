@@ -1673,6 +1673,8 @@ namespace Invader {
             std::uint32_t player_starting_location_total = encounter->player_starting_locations.count.read();
             std::size_t max_hits = squad_total + firing_position_total + player_starting_location_total;
 
+            float distance_to_ground_max = 0.0F;
+
             // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
                 // Clear the current arrays
@@ -1687,6 +1689,9 @@ namespace Invader {
 
                 // Check if the squad spawn positions are in the BSP
                 std::uint32_t squad_count = 0;
+
+                #define MAX_DISTANCE 2.0F
+                float distance_to_ground = MAX_DISTANCE;
                 for(std::size_t s = 0; s < squad_total; s++) {
                     // Add 'em up
                     auto &squad = squads[s];
@@ -1710,6 +1715,25 @@ namespace Invader {
                         if(!this->point_in_bsp(b, spawn_point->position)) {
                             found = false;
                         }
+
+                        // If 3D firing positions is not set, find the distance to the ground. TODO: Use raycasting.
+                        else if(!encounter->flags.read()._3d_firing_positions) {
+                            HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
+                            float q = 0.0F;
+                            for(; q <= MAX_DISTANCE; q += 0.1F) {
+                                point.z = spawn_point->position.z - q;
+                                if(!this->point_in_bsp(b, point)) {
+                                    break;
+                                }
+                            }
+                            if(q >= MAX_DISTANCE) {
+                                q = MAX_DISTANCE;
+                            }
+
+                            if(distance_to_ground > q) {
+                                distance_to_ground = q;
+                            }
+                        }
                     }
 
                     if(found) {
@@ -1717,6 +1741,8 @@ namespace Invader {
                         set_flag_for_array(current_squad, s, 1);
                     }
                 }
+
+                #undef MAX_DISTANCE
 
                 // Check if the player starting locations are in the BSP
                 std::uint32_t player_starting_location_count = 0;
@@ -1740,7 +1766,13 @@ namespace Invader {
                 std::uint32_t current_count = squad_count + firing_position_count + player_starting_location_count;
                 if(current_count) {
                     if(current_count == highest_count) {
-                        bsps_found_in++;
+                        if(distance_to_ground == distance_to_ground_max) {
+                            bsps_found_in++;
+                        }
+                        else if(distance_to_ground < distance_to_ground_max) {
+                            bsps_found_in = 1;
+                            encounter->precomputed_bsp_index = static_cast<std::uint16_t>(b);
+                        }
                     }
                     else if(current_count > highest_count) {
                         encounter->precomputed_bsp_index = static_cast<std::uint16_t>(b);
@@ -1749,6 +1781,7 @@ namespace Invader {
                         squad_max_hits = squad_count;
                         firing_position_max_hits = firing_position_count;
                         player_starting_location_max_hits = player_starting_location_count;
+                        distance_to_ground_max = distance_to_ground;
                         copy_array(current_player_starting_location, best_player_starting_location);
                         copy_array(current_firing_position, best_firing_position);
                         copy_array(current_squad, best_squad);
