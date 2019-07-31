@@ -1657,19 +1657,15 @@ namespace Invader {
             // How many BSPs we've found the highest count
             std::uint32_t bsps_found_in = 0;
 
-            // Maximum number of hits
-            std::size_t max_hits = 0;
-
             // Get pointers
-            std::uint32_t squad_count = encounter->squads.count;
             auto *squads = reinterpret_cast<HEK::ScenarioSquad<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->squads.pointer));
-            auto *squad_end = squads + squad_count;
             auto *firing_positions = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->firing_positions.pointer));
 
             std::uint32_t squad_max_hits = 0;
-            std::uint32_t squad_total = 0;
+            std::uint32_t squad_total = encounter->squads.count.read();
             std::uint32_t firing_position_max_hits = 0;
             std::uint32_t firing_position_total = encounter->firing_positions.count.read();
+            std::size_t max_hits = squad_total + firing_position_total;
 
             // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
@@ -1678,27 +1674,26 @@ namespace Invader {
                 clear_array(current_squad);
 
                 // Don't check for stuff here if there's nothing to check
-                if(b > 0 && max_hits == 0) {
+                if(max_hits == 0) {
                     break;
                 }
 
                 // Check if the squad spawn positions are in the BSP
                 std::uint32_t squad_count = 0;
-                std::uint32_t squad_offset = 0;
-                for(auto *squad = squads; squad < squad_end; squad++) {
+                for(std::size_t s = 0; s < squad_total; s++) {
                     // Add 'em up
-                    auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad->starting_locations.pointer));
-                    std::size_t spawn_point_count = squad->starting_locations.count.read();
+                    auto &squad = squads[s];
+                    auto *spawn_point = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad.starting_locations.pointer));
+                    std::size_t spawn_point_count = squad.starting_locations.count.read();
+                    set_flag_for_array(current_squad, s, 1);
+                    squad_count++;
                     for(std::size_t i = 0; i < spawn_point_count; i++) {
                         if(this->point_in_bsp(b, spawn_point[i].position)) {
-                            squad_count++;
-                            set_flag_for_array(current_squad, squad_offset + i, 1);
+                            set_flag_for_array(current_squad, s, 0);
+                            squad_count--;
+                            break;
                         }
                     }
-                    squad_offset += spawn_point_count;
-                }
-                if(b == 0) {
-                    squad_total = squad_offset;
                 }
 
                 // Check if the firing positions are in the BSP
@@ -1708,11 +1703,6 @@ namespace Invader {
                         firing_position_count++;
                         set_flag_for_array(current_firing_position, i, 1);
                     }
-                }
-
-                // Add the totals together
-                if(b == 0) {
-                    max_hits = squad_total + firing_position_total;
                 }
 
                 // Check if we got something
