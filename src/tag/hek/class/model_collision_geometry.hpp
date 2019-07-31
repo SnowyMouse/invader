@@ -269,18 +269,21 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelCollisionGeometryBSP<BigEndian>) == 0x60);
 
-    bool point_inside_bsp(
+    /**
+     * Determine if a point is located inside of a BSP. If so, return the leaf.
+     * @param  point            3D point reference
+     * @param  bsp3d_nodes      pointer to the BSP3D nodes
+     * @param  bsp3d_node_count number of BSP3D nodes
+     * @param  planes           pointer to the BSP planes
+     * @param  plane_count      number of BSP planes
+     * @return                  leaf index if found; null index if not
+     */
+    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(
         const Point3D<LittleEndian> &point,
         const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
         std::uint32_t bsp3d_node_count,
         const ModelCollisionGeometryPlane<LittleEndian> *planes,
-        std::uint32_t plane_count,
-        const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
-        std::uint32_t leaf_count,
-        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
-        std::uint32_t bsp2d_reference_count,
-        const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
-        std::uint32_t surface_count
+        std::uint32_t plane_count
     );
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryNode {

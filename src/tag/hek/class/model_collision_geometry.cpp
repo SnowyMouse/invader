@@ -37,61 +37,42 @@ namespace Invader::HEK {
         FINISH_COMPILE
     }
 
-    bool point_inside_bsp(
-        const Point3D<LittleEndian> &point,
-        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
-        std::uint32_t bsp3d_node_count,
-        const ModelCollisionGeometryPlane<LittleEndian> *planes,
-        std::uint32_t plane_count,
-        const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
-        std::uint32_t leaf_count,
-        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
-        std::uint32_t bsp2d_reference_count,
-        const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
-        std::uint32_t surface_count
-    ) {
-        auto point_in_front_of_plane = [&point, &planes, &plane_count](std::uint32_t plane_index) {
-            if(plane_index >= plane_count) {
-                eprintf("Invalid plane index %u / %u in BSP.\n", plane_index, plane_count);
+    static inline bool point_in_front_of_plane(const Point3D<LittleEndian> &point, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count, std::uint32_t plane_index) {
+        if(plane_index >= plane_count) {
+            eprintf("Invalid plane index %u / %u in BSP.\n", plane_index, plane_count);
+            throw OutOfBoundsException();
+        }
+        return point.distance_from_plane(planes[plane_index].plane) >= 0;
+    }
+
+    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count) {
+        FlaggedInt<std::uint32_t> node_index = {0};
+
+        // Loop until we get outta here
+        while(true) {
+            //  If it's null or it's a leaf, return it
+            if(node_index.is_null() || node_index.flag_value()) {
+                return node_index;
+            }
+
+            // Make sure it's a valid index
+            if(node_index >= bsp3d_node_count) {
+                eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
                 throw OutOfBoundsException();
             }
-            return point.distance_from_plane(planes[plane_index].plane) >= 0;
-        };
 
-        auto point_in_3d_tree = [&bsp3d_nodes, &bsp3d_node_count, &point_in_front_of_plane](FlaggedInt<std::uint32_t> node_index, auto &point_in_tree_recursion) -> bool {
-            while(true) {
-                // First, make sure it's not null
-                if(node_index.is_null()) {
-                    return false;
-                }
+            // Get the node as well as front/back child info
+            auto &node = bsp3d_nodes[node_index];
 
-                // Next, make sure it's not a leaf. If it is, we should look at leaves, instead.
-                if(node_index.flag_value()) {
-                    return true;
-                }
+            // Let's see if it's in front of the plane
+            if(point_in_front_of_plane(point, planes, plane_count, node.plane)) {
+                node_index = node.front_child;
+            }
 
-                // Make sure it's a valid index
-                if(node_index >= bsp3d_node_count) {
-                    eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
-                    throw OutOfBoundsException();
-                }
-
-                // Get the node as well as front/back child info
-                auto &node = bsp3d_nodes[node_index];
-
-                // Let's see if it's in front of the plane
-                if(point_in_front_of_plane(node.plane)) {
-                    return point_in_tree_recursion(node.front_child, point_in_tree_recursion);
-                }
-
-                // If not, keep going
-                else {
-                    return point_in_tree_recursion(node.back_child, point_in_tree_recursion);
-                }
+            // If not, keep going
+            else {
+                node_index = node.back_child;
             }
         };
-
-        FlaggedInt<std::uint32_t> first_node = {};
-        return point_in_3d_tree(first_node, point_in_3d_tree);
     }
 }

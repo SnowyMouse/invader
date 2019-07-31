@@ -1871,13 +1871,7 @@ namespace Invader {
         auto bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count.read();
         auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
         auto planes_count = collision_bsp.planes.count.read();
-        auto *leaves = reinterpret_cast<HEK::ModelCollisionGeometryLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.leaves.pointer));
-        auto leaves_count = collision_bsp.leaves.count.read();
-        auto *bsp2d_references = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DReference<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_references.pointer));
-        auto bsp2d_reference_count = collision_bsp.bsp2d_references.count.read();
-        auto *surfaces = reinterpret_cast<HEK::ModelCollisionGeometrySurface<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.surfaces.pointer));
-        auto surface_count = collision_bsp.surfaces.count.read();
 
-        return HEK::point_inside_bsp(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count, leaves, leaves_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count);
+        return !HEK::leaf_for_point_of_bsp_tree(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count).is_null();
     }
 }
