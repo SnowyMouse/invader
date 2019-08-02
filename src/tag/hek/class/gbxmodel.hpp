@@ -60,7 +60,7 @@ namespace Invader::HEK {
         EndianType<float> node_distance_from_parent;
         PAD(0x20);
         EndianType<float> scale;
-        Matrix<EndianType> matrix;
+        Matrix<EndianType> rotation;
         Point3D<EndianType> translation;
 
         ENDIAN_TEMPLATE(NewType) operator GBXModelNode<NewType>() const noexcept {
@@ -73,7 +73,7 @@ namespace Invader::HEK {
             COPY_THIS(default_rotation);
             COPY_THIS(node_distance_from_parent);
             COPY_THIS(scale);
-            COPY_THIS(matrix);
+            COPY_THIS(rotation);
             COPY_THIS(translation);
             return copy;
         }
