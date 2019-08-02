@@ -46,15 +46,11 @@ namespace Invader::HEK {
     }
 
     FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count) {
+        // Start with an initial index of 0
         FlaggedInt<std::uint32_t> node_index = {0};
 
-        // Loop until we get outta here
-        while(true) {
-            // If it's a leaf or it's null, return it
-            if(node_index.flag_value() || node_index.is_null()) {
-                return node_index;
-            }
-
+        // Loop until we have a leaf or nothing
+        while(!node_index.flag_value() && !node_index.is_null()) {
             // Make sure it's a valid index
             if(node_index >= bsp3d_node_count) {
                 eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
@@ -63,16 +59,9 @@ namespace Invader::HEK {
 
             // Get the node as well as front/back child info
             auto &node = bsp3d_nodes[node_index];
-
-            // Let's see if it's in front of the plane
-            if(point_in_front_of_plane(point, planes, plane_count, node.plane)) {
-                node_index = node.front_child;
-            }
-
-            // If not, keep going
-            else {
-                node_index = node.back_child;
-            }
+            node_index = point_in_front_of_plane(point, planes, plane_count, node.plane) ? node.front_child : node.back_child;
         };
+
+        return node_index;
     }
 }
