@@ -1814,19 +1814,8 @@ namespace Invader {
     }
 
     HEK::FlaggedInt<std::uint32_t> BuildWorkload::leaf_for_point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
-        // Get current BSP
-        auto &scenario_tag = this->compiled_tags[this->scenario_index];
-        auto *scenario_tag_data = scenario_tag->data.data();
-        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
-        auto *sbsps = reinterpret_cast<HEK::ScenarioBSP<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.structure_bsps.pointer));
-        auto &sbsp_scenario_entry = sbsps[bsp];
-        auto sbsp_tag_id = sbsp_scenario_entry.structure_bsp.tag_id.read();
-        if(sbsp_tag_id.is_null()) {
-            return HEK::FlaggedInt<std::uint32_t>::null();
-        }
-
         // Get current BSP data
-        auto &sbsp_tag = this->compiled_tags[sbsp_tag_id.index];
+        auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
         auto *sbsp_tag_data = sbsp_tag->data.data();
         auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
         auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
@@ -1848,5 +1837,26 @@ namespace Invader {
 
     bool BuildWorkload::point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
         return !this->leaf_for_point_in_bsp(bsp, point).is_null();
+    }
+
+    std::size_t BuildWorkload::get_bsp_tag_index(std::uint32_t bsp) {
+        auto &scenario_tag = this->compiled_tags[this->scenario_index];
+        auto *scenario_tag_data = scenario_tag->data.data();
+        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
+        auto *sbsps = reinterpret_cast<HEK::ScenarioBSP<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.structure_bsps.pointer));
+
+        // Invalid BSP?
+        if(scenario.structure_bsps.count <= bsp) {
+            throw OutOfBoundsException();
+        }
+
+        // Do it
+        auto &sbsp_scenario_entry = sbsps[bsp];
+        auto sbsp_tag = sbsp_scenario_entry.structure_bsp.tag_id.read().index;
+        if(sbsp_tag >= this->tag_count) {
+            throw OutOfBoundsException();
+        }
+
+        return sbsp_tag;
     }
 }

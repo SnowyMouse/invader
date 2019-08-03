@@ -203,6 +203,13 @@ namespace Invader {
          * @return      leaf index or null if not in BSP
          */
         HEK::FlaggedInt<std::uint32_t> leaf_for_point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point);
+
+        /**
+         * Get the tag index of the BSP
+         * @param  bsp bsp index
+         * @return     index of the BSP
+         */
+        std::size_t get_bsp_tag_index(std::uint32_t bsp);
     };
 }
 #endif
