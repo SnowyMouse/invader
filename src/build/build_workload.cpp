@@ -1772,6 +1772,45 @@ namespace Invader {
                 warnings_given++;
                 encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
             }
+
+            // Go through all the firing positions and set cluster stuff
+            std::uint16_t bsp = encounter->precomputed_bsp_index.read();
+            if(bsp != 0xFFFF && firing_position_total > 0) {
+                // Get leaves for the BSP
+                auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
+                auto *sbsp_tag_data = sbsp_tag->data.data();
+                auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+                auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
+
+                // Leaves (visible)
+                auto *visible_leaves = reinterpret_cast<HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.leaves.pointer));
+                auto leaves_count = sbsp.leaves.count.read();
+
+                auto get_leaf = [&visible_leaves, &leaves_count](std::uint32_t leaf_index) -> const HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> & {
+                    if(leaves_count <= leaf_index) {
+                        eprintf("Invalid leaf index %u / %u in BSP.\n", leaf_index, leaves_count);
+                        throw OutOfBoundsException();
+                    }
+                    return visible_leaves[leaf_index];
+                };
+
+                for(std::uint32_t f = 0; f < firing_position_total; f++) {
+                    // Get a reference to the firing position
+                    auto &firing_position = firing_positions[f];
+
+                    // Get the leaf this point is located in
+                    auto leaf = this->leaf_for_point_in_bsp(bsp, firing_position.position);
+                    if(leaf.is_null()) {
+                        firing_position.cluster_index = 0xFFFF;
+                        continue;
+                    }
+
+                    // Set the cluster index
+                    auto &leaf_entry = get_leaf(leaf);
+                    firing_position.cluster_index = leaf_entry.cluster.read();
+                }
+            }
+
             if(max_hits > highest_count) {
                 eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
                 warnings_given++;
