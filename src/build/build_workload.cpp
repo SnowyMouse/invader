@@ -1635,16 +1635,13 @@ namespace Invader {
         // Ideally you want everything to be 1's up to the total count. 0 means it wasn't found in a BSP.
         auto best_firing_position = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
         auto best_squad = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
-        auto best_player_starting_location = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
         auto current_firing_position = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
         auto current_squad = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
-        auto current_player_starting_location = std::make_unique<std::uint8_t []>(VECTOR_SIZE);
 
         // Iterate
         std::size_t warnings_given = 0;
         for(auto *encounter = encounters; encounter < encounters_end; encounter++) {
             // Clear the best arrays
-            clear_array(best_player_starting_location);
             clear_array(best_firing_position);
             clear_array(best_squad);
 
@@ -1663,22 +1660,18 @@ namespace Invader {
             // Get pointers
             auto *squads = reinterpret_cast<HEK::ScenarioSquad<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->squads.pointer));
             auto *firing_positions = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->firing_positions.pointer));
-            auto *player_starting_locations = reinterpret_cast<HEK::ScenarioPlayerStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(encounter->player_starting_locations.pointer));
 
             std::uint32_t squad_max_hits = 0;
             std::uint32_t squad_total = encounter->squads.count.read();
             std::uint32_t firing_position_max_hits = 0;
             std::uint32_t firing_position_total = encounter->firing_positions.count.read();
-            std::uint32_t player_starting_location_max_hits = 0;
-            std::uint32_t player_starting_location_total = encounter->player_starting_locations.count.read();
-            std::size_t max_hits = squad_total + firing_position_total + player_starting_location_total;
+            std::size_t max_hits = squad_total + firing_position_total;
 
             float distance_to_ground_max = 0.0F;
 
             // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
                 // Clear the current arrays
-                clear_array(current_player_starting_location);
                 clear_array(current_firing_position);
                 clear_array(current_squad);
 
@@ -1690,7 +1683,7 @@ namespace Invader {
                 // Check if the squad spawn positions are in the BSP
                 std::uint32_t squad_count = 0;
 
-                #define MAX_DISTANCE 2.0F
+                const float MAX_DISTANCE = 2.0F;
                 float distance_to_ground = MAX_DISTANCE;
                 for(std::size_t s = 0; s < squad_total; s++) {
                     // Add 'em up
@@ -1698,15 +1691,6 @@ namespace Invader {
 
                     // Have this here
                     bool found = true;
-
-                    // Check move positions
-                    auto *move_position_first = reinterpret_cast<HEK::ScenarioMovePosition<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad.move_positions.pointer));
-                    auto *move_position_end = move_position_first + squad.move_positions.count.read();
-                    for(auto *move_position = move_position_first; move_position < move_position_end && found; move_position++) {
-                        if(!this->point_in_bsp(b, move_position->position)) {
-                            found = false;
-                        }
-                    }
 
                     // Check spawn points
                     auto *spawn_point_first = reinterpret_cast<HEK::ScenarioActorStartingLocation<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(squad.starting_locations.pointer));
@@ -1742,17 +1726,6 @@ namespace Invader {
                     }
                 }
 
-                #undef MAX_DISTANCE
-
-                // Check if the player starting locations are in the BSP
-                std::uint32_t player_starting_location_count = 0;
-                for(std::size_t i = 0; i < player_starting_location_total; i++) {
-                    if(this->point_in_bsp(b, player_starting_locations[i].position)) {
-                        player_starting_location_count++;
-                        set_flag_for_array(current_player_starting_location, i, 1);
-                    }
-                }
-
                 // Check if the firing positions are in the BSP
                 std::uint32_t firing_position_count = 0;
                 for(std::size_t i = 0; i < firing_position_total; i++) {
@@ -1763,7 +1736,7 @@ namespace Invader {
                 }
 
                 // Check if we got something
-                std::uint32_t current_count = squad_count + firing_position_count + player_starting_location_count;
+                std::uint32_t current_count = squad_count + firing_position_count;
                 if(current_count) {
                     if(current_count == highest_count) {
                         if(distance_to_ground == distance_to_ground_max) {
@@ -1780,9 +1753,7 @@ namespace Invader {
                         highest_count = current_count;
                         squad_max_hits = squad_count;
                         firing_position_max_hits = firing_position_count;
-                        player_starting_location_max_hits = player_starting_location_count;
                         distance_to_ground_max = distance_to_ground;
-                        copy_array(current_player_starting_location, best_player_starting_location);
                         copy_array(current_firing_position, best_firing_position);
                         copy_array(current_squad, best_squad);
                     }
@@ -1833,7 +1804,6 @@ namespace Invader {
 
                 print_info_for_encounter("squads", squad_max_hits, squad_total, best_squad);
                 print_info_for_encounter("firing positions", firing_position_max_hits, firing_position_total, best_firing_position);
-                print_info_for_encounter("player starting loc.", player_starting_location_max_hits, player_starting_location_total, best_player_starting_location);
             }
         }
 
