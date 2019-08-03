@@ -1770,6 +1770,7 @@ namespace Invader {
             else if(bsps_found_in == 0) {
                 eprintf("Warning: Encounter #%zu (%s) was found in 0 BSPs.\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string);
                 warnings_given++;
+                encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
             }
             if(max_hits > highest_count) {
                 eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
