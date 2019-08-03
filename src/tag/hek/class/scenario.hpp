@@ -1097,12 +1097,16 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioFiringPosition {
         Point3D<EndianType> position;
         EndianType<ScenarioGroupIndex> group_index;
-        PAD(0xA);
+        LittleEndian<std::uint16_t> cluster_index;
+        PAD(0x4);
+        LittleEndian<std::uint32_t> surface_index;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioFiringPosition<NewType>() const noexcept {
             ScenarioFiringPosition<NewType> copy = {};
             COPY_THIS(position);
             COPY_THIS(group_index);
+            COPY_THIS(cluster_index);
+            COPY_THIS(surface_index);
             return copy;
         }
     };
