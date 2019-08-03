@@ -195,6 +195,14 @@ namespace Invader {
          * @return      true if point is inside the bsp
          */
         bool point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point);
+
+        /**
+         * Get the leaf index for the point in BSP
+         * @param bsp   bsp index to check
+         * @param point point to check
+         * @return      leaf index or null if not in BSP
+         */
+        HEK::FlaggedInt<std::uint32_t> leaf_for_point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point);
     };
 }
 #endif

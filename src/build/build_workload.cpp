@@ -1842,7 +1842,7 @@ namespace Invader {
         }
     }
 
-    bool BuildWorkload::point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
+    HEK::FlaggedInt<std::uint32_t> BuildWorkload::leaf_for_point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
         // Get current BSP
         auto &scenario_tag = this->compiled_tags[this->scenario_index];
         auto *scenario_tag_data = scenario_tag->data.data();
@@ -1851,7 +1851,7 @@ namespace Invader {
         auto &sbsp_scenario_entry = sbsps[bsp];
         auto sbsp_tag_id = sbsp_scenario_entry.structure_bsp.tag_id.read();
         if(sbsp_tag_id.is_null()) {
-            return false;
+            return HEK::FlaggedInt<std::uint32_t>::null();
         }
 
         // Get current BSP data
@@ -1862,7 +1862,7 @@ namespace Invader {
 
         // Make sure we have a collision BSP
         if(sbsp.collision_bsp.count == 0) {
-            return false;
+            return HEK::FlaggedInt<std::uint32_t>::null();
         }
         auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
 
@@ -1872,6 +1872,10 @@ namespace Invader {
         auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
         auto planes_count = collision_bsp.planes.count.read();
 
-        return !HEK::leaf_for_point_of_bsp_tree(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count).is_null();
+        return HEK::leaf_for_point_of_bsp_tree(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count);
+    }
+
+    bool BuildWorkload::point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {
+        return !this->leaf_for_point_in_bsp(bsp, point).is_null();
     }
 }

@@ -114,6 +114,14 @@ namespace Invader::HEK {
         static constexpr T MAX_VALUE = FLAG_BIT - 1;
 
         /**
+         * Create a null FlaggedInt
+         * @return null FlaggedInt
+         */
+        static inline FlaggedInt<T> null() {
+            return FlaggedInt<T> { (FLAG_BIT | MAX_VALUE) };
+        }
+
+        /**
          * Return true if the flag is set
          * @return true if flag is set
          */
@@ -536,8 +544,38 @@ namespace Invader::HEK {
          * @param  plane Plane to check
          * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
          */
-        float distance_from_plane(const Plane3D<EndianType> &plane) const {
+        inline float distance_from_plane(const Plane3D<EndianType> &plane) const {
             return ((plane.vector.i * this->x) + (plane.vector.j * this->y) + (plane.vector.k * this->z)) - plane.w;
+        }
+
+        /**
+         * Get the distance from the plane
+         * @param plane Plane to check
+         * @return      distance from the plane in world units
+         */
+        inline float operator-(const Plane3D<EndianType> &plane) const {
+            return this->distance_from_plane(plane);
+        }
+
+        /**
+         * Get the distance from the point squared. This is faster because no square root operation is used.
+         * @param  point Point to check
+         * @return       Distance in world units
+         */
+        inline float distance_from_point_squared(const Point3D<EndianType> &point) const {
+            float x = point.x - this->x;
+            float y = point.y - this->y;
+            float z = point.z - this->z;
+            return x*x + y*y + z*z;
+        }
+
+        /**
+         * Get the distance from the point.
+         * @param  point Point to check
+         * @return       Distance in world units
+         */
+        inline float distance_from_point(const Point3D<EndianType> &point) const {
+            return std::sqrt(this->distance_from_point_squared(point));
         }
 
         Point3D(const Vector3D<EndianType> &copy) : x(copy.i), y(copy.j), z(copy.k) {}
