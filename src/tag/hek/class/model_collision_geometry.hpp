@@ -269,23 +269,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelCollisionGeometryBSP<BigEndian>) == 0x60);
 
-    /**
-     * Determine if a point is located inside of a BSP. If so, return the leaf.
-     * @param  point            3D point reference
-     * @param  bsp3d_nodes      pointer to the BSP3D nodes
-     * @param  bsp3d_node_count number of BSP3D nodes
-     * @param  planes           pointer to the BSP planes
-     * @param  plane_count      number of BSP planes
-     * @return                  leaf index if found; null index if not
-     */
-    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(
-        const Point3D<LittleEndian> &point,
-        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
-        std::uint32_t bsp3d_node_count,
-        const ModelCollisionGeometryPlane<LittleEndian> *planes,
-        std::uint32_t plane_count
-    );
-
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryNode {
         TagString name;
         EndianType<std::int16_t> region;
@@ -421,5 +404,22 @@ namespace Invader::HEK {
                                                       } ADD_REFLEXIVE_END;
 
     void compile_model_collision_geometry_tag(CompiledTag &compiled, const std::byte *data, std::size_t size);
+
+    /**
+     * Determine if a point is located inside of a BSP. If so, return the leaf.
+     * @param  point            3D point reference
+     * @param  bsp3d_nodes      pointer to the BSP3D nodes
+     * @param  bsp3d_node_count number of BSP3D nodes
+     * @param  planes           pointer to the BSP planes
+     * @param  plane_count      number of BSP planes
+     * @return                  leaf index if found; null index if not
+     */
+    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(
+        const Point3D<LittleEndian> &point,
+        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+        std::uint32_t bsp3d_node_count,
+        const ModelCollisionGeometryPlane<LittleEndian> *planes,
+        std::uint32_t plane_count
+    );
 }
 #endif
