@@ -1782,17 +1782,20 @@ namespace Invader {
                 auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
                 auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
 
-                // Leaves (visible)
-                auto *visible_leaves = reinterpret_cast<HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.leaves.pointer));
-                auto leaves_count = sbsp.leaves.count.read();
+                // Make sure we have a collision BSP
+                if(sbsp.collision_bsp.count != 1) {
+                    eprintf("BSP is missing a collision BSP.\n");
+                    throw OutOfBoundsException();
+                }
+                auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
 
-                auto get_leaf = [&visible_leaves, &leaves_count](std::uint32_t leaf_index) -> const HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> & {
-                    if(leaves_count <= leaf_index) {
-                        eprintf("Invalid leaf index %u / %u in BSP.\n", leaf_index, leaves_count);
-                        throw OutOfBoundsException();
-                    }
-                    return visible_leaves[leaf_index];
-                };
+                // Leaves
+                auto *render_leaves = reinterpret_cast<HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.leaves.pointer));
+                auto leaves_count = sbsp.leaves.count.read();
+                if(collision_bsp.leaves.count != leaves_count) {
+                    eprintf("BSP leaf count is not correct.\n");
+                    throw OutOfBoundsException();
+                }
 
                 for(std::uint32_t f = 0; f < firing_position_total; f++) {
                     // Get a reference to the firing position
@@ -1804,10 +1807,14 @@ namespace Invader {
                         firing_position.cluster_index = 0xFFFF;
                         continue;
                     }
+                    if(leaves_count <= leaf) {
+                        eprintf("Invalid leaf index %u / %u in BSP.\n", leaf.int_value(), leaves_count);
+                        throw OutOfBoundsException();
+                    }
 
                     // Set the cluster index
-                    auto &leaf_entry = get_leaf(leaf);
-                    firing_position.cluster_index = leaf_entry.cluster.read();
+                    auto &render_leaf_entry = render_leaves[leaf];
+                    firing_position.cluster_index = render_leaf_entry.cluster.read();
                 }
             }
 
@@ -1860,8 +1867,9 @@ namespace Invader {
         auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
 
         // Make sure we have a collision BSP
-        if(sbsp.collision_bsp.count == 0) {
-            return HEK::FlaggedInt<std::uint32_t>::null();
+        if(sbsp.collision_bsp.count != 1) {
+            eprintf("BSP is missing a collision BSP.\n");
+            throw OutOfBoundsException();
         }
         auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
 
