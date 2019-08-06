@@ -164,6 +164,10 @@ namespace Invader::HEK {
         inline operator T() const noexcept {
             return this->int_value();
         }
+
+        inline bool operator ==(const FlaggedInt<T> &other) {
+            return this->value == other.value;
+        }
     };
     static_assert(sizeof(FlaggedInt<std::uint32_t>) == sizeof(std::uint32_t));
     static_assert(FlaggedInt<std::uint32_t>::MAX_VALUE == 0x7FFFFFFF);
