@@ -103,6 +103,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(ScenarioStructureBSPArrayVertexBuffer<BigEndian>) == 0x14);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedRenderedVertex {
         Point3D<EndianType> position;
@@ -125,12 +126,12 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedLightmapVertex {
         Vector3D<EndianType> normal;
-        Point2D<EndianType> coords;
+        Point2D<EndianType> texture_coords;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPMaterialUncompressedLightmapVertex<NewType>() const noexcept {
             ScenarioStructureBSPMaterialUncompressedLightmapVertex<NewType> copy = {};
             COPY_THIS(normal);
-            COPY_THIS(coords);
+            COPY_THIS(texture_coords);
             return copy;
         }
     };
