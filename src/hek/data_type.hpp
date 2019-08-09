@@ -413,11 +413,39 @@ namespace Invader::HEK {
             return copy;
         }
 
+        Vector3D<EndianType> operator*(float multiply) const {
+            Vector3D<EndianType> copy;
+            copy.i = this->i * multiply;
+            copy.j = this->j * multiply;
+            copy.k = this->k * multiply;
+            return copy;
+        }
+
         Vector3D<EndianType> operator+(const Vector3D<EndianType> &add) const {
             Vector3D<EndianType> copy;
             copy.i = this->i + add.i;
             copy.j = this->j + add.j;
             copy.k = this->k + add.k;
+            return copy;
+        }
+
+        Vector3D<EndianType> normalize() const {
+            // First let's get the distance
+            float distance = std::sqrt(i*i + j*j + k*k);
+
+            // If it's 0, we can't normalize it
+            if(distance == 0.0F) {
+                return {};
+            }
+
+            // Find what we must multiply to get
+            float m_distance = 1.0F / distance;
+
+            // Now write and return the new values
+            Vector3D<EndianType> copy;
+            copy.i = i * m_distance;
+            copy.j = j * m_distance;
+            copy.k = k * m_distance;
             return copy;
         }
     };
@@ -506,7 +534,7 @@ namespace Invader::HEK {
          * @return     Distance in world units (positive if in front, negative if behind, zero if neither)
          */
         float distance_from_plane(const Plane2D<EndianType> &plane) const {
-            return ((plane.x * this->x) + (plane.y * this->y)) - plane.w;
+            return ((plane.vector.i * this->x) + (plane.vector.j * this->y)) - plane.w;
         }
     };
     static_assert(sizeof(Point2D<BigEndian>) == 0x8);
@@ -537,10 +565,30 @@ namespace Invader::HEK {
 
         Point3D<EndianType> operator+(const Point3D<EndianType> &add) const {
             Point3D<EndianType> copy;
-            copy.y = this->x + add.x;
-            copy.x = this->y + add.y;
+            copy.x = this->x + add.x;
+            copy.y = this->y + add.y;
             copy.z = this->z + add.z;
             return copy;
+        }
+
+        Point3D<EndianType> operator+(const Vector3D<EndianType> &add) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x + add.i;
+            copy.y = this->y + add.j;
+            copy.z = this->z + add.k;
+            return copy;
+        }
+
+        Point3D<EndianType> operator+(float add) const {
+            Point3D<EndianType> copy;
+            copy.x = this->x + add;
+            copy.y = this->y + add;
+            copy.z = this->z + add;
+            return copy;
+        }
+
+        bool operator ==(const Point3D<EndianType> &other) const {
+            return this->x == other.x && this->y == other.y && this->z == other.z;
         }
 
         /**
@@ -559,6 +607,19 @@ namespace Invader::HEK {
          */
         inline float operator-(const Plane3D<EndianType> &plane) const {
             return this->distance_from_plane(plane);
+        }
+
+        /**
+         * Calculate a non-normalized vector between two points
+         * @param point Other point to check
+         * @return      vector calculated
+         */
+        inline Vector3D<EndianType> operator-(const Point3D<EndianType> &point) const {
+            Vector3D<EndianType> v;
+            v.i = this->x - point.x;
+            v.j = this->y - point.y;
+            v.k = this->z - point.z;
+            return v;
         }
 
         /**
@@ -769,5 +830,14 @@ namespace Invader::HEK {
     Vector3D<NativeEndian> multiply_vector(const Vector3D<NativeEndian> &vector, float value) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Quaternion<NativeEndian> &rotation) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Matrix<NativeEndian> &rotation) noexcept;
+
+    bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection = nullptr, float epsilon = 0.0001);
+
+    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Vector3D<NativeEndian> &vector_b) {
+        return (vector_a.i * vector_b.i) + (vector_a.j * vector_b.j) + (vector_a.k * vector_b.k);
+    }
+    inline float dot3(const Vector3D<NativeEndian> &vector_a, const Point3D<NativeEndian> &point_b) {
+        return (vector_a.i * point_b.x) + (vector_a.j * point_b.y) + (vector_a.k * point_b.z);
+    }
 }
 #endif

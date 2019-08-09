@@ -1606,6 +1606,46 @@ namespace Invader {
     #define TRANSLATE_SBSP_TAG_DATA_PTR(pointer) (sbsp_tag_data + sbsp_tag->resolve_pointer(&pointer))
 
     void BuildWorkload::fix_scenario_tag_encounters() {
+        // Find collision
+        /*{
+            using namespace HEK;
+
+            auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(0)];
+            auto *sbsp_tag_data = sbsp_tag->data.data();
+            auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+            auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
+
+            // Points
+            Point3D<LittleEndian> point_a;
+            point_a.x = 95.0F;
+            point_a.y = -159.5F;
+            point_a.z = -0.25F;
+            Point3D<LittleEndian> point_b = point_a;
+            point_b.z = -0.5F;
+
+            auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
+            auto *bsp3d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP3DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp3d_nodes.pointer));
+            auto bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count.read();
+            auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
+            auto planes_count = collision_bsp.planes.count.read();
+            auto *leaves = reinterpret_cast<HEK::ModelCollisionGeometryLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.leaves.pointer));
+            auto leaf_count = collision_bsp.leaves.count.read();
+            auto *bsp2d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_nodes.pointer));
+            auto bsp2d_node_count = collision_bsp.bsp2d_nodes.count.read();
+            auto *bsp2d_references = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DReference<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_references.pointer));
+            auto bsp2d_reference_count = collision_bsp.bsp2d_references.count.read();
+            auto *surfaces = reinterpret_cast<HEK::ModelCollisionGeometrySurface<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.surfaces.pointer));
+            auto surface_count = collision_bsp.surfaces.count.read();
+            auto *edges = reinterpret_cast<HEK::ModelCollisionGeometryEdge<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.edges.pointer));
+            auto edge_count = collision_bsp.edges.count.read();
+            auto *vertices = reinterpret_cast<HEK::ModelCollisionGeometryVertex<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.vertices.pointer));
+            auto vertex_count = collision_bsp.vertices.count.read();
+
+            check_for_intersection(point_a, point_b, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count, leaves, leaf_count, bsp2d_nodes, bsp2d_node_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count, edges, edge_count, vertices, vertex_count);
+
+            std::exit(1);
+        }*/
+
         // Get the scenario tag and some BSP information
         auto &scenario_tag = this->compiled_tags[this->scenario_index];
         auto *scenario_tag_data = scenario_tag->data.data();
@@ -1812,9 +1852,17 @@ namespace Invader {
                         throw OutOfBoundsException();
                     }
 
-                    // Set the cluster index
-                    auto &render_leaf_entry = render_leaves[leaf];
-                    firing_position.cluster_index = render_leaf_entry.cluster.read();
+                    // Intersect
+                    auto position_below = firing_position.position;
+                    position_below.z = position_below.z - 0.5F;
+
+                    HEK::Point3D<HEK::LittleEndian> intersection_point;
+                    std::uint32_t surface_index;
+                    std::uint32_t leaf_index;
+                    if(intersect_in_bsp(firing_position.position, position_below, bsp, intersection_point, surface_index, leaf_index)) {
+                        firing_position.cluster_index = render_leaves[leaf_index].cluster;
+                        firing_position.surface_index = surface_index;
+                    }
                 }
             }
 
@@ -1880,6 +1928,33 @@ namespace Invader {
         auto planes_count = collision_bsp.planes.count.read();
 
         return HEK::leaf_for_point_of_bsp_tree(point, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count);
+    }
+
+    bool BuildWorkload::intersect_in_bsp(const HEK::Point3D<HEK::LittleEndian> &point_a, const HEK::Point3D<HEK::LittleEndian> &point_b, std::uint32_t bsp, HEK::Point3D<HEK::LittleEndian> &intersection_point, std::uint32_t &surface_index, std::uint32_t &leaf_index) {
+        auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
+        auto *sbsp_tag_data = sbsp_tag->data.data();
+        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+        auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
+
+        auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
+        auto *bsp3d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP3DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp3d_nodes.pointer));
+        auto bsp3d_nodes_count = collision_bsp.bsp3d_nodes.count.read();
+        auto *planes = reinterpret_cast<HEK::ModelCollisionGeometryPlane<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.planes.pointer));
+        auto planes_count = collision_bsp.planes.count.read();
+        auto *leaves = reinterpret_cast<HEK::ModelCollisionGeometryLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.leaves.pointer));
+        auto leaf_count = collision_bsp.leaves.count.read();
+        auto *bsp2d_nodes = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DNode<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_nodes.pointer));
+        auto bsp2d_node_count = collision_bsp.bsp2d_nodes.count.read();
+        auto *bsp2d_references = reinterpret_cast<HEK::ModelCollisionGeometryBSP2DReference<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.bsp2d_references.pointer));
+        auto bsp2d_reference_count = collision_bsp.bsp2d_references.count.read();
+        auto *surfaces = reinterpret_cast<HEK::ModelCollisionGeometrySurface<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.surfaces.pointer));
+        auto surface_count = collision_bsp.surfaces.count.read();
+        auto *edges = reinterpret_cast<HEK::ModelCollisionGeometryEdge<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.edges.pointer));
+        auto edge_count = collision_bsp.edges.count.read();
+        auto *vertices = reinterpret_cast<HEK::ModelCollisionGeometryVertex<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(collision_bsp.vertices.pointer));
+        auto vertex_count = collision_bsp.vertices.count.read();
+
+        return check_for_intersection(point_a, point_b, bsp3d_nodes, bsp3d_nodes_count, planes, planes_count, leaves, leaf_count, bsp2d_nodes, bsp2d_node_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count, edges, edge_count, vertices, vertex_count, intersection_point, surface_index, leaf_index);
     }
 
     bool BuildWorkload::point_in_bsp(std::uint32_t bsp, const HEK::Point3D<HEK::LittleEndian> &point) {

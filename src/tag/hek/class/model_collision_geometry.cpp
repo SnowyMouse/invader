@@ -64,4 +64,368 @@ namespace Invader::HEK {
 
         return node_index;
     }
+
+    class IntersectionCheck {
+    public:
+        static bool check_for_intersection(
+            const Point3D<LittleEndian> &point_a,
+            const Point3D<LittleEndian> &point_b,
+            const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+            std::uint32_t bsp3d_node_count,
+            const ModelCollisionGeometryPlane<LittleEndian> *planes,
+            std::uint32_t plane_count,
+            const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+            std::uint32_t leaf_count,
+            const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
+            std::uint32_t bsp2d_node_count,
+            const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+            std::uint32_t bsp2d_reference_count,
+            const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+            std::uint32_t surface_count,
+            const ModelCollisionGeometryEdge<LittleEndian> *edges,
+            std::uint32_t edge_count,
+            const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+            std::uint32_t vertex_count,
+            Point3D<LittleEndian> &intersection_point,
+            std::uint32_t &surface_index,
+            std::uint32_t &leaf_index
+        ) {
+            IntersectionCheck check(point_a, point_b, bsp3d_nodes, bsp3d_node_count, planes, plane_count, leaves, leaf_count, bsp2d_nodes, bsp2d_node_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count, edges, edge_count, vertices, vertex_count);
+            return check.check_for_intersection_recursion(point_a, point_b, surface_index, leaf_index, intersection_point, {0});
+        }
+
+    private:
+        const Point3D<LittleEndian> &original_point_a;
+        const Point3D<LittleEndian> &original_point_b;
+        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes;
+        std::uint32_t bsp3d_node_count;
+        const ModelCollisionGeometryPlane<LittleEndian> *planes;
+        std::uint32_t plane_count;
+        const ModelCollisionGeometryLeaf<LittleEndian> *leaves;
+        std::uint32_t leaf_count;
+        const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes;
+        std::uint32_t bsp2d_node_count;
+        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references;
+        std::uint32_t bsp2d_reference_count;
+        const ModelCollisionGeometrySurface<LittleEndian> *surfaces;
+        std::uint32_t surface_count;
+        const ModelCollisionGeometryEdge<LittleEndian> *edges;
+        std::uint32_t edge_count;
+        const ModelCollisionGeometryVertex<LittleEndian> *vertices;
+        std::uint32_t vertex_count;
+
+        bool check_for_intersection_bsp2d_node (
+            FlaggedInt<std::uint32_t> node_index,
+            const Point2D<LittleEndian> &point,
+            std::uint32_t &surface_index
+        ) {
+            // If we fall out, fail
+            if(node_index.is_null()) {
+                return false;
+            }
+
+            // Until it's a surface, search
+            while(!node_index.flag_value() && !node_index.is_null()) {
+                if(node_index.int_value() >= this->bsp2d_node_count) {
+                    eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), this->bsp2d_node_count);
+                    throw OutOfBoundsException();
+                }
+
+                auto &bsp2d_node = this->bsp2d_nodes[node_index.int_value()];
+                if(point.distance_from_plane(bsp2d_node.plane) > 0.0F) {
+                    node_index = bsp2d_node.right_child.read();
+                }
+                else {
+                    node_index = bsp2d_node.left_child.read();
+                }
+            }
+
+            // If we fell out, return false
+            if(node_index.is_null()) {
+                return false;
+            }
+
+            if(node_index.int_value() >= this->surface_count) {
+                eprintf("Invalid surface %u / %u in BSP.\n", node_index.int_value(), this->surface_count);
+                throw OutOfBoundsException();
+            }
+
+            //auto &surface = this->surfaces[node_index.int_value()];
+            surface_index = node_index.int_value();
+            return true;
+        }
+
+        bool check_for_intersection_recursion (
+            const Point3D<LittleEndian> &point_a,
+            const Point3D<LittleEndian> &point_b,
+            std::uint32_t &surface_index,
+            std::uint32_t &leaf_index,
+            Point3D<LittleEndian> &intersection_point,
+            FlaggedInt<std::uint32_t> node_index)
+        {
+            // Check if they're equal. If so, there's no intersection
+            if(point_a == point_b) {
+                return false;
+            }
+
+            while(!node_index.flag_value() && !node_index.is_null()) {
+                // Make sure it's a valid index
+                if(node_index >= bsp3d_node_count) {
+                    eprintf("Invalid BSP3D node %u / %u in BSP.\n", node_index.int_value(), this->bsp3d_node_count);
+                    throw OutOfBoundsException();
+                }
+
+                // Get the node as well as front/back child info for each point
+                auto &node = bsp3d_nodes[node_index];
+                bool a_in_front_of_plane = point_in_front_of_plane(point_a, this->planes, plane_count, node.plane);
+                bool b_in_front_of_plane = point_in_front_of_plane(point_b, this->planes, plane_count, node.plane);
+
+                FlaggedInt<std::uint32_t> node_index_a = a_in_front_of_plane ? node.front_child : node.back_child;
+                FlaggedInt<std::uint32_t> node_index_b = b_in_front_of_plane ? node.front_child : node.back_child;
+
+                if(node_index_a == node_index_b) {
+                    node_index = node_index_a;
+                }
+                else {
+                    // Calculate a point that's almost on the plane
+                    auto &plane = planes[node.plane.read()].plane;
+                    Point3D<LittleEndian> intersection_front;
+                    intersect_plane_with_points(plane, point_a, point_b);
+
+                    Point3D<LittleEndian> point_c = {};
+                    Point3D<LittleEndian> point_d = {};
+
+                    std::uint32_t leaf_c, leaf_d, surface_c, surface_d;
+
+                    // Can we get anything closer?
+                    bool point_c_intersected = check_for_intersection_recursion(
+                        point_a,
+                        intersection_front,
+                        surface_c,
+                        leaf_c,
+                        point_c,
+                        node_index_a
+                    );
+
+                    bool point_d_intersected = check_for_intersection_recursion(
+                        intersection_front,
+                        point_b,
+                        surface_d,
+                        leaf_d,
+                        point_d,
+                        node_index_b
+                    );
+
+                    // If neither intersected, we don't have an intersection.
+                    if(!point_c_intersected && !point_d_intersected) {
+                        return false;
+                    }
+
+                    // If both intersected, invalidate the furthest one
+                    if(point_c_intersected && point_d_intersected) {
+                        float c_distance_squared = point_c.distance_from_point_squared(point_a);
+                        float d_distance_squared = point_d.distance_from_point_squared(point_a);
+
+                        if(d_distance_squared >= c_distance_squared) {
+                            point_d_intersected = false;
+                        }
+                        else {
+                            point_c_intersected = false;
+                        }
+                    }
+
+                    if(point_c_intersected) {
+                        intersection_point = point_c;
+                        leaf_index = leaf_c;
+                        surface_index = surface_c;
+                    }
+                    else {
+                        intersection_point = point_d;
+                        leaf_index = leaf_d;
+                        surface_index = surface_d;
+                    }
+
+                    return true;
+                }
+            };
+
+            // Fell out of the BSP; null
+            if(node_index.is_null()) {
+                return false;
+            }
+
+            // Make sure the leaf is valid
+            std::uint32_t leaf_index_t = node_index.int_value();
+            if(leaf_index_t >= leaf_count) {
+                eprintf("invalid leaf index #%u / %u\n", leaf_index_t, leaf_count);
+                throw OutOfBoundsException();
+            }
+
+            // Get the leaf
+            auto &leaf = this->leaves[leaf_index_t];
+
+            // Check if we have nil BSP2D references
+            std::uint32_t leaf_bsp2d_reference_count = leaf.bsp2d_reference_count.read();
+            std::uint32_t leaf_bsp2d_reference_index = leaf.first_bsp2d_reference.read();
+            if(leaf_bsp2d_reference_count == 0) {
+                return false;
+            }
+
+            // Make sure the BSP2D references are valid
+            std::uint64_t bsp2d_end = static_cast<std::uint64_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count);
+            if(bsp2d_end >= this->bsp2d_reference_count) {
+                eprintf("invalid bsp2d reference range #%u - %zu / %u\n", leaf_bsp2d_reference_count, static_cast<std::uint64_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count), this->bsp2d_reference_count);
+                throw OutOfBoundsException();
+            }
+
+            // Go through each BSP2D reference
+            bool ever_intersected = false;
+            float closest_intersection_distance = 0.0F;
+            for(std::uint32_t b = leaf_bsp2d_reference_index; b < bsp2d_end; b++) {
+                auto &reference = this->bsp2d_references[b];
+                auto node_index = reference.bsp2d_node.read();
+
+                // Make sure the plane is valid
+                auto plane = reference.plane.read().int_value();
+                if(plane >= this->plane_count) {
+                    eprintf("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
+                    throw OutOfBoundsException();
+                }
+
+                // Make sure point a is in front and point b is behind
+                Point3D<LittleEndian> intersection;
+                if(!intersect_plane_with_points(this->planes[plane].plane, point_a, point_b, &intersection)) {
+                    continue;
+                }
+
+                // Calculate the distance from the intersection to this. If it's further than what we got previously, disregard it
+                float intersection_distance = point_a.distance_from_point_squared(intersection);
+                if(ever_intersected && closest_intersection_distance < intersection_distance) {
+                    continue;
+                }
+
+                // Okay, now let's see if we can get this going
+                auto plane_ref = this->planes[plane].plane;
+                float x = std::fabs(plane_ref.vector.i);
+                float y = std::fabs(plane_ref.vector.j);
+                float z = std::fabs(plane_ref.vector.k);
+                int axis = 0;
+                int sign = 0;
+
+                // This is from <http://www.halomods.com/ips/index.php?/topic/357-collision-bsp-structure/>
+                // Get the axis
+                float highest;
+                if (z < y || z < x) {
+                    if (x > y) {
+                        axis = 0;
+                        highest = x;
+                    }
+                    else {
+                        axis = 1;
+                        highest = y;
+                    }
+                }
+                else {
+                    axis = 2;
+                    highest = z;
+                }
+
+                if(highest > 0.0f) {
+                    sign = 1;
+                }
+
+                // Projection plane
+                static const short PLANE_INDICES[2][3][2] = {
+                    {
+                        {2, 1},
+                        {0, 2},
+                        {1, 0}
+                    },
+                    {
+                         {1, 2},
+                         {2, 0},
+                         {0, 1}
+                    }
+                };
+
+                Point2D<LittleEndian> point;
+                point.x = (&plane_ref.vector.i)[PLANE_INDICES[sign][axis][0]];
+                point.y = (&plane_ref.vector.i)[PLANE_INDICES[sign][axis][1]];
+
+                if(check_for_intersection_bsp2d_node(node_index, point, surface_index)) {
+                    ever_intersected = true;
+                    intersection_point = intersection;
+                    leaf_index = leaf_index_t;
+                    closest_intersection_distance = intersection_distance;
+                }
+            }
+
+            return ever_intersected;
+        }
+
+        IntersectionCheck(
+            const Point3D<LittleEndian> &original_point_a,
+            const Point3D<LittleEndian> &original_point_b,
+            const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+            std::uint32_t bsp3d_node_count,
+            const ModelCollisionGeometryPlane<LittleEndian> *planes,
+            std::uint32_t plane_count,
+            const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+            std::uint32_t leaf_count,
+            const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
+            std::uint32_t bsp2d_node_count,
+            const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+            std::uint32_t bsp2d_reference_count,
+            const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+            std::uint32_t surface_count,
+            const ModelCollisionGeometryEdge<LittleEndian> *edges,
+            std::uint32_t edge_count,
+            const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+            std::uint32_t vertex_count
+        ) :
+        original_point_a(original_point_a),
+        original_point_b(original_point_b),
+        bsp3d_nodes(bsp3d_nodes),
+        bsp3d_node_count(bsp3d_node_count),
+        planes(planes),
+        plane_count(plane_count),
+        leaves(leaves),
+        leaf_count(leaf_count),
+        bsp2d_nodes(bsp2d_nodes),
+        bsp2d_node_count(bsp2d_node_count),
+        bsp2d_references(bsp2d_references),
+        bsp2d_reference_count(bsp2d_reference_count),
+        surfaces(surfaces),
+        surface_count(surface_count),
+        edges(edges),
+        edge_count(edge_count),
+        vertices(vertices),
+        vertex_count(vertex_count) {}
+    };
+
+    bool check_for_intersection(
+        const Point3D<LittleEndian> &point_a,
+        const Point3D<LittleEndian> &point_b,
+        const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
+        std::uint32_t bsp3d_node_count,
+        const ModelCollisionGeometryPlane<LittleEndian> *planes,
+        std::uint32_t plane_count,
+        const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+        std::uint32_t leaf_count,
+        const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
+        std::uint32_t bsp2d_node_count,
+        const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
+        std::uint32_t bsp2d_reference_count,
+        const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+        std::uint32_t surface_count,
+        const ModelCollisionGeometryEdge<LittleEndian> *edges,
+        std::uint32_t edge_count,
+        const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+        std::uint32_t vertex_count,
+        Point3D<LittleEndian> &intersection_point,
+        std::uint32_t &surface_index,
+        std::uint32_t &leaf_index
+    ) {
+        return IntersectionCheck::check_for_intersection(point_a, point_b, bsp3d_nodes, bsp3d_node_count, planes, plane_count, leaves, leaf_count, bsp2d_nodes, bsp2d_node_count, bsp2d_references, bsp2d_reference_count, surfaces, surface_count, edges, edge_count, vertices, vertex_count, intersection_point, surface_index, leaf_index);
+    }
 }

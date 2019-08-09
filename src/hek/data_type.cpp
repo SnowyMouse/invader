@@ -170,4 +170,41 @@ namespace Invader::HEK {
         returned_vector.k = vector.i * rotation.matrix[0][2] + vector.j * rotation.matrix[1][2] + vector.k * rotation.matrix[2][2];
         return returned_vector;
     }
+
+    bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection, float epsilon) {
+        // Get point a and b's distance from the plane
+        float point_a_distance = point_a.distance_from_plane(plane);
+        float point_b_distance = point_b.distance_from_plane(plane);
+
+        // Make sure they are on opposite sides of the plane
+        if(point_b_distance * point_a_distance >= 0.0F) {
+            return false;
+        }
+
+        // If that's all we need, return true
+        if(!intersection) {
+            return true;
+        }
+
+        // Find the points in the front and back
+        float back_distance;
+        const Point3D<NativeEndian> *front_point;
+        const Point3D<NativeEndian> *back_point;
+
+        if(point_a_distance > point_b_distance) {
+            front_point = &point_a;
+            back_point = &point_b;
+            back_distance = point_b_distance;
+        }
+        else {
+            front_point = &point_b;
+            back_point = &point_a;
+            back_distance = point_a_distance;
+        }
+
+        // Next, find the difference between the front and back points and normalize, then add to point_b to get the intersection
+        Vector3D<LittleEndian> vector = (*back_point - *front_point).normalize();
+        *intersection = *back_point + vector * (back_distance + epsilon);
+        return true;
+    }
 }
