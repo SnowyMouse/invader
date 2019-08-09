@@ -190,7 +190,7 @@ namespace Invader::HEK {
                     // Calculate a point that's almost on the plane
                     auto &plane = planes[node.plane.read()].plane;
                     Point3D<LittleEndian> intersection_front;
-                    intersect_plane_with_points(plane, point_a, point_b);
+                    intersect_plane_with_points(plane, point_a, point_b, &intersection_front);
 
                     Point3D<LittleEndian> point_c = {};
                     Point3D<LittleEndian> point_d = {};
