@@ -273,7 +273,7 @@ namespace Invader::HEK {
 
             // Make sure the BSP2D references are valid
             std::uint64_t bsp2d_end = static_cast<std::uint64_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count);
-            if(bsp2d_end >= this->bsp2d_reference_count) {
+            if(bsp2d_end > this->bsp2d_reference_count) {
                 eprintf("invalid bsp2d reference range #%u - %zu / %u\n", leaf_bsp2d_reference_count, static_cast<std::uint64_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count), this->bsp2d_reference_count);
                 throw OutOfBoundsException();
             }
