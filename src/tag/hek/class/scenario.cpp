@@ -44,7 +44,7 @@ namespace Invader::HEK {
                 if(object_name_index < tag.object_names.count) { \
                     auto &object_name = reinterpret_cast<ScenarioObjectName<BigEndian> *>(compiled.data.data() + object_names_offset)[object_name_index]; \
                     object_name.object_type = type; \
-                    object_name.object_index = i; \
+                    object_name.object_index = static_cast<std::int16_t>(i); \
                 } \
             } ADD_REFLEXIVE_END
 
@@ -122,9 +122,9 @@ namespace Invader::HEK {
                     long bsp_2 = std::strtol(end, &end2, 10);
                     if(end2 && *end2 == 0) {
                         ScenarioBSPSwitchTriggerVolume<LittleEndian> new_volume = {};
-                        new_volume.source = bsp_1;
-                        new_volume.destination = bsp_2;
-                        new_volume.trigger_volume = i;
+                        new_volume.source = static_cast<std::int16_t>(bsp_1);
+                        new_volume.destination = static_cast<std::int16_t>(bsp_2);
+                        new_volume.trigger_volume = static_cast<std::int16_t>(i);
                         new_volume.unknown = 0xFFFF;
                         switch_volumes.push_back(new_volume);
                     }
