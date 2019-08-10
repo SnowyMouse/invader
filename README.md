@@ -37,10 +37,8 @@ If you're building this with MSYS (Windows), use this, instead:
 cmake ../Invader -D CMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
 ```
 
-Lastly, you can compile this using `make`, optionally using `-j#` to specify the maximum number of jobs if you want
-this to build faster.
-
-Alternatively, using `make -j$(nproc)` will build with the maximum number of jobs equal to CPU threads.
+Lastly, you can compile this using the `make` command, optionally using `-j#` to specify the maximum number of jobs if
+you want to build using multiple processing threads.
 
 ## Programs
 To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
