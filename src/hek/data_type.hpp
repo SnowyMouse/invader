@@ -9,11 +9,10 @@
 
 #include <string>
 #include <vector>
-
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include "../error.hpp"
+#include "constants.hpp"
 #include "pad.hpp"
 #include "class_int.hpp"
 #include "endian.hpp"
@@ -30,14 +29,14 @@
  * @param  deg Degrees to convert from
  * @return     Radians
  */
-#define DEGREES_TO_RADIANS(deg) (deg * M_PI / 180.0)
+#define DEGREES_TO_RADIANS(deg) (deg * HALO_PI / 180.0)
 
 /**
  * Convert radians to degrees
  * @param  rad Radians to convert from
  * @return     Degrees
  */
-#define RADIANS_TO_DEGREES(rad) (rad * 180.0 / M_PI)
+#define RADIANS_TO_DEGREES(rad) (rad * 180.0 / HALO_PI)
 
 namespace Invader::HEK {
     using Pointer = std::uint32_t;

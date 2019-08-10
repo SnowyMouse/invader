@@ -4,9 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "../compile.hpp"
 
 #include "light.hpp"
@@ -22,8 +19,8 @@ namespace Invader::HEK {
         DEFAULT_VALUE(tag.yaw_period, 1.0f);
         DEFAULT_VALUE(tag.roll_period, 1.0f);
         DEFAULT_VALUE(tag.pitch_period, 1.0f);
-        DEFAULT_VALUE(tag.cutoff_angle, static_cast<float>(M_PI));
-        DEFAULT_VALUE(tag.falloff_angle, static_cast<float>(M_PI));
+        DEFAULT_VALUE(tag.cutoff_angle, static_cast<float>(HALO_PI));
+        DEFAULT_VALUE(tag.falloff_angle, static_cast<float>(HALO_PI));
         tag.cos_cutoff_angle = std::cos(tag.cutoff_angle);
         tag.cos_falloff_angle = std::cos(tag.falloff_angle);
         DEFAULT_VALUE(tag.unknown_two, 2.0f);

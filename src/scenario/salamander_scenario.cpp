@@ -4,7 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#define _USE_MATH_DEFINES
 #include <string>
 #include <cmath>
 
@@ -126,9 +125,9 @@ namespace Invader {
             position.y = read_float(); \
             position.z = read_float(); \
             HEK::Euler3D<HEK::BigEndian> rotation; \
-            rotation.yaw = read_float() * M_PI / 180.0; \
-            rotation.pitch = read_float() * M_PI / 180.0; \
-            rotation.roll = read_float() * M_PI / 180.0; \
+            rotation.yaw = read_float() * HALO_PI / 180.0; \
+            rotation.pitch = read_float() * HALO_PI / 180.0; \
+            rotation.roll = read_float() * HALO_PI / 180.0; \
             what.position = position; \
             what.rotation = rotation; \
         }
@@ -277,8 +276,8 @@ namespace Invader {
             ss.color.green = read_float();
             ss.color.blue = read_float();
             ss.intensity = read_float();
-            ss.falloff_angle = read_float() * M_PI / 180.0;
-            ss.cutoff_angle = read_float() * M_PI / 180.0;
+            ss.falloff_angle = read_float() * HALO_PI / 180.0;
+            ss.cutoff_angle = read_float() * HALO_PI / 180.0;
             scenario.light_fixtures.push_back(ss);
         }
         scenario.light_fixture_palette = read_string_array();
@@ -299,7 +298,7 @@ namespace Invader {
             ss.position.x = read_float();
             ss.position.y = read_float();
             ss.position.z = read_float();
-            ss.facing = read_float() * M_PI / 180.0;
+            ss.facing = read_float() * HALO_PI / 180.0;
             ss.team_index = read_int();
             ss.bsp_index = read_int();
             ss.type_0 = static_cast<HEK::ScenarioSpawnType>(read_int());
@@ -316,7 +315,7 @@ namespace Invader {
             ss.position.x = read_float();
             ss.position.y = read_float();
             ss.position.z = read_float();
-            ss.facing = read_float() * M_PI / 180.0;
+            ss.facing = read_float() * HALO_PI / 180.0;
             ss.team_index = read_int();
             scenario.netgame_flags.push_back(ss);
         }
@@ -337,7 +336,7 @@ namespace Invader {
             ss.position.x = read_float();
             ss.position.y = read_float();
             ss.position.z = read_float();
-            ss.facing = read_float() * M_PI / 180.0;
+            ss.facing = read_float() * HALO_PI / 180.0;
             scenario.netgame_equipment_items.push_back(read_string());
             scenario.netgame_equipment.push_back(ss);
         }

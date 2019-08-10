@@ -4,9 +4,6 @@
  * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
  */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "../compile.hpp"
 #include "../../../hek/constants.hpp"
 
@@ -17,8 +14,8 @@ namespace Invader::HEK {
         BEGIN_COMPILE(Sound);
         DEFAULT_VALUE(tag.random_pitch_bounds.from, 1.0f);
         DEFAULT_VALUE(tag.random_pitch_bounds.to, 1.0f);
-        DEFAULT_VALUE(tag.inner_cone_angle, 2 * static_cast<float>(M_PI));
-        DEFAULT_VALUE(tag.outer_cone_angle, 2 * static_cast<float>(M_PI));
+        DEFAULT_VALUE(tag.inner_cone_angle, 2 * static_cast<float>(HALO_PI));
+        DEFAULT_VALUE(tag.outer_cone_angle, 2 * static_cast<float>(HALO_PI));
         DEFAULT_VALUE(tag.outer_cone_gain, 1.0f);
         DEFAULT_VALUE(tag.random_gain_modifier, 1.0f);
 
