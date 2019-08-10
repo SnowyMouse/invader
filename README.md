@@ -2,8 +2,8 @@
 Invader is an open source map and tag builder for Halo: Custom Edition written in C++ using the C++17 standard.
 
 ## Building Invader
-Building Invader requires that you have CMake as well as GCC and G++ 9.0 or later. For all programs to build, you
-will also need to install Python, libTIFF, and zlib.
+Building Invader requires that you have CMake 3.10 or newer as well as GCC and G++ 9.0 or later. For all programs to
+build, you will also need to install Python 3, libTIFF, and zlib.
 
 ### Windows
 To compile on Windows, you will need to install 64-bit [MSYS2](https://www.msys2.org/), installing the aforementioned
