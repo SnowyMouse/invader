@@ -40,7 +40,7 @@ uint32_t crc_spoof_reverse_bits(uint32_t x);
 
 static uint64_t multiply_mod(uint64_t x, uint64_t y);
 static uint64_t pow_mod(uint64_t x, uint64_t y);
-static void divide_and_remainder(uint64_t x, uint64_t y, uint64_t q[static 1], uint64_t r[static 1]);
+static void divide_and_remainder(uint64_t x, uint64_t y, uint64_t *q, uint64_t *r);
 static uint64_t reciprocal_mod(uint64_t x);
 static int get_degree(uint64_t x);
 
@@ -227,7 +227,7 @@ static uint64_t pow_mod(uint64_t x, uint64_t y) {
 
 
 // Computes polynomial x divided by polynomial y, returning the quotient and remainder.
-static void divide_and_remainder(uint64_t x, uint64_t y, uint64_t q[static 1], uint64_t r[static 1]) {
+static void divide_and_remainder(uint64_t x, uint64_t y, uint64_t *q, uint64_t *r) {
     if (y == 0) {
         fprintf(stderr, "Division by zero\n");
         exit(EXIT_FAILURE);
