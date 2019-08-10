@@ -29,14 +29,14 @@
  * @param  deg Degrees to convert from
  * @return     Radians
  */
-#define DEGREES_TO_RADIANS(deg) (deg * HALO_PI / 180.0)
+#define DEGREES_TO_RADIANS(deg) static_cast<float>(deg * HALO_PI / 180.0F)
 
 /**
  * Convert radians to degrees
  * @param  rad Radians to convert from
  * @return     Degrees
  */
-#define RADIANS_TO_DEGREES(rad) (rad * 180.0 / HALO_PI)
+#define RADIANS_TO_DEGREES(rad) static_cast<float>(rad * 180.0F / HALO_PI)
 
 namespace Invader::HEK {
     using Pointer = std::uint32_t;
