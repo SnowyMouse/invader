@@ -18,8 +18,8 @@ First, you will need to download the Invader repository onto your computer. You 
 git clone https://github.com/Kavawuvi/Invader
 ```
 
-Everything from this point on assumes the Invader source code is in
-a directory called "Invader" in the current directory.
+Everything from this point on assumes the Invader repository was cloned in a directory called "Invader" in the
+current directory.
 
 Next, you will need to create an out-of-source build directory. You can use this command to make the build
 directory:
