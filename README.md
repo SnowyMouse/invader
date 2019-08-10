@@ -1,6 +1,47 @@
 # Invader
 Invader is an open source map and tag builder for Halo: Custom Edition written in C++ using the C++17 standard.
 
+## Building Invader
+Building Invader requires that you have CMake as well as GCC and G++ 9.0 or later. For all programs to build, you
+will also need to install Python, libTIFF, and zlib.
+
+### Windows
+To compile on Windows, you will need to install 64-bit [MSYS2](https://www.msys2.org/), installing the aforementioned
+software (Python, etc.) through MSYS2 and NOT through their Windows installers. Ensure you are using the MSYS2 MinGW
+64-bit shell when building.
+
+MSVC is unsupported and will not work.
+
+### Compiling
+First, you will need to download the Invader repository onto your computer. You can do this using the command:
+```
+git clone https://github.com/Kavawuvi/Invader
+```
+
+Everything from this point on assumes the Invader source code is in
+a directory called "Invader" in the current directory.
+
+Next, you will need to create an out-of-source build directory. You can use this command to make the build
+directory:
+```
+mkdir invader-build && cd invader-build
+```
+
+Next, use this command to set up the CMake build directory if you're on Linux:
+```
+cmake ../Invader -D CMAKE_BUILD_TYPE=Release
+```
+
+If you're building this with MSYS (Windows), use this, instead:
+```
+cmake ../Invader -D CMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
+```
+
+Lastly, you can compile this using `make`, optionally using `-j#` to specify the maximum number of jobs if you want
+this to build faster.
+
+Alternatively, using `make -j$(nproc)` will build with the maximum number of jobs equal to CPU threads.
+
 ## Programs
 To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
 well as make things easier for me to work with, this project is split into different programs.
