@@ -334,7 +334,7 @@ int crc_spoof_fake_feof(FakeFileHandle *f) {
 
 size_t crc_spoof_fake_fread(void *ptr, size_t size, size_t count, FakeFileHandle *f) {
     char *cptr = (char *)ptr;
-    size_t remaining_size = f->size - f->offset;
+    size_t remaining_size = (size_t)(f->size - f->offset);
     if(remaining_size < size * count) {
         count = remaining_size / size;
     }
