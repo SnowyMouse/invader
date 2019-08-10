@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <memory>
 #include <vector>
+#include <cctype>
 #include "../eprintf.hpp"
 #include "../map/map.hpp"
 #include "../tag/hek/class/scenario.hpp"
