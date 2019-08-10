@@ -294,7 +294,7 @@ namespace Invader::HEK {
 
                 // Make sure point a is in front and point b is behind
                 Point3D<LittleEndian> intersection;
-                if(!intersect_plane_with_points(this->planes[plane].plane, point_a, point_b, &intersection)) {
+                if(!intersect_plane_with_points(this->planes[plane].plane, this->original_point_a, this->original_point_b, &intersection)) {
                     continue;
                 }
 
