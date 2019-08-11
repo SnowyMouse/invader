@@ -1,5 +1,5 @@
 # Invader
-Invader is an open source map and tag builder for Halo: Custom Edition written in C++ using the C++17 standard.
+Invader is an open source toolkit for creating Halo: Combat Evolved maps. It is written in C++ using the C++17 standard.
 
 ## Building Invader
 Building Invader requires that you have CMake 3.10 or newer as well as GCC and G++ 9.0 or later. For all programs to
