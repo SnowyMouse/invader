@@ -183,6 +183,7 @@ namespace Invader::HEK {
                 FlaggedInt<std::uint32_t> node_index_a = a_in_front_of_plane ? node.front_child : node.back_child;
                 FlaggedInt<std::uint32_t> node_index_b = b_in_front_of_plane ? node.front_child : node.back_child;
 
+                // If they're the same, set node_index to one of them and keep going
                 if(node_index_a == node_index_b) {
                     node_index = node_index_a;
                 }
@@ -192,57 +193,58 @@ namespace Invader::HEK {
                     Point3D<LittleEndian> intersection_front;
                     intersect_plane_with_points(plane, point_a, point_b, &intersection_front);
 
-                    Point3D<LittleEndian> point_c = {};
-                    Point3D<LittleEndian> point_d = {};
+                    Point3D<LittleEndian> point_a_intersection;
+                    Point3D<LittleEndian> point_b_intersection;
 
-                    std::uint32_t leaf_c, leaf_d, surface_c, surface_d;
+                    std::uint32_t leaf_a_intersection, leaf_b_intersection, surface_a_intersection, surface_b_intersection;
 
                     // Can we get anything closer?
-                    bool point_c_intersected = check_for_intersection_recursion(
+                    bool point_a_intersected = check_for_intersection_recursion(
                         point_a,
                         intersection_front,
-                        surface_c,
-                        leaf_c,
-                        point_c,
+                        surface_a_intersection,
+                        leaf_a_intersection,
+                        point_a_intersection,
                         node_index_a
                     );
 
-                    bool point_d_intersected = check_for_intersection_recursion(
+                    bool point_b_intersected = check_for_intersection_recursion(
                         intersection_front,
                         point_b,
-                        surface_d,
-                        leaf_d,
-                        point_d,
+                        surface_b_intersection,
+                        leaf_b_intersection,
+                        point_b_intersection,
                         node_index_b
                     );
 
                     // If neither intersected, we don't have an intersection.
-                    if(!point_c_intersected && !point_d_intersected) {
+                    if(!point_a_intersected && !point_b_intersected) {
                         return false;
                     }
 
                     // If both intersected, invalidate the furthest one
-                    if(point_c_intersected && point_d_intersected) {
-                        float c_distance_squared = point_c.distance_from_point_squared(point_a);
-                        float d_distance_squared = point_d.distance_from_point_squared(point_a);
+                    if(point_a_intersected && point_b_intersected) {
+                        float a_distance_squared = point_a_intersection.distance_from_point_squared(point_a);
+                        float b_distance_squared = point_b_intersection.distance_from_point_squared(point_a);
 
-                        if(d_distance_squared >= c_distance_squared) {
-                            point_d_intersected = false;
+                        if(a_distance_squared > b_distance_squared) {
+                            point_a_intersected = false;
                         }
                         else {
-                            point_c_intersected = false;
+                            point_b_intersected = false;
                         }
                     }
 
-                    if(point_c_intersected) {
-                        intersection_point = point_c;
-                        leaf_index = leaf_c;
-                        surface_index = surface_c;
+                    // Now that we have one, return it
+                    if(point_a_intersected) {
+                        intersection_point = point_a_intersection;
+                        leaf_index = leaf_a_intersection;
+                        surface_index = surface_a_intersection;
                     }
                     else {
-                        intersection_point = point_d;
-                        leaf_index = leaf_d;
-                        surface_index = surface_d;
+                        intersection_point = point_b_intersection;
+                        leaf_index = leaf_b_intersection;
+                        surface_index = surface_b_intersection;
                     }
 
                     return true;
