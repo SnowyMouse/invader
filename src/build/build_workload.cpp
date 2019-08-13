@@ -8,6 +8,7 @@
 #include <cmath>
 #include <thread>
 
+#define USE_RAYCASTING_FOR_ENCOUNTER_SPAWNS
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
 // This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
@@ -1703,8 +1704,24 @@ namespace Invader {
                             found = false;
                         }
 
-                        // If 3D firing positions is not set, find the distance to the ground. TODO: Use raycasting.
+                        // If 3D firing positions is not set, find the distance to the ground.
                         else if(!three_dimensional_fire_positions) {
+                            // Raycasting; Get two points: one at the point and one MAX_DISTANCE below it
+                            #ifdef USE_RAYCASTING_FOR_ENCOUNTER_SPAWNS
+                            HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
+                            HEK::Point3D<HEK::LittleEndian> point_lower = spawn_point->position;
+                            point_lower.z = point.z - MAX_DISTANCE;
+
+                            // Use raycasting to get the distance to ground
+                            float q = MAX_DISTANCE;
+                            HEK::Point3D<HEK::LittleEndian> point_intersect;
+                            std::uint32_t surface_index, leaf_index;
+                            if(this->intersect_in_bsp(point, point_lower, b, point_intersect, surface_index, leaf_index)) {
+                                q = point.z - point_intersect.z;
+                            }
+
+                            // Brute forcing (slower); leaving this here until I can determine that the raycasting algorithm is OK
+                            #else
                             HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
                             float q = 0.0F;
                             for(; q <= MAX_DISTANCE; q += 0.1F) {
@@ -1713,10 +1730,9 @@ namespace Invader {
                                     break;
                                 }
                             }
-                            if(q >= MAX_DISTANCE) {
-                                q = MAX_DISTANCE;
-                            }
+                            #endif
 
+                            // If what we got is less than what we had before, narrow it down like that
                             if(distance_to_ground > q) {
                                 distance_to_ground = q;
                             }
