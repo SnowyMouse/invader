@@ -1669,6 +1669,9 @@ namespace Invader {
 
             float distance_to_ground_max = 0.0F;
 
+            // Hold onto this
+            bool three_dimensional_fire_positions = encounter->flags.read()._3d_firing_positions;
+
             // Begin counting and iterating through the BSPs
             for(std::uint32_t b = 0; b < sbsp_count; b++) {
                 // Clear the current arrays
@@ -1701,7 +1704,7 @@ namespace Invader {
                         }
 
                         // If 3D firing positions is not set, find the distance to the ground. TODO: Use raycasting.
-                        else if(!encounter->flags.read()._3d_firing_positions) {
+                        else if(!three_dimensional_fire_positions) {
                             HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
                             float q = 0.0F;
                             for(; q <= MAX_DISTANCE; q += 0.1F) {
@@ -1807,6 +1810,14 @@ namespace Invader {
                         firing_position.cluster_index = 0xFFFF;
                         continue;
                     }
+
+                    // If it's 3D firing positions, then we can't get the surface index
+                    else if(three_dimensional_fire_positions) {
+                        firing_position.cluster_index = render_leaves[leaf.int_value()].cluster;
+                        firing_position.surface_index = ~0;
+                        continue;
+                    }
+
                     if(leaves_count <= leaf) {
                         eprintf("Invalid leaf index %u / %u in BSP.\n", leaf.int_value(), leaves_count);
                         throw OutOfBoundsException();
@@ -1817,8 +1828,7 @@ namespace Invader {
                     position_below.z = position_below.z - 0.5F;
 
                     HEK::Point3D<HEK::LittleEndian> intersection_point;
-                    std::uint32_t surface_index;
-                    std::uint32_t leaf_index;
+                    std::uint32_t surface_index, leaf_index;
                     if(intersect_in_bsp(firing_position.position, position_below, bsp, intersection_point, surface_index, leaf_index)) {
                         firing_position.cluster_index = render_leaves[leaf_index].cluster;
                         firing_position.surface_index = surface_index;
