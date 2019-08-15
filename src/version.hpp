@@ -17,6 +17,10 @@
 #define INVADER_VERSION_MAJOR 0
 #define INVADER_VERSION_MINOR 0
 #define INVADER_VERSION_PATCH 0
+#else
+#ifndef INVADER_VERSION_STRING
+#include "version_str.hpp"
+#endif
 #endif
 
 #ifndef INVADER_VERSION_STRING

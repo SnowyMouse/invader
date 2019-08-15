@@ -24,22 +24,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -march=native")
 endif()
 
-# Get the git revision and commit
-execute_process(COMMAND bash -c "printf '%s' $(git --git-dir '${CMAKE_SOURCE_DIR}/.git' rev-list --count HEAD)"
-                OUTPUT_VARIABLE GIT_REVISION
-                ERROR_QUIET)
+# Get the git commit (so we know we have a .git repo)
 execute_process(COMMAND bash -c "printf '%s' $(git --git-dir '${CMAKE_SOURCE_DIR}/.git' rev-parse --short HEAD)"
                 OUTPUT_VARIABLE GIT_COMMIT
                 ERROR_QUIET)
-                
-add_definitions(-DINVADER_VERSION_MAJOR=${Invader_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${Invader_VERSION_MINOR} -DINVADER_VERSION_PATCH=${Invader_VERSION_PATCH})
 
-# If executing the git command was not successful, set things
-if("${GIT_COMMIT}" STREQUAL "")
-    add_definitions("-DINVADER_VERSION_STRING=\"${Invader_VERSION_MAJOR}.${Invader_VERSION_MINOR}.${Invader_VERSION_PATCH}.unknown\"")
-else()
-    add_definitions("-DINVADER_VERSION_STRING=\"${Invader_VERSION_MAJOR}.${Invader_VERSION_MINOR}.${Invader_VERSION_PATCH}.r${GIT_REVISION}.${GIT_COMMIT}\"")
-endif()
+# Here's to set up constants for version.hpp
+add_definitions(-DINVADER_VERSION_MAJOR=${Invader_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${Invader_VERSION_MINOR} -DINVADER_VERSION_PATCH=${Invader_VERSION_PATCH})
 
 # Turn on console messages
 option(NO_OUTPUT "don't show any console messages" OFF)
