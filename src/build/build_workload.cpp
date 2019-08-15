@@ -152,7 +152,6 @@ namespace Invader {
         CacheFileHeader cache_file_header = {};
         std::vector<std::byte> file(sizeof(cache_file_header));
         std::strncpy(cache_file_header.name.string, get_scenario_name().data(), sizeof(cache_file_header.name.string) - 1);
-        std::strncpy(cache_file_header.build.string, INVADER_VERSION_STRING, sizeof(cache_file_header.build.string));
         cache_file_header.map_type = this->cache_file_type;
 
         // eXoDux-specific bit
@@ -304,7 +303,7 @@ namespace Invader {
         cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
         cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
         cache_file_header.crc32 = 0x7E706156;
-        std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "Invader " INVADER_VERSION_STRING);
+        std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), INVADER_FULL_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 
         // Set eXoDux compatibility mode.

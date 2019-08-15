@@ -7,7 +7,7 @@
 # Require at least version 3.10
 cmake_minimum_required(VERSION 3.10)
 
-# Project name
+# Project name - You should change this if you're making a fork
 project(Invader
     VERSION 0.1.0
     DESCRIPTION "Modding toolkit for Halo Custom Edition"
@@ -30,7 +30,7 @@ execute_process(COMMAND bash -c "printf '%s' $(git --git-dir '${CMAKE_CURRENT_SO
                 ERROR_QUIET)
 
 # Here's to set up constants for version.hpp
-add_definitions(-DINVADER_VERSION_MAJOR=${Invader_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${Invader_VERSION_MINOR} -DINVADER_VERSION_PATCH=${Invader_VERSION_PATCH})
+add_definitions(-DINVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DINVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} "-DINVADER_FORK=\"${PROJECT_NAME}\"")
 
 # Turn on console messages
 option(NO_OUTPUT "don't show any console messages" OFF)

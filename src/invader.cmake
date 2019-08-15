@@ -88,14 +88,14 @@ add_library(invader STATIC
 # Set things whether or not things worked
 if("${GIT_COMMIT}" STREQUAL "")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp
-        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh "${Invader_VERSION_MAJOR}.${Invader_VERSION_MINOR}.${Invader_VERSION_PATCH}.unknown" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.unknown" "${CMAKE_CURRENT_BINARY_DIR}"
 
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/master"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh"
     )
 else()
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp
-        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh "${Invader_VERSION_MAJOR}.${Invader_VERSION_MINOR}.${Invader_VERSION_PATCH}." "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}." "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
 
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/master"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh"

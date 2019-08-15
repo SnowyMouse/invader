@@ -23,13 +23,19 @@
 #endif
 #endif
 
-#ifndef INVADER_VERSION_STRING
-#define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_PATCH)
+#ifndef INVADER_FORK
+#define INVADER_FORK "Invader"
 #endif
 
-static_assert(sizeof(INVADER_VERSION_STRING) < sizeof(Invader::HEK::TagString), "version string too long");
+#ifndef INVADER_VERSION_STRING
+#define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_PATCH) ".unknown"
+#endif
 
-#define INVADER_SHOW_INFO eprintf("Invader Version " INVADER_VERSION_STRING "\n\n"); \
+#define INVADER_FULL_VERSION_STRING INVADER_FORK " " INVADER_VERSION_STRING
+
+static_assert(sizeof(INVADER_FULL_VERSION_STRING) < sizeof(Invader::HEK::TagString), "version string " INVADER_FULL_VERSION_STRING " too long");
+
+#define INVADER_SHOW_INFO eprintf(INVADER_FULL_VERSION_STRING "\n\n"); \
                           eprintf("This program is licensed under the GNU General Public License v3.0 or later.\n\n"); \
                           eprintf("Credits:\n"); \
                           eprintf("    Kavawuvi                       - Developer\n"); \
