@@ -25,7 +25,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # Get the git commit (so we know we have a .git repo)
-execute_process(COMMAND bash -c "printf '%s' $(git --git-dir '${CMAKE_SOURCE_DIR}/.git' rev-parse --short HEAD)"
+execute_process(COMMAND bash -c "printf '%s' $(git --git-dir '${CMAKE_CURRENT_SOURCE_DIR}/.git' rev-parse --short HEAD)"
                 OUTPUT_VARIABLE GIT_COMMIT
                 ERROR_QUIET)
 
