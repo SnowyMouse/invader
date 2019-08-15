@@ -10,7 +10,6 @@
 #include <cstring>
 
 #include "../../eprintf.hpp"
-#include "../../version.hpp"
 #include "../../hek/data_type.hpp"
 #include "../../error.hpp"
 #include "../compiled_tag.hpp"
