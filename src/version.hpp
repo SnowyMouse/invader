@@ -8,6 +8,7 @@
 #define INVADER__VERSION_HPP
 
 #include "eprintf.hpp"
+#include "hek/data_type.hpp"
 
 #define TOSTR2(str) # str
 #define TOSTR(str) TOSTR2(str)
@@ -18,7 +19,11 @@
 #define INVADER_VERSION_PATCH 0
 #endif
 
+#ifndef INVADER_VERSION_STRING
 #define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_PATCH)
+#endif
+
+static_assert(sizeof(INVADER_VERSION_STRING) < sizeof(Invader::HEK::TagString), "version string too long");
 
 #define INVADER_SHOW_INFO eprintf("Invader Version " INVADER_VERSION_STRING "\n\n"); \
                           eprintf("This program is licensed under the GNU General Public License v3.0 or later.\n\n"); \
