@@ -23,6 +23,14 @@ find_package(ZLIB)
 find_package(Python3)
 find_package(Git)
 
+# Also make sure to find bash
+find_program(BASH
+    bash
+)
+if("${BASH}" STREQUAL "BASH-NOTFOUND")
+    message(FATAL_ERROR "Bash is required to build ${PROJECT_NAME}")
+endif()
+
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
     execute_process(COMMAND bash -c "printf '%s' $(${GIT_EXECUTABLE} --git-dir '${CMAKE_CURRENT_SOURCE_DIR}/.git' rev-parse --short HEAD)"
