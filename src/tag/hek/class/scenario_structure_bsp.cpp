@@ -118,7 +118,7 @@ namespace Invader::HEK {
             ADD_REFLEXIVE(reflexive.instances);
             ADD_REFLEXIVE(reflexive.counts);
             ADD_REFLEXIVE(reflexive.z_reference_vectors);
-            reflexive.bullshit = 1;
+            reflexive.bullshit = reflexive.instances.count.read() != 0;
         } ADD_REFLEXIVE_END
 
         skip_data = true;
