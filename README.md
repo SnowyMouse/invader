@@ -2,8 +2,19 @@
 Invader is an open source toolkit for creating Halo: Combat Evolved maps. It is written in C++ using the C++17 standard.
 
 ## Building Invader
-Building Invader requires that you have CMake 3.10 or newer as well as GCC and G++ 9.0 or later. For all programs to
-build, you will also need to install Python 3, libTIFF, and zlib.
+There are a number of things you will need in order to successfully compile Invader.
+
+### Required Dependencies
+* C++17 compiler
+* C99 compiler
+* CMake 3.10 or newer (build only)
+* Bash (build only)
+
+### Optional Dependencies
+* LibTIFF (invader-bitmap)
+* zlib (invader-bitmap)
+* Python 3.7 or newer (invader-resource - build only)
+* git (git commit hash in version - build only)
 
 ### Windows
 To compile on Windows, you will need to install 64-bit [MSYS2](https://www.msys2.org/), installing the aforementioned
@@ -64,10 +75,6 @@ supported.
 | `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 
-#### Requirements
-* libtiff
-* libzlib
-
 ### invader-build
 This program builds cache files.
 
@@ -114,6 +121,3 @@ This program builds resource maps.
 | `--maps,-m <dir>` | Use a specific maps directory. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
 | `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
-
-#### Requirements
-* Python 3 (build only)
