@@ -85,22 +85,8 @@ add_library(invader STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
 )
 
-# Set things whether or not things worked
-if(${IN_GIT_REPO})
-    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-        COMMAND "${BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh" "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}." "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}" "${GIT_EXECUTABLE}"
-
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/master"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh"
-    )
-else()
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp
-        COMMAND "${BASH}" "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh" "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.unknown" "${CMAKE_CURRENT_BINARY_DIR}"
-
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/master"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version_gen.sh"
-    )
-endif()
+# Include version script
+include(src/version.cmake)
 
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

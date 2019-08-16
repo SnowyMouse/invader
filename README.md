@@ -8,7 +8,6 @@ There are a number of things you will need in order to successfully compile Inva
 * C++17 compiler
 * C99 compiler
 * CMake 3.10 or newer (build only)
-* Bash (build only)
 
 ### Optional Dependencies
 * LibTIFF (invader-bitmap)
