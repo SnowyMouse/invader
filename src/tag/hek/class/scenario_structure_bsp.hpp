@@ -659,7 +659,9 @@ namespace Invader::HEK {
         TagReflexive<EndianType, ScenarioStructureBSPGlobalDetailObject> instances;
         TagReflexive<EndianType, ScenarioStructureBSPGlobalDetailObjectCount> counts;
         TagReflexive<EndianType, ScenarioStructureBSPGlobalZReferenceVector> z_reference_vectors;
-        PAD(0x10);
+        std::uint8_t bullshit; // 1 = enabled lol
+        PAD(0x3);
+        PAD(0xC);
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPDetailObjectData<NewType>() const noexcept {
             ScenarioStructureBSPDetailObjectData<NewType> copy = {};
@@ -667,6 +669,7 @@ namespace Invader::HEK {
             COPY_THIS(instances);
             COPY_THIS(counts);
             COPY_THIS(z_reference_vectors);
+            COPY_THIS(bullshit);
             return copy;
         }
     };
