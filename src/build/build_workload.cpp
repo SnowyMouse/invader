@@ -17,6 +17,7 @@
 #include "../eprintf.hpp"
 #include "../tag/hek/class/biped.hpp"
 #include "../tag/hek/class/bitmap.hpp"
+#include "../tag/hek/class/detail_object_collection.hpp"
 #include "../tag/hek/class/fog.hpp"
 #include "../tag/hek/class/font.hpp"
 #include "../tag/hek/class/gbxmodel.hpp"
@@ -744,6 +745,38 @@ namespace Invader {
                                 }
                             }
                         }
+                    }
+                }
+
+                // Detail-object collection things
+                else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION) {
+                    // Make sure we're referencing the right things
+                    auto &dobc = *reinterpret_cast<DetailObjectCollection<LittleEndian> *>(tag_ptr->data.data());
+                    if(dobc.sprite_plate.tag_id.read().is_null()) {
+                        eprintf("%s.detail_object_collection has no bitmap.\n", tag_ptr->path.data());
+                        throw;
+                    }
+                    auto &bitmap_tag = this->compiled_tags[dobc.sprite_plate.tag_id.read().index];
+                    if(bitmap_tag->tag_class_int != TagClassInt::TAG_CLASS_BITMAP) {
+                        eprintf("%s.detail_object_collection does not reference a bitmap.\n", tag_ptr->path.data());
+                        throw;
+                    }
+
+                    // Get bitmap data
+                    auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(bitmap_tag->data.data());
+                    std::uint32_t sequences_count = bitmap.bitmap_group_sequence.count.read();
+                    auto *sequences = reinterpret_cast<BitmapGroupSequence<LittleEndian> *>(bitmap_tag->data.data() + bitmap_tag->resolve_pointer(&bitmap.bitmap_group_sequence.pointer));
+
+                    // Go through each thing
+                    std::uint32_t dobc_count = dobc.types.count.read();
+                    auto *dobc_type = reinterpret_cast<DetailObjectCollectionObjectType<LittleEndian> *>(tag_ptr->data.data() + tag_ptr->resolve_pointer(&dobc.types.pointer));
+                    for(std::uint32_t i = 0; i < dobc_count; i++) {
+                        std::uint8_t sequence_index = dobc_type[i].sequence_index;
+                        if(sequence_index >= sequences_count) {
+                            eprintf("Invalid sequence index %u / %u.\n", sequence_index, sequences_count);
+                            throw OutOfBoundsException();
+                        }
+                        dobc_type[i].sprite_count = static_cast<std::uint8_t>(sequences[sequence_index].sprites.count.read());
                     }
                 }
 

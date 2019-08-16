@@ -25,9 +25,10 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct DetailObjectCollectionObjectType {
         TagString name;
-        std::int8_t sequence_index;
+        std::uint8_t sequence_index;
         DetailObjectCollectionTypeFlags flags;
-        PAD(0x2);
+        PAD(0x1);
+        std::uint8_t sprite_count;
         EndianType<Fraction> color_override_factor;
         PAD(0x8);
         EndianType<float> near_fade_distance;
@@ -44,6 +45,7 @@ namespace Invader::HEK {
             COPY_THIS(name);
             COPY_THIS(sequence_index);
             COPY_THIS(flags);
+            COPY_THIS(sprite_count);
             COPY_THIS(color_override_factor);
             COPY_THIS(near_fade_distance);
             COPY_THIS(far_fade_distance);
