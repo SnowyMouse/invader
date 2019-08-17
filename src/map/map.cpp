@@ -203,7 +203,7 @@ namespace Invader {
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         type = DataMapType::DATA_MAP_SOUND;
-                        tag.base_struct_pointer = static_cast<HEK::Pointer>(~sizeof(HEK::Sound<LittleEndian>));
+                        tag.base_struct_pointer = ~static_cast<HEK::Pointer>(sizeof(HEK::Sound<LittleEndian>));
                         break;
                     default:
                         type = DataMapType::DATA_MAP_LOC;
