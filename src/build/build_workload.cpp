@@ -1651,7 +1651,7 @@ namespace Invader {
         auto *encounters_end = encounters + encounters_count;
 
         // Set some stuff up
-        const std::size_t VECTOR_SIZE = 65536;
+        static constexpr std::size_t VECTOR_SIZE = 65536;
         auto clear_array = [](std::unique_ptr<std::uint8_t []> &arr) {
             std::fill(arr.get(), arr.get() + VECTOR_SIZE, 0);
         };
