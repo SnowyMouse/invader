@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <cctype>
+#include <climits>
 #include "../eprintf.hpp"
 #include "../map/map.hpp"
 #include "../tag/hek/class/scenario.hpp"
@@ -86,10 +87,17 @@ int main(int argc, const char **argv) {
     const std::byte *random_number_ptr = reinterpret_cast<const std::byte *>(&tag_data_header.random_number);
     std::size_t random_number_offset_in_memory = random_number_ptr - reinterpret_cast<const std::byte *>(&tag_data_header) + data_crc.size();
     std::size_t random_number_offset_in_file = random_number_ptr - data.get();
+
     data_crc.insert(data_crc.end(), data.get() + tag_data_start, data.get() + tag_data_end);
 
     // Overwrite with new CRC32
     if(argc == 3) {
+        // If the map is too big, oh no
+        if(random_number_offset_in_memory > LONG_MAX) {
+            eprintf("Offset random_number_offset_in_memory is too large (max is %li, got %zu)\n", LONG_MAX, random_number_offset_in_memory);
+            return 1;
+        }
+
         // Make sure the CRC32 given is actually valid
         std::size_t given_crc32_length = std::strlen(argv[2]);
         if(given_crc32_length > 8 || given_crc32_length < 1) {
@@ -114,7 +122,9 @@ int main(int argc, const char **argv) {
             eprintf("Failed to open for reading/writing\n");
             return 1;
         }
-        std::fseek(f, random_number_offset_in_file, SEEK_SET);
+
+        // Seek to the random number offset
+        std::fseek(f, static_cast<long>(random_number_offset_in_file), SEEK_SET);
         if(!fwrite(reinterpret_cast<std::byte *>(data_crc.data() + random_number_offset_in_memory), sizeof(std::uint32_t), 1, f)) {
             eprintf("Failed to update value\n");
             return 1;

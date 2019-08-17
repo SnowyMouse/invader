@@ -63,7 +63,7 @@ namespace Invader::HEK {
         // Add all the data and make the pointer a reality
         compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(sequence_data.data()), reinterpret_cast<std::byte *>(sequence_data.data() + sequence_data.size()));
         compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(sprite_data.data()), reinterpret_cast<std::byte *>(sprite_data.data() + sprite_data.size()));
-        tag.bitmap_group_sequence.count = last_sequence;
+        tag.bitmap_group_sequence.count = static_cast<std::uint32_t>(last_sequence);
         add_pointer(compiled, reinterpret_cast<std::byte *>(&tag.bitmap_group_sequence.pointer) - reinterpret_cast<std::byte *>(&tag), sequence_offset);
 
         ADD_REFLEXIVE_START(tag.bitmap_data) {
@@ -95,13 +95,13 @@ namespace Invader::HEK {
                 case BITMAP_FORMAT_Y8:
                 case BITMAP_FORMAT_P8_BUMP:
                 case BITMAP_FORMAT_AY8:
-                    reflexive.pixels_count = total_pixel_count;
+                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count);
                     break;
 
                 // 8-bit DXT (4x4 blocks)
                 case BITMAP_FORMAT_DXT3:
                 case BITMAP_FORMAT_DXT5:
-                    reflexive.pixels_count = total_pixel_count_dxt;
+                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt);
                     break;
 
                 // 16-bit
@@ -109,18 +109,18 @@ namespace Invader::HEK {
                 case BITMAP_FORMAT_R5G6B5:
                 case BITMAP_FORMAT_A1R5G5B5:
                 case BITMAP_FORMAT_A4R4G4B4:
-                    reflexive.pixels_count = total_pixel_count * 2;
+                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 2);
                     break;
 
                 // 32-bit
                 case BITMAP_FORMAT_X8R8G8B8:
                 case BITMAP_FORMAT_A8R8G8B8:
-                    reflexive.pixels_count = total_pixel_count * 4;
+                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 4);
                     break;
 
                 // 4-bit DXT (4x4 blocks)
                 case BITMAP_FORMAT_DXT1:
-                    reflexive.pixels_count = total_pixel_count_dxt / 2;
+                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
                     break;
 
                 // lol

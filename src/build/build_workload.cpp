@@ -353,7 +353,7 @@ namespace Invader {
                             if(this->bitmaps[b].name == tag->path) {
                                 total_removed_data += tag->data.size();
                                 tag->indexed = true;
-                                tag->index = b;
+                                tag->index = static_cast<std::uint32_t>(b);
                                 tag->asset_data.clear();
                                 tag->data.clear();
                                 break;
@@ -915,7 +915,7 @@ namespace Invader {
                                 }
 
                                 // Set the decal count to the number of decals we used and add it to the end of the BSP
-                                bsp_data->runtime_decals.count = runtime_decals.size();
+                                bsp_data->runtime_decals.count = static_cast<std::uint32_t>(runtime_decals.size());
 
                                 if(runtime_decals.size() != 0) {
                                     std::size_t bsp_runtime_decal_offset = reinterpret_cast<std::byte *>(&bsp_data->runtime_decals.pointer) - bsp_tag->data.data();
