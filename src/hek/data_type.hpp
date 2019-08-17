@@ -81,14 +81,6 @@ namespace Invader::HEK {
      */
     struct TagString {
         char string[0x20] = {};
-
-        TagString() {}
-        TagString(const std::string &copy) {
-            if(copy.length() >= sizeof(string)) {
-                throw OutOfBoundsException();
-            }
-            std::strcpy(string, copy.data());
-        }
     };
 
     /**
