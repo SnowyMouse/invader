@@ -10,6 +10,7 @@ There are a number of things you will need in order to successfully compile Inva
 * CMake 3.10 or newer (build only)
 
 ### Optional Dependencies
+* LibArchive (invader-archive)
 * LibTIFF (invader-bitmap)
 * zlib (invader-bitmap)
 * Python 3.7 or newer (invader-resource - build only)
