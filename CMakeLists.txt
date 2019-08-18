@@ -25,6 +25,7 @@ find_package(TIFF)
 find_package(ZLIB)
 find_package(Python3)
 find_package(Git)
+find_package(LibArchive)
 
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
@@ -65,3 +66,4 @@ include(src/indexer/indexer.cmake)
 # include(src/scenario/scenario.cmake)
 include(src/bitmap/bitmap.cmake)
 include(src/resource/resource.cmake)
+include(src/archive/archive.cmake)
