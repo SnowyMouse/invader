@@ -6,6 +6,7 @@ add_library(invader STATIC
 
     src/map/map.cpp
     src/map/tag.cpp
+    src/build/build_workload.cpp
 
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
