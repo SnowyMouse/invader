@@ -102,7 +102,7 @@ int main(int argc, char * const argv[]) {
             case 'i':
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
-            case 'h':
+            default:
                 eprintf("Usage: %s [options] <scenario>\n", argv[0]);
                 eprintf("Options:\n");
                 eprintf("  --game-engine <id>   Specify the game engine. Valid engines are: ce (default),\n");
@@ -123,8 +123,6 @@ int main(int argc, char * const argv[]) {
                 eprintf("  -t                   add more directories, ordered by precedence.\n\n");
                 eprintf("  --with-index <file>  Use an index file for the tags, ensuring the map's tags\n");
                 eprintf("  -w                   are ordered in the same way.\n");
-                return EXIT_FAILURE;
-            default:
                 return EXIT_FAILURE;
         }
     }
