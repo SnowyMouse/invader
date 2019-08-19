@@ -103,7 +103,8 @@ int main(int argc, char * const argv[]) {
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
             default:
-                eprintf("Usage: %s [options] <scenario>\n", argv[0]);
+                eprintf("Usage: %s [options] <scenario>\n\n", argv[0]);
+                eprintf("Build cache files for Halo Custom Edition.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --game-engine <id>   Specify the game engine. Valid engines are: ce (default),\n");
                 eprintf("  -g                   retail\n\n");

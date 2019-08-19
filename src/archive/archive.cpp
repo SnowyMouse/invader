@@ -43,7 +43,8 @@ int main(int argc, char * const *argv) {
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
             default:
-                eprintf("Usage: %s [options] <scenario>\n", argv[0]);
+                eprintf("Usage: %s [options] <scenario>\n\n", argv[0]);
+                eprintf("Generate .tar.xz archives of the tags required to build a cache file.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i            Show credits, source info, and other info.\n");
                 eprintf("  --output,-o <file>   Output to a specific file. Extension must be .tar.xz.\n");
