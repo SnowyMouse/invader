@@ -10,29 +10,105 @@
 #include <filesystem>
 #include <archive.h>
 #include <archive_entry.h>
+#include "../version.hpp"
 #include "../eprintf.hpp"
 
 #include "../build/build_workload.hpp"
 #include "../map/map.hpp"
 
-int main(int argc, const char **argv) {
-    if(argc < 4) {
-        eprintf("Usage: %s <scenario> <output> <tags> [tags2 [...]]\n", argv[0]);
-        return EXIT_FAILURE;
+int main(int argc, char * const *argv) {
+    static struct option options[] = {
+        {"help",  no_argument, 0, 'h'},
+        {"info", no_argument, 0, 'i' },
+        {"tags", required_argument, 0, 't' },
+        {"output", required_argument, 0, 'o' },
+        {0, 0, 0, 0 }
+    };
+
+    int opt;
+    int longindex = 0;
+
+    // Go through every argument
+    std::vector<std::string> tags;
+    std::string output;
+    while((opt = getopt_long(argc, argv, "t:o:ih", options, &longindex)) != -1) {
+        switch(opt) {
+            case 't':
+                tags.push_back(optarg);
+                break;
+            case 'o':
+                output = optarg;
+                break;
+            case 'i':
+                INVADER_SHOW_INFO
+                return EXIT_FAILURE;
+            default:
+                eprintf("Usage: %s [options] <scenario>\n", argv[0]);
+                eprintf("Options:\n");
+                eprintf("  --info,-i            Show credits, source info, and other info.\n");
+                eprintf("  --output,-o <file>   Output to a specific file. Extension must be .tar.xz.\n");
+                eprintf("  --tags,-t <dir>      Use the specified tags directory. Use multiple times to\n");
+                eprintf("                       add more directories, ordered by precedence.\n\n");
+                return EXIT_FAILURE;
+        }
     }
 
-    // Add tags to the array
-    std::vector<std::string> tags;
-    for(int i = 3; i < argc; i++) {
-        tags.emplace_back(argv[i]);
+    // No tags folder? Use tags in current directory
+    if(tags.size() == 0) {
+        tags.emplace_back("tags");
+    }
+
+    // Require a scenario
+    const char *scenario;
+    if(optind == argc) {
+        eprintf("%s: A scenario tag path is required. Use -h for help.\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    else if(optind < argc - 1) {
+        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
+        return EXIT_FAILURE;
+    }
+    else {
+        scenario = argv[optind];
     }
 
     // Build the map
-    auto map = Invader::BuildWorkload::compile_map(argv[1], tags, "", std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(), true, false, false);
+    auto map = Invader::BuildWorkload::compile_map(scenario, tags, "", std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(), true, false, false);
 
     // Parse the map
     auto parsed_map = Invader::Map::map_with_pointer(map.data(), map.size());
     auto tag_count = parsed_map.tag_count();
+
+    // If no output filename was given, make one
+    static const char extension[] = ".tar.xz";
+    if(output.size() == 0) {
+        // Get the base scenario tag file name
+        const char *file_name = parsed_map.get_tag(parsed_map.get_scenario_tag_id()).path().data();
+        for(const char *c = file_name; *c; c++) {
+            if(*c == '\\') {
+                file_name = c + 1;
+            }
+        }
+
+        // Fallback name
+        if(*file_name == 0) {
+            file_name = "output";
+        }
+
+        // Set output
+        output = std::string(file_name) + extension;
+    }
+    else {
+        bool fail = true;
+        if(output.size() > sizeof(extension)) {
+            fail = std::strcmp(output.data() + output.size() - sizeof(extension) + 1, extension) != 0;
+        }
+
+        if(fail) {
+            eprintf("Invalid output file %s. This should end with .tar.xz.\n", output.data());
+            return EXIT_FAILURE;
+        }
+    }
 
     // Go through each tag and see if we can find everything.
     std::vector<std::string> archive_list;
@@ -73,7 +149,7 @@ int main(int argc, const char **argv) {
     auto *archive = archive_write_new();
     archive_write_add_filter_xz(archive);
     archive_write_set_format_pax_restricted(archive);
-    archive_write_open_filename(archive, argv[2]);
+    archive_write_open_filename(archive, output.data());
 
     // Go through each tag path we got
     for(std::size_t i = 0; i < tag_count; i++) {
