@@ -46,10 +46,12 @@ int main(int argc, char * const *argv) {
                 eprintf("Usage: %s [options] <scenario>\n\n", argv[0]);
                 eprintf("Generate .tar.xz archives of the tags required to build a cache file.\n\n");
                 eprintf("Options:\n");
-                eprintf("  --info,-i            Show credits, source info, and other info.\n");
-                eprintf("  --output,-o <file>   Output to a specific file. Extension must be .tar.xz.\n");
-                eprintf("  --tags,-t <dir>      Use the specified tags directory. Use multiple times to\n");
-                eprintf("                       add more directories, ordered by precedence.\n\n");
+                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
+                eprintf("  --output,-o <file>           Output to a specific file. Extension must be\n");
+                eprintf("                               .tar.xz.\n");
+                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
+                eprintf("                               times to add more directories, ordered by\n");
+                eprintf("                               precedence.\n");
                 return EXIT_FAILURE;
         }
     }
