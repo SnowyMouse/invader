@@ -55,6 +55,19 @@ you want to build using multiple processing threads.
 To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
 well as make things easier for me to work with, this project is split into different programs.
 
+### invader-archive
+This program generates a .tar.xz archive containing all of the tags used to build a map.
+
+#### Usage
+`invader-archive [options] <scenario-tag>`
+
+| Option | Description |
+| --- | --- |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--help,-h` | Show help. |
+| `--output,-o <file>` | Output to a specific file. Extension must be .tar.xz. |
+| `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
+
 ### invader-bitmap
 This program generates bitmap tags from images. For source images, .tif, .tiff, .png, .tga, and .bmp extensions are
 supported.
