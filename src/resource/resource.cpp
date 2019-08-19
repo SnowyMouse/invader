@@ -96,6 +96,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if(optind < argc) {
+        eprintf("%s: Unexpected argument: %s\n", argv[0], argv[optind]);
+        return EXIT_FAILURE;
+    }
+
     if(!resource_map_set) {
         eprintf("No resource map type was given. Use --help for more information.\n");
         return EXIT_FAILURE;

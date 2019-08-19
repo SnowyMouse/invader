@@ -133,8 +133,12 @@ int main(int argc, char * const argv[]) {
     }
 
     // Check if there's a scenario tag
-    if(optind != argc - 1) {
+    if(optind == argc) {
         eprintf("%s: A scenario tag path is required. Use -h for help.\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    else if(optind < argc - 1) {
+        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
         return EXIT_FAILURE;
     }
     else {
