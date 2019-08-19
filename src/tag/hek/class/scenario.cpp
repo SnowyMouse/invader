@@ -203,7 +203,80 @@ namespace Invader::HEK {
         for(std::size_t i = 0; i < node_count; i++) {
             nodes[i] = nodes_big[i];
         }
+
+        // Increment this
         INCREMENT_DATA_PTR(tag.script_syntax_data.size);
+        ASSERT_SIZE(tag.script_string_data.size)
+
+        // Hold a list of references here
+        std::vector<CompiledTagDependency> script_dependencies;
+        const char *script_string_data = reinterpret_cast<const char *>(data);
+
+        // Iterate through the nodes to get references
+        for(std::uint16_t c = 0; c < table.size.read(); c++) {
+            // Check if we know the class
+            HEK::TagClassInt tag_class = HEK::TAG_CLASS_NONE;
+            auto &node = nodes[c];
+
+            // Check the class type
+            switch(node.type.read()) {
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
+                    tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
+                    tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
+                    tag_class = HEK::TAG_CLASS_OBJECT;
+                    break;
+
+                default:
+                    continue;
+            }
+
+            if(tag_class != HEK::TAG_CLASS_NONE) {
+                // Check if we should leave it alone
+                auto flags = nodes[c].flags.read();
+                if(flags.is_global || flags.is_script_call) {
+                    continue;
+                }
+
+                // Get the string
+                const char *string = script_string_data + node.string_offset.read();
+                std::size_t dependency_offset = reinterpret_cast<std::byte *>(&node.data) - compiled.data.data();
+
+                // Add it to the list
+                CompiledTagDependency dependency_to_add;
+                dependency_to_add.offset = dependency_offset;
+                dependency_to_add.path = string;
+                dependency_to_add.tag_class_int = tag_class;
+                dependency_to_add.tag_id_only = true;
+                compiled.dependencies.push_back(dependency_to_add);
+                script_dependencies.push_back(dependency_to_add);
+            }
+        }
 
         // Fix pointer and element size
         if(table.first_element_ptr == 0x40440028) {
@@ -211,7 +284,6 @@ namespace Invader::HEK {
             table.maximum_count = 0x764F;
         }
 
-        ASSERT_SIZE(tag.script_string_data.size)
         ADD_POINTER_FROM_INT32(tag.script_string_data.pointer, compiled.data.size());
         compiled.data.insert(compiled.data.end(), data, data + tag.script_string_data.size);
         INCREMENT_DATA_PTR(tag.script_string_data.size);
@@ -219,7 +291,44 @@ namespace Invader::HEK {
 
         ADD_REFLEXIVE(tag.scripts);
         ADD_REFLEXIVE(tag.globals);
-        ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.references, reference);
+        ADD_REFLEXIVE_START(tag.references) {
+            const char *path = reinterpret_cast<const char *>(data);
+            ADD_DEPENDENCY_ADJUST_SIZES(reflexive.reference);
+
+            // If it's a script dependency that's already in the map, remove it
+            if(reflexive.reference.path_size != 0) {
+                auto tag_class_int = reflexive.reference.tag_class_int.read();
+                for(auto dependency = script_dependencies.begin(); dependency != script_dependencies.end(); dependency++) {
+                    if(dependency->path == path) {
+                        if(dependency->tag_class_int == tag_class_int || (dependency->tag_class_int == HEK::TagClassInt::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag_class_int))) {
+                            script_dependencies.erase(dependency);
+                            break;
+                        }
+                    }
+                }
+            }
+        } ADD_REFLEXIVE_END
+
+        // Add the remaining dependencies
+        std::size_t size_before_adding_references = compiled.data.size();
+        for(auto &dependency : script_dependencies) {
+            CompiledTagDependency dependency_reference = dependency;
+            ScenarioReference<LittleEndian> dependency_reference_tag_data = {};
+            dependency_reference.offset = compiled.data.size() + (reinterpret_cast<std::byte *>(&dependency_reference_tag_data.reference) - reinterpret_cast<std::byte *>(&dependency_reference_tag_data));
+            dependency_reference_tag_data.reference.tag_class_int = dependency.tag_class_int;
+            dependency_reference.tag_id_only = false;
+            compiled.dependencies.push_back(dependency_reference);
+            compiled.data.insert(compiled.data.end(), reinterpret_cast<std::byte *>(&dependency_reference_tag_data), reinterpret_cast<std::byte *>(&dependency_reference_tag_data + 1));
+        }
+
+        // Increment the dependency array count, making a brand new array if it was 0
+        if(tag.references.count == 0) {
+            tag.references.count = script_dependencies.size();
+            ADD_POINTER_FROM_INT32(tag.references.pointer, size_before_adding_references);
+        }
+        else {
+            tag.references.count = tag.references.count.read() + script_dependencies.size();
+        }
 
         skip_data = true;
         ADD_REFLEXIVE_START(tag.source_files) {

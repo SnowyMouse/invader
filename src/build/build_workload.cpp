@@ -165,7 +165,6 @@ namespace Invader {
         this->populate_tag_array(tag_data);
 
         // Fix the scenario tag
-        this->fix_scenario_tag_scripts();
         this->fix_scenario_tag_encounters();
 
         // Add tag data
@@ -592,11 +591,55 @@ namespace Invader {
         #endif
 
         for(const auto &tag_dir : this->tags_directories) {
-            // Concatenate the tag path
-            std::string tag_path = tag_dir + tag_base_path;
-
             // Open the tag file
-            std::FILE *file = std::fopen(tag_path.data(), "rb");
+            std::FILE *file = nullptr;
+
+            // If it's not purely an object tag try to open it
+            if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
+                // Concatenate the tag path
+                std::string tag_path = tag_dir + tag_base_path;
+                file = std::fopen(tag_path.data(), "rb");
+            }
+            // Otherwise, see if we can go through the different object types
+            else {
+                auto attempt_to_open_tag = [&tag_dir, &path](TagClassInt class_int) -> std::FILE * {
+                    std::string tag_path = tag_dir + path + "." + tag_class_to_extension(class_int);
+                    #ifndef _WIN32
+                    for(char &c : tag_path) {
+                        if(c == '\\') {
+                            c = '/';
+                        }
+                    }
+                    #endif
+                    return std::fopen(tag_path.data(), "rb");
+                };
+                #define MAKE_ATTEMPT(class_int) if(file == nullptr) { file = attempt_to_open_tag(class_int); if(file) tag_class_int = class_int; }
+
+                std::string tag_path = tag_dir + tag_base_path;
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_BIPED);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_CONTROL);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_MACHINE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_EQUIPMENT);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_GARBAGE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_ITEM);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_OBJECT);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_PLACEHOLDER);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_PROJECTILE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_SCENERY);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_SOUND_SCENERY);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_VEHICLE);
+                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_WEAPON);
+
+                // If we successfully open it, try again
+                if(file) {
+                    std::fclose(file);
+                    return compile_tag_recursively(path, tag_class_int);
+                }
+            }
+
+            // Continue if we couldn't do it
             if(!file) {
                 continue;
             }
@@ -1566,92 +1609,6 @@ namespace Invader {
     }
 
     #define TRANSLATE_SCENARIO_TAG_DATA_PTR(pointer) (scenario_tag_data + scenario_tag->resolve_pointer(&pointer))
-
-    void BuildWorkload::fix_scenario_tag_scripts() {
-        // Get the scenario tag
-        auto &scenario_tag = this->compiled_tags[this->scenario_index];
-        auto *scenario_tag_data = scenario_tag->data.data();
-        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
-
-        // Let's-a-go
-        auto *script_syntax_data = TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.script_syntax_data.pointer);
-        auto *script_string_data = reinterpret_cast<const char *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.script_string_data.pointer));
-        auto &script_node_table = *reinterpret_cast<HEK::ScenarioScriptNodeTable<HEK::LittleEndian> *>(script_syntax_data);
-        auto *script_nodes = reinterpret_cast<HEK::ScenarioScriptNode<HEK::LittleEndian> *>(script_syntax_data + sizeof(script_node_table));
-        std::uint16_t count = script_node_table.size.read();
-
-        // Iterate through this
-        for(std::uint16_t c = 0; c < count; c++) {
-            // Check if we know the class
-            HEK::TagClassInt tag_class = HEK::TAG_CLASS_NONE;
-
-            switch(script_nodes[c].type.read()) {
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                    tag_class = HEK::TAG_CLASS_SOUND;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                    tag_class = HEK::TAG_CLASS_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                    tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                    tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                    tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
-                    break;
-
-                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                    tag_class = HEK::TAG_CLASS_OBJECT;
-                    break;
-
-                default:
-                    continue;
-            }
-
-            if(tag_class != HEK::TAG_CLASS_NONE) {
-                // Check if we should leave it alone
-                auto flags = script_nodes[c].flags.read();
-                if(flags.is_global || flags.is_script_call) {
-                    continue;
-                }
-
-                // Get the string
-                bool found = false;
-                const char *string = script_string_data + script_nodes[c].string_offset.read();
-
-                // Get and write the tag ID
-                for(std::size_t t = 0; t < this->compiled_tags.size(); t++) {
-                    auto &tag = this->compiled_tags[t];
-                    if((tag->tag_class_int == tag_class || (tag_class == HEK::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag->tag_class_int))) && tag->path == string) {
-                        script_nodes[c].data = tag_id_from_index(t);
-                        found = true;
-                        break;
-                    }
-                }
-
-                // If we didn't find it, fail
-                if(!found) {
-                    eprintf("Cannot resolve script reference %s.%s\n", string, tag_class_to_extension(tag_class));
-                    throw;
-                }
-            }
-        }
-    }
-
     #define TRANSLATE_SBSP_TAG_DATA_PTR(pointer) (sbsp_tag_data + sbsp_tag->resolve_pointer(&pointer))
 
     void BuildWorkload::fix_scenario_tag_encounters() {
