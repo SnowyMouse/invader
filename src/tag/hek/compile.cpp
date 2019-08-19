@@ -41,7 +41,7 @@ namespace Invader {
                     eprintf("path length is wrong (expected %zu; got %zu)\n", path_size, path_str.length());
                     throw InvalidDependencyException();
                 }
-                compiled.dependencies.push_back(CompiledTagDependency { offset, path_str, dependency.tag_class_int });
+                compiled.dependencies.push_back(CompiledTagDependency { offset, path_str, dependency.tag_class_int, false });
             }
 
             // Set the return value to the size of the path, including the null byte

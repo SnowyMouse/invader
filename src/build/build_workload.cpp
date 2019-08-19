@@ -685,12 +685,23 @@ namespace Invader {
 
                 // Iterate through all of the tags this tag references
                 for(auto &dependency : tag_ptr->dependencies) {
+                    // Older HEK tags may use .model references instead of .gbxmodel references. tool.exe changes them to .gbxmodel references.
                     if(dependency.tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
                         dependency.tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
                     }
-                    auto *dependency_in_tag = reinterpret_cast<TagDependency<LittleEndian> *>(tag_ptr->data.data() + dependency.offset);
-                    dependency_in_tag->tag_id = tag_id_from_index(this->compile_tag_recursively(dependency.path.data(), dependency.tag_class_int));
-                    dependency_in_tag->tag_class_int = dependency.tag_class_int;
+
+                    // Compile the tag
+                    TagID new_tag_id = tag_id_from_index(this->compile_tag_recursively(dependency.path.data(), dependency.tag_class_int));
+
+                    // Set the tag ID
+                    if(!dependency.tag_id_only) {
+                        auto *dependency_in_tag = reinterpret_cast<TagDependency<LittleEndian> *>(tag_ptr->data.data() + dependency.offset);
+                        dependency_in_tag->tag_id = new_tag_id;
+                        dependency_in_tag->tag_class_int = dependency.tag_class_int;
+                    }
+                    else {
+                        *reinterpret_cast<LittleEndian<TagID> *>(tag_ptr->data.data() + dependency.offset) = new_tag_id;
+                    }
                 }
 
                 // BSP-related things (need to set water plane stuff for fog)
@@ -1284,6 +1295,11 @@ namespace Invader {
 
         // Adjust for all dependencies
         for(auto &dependency : compiled_tag->dependencies) {
+            // Skip tag ID-only dependencies
+            if(dependency.tag_id_only) {
+                continue;
+            }
+
             if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data.size()) {
                 eprintf("Invalid dependency offset for %s.%s\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                 throw InvalidDependencyException();

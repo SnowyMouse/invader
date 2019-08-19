@@ -37,6 +37,11 @@ namespace Invader {
          * Type of class
          */
         HEK::TagClassInt tag_class_int;
+
+        /**
+         * This is just a tag ID
+         */
+        bool tag_id_only;
     };
 
     /**
