@@ -11,91 +11,98 @@
 #include <filesystem>
 
 namespace Invader {
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
-        success = false;
-
-        std::string tag_path_to_find = tag_path_to_find_2;
+        success = true;
 
         if(!reverse) {
-            #ifndef _WIN32
-            for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-                if(tag_path_to_find[i] == '\\') {
-                    tag_path_to_find[i] = '/';
-                }
-            }
-            #endif
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, auto recursion) -> void {
+                std::string tag_path_to_find = tag_path_to_find_2;
 
-            // See if we can open the tag
-            bool found = false;
-            for(auto &tags_directory : tags) {
-                std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
-                std::FILE *f = std::fopen(tag_path.string().data(), "rb");
-                if(!f) {
-                    continue;
-                }
-                std::fseek(f, 0, SEEK_END);
-                long file_size = std::ftell(f);
-                std::fseek(f, 0, SEEK_SET);
-                auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                std::fread(tag_data.get(), file_size, 1, f);
-                std::fclose(f);
-
-                try {
-                    Invader::CompiledTag tag(tag_path, tag_int_to_find, tag_data.get(), static_cast<std::size_t>(file_size));
-                    for(auto &dependency : tag.dependencies) {
-                        found_tags.emplace_back(dependency.path, dependency.tag_class_int, true);
-                    }
-                    found = true;
-                    break;
-                }
-                catch (std::exception &e) {
-                    eprintf("Failed to compile tag %s. %s\n", tag_path.string().data(), e.what());
-                    return std::vector<FoundTagDependency>();
-                }
-            }
-
-            if(!found) {
-                eprintf("Failed to open tag %s.%s.\n", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
-                return std::vector<FoundTagDependency>();
-            }
-
-            // Dedupe it
-            for(auto dep = found_tags.begin(); dep != found_tags.end(); dep++) {
-                bool deduped;
-                do {
-                    deduped = false;
-                    for(auto dep2 = dep + 1; dep2 != found_tags.end(); dep2++) {
-                        if(dep->path == dep2->path && dep->class_int == dep2->class_int) {
-                            found_tags.erase(dep2);
-                            deduped = true;
-                            break;
-                        }
-                    }
-                } while(deduped);
-            }
-
-            // Lastly, go through each dependency and see if it's broken or not
-            for(auto &tag : found_tags) {
-                std::string full_tag_path = tag.path + "." + Invader::HEK::tag_class_to_extension(tag.class_int);
+                // Forwardslashafy it
                 #ifndef _WIN32
-                for(char &c : full_tag_path) {
-                    if(c == '\\') {
-                        c = '/';
+                for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
+                    if(tag_path_to_find[i] == '\\') {
+                        tag_path_to_find[i] = '/';
                     }
                 }
                 #endif
 
+                // See if we can open the tag
+                bool found = false;
                 for(auto &tags_directory : tags) {
-                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / full_tag_path;
-                    if(std::filesystem::is_regular_file(tag_path)) {
-                        tag.broken = false;
+                    std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
+                    std::FILE *f = std::fopen(tag_path.string().data(), "rb");
+                    if(!f) {
+                        continue;
+                    }
+                    std::fseek(f, 0, SEEK_END);
+                    long file_size = std::ftell(f);
+                    std::fseek(f, 0, SEEK_SET);
+                    auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
+                    std::fread(tag_data.get(), file_size, 1, f);
+                    std::fclose(f);
+
+                    try {
+                        Invader::CompiledTag tag(tag_path, tag_int_to_find, tag_data.get(), static_cast<std::size_t>(file_size));
+                        for(auto &dependency : tag.dependencies) {
+                            // Make sure it's not in found_tags
+                            bool dupe = false;
+                            for(auto &tag : found_tags) {
+                                if(tag.path == dependency.path && tag.class_int == dependency.tag_class_int) {
+                                    dupe = true;
+                                    break;
+                                }
+                            }
+                            if(dupe) {
+                                continue;
+                            }
+                            found_tags.emplace_back(dependency.path, dependency.tag_class_int, true);
+                            if(recursive) {
+                                recursion(dependency.path.data(), dependency.tag_class_int, recursion);
+                            }
+                        }
+                        found = true;
+                        break;
+                    }
+                    catch (std::exception &e) {
+                        eprintf("Failed to compile tag %s. %s\n", tag_path.string().data(), e.what());
+                        success = false;
+                        return;
                     }
                 }
-            }
+
+                if(!found) {
+                    eprintf("Failed to open tag %s.%s.\n", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
+                    success = false;
+                    return;
+                }
+
+                // Next, go through each dependency and see if it's broken or not
+                for(auto &tag : found_tags) {
+                    std::string full_tag_path = tag.path + "." + Invader::HEK::tag_class_to_extension(tag.class_int);
+                    #ifndef _WIN32
+                    for(char &c : full_tag_path) {
+                        if(c == '\\') {
+                            c = '/';
+                        }
+                    }
+                    #endif
+
+                    for(auto &tags_directory : tags) {
+                        std::filesystem::path tag_path = std::filesystem::path(tags_directory) / full_tag_path;
+                        if(std::filesystem::is_regular_file(tag_path)) {
+                            tag.broken = false;
+                        }
+                    }
+                }
+            };
+
+            find_dependencies_in_tag(tag_path_to_find_2, tag_int_to_find, find_dependencies_in_tag);
         }
         else {
             // Turn all forward slashes into backslashes if not on Windows
+            std::string tag_path_to_find = tag_path_to_find_2;
             #ifndef _WIN32
             for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
                 if(tag_path_to_find[i] == '/') {

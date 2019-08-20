@@ -23,17 +23,19 @@ int main(int argc, char * const *argv) {
         {"info", no_argument, 0, 'i' },
         {"tags", required_argument, 0, 't' },
         {"reverse", no_argument, 0, 'r'},
+        {"recursive", no_argument, 0, 'R'},
         {0, 0, 0, 0 }
     };
 
     int opt;
     int longindex = 0;
     bool reverse = false;
+    bool recursive = false;
 
     // Go through every argument
     std::vector<std::string> tags;
     std::string output;
-    while((opt = getopt_long(argc, argv, "t:ihr", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "t:ihrR", options, &longindex)) != -1) {
         switch(opt) {
             case 't':
                 tags.push_back(optarg);
@@ -44,11 +46,15 @@ int main(int argc, char * const *argv) {
             case 'r':
                 reverse = true;
                 break;
+            case 'R':
+                recursive = true;
+                break;
             default:
                 eprintf("Usage: %s [options] <tag.class>\n\n", argv[0]);
                 eprintf("Check dependencies for a tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
+                eprintf("  --recursive, -R              Recursively get all depended tags.\n");
                 eprintf("  --reverse, -r                Find all tags that depend on the tag, instead.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");
@@ -99,7 +105,7 @@ int main(int argc, char * const *argv) {
 
     // Here's an array we can use to hold what we got
     bool success;
-    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tags, reverse, success);
+    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tags, reverse, recursive, success);
 
     if(!success) {
         return EXIT_FAILURE;

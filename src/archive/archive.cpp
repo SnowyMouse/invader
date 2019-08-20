@@ -206,7 +206,7 @@ int main(int argc, char * const *argv) {
 
             // Last, go through its dependencies
             bool success;
-            auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tag_found_in, false, success);
+            auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tag_found_in, false, false, success);
             if(!success) {
                 eprintf("Failed to find dependencies for %s. Archive could not be made.\n", internal_filename.data());
                 return false;

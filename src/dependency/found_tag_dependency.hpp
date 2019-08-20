@@ -17,7 +17,7 @@ namespace Invader {
         Invader::HEK::TagClassInt class_int;
         bool broken;
 
-        static std::vector<FoundTagDependency> find_dependencies(const char *tag_path_to_find, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool &success);
+        static std::vector<FoundTagDependency> find_dependencies(const char *tag_path_to_find, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success);
 
         FoundTagDependency(std::string path, Invader::HEK::TagClassInt class_int, bool broken) : path(path), class_int(class_int), broken(broken) {}
     };
