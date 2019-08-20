@@ -3,11 +3,10 @@ add_library(invader STATIC
     src/hek/class_int.cpp
     src/hek/data_type.cpp
     src/resource/resource_map.cpp
-
+    src/dependency/found_tag_dependency.cpp
     src/map/map.cpp
     src/map/tag.cpp
     src/build/build_workload.cpp
-
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
