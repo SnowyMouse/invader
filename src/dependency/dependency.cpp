@@ -49,7 +49,7 @@ int main(int argc, char * const *argv) {
                 eprintf("Check dependencies for a tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --reverse, -r                Find all tags that depend on the tag, instead.\r");
+                eprintf("  --reverse, -r                Find all tags that depend on the tag, instead.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");
                 eprintf("                               precedence.\n");
