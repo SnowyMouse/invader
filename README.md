@@ -134,3 +134,15 @@ This program builds resource maps.
 | `--maps,-m <dir>` | Use a specific maps directory. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
 | `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
+
+### invader-reverse-dependency
+This program finds tags that directly depend on a given tag.
+
+#### Usage
+`invader-reverse-dependency [options] <tag.class>`
+
+| Option | Description |
+| --- | --- |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--help,-h` | Show help. |
+| `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
