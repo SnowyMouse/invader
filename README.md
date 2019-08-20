@@ -59,13 +59,14 @@ well as make things easier for me to work with, this project is split into diffe
 This program generates a .tar.xz archive containing all of the tags used to build a map.
 
 #### Usage
-`invader-archive [options] <scenario-tag>`
+`invader-archive [options] <scenario-tag | -s tag.class>`
 
 | Option | Description |
 | --- | --- |
 | `--info,-i` | Show credits, source info, and other info. |
 | `--help,-h` | Show help. |
 | `--output,-o <file>` | Output to a specific file. Extension must be .tar.xz. |
+| `--single-tag,-s` | Archive a tag tree instead of a cache file tree. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
 
 ### invader-bitmap
@@ -135,14 +136,16 @@ This program builds resource maps.
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
 | `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
 
-### invader-reverse-dependency
+### invader-dependency
 This program finds tags that directly depend on a given tag.
 
 #### Usage
-`invader-reverse-dependency [options] <tag.class>`
+`invader-dependency [options] <tag.class>`
 
 | Option | Description |
 | --- | --- |
-| `--info,-i` | Show credits, source info, and other info. |
 | `--help,-h` | Show help. |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--recursive,-R` | Recursively get all depended tags. |
+| `--reverse,-r` | Find all tags that depend on the tag, instead. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
