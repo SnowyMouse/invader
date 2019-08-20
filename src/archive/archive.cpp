@@ -55,7 +55,7 @@ int main(int argc, char * const *argv) {
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
                 eprintf("  --output,-o <file>           Output to a specific file. Extension must be\n");
                 eprintf("                               .tar.xz.\n");
-                eprintf("  --single-tag,-s              Archive a single tag instead of a cache file.\n");
+                eprintf("  --single-tag,-s              Archive a tag tree instead of a cache file.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");
                 eprintf("                               precedence.\n");
