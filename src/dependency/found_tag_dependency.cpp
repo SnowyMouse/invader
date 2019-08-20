@@ -57,7 +57,7 @@ namespace Invader {
                             if(dupe) {
                                 continue;
                             }
-                            found_tags.emplace_back(dependency.path, dependency.tag_class_int, true);
+                            found_tags.emplace_back(dependency.path, dependency.tag_class_int, true, tag_path.string());
                             if(recursive) {
                                 recursion(dependency.path.data(), dependency.tag_class_int, recursion);
                             }
@@ -167,7 +167,7 @@ namespace Invader {
                                 Invader::CompiledTag tag(dir_tag_path, class_int, tag_data.get(), static_cast<std::size_t>(file_size));
                                 for(auto &dependency : tag.dependencies) {
                                     if(dependency.path == tag_path_to_find && dependency.tag_class_int == tag_int_to_find) {
-                                        found_tags.emplace_back(dir_tag_path, class_int, false);
+                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path().string());
                                         break;
                                     }
                                 }

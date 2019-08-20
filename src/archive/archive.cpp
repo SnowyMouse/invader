@@ -161,74 +161,58 @@ int main(int argc, char * const *argv) {
 
         // Split the extension
         char *tag_path_to_find = base_tag;
-        char *c;
+        char *c = nullptr;
         for(char *d = tag_path_to_find; *d; d++) {
             if(*d == '.') {
                 c = d + 1;
             }
         }
+        if(!c) {
+            eprintf("No extension for %s. Archive could not be made.\n", tag_path_to_find);
+            return EXIT_FAILURE;
+        }
         *(c - 1) = 0;
         Invader::HEK::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
-        auto recursively_add_dependencies = [&archive_list, &tags](const char *tag_path_to_find, Invader::HEK::TagClassInt tag_int_to_find, auto recursion) -> bool {
-            std::string tag_path = tag_path_to_find;
+        bool exists = false;
+        for(auto &dir : tags) {
+            auto name_with_extension = std::string(base_tag) + "." + c;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / name_with_extension;
+            if(std::filesystem::exists(tag_path)) {
+                exists = true;
+                archive_list.emplace_back(tag_path.string(), name_with_extension);
+                break;
+            }
+        }
+
+        if(!exists) {
+            eprintf("Failed to find %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            return EXIT_FAILURE;
+        }
+
+        bool success;
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tags, false, true, success);
+        if(!success) {
+            eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            return EXIT_FAILURE;
+        }
+
+        // Make sure there aren't any broken dependencies
+        for(auto &dependency : dependencies) {
+            if(dependency.broken) {
+                eprintf("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.data(), tag_class_to_extension(dependency.class_int));
+                return EXIT_FAILURE;
+            }
+
+            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.class_int);
             #ifndef _WIN32
-            for(char &c : tag_path) {
+            for(char &c : path_copy) {
                 if(c == '\\') {
                     c = '/';
                 }
             }
             #endif
-            std::string internal_filename = tag_path + "." + tag_class_to_extension(tag_int_to_find);
-
-            // First see if we already added it
-            for(const auto &archive : archive_list) {
-                if(archive.second == internal_filename) {
-                    return true;
-                }
-            }
-
-            // Next see if we can find the tag itself
-            std::vector<std::string> tag_found_in;
-            for(auto &tags_directory : tags) {
-                std::filesystem::path tag_path = std::filesystem::path(tags_directory) / internal_filename;
-                if(std::filesystem::exists(tag_path)) {
-                    archive_list.emplace_back(tag_path, internal_filename);
-                    tag_found_in.push_back(tags_directory);
-                    break;
-                }
-            }
-
-            if(archive_list.size() == 0) {
-                eprintf("Failed to find %s. Archive could not be made.\n", internal_filename.data());
-                return false;
-            }
-
-            // Last, go through its dependencies
-            bool success;
-            auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tag_found_in, false, false, success);
-            if(!success) {
-                eprintf("Failed to find dependencies for %s. Archive could not be made.\n", internal_filename.data());
-                return false;
-            }
-
-            // Add them
-            for(auto &dependency : dependencies) {
-                if(dependency.broken) {
-                    eprintf("%s has a broken dependency (%s.%s). Archive could not be made.\n", internal_filename.data(), dependency.path.data(), tag_class_to_extension(dependency.class_int));
-                    return false;
-                }
-                else if(!recursion(dependency.path.data(), dependency.class_int, recursion)) {
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        if(!recursively_add_dependencies(tag_path_to_find, tag_int_to_find, recursively_add_dependencies)) {
-            eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
-            return EXIT_FAILURE;
+            archive_list.emplace_back(dependency.file_path, path_copy);
         }
     }
 
