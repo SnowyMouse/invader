@@ -44,7 +44,7 @@ namespace Invader {
                     std::fclose(f);
 
                     try {
-                        Invader::CompiledTag tag(tag_path, tag_int_to_find, tag_data.get(), static_cast<std::size_t>(file_size));
+                        Invader::CompiledTag tag(tag_path.string(), tag_int_to_find, tag_data.get(), static_cast<std::size_t>(file_size));
                         for(auto &dependency : tag.dependencies) {
                             // Make sure it's not in found_tags
                             bool dupe = false;
