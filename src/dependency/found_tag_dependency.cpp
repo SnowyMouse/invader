@@ -57,8 +57,30 @@ namespace Invader {
                             if(dupe) {
                                 continue;
                             }
-                            found_tags.emplace_back(dependency.path, dependency.tag_class_int, true, tag_path.string());
-                            if(recursive) {
+
+                            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.tag_class_int);
+                            #ifndef _WIN32
+                            for(char &c : path_copy) {
+                                if(c == '\\') {
+                                    c = '/';
+                                }
+                            }
+                            #endif
+
+                            bool found = false;
+                            for(auto &tags_directory : tags) {
+                                auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
+                                if(std::filesystem::is_regular_file(complete_tag_path)) {
+                                    found_tags.emplace_back(dependency.path, dependency.tag_class_int, false, complete_tag_path.string());
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(!found) {
+                                found_tags.emplace_back(dependency.path, dependency.tag_class_int, true, "");
+                            }
+                            else if(recursive) {
                                 recursion(dependency.path.data(), dependency.tag_class_int, recursion);
                             }
                         }
@@ -76,25 +98,6 @@ namespace Invader {
                     eprintf("Failed to open tag %s.%s.\n", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
                     success = false;
                     return;
-                }
-
-                // Next, go through each dependency and see if it's broken or not
-                for(auto &tag : found_tags) {
-                    std::string full_tag_path = tag.path + "." + Invader::HEK::tag_class_to_extension(tag.class_int);
-                    #ifndef _WIN32
-                    for(char &c : full_tag_path) {
-                        if(c == '\\') {
-                            c = '/';
-                        }
-                    }
-                    #endif
-
-                    for(auto &tags_directory : tags) {
-                        std::filesystem::path tag_path = std::filesystem::path(tags_directory) / full_tag_path;
-                        if(std::filesystem::is_regular_file(tag_path)) {
-                            tag.broken = false;
-                        }
-                    }
                 }
             };
 
