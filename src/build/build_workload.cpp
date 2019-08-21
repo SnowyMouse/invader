@@ -1659,7 +1659,7 @@ namespace Invader {
             }
 
             // Highest number of hits in a BSP and current number of hits
-            std::size_t highest_count = 0;
+            std::uint32_t highest_count = 0;
 
             // How many BSPs we've found the highest count
             std::uint32_t bsps_found_in = 0;
@@ -1672,7 +1672,7 @@ namespace Invader {
             std::uint32_t squad_total = encounter->squads.count.read();
             std::uint32_t firing_position_max_hits = 0;
             std::uint32_t firing_position_total = encounter->firing_positions.count.read();
-            std::size_t max_hits = squad_total + firing_position_total;
+            std::uint32_t max_hits = squad_total + firing_position_total;
 
             float distance_to_ground_max = 0.0F;
 
@@ -1859,11 +1859,11 @@ namespace Invader {
             }
 
             if(max_hits > highest_count) {
-                eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%zu / %zu hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
+                eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%u / %u hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
                 warnings_given++;
 
                 // Show some information
-                auto print_info_for_encounter = [](const char *name, std::size_t max, std::size_t total, const std::unique_ptr<std::uint8_t []> &best) {
+                auto print_info_for_encounter = [](const char *name, std::uint32_t max, std::uint32_t total, const std::unique_ptr<std::uint8_t []> &best) {
                     char indices_list[256] = {};
                     char *indices_list_offset = indices_list;
                     char *indices_list_end = indices_list + sizeof(indices_list) - 1;
@@ -1885,7 +1885,7 @@ namespace Invader {
                         }
                     }
                     char counter[16] = {};
-                    std::snprintf(counter, sizeof(counter), "%zu/%zu", max, total);
+                    std::snprintf(counter, sizeof(counter), "%u/%u", max, total);
                     eprintf("    %-20s Count: %-16s Indices: [%s]\n", name, counter, indices_list);
                 };
 
