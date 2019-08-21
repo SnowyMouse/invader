@@ -184,6 +184,11 @@ namespace Invader {
         void fix_scenario_tag_encounters();
 
         /**
+         * Fix the command lists in the scenario tag
+         */
+        void fix_scenario_tag_command_lists();
+
+        /**
          * Check if the point is in the bsp
          * @param bsp   bsp index to check
          * @param point point to check

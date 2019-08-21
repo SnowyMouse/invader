@@ -1213,7 +1213,7 @@ namespace Invader::HEK {
         EndianType<ScenarioCommandListFlags> flags;
         PAD(0x8);
         EndianType<std::int16_t> manual_bsp_index;
-        EndianType<std::int16_t> unknown;
+        EndianType<std::int16_t> precomputed_bsp_index;
         TagReflexive<EndianType, ScenarioCommand> commands;
         TagReflexive<EndianType, ScenarioCommandPoint> points;
         PAD(0x18);
@@ -1223,7 +1223,7 @@ namespace Invader::HEK {
             COPY_THIS(name);
             COPY_THIS(flags);
             COPY_THIS(manual_bsp_index);
-            COPY_THIS(unknown);
+            COPY_THIS(precomputed_bsp_index);
             COPY_THIS(commands);
             COPY_THIS(points);
             return copy;

@@ -162,7 +162,6 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
 
         ADD_REFLEXIVE_START(tag.command_lists) {
-            reflexive.unknown = 0;
             ADD_REFLEXIVE(reflexive.commands);
             ADD_REFLEXIVE(reflexive.points);
         } ADD_REFLEXIVE_END

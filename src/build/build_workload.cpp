@@ -166,6 +166,7 @@ namespace Invader {
 
         // Fix the scenario tag
         this->fix_scenario_tag_encounters();
+        this->fix_scenario_tag_command_lists();
 
         // Add tag data
         this->add_tag_data(tag_data, file);
@@ -1890,6 +1891,80 @@ namespace Invader {
 
                 print_info_for_encounter("squads", squad_max_hits, squad_total, best_squad);
                 print_info_for_encounter("firing positions", firing_position_max_hits, firing_position_total, best_firing_position);
+            }
+        }
+
+        if(warnings_given) {
+            eprintf("Note: You can use manual BSP indices to silence %s.\n", warnings_given == 1 ? "this warning" : "these warnings");
+        }
+    }
+
+    void BuildWorkload::fix_scenario_tag_command_lists() {
+        // Get the scenario tag and some BSP information
+        auto &scenario_tag = this->compiled_tags[this->scenario_index];
+        auto *scenario_tag_data = scenario_tag->data.data();
+        auto &scenario = *reinterpret_cast<HEK::Scenario<HEK::LittleEndian> *>(scenario_tag_data);
+        std::uint32_t sbsp_count = scenario.structure_bsps.count;
+
+        // Get command lists
+        std::uint32_t command_lists_count = scenario.command_lists.count;
+        auto *command_lists = reinterpret_cast<HEK::ScenarioCommandList<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(scenario.command_lists.pointer));
+
+        std::size_t warnings_given = 0;
+
+        // Iterate
+        for(std::uint32_t c = 0; c < command_lists_count; c++) {
+            auto &command_list = command_lists[c];
+
+            // If a manual BSP index is set or we risk dividing by 0, skip it
+            if(command_list.flags.read().manual_bsp_index) {
+                command_list.precomputed_bsp_index = command_list.manual_bsp_index;
+                continue;
+            }
+            if(command_list.points.count == 0) {
+                command_list.precomputed_bsp_index = ~static_cast<std::uint16_t>(0);
+                continue;
+            }
+
+            // Otherwise, let's begin
+            std::uint32_t points_count = command_list.points.count;
+            auto *points = reinterpret_cast<HEK::ScenarioCommandPoint<HEK::LittleEndian> *>(TRANSLATE_SCENARIO_TAG_DATA_PTR(command_list.points.pointer));
+            std::uint32_t points_found = 0;
+            std::uint32_t highest_bsp = 0;
+            std::uint32_t highest_bsp_count = 0;
+
+            for(std::uint32_t b = 0; b < sbsp_count; b++) {
+                std::uint32_t point_count_this_bsp = 0;
+                for(std::uint32_t p = 0; p < points_count; p++) {
+                    point_count_this_bsp += this->point_in_bsp(b, points[p].position);
+                }
+                if(point_count_this_bsp > 0) {
+                    if(points_found == point_count_this_bsp) {
+                        highest_bsp_count++;
+                    }
+                    else if(point_count_this_bsp > points_found) {
+                        highest_bsp = b;
+                        highest_bsp_count = 1;
+                        points_found = point_count_this_bsp;
+                    }
+                }
+            }
+
+            command_list.precomputed_bsp_index = highest_bsp;
+
+            if(highest_bsp_count == 0) {
+                eprintf("Warning: Command list #%u (%s) was found in 0 BSPs.\n", c, command_list.name.string);
+                warnings_given++;
+            }
+            else {
+                if(points_found < points_count) {
+                    eprintf("Warning: Command list #%u (%s) is partially outside of BSP #%u (%u / %u hits).\n", c, command_list.name.string, highest_bsp, points_found, points_count);
+                    warnings_given++;
+                }
+                else if(highest_bsp_count > 1) {
+                    eprintf("Warning: Command list #%u (%s) was found in %u BSPs (will place in BSP #%u).\n", c, command_list.name.string, highest_bsp_count, highest_bsp);
+                    warnings_given++;
+                }
             }
         }
 
