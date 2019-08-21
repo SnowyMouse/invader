@@ -122,20 +122,6 @@ This program builds index files for usage with `--with-index` with invader-build
 #### Usage
 `invader-indexer <input map> <output index>`
 
-### invader-resource
-This program builds resource maps.
-
-#### Usage
-`invader-resource <options>`
-
-| Option | Description |
-| --- | --- |
-| `--info,-i` | Show credits, source info, and other info. |
-| `--help,-h` | Show help. |
-| `--maps,-m <dir>` | Use a specific maps directory. |
-| `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
-| `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
-
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
 
@@ -149,3 +135,17 @@ This program finds tags that directly depend on a given tag.
 | `--recursive,-R` | Recursively get all depended tags. |
 | `--reverse,-r` | Find all tags that depend on the tag, instead. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
+
+### invader-resource
+This program builds resource maps.
+
+#### Usage
+`invader-resource <options>`
+
+| Option | Description |
+| --- | --- |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--help,-h` | Show help. |
+| `--maps,-m <dir>` | Use a specific maps directory. |
+| `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
+| `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
