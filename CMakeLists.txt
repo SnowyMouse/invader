@@ -27,6 +27,11 @@ find_package(Python3)
 find_package(Git)
 find_package(LibArchive)
 
+# If we don't have Python, bail
+if(${Python3_FOUND} STREQUAL FALSE)
+    message(FATAL_ERROR "Python 3 is required to build Invader.")
+endif()
+
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
     execute_process(
