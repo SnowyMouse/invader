@@ -7,13 +7,13 @@ There are a number of things you will need in order to successfully compile Inva
 ### Required Dependencies
 * C++17 compiler
 * C99 compiler
-* CMake 3.10 or newer (build only)
+* CMake 3.10 or newer
+* Python 3.7 or newer
 
 ### Optional Dependencies
 * LibArchive (invader-archive)
 * LibTIFF (invader-bitmap)
 * zlib (invader-bitmap)
-* Python 3.7 or newer (invader-resource - build only)
 * git (git commit hash in version - build only)
 
 ### Windows
