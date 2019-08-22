@@ -8,6 +8,8 @@
 #include <cmath>
 #include <thread>
 
+#include "../resource/list/resource_list.hpp"
+
 #define USE_RAYCASTING_FOR_ENCOUNTER_SPAWNS
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
@@ -488,6 +490,67 @@ namespace Invader {
 
         this->scenario_index = this->compile_tag_recursively(this->scenario.data(), TagClassInt::TAG_CLASS_SCENARIO);
         this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(this->compiled_tags[this->scenario_index]->data.data())->type;
+        auto scenario_name = this->get_scenario_name();
+
+        // Disregard a certain amount of resources if we're building a non-stock map
+        #define SCENARIO_IS_NOT(what) (std::strcmp(scenario_name.data(), what) != 0)
+        if(
+            SCENARIO_IS_NOT("beavercreek") &&
+            SCENARIO_IS_NOT("bloodgulch") &&
+            SCENARIO_IS_NOT("boardingaction") &&
+            SCENARIO_IS_NOT("carousel") &&
+            SCENARIO_IS_NOT("chillout") &&
+            SCENARIO_IS_NOT("damnation") &&
+            SCENARIO_IS_NOT("dangercanyon") &&
+            SCENARIO_IS_NOT("deathisland") &&
+            SCENARIO_IS_NOT("gephyrophobia") &&
+            SCENARIO_IS_NOT("hangemhigh") &&
+            SCENARIO_IS_NOT("icefields") &&
+            SCENARIO_IS_NOT("infinity") &&
+            SCENARIO_IS_NOT("longest") &&
+            SCENARIO_IS_NOT("prisoner") &&
+            SCENARIO_IS_NOT("putput") &&
+            SCENARIO_IS_NOT("ratrace") &&
+            SCENARIO_IS_NOT("sidewinder") &&
+            SCENARIO_IS_NOT("timberland") &&
+            SCENARIO_IS_NOT("a10") &&
+            SCENARIO_IS_NOT("a30") &&
+            SCENARIO_IS_NOT("a50") &&
+            SCENARIO_IS_NOT("b30") &&
+            SCENARIO_IS_NOT("b40") &&
+            SCENARIO_IS_NOT("c10") &&
+            SCENARIO_IS_NOT("c20") &&
+            SCENARIO_IS_NOT("c40") &&
+            SCENARIO_IS_NOT("d20") &&
+            SCENARIO_IS_NOT("d40")
+        ) {
+            std::size_t bitmap_limit, sound_limit, loc_limit;
+
+            // Singleplayer limits - use the internal list
+            if(this->cache_file_type == CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+                bitmap_limit = get_default_bitmap_resources_count();
+                sound_limit = get_default_sound_resources_count();
+                loc_limit = get_default_loc_resources_count();
+            }
+
+            // UI / multiplayer limits
+            else {
+                bitmap_limit = 853;
+                sound_limit = 176;
+                loc_limit = 376;
+            }
+
+            while(this->bitmaps.size() > bitmap_limit) {
+                this->bitmaps.erase(this->bitmaps.begin() + this->bitmaps.size() - 1);
+            }
+            while(this->sounds.size() > sound_limit) {
+                this->sounds.erase(this->sounds.begin() + this->sounds.size() - 1);
+            }
+            while(this->loc.size() > loc_limit) {
+                this->loc.erase(this->loc.begin() + this->loc.size() - 1);
+            }
+        }
+        #undef SCENARIO_IS_NOT
 
         // We'll need to load these tags for all map types
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
