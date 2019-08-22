@@ -536,8 +536,8 @@ namespace Invader {
             // UI / multiplayer limits
             else {
                 bitmap_limit = 853;
-                sound_limit = 176;
-                loc_limit = 376;
+                sound_limit = 376;
+                loc_limit = 176;
             }
 
             while(this->bitmaps.size() > bitmap_limit) {
