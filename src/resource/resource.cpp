@@ -19,6 +19,7 @@
 
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
+    using namespace Invader;
 
     // Long options
     int longindex = 0;
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     for(const std::string &tag : tags_list) {
         // First let's open it
-        Invader::HEK::TagClassInt tag_class_int;
+        TagClassInt tag_class_int;
         std::vector<std::byte> tag_data;
 
         // Convert backslashes if needed
@@ -170,15 +171,15 @@ int main(int argc, char *argv[]) {
 
         switch(type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
-                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_BITMAP;
+                tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
                 ATTEMPT_TO_OPEN(".bitmap")
                 break;
             case ResourceMapType::RESOURCE_MAP_SOUND:
-                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_SOUND;
+                tag_class_int = TagClassInt::TAG_CLASS_SOUND;
                 ATTEMPT_TO_OPEN(".sound")
                 break;
             case ResourceMapType::RESOURCE_MAP_LOC:
-                tag_class_int = Invader::HEK::TagClassInt::TAG_CLASS_FONT;
+                tag_class_int = TagClassInt::TAG_CLASS_FONT;
                 #define DO_THIS_FOR_ME_PLEASE(tci, extension) if(tag_data.size() == 0) { \
                     tag_class_int = tci; \
                     std::FILE *f = open_tag(extension); \
@@ -193,9 +194,9 @@ int main(int argc, char *argv[]) {
                         std::fclose(f); \
                     } \
                 }
-                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_FONT, ".font")
-                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
-                DO_THIS_FOR_ME_PLEASE(Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
+                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_FONT, ".font")
+                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
+                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
                 #undef DO_THIS_FOR_ME_PLEASE
 
                 if(tag_data.size() == 0) {
@@ -212,7 +213,7 @@ int main(int argc, char *argv[]) {
 
         // Compile the tags
         try {
-            Invader::CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
+            CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
 
             // Now, adjust stuff for pointers
             switch(type) {
