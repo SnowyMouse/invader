@@ -540,6 +540,9 @@ namespace Invader {
                 loc_limit = 176;
             }
 
+            bitmap_limit *= 2;
+            sound_limit *= 2;
+
             while(this->bitmaps.size() > bitmap_limit) {
                 this->bitmaps.erase(this->bitmaps.begin() + this->bitmaps.size() - 1);
             }
