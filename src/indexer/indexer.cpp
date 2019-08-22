@@ -30,9 +30,7 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     if(argc < 3) {
-        #ifndef NO_OUTPUT
-        std::cout << "invader-indexer <input map> <output index>"                                       << std::endl;
-        #endif
+        eprintf("Usage: %s <input map> <output index>", argv[0]);
         return RETURN_FAILED_NOTHING_TO_DO;
     }
 
@@ -42,7 +40,7 @@ int main(int argc, const char **argv) {
     // Open input map
     FILE *f = std::fopen(input, "rb");
     if(!f) {
-        std::cerr << "Failed to open " << input << "\n";
+        eprintf("Failed to open %s.\n", input);
         return RETURN_FAILED_ERROR;
     }
     std::fseek(f, 0, SEEK_END);
@@ -50,7 +48,7 @@ int main(int argc, const char **argv) {
     std::unique_ptr<std::byte []> map_data(new std::byte[size]);
     std::fseek(f, 0, SEEK_SET);
     if(std::fread(map_data.get(), size, 1, f) != 1) {
-        std::cerr << "Failed to read " << argv[1] << "\n";
+        eprintf("Failed to read %s\n", argv[1]);
         return RETURN_FAILED_ERROR;
     }
     std::fclose(f);
@@ -81,7 +79,7 @@ int main(int argc, const char **argv) {
             std::fclose(f);
         }
         catch(std::exception &e) {
-            std::cerr << "Exception: " << e.what() << std::endl;
+            eprintf("Exception %s\n", e.what());
             std::fclose(f);
             return RETURN_FAILED_ERROR;
         }
@@ -95,7 +93,7 @@ int main(int argc, const char **argv) {
             // Open output
             f = std::fopen(output, "wb");
             if(!f) {
-                std::cerr << "Failed to open " << output << "\n";
+                eprintf("Failed to open %s\n", output);
                 return RETURN_FAILED_ERROR;
             }
 
@@ -113,7 +111,7 @@ int main(int argc, const char **argv) {
             std::fclose(f);
         }
         catch(std::exception &e) {
-            std::cerr << "Exception: " << e.what() << std::endl;
+            eprintf("Exception: %s\n", e.what());
             std::fclose(f);
             return RETURN_FAILED_ERROR;
         }

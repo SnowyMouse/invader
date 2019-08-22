@@ -145,9 +145,7 @@ int main(int argc, char * const argv[]) {
 
     // If something is missing, let the user know
     if(!handled) {
-        #ifndef NO_OUTPUT
-        std::cerr << "Unhandled argument: " << last_argument << "\n";
-        #endif
+        eprintf("Unhandled argument: %s\n", last_argument.data());
         return RETURN_FAILED_UNHANDLED_ARGUMENT;
     }
 
@@ -211,17 +209,13 @@ int main(int argc, char * const argv[]) {
 
         // Check if file is open
         if(!file) {
-            #ifndef NO_OUTPUT
-            std::cerr << "Failed to open " << final_file << " for writing.\n";
-            #endif
+            eprintf("Failed to open %s for writing.\n", final_file.data());
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
         // Write to file
         if(std::fwrite(map.data(), map.size(), 1, file) == 0) {
-            #ifndef NO_OUTPUT
-            std::cerr << "Failed to save.\n";
-            #endif
+            eprintf("Failed to save.\n");
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
@@ -236,10 +230,8 @@ int main(int argc, char * const argv[]) {
         return RETURN_OK;
     }
     catch(std::exception &exception) {
-        #ifndef NO_OUTPUT
-        std::cerr << "Failed to compile the map.\n";
-        std::cerr << exception.what() << "\n";
-        #endif
+        eprintf("Failed to compile the map.\n");
+        eprintf("%s\n", exception.what());
         return RETURN_FAILED_EXCEPTION_ERROR;
     }
 }
