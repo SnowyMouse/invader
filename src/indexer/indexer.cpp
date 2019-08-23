@@ -30,7 +30,7 @@ int main(int argc, const char **argv) {
     using namespace Invader::HEK;
 
     if(argc < 3) {
-        eprintf("Usage: %s <input map> <output index>", argv[0]);
+        eprintf("Usage: %s <input map> <output index>\n", argv[0]);
         return RETURN_FAILED_NOTHING_TO_DO;
     }
 
