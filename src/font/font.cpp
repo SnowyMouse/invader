@@ -164,9 +164,46 @@ int main(int argc, char *argv[]) {
     int max_ascending_height = 1;
     for(std::size_t i = ' '; i < characters.size(); i++) {
         auto &character = characters[i];
-
         Invader::HEK::FontCharacter<Invader::HEK::BigEndian> tag_character = {};
-        if(i == 32 || character.data.size() != 0) {
+
+        // Dot
+        if(i == 127) {
+            std::vector<unsigned char> data(pixel_size * pixel_size);
+            float radius_inner = pixel_size / 5.0F;
+            float radius_inner_distance = radius_inner * radius_inner;
+            float center = pixel_size / 2.0F;
+
+            // Make an antialiased circle of fun
+            for(int x = 0; x < pixel_size; x++) {
+                for(int y = 0; y < pixel_size; y++) {
+                    unsigned char &c = data[x * pixel_size + y];
+
+                    // Subpixels
+                    for(char sx = -2; sx < 3; sx++) {
+                        for(char sy = -2; sy < 3; sy++) {
+                            float dx = center - x + sx * 0.2;
+                            float dy = center - y + sy * 0.2;
+
+                            float distance = dx * dx + dy * dy;
+                            if(distance < radius_inner_distance) {
+                                c += 250 / 25;
+                            }
+                        }
+                    }
+                }
+            }
+
+            tag_character.character = static_cast<std::uint16_t>(i);
+            tag_character.bitmap_height = pixel_size;
+            tag_character.bitmap_width = pixel_size;
+            tag_character.character_width = pixel_size;
+            tag_character.pixels_offset = static_cast<std::uint32_t>(pixels.size());
+            tag_character.hardware_character_index = -1;
+            tag_character.bitmap_origin_x = center / 2;
+            tag_character.bitmap_origin_y = center + radius_inner * 2;
+            pixels.insert(pixels.end(), reinterpret_cast<std::byte *>(data.data()), reinterpret_cast<std::byte *>(data.data()) + data.size());
+        }
+        else if(i == 32 || character.data.size() != 0) {
             tag_character.character = static_cast<std::uint16_t>(i);
             tag_character.bitmap_height = character.height;
             tag_character.bitmap_width = character.width;
