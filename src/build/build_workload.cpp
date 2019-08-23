@@ -10,7 +10,6 @@
 
 #include "../resource/list/resource_list.hpp"
 
-#define USE_RAYCASTING_FOR_ENCOUNTER_SPAWNS
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
 // This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
@@ -1779,7 +1778,6 @@ namespace Invader {
                         // If 3D firing positions is not set, find the distance to the ground.
                         else if(!three_dimensional_fire_positions) {
                             // Raycasting; Get two points: one at the point and one MAX_DISTANCE below it
-                            #ifdef USE_RAYCASTING_FOR_ENCOUNTER_SPAWNS
                             HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
                             HEK::Point3D<HEK::LittleEndian> point_lower = spawn_point->position;
                             point_lower.z = point.z - MAX_DISTANCE;
@@ -1791,18 +1789,10 @@ namespace Invader {
                             if(this->intersect_in_bsp(point, point_lower, b, point_intersect, surface_index, leaf_index)) {
                                 q = point.z - point_intersect.z;
                             }
-
-                            // Brute forcing (slower); leaving this here until I can determine that the raycasting algorithm is OK
-                            #else
-                            HEK::Point3D<HEK::LittleEndian> point = spawn_point->position;
-                            float q = 0.0F;
-                            for(; q <= MAX_DISTANCE; q += 0.1F) {
-                                point.z = spawn_point->position.z - q;
-                                if(!this->point_in_bsp(b, point)) {
-                                    break;
-                                }
+                            else {
+                                found = false;
+                                break;
                             }
-                            #endif
 
                             // If what we got is less than what we had before, narrow it down like that
                             if(distance_to_ground > q) {
@@ -1821,8 +1811,17 @@ namespace Invader {
                 std::uint32_t firing_position_count = 0;
                 for(std::size_t i = 0; i < firing_position_total; i++) {
                     if(this->point_in_bsp(b, firing_positions[i].position)) {
-                        firing_position_count++;
-                        set_flag_for_array(current_firing_position, i, 1);
+                        HEK::Point3D<HEK::LittleEndian> point = firing_positions[i].position;
+                        HEK::Point3D<HEK::LittleEndian> point_lower = firing_positions[i].position;
+                        point_lower.z = point.z - MAX_DISTANCE;
+
+                        HEK::Point3D<HEK::LittleEndian> point_intersect;
+                        std::uint32_t surface_index, leaf_index;
+
+                        if(three_dimensional_fire_positions || this->intersect_in_bsp(point, point_lower, b, point_intersect, surface_index, leaf_index)) {
+                            firing_position_count++;
+                            set_flag_for_array(current_firing_position, i, 1);
+                        }
                     }
                 }
 
