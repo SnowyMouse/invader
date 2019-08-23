@@ -26,6 +26,7 @@ find_package(ZLIB)
 find_package(Python3)
 find_package(Git)
 find_package(LibArchive)
+find_package(Freetype)
 
 # If we don't have Python, bail
 if(${Python3_FOUND} STREQUAL FALSE)
@@ -72,3 +73,4 @@ include(src/bitmap/bitmap.cmake)
 include(src/resource/resource.cmake)
 include(src/archive/archive.cmake)
 include(src/dependency/dependency.cmake)
+include(src/font/font.cmake)

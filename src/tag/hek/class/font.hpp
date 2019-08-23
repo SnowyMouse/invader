@@ -63,9 +63,9 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Font {
         EndianType<std::int32_t> flags;
         EndianType<std::int16_t> ascending_height;
-        EndianType<std::int16_t> decending_height;
+        EndianType<std::int16_t> descending_height;
         EndianType<std::int16_t> leading_height;
-        EndianType<std::int16_t> leadin_width;
+        EndianType<std::int16_t> leading_width;
         PAD(0x24);
         TagReflexive<EndianType, FontCharacterTables> character_tables;
         TagDependency<EndianType> bold; // font
@@ -79,9 +79,9 @@ namespace Invader::HEK {
             Font<NewType> copy = {};
             COPY_THIS(flags);
             COPY_THIS(ascending_height);
-            COPY_THIS(decending_height);
+            COPY_THIS(descending_height);
             COPY_THIS(leading_height);
-            COPY_THIS(leadin_width);
+            COPY_THIS(leading_width);
             COPY_THIS(character_tables);
             COPY_THIS(bold);
             COPY_THIS(italic);

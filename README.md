@@ -14,6 +14,7 @@ There are a number of things you will need in order to successfully compile Inva
 * LibArchive (invader-archive)
 * LibTIFF (invader-bitmap)
 * zlib (invader-bitmap)
+* freetype (invader-font)
 * git (git commit hash in version - build only)
 
 ### Windows
@@ -116,12 +117,6 @@ This program gets and/or modifies the calculated CRC32 of a map file.
 Not specifying a CRC32 value will only calculate the CRC32 value of the cache file without modifying it. Otherwise, it
 will modify it and then calculate the CRC32.
 
-### invader-indexer
-This program builds index files for usage with `--with-index` with invader-build.
-
-#### Usage
-`invader-indexer <input map> <output index>`
-
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
 
@@ -135,6 +130,26 @@ This program finds tags that directly depend on a given tag.
 | `--recursive,-R` | Recursively get all depended tags. |
 | `--reverse,-r` | Find all tags that depend on the tag, instead. |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
+
+### invader-font
+This program generates font tags.
+
+#### Usage
+`invader-font [options] <font-tag>`
+
+| Option | Description |
+| --- | --- |
+| `--help,-h` | Show help. |
+| `--info,-i` | Show credits, source info, and other info. |
+| `--data,-d <dir>` | Data directory. |
+| `--maps,-m <dir>` | Maps directory. |
+| `--font-size,-s <px>` | Use a font size in pixels. |
+
+### invader-indexer
+This program builds index files for usage with `--with-index` with invader-build.
+
+#### Usage
+`invader-indexer <input map> <output index>`
 
 ### invader-resource
 This program builds resource maps.
