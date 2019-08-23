@@ -123,9 +123,9 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Render 65536 characters
+    // Render the characters in a range
     std::vector<RenderedCharacter> characters;
-    for(int i = 0; i < 65536; i++) {
+    for(int i = 0; i < 16384; i++) {
         auto index = FT_Get_Char_Index(face, i);
         if(FT_Load_Glyph(face, index, FT_LOAD_DEFAULT)) {
             eprintf("Failed to load glyph %i\n", i);
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
     // Set up the character stuff
     int max_descending_height = 1;
     int max_ascending_height = 1;
-    for(std::size_t i = 0; i < characters.size(); i++) {
+    for(std::size_t i = ' '; i < characters.size(); i++) {
         auto &character = characters[i];
 
         Invader::HEK::FontCharacter<Invader::HEK::BigEndian> tag_character = {};
