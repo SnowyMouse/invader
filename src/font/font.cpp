@@ -199,6 +199,7 @@ int main(int argc, char *argv[]) {
     font.characters.count = tag_characters.size();
 
     // Write
+    std::filesystem::create_directories(tag_path.parent_path());
     std::FILE *f = std::fopen(final_tag_path.data(), "wb");
     if(!f) {
         eprintf("Failed to open %s for writing.\n", final_tag_path.data());
