@@ -193,13 +193,15 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            // Same as the width of the X character
+            int width = characters['X'].x;
             tag_character.character = static_cast<std::uint16_t>(i);
             tag_character.bitmap_height = pixel_size;
             tag_character.bitmap_width = pixel_size;
-            tag_character.character_width = pixel_size;
+            tag_character.character_width = width;
             tag_character.pixels_offset = static_cast<std::uint32_t>(pixels.size());
             tag_character.hardware_character_index = -1;
-            tag_character.bitmap_origin_x = center / 2;
+            tag_character.bitmap_origin_x = width / 2;
             tag_character.bitmap_origin_y = center + radius_inner * 2;
             pixels.insert(pixels.end(), reinterpret_cast<std::byte *>(data.data()), reinterpret_cast<std::byte *>(data.data()) + data.size());
         }
