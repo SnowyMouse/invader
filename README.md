@@ -110,13 +110,10 @@ This program builds cache files.
 | `--with-index,-w <file>` | Use an index file for the tags. |
 
 ### invader-crc
-This program gets and/or modifies the calculated CRC32 of a map file.
+This program calculates the CRC32 of a map file.
 
 #### Usage
-`invader-crc <map> [new crc]`
-
-Not specifying a CRC32 value will only calculate the CRC32 value of the cache file without modifying it. Otherwise, it
-will modify it and then calculate the CRC32.
+`invader-crc <map>`
 
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
