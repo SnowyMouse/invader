@@ -254,7 +254,11 @@ namespace Invader::HEK {
         /** number of vertices when compiled */
         EndianType<std::uint32_t> vertex_count;
 
-        PAD(0x8);
+        /** actual padding */
+        PAD(0x4);
+
+        /** This value is complete and utter bullshit. Tool changes this arbitrarily, resulting in different values when built on different OS's, shells, etc. And it probably doesn't even do anything. */
+        LittleEndian<std::uint32_t> bullshit;
 
         /** offset to vertices from beginning of vertices when compiled */
         EndianType<std::uint32_t> vertex_offset;
@@ -285,6 +289,7 @@ namespace Invader::HEK {
             COPY_THIS(triangle_offset_2);
             COPY_THIS(vertex_count);
             COPY_THIS(vertex_offset);
+            COPY_THIS(bullshit);
             COPY_THIS_ARRAY(local_node_indices);
             return copy;
         }
