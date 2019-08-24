@@ -119,7 +119,7 @@ int main(int argc, char * const argv[]) {
                 eprintf("                               at the cost of a much larger file size.\n");
                 eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
                 eprintf("                               up build time, but stock tags can't be modified.\n");
-                eprintf("  --forge-crc,-f <crc>         Forge the CRC32 value of a map. This is useful\n");
+                eprintf("  --forge-crc,-c <crc>         Forge the CRC32 value of a map. This is useful\n");
                 eprintf("                               for multiplayer.\n");
                 eprintf("  --output,-o <file>           Output to a specific file.\n");
                 eprintf("  --quiet,-q                   Only output error messages.\n");
