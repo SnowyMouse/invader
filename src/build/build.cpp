@@ -47,6 +47,7 @@ int main(int argc, char * const argv[]) {
     bool handled = true;
     bool quiet = false;
     bool always_index_tags = false;
+    const char *forged_crc = nullptr;
 
     int opt;
     int longindex = 0;
@@ -61,11 +62,12 @@ int main(int argc, char * const argv[]) {
         {"maps", required_argument, 0, 'm' },
         {"tags", required_argument, 0, 't' },
         {"output", required_argument, 0, 'o' },
+        {"forge-crc", required_argument, 0, 'c' },
         {0, 0, 0, 0 }
     };
 
     // Go through every argument
-    while((opt = getopt_long(argc, argv, "naqhiw:m:t:o:g:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "naqhiw:m:t:o:g:c:", options, &longindex)) != -1) {
         switch(opt) {
             case 'n':
                 no_indexed_tags = true;
@@ -99,6 +101,9 @@ int main(int argc, char * const argv[]) {
                     no_indexed_tags = true;
                 }
                 break;
+            case 'c':
+                forged_crc = optarg;
+                break;
             case 'i':
                 INVADER_SHOW_INFO
                 return EXIT_FAILURE;
@@ -114,6 +119,8 @@ int main(int argc, char * const argv[]) {
                 eprintf("                               at the cost of a much larger file size.\n");
                 eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
                 eprintf("                               up build time, but stock tags can't be modified.\n");
+                eprintf("  --forge-crc,-f <crc>         Forge the CRC32 value of a map. This is useful\n");
+                eprintf("                               for multiplayer.\n");
                 eprintf("  --output,-o <file>           Output to a specific file.\n");
                 eprintf("  --quiet,-q                   Only output error messages.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
@@ -183,7 +190,26 @@ int main(int argc, char * const argv[]) {
             }
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, no_indexed_tags, always_index_tags, !quiet);
+        std::uint32_t forged_crc_value = 0;
+        std::uint32_t *forged_crc_ptr = nullptr;
+        if(forged_crc) {
+            std::size_t given_crc32_length = std::strlen(forged_crc);
+            if(given_crc32_length > 8 || given_crc32_length < 1) {
+                eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
+                return 1;
+            }
+            for(std::size_t i = 0; i < given_crc32_length; i++) {
+                char c = std::tolower(forged_crc[i]);
+                if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
+                    eprintf("Invalid CRC32 %s (must be hexadecimal)\n", argv[2]);
+                    return 1;
+                }
+            }
+            forged_crc_value = std::strtoul(forged_crc, nullptr, 16);
+            forged_crc_ptr = &forged_crc_value;
+        }
+
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
 
         if(engine == "retail") {
             reinterpret_cast<Invader::HEK::CacheFileHeader *>(map.data())->engine = Invader::HEK::CACHE_FILE_RETAIL;

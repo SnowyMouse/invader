@@ -42,7 +42,8 @@ namespace Invader {
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
         bool no_indexed_tags,
         bool always_index_tags,
-        bool verbose
+        bool verbose,
+        const std::uint32_t *forge_crc
     ) {
         BuildWorkload workload;
 
@@ -134,10 +135,10 @@ namespace Invader {
             }
         }
 
-        return workload.build_cache_file();
+        return workload.build_cache_file(forge_crc);
     }
 
-    std::vector<std::byte> BuildWorkload::build_cache_file() {
+    std::vector<std::byte> BuildWorkload::build_cache_file(const std::uint32_t *forge_crc) {
         using namespace HEK;
 
         // Get all the tags
@@ -308,12 +309,18 @@ namespace Invader {
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), INVADER_FULL_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 
-        // Get the CRC and re-copy the header
-        std::uint32_t crc32_of_map = calculate_map_crc(file.data(), file.size());
-        std::printf("CRC32 checksum:    0x%08X\n", crc32_of_map);
-        cache_file_header.crc32 = crc32_of_map;
-        std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
-
+        // Get the CRC and set it in the header
+        CacheFileHeader &cache_file_header_file = *reinterpret_cast<CacheFileHeader *>(file.data());
+        if(forge_crc) {
+            std::uint32_t new_random;
+            cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size(), forge_crc, &new_random);
+            CacheFileTagDataHeader &header = *reinterpret_cast<CacheFileTagDataHeader *>(file.data() + cache_file_header.tag_data_offset);
+            header.random_number = new_random;
+        }
+        else {
+            cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size());
+        }
+        std::printf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
 
         // Set eXoDux compatibility mode.
         if(x_dux) {

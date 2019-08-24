@@ -28,6 +28,7 @@ namespace Invader {
          * @param no_indexed_tags   do not use cached tags
          * @param always_index_tags always use cached tags
          * @param verbose           output non-error messages to console
+         * @param forge_crc         forge the CRC32 of the map
          */
         static std::vector<std::byte> compile_map(
             const char *scenario,
@@ -36,7 +37,8 @@ namespace Invader {
             const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),
             bool no_indexed_tags = false,
             bool always_index_tags = false,
-            bool verbose = false
+            bool verbose = false,
+            const std::uint32_t *forge_crc = nullptr
         );
 
     private:
@@ -125,9 +127,10 @@ namespace Invader {
 
         /**
          * Build a cache file
+         * @param   forge_crc  forge the CRC32 of the map
          * @return  cache file data
          */
-        std::vector<std::byte> build_cache_file();
+        std::vector<std::byte> build_cache_file(const std::uint32_t *forge_crc = nullptr);
 
         /**
          * Index tags that can be indexed
