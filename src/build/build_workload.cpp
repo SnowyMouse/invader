@@ -589,7 +589,7 @@ namespace Invader {
                 // Damage effects and object tags that are not in the correct location will break things
                 #ifndef NO_OUTPUT
                 if(this->cache_file_type == CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
-                    eprintf("Warning: Network object %s.%s is missing.", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
+                    eprintf("Warning: Network object %s.%s is missing.\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                     network_issue = true;
                 }
                 #endif
