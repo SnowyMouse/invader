@@ -1,6 +1,10 @@
 #ifndef INVADER__CRC__CRC_SPOOF_H
 #define INVADER__CRC__CRC_SPOOF_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -22,4 +26,9 @@ size_t crc_spoof_fake_fread(void *ptr, size_t size, size_t count, FakeFileHandle
 
 const char *crc_spoof_modify_file_crc32(FakeFileHandle *f, uint64_t offset, uint32_t newcrc, bool printstatus);
 uint32_t crc_spoof_reverse_bits(uint32_t x);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

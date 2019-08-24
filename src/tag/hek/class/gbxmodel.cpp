@@ -227,6 +227,9 @@ namespace Invader::HEK {
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
 
+        bool exodux_handler = false;
+        bool exodux_parser = false;
+
         ADD_REFLEXIVE_START(tag.geometries) {
             ADD_REFLEXIVE_START(reflexive.parts) {
                 auto vertex_count = static_cast<std::size_t>(reflexive.uncompressed_vertices.count);
@@ -308,7 +311,18 @@ namespace Invader::HEK {
 
                 INCREMENT_DATA_PTR(index_size);
 
+                // exodux compatibility bit
+                if(exodux_handler) {
+                    reflexive.bullshit = 0x43687521;
+                }
+                else {
+                    reflexive.bullshit = exodux_parser ? 0x52616921 : 0x56617021;
+                    exodux_parser = !exodux_parser;
+                }
+                exodux_handler = !exodux_handler;
+
                 reflexive.triangles.count = 0;
+
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
 

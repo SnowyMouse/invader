@@ -1,11 +1,8 @@
 #include <cstdio>
 #include <memory>
-#include <vector>
-#include <cctype>
-#include <climits>
 #include "../eprintf.hpp"
 #include "../map/map.hpp"
-#include "../tag/hek/class/scenario.hpp"
+#include "hek/crc.hpp"
 
 extern "C" {
     #include "crc_spoof.h"
@@ -34,8 +31,6 @@ int main(int argc, const char **argv) {
 
     // Hold the tag data
     std::unique_ptr<std::byte[]> data = std::make_unique<std::byte[]>(size);
-    std::vector<std::byte> data_crc(0);
-    data_crc.reserve(size);
     if(std::fread(data.get(), size, 1, f) != 1) {
         eprintf("Failed to read %s\n", file);
         std::fclose(f);
@@ -43,62 +38,9 @@ int main(int argc, const char **argv) {
     }
     std::fclose(f);
 
-    // Parse the map
-    Map map = Map::map_with_pointer(data.get(), size);
-    auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
-    auto &scenario = scenario_tag.get_base_struct<HEK::Scenario>();
-    std::size_t bsp_count = scenario.structure_bsps.count.read();
-    auto *bsps = scenario_tag.resolve_reflexive(scenario.structure_bsps);
+    std::uint32_t final_crc = 0;
 
-    // Iterate through all BSPs
-    for(std::size_t b = 0; b < bsp_count; b++) {
-        std::size_t start = bsps[b].bsp_start.read();
-        std::size_t end = start + bsps[b].bsp_size.read();
-
-        if(start >= size || end > size) {
-            eprintf("Failed to CRC bsp #%zu\n", b);
-            return 1;
-        }
-
-        // Add it
-        data_crc.insert(data_crc.end(), data.get() + start, data.get() + end);
-    }
-
-    // Now copy model data
-    const auto &tag_data_header = static_cast<const HEK::CacheFileTagDataHeaderPC &>(map.get_tag_data_header());
-    std::size_t model_start = tag_data_header.model_data_file_offset.read();
-    std::size_t model_end = model_start + tag_data_header.model_data_size.read();
-    if(model_start >= size || model_end > size) {
-        eprintf("Failed to CRC model data\n");
-        return 1;
-    }
-    data_crc.insert(data_crc.end(), data.get() + model_start, data.get() + model_end);
-
-    // Lastly, do tag data
-    const auto &cache_file_header = map.get_cache_file_header();
-    std::size_t tag_data_start = cache_file_header.tag_data_offset.read();
-    std::size_t tag_data_end = tag_data_start + cache_file_header.tag_data_size.read();
-    if(tag_data_start >= size || tag_data_end > size) {
-        eprintf("Failed to CRC tag data\n");
-        return 1;
-    }
-
-    // Find out where we're going to be doing CRC32 stuff
-    const std::byte *random_number_ptr = reinterpret_cast<const std::byte *>(&tag_data_header.random_number);
-    std::size_t random_number_offset_in_memory = random_number_ptr - reinterpret_cast<const std::byte *>(&tag_data_header) + data_crc.size();
-    std::size_t random_number_offset_in_file = random_number_ptr - data.get();
-
-    data_crc.insert(data_crc.end(), data.get() + tag_data_start, data.get() + tag_data_end);
-
-    // Overwrite with new CRC32
     if(argc == 3) {
-        // If the map is too big, oh no
-        if(random_number_offset_in_memory > LONG_MAX) {
-            eprintf("Offset random_number_offset_in_memory is too large (max is %li, got %zu)\n", LONG_MAX, random_number_offset_in_memory);
-            return 1;
-        }
-
-        // Make sure the CRC32 given is actually valid
         std::size_t given_crc32_length = std::strlen(argv[2]);
         if(given_crc32_length > 8 || given_crc32_length < 1) {
             eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
@@ -112,27 +54,26 @@ int main(int argc, const char **argv) {
             }
         }
 
-        FakeFileHandle handle = { reinterpret_cast<std::uint8_t *>(data_crc.data()), data_crc.size(), 0 };
-        std::uint32_t desired_crc = static_cast<std::uint32_t>(std::strtoul(argv[2], nullptr, 16));
-        std::uint32_t newcrc = ~crc_spoof_reverse_bits(desired_crc);
-        crc_spoof_modify_file_crc32(&handle, random_number_offset_in_memory, newcrc, false);
+        std::uint32_t given_crc = std::strtoul(argv[2], nullptr, 16);
+        std::uint32_t new_random;
+        final_crc = calculate_map_crc(data.get(), size, &given_crc, &new_random);
 
-        f = std::fopen(argv[1], "r+");
+        f = std::fopen(file, "rb+");
         if(!f) {
-            eprintf("Failed to open for reading/writing\n");
+            eprintf("Failed to open %s\n", file);
             return 1;
         }
 
-        // Seek to the random number offset
-        std::fseek(f, static_cast<long>(random_number_offset_in_file), SEEK_SET);
-        if(!fwrite(reinterpret_cast<std::byte *>(data_crc.data() + random_number_offset_in_memory), sizeof(std::uint32_t), 1, f)) {
-            eprintf("Failed to update value\n");
-            return 1;
-        }
+        HEK::CacheFileTagDataHeader header;
+        std::fseek(f, *reinterpret_cast<std::uint32_t *>(data.get() + 0x10) + static_cast<long>(reinterpret_cast<std::byte *>(&header.random_number) - reinterpret_cast<std::byte *>(&header)), SEEK_CUR);
+        std::fwrite(&new_random, sizeof(new_random), 1, f);
         std::fclose(f);
+    }
+    else {
+        final_crc = calculate_map_crc(data.get(), size);
     }
 
     // Calculate CRC32
-    printf("%08X\n", ~crc32(0, data_crc.data(), data_crc.size()));
+    printf("%08X\n", final_crc);
     return 0;
 }

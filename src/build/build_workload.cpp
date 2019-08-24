@@ -30,6 +30,7 @@
 #include "../version.hpp"
 #include "../error.hpp"
 #include "../hek/map.hpp"
+#include "../crc/hek/crc.hpp"
 
 #include "build_workload.hpp"
 
@@ -304,9 +305,15 @@ namespace Invader {
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
         cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
-        cache_file_header.crc32 = 0x7E706156;
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), INVADER_FULL_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
+
+        // Get the CRC and re-copy the header
+        std::uint32_t crc32_of_map = calculate_map_crc(file.data(), file.size());
+        std::printf("CRC32 checksum:    0x%08X\n", crc32_of_map);
+        cache_file_header.crc32 = crc32_of_map;
+        std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
+
 
         // Set eXoDux compatibility mode.
         if(x_dux) {
