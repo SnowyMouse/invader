@@ -45,6 +45,7 @@ namespace Invader::HEK {
             COPY_THIS(door_open_time);
             COPY_THIS(collision_response);
             COPY_THIS(elevator_node);
+            COPY_THIS(door_open_time_ticks);
             return copy;
         }
     };
