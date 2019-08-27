@@ -320,7 +320,12 @@ namespace Invader {
         else {
             cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size());
         }
-        std::printf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
+
+        #ifndef NO_OUTPUT
+        if(this->verbose) {
+            std::printf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
+        }
+        #endif
 
         // Set eXoDux compatibility mode.
         if(x_dux) {
