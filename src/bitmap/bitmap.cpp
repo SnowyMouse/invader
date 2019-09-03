@@ -373,6 +373,7 @@ int main(int argc, char *argv[]) {
         bitmap.type = BitmapDataType::BITMAP_TYPE__2D_TEXTURE;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
+        bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
 
         // Calculate how big the bitmap is
         std::size_t total_size = 0;

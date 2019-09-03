@@ -177,19 +177,19 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct BitmapData {
         EndianType<TagClassInt> bitmap_class;
-        EndianType<std::int16_t> width;
-        EndianType<std::int16_t> height;
-        EndianType<std::int16_t> depth;
+        EndianType<std::uint16_t> width;
+        EndianType<std::uint16_t> height;
+        EndianType<std::uint16_t> depth;
         EndianType<BitmapDataType> type;
         EndianType<BitmapDataFormat> format;
         EndianType<BitmapDataFlags> flags;
         Point2DInt<EndianType> registration_point;
-        EndianType<std::int16_t> mipmap_count;
+        EndianType<std::uint16_t> mipmap_count;
         PAD(0x2);
-        EndianType<std::int32_t> pixels_offset;
-        EndianType<std::int32_t> pixels_count;
+        EndianType<std::uint32_t> pixels_offset;
+        EndianType<std::uint32_t> pixels_count;
         EndianType<TagID> bitmap_tag_id;
-        EndianType<std::int32_t> pointer;
+        EndianType<Pointer> pointer;
         PAD(0x4);
         PAD(0x4);
 
