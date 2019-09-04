@@ -5,11 +5,11 @@
  */
 
 #include "../compile.hpp"
-#include "unicode_string_list.hpp"
+#include "string_list.hpp"
 
 namespace Invader::HEK {
-    void compile_unicode_string_list_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
-        BEGIN_COMPILE(UnicodeStringList)
+    void compile_string_list_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
+        BEGIN_COMPILE(StringList)
         ADD_REFLEXIVE_START(tag.strings) {
             std::size_t data_size = reflexive.string.size;
             ASSERT_SIZE(data_size);

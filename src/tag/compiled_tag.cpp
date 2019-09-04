@@ -235,7 +235,7 @@ namespace Invader::HEK {
                 compile_object_tag(compiled, data, size, ObjectType::OBJECT_TYPE_SOUND_SCENERY);
                 break;
             case TagClassInt::TAG_CLASS_STRING_LIST:
-                COMPILE_EXTERN_TAG_FN(compile_unicode_string_list_tag);
+                COMPILE_EXTERN_TAG_FN(compile_string_list_tag);
                 break;
             case TagClassInt::TAG_CLASS_TAG_COLLECTION:
                 COMPILE_EXTERN_TAG_FN(compile_tag_collection_tag);
@@ -247,7 +247,7 @@ namespace Invader::HEK {
                 COMPILE_EXTERN_TAG_FN(compile_ui_widget_definition_tag);
                 break;
             case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                COMPILE_EXTERN_TAG_FN(compile_unicode_string_list_tag);
+                COMPILE_EXTERN_TAG_FN(compile_string_list_tag);
                 break;
             case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
                 COMPILE_EXTERN_TAG_FN(compile_unit_hud_interface_tag);

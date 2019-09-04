@@ -69,9 +69,9 @@ add_library(invader STATIC
     src/tag/hek/class/sound.cpp
     src/tag/hek/class/sound_environment.cpp
     src/tag/hek/class/sound_looping.cpp
+    src/tag/hek/class/string_list.cpp
     src/tag/hek/class/tag_collection.cpp
     src/tag/hek/class/ui_widget_definition.cpp
-    src/tag/hek/class/unicode_string_list.cpp
     src/tag/hek/class/unit_hud_interface.cpp
     src/tag/hek/class/vehicle.cpp
     src/tag/hek/class/weapon.cpp
