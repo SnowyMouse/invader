@@ -34,23 +34,26 @@ template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte>
     // Separate into lines
     std::string string;
     std::size_t line_start = 0;
+    static const char LINE_ENDING[] = "\r\n";
     for(std::size_t i = 0; i < string_length; i++) {
         if(c[i] == '\r' || c[i] == '\n') {
-            if(line_start != i) {
-                std::string line(c + line_start, c + i);
-                if(line == "###END-STRING###") {
-                    strings.emplace_back(string, 0, string.size() - 1);
-                    string.clear();
-                }
-                else {
-                    string += string + line + "\n";
-                }
-                line_start = i + 1;
+            unsigned int increment;
+            if(c[i] == '\r' && c[i + 1] == '\n') {
+                increment = 1;
             }
             else {
-                line_start++;
-                continue;
+                increment = 0;
             }
+            std::string line(c + line_start, c + i);
+            if(line == "###END-STRING###") {
+                strings.emplace_back(string, 0, string.size() - sizeof(LINE_ENDING));
+                string.clear();
+            }
+            else {
+                string += line + LINE_ENDING;
+            }
+            i += increment;
+            line_start = i + 1;
         }
     }
 
