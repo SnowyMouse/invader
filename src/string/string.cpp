@@ -46,7 +46,7 @@ template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte>
             }
             std::string line(c + line_start, c + i);
             if(line == "###END-STRING###") {
-                strings.emplace_back(string, 0, string.size() - sizeof(LINE_ENDING));
+                strings.emplace_back(string, 0, string.size() - (sizeof(LINE_ENDING) - 1));
                 string.clear();
             }
             else {
