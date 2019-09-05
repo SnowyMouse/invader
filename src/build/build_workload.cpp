@@ -27,6 +27,7 @@
 #include "../tag/hek/class/scenario_structure_bsp.hpp"
 #include "../tag/hek/class/weather_particle_system.hpp"
 #include "../tag/hek/class/sound.hpp"
+#include "../tag/hek/class/string_list.hpp"
 #include "../version.hpp"
 #include "../error.hpp"
 #include "../hek/map.hpp"
@@ -468,8 +469,42 @@ namespace Invader {
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
                             if(loc_tag.name == tag->path) {
-                                // TODO: Compare strings.
-                                if(loc_tag.data.size() == tag->data.size()) {
+                                auto *tag_base = tag->data.data();
+                                auto *loc_base = loc_tag.data.data();
+
+                                auto *tag_list = reinterpret_cast<StringList<LittleEndian> *>(tag_base);
+                                auto *loc_list = reinterpret_cast<StringList<LittleEndian> *>(loc_base);
+                                std::uint32_t string_count = tag_list->strings.count.read();
+
+                                // First check if they have the same number of strings
+                                bool removed = false;
+                                if(loc_list->strings.count == string_count) {
+                                    // Next, iterate through each string and compare them
+                                    auto *tag_strings = reinterpret_cast<HEK::StringListString<LittleEndian> *>(tag_base + tag->resolve_pointer(&tag_list->strings.pointer));
+                                    auto *loc_strings = reinterpret_cast<HEK::StringListString<LittleEndian> *>(loc_base + loc_list->strings.pointer.read());
+
+                                    for(std::uint32_t s = 0; s < string_count; s++) {
+                                        auto *tag_str = reinterpret_cast<LittleEndian<std::uint16_t> *>(tag_base + tag->resolve_pointer(&tag_strings[s].string.pointer));
+                                        auto *loc_str = reinterpret_cast<LittleEndian<std::uint16_t> *>(loc_base + loc_strings[s].string.pointer.read());
+
+                                        // Iterate through each character until they aren't equal anymore or we hit a null byte
+                                        while(*tag_str != 0 && *loc_str != 0 && *tag_str == *loc_str) {
+                                            tag_str++;
+                                            loc_str++;
+                                        }
+
+                                        removed = *tag_str != *loc_str;
+                                        if(removed) {
+                                            break;
+                                        }
+                                    }
+                                }
+                                else {
+                                    removed = true;
+                                }
+
+                                // If we had to remove it, give up
+                                if(!removed) {
                                     tag->index = static_cast<std::uint32_t>(l);
                                     tag->indexed = true;
                                     total_removed_data += loc_tag.data.size();
