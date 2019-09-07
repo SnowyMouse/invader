@@ -731,20 +731,14 @@ namespace Invader::HEK {
         LittleEndian<std::uint16_t> unknown; // 1 = enabled? idk
         PAD(0x2);
         TagString name;
-        PAD(0xC);
-        EndianType<float> one;
-        PAD(0x8);
-        EndianType<float> half[2];
-        EndianType<float> one_2;
+        EndianType<float> unknown_values[9];
         Point3D<EndianType> corners[2];
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioTriggerVolume<NewType>() const noexcept {
             ScenarioTriggerVolume<NewType> copy = {};
             COPY_THIS(unknown);
             COPY_THIS(name);
-            COPY_THIS(one);
-            COPY_THIS_ARRAY(half);
-            COPY_THIS(one_2);
+            COPY_THIS_ARRAY(unknown_values);
             COPY_THIS_ARRAY(corners);
             return copy;
         }
