@@ -123,7 +123,8 @@ namespace Invader::HEK {
         EndianType<std::int16_t> actual_permutation_count;
         PAD(0x2);
         EndianType<float> playback_rate;
-        PAD(0x8);
+        LittleEndian<std::uint32_t> unknown_ffffffff_0;
+        LittleEndian<std::uint32_t> unknown_ffffffff_1;
         TagReflexive<EndianType, SoundPermutation> permutations;
 
         ENDIAN_TEMPLATE(NewType) operator SoundPitchRange<NewType>() const noexcept {
@@ -134,6 +135,8 @@ namespace Invader::HEK {
             COPY_THIS(actual_permutation_count);
             COPY_THIS(permutations);
             COPY_THIS(playback_rate);
+            COPY_THIS(unknown_ffffffff_0);
+            COPY_THIS(unknown_ffffffff_1);
             return copy;
         }
     };
@@ -181,7 +184,9 @@ namespace Invader::HEK {
         EndianType<std::int16_t> promotion_count;
         PAD(0x2);
         EndianType<std::uint32_t> unknown_int;
-        PAD(0x10);
+        PAD(0x8);
+        LittleEndian<std::uint32_t> unknown_ffffffff_0;
+        LittleEndian<std::uint32_t> unknown_ffffffff_1;
         TagReflexive<EndianType, SoundPitchRange> pitch_ranges;
 
         ENDIAN_TEMPLATE(NewType) operator Sound<NewType>() const noexcept {
@@ -209,6 +214,8 @@ namespace Invader::HEK {
             COPY_THIS(promotion_sound);
             COPY_THIS(promotion_count);
             COPY_THIS(unknown_int);
+            COPY_THIS(unknown_ffffffff_0);
+            COPY_THIS(unknown_ffffffff_1);
             COPY_THIS(pitch_ranges);
             return copy;
         }
