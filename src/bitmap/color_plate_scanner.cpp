@@ -251,7 +251,7 @@ namespace Invader {
                                 std::uint32_t w,h;
                                 std::uint32_t ew = width / 2;
                                 std::uint32_t eh = height / 2;
-                                std::int32_t mipmap_count = get_bitmap_mipmaps_recursion(x, y, w, h, get_bitmap_mipmaps_recursion, &ew, &eh);
+                                std::int32_t mipmap_count = get_bitmap_mipmaps_recursion(x, y2, w, h, get_bitmap_mipmaps_recursion, &ew, &eh);
                                 if(mipmap_count == -1) {
                                     return -1;
                                 }
@@ -286,7 +286,7 @@ namespace Invader {
                         std::uint32_t mw = bitmap_width;
                         std::uint32_t mh = bitmap_height;
                         for(std::uint32_t m = 0; m <= mipmap_count; m++) {
-                            const std::uint32_t m_end_y = my + bitmap_height;
+                            const std::uint32_t m_end_y = my + mh;
                             for(; my < m_end_y; my++) {
                                 auto *pixel = &get_pixel(x, my);
                                 bitmap.pixels.insert(bitmap.pixels.end(), pixel, pixel + mw);
