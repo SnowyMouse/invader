@@ -10,6 +10,10 @@
 #include "../eprintf.hpp"
 
 namespace Invader {
+    static inline bool same_color_ignore_opacity(const ColorPlatePixel &color_a, const ColorPlatePixel &color_b) {
+        return color_a.red == color_b.red && color_a.blue == color_b.blue && color_a.green == color_b.green;
+    }
+
     static inline bool power_of_two(std::uint32_t number) {
         std::uint32_t ones = 0;
         while(number > 0) {
@@ -85,7 +89,7 @@ namespace Invader {
             if(blue_candidate != magenta_candidate && blue_candidate != cyan_candidate && magenta_candidate != cyan_candidate) {
                 // Let's assume for a moment they are. Is everything after the cyan pixel blue?
                 for(std::uint32_t x = 3; x < width; x++) {
-                    if(get_pixel(x, 0) != blue_candidate) {
+                    if(!same_color_ignore_opacity(get_pixel(x, 0), blue_candidate)) {
                         scanner.valid_color_plate = false;
                         break;
                     }
@@ -94,7 +98,7 @@ namespace Invader {
                 // Next, is there a sequence border immediately below this?
                 if(scanner.valid_color_plate) {
                     for(std::uint32_t x = 0; x < width; x++) {
-                        if(get_pixel(x, 1) != magenta_candidate) {
+                        if(!same_color_ignore_opacity(get_pixel(x, 1), magenta_candidate)) {
                             scanner.valid_color_plate = false;
                             break;
                         }
@@ -102,34 +106,40 @@ namespace Invader {
                 }
 
                 // Okay, I'm convinced this is a valid color plate
-                scanner.blue = blue_candidate;
-                scanner.magenta = magenta_candidate;
-                scanner.cyan = cyan_candidate;
-                auto *sequence = &color_plate.sequences.emplace_back();
-                sequence->y_start = 2;
+                if(scanner.valid_color_plate) {
+                    scanner.blue = blue_candidate;
+                    scanner.magenta = magenta_candidate;
+                    scanner.cyan = cyan_candidate;
+                    auto *sequence = &color_plate.sequences.emplace_back();
+                    sequence->y_start = 2;
 
-                // Next, we need to find all of the sequences
-                for(std::uint32_t y = 2; y < height; y++) {
-                    bool sequence_border = true;
-                    for(std::uint32_t x = 0; x < width; x++) {
-                        if(get_pixel(x, y) != magenta_candidate) {
-                            sequence_border = false;
-                            break;
+                    // Next, we need to find all of the sequences
+                    for(std::uint32_t y = 2; y < height; y++) {
+                        bool sequence_border = true;
+                        for(std::uint32_t x = 0; x < width; x++) {
+                            if(!same_color_ignore_opacity(get_pixel(x, y), magenta_candidate)) {
+                                sequence_border = false;
+                                break;
+                            }
+                        }
+
+                        // If we got it, create a new sequence, but not before terminating the last one
+                        if(sequence_border) {
+                            sequence->y_end = y;
+                            sequence = &color_plate.sequences.emplace_back();
+                            sequence->y_start = y + 1;
                         }
                     }
 
-                    // If we got it, create a new sequence, but not before terminating the last one
-                    if(sequence_border) {
-                        sequence->y_end = y;
-                        sequence = &color_plate.sequences.emplace_back();
-                        sequence->y_start = y + 1;
-                    }
+                    // Terminate the last sequence index
+                    sequence->y_end = height;
                 }
-
-                // Terminate the last sequence index
-                sequence->y_end = height;
             }
             else {
+                scanner.valid_color_plate = false;
+            }
+
+            if(!scanner.valid_color_plate) {
                 // Create a default sequence
                 auto &sequence = color_plate.sequences.emplace_back();
                 sequence.y_start = 0;
@@ -315,18 +325,18 @@ namespace Invader {
     }
 
     bool ColorPlateScanner::is_blue(const ColorPlatePixel &color) const {
-        return this->blue == color;
+        return same_color_ignore_opacity(this->blue, color);
     }
 
     bool ColorPlateScanner::is_magenta(const ColorPlatePixel &color) const {
-        return this->magenta == color;
+        return same_color_ignore_opacity(this->magenta, color);
     }
 
     bool ColorPlateScanner::is_cyan(const ColorPlatePixel &color) const {
-        return this->cyan == color;
+        return same_color_ignore_opacity(this->cyan, color);
     }
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
-        return this->blue == color || (this->valid_color_plate && (this->cyan == color || this->magenta == color));
+        return this->is_blue(color) || (this->valid_color_plate && (this->is_cyan(color) || this->is_magenta(color)));
     }
 }
