@@ -23,7 +23,7 @@ namespace Invader {
         return ones <= 1;
     }
 
-    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool sprites, bool power_of_two) {
+    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool power_of_two) {
         ColorPlateScanner scanner;
         ScannedColorPlate color_plate;
 
@@ -146,12 +146,6 @@ namespace Invader {
                 sequence.y_end = height;
                 scanner.valid_color_plate = false;
             }
-        }
-
-        // If we're getting sprites, make sure we're getting valid stuff
-        if(sprites && scanner.valid_color_plate == false) {
-            eprintf("Sprites require valid color plate data.\n");
-            return color_plate;
         }
 
         static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";

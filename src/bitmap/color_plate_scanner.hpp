@@ -112,11 +112,10 @@ namespace Invader {
          * @param  pixels       pointer to first pixel
          * @param  width        width of color plate
          * @param  height       height of color plate
-         * @param  sprites      sprites are present
          * @param  power_of_two require power of two
          * @return              scanned color plate data
          */
-        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool sprites = false, bool power_of_two = true);
+        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool power_of_two = true);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
