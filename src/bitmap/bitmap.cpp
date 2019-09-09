@@ -7,6 +7,7 @@
 #include <getopt.h>
 #include <zlib.h>
 #include <filesystem>
+#include <optional>
 #include <tiffio.h>
 
 #define STB_DXT_USE_ROUNDING_BIAS
@@ -72,11 +73,13 @@ int main(int argc, char *argv[]) {
     MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
 
     // Format?
-    BitmapFormat format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
-    bool format_set = false;
+    std::optional<BitmapFormat> format;
 
     // Mipmap fade factor
-    float mipmap_fade = -1.0F;
+    std::optional<float> mipmap_fade;
+
+    // Bitmap type
+    std::optional<BitmapType> bitmap_type;
 
     // Dithering?
     bool dithering = false;
@@ -168,7 +171,6 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "dxt1") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
-                format_set = true;
                 break;
 
             case 'D':
@@ -245,11 +247,14 @@ int main(int argc, char *argv[]) {
         }
 
         // Set some default values
-        if(!format_set) {
+        if(!format.has_value()) {
             format = bitmap_tag_header.format;
         }
-        if(mipmap_fade < 0.0F) {
+        if(!mipmap_fade.has_value()) {
             mipmap_fade = bitmap_tag_header.detail_fade_factor;
+        }
+        if(!bitmap_type.has_value()) {
+            bitmap_type = bitmap_tag_header.type;
         }
         if(max_mipmap_count == INT16_MAX) {
             std::int16_t mipmap_count = bitmap_tag_header.mipmap_count.read();
@@ -265,6 +270,16 @@ int main(int argc, char *argv[]) {
         }
 
         std::fclose(tag_read);
+    }
+
+    // If format wasn't set, set it
+    if(!format.has_value()) {
+        format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+    }
+
+    // Same with bitmap type
+    if(!bitmap_type.has_value()) {
+        bitmap_type = BitmapType::BITMAP_TYPE_1__2D_TEXTURES;
     }
 
     // Have these variables handy
@@ -353,7 +368,7 @@ int main(int argc, char *argv[]) {
     std::vector<BitmapData<BigEndian>> bitmap_data(bitmaps_array.size());
 
     // Default mipmap parameters
-    if(mipmap_fade == -1.0F) {
+    if(!mipmap_fade.has_value()) {
         mipmap_fade = 0.0F;
     }
     if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_TAG) {
@@ -467,10 +482,12 @@ int main(int argc, char *argv[]) {
                                 break;
                         }
 
+                        float mipmap_fade_value = mipmap_fade.value();
+
                         // Fade to gray?
                         if(mipmap_fade > 0.0F) {
                             // Alpha -> white
-                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade + 1;
+                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade_value + 1;
                             if(static_cast<std::uint32_t>(0xFF - pixel.alpha) < alpha_delta) {
                                 pixel.alpha = 0xFF;
                             }
@@ -479,9 +496,9 @@ int main(int argc, char *argv[]) {
                             }
 
                             // RGB -> gray
-                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade;
-                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade;
-                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade;
+                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade_value;
+                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade_value;
+                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade_value;
                         }
                     }
                 }
@@ -553,7 +570,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Set the format
-        switch(format) {
+        switch(format.value()) {
             case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
                 break;
@@ -808,9 +825,10 @@ int main(int argc, char *argv[]) {
     new_tag_header.bitmap_data.count = bitmap_data.size();
 
     // Set more parameters
+    new_tag_header.type = bitmap_type.value();
     new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
-    new_tag_header.detail_fade_factor = mipmap_fade;
-    new_tag_header.format = static_cast<BitmapFormat>(format);
+    new_tag_header.detail_fade_factor = mipmap_fade.value();
+    new_tag_header.format = format.value();
     if(max_mipmap_count == INT16_MAX) {
         new_tag_header.mipmap_count = 0;
     }
