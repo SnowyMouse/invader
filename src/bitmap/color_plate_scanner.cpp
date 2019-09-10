@@ -491,7 +491,7 @@ namespace Invader {
                     };
 
                     // Pull in the mipmap and bitmap stuff
-                    std::uint32_t bitmap_width, bitmap_height;
+                    std::uint32_t bitmap_width = 0, bitmap_height = 0;
                     auto mipmap_count = get_bitmap_mipmaps(x, y, bitmap_width, bitmap_height, get_bitmap_mipmaps);
 
                     // Store that in a bitmap
