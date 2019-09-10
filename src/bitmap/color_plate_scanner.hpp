@@ -100,21 +100,33 @@ namespace Invader {
         std::vector<ScannedColorPlateSequence> sequences;
     };
 
+    enum ScannedColorMipmapType {
+        SCANNED_COLOR_MIPMAP_LINEAR,
+        SCANNED_COLOR_MIPMAP_NEAREST_ALPHA,
+        SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR
+    };
+
     class ColorPlateScanner {
     public:
         /**
          * Scan the color plate for bitmaps
-         * @param  pixels pointer to first pixel
-         * @param  width  width of color plate
-         * @param  height height of color plate
-         * @param  type   type of bitmap
-         * @return        scanned color plate data
+         * @param  pixels             pointer to first pixel
+         * @param  width              width of color plate
+         * @param  height             height of color plate
+         * @param  type               type of bitmap
+         * @param  mipmaps            maximum number of mipmaps
+         * @param  mipmap_type        type of mipmaps
+         * @param  mipmap_fade_factor fade-to-gray factor for mipmaps
+         * @return                    scanned color plate data
          */
-        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type);
+        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
         bool valid_color_plate = false;
+
+        /** Is power of two required */
+        bool power_of_two = true;
 
         /** Blue color */
         ColorPlatePixel blue = { 0xFF, 0x00, 0x00, 0xFF };
@@ -152,6 +164,36 @@ namespace Invader {
          * @return       true if ignored
          */
         bool is_ignored(const ColorPlatePixel &color) const;
+
+        /**
+         * Read the color plate-valid bitmap data
+         * @param color_plate color plate data to write to (output)
+         * @param pixels      pixel input
+         * @param width       width of input
+         * @param height      height of input
+         * @param type        type of bitmap
+         */
+        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
+
+        /**
+         * Read an unrolled cubemap
+         * @param color_plate color plate data to write to (output)
+         * @param pixels      pixel input
+         * @param width       width of input
+         * @param height      height of input
+         * @param type        type of bitmap
+         */
+        void read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
+
+        /**
+         * Read bitmap data that doesn't have a valid color plate
+         * @param color_plate color plate data to write to (output)
+         * @param pixels      pixel input
+         * @param width       width of input
+         * @param height      height of input
+         * @param type        type of bitmap
+         */
+        void read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
 
         ColorPlateScanner() = default;
     };
