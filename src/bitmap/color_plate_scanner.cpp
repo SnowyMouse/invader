@@ -13,6 +13,15 @@ namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
     static constexpr char ERROR_INVALID_BITMAP_HEIGHT[] = "Error: Found a bitmap with an invalid height: %u\n";
 
+    template<typename T> static constexpr inline T log2_int(T number) {
+        T log2_value = 0;
+        while(number != 1) {
+            number >>= 1;
+            log2_value++;
+        }
+        return log2_value;
+    }
+
     static inline bool same_color_ignore_opacity(const ColorPlatePixel &color_a, const ColorPlatePixel &color_b) {
         return color_a.red == color_b.red && color_a.blue == color_b.blue && color_a.green == color_b.green;
     }
@@ -32,6 +41,7 @@ namespace Invader {
         ColorPlateScanner scanner;
         ScannedColorPlate color_plate;
 
+        color_plate.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
         // Check to see if we have valid color plate data. If so, look for sequences
@@ -113,17 +123,17 @@ namespace Invader {
 
         // If we have valid color plate data, use the color plate data
         if(scanner.valid_color_plate) {
-            scanner.read_color_plate(color_plate, pixels, width, height, type);
+            scanner.read_color_plate(color_plate, pixels, width, height);
         }
 
         // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
         else if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            scanner.read_unrolled_cubemap(color_plate, pixels, width, height, type);
+            scanner.read_unrolled_cubemap(color_plate, pixels, width, height);
         }
 
         // Otherwise, look for bitmaps up, down, left, and right
         else {
-            scanner.read_non_color_plate(color_plate, pixels, width, height, type);
+            scanner.read_non_color_plate(color_plate, pixels, width, height);
         }
 
         // Go through each sequence and check to make sure they have 6 bitmaps (if a cubemap)
@@ -136,10 +146,15 @@ namespace Invader {
             }
         }
 
+        // If we aren't making interface bitmaps, generate mipmaps when needed
+        if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
+            generate_mipmaps(color_plate, mipmaps, mipmap_type, mipmap_fade_factor);
+        }
+
         return color_plate;
     }
 
-    void ColorPlateScanner::read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const {
+    void ColorPlateScanner::read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         for(auto &sequence : color_plate.sequences) {
             sequence.first_bitmap = color_plate.bitmaps.size();
             sequence.bitmap_count = 0;
@@ -248,7 +263,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const {
+    void ColorPlateScanner::read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         // Make sure the height and width of each face is the same
         std::uint32_t face_width = width / 4;
         std::uint32_t face_height = height / 3;
@@ -308,7 +323,7 @@ namespace Invader {
         color_plate.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const {
+    void ColorPlateScanner::read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         auto &sequence = color_plate.sequences[0];
         sequence.first_bitmap = color_plate.bitmaps.size();
         sequence.bitmap_count = 0;
@@ -522,5 +537,108 @@ namespace Invader {
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
         return this->is_blue(color) || (this->valid_color_plate && (this->is_cyan(color) || this->is_magenta(color)));
+    }
+
+    void ColorPlateScanner::generate_mipmaps(ScannedColorPlate &color_plate, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+        auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
+        for(auto &bitmap : color_plate.bitmaps) {
+            std::uint32_t mipmap_width = bitmap.width;
+            std::uint32_t mipmap_height = bitmap.height;
+            std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_height) : log2_int(mipmap_width);
+            if(max_mipmap_count > mipmaps_unsigned) {
+                max_mipmap_count = mipmaps_unsigned;
+            }
+
+            // Delete mipmaps if needed
+            while(bitmap.mipmaps.size() > max_mipmap_count) {
+                auto mipmap_to_remove = bitmap.mipmaps.begin() + (bitmap.mipmaps.size() - 1);
+                auto first_pixel = bitmap.pixels.begin() + mipmap_to_remove->first_pixel;
+                auto last_pixel = first_pixel + mipmap_to_remove->pixel_count;
+                bitmap.pixels.erase(first_pixel, last_pixel);
+                bitmap.mipmaps.erase(mipmap_to_remove);
+            }
+
+            // If we don't need to generate mipmaps, bail
+            if(bitmap.mipmaps.size() == max_mipmap_count) {
+                return;
+            }
+
+            // Now generate mipmaps
+            std::uint32_t last_mipmap_offset = 0;
+            if(bitmap.mipmaps.size() > 0) {
+                auto &last_mipmap = bitmap.mipmaps[bitmap.mipmaps.size() - 1];
+                last_mipmap_offset = last_mipmap.first_pixel;
+                mipmap_width = last_mipmap.mipmap_width;
+                mipmap_height = last_mipmap.mipmap_height;
+            }
+
+            mipmap_height /= 2;
+            mipmap_width /= 2;
+
+            while(bitmap.mipmaps.size() < max_mipmap_count) {
+                // Begin creating the mipmap
+                auto &next_mipmap = bitmap.mipmaps.emplace_back();
+                std::size_t this_mipmap_offset = bitmap.pixels.size();
+                next_mipmap.first_pixel = static_cast<std::uint32_t>(this_mipmap_offset);
+                next_mipmap.pixel_count = mipmap_height * mipmap_width;
+                next_mipmap.mipmap_height = mipmap_height;
+                next_mipmap.mipmap_width = mipmap_width;
+
+                // Insert all the pixels needed for the mipmap
+                bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
+                auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
+                auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
+
+                // Combine each 2x2 block based on the given algorithm
+                for(std::uint32_t y = 0; y < mipmap_width; y++) {
+                    for(std::uint32_t x = 0; x < mipmap_height; x++) {
+                        auto &pixel = this_mipmap_data[x + y * mipmap_width];
+                        auto &last_a = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2];
+                        auto &last_b = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2 + 1];
+                        auto &last_c = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2];
+                        auto &last_d = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2 + 1];
+                        pixel = last_a; // Nearest-neighbor first
+
+                        #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
+
+                        // Interpolate color?
+                        if(mipmap_type == ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR || mipmap_type == ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA) {
+                            INTERPOLATE_CHANNEL(red);
+                            INTERPOLATE_CHANNEL(green);
+                            INTERPOLATE_CHANNEL(blue);
+                        }
+
+                        // Interpolate alpha?
+                        if(mipmap_type == ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR) {
+                            INTERPOLATE_CHANNEL(alpha);
+                        }
+
+                        #undef INTERPOLATE_CHANNEL
+
+                        // Fade to gray?
+                        if(mipmap_fade_factor > 0.0F) {
+                            // Alpha -> white
+                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade_factor + 1;
+                            if(static_cast<std::uint32_t>(0xFF - pixel.alpha) < alpha_delta) {
+                                pixel.alpha = 0xFF;
+                            }
+                            else {
+                                pixel.alpha += alpha_delta;
+                            }
+
+                            // RGB -> gray
+                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade_factor;
+                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade_factor;
+                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade_factor;
+                        }
+                    }
+                }
+
+                // Set the values for the next mipmap
+                mipmap_height /= 2;
+                mipmap_width /= 2;
+                last_mipmap_offset = this_mipmap_offset;
+            }
+        }
     }
 }

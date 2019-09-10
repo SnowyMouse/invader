@@ -385,133 +385,10 @@ int main(int argc, char *argv[]) {
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
         bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
+        std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
-        // Calculate how big the bitmap is
-        std::size_t total_size = 0;
-        std::size_t mipmap_width = bitmap_color_plate.width;
-        std::size_t mipmap_height = bitmap_color_plate.height;
-        std::size_t *smaller_dimension = mipmap_width > mipmap_height ? &mipmap_height : &mipmap_width;
-
-        // Calculate how many mipmaps we can make
-        std::size_t bitmap_maximum_mipmap_count = 0;
-        for(std::size_t s = *smaller_dimension >> 1; s > 0; s >>= 1) {
-            bitmap_maximum_mipmap_count++;
-        }
-
-        // If we're removing mipmaps, let's see how many
-        if(max_mipmap_count < 0) {
-            std::size_t mipmaps_discarded = -max_mipmap_count;
-            if(bitmap_maximum_mipmap_count > mipmaps_discarded) {
-                bitmap_maximum_mipmap_count -= mipmaps_discarded;
-            }
-            else {
-                bitmap_maximum_mipmap_count = 0; // more mipmaps than we have, so we'll just remove all of them
-            }
-        }
-        else if(static_cast<std::size_t>(max_mipmap_count) < bitmap_maximum_mipmap_count) {
-            bitmap_maximum_mipmap_count = static_cast<std::size_t>(max_mipmap_count);
-        }
-
-        // Calculate the lowest-resolution mipmap we have
-        std::size_t mipmap_count = bitmap_color_plate.mipmaps.size();
-        for(std::size_t i = 0; i <= mipmap_count && i <= bitmap_maximum_mipmap_count; i++) {
-            total_size += mipmap_width * mipmap_height * 4;
-            mipmap_height /= 2;
-            mipmap_width /= 2;
-        }
-
-        if(mipmap_count > bitmap_maximum_mipmap_count) {
-            mipmap_count = bitmap_maximum_mipmap_count;
-        }
-
-        // Generate mipmaps?
-        const auto *pixels_start = reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data());
-        std::vector<std::byte> current_bitmap_pixels(pixels_start, pixels_start + total_size);
-
-        // Process mipmaps
-        if(mipmap_scale_type != MipmapScaleType::MIPMAP_SCALE_TYPE_NONE) {
-            while(*smaller_dimension > 0 && mipmap_count < bitmap_maximum_mipmap_count) {
-                // Get the last mipmap
-                const auto *last_mipmap = reinterpret_cast<const ColorPlatePixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(ColorPlatePixel));
-
-                // Allocate data to hold the new mipmap data
-                std::vector<std::byte> this_mipmap_v(mipmap_height * mipmap_width * sizeof(ColorPlatePixel));
-                auto *this_mipmap = reinterpret_cast<ColorPlatePixel *>(this_mipmap_v.data());
-                for(std::size_t y = 0; y < mipmap_height; y++) {
-                    for(std::size_t x = 0; x < mipmap_width; x++) {
-                        // Get the pixels
-                        ColorPlatePixel pixels[4] = {
-                            last_mipmap[x * 2 + y * 2 * mipmap_width * 2],
-                            last_mipmap[x * 2 + 1 + y * 2 * mipmap_width * 2],
-                            last_mipmap[x * 2 + (y * 2 + 1) * mipmap_width * 2],
-                            last_mipmap[x * 2 + 1 + (y * 2 + 1) * mipmap_width * 2]
-                        };
-
-                        // Get this mipmap pixel
-                        ColorPlatePixel &pixel = this_mipmap[y * mipmap_width + x];
-
-                        // Average the pixels
-                        switch(mipmap_scale_type) {
-                            case MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR:
-                            case MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA:
-                                #define AVERAGE_CHANNEL_VALUE(channel) static_cast<std::uint8_t>(static_cast<std::size_t>(pixels[0].channel + pixels[1].channel + pixels[2].channel + pixels[3].channel) / 4)
-
-                                // Determine whether or not to interpolate the alpha
-                                if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA) {
-                                    pixel.alpha = pixels[0].alpha;
-                                }
-                                else {
-                                    pixel.alpha = AVERAGE_CHANNEL_VALUE(alpha);
-                                }
-
-                                // Interpolate RGB
-                                pixel.red = AVERAGE_CHANNEL_VALUE(red);
-                                pixel.green = AVERAGE_CHANNEL_VALUE(green);
-                                pixel.blue = AVERAGE_CHANNEL_VALUE(blue);
-                                break;
-
-                            case MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST:
-                                pixel = pixels[0];
-                                break;
-
-                            default:
-                                break;
-                        }
-
-                        float mipmap_fade_value = mipmap_fade.value();
-
-                        // Fade to gray?
-                        if(mipmap_fade > 0.0F) {
-                            // Alpha -> white
-                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade_value + 1;
-                            if(static_cast<std::uint32_t>(0xFF - pixel.alpha) < alpha_delta) {
-                                pixel.alpha = 0xFF;
-                            }
-                            else {
-                                pixel.alpha += alpha_delta;
-                            }
-
-                            // RGB -> gray
-                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade_value;
-                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade_value;
-                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade_value;
-                        }
-                    }
-                }
-
-                // Handle compression
-                bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
-
-                // Add the new mipmap
-                total_size += this_mipmap_v.size();
-                current_bitmap_pixels.insert(current_bitmap_pixels.end(), this_mipmap_v.begin(), this_mipmap_v.end());
-
-                // Halve both dimensions and add mipmap count
-                mipmap_height /= 2;
-                mipmap_width /= 2;
-                mipmap_count++;
-            }
-        }
+        // Get the data
+        std::vector<std::byte> current_bitmap_pixels(reinterpret_cast<std::byte *>(bitmap_color_plate.pixels.data()), reinterpret_cast<std::byte *>(bitmap_color_plate.pixels.data() + bitmap_color_plate.pixels.size()));
 
         // Determine if there is any alpha present
         enum AlphaType {
@@ -799,9 +676,9 @@ int main(int argc, char *argv[]) {
 
         #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-        printf("    Bitmap #%zu: %ux%u, %zu mipmap%s, %s - %.02f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
+        printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
     }
-    printf("Total: %.02f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
+    printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());

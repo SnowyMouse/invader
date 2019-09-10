@@ -103,6 +103,7 @@ namespace Invader {
     };
 
     struct ScannedColorPlate {
+        BitmapType type;
         std::vector<ScannedColorPlateBitmap> bitmaps;
         std::vector<ScannedColorPlateSequence> sequences;
     };
@@ -178,9 +179,8 @@ namespace Invader {
          * @param pixels      pixel input
          * @param width       width of input
          * @param height      height of input
-         * @param type        type of bitmap
          */
-        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
+        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Read an unrolled cubemap
@@ -188,9 +188,8 @@ namespace Invader {
          * @param pixels      pixel input
          * @param width       width of input
          * @param height      height of input
-         * @param type        type of bitmap
          */
-        void read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
+        void read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Read bitmap data that doesn't have a valid color plate
@@ -198,9 +197,14 @@ namespace Invader {
          * @param pixels      pixel input
          * @param width       width of input
          * @param height      height of input
-         * @param type        type of bitmap
          */
-        void read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) const;
+        void read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+
+        /**
+         * Generate mipmaps for the color plate
+         * @param color_plate color plate to generate mipmaps for
+         */
+        static void generate_mipmaps(ScannedColorPlate &color_plate, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
 
         ColorPlateScanner() = default;
     };
