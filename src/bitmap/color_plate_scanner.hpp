@@ -9,8 +9,11 @@
 
 #include <cstdint>
 #include <vector>
+#include "../tag/hek/class/bitmap.hpp"
 
 namespace Invader {
+    using BitmapType = HEK::BitmapType;
+
     struct ColorPlatePixel {
         std::uint8_t blue;
         std::uint8_t green;
@@ -85,19 +88,11 @@ namespace Invader {
         std::uint32_t mipmaps;
     };
 
-    struct ScannedColorPlateSprite {
-        float top;
-        float left;
-        float bottom;
-        float right;
-    };
-
     struct ScannedColorPlateSequence {
         std::uint32_t y_start;
         std::uint32_t y_end;
         std::uint32_t first_bitmap;
         std::uint32_t bitmap_count;
-        std::vector<ScannedColorPlateSprite> sprites;
     };
 
     struct ScannedColorPlate {
@@ -109,13 +104,13 @@ namespace Invader {
     public:
         /**
          * Scan the color plate for bitmaps
-         * @param  pixels       pointer to first pixel
-         * @param  width        width of color plate
-         * @param  height       height of color plate
-         * @param  power_of_two require power of two
-         * @return              scanned color plate data
+         * @param  pixels pointer to first pixel
+         * @param  width  width of color plate
+         * @param  height height of color plate
+         * @param  type   type of bitmap
+         * @return        scanned color plate data
          */
-        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool power_of_two = true);
+        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */

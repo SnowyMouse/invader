@@ -13,10 +13,10 @@
 
 namespace Invader::HEK {
     enum BitmapDataType : TagEnum {
-        BITMAP_TYPE__2D_TEXTURE,
-        BITMAP_TYPE__3D_TEXTURE,
-        BITMAP_TYPE_CUBE_MAP,
-        BITMAP_TYPE_WHITE
+        BITMAP_DATA_TYPE_2D_TEXTURE,
+        BITMAP_DATA_TYPE_3D_TEXTURE,
+        BITMAP_DATA_TYPE_CUBE_MAP,
+        BITMAP_DATA_TYPE_WHITE
     };
 
     enum BitmapDataFormat : TagEnum {
@@ -78,11 +78,11 @@ namespace Invader::HEK {
     const char *bitmap_data_format_name(BitmapDataFormat format);
 
     enum BitmapType : TagEnum {
-        BITMAP_TYPE_1__2D_TEXTURES,
-        BITMAP_TYPE_1__3D_TEXTURES,
-        BITMAP_TYPE_1_CUBE_MAPS,
-        BITMAP_TYPE_1_SPRITES,
-        BITMAP_TYPE_1_INTERFACE_BITMAPS
+        BITMAP_TYPE_2D_TEXTURES,
+        BITMAP_TYPE_3D_TEXTURES,
+        BITMAP_TYPE_CUBE_MAPS,
+        BITMAP_TYPE_SPRITES,
+        BITMAP_TYPE_INTERFACE_BITMAPS
     };
 
     enum BitmapFormat : TagEnum {
@@ -104,11 +104,11 @@ namespace Invader::HEK {
     };
 
     enum BitmapSpriteBudgetSize : TagEnum {
-        BITMAP_SPRITE_BUDGET_SIZE__32X32,
-        BITMAP_SPRITE_BUDGET_SIZE__64X64,
-        BITMAP_SPRITE_BUDGET_SIZE__128X128,
-        BITMAP_SPRITE_BUDGET_SIZE__256X256,
-        BITMAP_SPRITE_BUDGET_SIZE__512X512
+        BITMAP_SPRITE_BUDGET_SIZE_32X32,
+        BITMAP_SPRITE_BUDGET_SIZE_64X64,
+        BITMAP_SPRITE_BUDGET_SIZE_128X128,
+        BITMAP_SPRITE_BUDGET_SIZE_256X256,
+        BITMAP_SPRITE_BUDGET_SIZE_512X512
     };
 
     enum BitmapSpriteUsage : TagEnum {

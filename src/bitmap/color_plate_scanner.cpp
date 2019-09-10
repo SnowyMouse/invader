@@ -23,9 +23,11 @@ namespace Invader {
         return ones <= 1;
     }
 
-    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, bool power_of_two) {
+    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type) {
         ColorPlateScanner scanner;
         ScannedColorPlate color_plate;
+
+        bool power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
         auto get_pixel = [&pixels, &width](std::uint32_t x, std::uint32_t y) -> const ColorPlatePixel & {
             return pixels[y * width + x];
@@ -148,6 +150,12 @@ namespace Invader {
             }
         }
 
+        // Sprites require a color plate
+        if(type == BitmapType::BITMAP_TYPE_SPRITES && !scanner.valid_color_plate) {
+            eprintf("Error: Sprites require a valid color plate.\n");
+            std::terminate();
+        }
+
         static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
         static constexpr char ERROR_INVALID_BITMAP_HEIGHT[] = "Error: Found a bitmap with an invalid height: %u\n";
 
@@ -245,8 +253,6 @@ namespace Invader {
                                     }
                                 }
 
-                                eprintf("Found a bitmap (%ux%u) (%u,%u) -> (%u,%u)\n", width, height, min_x.value(), min_y.value(), max_x.value(), max_y.value());
-
                                 bitmap_x_start.reset();
                                 sequence.bitmap_count++;
                             }
@@ -261,6 +267,68 @@ namespace Invader {
                     }
                 }
             }
+        }
+
+        // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
+        else if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+            // Make sure the height and width of each face is the same
+            std::uint32_t face_width = width / 4;
+            std::uint32_t face_height = height / 3;
+
+            if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
+                eprintf("Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
+                std::terminate();
+            }
+
+            auto get_pixel_transformed = [&get_pixel, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t relative_x, std::uint32_t relative_y, std::uint32_t rotation) {
+                std::uint32_t x, y;
+                if(rotation == 0) {
+                    x = left + relative_x;
+                    y = top + relative_y;
+                }
+                else if(rotation == 90) {
+                    x = left + face_width - relative_y - 1;
+                    y = top + relative_x;
+                }
+                else if(rotation == 180) {
+                    x = left + face_width - relative_x - 1;
+                    y = top + face_width - relative_y - 1;
+                }
+                else if(rotation == 270) {
+                    x = left + relative_y;
+                    y = top + face_width - relative_x - 1;
+                }
+                else {
+                    std::terminate();
+                }
+                return get_pixel(x, y);
+            };
+
+            auto add_bitmap = [&color_plate, &get_pixel_transformed, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t rotation) {
+                auto &new_bitmap = color_plate.bitmaps.emplace_back();
+                new_bitmap.color_plate_x = left;
+                new_bitmap.color_plate_y = top;
+                new_bitmap.height = face_width;
+                new_bitmap.width = face_width;
+                new_bitmap.mipmaps = 0;
+                new_bitmap.pixels.reserve(face_width * face_width);
+
+                for(std::uint32_t y = 0; y < face_width; y++) {
+                    for(std::uint32_t x = 0; x < face_width; x++) {
+                        new_bitmap.pixels.push_back(get_pixel_transformed(left, top, x, y, rotation));
+                    }
+                }
+            };
+
+            // Add each cubemap face
+            add_bitmap(0, face_width * 1, 90);
+            add_bitmap(0, face_width * 2, 180);
+            add_bitmap(0, face_width * 3, 270);
+            add_bitmap(0, face_width * 4, 0);
+            add_bitmap(0, 0, 90);
+            add_bitmap(face_width * 2, 0, 90);
+            color_plate.sequences[0].first_bitmap = 0;
+            color_plate.sequences[0].bitmap_count = 6;
         }
 
         // Otherwise, look for bitmaps up, down, left, and right
@@ -409,21 +477,13 @@ namespace Invader {
             }
         }
 
-        // Output debugging info
-        eprintf("Dimensions:        %u x %u\n", width, height);
-        eprintf("Valid color plate: %s\n", scanner.valid_color_plate ? "true" : "false");
-        eprintf("Sequences:         %zu\n", color_plate.sequences.size());
-        for(auto &sequence : color_plate.sequences) {
-            eprintf("    Sequence #%zu\n", &sequence - color_plate.sequences.data());
-            eprintf("        Y:       %u-%u\n", sequence.y_start, sequence.y_end);
-            std::uint32_t bitmap_end = sequence.first_bitmap + sequence.bitmap_count;
-            eprintf("        Bitmaps: %u-%u\n", sequence.first_bitmap, bitmap_end);
-            for(std::uint32_t b = sequence.first_bitmap; b < bitmap_end; b++) {
-                eprintf("            Bitmap #%u\n", b);
-                auto &bitmap = color_plate.bitmaps[b];
-                eprintf("                Dimensions: %u x %u\n", bitmap.width, bitmap.height);
-                eprintf("                Position:   %u , %u\n", bitmap.color_plate_x, bitmap.color_plate_y);
-                eprintf("                Mipmaps:    %u\n", bitmap.mipmaps);
+        // Go through each sequence and check to make sure they have 6 bitmaps (if a cubemap)
+        if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+            for(auto &sequence : color_plate.sequences) {
+                if(sequence.bitmap_count != 6) {
+                    eprintf("Cubemaps must have exactly 6 bitmaps per sequence.\n");
+                    std::terminate();
+                }
             }
         }
 

@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
 
     // Same with bitmap type
     if(!bitmap_type.has_value()) {
-        bitmap_type = BitmapType::BITMAP_TYPE_1__2D_TEXTURES;
+        bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
     }
 
     // Have these variables handy
@@ -385,7 +385,7 @@ int main(int argc, char *argv[]) {
         bitmap.width = bitmap_pixels.get_width();
         bitmap.height = bitmap_pixels.get_height();
         bitmap.depth = 1;
-        bitmap.type = BitmapDataType::BITMAP_TYPE__2D_TEXTURE;
+        bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
         bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
