@@ -17,7 +17,6 @@
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
 #include "color_plate_scanner.hpp"
-#include "composite_bitmap.hpp"
 
 enum SUPPORTED_FORMATS_INT {
     SUPPORTED_FORMATS_TIF = 0,
@@ -39,8 +38,8 @@ static const char *SUPPORTED_FORMATS[] = {
 
 static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
 
-static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
-static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
+static Invader::ColorPlatePixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
+static Invader::ColorPlatePixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
 enum MipmapScaleType {
     /** Guess based on what the tag says */
@@ -286,7 +285,7 @@ int main(int argc, char *argv[]) {
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
     std::size_t image_size = 0;
-    CompositeBitmapPixel *image_pixels = nullptr;
+    ColorPlatePixel *image_pixels = nullptr;
 
     // Load the bitmap file
     for(auto i = SUPPORTED_FORMATS_TIF; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SUPPORTED_FORMATS_INT>(i + 1)) {
@@ -433,15 +432,15 @@ int main(int argc, char *argv[]) {
         if(mipmap_scale_type != MipmapScaleType::MIPMAP_SCALE_TYPE_NONE) {
             while(*smaller_dimension > 0 && mipmap_count < bitmap_maximum_mipmap_count) {
                 // Get the last mipmap
-                const auto *last_mipmap = reinterpret_cast<const CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(CompositeBitmapPixel));
+                const auto *last_mipmap = reinterpret_cast<const ColorPlatePixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size() - (mipmap_height * 2) * (mipmap_width * 2) * sizeof(ColorPlatePixel));
 
                 // Allocate data to hold the new mipmap data
-                std::vector<std::byte> this_mipmap_v(mipmap_height * mipmap_width * sizeof(CompositeBitmapPixel));
-                auto *this_mipmap = reinterpret_cast<CompositeBitmapPixel *>(this_mipmap_v.data());
+                std::vector<std::byte> this_mipmap_v(mipmap_height * mipmap_width * sizeof(ColorPlatePixel));
+                auto *this_mipmap = reinterpret_cast<ColorPlatePixel *>(this_mipmap_v.data());
                 for(std::size_t y = 0; y < mipmap_height; y++) {
                     for(std::size_t x = 0; x < mipmap_width; x++) {
                         // Get the pixels
-                        CompositeBitmapPixel pixels[4] = {
+                        ColorPlatePixel pixels[4] = {
                             last_mipmap[x * 2 + y * 2 * mipmap_width * 2],
                             last_mipmap[x * 2 + 1 + y * 2 * mipmap_width * 2],
                             last_mipmap[x * 2 + (y * 2 + 1) * mipmap_width * 2],
@@ -449,7 +448,7 @@ int main(int argc, char *argv[]) {
                         };
 
                         // Get this mipmap pixel
-                        CompositeBitmapPixel &pixel = this_mipmap[y * mipmap_width + x];
+                        ColorPlatePixel &pixel = this_mipmap[y * mipmap_width + x];
 
                         // Average the pixels
                         switch(mipmap_scale_type) {
@@ -525,14 +524,14 @@ int main(int argc, char *argv[]) {
         bool luminosity_set = false;
 
         AlphaType alpha_present = ALPHA_TYPE_NONE;
-        auto *first_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data());
-        auto *last_pixel = reinterpret_cast<CompositeBitmapPixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size());
+        auto *first_pixel = reinterpret_cast<ColorPlatePixel *>(current_bitmap_pixels.data());
+        auto *last_pixel = reinterpret_cast<ColorPlatePixel *>(current_bitmap_pixels.data() + current_bitmap_pixels.size());
         std::size_t pixel_count = last_pixel - first_pixel;
 
         // If we need to do monochrome, check if the alpha equals luminosity
         if(format == BitmapFormat::BITMAP_FORMAT_MONOCHROME) {
             for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
-                std::uint8_t luminosity = CompositeBitmapPixel::convert_to_y8(pixel);
+                std::uint8_t luminosity = ColorPlatePixel::convert_to_y8(pixel);
 
                 // First, check if the luminosity is the same as alpha. If not, AY8 is not an option.
                 if(luminosity != pixel->alpha) {
@@ -629,17 +628,17 @@ int main(int argc, char *argv[]) {
             case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
             case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
-                uint16_t (*conversion_function)(const CompositeBitmapPixel *);
+                uint16_t (*conversion_function)(const ColorPlatePixel *);
 
                 switch(bitmap_format) {
                     case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
-                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<1,5,5,5>;
+                        conversion_function = ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
-                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<4,4,4,4>;
+                        conversion_function = ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
-                        conversion_function = CompositeBitmapPixel::convert_to_16_bit<0,5,6,5>;
+                        conversion_function = ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
                         break;
                     default:
                         std::terminate();
@@ -649,7 +648,7 @@ int main(int argc, char *argv[]) {
                 // Begin
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
-                for(CompositeBitmapPixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
                     *pixel_16_bit = conversion_function(pixel_32_bit);
                 }
 
@@ -676,7 +675,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint8_t));
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
-                    *pixel_8_bit = CompositeBitmapPixel::convert_to_y8(pixel);
+                    *pixel_8_bit = ColorPlatePixel::convert_to_y8(pixel);
                 }
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
@@ -686,7 +685,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
-                    *pixel_16_bit = CompositeBitmapPixel::convert_to_a8y8(pixel);
+                    *pixel_16_bit = ColorPlatePixel::convert_to_a8y8(pixel);
                 }
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
@@ -722,7 +721,7 @@ int main(int argc, char *argv[]) {
                         for(std::size_t y = 0; y < mipmap_height; y += BLOCK_LENGTH) {
                             for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
                                 // Let's make the 4x4 block
-                                CompositeBitmapPixel block[BLOCK_LENGTH * BLOCK_LENGTH];
+                                ColorPlatePixel block[BLOCK_LENGTH * BLOCK_LENGTH];
 
                                 // Get the block
                                 for(int i = 0; i < BLOCK_LENGTH; i++) {
@@ -860,9 +859,9 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-#define ALLOCATE_PIXELS(count) reinterpret_cast<Invader::CompositeBitmapPixel *>(calloc(sizeof(Invader::CompositeBitmapPixel) * pixel_count, 1))
+#define ALLOCATE_PIXELS(count) reinterpret_cast<Invader::ColorPlatePixel *>(calloc(sizeof(Invader::ColorPlatePixel) * pixel_count, 1))
 
-static Invader::CompositeBitmapPixel *rgba_to_pixel(const std::uint8_t *data, std::size_t pixel_count) {
+static Invader::ColorPlatePixel *rgba_to_pixel(const std::uint8_t *data, std::size_t pixel_count) {
     auto *pixel_data = ALLOCATE_PIXELS(pixel_count);
 
     for(std::size_t i = 0; i < pixel_count; i++) {
@@ -878,7 +877,7 @@ static Invader::CompositeBitmapPixel *rgba_to_pixel(const std::uint8_t *data, st
 
 #undef ALLOCATE_PIXELS
 
-static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
+static Invader::ColorPlatePixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
     // Load it
     int x = 0, y = 0, channels = 0;
     auto *image_buffer = stbi_load(path, &x, &y, &channels, 4);
@@ -890,10 +889,10 @@ static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t
     // Get the width and height
     image_width = static_cast<std::uint32_t>(x);
     image_height = static_cast<std::uint32_t>(y);
-    image_size = image_width * image_height * sizeof(Invader::CompositeBitmapPixel);
+    image_size = image_width * image_height * sizeof(Invader::ColorPlatePixel);
 
     // Do the thing
-    Invader::CompositeBitmapPixel *return_value = rgba_to_pixel(reinterpret_cast<std::uint8_t *>(image_buffer), image_width * image_height);
+    Invader::ColorPlatePixel *return_value = rgba_to_pixel(reinterpret_cast<std::uint8_t *>(image_buffer), image_width * image_height);
 
     // Free the buffer
     stbi_image_free(image_buffer);
@@ -901,7 +900,7 @@ static Invader::CompositeBitmapPixel *load_image(const char *path, std::uint32_t
     return return_value;
 }
 
-static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
+static Invader::ColorPlatePixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
     TIFF *image_tiff = TIFFOpen(path, "r");
     if(!image_tiff) {
         eprintf("Cannot open %s\n", path);
@@ -915,8 +914,8 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
     TIFFSetField(image_tiff, TIFFTAG_EXTRASAMPLES, 1, ua);
 
     // Read it all
-    image_size = image_width * image_height * sizeof(Invader::CompositeBitmapPixel);
-    auto *image_pixels = reinterpret_cast<Invader::CompositeBitmapPixel *>(std::calloc(image_size, 1));
+    image_size = image_width * image_height * sizeof(Invader::ColorPlatePixel);
+    auto *image_pixels = reinterpret_cast<Invader::ColorPlatePixel *>(std::calloc(image_size, 1));
     TIFFReadRGBAImageOriented(image_tiff, image_width, image_height, reinterpret_cast<std::uint32_t *>(image_pixels), ORIENTATION_TOPLEFT);
 
     // Close the TIFF
@@ -924,7 +923,7 @@ static Invader::CompositeBitmapPixel *load_tiff(const char *path, std::uint32_t 
 
     // Swap red and blue channels
     for(std::size_t i = 0; i < image_size / 4; i++) {
-        Invader::CompositeBitmapPixel swapped = image_pixels[i];
+        Invader::ColorPlatePixel swapped = image_pixels[i];
         swapped.red = image_pixels[i].blue;
         swapped.blue = image_pixels[i].red;
         image_pixels[i] = swapped;

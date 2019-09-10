@@ -4,7 +4,6 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
         src/bitmap/color_plate_scanner.cpp
-        src/bitmap/composite_bitmap.cpp
         src/bitmap/stb/stb_impl.c
     )
 
