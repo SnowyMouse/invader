@@ -16,6 +16,7 @@
 #include "../eprintf.hpp"
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
+#include "color_plate_scanner.hpp"
 #include "composite_bitmap.hpp"
 
 enum SUPPORTED_FORMATS_INT {
@@ -317,13 +318,9 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    // Generate the thing
-    CompositeBitmap bitmaps(image_pixels, image_width, image_height);
-    auto &bitmaps_array = bitmaps.get_bitmaps();
-    if(bitmaps_array.size() == 0) {
-        eprintf("No bitmaps found in input.\n");
-        return EXIT_FAILURE;
-    }
+    // Do it!
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value());
+    std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
     std::vector<std::byte> bitmap_tag_data(sizeof(TagFileHeader) + sizeof(Bitmap<BigEndian>));
@@ -365,7 +362,7 @@ int main(int argc, char *argv[]) {
 
     // Now let's add the actual bitmap data
     std::vector<std::byte> bitmap_data_pixels;
-    std::vector<BitmapData<BigEndian>> bitmap_data(bitmaps_array.size());
+    std::vector<BitmapData<BigEndian>> bitmap_data(bitmap_count);
 
     // Default mipmap parameters
     if(!mipmap_fade.has_value()) {
@@ -376,14 +373,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Add our bitmap data
-    printf("Found %zu bitmap%s:\n", bitmaps_array.size(), bitmaps_array.size() == 1 ? "" : "s");
-    for(std::size_t i = 0; i < bitmaps_array.size(); i++) {
+    printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
+    for(std::size_t i = 0; i < bitmap_count; i++) {
         // Write all of the fields here
         auto &bitmap = bitmap_data[i];
-        auto &bitmap_pixels = bitmaps_array[i];
+        auto &bitmap_color_plate = scanned_color_plate.bitmaps[i];
         bitmap.bitmap_class = TagClassInt::TAG_CLASS_BITMAP;
-        bitmap.width = bitmap_pixels.get_width();
-        bitmap.height = bitmap_pixels.get_height();
+        bitmap.width = bitmap_color_plate.width;
+        bitmap.height = bitmap_color_plate.height;
         bitmap.depth = 1;
         bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
@@ -392,8 +389,8 @@ int main(int argc, char *argv[]) {
 
         // Calculate how big the bitmap is
         std::size_t total_size = 0;
-        std::size_t mipmap_width = bitmap_pixels.get_width();
-        std::size_t mipmap_height = bitmap_pixels.get_height();
+        std::size_t mipmap_width = bitmap_color_plate.width;
+        std::size_t mipmap_height = bitmap_color_plate.height;
         std::size_t *smaller_dimension = mipmap_width > mipmap_height ? &mipmap_height : &mipmap_width;
 
         // Calculate how many mipmaps we can make
@@ -417,7 +414,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Calculate the lowest-resolution mipmap we have
-        std::size_t mipmap_count = bitmap_pixels.get_mipmap_count();
+        std::size_t mipmap_count = bitmap_color_plate.mipmaps;
         for(std::size_t i = 0; i <= mipmap_count && i <= bitmap_maximum_mipmap_count; i++) {
             total_size += mipmap_width * mipmap_height * 4;
             mipmap_height /= 2;
@@ -429,7 +426,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Generate mipmaps?
-        const auto *pixels_start = reinterpret_cast<const std::byte *>(bitmap_pixels.get_pixels());
+        const auto *pixels_start = reinterpret_cast<const std::byte *>(bitmap_color_plate.pixels.data());
         std::vector<std::byte> current_bitmap_pixels(pixels_start, pixels_start + total_size);
 
         // Process mipmaps
@@ -803,7 +800,7 @@ int main(int argc, char *argv[]) {
 
         #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-        printf("    Bitmap #%zu: %zux%zu, %zu mipmap%s, %s - %.02f MiB\n", i, bitmaps_array[i].get_width(), bitmaps_array[i].get_height(), mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
+        printf("    Bitmap #%zu: %ux%u, %zu mipmap%s, %s - %.02f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(bitmap_data_pixels.size()));
     }
     printf("Total: %.02f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
@@ -811,12 +808,14 @@ int main(int argc, char *argv[]) {
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());
     new_tag_header.processed_pixel_data.size = bitmap_data_pixels.size();
 
-    // Add a sequence
-    BitmapGroupSequence<BigEndian> bgs = {};
-    bgs.first_bitmap_index = 0;
-    bgs.bitmap_count = bitmap_data.size();
-    bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<const std::byte *>(&bgs), reinterpret_cast<const std::byte *>(&bgs + 1));
-    new_tag_header.bitmap_group_sequence.count = 1;
+    // Add all sequences
+    for(auto &sequence : scanned_color_plate.sequences) {
+        BitmapGroupSequence<BigEndian> bgs = {};
+        bgs.first_bitmap_index = sequence.first_bitmap;
+        bgs.bitmap_count = sequence.bitmap_count;
+        bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<const std::byte *>(&bgs), reinterpret_cast<const std::byte *>(&bgs + 1));
+    }
+    new_tag_header.bitmap_group_sequence.count = scanned_color_plate.sequences.size();
 
     // Add the bitmap tag data
     const auto *bitmap_data_start = reinterpret_cast<const std::byte *>(bitmap_data.data());
