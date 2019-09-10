@@ -468,8 +468,8 @@ int main(int argc, char *argv[]) {
         auto format_check = format.value();
         bool compressed = (format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY || format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA || format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA);
 
-        // If the bitmap is less than 4x4, use 32-bit color
-        if(compressed && (bitmap.height.read() < 4 || bitmap.width.read() < 4)) {
+        // If the bitmap length or height isn't divisible by 4, use 32-bit color
+        if(compressed && ((bitmap.height.read() % 4) != 0 || (bitmap.width.read() % 4) != 0)) {
             format_check = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
             compressed = false;
         }
