@@ -41,6 +41,16 @@ namespace Invader {
         ColorPlateScanner scanner;
         ScannedColorPlate color_plate;
 
+        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+            eprintf("Error: 3D textures are unimplemented.\n");
+            std::terminate();
+        }
+
+        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            eprintf("Error: Sprites are unimplemented.\n");
+            std::terminate();
+        }
+
         color_plate.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
