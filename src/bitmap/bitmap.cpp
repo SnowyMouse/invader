@@ -465,7 +465,16 @@ int main(int argc, char *argv[]) {
         }
 
         // Set the format
-        switch(format.value()) {
+        auto format_check = format.value();
+        bool compressed = (format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY || format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA || format_check == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA);
+
+        // If the bitmap is less than 4x4, use 32-bit color
+        if(compressed && (bitmap.height.read() < 4 || bitmap.width.read() < 4)) {
+            format_check = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+            compressed = false;
+        }
+
+        switch(format_check) {
             case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
                 bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
                 break;
@@ -694,7 +703,7 @@ int main(int argc, char *argv[]) {
         bitmap.pixels_count = current_bitmap_pixels.size();
 
         BitmapDataFlags flags = {};
-        flags.compressed = (bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT1) || (bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT3) || (bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT5);
+        flags.compressed = compressed;
         flags.power_of_two_dimensions = 1;
         bitmap.flags = flags;
 
