@@ -261,7 +261,7 @@ namespace Invader::HEK {
         EndianType<BitmapSpriteUsage> sprite_usage;
 
         // 0x50
-        EndianType<std::int16_t> sprite_spacing;
+        EndianType<std::uint16_t> sprite_spacing;
         PAD(0x2);
         TagReflexive<EndianType, BitmapGroupSequence> bitmap_group_sequence;
         TagReflexive<EndianType, BitmapData> bitmap_data;

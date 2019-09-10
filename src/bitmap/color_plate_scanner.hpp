@@ -9,10 +9,12 @@
 
 #include <cstdint>
 #include <vector>
+#include <optional>
 #include "../tag/hek/class/bitmap.hpp"
 
 namespace Invader {
     using BitmapType = HEK::BitmapType;
+    using BitmapSpriteUsage = HEK::BitmapSpriteUsage;
 
     struct ColorPlatePixel {
         std::uint8_t blue;
@@ -95,11 +97,20 @@ namespace Invader {
         std::vector<ScannedColorPlateBitmapMipmap> mipmaps;
     };
 
+    struct ScannedColorPlateSprite {
+        std::uint32_t top;
+        std::uint32_t left;
+        std::uint32_t right;
+        std::uint32_t bottom;
+        std::uint32_t bitmap_index;
+    };
+
     struct ScannedColorPlateSequence {
         std::uint32_t y_start;
         std::uint32_t y_end;
         std::uint32_t first_bitmap;
         std::uint32_t bitmap_count;
+        std::vector<ScannedColorPlateSprite> sprites;
     };
 
     struct ScannedColorPlate {
@@ -114,6 +125,13 @@ namespace Invader {
         SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR
     };
 
+    struct ColorPlateScannerSpriteParameters {
+        BitmapSpriteUsage sprite_usage;
+        std::uint32_t sprite_budget;
+        std::uint32_t sprite_budget_count;
+        std::uint32_t sprite_spacing;
+    };
+
     class ColorPlateScanner {
     public:
         /**
@@ -125,9 +143,10 @@ namespace Invader {
          * @param  mipmaps            maximum number of mipmaps
          * @param  mipmap_type        type of mipmaps
          * @param  mipmap_fade_factor fade-to-gray factor for mipmaps
+         * @param  sprite_parameters  sprite parameters for sprite generation (only necessary if making sprites)
          * @return                    scanned color plate data
          */
-        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
+        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
@@ -211,6 +230,13 @@ namespace Invader {
          * @param color_plate color plate data to do cubemap stuff with
          */
         static void consolidate_cubemaps(ScannedColorPlate &color_plate);
+
+        /**
+         * Process sprites
+         * @param color_plate color plate data to do sprite stuff with
+         * @param parameters  sprite parameters
+         */
+        static void process_sprites(ScannedColorPlate &color_plate, const ColorPlateScannerSpriteParameters &parameters);
 
         ColorPlateScanner() = default;
     };

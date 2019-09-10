@@ -37,7 +37,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
         ColorPlateScanner scanner;
         ScannedColorPlate color_plate;
 
@@ -144,6 +144,11 @@ namespace Invader {
         // Otherwise, look for bitmaps up, down, left, and right
         else {
             scanner.read_non_color_plate(color_plate, pixels, width, height);
+        }
+
+        // If we are doing sprites, we need to handle those now
+        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            process_sprites(color_plate, sprite_parameters.value());
         }
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
@@ -749,5 +754,327 @@ namespace Invader {
 
         color_plate.bitmaps = std::move(new_bitmaps);
         color_plate.sequences = std::move(new_sequences);
+    }
+
+    static std::uint32_t number_of_sprite_sheets(const std::vector<ScannedColorPlateSequence> &sequences) {
+        std::uint32_t highest = 0;
+        for(auto &sequence : sequences) {
+            for(auto &sprite : sequence.sprites) {
+                std::uint32_t count = sprite.bitmap_index + 1;
+                if(count > highest) {
+                    highest = count;
+                }
+            }
+        }
+        return highest;
+    }
+
+    static std::pair<std::uint32_t, std::uint32_t> dimensions_of_sprite_sheet(const std::vector<ScannedColorPlateSequence> &sequences, std::uint32_t bitmap_index) {
+        std::uint32_t max_width = 0;
+        std::uint32_t max_height = 0;
+
+        // Go through each sprite of the bitmap index
+        for(auto &sequence : sequences) {
+            for(auto &sprite : sequence.sprites) {
+                if(sprite.bitmap_index != bitmap_index) {
+                    continue;
+                }
+                if(sprite.right > max_width) {
+                    max_width = sprite.right;
+                }
+                if(sprite.top > max_height) {
+                    max_height = sprite.top;
+                }
+            }
+        }
+
+        // Find the lowest power of two that is greater than or equal, doing this for width and height
+        auto power_of_twoafy = [](auto number) {
+            for(std::uint32_t p = 0; p < sizeof(number)*4-1; p++) {
+                if((1 << p) >= number) {
+                    return number;
+                }
+            }
+            std::terminate();
+        };
+
+        max_width = power_of_twoafy(max_width);
+        max_height = power_of_twoafy(max_height);
+
+        return std::pair(max_width, max_height);
+    }
+
+    static std::size_t number_of_pixels(const std::vector<ScannedColorPlateSequence> &sequences) {
+        std::uint32_t sprite_sheet_count = number_of_sprite_sheets(sequences);
+        std::size_t sprite_sheet_pixels = 0;
+        for(std::uint32_t i = 0; i < sprite_sheet_count; i++) {
+            auto dimensions = dimensions_of_sprite_sheet(sequences, i);
+            sprite_sheet_pixels += dimensions.first * dimensions.second;
+        }
+        return sprite_sheet_pixels;
+    }
+
+    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
+        // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
+        for(auto &bitmap : color_plate.bitmaps) {
+            if(bitmap.height > height || bitmap.width > width) {
+                return std::nullopt;
+            }
+        }
+
+        std::uint32_t sheet_count = 1;
+        std::vector<ScannedColorPlateSequence> new_sequences;
+
+        struct SortedSprite {
+            std::uint32_t bitmap_index;
+            std::uint32_t sequence_index;
+            std::uint32_t sequence_sprite_index;
+            std::uint32_t length;
+
+            std::uint32_t width;
+            std::uint32_t height;
+
+            std::uint32_t top;
+            std::uint32_t left;
+            std::uint32_t bottom;
+            std::uint32_t right;
+        };
+
+        // Sort each sprite by height or width depending on if height > width (use the lower dimension). The first element of the pair is the bitmap index and the second element is the length
+        std::vector<SortedSprite> sprites_sorted;
+        const auto *bitmaps = color_plate.bitmaps.data();
+        const bool SORT_BY_HEIGHT = width >= height;
+        for(std::uint32_t s = 0; s < color_plate.sequences.size(); s++) {
+            // Go through each bitmap in the sequence
+            auto &sequence = color_plate.sequences[s];
+            const auto FIRST_BITMAP = sequence.first_bitmap;
+            const auto END_BITMAP = FIRST_BITMAP + sequence.bitmap_count;
+            for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
+                auto &bitmap = bitmaps[b];
+                std::uint32_t length;
+                if(SORT_BY_HEIGHT) {
+                    length = bitmap.height;
+                }
+                else {
+                    length = bitmap.width;
+                }
+
+                // Create it!
+                SortedSprite sprite_to_add = {};
+                sprite_to_add.bitmap_index = b;
+                sprite_to_add.length = length;
+                sprite_to_add.sequence_sprite_index = b - FIRST_BITMAP;
+                sprite_to_add.sequence_index = s;
+                sprite_to_add.width = bitmap.width;
+                sprite_to_add.height = bitmap.height;
+
+                // Find a sprite that's smaller and add it before that, stopping when we reach the end of the array
+                auto sprite_iter = sprites_sorted.begin();
+                for(; sprite_iter < sprites_sorted.end(); sprite_iter++) {
+                    if(sprite_iter->length < length) {
+                        break;
+                    }
+                }
+                sprites_sorted.insert(sprite_iter, sprite_to_add);
+            }
+        }
+
+        // Now that it's all sorted, begin placing things. If sorting by height, then scan vertically. Otherwise scan horizontally
+        for(std::size_t sprite = 0; sprite < sprites_sorted.size(); sprite++) {
+            auto &sprite_fitting = sprites_sorted[sprite];
+
+            for(std::uint32_t sheet = 0; sheet < sheet_count; sheet++) {
+                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sprite_spacing, &sheet](std::uint32_t x, std::uint32_t y) -> bool {
+                    auto subtract_clamp = [](std::uint32_t a, std::uint32_t b) -> std::uint32_t {
+                        if(a < b) {
+                            return 0;
+                        }
+                        else {
+                            return a - b;
+                        }
+                    };
+
+                    // Get the corners
+                    std::pair<std::uint32_t, std::uint32_t> top_left_corner = std::pair<std::uint32_t, std::uint32_t>(x, y);
+                    std::pair<std::uint32_t, std::uint32_t> top_right_corner = std::pair<std::uint32_t, std::uint32_t>(x, y + sprite_fitting.height - 1);
+                    std::pair<std::uint32_t, std::uint32_t> bottom_left_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y);
+                    std::pair<std::uint32_t, std::uint32_t> bottom_right_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y + sprite_fitting.height - 1);
+
+                    for(std::uint32_t sprite_test = 0; sprite_test < sprite; sprite_test++) {
+                        auto sprite_test_value = sprites_sorted[sprite_test];
+
+                        // If we aren't even on the same bitmap, ignore
+                        if(sheet != sprite_test_value.bitmap_index) {
+                            continue;
+                        }
+
+                        // Get the value for comparing, spacing included
+                        std::uint32_t compare_top = subtract_clamp(sprite_test_value.top, sprite_spacing);
+                        std::uint32_t compare_left = subtract_clamp(sprite_test_value.left, sprite_spacing);
+                        std::uint32_t compare_bottom = sprite_test_value.bottom + sprite_spacing;
+                        std::uint32_t compare_right = sprite_test_value.right + sprite_spacing;
+
+                        auto corner_inside_box = [&compare_top, &compare_left, &compare_bottom, &compare_right](std::pair<std::uint32_t, std::uint32_t> &point) {
+                            auto &x = point.first;
+                            auto &y = point.second;
+
+                            return x >= compare_left && x < compare_right && y >= compare_top && y < compare_bottom;
+                        };
+
+                        // If any corner is inside the sprite return false
+                        if(corner_inside_box(top_left_corner) || corner_inside_box(top_right_corner) || corner_inside_box(bottom_left_corner) || corner_inside_box(bottom_right_corner)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                };
+
+                // Coordinates
+                std::optional<std::pair<std::uint32_t,std::uint32_t>> coordinates;
+
+                // If it fits, set the coordinates
+                #define CHECK_IF_FITS if(fits(x,y)) { \
+                    coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y); \
+                }
+
+                if(SORT_BY_HEIGHT) {
+                    for(std::uint32_t x = 0; x < width && !coordinates.has_value(); x++) {
+                        for(std::uint32_t y = 0; y < height && !coordinates.has_value(); y++) {
+                            CHECK_IF_FITS
+                        }
+                    }
+                }
+                else {
+                    for(std::uint32_t y = 0; y < height && !coordinates.has_value(); y++) {
+                        for(std::uint32_t x = 0; x < width && !coordinates.has_value(); x++) {
+                            CHECK_IF_FITS
+                        }
+                    }
+                }
+
+                // Did we do it?
+                if(coordinates.has_value()) {
+                    sprite_fitting.bitmap_index = sheet;
+
+                    auto &x = coordinates.value().first;
+                    auto &y = coordinates.value().second;
+
+                    sprite_fitting.left = x;
+                    sprite_fitting.top = y;
+                    sprite_fitting.bottom = y + sprite_fitting.height;
+                    sprite_fitting.right = x + sprite_fitting.width;
+
+                    break;
+                }
+
+                // Try making a new sprite sheet. If we hit the maximum sprite sheets, give up.
+                if(sheet + 1 == sheet_count) {
+                    if(++sheet_count >= maximum_sprite_sheets) {
+                        return std::nullopt;
+                    }
+                }
+            }
+        }
+
+        // Put it all together
+        for(std::size_t s = 0; s < color_plate.sequences.size(); s++) {
+            auto &sequence = color_plate.sequences[s];
+            auto &new_sequence = new_sequences.emplace_back();
+            new_sequence.bitmap_count = 0;
+            new_sequence.first_bitmap = 0;
+            new_sequence.y_end = sequence.y_end;
+            new_sequence.y_start = sequence.y_start;
+
+            // Find the sprite
+            for(std::uint32_t b = 0; b < sequence.bitmap_count; b++) {
+                for(auto &sprite : sprites_sorted) {
+                    if(sprite.sequence_index == s && sprite.bitmap_index == b) {
+                        auto &new_sprite = new_sequence.sprites.emplace_back();
+                        new_sprite.bitmap_index = sprite.bitmap_index;
+                        new_sprite.bottom = sprite.bottom;
+                        new_sprite.top = sprite.top;
+                        new_sprite.left = sprite.left;
+                        new_sprite.right = sprite.right;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Done!
+        return new_sequences;
+    }
+
+    // Go through each possible height/width until we get something. The maximum number of operations this can do is log2(width * height)
+    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
+        auto fit_sprites = fit_sprites_into_sprite_sheet(width, height, color_plate, sprite_spacing, maximum_sprite_sheets);
+        if(!fit_sprites.has_value()) {
+            return std::nullopt;
+        }
+
+        auto fit_sprites_pixels = number_of_pixels(fit_sprites.value());
+
+        auto fit_sprites_half_height = fit_sprites_into_maximum_sprite_sheet(width, height / 2, color_plate, sprite_spacing, maximum_sprite_sheets);
+        auto fit_sprites_half_width = fit_sprites_into_maximum_sprite_sheet(width / 2, height, color_plate, sprite_spacing, maximum_sprite_sheets);
+        auto fit_sprites_half_height_pixels = fit_sprites_half_height.has_value() ? number_of_pixels(fit_sprites_half_height.value()) : ~0;
+        auto fit_sprites_half_width_pixels = fit_sprites_half_width.has_value() ? number_of_pixels(fit_sprites_half_width.value()) : ~0;
+
+        if(fit_sprites_pixels > fit_sprites_half_height_pixels) {
+            if(fit_sprites_half_height_pixels > fit_sprites_half_width_pixels) {
+                return fit_sprites_half_width;
+            }
+            else {
+                return fit_sprites_half_height;
+            }
+        }
+        else if(fit_sprites_pixels > fit_sprites_half_width_pixels) {
+            return fit_sprites_half_width;
+        }
+        else {
+            return fit_sprites;
+        }
+    }
+
+    void ColorPlateScanner::process_sprites(ScannedColorPlate &color_plate, const ColorPlateScannerSpriteParameters &parameters) {
+        // Pick the background color of the sprite sheet
+        ColorPlatePixel background_color;
+        switch(parameters.sprite_usage) {
+            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX:
+                background_color.alpha = 0;
+                background_color.red = 0;
+                background_color.green = 0;
+                background_color.blue = 0;
+                break;
+            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_DOUBLE_MULTIPLY:
+                background_color.alpha = 255;
+                background_color.red = 127;
+                background_color.green = 127;
+                background_color.blue = 127;
+                break;
+            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN:
+                background_color.alpha = 255;
+                background_color.red = 255;
+                background_color.green = 255;
+                background_color.blue = 255;
+                break;
+        }
+
+        // Get the max budget of the sprite sheet. If none is given, automatically choose a large budget
+        std::uint32_t max_budget = parameters.sprite_budget;
+        std::uint32_t max_sheet_count = parameters.sprite_budget_count;
+        if(max_sheet_count == 0) {
+            max_budget = 2048;
+            max_sheet_count = 1;
+        }
+
+        // First see if we can even fit things into this
+        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, parameters.sprite_spacing, max_sheet_count);
+        if(!fit_sprites.has_value()) {
+            eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
+            std::terminate();
+        }
+
+        std::terminate();
     }
 }

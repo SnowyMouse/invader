@@ -41,23 +41,6 @@ static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTE
 static Invader::ColorPlatePixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 static Invader::ColorPlatePixel *load_image(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size);
 
-enum MipmapScaleType {
-    /** Guess based on what the tag says */
-    MIPMAP_SCALE_TYPE_TAG,
-
-    /** Interpolate colors */
-    MIPMAP_SCALE_TYPE_LINEAR,
-
-    /** Interpolate RGB only */
-    MIPMAP_SCALE_TYPE_NEAREST_ALPHA,
-
-    /** Do not interpolate colors */
-    MIPMAP_SCALE_TYPE_NEAREST,
-
-    /** No mipmap */
-    MIPMAP_SCALE_TYPE_NONE
-};
-
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
     using namespace Invader;
@@ -70,7 +53,7 @@ int main(int argc, char *argv[]) {
     const char *tags = "tags/";
 
     // Scale type?
-    MipmapScaleType mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_TAG;
+    std::optional<ScannedColorMipmapType> mipmap_scale_type;
 
     // Format?
     std::optional<BitmapFormat> format;
@@ -80,6 +63,12 @@ int main(int argc, char *argv[]) {
 
     // Bitmap type
     std::optional<BitmapType> bitmap_type;
+
+    // Sprite parameters
+    std::optional<BitmapSpriteUsage> sprite_usage;
+    std::optional<std::uint32_t> sprite_budget;
+    std::optional<std::uint32_t> sprite_budget_count;
+    std::optional<std::uint32_t> sprite_spacing;
 
     // Dithering?
     bool dithering = false;
@@ -136,16 +125,13 @@ int main(int argc, char *argv[]) {
 
             case 's':
                 if(std::strcmp(optarg, "linear") == 0) {
-                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
+                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
                 }
                 else if(std::strcmp(optarg, "nearest") == 0) {
-                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST;
+                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
                 }
                 else if(std::strcmp(optarg, "nearest-alpha") == 0) {
-                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NEAREST_ALPHA;
-                }
-                else if(std::strcmp(optarg, "none") == 0) {
-                    mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_NONE;
+                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
                 }
                 else {
                     eprintf("Unknown mipmap scale type %s\n", optarg);
@@ -221,7 +207,7 @@ int main(int argc, char *argv[]) {
                 eprintf("                               <count> mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
-                eprintf("                               nearest, none. Default (new tag): linear\n");
+                eprintf("                               nearest. Default (new tag): linear\n");
 
                 return EXIT_FAILURE;
         }
@@ -290,6 +276,18 @@ int main(int argc, char *argv[]) {
                 max_mipmap_count = mipmap_count - 1;
             }
         }
+        if(!sprite_usage.has_value()) {
+            sprite_usage = bitmap_tag_header.sprite_usage;
+        }
+        if(!sprite_budget.has_value()) {
+            sprite_budget = 32 << bitmap_tag_header.sprite_budget_size;
+        }
+        if(!sprite_budget_count.has_value()) {
+            sprite_budget_count = bitmap_tag_header.sprite_budget_count;
+        }
+        if(!sprite_spacing.has_value()) {
+            sprite_spacing = bitmap_tag_header.sprite_spacing;
+        }
 
         std::fclose(tag_read);
     }
@@ -302,6 +300,26 @@ int main(int argc, char *argv[]) {
     // Same with bitmap type
     if(!bitmap_type.has_value()) {
         bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
+    }
+
+    // And these other things too
+    if(!sprite_usage.has_value()) {
+        sprite_usage = BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX;
+    }
+    if(!sprite_budget.has_value()) {
+        sprite_budget = 32;
+    }
+    if(!sprite_budget_count.has_value()) {
+        sprite_budget_count = 0;
+    }
+    if(!sprite_spacing.has_value()) {
+        sprite_spacing = 4;
+    }
+    if(!mipmap_fade.has_value()) {
+        mipmap_fade = 0.0F;
+    }
+    if(!mipmap_scale_type.has_value()) {
+        mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
     }
 
     // Have these variables handy
@@ -339,8 +357,19 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Set up sprite parameters
+    std::optional<ColorPlateScannerSpriteParameters> sprite_parameters;
+    if(bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
+        sprite_parameters = {};
+        auto &p = sprite_parameters.value();
+        p.sprite_budget = sprite_budget.value();
+        p.sprite_budget_count = sprite_budget_count.value();
+        p.sprite_spacing = sprite_spacing.value();
+        p.sprite_usage = sprite_usage.value();
+    }
+
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value());
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), sprite_parameters, max_mipmap_count, mipmap_scale_type.value(), mipmap_fade.value());
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -388,9 +417,6 @@ int main(int argc, char *argv[]) {
     // Default mipmap parameters
     if(!mipmap_fade.has_value()) {
         mipmap_fade = 0.0F;
-    }
-    if(mipmap_scale_type == MipmapScaleType::MIPMAP_SCALE_TYPE_TAG) {
-        mipmap_scale_type = MipmapScaleType::MIPMAP_SCALE_TYPE_LINEAR;
     }
 
     // Add our bitmap data
@@ -748,6 +774,31 @@ int main(int argc, char *argv[]) {
     }
     else {
         new_tag_header.mipmap_count = max_mipmap_count;
+    }
+
+    new_tag_header.sprite_spacing = sprite_spacing.value();
+    new_tag_header.sprite_budget_count = sprite_budget_count.value();
+    new_tag_header.sprite_usage = sprite_usage.value();
+    auto &sprite_budget_value = sprite_budget.value();
+    switch(sprite_budget_value) {
+        case 32:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
+            break;
+        case 64:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_64X64;
+            break;
+        case 128:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_128X128;
+            break;
+        case 256:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_256X256;
+            break;
+        case 512:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_512X512;
+            break;
+        default:
+            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
+            break;
     }
 
     // Add the struct in
