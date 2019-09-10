@@ -321,12 +321,12 @@ namespace Invader {
             };
 
             // Add each cubemap face
-            add_bitmap(0, face_width * 1, 90);
-            add_bitmap(0, face_width * 2, 180);
-            add_bitmap(0, face_width * 3, 270);
-            add_bitmap(0, face_width * 4, 0);
-            add_bitmap(0, 0, 90);
-            add_bitmap(face_width * 2, 0, 90);
+            add_bitmap(face_width * 0, face_width * 1, 90);
+            add_bitmap(face_width * 1, face_width * 1, 180);
+            add_bitmap(face_width * 2, face_width * 1, 270);
+            add_bitmap(face_width * 3, face_width * 1, 0);
+            add_bitmap(face_width * 0, face_width * 0, 90);
+            add_bitmap(face_width * 0, face_width * 2, 90);
             color_plate.sequences[0].first_bitmap = 0;
             color_plate.sequences[0].bitmap_count = 6;
         }
