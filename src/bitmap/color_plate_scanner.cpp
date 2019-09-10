@@ -245,6 +245,8 @@ namespace Invader {
                             bitmap.height = height;
                             bitmap.color_plate_x = min_x.value();
                             bitmap.color_plate_y = min_y.value();
+                            bitmap.registration_point_x = (max_x.value() - min_x.value()) / 2;
+                            bitmap.registration_point_y = (max_y.value() - min_y.value()) / 2;
                             for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
                                 for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
                                     auto &pixel = GET_PIXEL(bx, by);
@@ -314,6 +316,8 @@ namespace Invader {
             new_bitmap.height = face_width;
             new_bitmap.width = face_width;
             new_bitmap.pixels.reserve(face_width * face_width);
+            new_bitmap.registration_point_x = 0;
+            new_bitmap.registration_point_y = 0;
 
             for(std::uint32_t y = 0; y < face_width; y++) {
                 for(std::uint32_t x = 0; x < face_width; x++) {
@@ -501,6 +505,8 @@ namespace Invader {
                     bitmap.mipmaps = std::vector<ScannedColorPlateBitmapMipmap>();
                     bitmap.width = bitmap_width;
                     bitmap.height = bitmap_height;
+                    bitmap.registration_point_x = width / 2;
+                    bitmap.registration_point_y = height / 2;
 
                     // Store bitmap data, too
                     std::uint32_t my = y;
@@ -674,6 +680,8 @@ namespace Invader {
             new_bitmap.width = bitmaps->width;
             new_bitmap.color_plate_x = bitmaps->color_plate_x;
             new_bitmap.color_plate_y = bitmaps->color_plate_y;
+            new_bitmap.registration_point_x = 0;
+            new_bitmap.registration_point_y = 0;
 
             const std::uint32_t MIPMAP_COUNT = bitmaps->mipmaps.size();
 
@@ -791,8 +799,9 @@ namespace Invader {
         // Find the lowest power of two that is greater than or equal, doing this for width and height
         auto power_of_twoafy = [](auto number) {
             for(std::uint32_t p = 0; p < sizeof(number)*4-1; p++) {
-                if(static_cast<std::uint32_t>(1 << p) >= number) {
-                    return number;
+                std::uint32_t powered = static_cast<std::uint32_t>(1 << p);
+                if(powered >= number) {
+                    return powered;
                 }
             }
             std::terminate();
@@ -838,6 +847,9 @@ namespace Invader {
             std::uint32_t left;
             std::uint32_t bottom;
             std::uint32_t right;
+
+            std::uint32_t registration_point_x;
+            std::uint32_t registration_point_y;
         };
 
         // Sort each sprite by height or width depending on if height > width (use the lower dimension). The first element of the pair is the bitmap index and the second element is the length
@@ -867,6 +879,8 @@ namespace Invader {
                 sprite_to_add.sequence_index = s;
                 sprite_to_add.width = bitmap.width;
                 sprite_to_add.height = bitmap.height;
+                sprite_to_add.registration_point_x = bitmap.registration_point_x;
+                sprite_to_add.registration_point_y = bitmap.registration_point_y;
 
                 // Find a sprite that's smaller and add it before that, stopping when we reach the end of the array
                 auto sprite_iter = sprites_sorted.begin();
@@ -996,6 +1010,8 @@ namespace Invader {
                         new_sprite.top = sprite.top;
                         new_sprite.left = sprite.left;
                         new_sprite.right = sprite.right;
+                        new_sprite.registration_point_x = sprite.registration_point_x;
+                        new_sprite.registration_point_y = sprite.registration_point_y;
                         break;
                     }
                 }

@@ -432,7 +432,6 @@ int main(int argc, char *argv[]) {
         bitmap.depth = 1;
         bitmap.type = bitmap_type.value() == BitmapType::BITMAP_TYPE_CUBE_MAPS ? BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP : BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
-        bitmap.registration_point = Point2DInt<BigEndian> {};
         bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
         std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
@@ -734,8 +733,8 @@ int main(int argc, char *argv[]) {
         flags.power_of_two_dimensions = 1;
         bitmap.flags = flags;
 
-        bitmap.registration_point.x = bitmap.width.read() / 2;
-        bitmap.registration_point.y = bitmap.height.read() / 2;
+        bitmap.registration_point.x = bitmap_color_plate.registration_point_x;
+        bitmap.registration_point.y = bitmap_color_plate.registration_point_y;
 
         #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
