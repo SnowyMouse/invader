@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'F' },
+        {"type", required_argument, 0, 'T' },
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
@@ -171,7 +172,26 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "dxt1") == 0) {
                     format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
+                else {
+                    eprintf("Unknown format %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
                 break;
+
+            case 'T':
+                if(std::strcmp(optarg, "2d") == 0) {
+                    bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
+                }
+                else if(std::strcmp(optarg, "cubemap") == 0) {
+                    bitmap_type = BitmapType::BITMAP_TYPE_CUBE_MAPS;
+                }
+                else if(std::strcmp(optarg, "interface") == 0) {
+                    bitmap_type = BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
+                }
+                else {
+                    eprintf("Unknown type %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
 
             case 'D':
                 dithering = true;
@@ -191,7 +211,9 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
-                eprintf("    --dithering,-D             Apply dithering. Only works on dxt5/dxt1 for now.\n");
+                eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, cubemap,\n");
+                eprintf("                               interface. Default (new tag): 2d\n");
+                eprintf("    --dithering,-D             Apply dithering. Only works on dxtn for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
