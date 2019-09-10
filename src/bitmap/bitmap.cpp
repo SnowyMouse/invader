@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
     // Set up sprite parameters
     std::optional<ColorPlateScannerSpriteParameters> sprite_parameters;
     if(bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
-        sprite_parameters = {};
+        sprite_parameters = ColorPlateScannerSpriteParameters {};
         auto &p = sprite_parameters.value();
         p.sprite_budget = sprite_budget.value();
         p.sprite_budget_count = sprite_budget_count.value();
