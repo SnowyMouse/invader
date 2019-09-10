@@ -381,7 +381,7 @@ int main(int argc, char *argv[]) {
         bitmap.width = bitmap_color_plate.width;
         bitmap.height = bitmap_color_plate.height;
         bitmap.depth = 1;
-        bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
+        bitmap.type = bitmap_type.value() == BitmapType::BITMAP_TYPE_CUBE_MAPS ? BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP : BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.registration_point = Point2DInt<BigEndian> {};
         bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());

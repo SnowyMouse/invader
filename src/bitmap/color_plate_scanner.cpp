@@ -136,19 +136,14 @@ namespace Invader {
             scanner.read_non_color_plate(color_plate, pixels, width, height);
         }
 
-        // Go through each sequence and check to make sure they have 6 bitmaps (if a cubemap)
-        if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            for(auto &sequence : color_plate.sequences) {
-                if(sequence.bitmap_count != 6) {
-                    eprintf("Cubemaps must have exactly 6 bitmaps per sequence.\n");
-                    std::terminate();
-                }
-            }
-        }
-
         // If we aren't making interface bitmaps, generate mipmaps when needed
         if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             generate_mipmaps(color_plate, mipmaps, mipmap_type, mipmap_fade_factor);
+        }
+
+        // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data
+        if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+            consolidate_cubemaps(color_plate);
         }
 
         return color_plate;
@@ -640,5 +635,109 @@ namespace Invader {
                 last_mipmap_offset = this_mipmap_offset;
             }
         }
+    }
+
+    void ColorPlateScanner::consolidate_cubemaps(ScannedColorPlate &color_plate) {
+        std::vector<ScannedColorPlateSequence> new_sequences;
+        std::vector<ScannedColorPlateBitmap> new_bitmaps;
+        for(auto &sequence : color_plate.sequences) {
+            // First, make sure we have six bitmaps exactly. Otherwise, bail.
+            if(sequence.bitmap_count != 6) {
+                eprintf("Error: Cubemap sequences require 6 bitmaps. %u found\n", sequence.bitmap_count);
+                std::terminate();
+            }
+
+            auto &new_sequence = new_sequences.emplace_back();
+            new_sequence.bitmap_count = 1;
+            new_sequence.first_bitmap = new_bitmaps.size();
+            new_sequence.y_start = sequence.y_start;
+            new_sequence.y_start = sequence.y_end;
+
+            auto *bitmaps = color_plate.bitmaps.data() + sequence.first_bitmap;
+            auto &new_bitmap = new_bitmaps.emplace_back();
+            new_bitmap.height = bitmaps->height;
+            new_bitmap.width = bitmaps->width;
+            new_bitmap.color_plate_x = bitmaps->color_plate_x;
+            new_bitmap.color_plate_y = bitmaps->color_plate_y;
+
+            const std::uint32_t MIPMAP_COUNT = bitmaps->mipmaps.size();
+
+            // Next, make sure the bitmap is the same height and width
+            if(new_bitmap.height != new_bitmap.width) {
+                eprintf("Error: Cubemap bitmaps must have equal height and width. %ux%u found\n", new_bitmap.width, new_bitmap.height);
+                std::terminate();
+            }
+
+            const std::uint32_t BITMAP_LENGTH = new_bitmap.width;
+
+            // Allocate data to hold the new pixels and mipmaps
+            std::uint32_t mipmap_length = BITMAP_LENGTH;
+            static constexpr std::uint8_t FACES = 6;
+            for(std::uint32_t i = 0; i <= MIPMAP_COUNT; i++) {
+                // Calculate the mipmap size in pixels (6 faces x length^2)
+                std::uint32_t mipmap_size = mipmap_length * mipmap_length * FACES;
+
+                // Add everything
+                if(i) {
+                    auto &mipmap = new_bitmap.mipmaps.emplace_back();
+                    mipmap.first_pixel = new_bitmap.pixels.size();
+                    mipmap.pixel_count = mipmap_size;
+                    mipmap.mipmap_height = mipmap_length;
+                    mipmap.mipmap_width = mipmap_length;
+                }
+
+                new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
+
+                mipmap_length /= 2;
+            }
+
+            // Go through each face
+            for(std::size_t f = 0; f < FACES; f++) {
+                auto &bitmap = bitmaps[f];
+
+                // Ensure it's the same dimensions
+                if(bitmap.height != BITMAP_LENGTH || bitmap.width != BITMAP_LENGTH) {
+                    eprintf("Error: Cubemap bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", new_bitmap.width, new_bitmap.height, bitmap.width, bitmap.height);
+                    std::terminate();
+                }
+
+                // Also ensure it has the same # of mipmaps. I don't know how it wouldn't, but you never know
+                if(bitmap.mipmaps.size() != MIPMAP_COUNT) {
+                    eprintf("Error: Cubemap bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
+                    std::terminate();
+                }
+
+                // One of the only do/while loops I will ever do in Invader while writing it.
+                std::optional<std::uint32_t> m;
+                do {
+                    ColorPlatePixel *destination_buffer;
+                    const ColorPlatePixel *source_buffer;
+                    std::size_t pixel_count;
+
+                    // Determine things
+                    if(m.has_value()) {
+                        auto &mipmap = new_bitmap.mipmaps[m.value()];
+                        const auto MIPMAP_LENGTH = mipmap.mipmap_width;
+                        pixel_count = MIPMAP_LENGTH * MIPMAP_LENGTH;
+                        destination_buffer = new_bitmap.pixels.data() + mipmap.first_pixel + pixel_count * f;
+                        source_buffer = bitmap.pixels.data() + bitmap.mipmaps[m.value()].first_pixel;
+                        m = m.value() + 1;
+                    }
+                    else {
+                        pixel_count = BITMAP_LENGTH * BITMAP_LENGTH;
+                        destination_buffer = new_bitmap.pixels.data() + pixel_count * f;
+                        source_buffer = bitmap.pixels.data();
+                        m = 0;
+                    }
+
+                    // Copy!
+                    std::copy(source_buffer, source_buffer + pixel_count, destination_buffer);
+                }
+                while(m.value() < MIPMAP_COUNT);
+            }
+        }
+
+        color_plate.bitmaps = std::move(new_bitmaps);
+        color_plate.sequences = std::move(new_sequences);
     }
 }

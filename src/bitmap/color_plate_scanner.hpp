@@ -206,6 +206,12 @@ namespace Invader {
          */
         static void generate_mipmaps(ScannedColorPlate &color_plate, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
 
+        /**
+         * Consolidate the cubemap data
+         * @param color_plate color plate data to do cubemap stuff with
+         */
+        static void consolidate_cubemaps(ScannedColorPlate &color_plate);
+
         ColorPlateScanner() = default;
     };
 }
