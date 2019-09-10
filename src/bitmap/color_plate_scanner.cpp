@@ -133,7 +133,7 @@ namespace Invader {
 
         // If we have valid color plate data, use the color plate data
         if(scanner.valid_color_plate) {
-            scanner.read_color_plate(color_plate, pixels, width, height);
+            scanner.read_color_plate(color_plate, pixels, width);
         }
 
         // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
@@ -164,7 +164,7 @@ namespace Invader {
         return color_plate;
     }
 
-    void ColorPlateScanner::read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width) const {
         for(auto &sequence : color_plate.sequences) {
             sequence.first_bitmap = color_plate.bitmaps.size();
             sequence.bitmap_count = 0;
@@ -791,7 +791,7 @@ namespace Invader {
         // Find the lowest power of two that is greater than or equal, doing this for width and height
         auto power_of_twoafy = [](auto number) {
             for(std::uint32_t p = 0; p < sizeof(number)*4-1; p++) {
-                if((1 << p) >= number) {
+                if(static_cast<std::uint32_t>(1 << p) >= number) {
                     return number;
                 }
             }

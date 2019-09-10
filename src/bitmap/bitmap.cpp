@@ -178,6 +178,7 @@ int main(int argc, char *argv[]) {
                     eprintf("Unknown type %s\n", optarg);
                     return EXIT_FAILURE;
                 }
+                break;
 
             case 'D':
                 dithering = true;

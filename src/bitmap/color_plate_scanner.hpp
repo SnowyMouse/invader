@@ -197,9 +197,8 @@ namespace Invader {
          * @param color_plate color plate data to write to (output)
          * @param pixels      pixel input
          * @param width       width of input
-         * @param height      height of input
          */
-        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width) const;
 
         /**
          * Read an unrolled cubemap
