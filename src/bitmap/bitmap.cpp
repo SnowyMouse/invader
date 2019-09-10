@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
