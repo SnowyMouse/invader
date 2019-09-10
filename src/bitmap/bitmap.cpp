@@ -616,8 +616,13 @@ int main(int argc, char *argv[]) {
 
                 // Go through each 4x4 block and make them compressed
                 for(std::size_t i = 0; i <= mipmap_count; i++) {
-                    if(mipmap_width >= BLOCK_LENGTH && mipmap_height >= BLOCK_LENGTH) {
-                        for(std::size_t y = 0; y < mipmap_height; y += BLOCK_LENGTH) {
+                    std::uint32_t effective_mipmap_height = mipmap_height;
+                    if(bitmap.type == BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP) {
+                        effective_mipmap_height *= 6;
+                    }
+
+                    if(mipmap_width >= BLOCK_LENGTH && effective_mipmap_height >= BLOCK_LENGTH) {
+                        for(std::size_t y = 0; y < effective_mipmap_height; y += BLOCK_LENGTH) {
                             for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
                                 // Let's make the 4x4 block
                                 ColorPlatePixel block[BLOCK_LENGTH * BLOCK_LENGTH];
@@ -661,7 +666,7 @@ int main(int argc, char *argv[]) {
                         mipmaps_reduced++;
                     }
 
-                    uncompressed_pixel += mipmap_width * mipmap_height;
+                    uncompressed_pixel += mipmap_width * effective_mipmap_height;
                     mipmap_width /= 2;
                     mipmap_height /= 2;
                 }
