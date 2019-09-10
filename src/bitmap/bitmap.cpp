@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Calculate the lowest-resolution mipmap we have
-        std::size_t mipmap_count = bitmap_color_plate.mipmaps;
+        std::size_t mipmap_count = bitmap_color_plate.mipmaps.size();
         for(std::size_t i = 0; i <= mipmap_count && i <= bitmap_maximum_mipmap_count; i++) {
             total_size += mipmap_width * mipmap_height * 4;
             mipmap_height /= 2;

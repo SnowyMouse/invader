@@ -288,7 +288,6 @@ namespace Invader {
             new_bitmap.color_plate_y = top;
             new_bitmap.height = face_width;
             new_bitmap.width = face_width;
-            new_bitmap.mipmaps = 0;
             new_bitmap.pixels.reserve(face_width * face_width);
 
             for(std::uint32_t y = 0; y < face_width; y++) {
@@ -337,7 +336,7 @@ namespace Invader {
                     }
 
                     // Go through each mipmap
-                    const std::uint32_t BITMAP_MIPMAP_COUNT = bitmap.mipmaps;
+                    const std::uint32_t BITMAP_MIPMAP_COUNT = bitmap.mipmaps.size();
                     std::uint32_t mip_width = BITMAP_WIDTH;
                     std::uint32_t mip_start_y = BITMAP_START_Y;
                     std::uint32_t mip_height = bitmap.height;
@@ -381,14 +380,14 @@ namespace Invader {
                     auto &power_of_two = this->power_of_two;
                     auto &scanner = *this;
 
-                    auto get_bitmap_mipmaps = [&power_of_two, &scanner, &pixels, &X_END, &Y_END](std::uint32_t x, std::uint32_t y, std::uint32_t &width, std::uint32_t &height, auto &get_bitmap_mipmaps_recursion, std::uint32_t *expected_width = nullptr, std::uint32_t *expected_height = nullptr) -> std::int32_t {
+                    auto get_bitmap_mipmaps = [&power_of_two, &scanner, &pixels, &X_END, &Y_END](std::uint32_t x, std::uint32_t y, std::uint32_t &width, std::uint32_t &height, auto &get_bitmap_mipmaps_recursion, std::uint32_t *expected_width = nullptr, std::uint32_t *expected_height = nullptr) -> std::uint32_t {
                         // Find the width
                         std::uint32_t x2;
                         for(x2 = x; x2 < X_END && !scanner.is_ignored(GET_PIXEL(x2,y)); x2++);
                         width = x2 - x;
                         if(width < 1 || (power_of_two && !is_power_of_two(width))) {
                             eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
-                            return -1;
+                            std::terminate();
                         }
 
                         // Find the height
@@ -397,19 +396,19 @@ namespace Invader {
                         height = y2 - y;
                         if(height < 1 || (power_of_two && !is_power_of_two(height))) {
                             eprintf(ERROR_INVALID_BITMAP_HEIGHT, height);
-                            return -1;
+                            std::terminate();
                         }
 
                         // Make sure it's correct
                         if(expected_height && *expected_height != height) {
                             eprintf("Error: Found a bitmap with an invalid mipmap height: %u; Expected %u\n", height, *expected_height);
-                            return -1;
+                            std::terminate();
                         }
 
                         // Make sure it's correct
                         if(expected_width && *expected_width != width) {
                             eprintf("Error: Found a bitmap with an invalid mipmap width: %u; Expected %u\n", width, *expected_width);
-                            return -1;
+                            std::terminate();
                         }
 
                         // Make sure there's nothing along the right edge
@@ -418,7 +417,7 @@ namespace Invader {
                             for(std::uint32_t ym = y; ym < y2; ym++) {
                                 if(!scanner.is_ignored(GET_PIXEL(x2, ym))) {
                                     eprintf(TOO_CLOSE_ERROR);
-                                    return -1;
+                                    std::terminate();
                                 }
                             }
                         }
@@ -444,7 +443,7 @@ namespace Invader {
                         for(; xm < x2; xm++) {
                             if(!scanner.is_ignored(GET_PIXEL(xm, y2))) {
                                 eprintf(TOO_CLOSE_ERROR);
-                                return -1;
+                                return {};
                             }
                         }
 
@@ -468,16 +467,13 @@ namespace Invader {
 
                     // Pull in the mipmap and bitmap stuff
                     std::uint32_t bitmap_width, bitmap_height;
-                    std::int32_t mipmap_count = get_bitmap_mipmaps(x, y, bitmap_width, bitmap_height, get_bitmap_mipmaps);
-                    if(mipmap_count < 0) {
-                        std::terminate();
-                    }
+                    auto mipmap_count = get_bitmap_mipmaps(x, y, bitmap_width, bitmap_height, get_bitmap_mipmaps);
 
                     // Store that in a bitmap
                     auto &bitmap = color_plate.bitmaps.emplace_back();
                     bitmap.color_plate_x = x;
                     bitmap.color_plate_y = y;
-                    bitmap.mipmaps = static_cast<std::uint32_t>(mipmap_count);
+                    bitmap.mipmaps = std::vector<ScannedColorPlateBitmapMipmap>();
                     bitmap.width = bitmap_width;
                     bitmap.height = bitmap_height;
 
@@ -486,6 +482,15 @@ namespace Invader {
                     std::uint32_t mw = bitmap_width;
                     std::uint32_t mh = bitmap_height;
                     for(std::uint32_t m = 0; m <= mipmap_count; m++) {
+                        if(m != 0) {
+                            ScannedColorPlateBitmapMipmap mipmap = {};
+                            mipmap.first_pixel = bitmap.pixels.size();
+                            mipmap.mipmap_height = mh;
+                            mipmap.mipmap_width = mw;
+                            mipmap.pixel_count = mw * mh;
+                            bitmap.mipmaps.push_back(mipmap);
+                        }
+
                         const std::uint32_t m_end_y = my + mh;
                         for(; my < m_end_y; my++) {
                             auto *pixel = &GET_PIXEL(x, my);

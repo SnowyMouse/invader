@@ -79,13 +79,20 @@ namespace Invader {
     };
     static_assert(sizeof(ColorPlatePixel) == 4);
 
+    struct ScannedColorPlateBitmapMipmap {
+        std::uint32_t first_pixel;
+        std::uint32_t pixel_count;
+        std::uint32_t mipmap_width;
+        std::uint32_t mipmap_height;
+    };
+
     struct ScannedColorPlateBitmap {
         std::uint32_t height;
         std::uint32_t width;
         std::uint32_t color_plate_x;
         std::uint32_t color_plate_y;
         std::vector<ColorPlatePixel> pixels;
-        std::uint32_t mipmaps;
+        std::vector<ScannedColorPlateBitmapMipmap> mipmaps;
     };
 
     struct ScannedColorPlateSequence {
