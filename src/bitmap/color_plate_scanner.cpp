@@ -820,10 +820,17 @@ namespace Invader {
 
     static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
         // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
+        std::size_t total_pixels = 0;
         for(auto &bitmap : color_plate.bitmaps) {
             if(bitmap.height > height || bitmap.width > width) {
                 return std::nullopt;
             }
+            total_pixels += (bitmap.height + sprite_spacing) * (bitmap.width + sprite_spacing);
+        }
+
+        // Also, if the number of pixels is greater than height * width, there is no way we could fit everything in here
+        if(total_pixels > height * width * maximum_sprite_sheets) {
+            return std::nullopt;
         }
 
         std::uint32_t sheet_count = 1;
@@ -904,16 +911,9 @@ namespace Invader {
                         }
                     };
 
-                    // Get the corners
-                    std::pair<std::uint32_t, std::uint32_t> top_left_corner = std::pair<std::uint32_t, std::uint32_t>(x, y);
-                    std::pair<std::uint32_t, std::uint32_t> top_right_corner = std::pair<std::uint32_t, std::uint32_t>(x, y + sprite_fitting.height - 1);
-                    std::pair<std::uint32_t, std::uint32_t> bottom_left_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y);
-                    std::pair<std::uint32_t, std::uint32_t> bottom_right_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y + sprite_fitting.height - 1);
-
                     std::uint32_t potential_top = y;
-                    std::uint32_t potential_bottom = potential_top + sprite_fitting.height - 1;
-
                     std::uint32_t potential_left = x;
+                    std::uint32_t potential_bottom = potential_top + sprite_fitting.height - 1;
                     std::uint32_t potential_right = potential_left + sprite_fitting.width - 1;
 
                     // If we're outside the bitmap, fail
