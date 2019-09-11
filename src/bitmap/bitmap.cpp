@@ -240,6 +240,8 @@ int main(int argc, char *argv[]) {
                 eprintf("                               Default (new tag): 0\n");
                 eprintf("    --budget-optimize,-O       Find the smallest sprite sheet possible within\n");
                 eprintf("                               the budget. Note: This is very slow!\n");
+                eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
+                eprintf("                               pixels. Default (new tag): 4\n");
 
                 return EXIT_FAILURE;
         }
