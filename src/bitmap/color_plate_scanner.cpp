@@ -13,6 +13,10 @@ namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
     static constexpr char ERROR_INVALID_BITMAP_HEIGHT[] = "Error: Found a bitmap with an invalid height: %u\n";
 
+    template <typename T> inline constexpr T divide_by_two_round(T value) {
+        return (value / 2) + (value & 1);
+    }
+
     template<typename T> static constexpr inline T log2_int(T number) {
         T log2_value = 0;
         while(number != 1) {
@@ -175,7 +179,7 @@ namespace Invader {
             const std::uint32_t Y_END = sequence.y_end;
 
             // This is used for the registration point
-            const std::int32_t MID_Y = static_cast<std::int32_t>(Y_START + Y_END) / 2;
+            const std::int32_t MID_Y = divide_by_two_round(static_cast<std::int32_t>(Y_START + Y_END));
 
             std::optional<std::uint32_t> bitmap_x_start;
 
@@ -253,7 +257,7 @@ namespace Invader {
                             bitmap.color_plate_y = min_y.value();
 
                             // Calculate registration point.
-                            const std::int32_t MID_X = static_cast<std::int32_t>(xb + bitmap_x_start.value()) / 2;
+                            const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(xb + bitmap_x_start.value()));
 
                             // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
                             bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
@@ -520,8 +524,8 @@ namespace Invader {
                     bitmap.mipmaps = std::vector<ScannedColorPlateBitmapMipmap>();
                     bitmap.width = bitmap_width;
                     bitmap.height = bitmap_height;
-                    bitmap.registration_point_x = width / 2;
-                    bitmap.registration_point_y = height / 2;
+                    bitmap.registration_point_x = divide_by_two_round(width);
+                    bitmap.registration_point_y = divide_by_two_round(height);
 
                     // Store bitmap data, too
                     std::uint32_t my = y;
