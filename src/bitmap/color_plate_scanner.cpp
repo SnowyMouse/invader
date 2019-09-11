@@ -628,9 +628,15 @@ namespace Invader {
 
             // Only generate up to log2(spacing) mipmaps for sprites
             if(generated_bitmap.type == BitmapType::BITMAP_TYPE_SPRITES) {
-                auto max_mipmaps_sprites = log2_int(sprite_parameters.value().sprite_spacing);
-                if(max_mipmap_count > max_mipmaps_sprites) {
-                    max_mipmap_count = max_mipmaps_sprites;
+                auto sprite_spacing = sprite_parameters.value().sprite_spacing;
+                if(sprite_spacing == 0) {
+                    max_mipmap_count = 0;
+                }
+                else {
+                    auto max_mipmaps_sprites = log2_int(sprite_parameters.value().sprite_spacing);
+                    if(max_mipmap_count > max_mipmaps_sprites) {
+                        max_mipmap_count = max_mipmaps_sprites;
+                    }
                 }
             }
 
