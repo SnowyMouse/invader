@@ -220,8 +220,8 @@ namespace Invader {
                                 for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
                                     auto &pixel = GET_PIXEL(xb, yb);
 
-                                    // This is for anything that's not a cyan/magenta/blue pixel
-                                    if(!this->is_ignored(pixel)) {
+                                    // This is for anything that's not a cyan/magenta/blue pixel or zero-alpha if we're looking for sprites
+                                    if(!this->is_ignored(pixel) && (generated_bitmap.type != BitmapType::BITMAP_TYPE_SPRITES || pixel.alpha > 0)) {
                                         if(min_x.has_value()) {
                                             if(min_x.value() > xb) {
                                                 min_x = xb;
