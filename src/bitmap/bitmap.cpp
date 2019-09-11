@@ -93,11 +93,15 @@ int main(int argc, char *argv[]) {
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
+        {"sprite-spacing", required_argument, 0, 'S' },
+        {"sprite-budget", required_argument, 0, 'B' },
+        {"sprite-budget-count", required_argument, 0, 'C' },
+        {"sprite-budget-optimize", no_argument, 0, 'O' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:O", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -186,6 +190,22 @@ int main(int argc, char *argv[]) {
 
             case 'm':
                 max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
+                break;
+
+            case 'C':
+                sprite_budget_count = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                break;
+
+            case 'B':
+                sprite_budget = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                break;
+
+            case 'S':
+                sprite_spacing = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                break;
+
+            case 'O':
+                sprite_budget_optimize = true;
                 break;
 
             default:
@@ -367,6 +387,7 @@ int main(int argc, char *argv[]) {
         p.sprite_budget_count = sprite_budget_count.value();
         p.sprite_spacing = sprite_spacing.value();
         p.sprite_usage = sprite_usage.value();
+        p.sprite_budget_optimize = sprite_budget_optimize;
     }
 
     // Do it!

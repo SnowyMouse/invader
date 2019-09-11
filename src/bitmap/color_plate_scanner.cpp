@@ -48,7 +48,7 @@ namespace Invader {
 
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
             eprintf("Error: Sprites are unimplemented.\n");
-            std::terminate();
+            //std::terminate();
         }
 
         color_plate.type = type;
@@ -975,19 +975,6 @@ namespace Invader {
                         if(box_intersects_box(potential_top, potential_left, potential_bottom, potential_right, compare_top, compare_left, compare_bottom, compare_right) || box_intersects_box(compare_top, compare_left, compare_bottom, compare_right, potential_top, potential_left, potential_bottom, potential_right)) {
                             return false;
                         }
-
-
-                        /*auto corner_inside_box = [&compare_top, &compare_left, &compare_bottom, &compare_right](std::pair<std::uint32_t, std::uint32_t> &point) {
-                            auto &x = point.first;
-                            auto &y = point.second;
-
-                            return x >= compare_left && x < compare_right && y >= compare_top && y < compare_bottom;
-                        };
-
-                        // If any corner is inside the sprite return false
-                        if(corner_inside_box(top_left_corner) || corner_inside_box(top_right_corner) || corner_inside_box(bottom_left_corner) || corner_inside_box(bottom_right_corner)) {
-                            return false;
-                        }*/
                     }
 
                     return true;
@@ -1076,16 +1063,20 @@ namespace Invader {
     }
 
     // Go through each possible height/width until we get something. The maximum number of operations this can do is log2(width * height)
-    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
+    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets, bool sprite_budget_optimize) {
         auto fit_sprites = fit_sprites_into_sprite_sheet(width, height, color_plate, sprite_spacing, maximum_sprite_sheets);
         if(!fit_sprites.has_value()) {
             return std::nullopt;
         }
 
+        if(!sprite_budget_optimize) {
+            return fit_sprites;
+        }
+
         auto fit_sprites_pixels = number_of_pixels(fit_sprites.value());
 
-        auto fit_sprites_half_height = fit_sprites_into_maximum_sprite_sheet(width, height / 2, color_plate, sprite_spacing, maximum_sprite_sheets);
-        auto fit_sprites_half_width = fit_sprites_into_maximum_sprite_sheet(width / 2, height, color_plate, sprite_spacing, maximum_sprite_sheets);
+        auto fit_sprites_half_height = fit_sprites_into_maximum_sprite_sheet(width, height / 2, color_plate, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
+        auto fit_sprites_half_width = fit_sprites_into_maximum_sprite_sheet(width / 2, height, color_plate, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
         auto fit_sprites_half_height_pixels = fit_sprites_half_height.has_value() ? number_of_pixels(fit_sprites_half_height.value()) : ~0;
         auto fit_sprites_half_width_pixels = fit_sprites_half_width.has_value() ? number_of_pixels(fit_sprites_half_width.value()) : ~0;
 
@@ -1138,7 +1129,7 @@ namespace Invader {
         }
 
         // First see if we can even fit things into this
-        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, parameters.sprite_spacing, max_sheet_count);
+        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, parameters.sprite_spacing, max_sheet_count, parameters.sprite_budget_optimize);
         if(!fit_sprites.has_value()) {
             eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
             std::terminate();
@@ -1165,7 +1156,6 @@ namespace Invader {
             new_bitmap.width = SHEET_WIDTH;
             new_bitmap.height = SHEET_HEIGHT;
             new_bitmap.pixels.insert(new_bitmap.pixels.begin(), SHEET_WIDTH * SHEET_HEIGHT, background_color);
-            eprintf("%u vs %zu\n", SHEET_WIDTH * SHEET_HEIGHT, new_bitmap.pixels.size());
 
             // Put the sprites on the bitmap
             for(std::uint32_t sequence_index = 0; sequence_index < color_plate.sequences.size(); sequence_index++) {
@@ -1188,18 +1178,13 @@ namespace Invader {
                                 const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x];
                                 auto &output = new_bitmap.pixels[(y + sprite.top) * SHEET_WIDTH + (x + sprite.left)];
 
-                                if(&output - new_bitmap.pixels.data() >= new_bitmap.pixels.size()) {
-                                    eprintf("Oh no!\n");
-                                    std::terminate();
-                                }
-
                                 #define ALPHA_BLEND_CHANNEL(color) output.color = (input.color * input.alpha + output.color * output.alpha * (1 - input.alpha))
                                 output.alpha = input.alpha + output.alpha * (1 - input.alpha);
                                 ALPHA_BLEND_CHANNEL(red);
                                 ALPHA_BLEND_CHANNEL(green);
                                 ALPHA_BLEND_CHANNEL(blue);
 
-                                output = {0xFF, 0xFF, 0xFF, 0xFF};
+                                output = input;
                             }
                         }
                     }
