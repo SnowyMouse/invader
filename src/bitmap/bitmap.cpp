@@ -69,6 +69,7 @@ int main(int argc, char *argv[]) {
     std::optional<std::uint32_t> sprite_budget;
     std::optional<std::uint32_t> sprite_budget_count;
     std::optional<std::uint32_t> sprite_spacing;
+    bool sprite_budget_optimize = false;
 
     // Dithering?
     bool dithering = false;

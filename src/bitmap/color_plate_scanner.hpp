@@ -30,6 +30,32 @@ namespace Invader {
             return !(*this == other);
         }
 
+        ColorPlatePixel alpha_blend(const ColorPlatePixel &source) const {
+            ColorPlatePixel output;
+
+            if(source.alpha == 0.0F) {
+                return *this;
+            }
+
+            float destination_alpha_float = this->alpha / 255.0F;
+            float source_alpha_float = source.alpha / 255.0F;
+
+            float blend = destination_alpha_float * (1.0F - source_alpha_float);
+            float output_alpha_float = source_alpha_float + blend;
+
+            output.alpha = static_cast<std::uint8_t>(output_alpha_float * UINT8_MAX);
+
+            #define ALPHA_BLEND_CHANNEL(channel) output.channel = static_cast<std::uint8_t>(((source.channel * source_alpha_float) + (this->channel * blend)) / output_alpha_float);
+
+            ALPHA_BLEND_CHANNEL(red);
+            ALPHA_BLEND_CHANNEL(green);
+            ALPHA_BLEND_CHANNEL(blue);
+
+            #undef ALPHA_BLEND_CHANNEL
+
+            return output;
+        }
+
         template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
         static std::uint16_t convert_to_16_bit(const ColorPlatePixel *color) {
             static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");

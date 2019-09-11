@@ -1140,14 +1140,12 @@ namespace Invader {
 
         std::vector<ScannedColorPlateBitmap> new_bitmaps;
 
-        eprintf("Creating %u sprite sheet%s\n", sheet_count, sheet_count == 1 ? "" : "s");
         for(std::uint32_t s = 0; s < sheet_count; s++) {
             auto sheet_dimensions = dimensions_of_sprite_sheet(sprites_fit, s);
 
             // Initialize the new bitmap
             const std::uint32_t SHEET_WIDTH = sheet_dimensions.first;
             const std::uint32_t SHEET_HEIGHT = sheet_dimensions.second;
-            eprintf("- %2u. Size: %ux%u\n", s, SHEET_WIDTH, SHEET_HEIGHT);
             auto &new_bitmap = new_bitmaps.emplace_back();
             new_bitmap.color_plate_x = 0;
             new_bitmap.color_plate_y = 0;
@@ -1177,14 +1175,7 @@ namespace Invader {
                             for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) {
                                 const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x];
                                 auto &output = new_bitmap.pixels[(y + sprite.top) * SHEET_WIDTH + (x + sprite.left)];
-
-                                #define ALPHA_BLEND_CHANNEL(color) output.color = (input.color * input.alpha + output.color * output.alpha * (1 - input.alpha))
-                                output.alpha = input.alpha + output.alpha * (1 - input.alpha);
-                                ALPHA_BLEND_CHANNEL(red);
-                                ALPHA_BLEND_CHANNEL(green);
-                                ALPHA_BLEND_CHANNEL(blue);
-
-                                output = input;
+                                output = output.alpha_blend(input);
                             }
                         }
                     }
