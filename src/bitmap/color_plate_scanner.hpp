@@ -194,7 +194,7 @@ namespace Invader {
         ColorPlatePixel magenta = { 0xFF, 0x00, 0xFF, 0xFF };
 
         /** Cyan color */
-        ColorPlatePixel cyan = { 0xFF, 0xFF, 0x00, 0xFF };
+        std::optional<ColorPlatePixel> cyan;
 
         /**
          * Check if the color is blue

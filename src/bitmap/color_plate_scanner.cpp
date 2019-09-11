@@ -59,10 +59,11 @@ namespace Invader {
             const auto &blue_candidate = pixels[0];
             const auto &magenta_candidate = pixels[1];
             const auto &cyan_candidate = pixels[2];
+
             scanner.valid_color_plate = true;
 
             // Make sure they aren't the same
-            if(blue_candidate != magenta_candidate && blue_candidate != cyan_candidate && magenta_candidate != cyan_candidate) {
+            if(blue_candidate != magenta_candidate && magenta_candidate != cyan_candidate) {
                 // Let's assume for a moment they are. Is everything after the cyan pixel blue?
                 for(std::uint32_t x = 3; x < width; x++) {
                     if(!same_color_ignore_opacity(GET_PIXEL(x, 0), blue_candidate)) {
@@ -70,6 +71,9 @@ namespace Invader {
                         break;
                     }
                 }
+
+                // Is the cyan pixel blue? If it is, that's okay, but we can't use the cyan pixel
+                bool ignore_cyan = cyan_candidate == blue_candidate;
 
                 // Next, is there a sequence border immediately below this?
                 if(scanner.valid_color_plate) {
@@ -85,7 +89,11 @@ namespace Invader {
                 if(scanner.valid_color_plate) {
                     scanner.blue = blue_candidate;
                     scanner.magenta = magenta_candidate;
-                    scanner.cyan = cyan_candidate;
+
+                    if(!ignore_cyan) {
+                        scanner.cyan = cyan_candidate;
+                    }
+
                     auto *sequence = &generated_bitmap.sequences.emplace_back();
                     sequence->y_start = 2;
 
@@ -567,7 +575,7 @@ namespace Invader {
     }
 
     bool ColorPlateScanner::is_cyan(const ColorPlatePixel &color) const {
-        return same_color_ignore_opacity(this->cyan, color);
+        return this->cyan.has_value() && same_color_ignore_opacity(this->cyan.value(), color);
     }
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
