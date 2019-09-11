@@ -1049,8 +1049,8 @@ namespace Invader {
                     coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y); \
                 }
 
-                std::uint32_t max_x = width - sprite_fitting.width;
-                std::uint32_t max_y = height - sprite_fitting.height;
+                std::uint32_t max_x = width - sprite_fitting.width - effective_sprite_spacing;
+                std::uint32_t max_y = height - sprite_fitting.height - effective_sprite_spacing;
 
                 if(SORT_BY_HEIGHT) {
                     for(std::uint32_t x = 0; x <= max_x && !coordinates.has_value(); x++) {
@@ -1113,6 +1113,7 @@ namespace Invader {
                         new_sprite.right = sprite.right;
                         new_sprite.registration_point_x = sprite.registration_point_x + sprite_spacing;
                         new_sprite.registration_point_y = sprite.registration_point_y + sprite_spacing;
+
                         break;
                     }
                 }
