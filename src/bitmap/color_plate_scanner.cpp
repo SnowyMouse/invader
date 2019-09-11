@@ -188,6 +188,11 @@ namespace Invader {
                             std::optional<std::uint32_t> min_y;
                             std::optional<std::uint32_t> max_y;
 
+                            std::optional<std::uint32_t> min_x_cyan;
+                            std::optional<std::uint32_t> max_x_cyan;
+                            std::optional<std::uint32_t> min_y_cyan;
+                            std::optional<std::uint32_t> max_y_cyan;
+
                             // Find the minimum x, y, max x, and max y stuff
                             for(std::uint32_t xb = bitmap_x_start.value(); xb < x; xb++) {
                                 for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
@@ -212,6 +217,28 @@ namespace Invader {
                                             min_y = yb;
                                             max_x = xb;
                                             max_y = yb;
+                                        }
+                                    }
+                                    if(!this->is_magenta(pixel) && !this->is_blue(pixel)) {
+                                        if(min_x_cyan.has_value()) {
+                                            if(min_x_cyan.value() > xb) {
+                                                min_x_cyan = xb;
+                                            }
+                                            if(min_y_cyan.value() > yb) {
+                                                min_y_cyan = yb;
+                                            }
+                                            if(max_x_cyan.value() < xb) {
+                                                max_x_cyan = xb;
+                                            }
+                                            if(max_y_cyan.value() < yb) {
+                                                max_y_cyan = yb;
+                                            }
+                                        }
+                                        else {
+                                            min_x_cyan = xb;
+                                            min_y_cyan = yb;
+                                            max_x_cyan = xb;
+                                            max_y_cyan = yb;
                                         }
                                     }
                                 }
@@ -245,8 +272,8 @@ namespace Invader {
                             bitmap.height = bitmap_height;
                             bitmap.color_plate_x = min_x.value();
                             bitmap.color_plate_y = min_y.value();
-                            bitmap.registration_point_x = (max_x.value() - min_x.value()) / 2;
-                            bitmap.registration_point_y = (max_y.value() - min_y.value()) / 2;
+                            bitmap.registration_point_x = (max_x_cyan.value() - min_x_cyan.value()) / 2 - (min_x.value() - min_x_cyan.value());
+                            bitmap.registration_point_y = (max_y_cyan.value() - min_y_cyan.value()) / 2 - (min_y.value() - min_y_cyan.value());
                             for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
                                 for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
                                     auto &pixel = GET_PIXEL(bx, by);
