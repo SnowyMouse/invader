@@ -41,16 +41,16 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    ScannedColorPlate ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
         ColorPlateScanner scanner;
-        ScannedColorPlate color_plate;
+        GeneratedBitmapData generated_bitmap;
 
         if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
             eprintf("Error: 3D textures are unimplemented.\n");
             std::terminate();
         }
 
-        color_plate.type = type;
+        generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
         // Check to see if we have valid color plate data. If so, look for sequences
@@ -86,7 +86,7 @@ namespace Invader {
                     scanner.blue = blue_candidate;
                     scanner.magenta = magenta_candidate;
                     scanner.cyan = cyan_candidate;
-                    auto *sequence = &color_plate.sequences.emplace_back();
+                    auto *sequence = &generated_bitmap.sequences.emplace_back();
                     sequence->y_start = 2;
 
                     // Next, we need to find all of the sequences
@@ -102,7 +102,7 @@ namespace Invader {
                         // If we got it, create a new sequence, but not before terminating the last one
                         if(sequence_border) {
                             sequence->y_end = y;
-                            sequence = &color_plate.sequences.emplace_back();
+                            sequence = &generated_bitmap.sequences.emplace_back();
                             sequence->y_start = y + 1;
                         }
                     }
@@ -117,7 +117,7 @@ namespace Invader {
 
             if(!scanner.valid_color_plate) {
                 // Create a default sequence
-                auto &sequence = color_plate.sequences.emplace_back();
+                auto &sequence = generated_bitmap.sequences.emplace_back();
                 sequence.y_start = 0;
                 sequence.y_end = height;
                 scanner.valid_color_plate = false;
@@ -132,45 +132,45 @@ namespace Invader {
 
         // If we have valid color plate data, use the color plate data
         if(scanner.valid_color_plate) {
-            scanner.read_color_plate(color_plate, pixels, width);
+            scanner.read_color_plate(generated_bitmap, pixels, width);
         }
 
         // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
         else if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            scanner.read_unrolled_cubemap(color_plate, pixels, width, height);
+            scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
         }
 
         // Otherwise, look for bitmaps up, down, left, and right
         else {
-            scanner.read_non_color_plate(color_plate, pixels, width, height);
+            scanner.read_non_color_plate(generated_bitmap, pixels, width, height);
         }
 
         // If the last sequence is empty, purge it
-        if(color_plate.sequences.size() > 0 && color_plate.sequences[color_plate.sequences.size() - 1].bitmap_count == 0) {
-            color_plate.sequences.erase(color_plate.sequences.end() - 1);
+        if(generated_bitmap.sequences.size() > 0 && generated_bitmap.sequences[generated_bitmap.sequences.size() - 1].bitmap_count == 0) {
+            generated_bitmap.sequences.erase(generated_bitmap.sequences.end() - 1);
         }
 
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-            process_sprites(color_plate, sprite_parameters.value());
+            process_sprites(generated_bitmap, sprite_parameters.value());
         }
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
         if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
-            generate_mipmaps(color_plate, mipmaps, mipmap_type, mipmap_fade_factor);
+            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor);
         }
 
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data
         if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            consolidate_cubemaps(color_plate);
+            consolidate_cubemaps(generated_bitmap);
         }
 
-        return color_plate;
+        return generated_bitmap;
     }
 
-    void ColorPlateScanner::read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width) const {
-        for(auto &sequence : color_plate.sequences) {
-            sequence.first_bitmap = color_plate.bitmaps.size();
+    void ColorPlateScanner::read_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width) const {
+        for(auto &sequence : generated_bitmap.sequences) {
+            sequence.first_bitmap = generated_bitmap.bitmaps.size();
             sequence.bitmap_count = 0;
 
             // Search left and right for bitmap borders
@@ -250,7 +250,7 @@ namespace Invader {
                             }
 
                             // Add the bitmap
-                            auto &bitmap = color_plate.bitmaps.emplace_back();
+                            auto &bitmap = generated_bitmap.bitmaps.emplace_back();
                             bitmap.width = bitmap_width;
                             bitmap.height = bitmap_height;
                             bitmap.color_plate_x = min_x.value();
@@ -294,7 +294,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         // Make sure the height and width of each face is the same
         std::uint32_t face_width = width / 4;
         std::uint32_t face_height = height / 3;
@@ -328,8 +328,8 @@ namespace Invader {
             return GET_PIXEL(x, y);
         };
 
-        auto add_bitmap = [&color_plate, &get_pixel_transformed, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t rotation) {
-            auto &new_bitmap = color_plate.bitmaps.emplace_back();
+        auto add_bitmap = [&generated_bitmap, &get_pixel_transformed, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t rotation) {
+            auto &new_bitmap = generated_bitmap.bitmaps.emplace_back();
             new_bitmap.color_plate_x = left;
             new_bitmap.color_plate_y = top;
             new_bitmap.height = face_width;
@@ -352,27 +352,27 @@ namespace Invader {
         add_bitmap(face_width * 3, face_width * 1, 0);
         add_bitmap(face_width * 0, face_width * 0, 90);
         add_bitmap(face_width * 0, face_width * 2, 90);
-        color_plate.sequences[0].first_bitmap = 0;
-        color_plate.sequences[0].bitmap_count = 6;
+        generated_bitmap.sequences[0].first_bitmap = 0;
+        generated_bitmap.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
-        auto &sequence = color_plate.sequences[0];
-        sequence.first_bitmap = color_plate.bitmaps.size();
+    void ColorPlateScanner::read_non_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+        auto &sequence = generated_bitmap.sequences[0];
+        sequence.first_bitmap = generated_bitmap.bitmaps.size();
         sequence.bitmap_count = 0;
 
         // Go through each pixel to find a bitmap
         const std::uint32_t X_END = width;
         const std::uint32_t Y_END = height;
 
-        auto pixel_is_blocked = [&color_plate](std::uint32_t x, std::uint32_t y, const ScannedColorPlateSequence &sequence) -> std::optional<std::uint32_t> {
+        auto pixel_is_blocked = [&generated_bitmap](std::uint32_t x, std::uint32_t y, const GeneratedBitmapDataSequence &sequence) -> std::optional<std::uint32_t> {
             // Okay, let's see if we already got this pixel as a bitmap
             if(sequence.bitmap_count > 0) {
                 // Go through each bitmap in the sequence
                 const std::uint32_t FIRST_BITMAP = sequence.first_bitmap;
                 const std::uint32_t END_BITMAP = FIRST_BITMAP + sequence.bitmap_count;
                 for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
-                    auto &bitmap = color_plate.bitmaps[b];
+                    auto &bitmap = generated_bitmap.bitmaps[b];
 
                     // If we are outside the x bounds or, somehow, our y is less than the bitmap, we obviously cannot be in this bitmap
                     const std::uint32_t BITMAP_START_X = bitmap.color_plate_x;
@@ -518,10 +518,10 @@ namespace Invader {
                     auto mipmap_count = get_bitmap_mipmaps(x, y, bitmap_width, bitmap_height, get_bitmap_mipmaps);
 
                     // Store that in a bitmap
-                    auto &bitmap = color_plate.bitmaps.emplace_back();
+                    auto &bitmap = generated_bitmap.bitmaps.emplace_back();
                     bitmap.color_plate_x = x;
                     bitmap.color_plate_y = y;
-                    bitmap.mipmaps = std::vector<ScannedColorPlateBitmapMipmap>();
+                    bitmap.mipmaps = std::vector<GeneratedBitmapDataBitmapMipmap>();
                     bitmap.width = bitmap_width;
                     bitmap.height = bitmap_height;
                     bitmap.registration_point_x = divide_by_two_round(width);
@@ -533,7 +533,7 @@ namespace Invader {
                     std::uint32_t mh = bitmap_height;
                     for(std::uint32_t m = 0; m <= mipmap_count; m++) {
                         if(m != 0) {
-                            ScannedColorPlateBitmapMipmap mipmap = {};
+                            GeneratedBitmapDataBitmapMipmap mipmap = {};
                             mipmap.first_pixel = bitmap.pixels.size();
                             mipmap.mipmap_height = mh;
                             mipmap.mipmap_width = mw;
@@ -574,9 +574,9 @@ namespace Invader {
         return this->is_blue(color) || (this->valid_color_plate && (this->is_cyan(color) || this->is_magenta(color)));
     }
 
-    void ColorPlateScanner::generate_mipmaps(ScannedColorPlate &color_plate, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
-        for(auto &bitmap : color_plate.bitmaps) {
+        for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
             std::uint32_t mipmap_height = bitmap.height;
             std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_height) : log2_int(mipmap_width);
@@ -677,10 +677,10 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::consolidate_cubemaps(ScannedColorPlate &color_plate) {
-        std::vector<ScannedColorPlateSequence> new_sequences;
-        std::vector<ScannedColorPlateBitmap> new_bitmaps;
-        for(auto &sequence : color_plate.sequences) {
+    void ColorPlateScanner::consolidate_cubemaps(GeneratedBitmapData &generated_bitmap) {
+        std::vector<GeneratedBitmapDataSequence> new_sequences;
+        std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
+        for(auto &sequence : generated_bitmap.sequences) {
             // First, make sure we have six bitmaps exactly. Otherwise, bail.
             if(sequence.bitmap_count != 6) {
                 eprintf("Error: Cubemap sequences require 6 bitmaps. %u found\n", sequence.bitmap_count);
@@ -693,7 +693,7 @@ namespace Invader {
             new_sequence.y_start = sequence.y_start;
             new_sequence.y_start = sequence.y_end;
 
-            auto *bitmaps = color_plate.bitmaps.data() + sequence.first_bitmap;
+            auto *bitmaps = generated_bitmap.bitmaps.data() + sequence.first_bitmap;
             auto &new_bitmap = new_bitmaps.emplace_back();
             new_bitmap.height = bitmaps->height;
             new_bitmap.width = bitmaps->width;
@@ -779,11 +779,11 @@ namespace Invader {
             }
         }
 
-        color_plate.bitmaps = std::move(new_bitmaps);
-        color_plate.sequences = std::move(new_sequences);
+        generated_bitmap.bitmaps = std::move(new_bitmaps);
+        generated_bitmap.sequences = std::move(new_sequences);
     }
 
-    static std::uint32_t number_of_sprite_sheets(const std::vector<ScannedColorPlateSequence> &sequences) {
+    static std::uint32_t number_of_sprite_sheets(const std::vector<GeneratedBitmapDataSequence> &sequences) {
         std::uint32_t highest = 0;
         for(auto &sequence : sequences) {
             for(auto &sprite : sequence.sprites) {
@@ -796,7 +796,7 @@ namespace Invader {
         return highest;
     }
 
-    static std::pair<std::uint32_t, std::uint32_t> dimensions_of_sprite_sheet(const std::vector<ScannedColorPlateSequence> &sequences, std::uint32_t bitmap_index) {
+    static std::pair<std::uint32_t, std::uint32_t> dimensions_of_sprite_sheet(const std::vector<GeneratedBitmapDataSequence> &sequences, std::uint32_t bitmap_index) {
         std::uint32_t max_width = 0;
         std::uint32_t max_height = 0;
 
@@ -832,7 +832,7 @@ namespace Invader {
         return std::pair(max_width, max_height);
     }
 
-    static std::size_t number_of_pixels(const std::vector<ScannedColorPlateSequence> &sequences) {
+    static std::size_t number_of_pixels(const std::vector<GeneratedBitmapDataSequence> &sequences) {
         std::uint32_t sprite_sheet_count = number_of_sprite_sheets(sequences);
         std::size_t sprite_sheet_pixels = 0;
         for(std::uint32_t i = 0; i < sprite_sheet_count; i++) {
@@ -842,13 +842,13 @@ namespace Invader {
         return sprite_sheet_pixels;
     }
 
-    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
+    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_sprite_sheet(std::uint32_t width, std::uint32_t height, const GeneratedBitmapData &generated_bitmap, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
         // Effectively, all sprites are this many pixels apart
         std::uint32_t effective_sprite_spacing = sprite_spacing * 2;
 
         // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
         std::size_t total_pixels = 0;
-        for(auto &bitmap : color_plate.bitmaps) {
+        for(auto &bitmap : generated_bitmap.bitmaps) {
             if(bitmap.height > height || bitmap.width > width) {
                 return std::nullopt;
             }
@@ -861,7 +861,7 @@ namespace Invader {
         }
 
         std::uint32_t sheet_count = 1;
-        std::vector<ScannedColorPlateSequence> new_sequences;
+        std::vector<GeneratedBitmapDataSequence> new_sequences;
 
         struct SortedSprite {
             std::uint32_t sheet_index;
@@ -884,11 +884,11 @@ namespace Invader {
 
         // Sort each sprite by height or width depending on if height > width (use the lower dimension). The first element of the pair is the bitmap index and the second element is the length
         std::vector<SortedSprite> sprites_sorted;
-        const auto *bitmaps = color_plate.bitmaps.data();
+        const auto *bitmaps = generated_bitmap.bitmaps.data();
         const bool SORT_BY_HEIGHT = width >= height;
-        for(std::uint32_t s = 0; s < color_plate.sequences.size(); s++) {
+        for(std::uint32_t s = 0; s < generated_bitmap.sequences.size(); s++) {
             // Go through each bitmap in the sequence
-            auto &sequence = color_plate.sequences[s];
+            auto &sequence = generated_bitmap.sequences[s];
             const auto FIRST_BITMAP = sequence.first_bitmap;
             const auto END_BITMAP = FIRST_BITMAP + sequence.bitmap_count;
             for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
@@ -1044,8 +1044,8 @@ namespace Invader {
         }
 
         // Put it all together
-        for(std::size_t s = 0; s < color_plate.sequences.size(); s++) {
-            auto &sequence = color_plate.sequences[s];
+        for(std::size_t s = 0; s < generated_bitmap.sequences.size(); s++) {
+            auto &sequence = generated_bitmap.sequences[s];
             auto &new_sequence = new_sequences.emplace_back();
             new_sequence.bitmap_count = 0;
             new_sequence.first_bitmap = 0;
@@ -1076,8 +1076,8 @@ namespace Invader {
     }
 
     // Go through each possible height/width until we get something. The maximum number of operations this can do is log2(width * height)
-    static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets, bool sprite_budget_optimize) {
-        auto fit_sprites = fit_sprites_into_sprite_sheet(width, height, color_plate, sprite_spacing, maximum_sprite_sheets);
+    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t width, std::uint32_t height, const GeneratedBitmapData &generated_bitmap, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets, bool sprite_budget_optimize) {
+        auto fit_sprites = fit_sprites_into_sprite_sheet(width, height, generated_bitmap, sprite_spacing, maximum_sprite_sheets);
         if(!fit_sprites.has_value()) {
             return std::nullopt;
         }
@@ -1088,8 +1088,8 @@ namespace Invader {
 
         auto fit_sprites_pixels = number_of_pixels(fit_sprites.value());
 
-        auto fit_sprites_half_height = fit_sprites_into_maximum_sprite_sheet(width, height / 2, color_plate, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
-        auto fit_sprites_half_width = fit_sprites_into_maximum_sprite_sheet(width / 2, height, color_plate, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
+        auto fit_sprites_half_height = fit_sprites_into_maximum_sprite_sheet(width, height / 2, generated_bitmap, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
+        auto fit_sprites_half_width = fit_sprites_into_maximum_sprite_sheet(width / 2, height, generated_bitmap, sprite_spacing, maximum_sprite_sheets, sprite_budget_optimize);
         auto fit_sprites_half_height_pixels = fit_sprites_half_height.has_value() ? number_of_pixels(fit_sprites_half_height.value()) : ~0;
         auto fit_sprites_half_width_pixels = fit_sprites_half_width.has_value() ? number_of_pixels(fit_sprites_half_width.value()) : ~0;
 
@@ -1109,7 +1109,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::process_sprites(ScannedColorPlate &color_plate, const ColorPlateScannerSpriteParameters &parameters) {
+    void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, const ColorPlateScannerSpriteParameters &parameters) {
         // Pick the background color of the sprite sheet
         ColorPlatePixel background_color;
         switch(parameters.sprite_usage) {
@@ -1143,7 +1143,7 @@ namespace Invader {
 
         // First see if we can even fit things into this
         std::uint32_t sprite_spacing = parameters.sprite_spacing;
-        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, sprite_spacing, max_sheet_count, parameters.sprite_budget_optimize);
+        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, generated_bitmap, sprite_spacing, max_sheet_count, parameters.sprite_budget_optimize);
         if(!fit_sprites.has_value()) {
             eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
             std::terminate();
@@ -1152,7 +1152,7 @@ namespace Invader {
         auto &sprites_fit = fit_sprites.value();
         std::uint32_t sheet_count = number_of_sprite_sheets(sprites_fit);
 
-        std::vector<ScannedColorPlateBitmap> new_bitmaps;
+        std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
 
         for(std::uint32_t s = 0; s < sheet_count; s++) {
             auto sheet_dimensions = dimensions_of_sprite_sheet(sprites_fit, s);
@@ -1170,8 +1170,8 @@ namespace Invader {
             new_bitmap.pixels.insert(new_bitmap.pixels.begin(), SHEET_WIDTH * SHEET_HEIGHT, background_color);
 
             // Put the sprites on the bitmap
-            for(std::uint32_t sequence_index = 0; sequence_index < color_plate.sequences.size(); sequence_index++) {
-                auto &color_plate_sequence = color_plate.sequences[sequence_index];
+            for(std::uint32_t sequence_index = 0; sequence_index < generated_bitmap.sequences.size(); sequence_index++) {
+                auto &color_plate_sequence = generated_bitmap.sequences[sequence_index];
                 auto &sprite_sequence = sprites_fit[sequence_index];
 
                 if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
@@ -1182,7 +1182,7 @@ namespace Invader {
                 // Go through each sprite and bake it in
                 for(auto &sprite : sprite_sequence.sprites) {
                     if(sprite.bitmap_index == s) {
-                        auto &bitmap = color_plate.bitmaps[sprite.original_bitmap_index];
+                        auto &bitmap = generated_bitmap.bitmaps[sprite.original_bitmap_index];
                         const std::uint32_t SPRITE_WIDTH = bitmap.width;
                         const std::uint32_t SPRITE_HEIGHT = bitmap.height;
                         for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) {
@@ -1197,7 +1197,7 @@ namespace Invader {
             }
         }
 
-        color_plate.bitmaps = new_bitmaps;
-        color_plate.sequences = sprites_fit;
+        generated_bitmap.bitmaps = std::move(new_bitmaps);
+        generated_bitmap.sequences = std::move(sprites_fit);
     }
 }

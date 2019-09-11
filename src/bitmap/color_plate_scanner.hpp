@@ -107,14 +107,14 @@ namespace Invader {
     };
     static_assert(sizeof(ColorPlatePixel) == 4);
 
-    struct ScannedColorPlateBitmapMipmap {
+    struct GeneratedBitmapDataBitmapMipmap {
         std::uint32_t first_pixel;
         std::uint32_t pixel_count;
         std::uint32_t mipmap_width;
         std::uint32_t mipmap_height;
     };
 
-    struct ScannedColorPlateBitmap {
+    struct GeneratedBitmapDataBitmap {
         std::uint32_t height;
         std::uint32_t width;
         std::uint32_t color_plate_x;
@@ -122,10 +122,10 @@ namespace Invader {
         std::int32_t registration_point_x;
         std::int32_t registration_point_y;
         std::vector<ColorPlatePixel> pixels;
-        std::vector<ScannedColorPlateBitmapMipmap> mipmaps;
+        std::vector<GeneratedBitmapDataBitmapMipmap> mipmaps;
     };
 
-    struct ScannedColorPlateSprite {
+    struct GeneratedBitmapDataSprite {
         std::uint32_t top;
         std::uint32_t left;
         std::uint32_t right;
@@ -136,18 +136,18 @@ namespace Invader {
         std::uint32_t original_bitmap_index;
     };
 
-    struct ScannedColorPlateSequence {
+    struct GeneratedBitmapDataSequence {
         std::uint32_t y_start;
         std::uint32_t y_end;
         std::uint32_t first_bitmap;
         std::uint32_t bitmap_count;
-        std::vector<ScannedColorPlateSprite> sprites;
+        std::vector<GeneratedBitmapDataSprite> sprites;
     };
 
-    struct ScannedColorPlate {
+    struct GeneratedBitmapData {
         BitmapType type;
-        std::vector<ScannedColorPlateBitmap> bitmaps;
-        std::vector<ScannedColorPlateSequence> sequences;
+        std::vector<GeneratedBitmapDataBitmap> bitmaps;
+        std::vector<GeneratedBitmapDataSequence> sequences;
     };
 
     enum ScannedColorMipmapType {
@@ -178,7 +178,7 @@ namespace Invader {
          * @param  sprite_parameters  sprite parameters for sprite generation (only necessary if making sprites)
          * @return                    scanned color plate data
          */
-        static ScannedColorPlate scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
+        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
@@ -226,48 +226,48 @@ namespace Invader {
 
         /**
          * Read the color plate-valid bitmap data
-         * @param color_plate color plate data to write to (output)
-         * @param pixels      pixel input
-         * @param width       width of input
+         * @param generated_bitmap bitmap data to write to (output)
+         * @param pixels           pixel input
+         * @param width            width of input
          */
-        void read_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width) const;
+        void read_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width) const;
 
         /**
          * Read an unrolled cubemap
-         * @param color_plate color plate data to write to (output)
-         * @param pixels      pixel input
-         * @param width       width of input
-         * @param height      height of input
+         * @param generated_bitmap bitmap data to write to (output)
+         * @param pixels           pixel input
+         * @param width            width of input
+         * @param height           height of input
          */
-        void read_unrolled_cubemap(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+        void read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Read bitmap data that doesn't have a valid color plate
-         * @param color_plate color plate data to write to (output)
-         * @param pixels      pixel input
-         * @param width       width of input
-         * @param height      height of input
+         * @param generated_bitmap bitmap data to write to (output)
+         * @param pixels           pixel input
+         * @param width            width of input
+         * @param height           height of input
          */
-        void read_non_color_plate(ScannedColorPlate &color_plate, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+        void read_non_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Generate mipmaps for the color plate
-         * @param color_plate color plate to generate mipmaps for
+         * @param generated_bitmap color plate to generate mipmaps for
          */
-        static void generate_mipmaps(ScannedColorPlate &color_plate, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
 
         /**
          * Consolidate the cubemap data
-         * @param color_plate color plate data to do cubemap stuff with
+         * @param generated_bitmap bitmap data to do cubemap stuff with
          */
-        static void consolidate_cubemaps(ScannedColorPlate &color_plate);
+        static void consolidate_cubemaps(GeneratedBitmapData &generated_bitmap);
 
         /**
          * Process sprites
-         * @param color_plate color plate data to do sprite stuff with
+         * @param generated_bitmap bitmap data to do sprite stuff with
          * @param parameters  sprite parameters
          */
-        static void process_sprites(ScannedColorPlate &color_plate, const ColorPlateScannerSpriteParameters &parameters);
+        static void process_sprites(GeneratedBitmapData &generated_bitmap, const ColorPlateScannerSpriteParameters &parameters);
 
         ColorPlateScanner() = default;
     };
