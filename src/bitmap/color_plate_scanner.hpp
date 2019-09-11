@@ -252,6 +252,15 @@ namespace Invader {
         void read_non_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
+         * Read a single bitmap.
+         * @param generated_bitmap bitmap data to write to (output)
+         * @param pixels           pixel input
+         * @param width            width of input
+         * @param height           height of input
+         */
+        void read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+
+        /**
          * Generate mipmaps for the color plate
          * @param generated_bitmap color plate to generate mipmaps for
          */

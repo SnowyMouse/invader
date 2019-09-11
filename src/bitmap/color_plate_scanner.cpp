@@ -48,6 +48,10 @@ namespace Invader {
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
+        if(width == 0 || height == 0) {
+            return generated_bitmap;
+        }
+
         // Check to see if we have valid color plate data. If so, look for sequences
         if(width >= 4 && height >= 2) {
             // Get the candidate pixels
@@ -154,6 +158,11 @@ namespace Invader {
             else {
                 scanner.read_non_color_plate(generated_bitmap, pixels, width, height);
             }
+        }
+
+        // Read a single bitmap if the first pixel is not blue
+        else if(!scanner.is_blue(*pixels)) {
+            scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
         }
 
         // Otherwise, look for bitmaps up, down, left, and right
@@ -571,6 +580,30 @@ namespace Invader {
                 }
             }
         }
+    }
+
+    void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+        if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
+            if(!is_power_of_two(width)) {
+                eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
+                std::terminate();
+            }
+            if(!is_power_of_two(height)) {
+                eprintf(ERROR_INVALID_BITMAP_WIDTH, height);
+                std::terminate();
+            }
+        }
+
+        auto &new_bitmap = generated_bitmap.bitmaps.emplace_back();
+        new_bitmap.color_plate_x = 0;
+        new_bitmap.color_plate_y = 0;
+        new_bitmap.pixels.insert(new_bitmap.pixels.begin(), pixels, pixels + width * height);
+        new_bitmap.width = width;
+        new_bitmap.height = height;
+        new_bitmap.registration_point_x = divide_by_two_round(width);
+        new_bitmap.registration_point_y = divide_by_two_round(height);
+
+        generated_bitmap.sequences[0].bitmap_count = 1;
     }
 
     bool ColorPlateScanner::is_blue(const ColorPlatePixel &color) const {
