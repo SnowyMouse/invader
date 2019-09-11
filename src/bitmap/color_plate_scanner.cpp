@@ -224,25 +224,25 @@ namespace Invader {
                             }
 
                             // Get the width and height
-                            std::uint32_t width = max_x.value() - min_x.value() + 1;
-                            std::uint32_t height = max_y.value() - min_y.value() + 1;
+                            std::uint32_t bitmap_width = max_x.value() - min_x.value() + 1;
+                            std::uint32_t bitmap_height = max_y.value() - min_y.value() + 1;
 
                             // If we require power-of-two, check
                             if(power_of_two) {
-                                if(!is_power_of_two(width)) {
-                                    eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
+                                if(!is_power_of_two(bitmap_width)) {
+                                    eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
                                     std::terminate();
                                 }
-                                if(!is_power_of_two(height)) {
-                                    eprintf(ERROR_INVALID_BITMAP_HEIGHT, height);
+                                if(!is_power_of_two(bitmap_height)) {
+                                    eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
                                     std::terminate();
                                 }
                             }
 
                             // Add the bitmap
                             auto &bitmap = color_plate.bitmaps.emplace_back();
-                            bitmap.width = width;
-                            bitmap.height = height;
+                            bitmap.width = bitmap_width;
+                            bitmap.height = bitmap_height;
                             bitmap.color_plate_x = min_x.value();
                             bitmap.color_plate_y = min_y.value();
                             bitmap.registration_point_x = (max_x.value() - min_x.value()) / 2;
