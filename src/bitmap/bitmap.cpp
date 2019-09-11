@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     bool dithering = false;
 
     // Generate this many mipmaps
-    std::int16_t max_mipmap_count = INT16_MAX;
+    std::optional<std::uint16_t> max_mipmap_count;
 
     // Ignore the tag data?
     bool ignore_tag_data = false;
@@ -94,10 +94,10 @@ int main(int argc, char *argv[]) {
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
-        {"sprite-spacing", required_argument, 0, 'S' },
-        {"sprite-budget", required_argument, 0, 'B' },
-        {"sprite-budget-count", required_argument, 0, 'C' },
-        {"sprite-budget-optimize", no_argument, 0, 'O' },
+        {"budget", required_argument, 0, 'B' },
+        {"budget-count", required_argument, 0, 'C' },
+        {"budget-optimize", no_argument, 0, 'O' },
+        {"spacing", required_argument, 0, 'S' },
         {0, 0, 0, 0 }
     };
 
@@ -225,11 +225,18 @@ int main(int argc, char *argv[]) {
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
-                eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Negative numbers discard\n");
-                eprintf("                               <count> mipmaps. Default (new tag): 32767\n");
+                eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
-                eprintf("                               nearest. Default (new tag): linear\n");
+                eprintf("                               nearest. Default (new tag): linear\n\n");
+                eprintf("Sprite options:\n");
+                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
+                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n");
+                eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
+                eprintf("                               to 0 automatically determines budget and count.\n");
+                eprintf("                               Default (new tag): 0\n");
+                eprintf("    --budget-optimize,-O       Find the smallest sprite sheet possible within\n");
+                eprintf("                               the budget. Note: This is slow!\n\n");
 
                 return EXIT_FAILURE;
         }
@@ -286,13 +293,10 @@ int main(int argc, char *argv[]) {
         if(!bitmap_type.has_value()) {
             bitmap_type = bitmap_tag_header.type;
         }
-        if(max_mipmap_count == INT16_MAX) {
+        if(!max_mipmap_count.has_value()) {
             std::int16_t mipmap_count = bitmap_tag_header.mipmap_count.read();
             if(mipmap_count == 0) {
                 max_mipmap_count = INT16_MAX;
-            }
-            else if(mipmap_count < 0) {
-                max_mipmap_count = mipmap_count;
             }
             else {
                 max_mipmap_count = mipmap_count - 1;
@@ -325,6 +329,9 @@ int main(int argc, char *argv[]) {
     }
 
     // And these other things too
+    if(!max_mipmap_count.has_value()) {
+        max_mipmap_count = INT16_MAX;
+    }
     if(!sprite_usage.has_value()) {
         sprite_usage = BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX;
     }
@@ -334,14 +341,14 @@ int main(int argc, char *argv[]) {
     if(!sprite_budget_count.has_value()) {
         sprite_budget_count = 0;
     }
+    if(!mipmap_scale_type.has_value()) {
+        mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
+    }
     if(!sprite_spacing.has_value()) {
         sprite_spacing = 4;
     }
     if(!mipmap_fade.has_value()) {
         mipmap_fade = 0.0F;
-    }
-    if(!mipmap_scale_type.has_value()) {
-        mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
     }
 
     // Have these variables handy
@@ -392,7 +399,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), sprite_parameters, max_mipmap_count, mipmap_scale_type.value(), mipmap_fade.value());
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), mipmap_fade.value());
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -788,14 +795,11 @@ int main(int argc, char *argv[]) {
     new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
     new_tag_header.detail_fade_factor = mipmap_fade.value();
     new_tag_header.format = format.value();
-    if(max_mipmap_count == INT16_MAX) {
+    if(max_mipmap_count.value() >= INT16_MAX) {
         new_tag_header.mipmap_count = 0;
     }
-    else if(max_mipmap_count >= 0) {
-        new_tag_header.mipmap_count = max_mipmap_count + 1;
-    }
-    else {
-        new_tag_header.mipmap_count = max_mipmap_count;
+    else if(max_mipmap_count.value() >= 0) {
+        new_tag_header.mipmap_count = max_mipmap_count.value() + 1;
     }
 
     new_tag_header.sprite_spacing = sprite_spacing.value();

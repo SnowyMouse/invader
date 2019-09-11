@@ -46,11 +46,6 @@ namespace Invader {
             std::terminate();
         }
 
-        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-            eprintf("Error: Sprites are unimplemented.\n");
-            //std::terminate();
-        }
-
         color_plate.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
