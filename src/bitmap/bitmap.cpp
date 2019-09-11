@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
                 eprintf("                               to 0 automatically determines budget and count.\n");
                 eprintf("                               Default (new tag): 0\n");
                 eprintf("    --budget-optimize,-O       Find the smallest sprite sheet possible within\n");
-                eprintf("                               the budget. Note: This is slow!\n\n");
+                eprintf("                               the budget. Note: This is very slow!\n");
 
                 return EXIT_FAILURE;
         }
@@ -798,7 +798,7 @@ int main(int argc, char *argv[]) {
     if(max_mipmap_count.value() >= INT16_MAX) {
         new_tag_header.mipmap_count = 0;
     }
-    else if(max_mipmap_count.value() >= 0) {
+    else {
         new_tag_header.mipmap_count = max_mipmap_count.value() + 1;
     }
 
