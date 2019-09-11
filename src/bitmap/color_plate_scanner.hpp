@@ -262,9 +262,13 @@ namespace Invader {
 
         /**
          * Generate mipmaps for the color plate
-         * @param generated_bitmap color plate to generate mipmaps for
+         * @param generated_bitmap   color plate to generate mipmaps for
+         * @param mipmaps            max number of mipmaps
+         * @param mipmap_type        scaling filter to use for mipmaps
+         * @param mipmap_fade_factor fade-to-gray factor for mipmaps
+         * @param sprite_parameters  sprite parameters (if using sprites)
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)

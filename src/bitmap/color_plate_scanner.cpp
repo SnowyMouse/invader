@@ -176,7 +176,7 @@ namespace Invader {
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
         if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
-            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor);
+            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sprite_parameters);
         }
 
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
@@ -616,7 +616,7 @@ namespace Invader {
         return this->is_blue(color) || (this->valid_color_plate && (this->is_cyan(color) || this->is_magenta(color)));
     }
 
-    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
@@ -624,6 +624,14 @@ namespace Invader {
             std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_height) : log2_int(mipmap_width);
             if(max_mipmap_count > mipmaps_unsigned) {
                 max_mipmap_count = mipmaps_unsigned;
+            }
+
+            // Only generate up to log2(spacing) mipmaps for sprites
+            if(generated_bitmap.type == BitmapType::BITMAP_TYPE_SPRITES) {
+                auto max_mipmaps_sprites = log2_int(sprite_parameters.value().sprite_spacing);
+                if(max_mipmap_count > max_mipmaps_sprites) {
+                    max_mipmap_count = max_mipmaps_sprites;
+                }
             }
 
             // Delete mipmaps if needed
