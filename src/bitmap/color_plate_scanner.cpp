@@ -790,8 +790,8 @@ namespace Invader {
                 if(sprite.right > max_width) {
                     max_width = sprite.right;
                 }
-                if(sprite.top > max_height) {
-                    max_height = sprite.top;
+                if(sprite.bottom > max_height) {
+                    max_height = sprite.bottom;
                 }
             }
         }
@@ -835,6 +835,7 @@ namespace Invader {
         std::vector<ScannedColorPlateSequence> new_sequences;
 
         struct SortedSprite {
+            std::uint32_t sheet_index;
             std::uint32_t bitmap_index;
             std::uint32_t sequence_index;
             std::uint32_t sequence_sprite_index;
@@ -898,7 +899,7 @@ namespace Invader {
             auto &sprite_fitting = sprites_sorted[sprite];
 
             for(std::uint32_t sheet = 0; sheet < sheet_count; sheet++) {
-                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sprite_spacing, &sheet](std::uint32_t x, std::uint32_t y) -> bool {
+                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sprite_spacing, &sheet, &width, &height](std::uint32_t x, std::uint32_t y) -> bool {
                     auto subtract_clamp = [](std::uint32_t a, std::uint32_t b) -> std::uint32_t {
                         if(a < b) {
                             return 0;
@@ -914,11 +915,22 @@ namespace Invader {
                     std::pair<std::uint32_t, std::uint32_t> bottom_left_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y);
                     std::pair<std::uint32_t, std::uint32_t> bottom_right_corner = std::pair<std::uint32_t, std::uint32_t>(x + sprite_fitting.width - 1, y + sprite_fitting.height - 1);
 
+                    std::uint32_t potential_top = y;
+                    std::uint32_t potential_bottom = potential_top + sprite_fitting.height - 1;
+
+                    std::uint32_t potential_left = x;
+                    std::uint32_t potential_right = potential_left + sprite_fitting.width - 1;
+
+                    // If we're outside the bitmap, fail
+                    if(width <= potential_right || height <= potential_bottom) {
+                        return false;
+                    }
+
                     for(std::uint32_t sprite_test = 0; sprite_test < sprite; sprite_test++) {
                         auto sprite_test_value = sprites_sorted[sprite_test];
 
                         // If we aren't even on the same bitmap, ignore
-                        if(sheet != sprite_test_value.bitmap_index) {
+                        if(sheet != sprite_test_value.sheet_index) {
                             continue;
                         }
 
@@ -928,7 +940,44 @@ namespace Invader {
                         std::uint32_t compare_bottom = sprite_test_value.bottom + sprite_spacing;
                         std::uint32_t compare_right = sprite_test_value.right + sprite_spacing;
 
-                        auto corner_inside_box = [&compare_top, &compare_left, &compare_bottom, &compare_right](std::pair<std::uint32_t, std::uint32_t> &point) {
+                        auto box_intersects_box = [](
+                            std::uint32_t box_a_top,
+                            std::uint32_t box_a_left,
+                            std::uint32_t box_a_bottom,
+                            std::uint32_t box_a_right,
+                            std::uint32_t box_b_top,
+                            std::uint32_t box_b_left,
+                            std::uint32_t box_b_bottom,
+                            std::uint32_t box_b_right
+                        ) {
+                            bool top_inside = box_a_top >= box_b_top && box_a_top <= box_b_bottom;
+                            bool bottom_inside = box_a_bottom >= box_b_top && box_a_bottom <= box_b_bottom;
+
+                            bool left_inside = box_a_left >= box_b_left && box_a_left <= box_b_right;
+                            bool right_inside = box_a_right >= box_b_left && box_a_right <= box_b_right;
+
+                            bool wider = box_a_left <= box_b_left && box_a_right >= box_b_right;
+                            bool taller = box_a_top <= box_b_top && box_a_bottom >= box_b_bottom;
+
+                            // If two perpendicular sides are inside, then that means a corner is inside, which means it's banned
+                            if((top_inside && left_inside) || (bottom_inside && left_inside) || (top_inside && right_inside) || (bottom_inside && right_inside)) {
+                                return true;
+                            }
+
+                            // If the box is wider or taller and the adjacent side is inside, then that means it's banned.
+                            if((wider && top_inside) || (wider && bottom_inside) || (taller & left_inside) || (taller && right_inside)) {
+                                return true;
+                            }
+
+                            return false;
+                        };
+
+                        if(box_intersects_box(potential_top, potential_left, potential_bottom, potential_right, compare_top, compare_left, compare_bottom, compare_right) || box_intersects_box(compare_top, compare_left, compare_bottom, compare_right, potential_top, potential_left, potential_bottom, potential_right)) {
+                            return false;
+                        }
+
+
+                        /*auto corner_inside_box = [&compare_top, &compare_left, &compare_bottom, &compare_right](std::pair<std::uint32_t, std::uint32_t> &point) {
                             auto &x = point.first;
                             auto &y = point.second;
 
@@ -938,7 +987,7 @@ namespace Invader {
                         // If any corner is inside the sprite return false
                         if(corner_inside_box(top_left_corner) || corner_inside_box(top_right_corner) || corner_inside_box(bottom_left_corner) || corner_inside_box(bottom_right_corner)) {
                             return false;
-                        }
+                        }*/
                     }
 
                     return true;
@@ -952,16 +1001,19 @@ namespace Invader {
                     coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y); \
                 }
 
+                std::uint32_t max_x = width - sprite_fitting.width;
+                std::uint32_t max_y = height - sprite_fitting.height;
+
                 if(SORT_BY_HEIGHT) {
-                    for(std::uint32_t x = 0; x < width && !coordinates.has_value(); x++) {
-                        for(std::uint32_t y = 0; y < height && !coordinates.has_value(); y++) {
+                    for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                        for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
                             CHECK_IF_FITS
                         }
                     }
                 }
                 else {
-                    for(std::uint32_t y = 0; y < height && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = 0; x < width && !coordinates.has_value(); x++) {
+                    for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
+                        for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
                             CHECK_IF_FITS
                         }
                     }
@@ -969,7 +1021,7 @@ namespace Invader {
 
                 // Did we do it?
                 if(coordinates.has_value()) {
-                    sprite_fitting.bitmap_index = sheet;
+                    sprite_fitting.sheet_index = sheet;
 
                     auto &x = coordinates.value().first;
                     auto &y = coordinates.value().second;
@@ -1003,9 +1055,10 @@ namespace Invader {
             // Find the sprite
             for(std::uint32_t b = 0; b < sequence.bitmap_count; b++) {
                 for(auto &sprite : sprites_sorted) {
-                    if(sprite.sequence_index == s && sprite.bitmap_index == b) {
+                    if(sprite.sequence_index == s && sprite.sequence_sprite_index == b) {
                         auto &new_sprite = new_sequence.sprites.emplace_back();
-                        new_sprite.bitmap_index = sprite.bitmap_index;
+                        new_sprite.original_bitmap_index = sprite.bitmap_index;
+                        new_sprite.bitmap_index = sprite.sheet_index;
                         new_sprite.bottom = sprite.bottom;
                         new_sprite.top = sprite.top;
                         new_sprite.left = sprite.left;
@@ -1091,6 +1144,70 @@ namespace Invader {
             std::terminate();
         }
 
-        std::terminate();
+        auto &sprites_fit = fit_sprites.value();
+        std::uint32_t sheet_count = number_of_sprite_sheets(sprites_fit);
+
+        std::vector<ScannedColorPlateBitmap> new_bitmaps;
+
+        eprintf("Creating %u sprite sheet%s\n", sheet_count, sheet_count == 1 ? "" : "s");
+        for(std::uint32_t s = 0; s < sheet_count; s++) {
+            auto sheet_dimensions = dimensions_of_sprite_sheet(sprites_fit, s);
+
+            // Initialize the new bitmap
+            const std::uint32_t SHEET_WIDTH = sheet_dimensions.first;
+            const std::uint32_t SHEET_HEIGHT = sheet_dimensions.second;
+            eprintf("- %2u. Size: %ux%u\n", s, SHEET_WIDTH, SHEET_HEIGHT);
+            auto &new_bitmap = new_bitmaps.emplace_back();
+            new_bitmap.color_plate_x = 0;
+            new_bitmap.color_plate_y = 0;
+            new_bitmap.registration_point_x = 0;
+            new_bitmap.registration_point_y = 0;
+            new_bitmap.width = SHEET_WIDTH;
+            new_bitmap.height = SHEET_HEIGHT;
+            new_bitmap.pixels.insert(new_bitmap.pixels.begin(), SHEET_WIDTH * SHEET_HEIGHT, background_color);
+            eprintf("%u vs %zu\n", SHEET_WIDTH * SHEET_HEIGHT, new_bitmap.pixels.size());
+
+            // Put the sprites on the bitmap
+            for(std::uint32_t sequence_index = 0; sequence_index < color_plate.sequences.size(); sequence_index++) {
+                auto &color_plate_sequence = color_plate.sequences[sequence_index];
+                auto &sprite_sequence = sprites_fit[sequence_index];
+
+                if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
+                    eprintf("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
+                    std::terminate();
+                }
+
+                // Go through each sprite and bake it in
+                for(auto &sprite : sprite_sequence.sprites) {
+                    if(sprite.bitmap_index == s) {
+                        auto &bitmap = color_plate.bitmaps[sprite.original_bitmap_index];
+                        const std::uint32_t SPRITE_WIDTH = bitmap.width;
+                        const std::uint32_t SPRITE_HEIGHT = bitmap.height;
+                        for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) {
+                            for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) {
+                                const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x];
+                                auto &output = new_bitmap.pixels[(y + sprite.top) * SHEET_WIDTH + (x + sprite.left)];
+
+                                if(&output - new_bitmap.pixels.data() >= new_bitmap.pixels.size()) {
+                                    eprintf("Oh no!\n");
+                                    std::terminate();
+                                }
+
+                                #define ALPHA_BLEND_CHANNEL(color) output.color = (input.color * input.alpha + output.color * output.alpha * (1 - input.alpha))
+                                output.alpha = input.alpha + output.alpha * (1 - input.alpha);
+                                ALPHA_BLEND_CHANNEL(red);
+                                ALPHA_BLEND_CHANNEL(green);
+                                ALPHA_BLEND_CHANNEL(blue);
+
+                                output = {0xFF, 0xFF, 0xFF, 0xFF};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        color_plate.bitmaps = new_bitmaps;
+        color_plate.sequences = {};
     }
 }

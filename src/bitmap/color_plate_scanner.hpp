@@ -107,6 +107,7 @@ namespace Invader {
         std::uint32_t bitmap_index;
         std::uint32_t registration_point_x;
         std::uint32_t registration_point_y;
+        std::uint32_t original_bitmap_index;
     };
 
     struct ScannedColorPlateSequence {
