@@ -83,7 +83,7 @@ supported.
 | `--help,-h` | Show help. |
 | `--data,-d <dir>` | Data directory. |
 | `--tags,-t <dir>` | Tags directory. |
-| `--type,-T` | Set bitmap type. Can be `2d` (default), `cubemap`, `interface`, or `sprite`. |
+| `--type,-T` | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`. |
 | `--dithering,-D` | Apply dithering. Only works on `dxt1`, `dxt3`, and `dxt5` for now. |
 | `--ignore-tag,-I` | Ignore the tag data if the tag exists. |
 | `--format,-F <format>` | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |

@@ -121,6 +121,7 @@ namespace Invader {
         std::uint32_t color_plate_y;
         std::int32_t registration_point_x;
         std::int32_t registration_point_y;
+        std::uint32_t depth = 1;
         std::vector<ColorPlatePixel> pixels;
         std::vector<GeneratedBitmapDataBitmapMipmap> mipmaps;
     };
@@ -257,10 +258,10 @@ namespace Invader {
         static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor);
 
         /**
-         * Consolidate the cubemap data
+         * Consolidate the stacked bitmap data (cubemaps and 3d textures)
          * @param generated_bitmap bitmap data to do cubemap stuff with
          */
-        static void consolidate_cubemaps(GeneratedBitmapData &generated_bitmap);
+        static void consolidate_stacked_bitmaps(GeneratedBitmapData &generated_bitmap);
 
         /**
          * Process sprites

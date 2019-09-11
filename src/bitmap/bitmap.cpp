@@ -173,6 +173,9 @@ int main(int argc, char *argv[]) {
                 if(std::strcmp(optarg, "2d") == 0) {
                     bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
                 }
+                else if(std::strcmp(optarg, "3d") == 0) {
+                    bitmap_type = BitmapType::BITMAP_TYPE_3D_TEXTURES;
+                }
                 else if(std::strcmp(optarg, "cubemap") == 0) {
                     bitmap_type = BitmapType::BITMAP_TYPE_CUBE_MAPS;
                 }
@@ -222,7 +225,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
-                eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, cubemap,\n");
+                eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
                 eprintf("                               interface, sprite. Default (new tag): 2d\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxtn for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
@@ -462,8 +465,20 @@ int main(int argc, char *argv[]) {
         bitmap.bitmap_class = TagClassInt::TAG_CLASS_BITMAP;
         bitmap.width = bitmap_color_plate.width;
         bitmap.height = bitmap_color_plate.height;
-        bitmap.depth = 1;
-        bitmap.type = bitmap_type.value() == BitmapType::BITMAP_TYPE_CUBE_MAPS ? BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP : BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
+        switch(bitmap_type.value()) {
+            case BitmapType::BITMAP_TYPE_CUBE_MAPS:
+                bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP;
+                bitmap.depth = 1;
+                break;
+            case BitmapType::BITMAP_TYPE_3D_TEXTURES:
+                bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE;
+                bitmap.depth = bitmap_color_plate.depth;
+                break;
+            default:
+                bitmap.type = BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE;
+                bitmap.depth = 1;
+                break;
+        }
         bitmap.flags = BigEndian<BitmapDataFlags> {};
         bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
         std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();

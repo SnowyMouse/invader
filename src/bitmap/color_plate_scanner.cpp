@@ -45,11 +45,6 @@ namespace Invader {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
-        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
-            eprintf("Error: 3D textures are unimplemented.\n");
-            std::terminate();
-        }
-
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
@@ -181,9 +176,9 @@ namespace Invader {
             generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor);
         }
 
-        // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data
-        if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            consolidate_cubemaps(generated_bitmap);
+        // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
+        if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS || type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+            consolidate_stacked_bitmaps(generated_bitmap);
         }
 
         return generated_bitmap;
@@ -697,21 +692,21 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::consolidate_cubemaps(GeneratedBitmapData &generated_bitmap) {
+    void ColorPlateScanner::consolidate_stacked_bitmaps(GeneratedBitmapData &generated_bitmap) {
         std::vector<GeneratedBitmapDataSequence> new_sequences;
         std::vector<GeneratedBitmapDataBitmap> new_bitmaps;
         for(auto &sequence : generated_bitmap.sequences) {
-            // First, make sure we have six bitmaps exactly. Otherwise, bail.
-            if(sequence.bitmap_count != 6) {
-                eprintf("Error: Cubemap sequences require 6 bitmaps. %u found\n", sequence.bitmap_count);
-                std::terminate();
-            }
-
             auto &new_sequence = new_sequences.emplace_back();
             new_sequence.bitmap_count = 1;
             new_sequence.first_bitmap = new_bitmaps.size();
             new_sequence.y_start = sequence.y_start;
             new_sequence.y_start = sequence.y_end;
+            const std::uint32_t FACES = sequence.bitmap_count;
+
+            if(FACES == 0) {
+                eprintf("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
+                std::terminate();
+            }
 
             auto *bitmaps = generated_bitmap.bitmaps.data() + sequence.first_bitmap;
             auto &new_bitmap = new_bitmaps.emplace_back();
@@ -721,36 +716,43 @@ namespace Invader {
             new_bitmap.color_plate_y = bitmaps->color_plate_y;
             new_bitmap.registration_point_x = 0;
             new_bitmap.registration_point_y = 0;
+            new_bitmap.depth = FACES;
 
             const std::uint32_t MIPMAP_COUNT = bitmaps->mipmaps.size();
+            const std::uint32_t BITMAP_WIDTH = new_bitmap.width;
+            const std::uint32_t BITMAP_HEIGHT = new_bitmap.height;
 
-            // Next, make sure the bitmap is the same height and width
-            if(new_bitmap.height != new_bitmap.width) {
-                eprintf("Error: Cubemap bitmaps must have equal height and width. %ux%u found\n", new_bitmap.width, new_bitmap.height);
-                std::terminate();
+            if(generated_bitmap.type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+                if(FACES != 6) {
+                    eprintf("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
+                    std::terminate();
+                }
+                if(BITMAP_WIDTH != BITMAP_HEIGHT) {
+                    eprintf("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
+                    std::terminate();
+                }
             }
 
-            const std::uint32_t BITMAP_LENGTH = new_bitmap.width;
+            std::uint32_t mipmap_width = BITMAP_WIDTH;
+            std::uint32_t mipmap_height = BITMAP_HEIGHT;
 
-            // Allocate data to hold the new pixels and mipmaps
-            std::uint32_t mipmap_length = BITMAP_LENGTH;
-            static constexpr std::uint8_t FACES = 6;
             for(std::uint32_t i = 0; i <= MIPMAP_COUNT; i++) {
                 // Calculate the mipmap size in pixels (6 faces x length^2)
-                std::uint32_t mipmap_size = mipmap_length * mipmap_length * FACES;
+                std::uint32_t mipmap_size = mipmap_width * mipmap_height * FACES;
 
                 // Add everything
                 if(i) {
                     auto &mipmap = new_bitmap.mipmaps.emplace_back();
                     mipmap.first_pixel = new_bitmap.pixels.size();
                     mipmap.pixel_count = mipmap_size;
-                    mipmap.mipmap_height = mipmap_length;
-                    mipmap.mipmap_width = mipmap_length;
+                    mipmap.mipmap_height = mipmap_height;
+                    mipmap.mipmap_width = mipmap_width;
                 }
 
                 new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
 
-                mipmap_length /= 2;
+                mipmap_width /= 2;
+                mipmap_height /= 2;
             }
 
             // Go through each face
@@ -758,14 +760,14 @@ namespace Invader {
                 auto &bitmap = bitmaps[f];
 
                 // Ensure it's the same dimensions
-                if(bitmap.height != BITMAP_LENGTH || bitmap.width != BITMAP_LENGTH) {
-                    eprintf("Error: Cubemap bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", new_bitmap.width, new_bitmap.height, bitmap.width, bitmap.height);
+                if(bitmap.height != BITMAP_HEIGHT || bitmap.width != BITMAP_WIDTH) {
+                    eprintf("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
                     std::terminate();
                 }
 
                 // Also ensure it has the same # of mipmaps. I don't know how it wouldn't, but you never know
                 if(bitmap.mipmaps.size() != MIPMAP_COUNT) {
-                    eprintf("Error: Cubemap bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
+                    eprintf("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
                     std::terminate();
                 }
 
@@ -779,14 +781,13 @@ namespace Invader {
                     // Determine things
                     if(m.has_value()) {
                         auto &mipmap = new_bitmap.mipmaps[m.value()];
-                        const auto MIPMAP_LENGTH = mipmap.mipmap_width;
-                        pixel_count = MIPMAP_LENGTH * MIPMAP_LENGTH;
+                        pixel_count = mipmap.mipmap_width * mipmap.mipmap_height;
                         destination_buffer = new_bitmap.pixels.data() + mipmap.first_pixel + pixel_count * f;
                         source_buffer = bitmap.pixels.data() + bitmap.mipmaps[m.value()].first_pixel;
                         m = m.value() + 1;
                     }
                     else {
-                        pixel_count = BITMAP_LENGTH * BITMAP_LENGTH;
+                        pixel_count = BITMAP_WIDTH * BITMAP_HEIGHT;
                         destination_buffer = new_bitmap.pixels.data() + pixel_count * f;
                         source_buffer = bitmap.pixels.data();
                         m = 0;
