@@ -129,10 +129,10 @@ namespace Invader::HEK {
             }
 
             switch(reflexive.type.read()) {
-                case BitmapDataType::BITMAP_TYPE_CUBE_MAP:
+                case BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                     reflexive.pixels_count = reflexive.pixels_count * 6;
                     break;
-                case BitmapDataType::BITMAP_TYPE__3D_TEXTURE:
+                case BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
                     reflexive.pixels_count = reflexive.pixels_count * reflexive.depth.read();
                     break;
                 default:
