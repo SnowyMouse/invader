@@ -843,13 +843,16 @@ namespace Invader {
     }
 
     static std::optional<std::vector<ScannedColorPlateSequence>> fit_sprites_into_sprite_sheet(std::uint32_t width, std::uint32_t height, const ScannedColorPlate &color_plate, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets) {
+        // Effectively, all sprites are this many pixels apart
+        std::uint32_t effective_sprite_spacing = sprite_spacing * 2;
+
         // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
         std::size_t total_pixels = 0;
         for(auto &bitmap : color_plate.bitmaps) {
             if(bitmap.height > height || bitmap.width > width) {
                 return std::nullopt;
             }
-            total_pixels += (bitmap.height + sprite_spacing) * (bitmap.width + sprite_spacing);
+            total_pixels += (bitmap.height + effective_sprite_spacing) * (bitmap.width + effective_sprite_spacing);
         }
 
         // Also, if the number of pixels is greater than height * width, there is no way we could fit everything in here
@@ -925,16 +928,7 @@ namespace Invader {
             auto &sprite_fitting = sprites_sorted[sprite];
 
             for(std::uint32_t sheet = 0; sheet < sheet_count; sheet++) {
-                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sprite_spacing, &sheet, &width, &height](std::uint32_t x, std::uint32_t y) -> bool {
-                    auto subtract_clamp = [](std::uint32_t a, std::uint32_t b) -> std::uint32_t {
-                        if(a < b) {
-                            return 0;
-                        }
-                        else {
-                            return a - b;
-                        }
-                    };
-
+                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sheet, &width, &height](std::uint32_t x, std::uint32_t y) -> bool {
                     std::uint32_t potential_top = y;
                     std::uint32_t potential_left = x;
                     std::uint32_t potential_bottom = potential_top + sprite_fitting.height - 1;
@@ -954,10 +948,10 @@ namespace Invader {
                         }
 
                         // Get the value for comparing, spacing included
-                        std::uint32_t compare_top = subtract_clamp(sprite_test_value.top, sprite_spacing);
-                        std::uint32_t compare_left = subtract_clamp(sprite_test_value.left, sprite_spacing);
-                        std::uint32_t compare_bottom = sprite_test_value.bottom + sprite_spacing;
-                        std::uint32_t compare_right = sprite_test_value.right + sprite_spacing;
+                        std::uint32_t compare_top = sprite_test_value.top;
+                        std::uint32_t compare_left = sprite_test_value.left;
+                        std::uint32_t compare_bottom = sprite_test_value.bottom;
+                        std::uint32_t compare_right = sprite_test_value.right;
 
                         auto box_intersects_box = [](
                             std::uint32_t box_a_top,
@@ -1011,15 +1005,15 @@ namespace Invader {
                 std::uint32_t max_y = height - sprite_fitting.height;
 
                 if(SORT_BY_HEIGHT) {
-                    for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
-                        for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
+                    for(std::uint32_t x = 0; x <= max_x && !coordinates.has_value(); x++) {
+                        for(std::uint32_t y = 0; y <= max_y && !coordinates.has_value(); y++) {
                             CHECK_IF_FITS
                         }
                     }
                 }
                 else {
-                    for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                    for(std::uint32_t y = 0; y <= max_y && !coordinates.has_value(); y++) {
+                        for(std::uint32_t x = 0; x <= max_x && !coordinates.has_value(); x++) {
                             CHECK_IF_FITS
                         }
                     }
@@ -1034,8 +1028,8 @@ namespace Invader {
 
                     sprite_fitting.left = x;
                     sprite_fitting.top = y;
-                    sprite_fitting.bottom = y + sprite_fitting.height;
-                    sprite_fitting.right = x + sprite_fitting.width;
+                    sprite_fitting.bottom = y + sprite_fitting.height + effective_sprite_spacing;
+                    sprite_fitting.right = x + sprite_fitting.width + effective_sprite_spacing;
 
                     break;
                 }
@@ -1069,8 +1063,8 @@ namespace Invader {
                         new_sprite.top = sprite.top;
                         new_sprite.left = sprite.left;
                         new_sprite.right = sprite.right;
-                        new_sprite.registration_point_x = sprite.registration_point_x;
-                        new_sprite.registration_point_y = sprite.registration_point_y;
+                        new_sprite.registration_point_x = sprite.registration_point_x + sprite_spacing;
+                        new_sprite.registration_point_y = sprite.registration_point_y + sprite_spacing;
                         break;
                     }
                 }
@@ -1148,7 +1142,8 @@ namespace Invader {
         }
 
         // First see if we can even fit things into this
-        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, parameters.sprite_spacing, max_sheet_count, parameters.sprite_budget_optimize);
+        std::uint32_t sprite_spacing = parameters.sprite_spacing;
+        auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, max_budget, color_plate, sprite_spacing, max_sheet_count, parameters.sprite_budget_optimize);
         if(!fit_sprites.has_value()) {
             eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
             std::terminate();
@@ -1193,7 +1188,7 @@ namespace Invader {
                         for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) {
                             for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) {
                                 const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x];
-                                auto &output = new_bitmap.pixels[(y + sprite.top) * SHEET_WIDTH + (x + sprite.left)];
+                                auto &output = new_bitmap.pixels[(y + sprite.top + sprite_spacing) * SHEET_WIDTH + (x + sprite.left + sprite_spacing)];
                                 output = output.alpha_blend(input);
                             }
                         }
