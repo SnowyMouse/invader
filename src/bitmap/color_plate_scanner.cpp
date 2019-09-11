@@ -903,7 +903,7 @@ namespace Invader {
         std::uint32_t effective_sprite_spacing = sprite_spacing * 2;
 
         // If it's impossible to fit even a single pixel, give up
-        if(height <= width || width <= effective_sprite_spacing) {
+        if(height <= effective_sprite_spacing || width <= effective_sprite_spacing) {
             return std::nullopt;
         }
 
