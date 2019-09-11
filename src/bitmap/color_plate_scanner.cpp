@@ -131,12 +131,6 @@ namespace Invader {
             }
         }
 
-        // Sprites require a color plate
-        if(type == BitmapType::BITMAP_TYPE_SPRITES && !scanner.valid_color_plate) {
-            eprintf("Error: Sprites require a valid color plate.\n");
-            std::terminate();
-        }
-
         // If we have valid color plate data, use the color plate data
         if(scanner.valid_color_plate) {
             scanner.read_color_plate(generated_bitmap, pixels, width);
