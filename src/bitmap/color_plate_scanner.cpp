@@ -63,7 +63,7 @@ namespace Invader {
             scanner.valid_color_plate = true;
 
             // Make sure they aren't the same
-            if(blue_candidate != magenta_candidate && magenta_candidate != cyan_candidate) {
+            if(!same_color_ignore_opacity(blue_candidate, magenta_candidate) && !same_color_ignore_opacity(magenta_candidate, cyan_candidate)) {
                 // Let's assume for a moment they are. Is everything after the cyan pixel blue?
                 for(std::uint32_t x = 3; x < width; x++) {
                     if(!same_color_ignore_opacity(GET_PIXEL(x, 0), blue_candidate)) {
@@ -73,7 +73,7 @@ namespace Invader {
                 }
 
                 // Is the cyan pixel blue? If it is, that's okay, but we can't use the cyan pixel
-                bool ignore_cyan = cyan_candidate == blue_candidate;
+                bool ignore_cyan = same_color_ignore_opacity(blue_candidate, cyan_candidate);
 
                 // Next, is there a sequence border immediately below this?
                 if(scanner.valid_color_plate) {
