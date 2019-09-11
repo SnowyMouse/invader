@@ -613,7 +613,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 // Begin
-                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
                     *pixel_16_bit = conversion_function(pixel_32_bit);
@@ -629,7 +629,7 @@ int main(int argc, char *argv[]) {
             // If it's monochrome, it depends
             case BitmapDataFormat::BITMAP_FORMAT_A8:
             case BitmapDataFormat::BITMAP_FORMAT_AY8: {
-                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint8_t));
+                std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
                     *pixel_8_bit = pixel->alpha;
@@ -639,7 +639,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
             case BitmapDataFormat::BITMAP_FORMAT_Y8: {
-                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint8_t));
+                std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
                     *pixel_8_bit = ColorPlatePixel::convert_to_y8(pixel);
@@ -649,7 +649,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
             case BitmapDataFormat::BITMAP_FORMAT_A8Y8: {
-                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count * sizeof(std::uint16_t));
+                std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
                     *pixel_16_bit = ColorPlatePixel::convert_to_a8y8(pixel);
