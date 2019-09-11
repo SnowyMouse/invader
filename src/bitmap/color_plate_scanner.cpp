@@ -145,7 +145,20 @@ namespace Invader {
 
         // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
         else if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
+            std::uint32_t w = 4;
+            std::uint32_t h = 3;
+
+            while(w < width && h < height) {
+                w <<= 1;
+                h <<= 1;
+            }
+
+            if(w == width && h == height) {
+                scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
+            }
+            else {
+                scanner.read_non_color_plate(generated_bitmap, pixels, width, height);
+            }
         }
 
         // Otherwise, look for bitmaps up, down, left, and right
@@ -370,7 +383,6 @@ namespace Invader {
         sequence.bitmap_count = 0;
 
         // Go through each pixel to find a bitmap
-        const std::uint32_t X_END = width;
         const std::uint32_t Y_END = height;
 
         auto pixel_is_blocked = [&generated_bitmap](std::uint32_t x, std::uint32_t y, const GeneratedBitmapDataSequence &sequence) -> std::optional<std::uint32_t> {
@@ -436,40 +448,40 @@ namespace Invader {
                     auto &power_of_two = this->power_of_two;
                     auto &scanner = *this;
 
-                    auto get_bitmap_mipmaps = [&power_of_two, &scanner, &pixels, &X_END, &Y_END](std::uint32_t x, std::uint32_t y, std::uint32_t &width, std::uint32_t &height, auto &get_bitmap_mipmaps_recursion, std::uint32_t *expected_width = nullptr, std::uint32_t *expected_height = nullptr) -> std::uint32_t {
+                    auto get_bitmap_mipmaps = [&power_of_two, &scanner, &pixels, &width, &Y_END](std::uint32_t x, std::uint32_t y, std::uint32_t &mip_width, std::uint32_t &mip_height, auto &get_bitmap_mipmaps_recursion, std::uint32_t *expected_width = nullptr, std::uint32_t *expected_height = nullptr) -> std::uint32_t {
                         // Find the width
                         std::uint32_t x2;
-                        for(x2 = x; x2 < X_END && !scanner.is_ignored(GET_PIXEL(x2,y)); x2++);
-                        width = x2 - x;
-                        if(width < 1 || (power_of_two && !is_power_of_two(width))) {
-                            eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
+                        for(x2 = x; x2 < width && !scanner.is_ignored(GET_PIXEL(x2,y)); x2++);
+                        mip_width = x2 - x;
+                        if(mip_width < 1 || (power_of_two && !is_power_of_two(mip_width))) {
+                            eprintf(ERROR_INVALID_BITMAP_WIDTH, mip_width);
                             std::terminate();
                         }
 
                         // Find the height
                         std::uint32_t y2;
                         for(y2 = y; y2 < Y_END && !scanner.is_ignored(GET_PIXEL(x2 - 1,y2)); y2++);
-                        height = y2 - y;
-                        if(height < 1 || (power_of_two && !is_power_of_two(height))) {
-                            eprintf(ERROR_INVALID_BITMAP_HEIGHT, height);
+                        mip_height = y2 - y;
+                        if(mip_height < 1 || (power_of_two && !is_power_of_two(mip_height))) {
+                            eprintf(ERROR_INVALID_BITMAP_HEIGHT, mip_height);
                             std::terminate();
                         }
 
                         // Make sure it's correct
-                        if(expected_height && *expected_height != height) {
-                            eprintf("Error: Found a bitmap with an invalid mipmap height: %u; Expected %u\n", height, *expected_height);
+                        if(expected_height && *expected_height != mip_height) {
+                            eprintf("Error: Found a bitmap with an invalid mipmap height: %u; Expected %u\n", mip_height, *expected_height);
                             std::terminate();
                         }
 
                         // Make sure it's correct
-                        if(expected_width && *expected_width != width) {
-                            eprintf("Error: Found a bitmap with an invalid mipmap width: %u; Expected %u\n", width, *expected_width);
+                        if(expected_width && *expected_width != mip_width) {
+                            eprintf("Error: Found a bitmap with an invalid mipmap width: %u; Expected %u\n", mip_width, *expected_width);
                             std::terminate();
                         }
 
                         // Make sure there's nothing along the right edge
                         static constexpr char TOO_CLOSE_ERROR[] = "Error: Found a bitmap that is too close to another one.\n";
-                        if(x2 < X_END) {
+                        if(x2 < width) {
                             for(std::uint32_t ym = y; ym < y2; ym++) {
                                 if(!scanner.is_ignored(GET_PIXEL(x2, ym))) {
                                     eprintf(TOO_CLOSE_ERROR);
@@ -479,7 +491,7 @@ namespace Invader {
                         }
 
                         // If width or height are 1 or y2 is the edge, there are no more mipmaps
-                        if(width == 1 || height == 1 || y2 == Y_END) {
+                        if(mip_width == 1 || mip_height == 1 || y2 == Y_END) {
                             return 0;
                         }
 
@@ -506,8 +518,8 @@ namespace Invader {
                         // Lastly, check for mipmaps if needed
                         if(potential_mipmap) {
                             std::uint32_t w,h;
-                            std::uint32_t ew = width / 2;
-                            std::uint32_t eh = height / 2;
+                            std::uint32_t ew = mip_width / 2;
+                            std::uint32_t eh = mip_height / 2;
                             std::int32_t mipmap_count = get_bitmap_mipmaps_recursion(x, y2, w, h, get_bitmap_mipmaps_recursion, &ew, &eh);
                             if(mipmap_count == -1) {
                                 return -1;
