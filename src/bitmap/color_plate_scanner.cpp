@@ -174,6 +174,9 @@ namespace Invader {
             const std::uint32_t Y_START = sequence.y_start;
             const std::uint32_t Y_END = sequence.y_end;
 
+            // This is used for the registration point
+            const std::int32_t MID_Y = static_cast<std::int32_t>(Y_START + Y_END) / 2;
+
             std::optional<std::uint32_t> bitmap_x_start;
 
             for(std::uint32_t x = 0; x < X_END; x++) {
@@ -188,15 +191,13 @@ namespace Invader {
                             std::optional<std::uint32_t> min_y;
                             std::optional<std::uint32_t> max_y;
 
-                            std::optional<std::uint32_t> min_x_cyan;
-                            std::optional<std::uint32_t> max_x_cyan;
-                            std::optional<std::uint32_t> min_y_cyan;
-                            std::optional<std::uint32_t> max_y_cyan;
-
                             // Find the minimum x, y, max x, and max y stuff
-                            for(std::uint32_t xb = bitmap_x_start.value(); xb < x; xb++) {
+                            std::uint32_t xb;
+                            for(xb = bitmap_x_start.value(); xb < x; xb++) {
                                 for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
                                     auto &pixel = GET_PIXEL(xb, yb);
+
+                                    // This is for anything that's not a cyan/magenta/blue pixel
                                     if(!this->is_ignored(pixel)) {
                                         if(min_x.has_value()) {
                                             if(min_x.value() > xb) {
@@ -217,28 +218,6 @@ namespace Invader {
                                             min_y = yb;
                                             max_x = xb;
                                             max_y = yb;
-                                        }
-                                    }
-                                    if(!this->is_magenta(pixel) && !this->is_blue(pixel)) {
-                                        if(min_x_cyan.has_value()) {
-                                            if(min_x_cyan.value() > xb) {
-                                                min_x_cyan = xb;
-                                            }
-                                            if(min_y_cyan.value() > yb) {
-                                                min_y_cyan = yb;
-                                            }
-                                            if(max_x_cyan.value() < xb) {
-                                                max_x_cyan = xb;
-                                            }
-                                            if(max_y_cyan.value() < yb) {
-                                                max_y_cyan = yb;
-                                            }
-                                        }
-                                        else {
-                                            min_x_cyan = xb;
-                                            min_y_cyan = yb;
-                                            max_x_cyan = xb;
-                                            max_y_cyan = yb;
                                         }
                                     }
                                 }
@@ -272,8 +251,17 @@ namespace Invader {
                             bitmap.height = bitmap_height;
                             bitmap.color_plate_x = min_x.value();
                             bitmap.color_plate_y = min_y.value();
-                            bitmap.registration_point_x = (max_x_cyan.value() - min_x_cyan.value()) / 2 - (min_x.value() - min_x_cyan.value());
-                            bitmap.registration_point_y = (max_y_cyan.value() - min_y_cyan.value()) / 2 - (min_y.value() - min_y_cyan.value());
+
+                            // Calculate registration point.
+                            const std::int32_t MID_X = static_cast<std::int32_t>(xb + bitmap_x_start.value()) / 2;
+
+                            // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
+                            bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
+
+                            // The x point is the midpoint of the height of the entire sequence relative to the top
+                            bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
+
+                            // Load the pixels
                             for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
                                 for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
                                     auto &pixel = GET_PIXEL(bx, by);

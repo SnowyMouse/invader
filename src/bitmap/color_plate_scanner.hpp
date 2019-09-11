@@ -119,8 +119,8 @@ namespace Invader {
         std::uint32_t width;
         std::uint32_t color_plate_x;
         std::uint32_t color_plate_y;
-        std::uint32_t registration_point_x;
-        std::uint32_t registration_point_y;
+        std::int32_t registration_point_x;
+        std::int32_t registration_point_y;
         std::vector<ColorPlatePixel> pixels;
         std::vector<ScannedColorPlateBitmapMipmap> mipmaps;
     };
@@ -131,8 +131,8 @@ namespace Invader {
         std::uint32_t right;
         std::uint32_t bottom;
         std::uint32_t bitmap_index;
-        std::uint32_t registration_point_x;
-        std::uint32_t registration_point_y;
+        std::int32_t registration_point_x;
+        std::int32_t registration_point_y;
         std::uint32_t original_bitmap_index;
     };
 
