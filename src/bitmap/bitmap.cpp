@@ -179,6 +179,9 @@ int main(int argc, char *argv[]) {
                 else if(std::strcmp(optarg, "interface") == 0) {
                     bitmap_type = BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
                 }
+                else if(std::strcmp(optarg, "sprite") == 0) {
+                    bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
+                }
                 else {
                     eprintf("Unknown type %s\n", optarg);
                     return EXIT_FAILURE;
@@ -220,7 +223,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
                 eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, cubemap,\n");
-                eprintf("                               interface. Default (new tag): 2d\n");
+                eprintf("                               interface, sprite. Default (new tag): 2d\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxtn for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
