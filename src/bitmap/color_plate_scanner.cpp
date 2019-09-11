@@ -1179,6 +1179,6 @@ namespace Invader {
         }
 
         color_plate.bitmaps = new_bitmaps;
-        color_plate.sequences = {};
+        color_plate.sequences = sprites_fit;
     }
 }

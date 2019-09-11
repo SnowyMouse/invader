@@ -776,13 +776,33 @@ int main(int argc, char *argv[]) {
     new_tag_header.processed_pixel_data.size = bitmap_data_pixels.size();
 
     // Add all sequences
+    std::vector<std::byte> sprite_data;
     for(auto &sequence : scanned_color_plate.sequences) {
         BitmapGroupSequence<BigEndian> bgs = {};
         bgs.first_bitmap_index = sequence.first_bitmap;
         bgs.bitmap_count = sequence.bitmap_count;
+
+        bgs.sprites.count = static_cast<std::uint32_t>(sequence.sprites.size());
+        for(auto &sprite : sequence.sprites) {
+            BitmapGroupSprite<BigEndian> bgss = {};
+            auto &bitmap = scanned_color_plate.bitmaps[sprite.bitmap_index];
+            bgss.bitmap_index = sprite.bitmap_index;
+
+            bgss.bottom = static_cast<float>(sprite.bottom) / bitmap.height;
+            bgss.top = static_cast<float>(sprite.top) / bitmap.height;
+            bgss.registration_point.y = static_cast<float>(sprite.registration_point_y) / bitmap.height;
+
+            bgss.left = static_cast<float>(sprite.left) / bitmap.width;
+            bgss.right = static_cast<float>(sprite.right) / bitmap.width;
+            bgss.registration_point.x = static_cast<float>(sprite.registration_point_x) / bitmap.width;
+
+            sprite_data.insert(sprite_data.end(), reinterpret_cast<const std::byte *>(&bgss), reinterpret_cast<const std::byte *>(&bgss + 1));
+        }
+
         bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<const std::byte *>(&bgs), reinterpret_cast<const std::byte *>(&bgs + 1));
     }
     new_tag_header.bitmap_group_sequence.count = scanned_color_plate.sequences.size();
+    bitmap_tag_data.insert(bitmap_tag_data.end(), sprite_data.begin(), sprite_data.end());
 
     // Add the bitmap tag data
     const auto *bitmap_data_start = reinterpret_cast<const std::byte *>(bitmap_data.data());
