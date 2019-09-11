@@ -93,7 +93,7 @@ supported.
 | `--sheet-optimize,-O` | Find the smallest possible sprite sheet within the budget. This is slow. |
 | `--spacing,-S <px>` | Set minimum spacing between sprites in pixels. By default, this is 4. |
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting. |
-| `--budget,-B <length> | Set max length of sprite sheet. By default, this is 32. |
+| `--budget,-B <length>` | Set max length of sprite sheet. By default, this is 32. |
 
 ### invader-build
 This program builds cache files.
