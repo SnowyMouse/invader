@@ -141,6 +141,11 @@ namespace Invader {
             scanner.read_non_color_plate(color_plate, pixels, width, height);
         }
 
+        // If the last sequence is empty, purge it
+        if(color_plate.sequences.size() > 0 && color_plate.sequences[color_plate.sequences.size() - 1].bitmap_count == 0) {
+            color_plate.sequences.erase(color_plate.sequences.end() - 1);
+        }
+
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
             process_sprites(color_plate, sprite_parameters.value());
