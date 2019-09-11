@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
         {"mipmap-scale", required_argument, 0, 's' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
-        {"budget-optimize", no_argument, 0, 'O' },
+        {"sheet-optimize", no_argument, 0, 'O' },
         {"spacing", required_argument, 0, 'S' },
         {0, 0, 0, 0 }
     };
@@ -233,15 +233,14 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
                 eprintf("Sprite options:\n");
-                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
-                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n");
-                eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
-                eprintf("                               to 0 automatically determines budget and count.\n");
-                eprintf("                               Default (new tag): 0\n");
-                eprintf("    --budget-optimize,-O       Find the smallest sprite sheet possible within\n");
-                eprintf("                               the budget. Note: This is very slow!\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
+                eprintf("    --sheet-optimize,-O        Find the smallest sprite sheet possible within\n");
+                eprintf("                               the budget. This is slow.\n");
+                eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
+                eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
+                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
+                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n");
 
                 return EXIT_FAILURE;
         }
