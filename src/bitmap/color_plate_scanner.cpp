@@ -1090,7 +1090,7 @@ namespace Invader {
 
                 // Try making a new sprite sheet. If we hit the maximum sprite sheets, give up.
                 if(sheet + 1 == sheet_count) {
-                    if(++sheet_count >= maximum_sprite_sheets) {
+                    if(++sheet_count > maximum_sprite_sheets) {
                         return std::nullopt;
                     }
                 }
