@@ -3,24 +3,24 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 
 ## [0.8.2] - 2019-09-11
 ### Changed
-- A changelog is now used to track changes.
+- A changelog is now used to track changes
 
 ### Fixed
-- Fixed zero spacing causing hangs.
+- Fixed zero spacing causing hangs
 
 ## [0.8.1] - 2019-09-11
 ### Added
 - invader-bitmap: 3D textures are now supported
 
 ### Changed
-- invader-bitmap: The cyan pixel is now optional in color plates.
-- invader-bitmap: Alpha is now ignored in color plates.
+- invader-bitmap: The cyan pixel is now optional in color plates
+- invader-bitmap: Alpha is now ignored in color plates
 - invader-bitmap: Textures that don't utilize blue backgrounds are now detected differently
-- invader-bitmap: Sprites no longer require valid color plates.
+- invader-bitmap: Sprites no longer require valid color plates
 - invader-bitmap: Sprite spacing now affects the maximum number of mipmaps you can have with sprites
 
 ### Fixed
-- invader-bitmap: Fixed certain bitmaps going over the specified budget.
+- invader-bitmap: Fixed certain bitmaps going over the specified budget
 
 ## [0.8.0] - 2019-09-11
 ### Added
@@ -35,7 +35,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Alpha is now ignored when checking if a pixel is blue, magenta, or cyan
 
 ### Fixed
-- invader-build: Fixed an issue with certain sounds not being played correctly, such as the "Come on! We've got to get the hell out of here!" dialogue at the start of the game.
+- invader-build: Fixed an issue with certain sounds not being played correctly, such as the "Come on! We've got to get the hell out of here!" dialogue at the start of the game
 
 ### Removed
 - invader-bitmap: Removed being able to specify negative mipmaps to remove mipmaps
@@ -88,7 +88,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-font: now creates directories when outputting a font tag
 
 ### Fixed
-- invader-indexer: Fixed a missing newline in a help message.
+- invader-indexer: Fixed a missing newline in a help message
 
 ## [0.4.0] - 2019-08-22
 ### Added
