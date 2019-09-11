@@ -894,10 +894,15 @@ namespace Invader {
         // Effectively, all sprites are this many pixels apart
         std::uint32_t effective_sprite_spacing = sprite_spacing * 2;
 
+        // If it's impossible to fit even a single pixel, give up
+        if(height <= width || width <= effective_sprite_spacing) {
+            return std::nullopt;
+        }
+
         // First see if all sprites can even fit by themselves. If not, there is no point in continuing.
         std::size_t total_pixels = 0;
         for(auto &bitmap : generated_bitmap.bitmaps) {
-            if(bitmap.height > height || bitmap.width > width) {
+            if(bitmap.height + effective_sprite_spacing > height || bitmap.width + effective_sprite_spacing > width) {
                 return std::nullopt;
             }
             total_pixels += (bitmap.height + effective_sprite_spacing) * (bitmap.width + effective_sprite_spacing);
