@@ -121,14 +121,6 @@ namespace Invader {
             else {
                 scanner.valid_color_plate = false;
             }
-
-            if(!scanner.valid_color_plate) {
-                // Create a default sequence
-                auto &sequence = generated_bitmap.sequences.emplace_back();
-                sequence.y_start = 0;
-                sequence.y_end = height;
-                scanner.valid_color_plate = false;
-            }
         }
 
         // If we have valid color plate data, use the color plate data
@@ -136,36 +128,70 @@ namespace Invader {
             scanner.read_color_plate(generated_bitmap, pixels, width);
         }
 
-        // If it's a cubemap that isn't on a sprite sheet, try parsing it like this
-        else if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-            std::uint32_t w = 4;
-            std::uint32_t h = 3;
-
-            while(w < width && h < height) {
-                w <<= 1;
-                h <<= 1;
-            }
-
-            if(w == width && h == height) {
-                scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
-            }
-            else {
-                scanner.read_blue_border(generated_bitmap, pixels, width, height);
-            }
-        }
-
-        // Depending on if the whole top row is blue or not, read as one bitmap or read as blue borders
+        // Depending on if the whole top row is blue or not, read as one bitmap/unrolled cubemap or read as color plate
         else {
             bool read = false;
             for(std::uint32_t x = 0; x < width; x++) {
                 if(!scanner.is_blue(pixels[x])) {
-                    scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
+                    // Since it's just one bitmap in a sequence, we just need to make a 0-1 sequence
+                    auto &new_sequence = generated_bitmap.sequences.emplace_back();
+                    new_sequence.bitmap_count = 1;
+                    new_sequence.first_bitmap = 0;
+                    new_sequence.y_start = 0;
+                    new_sequence.y_end = height;
+
+                    if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+                        scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
+                    }
+                    else {
+                        scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
+                    }
                     read = true;
                     break;
                 }
             }
             if(!read) {
-                scanner.read_blue_border(generated_bitmap, pixels, width, height);
+                // First, let's get the sequences
+                for(std::uint32_t y = 1; y < height; y++) {
+                    for(std::uint32_t x = 0; x < width; x++) {
+                        auto &pixel = GET_PIXEL(x,y);
+                        if(!scanner.is_blue(pixel)) {
+                            // Start a sequence
+                            auto &new_sequence = generated_bitmap.sequences.emplace_back();
+                            new_sequence.y_start = y;
+                            new_sequence.bitmap_count = 0;
+                            new_sequence.first_bitmap = 0;
+
+                            // Find the end of said sequence
+                            for(; y < height; y++) {
+                                bool found_the_end = true;
+                                for(std::uint32_t xb = 0; xb < width; xb++) {
+                                    if(!scanner.is_blue(GET_PIXEL(xb, y))) {
+                                        found_the_end = false;
+                                        break;
+                                    }
+                                }
+
+                                if(found_the_end) {
+                                    break;
+                                }
+                            }
+
+                            new_sequence.y_end = y;
+                            break;
+                        }
+                    }
+                }
+
+                // Next, set the dummy space
+                ColorPlatePixel cyan;
+                cyan.alpha = 0xFF;
+                cyan.red = 0;
+                cyan.green = 0xFF;
+                cyan.blue = 0xFF;
+                scanner.cyan = cyan;
+
+                scanner.read_color_plate(generated_bitmap, pixels, width);
             }
         }
 
@@ -380,207 +406,6 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_blue_border(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
-        auto &sequence = generated_bitmap.sequences[0];
-        sequence.first_bitmap = generated_bitmap.bitmaps.size();
-        sequence.bitmap_count = 0;
-
-        // Go through each pixel to find a bitmap
-        const std::uint32_t Y_END = height;
-
-        auto pixel_is_blocked = [&generated_bitmap](std::uint32_t x, std::uint32_t y, const GeneratedBitmapDataSequence &sequence) -> std::optional<std::uint32_t> {
-            // Okay, let's see if we already got this pixel as a bitmap
-            if(sequence.bitmap_count > 0) {
-                // Go through each bitmap in the sequence
-                const std::uint32_t FIRST_BITMAP = sequence.first_bitmap;
-                const std::uint32_t END_BITMAP = FIRST_BITMAP + sequence.bitmap_count;
-                for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
-                    auto &bitmap = generated_bitmap.bitmaps[b];
-
-                    // If we are outside the x bounds or, somehow, our y is less than the bitmap, we obviously cannot be in this bitmap
-                    const std::uint32_t BITMAP_START_X = bitmap.color_plate_x;
-                    const std::uint32_t BITMAP_WIDTH = bitmap.width;
-                    const std::uint32_t BITMAP_END_X = BITMAP_START_X + BITMAP_WIDTH;
-                    const std::uint32_t BITMAP_START_Y = bitmap.color_plate_y;
-                    if(x < BITMAP_START_X || x >= BITMAP_END_X || y < BITMAP_START_Y) {
-                        continue;
-                    }
-
-                    // Go through each mipmap
-                    const std::uint32_t BITMAP_MIPMAP_COUNT = bitmap.mipmaps.size();
-                    std::uint32_t mip_width = BITMAP_WIDTH;
-                    std::uint32_t mip_start_y = BITMAP_START_Y;
-                    std::uint32_t mip_height = bitmap.height;
-                    std::uint32_t mip_end_y = BITMAP_START_Y + mip_height;
-                    for(std::uint32_t m = 0; m <= BITMAP_MIPMAP_COUNT; m++) {
-                        const std::uint32_t mip_end_x = BITMAP_START_X + mip_width;
-                        if(y < mip_end_y) {
-                            if(x < mip_end_x) {
-                                return mip_end_x;
-                            }
-                            else {
-                                return std::optional<std::uint32_t>();
-                            }
-                        }
-
-                        mip_start_y += mip_height;
-                        mip_end_y += mip_height;
-                        mip_height /= 2;
-                        mip_width /= 2;
-                    }
-                }
-            }
-
-            return std::optional<std::uint32_t>();
-        };
-
-        for(std::uint32_t y = 0; y < Y_END; y++) {
-            for(std::uint32_t x = 0; x < width; x++) {
-                auto &pixel = GET_PIXEL(x,y);
-
-                // Found?
-                if(!this->is_ignored(pixel)) {
-                    auto blocked = pixel_is_blocked(x, y, sequence);
-
-                    // If we should ignore this, set the x to the end of this bitmap (minus one for the iterator)
-                    if(blocked.has_value()) {
-                        x = blocked.value() - 1;
-                        continue;
-                    }
-
-                    auto &power_of_two = this->power_of_two;
-                    auto &scanner = *this;
-
-                    auto get_bitmap_mipmaps = [&power_of_two, &scanner, &pixels, &width, &Y_END](std::uint32_t x, std::uint32_t y, std::uint32_t &mip_width, std::uint32_t &mip_height, auto &get_bitmap_mipmaps_recursion, std::uint32_t *expected_width = nullptr, std::uint32_t *expected_height = nullptr) -> std::uint32_t {
-                        // Find the width
-                        std::uint32_t x2;
-                        for(x2 = x; x2 < width && !scanner.is_ignored(GET_PIXEL(x2,y)); x2++);
-                        mip_width = x2 - x;
-                        if(mip_width < 1 || (power_of_two && !is_power_of_two(mip_width))) {
-                            eprintf(ERROR_INVALID_BITMAP_WIDTH, mip_width);
-                            std::terminate();
-                        }
-
-                        // Find the height
-                        std::uint32_t y2;
-                        for(y2 = y; y2 < Y_END && !scanner.is_ignored(GET_PIXEL(x2 - 1,y2)); y2++);
-                        mip_height = y2 - y;
-                        if(mip_height < 1 || (power_of_two && !is_power_of_two(mip_height))) {
-                            eprintf(ERROR_INVALID_BITMAP_HEIGHT, mip_height);
-                            std::terminate();
-                        }
-
-                        // Make sure it's correct
-                        if(expected_height && *expected_height != mip_height) {
-                            eprintf("Error: Found a bitmap with an invalid mipmap height: %u; Expected %u\n", mip_height, *expected_height);
-                            std::terminate();
-                        }
-
-                        // Make sure it's correct
-                        if(expected_width && *expected_width != mip_width) {
-                            eprintf("Error: Found a bitmap with an invalid mipmap width: %u; Expected %u\n", mip_width, *expected_width);
-                            std::terminate();
-                        }
-
-                        // Make sure there's nothing along the right edge
-                        static constexpr char TOO_CLOSE_ERROR[] = "Error: Found a bitmap that is too close to another one.\n";
-                        if(x2 < width) {
-                            for(std::uint32_t ym = y; ym < y2; ym++) {
-                                if(!scanner.is_ignored(GET_PIXEL(x2, ym))) {
-                                    eprintf(TOO_CLOSE_ERROR);
-                                    std::terminate();
-                                }
-                            }
-                        }
-
-                        // If width or height are 1 or y2 is the edge, there are no more mipmaps
-                        if(mip_width == 1 || mip_height == 1 || y2 == Y_END) {
-                            return 0;
-                        }
-
-                        // Next, we should check if there's an explicit mipmap. If we aren't looking for power of two, then there cannot be any explicit mipmap
-                        bool potential_mipmap;
-                        std::uint32_t xm;
-                        if(!power_of_two || scanner.is_ignored(GET_PIXEL(x, y2))) {
-                            potential_mipmap = false;
-                            xm = x + 1;
-                        }
-                        else {
-                            potential_mipmap = true;
-                            xm = x + width / 2;
-                        }
-
-                        // Check the bottom edge
-                        for(; xm < x2; xm++) {
-                            if(!scanner.is_ignored(GET_PIXEL(xm, y2))) {
-                                eprintf(TOO_CLOSE_ERROR);
-                                return {};
-                            }
-                        }
-
-                        // Lastly, check for mipmaps if needed
-                        if(potential_mipmap) {
-                            std::uint32_t w,h;
-                            std::uint32_t ew = mip_width / 2;
-                            std::uint32_t eh = mip_height / 2;
-                            std::int32_t mipmap_count = get_bitmap_mipmaps_recursion(x, y2, w, h, get_bitmap_mipmaps_recursion, &ew, &eh);
-                            if(mipmap_count == -1) {
-                                return -1;
-                            }
-                            else {
-                                return 1 + mipmap_count;
-                            }
-                        }
-                        else {
-                            return 0;
-                        }
-                    };
-
-                    // Pull in the mipmap and bitmap stuff
-                    std::uint32_t bitmap_width = 0, bitmap_height = 0;
-                    auto mipmap_count = get_bitmap_mipmaps(x, y, bitmap_width, bitmap_height, get_bitmap_mipmaps);
-
-                    // Store that in a bitmap
-                    auto &bitmap = generated_bitmap.bitmaps.emplace_back();
-                    bitmap.color_plate_x = x;
-                    bitmap.color_plate_y = y;
-                    bitmap.mipmaps = std::vector<GeneratedBitmapDataBitmapMipmap>();
-                    bitmap.width = bitmap_width;
-                    bitmap.height = bitmap_height;
-                    bitmap.registration_point_x = divide_by_two_round(width);
-                    bitmap.registration_point_y = divide_by_two_round(height);
-
-                    // Store bitmap data, too
-                    std::uint32_t my = y;
-                    std::uint32_t mw = bitmap_width;
-                    std::uint32_t mh = bitmap_height;
-                    for(std::uint32_t m = 0; m <= mipmap_count; m++) {
-                        if(m != 0) {
-                            GeneratedBitmapDataBitmapMipmap mipmap = {};
-                            mipmap.first_pixel = bitmap.pixels.size();
-                            mipmap.mipmap_height = mh;
-                            mipmap.mipmap_width = mw;
-                            mipmap.pixel_count = mw * mh;
-                            bitmap.mipmaps.push_back(mipmap);
-                        }
-
-                        const std::uint32_t m_end_y = my + mh;
-                        for(; my < m_end_y; my++) {
-                            auto *pixel = &GET_PIXEL(x, my);
-                            bitmap.pixels.insert(bitmap.pixels.end(), pixel, pixel + mw);
-                        }
-
-                        // Next mipmap - half the resolution
-                        mw /= 2;
-                        mh /= 2;
-                    }
-
-                    sequence.bitmap_count++;
-                }
-            }
-        }
-    }
-
     void ColorPlateScanner::read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             if(!is_power_of_two(width)) {
@@ -618,7 +443,7 @@ namespace Invader {
     }
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
-        return this->is_blue(color) || (this->valid_color_plate && (this->is_cyan(color) || this->is_magenta(color)));
+        return this->is_blue(color) || this->is_cyan(color) || (this->valid_color_plate && this->is_magenta(color));
     }
 
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {

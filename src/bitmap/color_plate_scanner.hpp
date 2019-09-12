@@ -226,7 +226,7 @@ namespace Invader {
         bool is_ignored(const ColorPlatePixel &color) const;
 
         /**
-         * Read the color plate-valid bitmap data
+         * Read the color plate data bitmap data
          * @param generated_bitmap bitmap data to write to (output)
          * @param pixels           pixel input
          * @param width            width of input
@@ -241,15 +241,6 @@ namespace Invader {
          * @param height           height of input
          */
         void read_unrolled_cubemap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
-
-        /**
-         * Read bitmap data that doesn't have a valid color plate but still uses blue borders
-         * @param generated_bitmap bitmap data to write to (output)
-         * @param pixels           pixel input
-         * @param width            width of input
-         * @param height           height of input
-         */
-        void read_blue_border(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
 
         /**
          * Read a single bitmap.
