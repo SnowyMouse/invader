@@ -150,18 +150,23 @@ namespace Invader {
                 scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
             }
             else {
-                scanner.read_non_color_plate(generated_bitmap, pixels, width, height);
+                scanner.read_blue_border(generated_bitmap, pixels, width, height);
             }
         }
 
-        // Read a single bitmap if the first pixel is not blue
-        else if(!scanner.is_blue(*pixels)) {
-            scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
-        }
-
-        // Otherwise, look for bitmaps up, down, left, and right
+        // Depending on if the whole top row is blue or not, read as one bitmap or read as blue borders
         else {
-            scanner.read_non_color_plate(generated_bitmap, pixels, width, height);
+            bool read = false;
+            for(std::uint32_t x = 0; x < width; x++) {
+                if(!scanner.is_blue(pixels[x])) {
+                    scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
+                    read = true;
+                    break;
+                }
+            }
+            if(!read) {
+                scanner.read_blue_border(generated_bitmap, pixels, width, height);
+            }
         }
 
         // If the last sequence is empty, purge it
@@ -375,7 +380,7 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 6;
     }
 
-    void ColorPlateScanner::read_non_color_plate(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
+    void ColorPlateScanner::read_blue_border(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const {
         auto &sequence = generated_bitmap.sequences[0];
         sequence.first_bitmap = generated_bitmap.bitmaps.size();
         sequence.bitmap_count = 0;

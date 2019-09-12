@@ -1,6 +1,10 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Changed
+- invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap
+
 ## [0.8.2] - 2019-09-11
 ### Changed
 - A changelog is now used to track changes
