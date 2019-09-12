@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
-                eprintf("Sprite options:\n");
+                eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
                 eprintf("    --sheet-optimize,-O        Find the smallest sprite sheet possible within\n");
