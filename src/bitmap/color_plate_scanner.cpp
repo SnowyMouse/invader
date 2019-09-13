@@ -74,12 +74,23 @@ namespace Invader {
                 // Is the cyan pixel blue? If it is, that's okay, but we can't use the cyan pixel
                 bool ignore_cyan = same_color_ignore_opacity(blue_candidate, cyan_candidate);
 
+                static constexpr char ERROR_SEQUENCE_DIVIDER_BROKEN[] = "Error: Sequence divider broken at (%u,%u)\n";
+
                 // Next, is there a sequence border immediately below this?
                 if(scanner.valid_color_plate) {
                     for(std::uint32_t x = 0; x < width; x++) {
                         if(!same_color_ignore_opacity(GET_PIXEL(x, 1), magenta_candidate)) {
-                            scanner.valid_color_plate = false;
-                            break;
+                            // If it's not a sprite, that's fine
+                            if(type != BitmapType::BITMAP_TYPE_SPRITES) {
+                                scanner.valid_color_plate = false;
+                                break;
+                            }
+
+                            // Otherwise, bad!
+                            else {
+                                eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, 1);
+                                std::exit(1);
+                            }
                         }
                     }
                 }
@@ -101,8 +112,16 @@ namespace Invader {
                         bool sequence_border = true;
                         for(std::uint32_t x = 0; x < width; x++) {
                             if(!same_color_ignore_opacity(GET_PIXEL(x, y), magenta_candidate)) {
-                                sequence_border = false;
-                                break;
+                                // If we're on the first pixel, that's fine
+                                if(x == 0) {
+                                    sequence_border = false;
+                                    break;
+                                }
+                                // Otherwise we only got part of a sequence divider and that's not fine
+                                else {
+                                    eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, y);
+                                    std::exit(1);
+                                }
                             }
                         }
 
@@ -142,6 +161,10 @@ namespace Invader {
 
                     if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
                         scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
+                    }
+                    else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+                        eprintf("Error: Sprites must have blue borders or a valid color plate.\n");
+                        std::exit(1);
                     }
                     else {
                         scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
@@ -350,7 +373,7 @@ namespace Invader {
         std::uint32_t face_height = height / 3;
 
         if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
-            eprintf("Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
+            eprintf("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
             std::terminate();
         }
 
