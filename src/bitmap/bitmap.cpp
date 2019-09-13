@@ -69,7 +69,6 @@ int main(int argc, char *argv[]) {
     std::optional<std::uint32_t> sprite_budget;
     std::optional<std::uint32_t> sprite_budget_count;
     std::optional<std::uint32_t> sprite_spacing;
-    bool sprite_budget_optimize = false;
 
     // Dithering?
     bool dithering = false;
@@ -96,13 +95,12 @@ int main(int argc, char *argv[]) {
         {"mipmap-scale", required_argument, 0, 's' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
-        {"sheet-optimize", no_argument, 0, 'O' },
         {"spacing", required_argument, 0, 'S' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:O", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -211,10 +209,6 @@ int main(int argc, char *argv[]) {
                 sprite_spacing = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
                 break;
 
-            case 'O':
-                sprite_budget_optimize = true;
-                break;
-
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -238,8 +232,6 @@ int main(int argc, char *argv[]) {
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
-                eprintf("    --sheet-optimize,-O        Find the smallest sprite sheet possible within\n");
-                eprintf("                               the budget. This is slow.\n");
                 eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
                 eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
                 eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
@@ -402,7 +394,6 @@ int main(int argc, char *argv[]) {
         p.sprite_budget_count = sprite_budget_count.value();
         p.sprite_spacing = sprite_spacing.value();
         p.sprite_usage = sprite_usage.value();
-        p.sprite_budget_optimize = sprite_budget_optimize;
     }
 
     // Do it!

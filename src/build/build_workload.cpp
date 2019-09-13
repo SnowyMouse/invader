@@ -782,7 +782,7 @@ namespace Invader {
                                 }
 
                                 // Get yer values here. Get 'em while they're hot.
-                                float width_bitmap = 1.0F / std::fabs(sprite.left - sprite.right) / bitmap_dimensions[sprite.bitmap_index].first;
+                                float width_bitmap = 1.0F / std::fabs(sprite.right - sprite.left) / bitmap_dimensions[sprite.bitmap_index].first;
                                 float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
                                 float smallest = (width_bitmap < height_bitmap) ? width_bitmap : height_bitmap;
                                 if(pixel_size > smallest) {

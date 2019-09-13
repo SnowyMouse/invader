@@ -162,7 +162,6 @@ namespace Invader {
         std::uint32_t sprite_budget;
         std::uint32_t sprite_budget_count;
         std::uint32_t sprite_spacing;
-        bool sprite_budget_optimize;
     };
 
     class ColorPlateScanner {

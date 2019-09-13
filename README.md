@@ -90,7 +90,6 @@ supported.
 | `--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767. |
 | `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
-| `--sheet-optimize,-O` | Find the smallest possible sprite sheet within the budget. This is slow. |
 | `--spacing,-S <px>` | Set minimum spacing between sprites in pixels. By default, this is 4. |
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting. |
 | `--budget,-B <length>` | Set max length of sprite sheet. By default, this is 32. |

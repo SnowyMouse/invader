@@ -1,9 +1,11 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.9.0]
 ### Changed
 - invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap
+- invader-bitmap: Removed -O (this is now done by default)
+- invader-bitmap: Removed the ability to create non 1:1 sprite sheets due to them not working well with particles
 
 ## [0.8.2] - 2019-09-11
 ### Changed
