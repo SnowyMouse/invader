@@ -1,6 +1,10 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-bitmap: Fixed some issues with spacing
+
 ## [0.9.0]
 ### Changed
 - invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap

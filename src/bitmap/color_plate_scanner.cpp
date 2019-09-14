@@ -837,11 +837,11 @@ namespace Invader {
             auto &sprite_fitting = sprites_sorted[sprite];
 
             for(std::uint32_t sheet = 0; sheet < sheet_count; sheet++) {
-                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sheet, &length](std::uint32_t x, std::uint32_t y) -> bool {
-                    std::uint32_t potential_top = y;
-                    std::uint32_t potential_left = x;
-                    std::uint32_t potential_bottom = potential_top + sprite_fitting.height - 1;
-                    std::uint32_t potential_right = potential_left + sprite_fitting.width - 1;
+                auto fits = [&sprite_fitting, &sprite, &sprites_sorted, &sheet, &sprite_spacing, &length](std::uint32_t x, std::uint32_t y) -> bool {
+                    std::uint32_t potential_top = y - sprite_spacing;
+                    std::uint32_t potential_left = x - sprite_spacing;
+                    std::uint32_t potential_bottom = potential_top + sprite_fitting.height + sprite_spacing * 2;
+                    std::uint32_t potential_right = potential_left + sprite_fitting.width + sprite_spacing * 2;
 
                     // If we're outside the bitmap, fail
                     if(length <= potential_right || length <= potential_bottom) {
@@ -859,8 +859,8 @@ namespace Invader {
                         // Get the value for comparing, spacing included
                         std::uint32_t compare_top = sprite_test_value.top;
                         std::uint32_t compare_left = sprite_test_value.left;
-                        std::uint32_t compare_bottom = sprite_test_value.bottom;
-                        std::uint32_t compare_right = sprite_test_value.right;
+                        std::uint32_t compare_bottom = sprite_test_value.bottom - 1;
+                        std::uint32_t compare_right = sprite_test_value.right - 1;
 
                         auto box_intersects_box = [](
                             std::uint32_t box_a_top,
@@ -905,11 +905,11 @@ namespace Invader {
                 // Coordinates
                 std::optional<std::pair<std::uint32_t,std::uint32_t>> coordinates;
 
-                std::uint32_t max_x = length - sprite_fitting.width - effective_sprite_spacing;
-                std::uint32_t max_y = length - sprite_fitting.height - effective_sprite_spacing;
+                std::uint32_t max_x = length - sprite_fitting.width - sprite_spacing;
+                std::uint32_t max_y = length - sprite_fitting.height - sprite_spacing;
 
-                for(std::uint32_t x = 0; x <= max_x && !coordinates.has_value(); x++) {
-                    for(std::uint32_t y = 0; y <= max_y && !coordinates.has_value(); y++) {
+                for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                    for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
                         if(fits(x,y)) {
                             coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
                         }
@@ -925,8 +925,8 @@ namespace Invader {
 
                     sprite_fitting.left = x;
                     sprite_fitting.top = y;
-                    sprite_fitting.bottom = y + sprite_fitting.height + effective_sprite_spacing;
-                    sprite_fitting.right = x + sprite_fitting.width + effective_sprite_spacing;
+                    sprite_fitting.bottom = y + sprite_fitting.height;
+                    sprite_fitting.right = x + sprite_fitting.width;
 
                     break;
                 }
@@ -956,10 +956,10 @@ namespace Invader {
                         auto &new_sprite = new_sequence.sprites.emplace_back();
                         new_sprite.original_bitmap_index = sprite.bitmap_index;
                         new_sprite.bitmap_index = sprite.sheet_index;
-                        new_sprite.bottom = sprite.bottom;
-                        new_sprite.top = sprite.top;
-                        new_sprite.left = sprite.left;
-                        new_sprite.right = sprite.right;
+                        new_sprite.top = sprite.top - sprite_spacing;
+                        new_sprite.left = sprite.left - sprite_spacing;
+                        new_sprite.bottom = sprite.bottom + sprite_spacing;
+                        new_sprite.right = sprite.right + sprite_spacing;
                         new_sprite.registration_point_x = sprite.registration_point_x + sprite_spacing;
                         new_sprite.registration_point_y = sprite.registration_point_y + sprite_spacing;
 
