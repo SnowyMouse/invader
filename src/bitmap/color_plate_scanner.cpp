@@ -809,7 +809,7 @@ namespace Invader {
             for(std::uint32_t b = FIRST_BITMAP; b < END_BITMAP; b++) {
                 auto &bitmap = bitmaps[b];
                 std::uint32_t length;
-                length = horizontal ? bitmap.width : bitmap.height;
+                length = horizontal ? bitmap.height : bitmap.width;
 
                 // Create it!
                 SortedSprite sprite_to_add = {};
@@ -920,15 +920,14 @@ namespace Invader {
                     }
                 }
                 else {
-                    for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                    for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                        for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
                             if(fits(x,y)) {
                                 coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
                             }
                         }
                     }
                 }
-
 
                 // Did we do it?
                 if(coordinates.has_value()) {
