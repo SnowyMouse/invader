@@ -755,6 +755,7 @@ namespace Invader {
     static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t sprite_spacing, std::uint32_t maximum_sprite_sheets, bool horizontal) {
         // Effectively, all sprites are this many pixels apart
         std::uint32_t effective_sprite_spacing = sprite_spacing * 2;
+        std::uint32_t half_spacing = sprite_spacing / 2;
 
         // If it's impossible to fit even a single pixel, give up
         if(length <= effective_sprite_spacing) {
@@ -906,12 +907,12 @@ namespace Invader {
                 // Coordinates
                 std::optional<std::pair<std::uint32_t,std::uint32_t>> coordinates;
 
-                std::uint32_t max_x = length - sprite_fitting.width - sprite_spacing;
-                std::uint32_t max_y = length - sprite_fitting.height - sprite_spacing;
+                std::uint32_t max_x = length - sprite_fitting.width - half_spacing;
+                std::uint32_t max_y = length - sprite_fitting.height - half_spacing;
 
                 if(horizontal) {
-                    for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                    for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
+                        for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
                             if(fits(x,y)) {
                                 coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
                             }
@@ -919,8 +920,8 @@ namespace Invader {
                     }
                 }
                 else {
-                    for(std::uint32_t y = sprite_spacing; y <= max_y && !coordinates.has_value(); y++) {
-                        for(std::uint32_t x = sprite_spacing; x <= max_x && !coordinates.has_value(); x++) {
+                    for(std::uint32_t y = half_spacing; y <= max_y && !coordinates.has_value(); y++) {
+                        for(std::uint32_t x = half_spacing; x <= max_x && !coordinates.has_value(); x++) {
                             if(fits(x,y)) {
                                 coordinates = std::pair<std::uint32_t,std::uint32_t>(x,y);
                             }
@@ -969,12 +970,12 @@ namespace Invader {
                         auto &new_sprite = new_sequence.sprites.emplace_back();
                         new_sprite.original_bitmap_index = sprite.bitmap_index;
                         new_sprite.bitmap_index = sprite.sheet_index;
-                        new_sprite.top = sprite.top - sprite_spacing;
-                        new_sprite.left = sprite.left - sprite_spacing;
-                        new_sprite.bottom = sprite.bottom + sprite_spacing;
-                        new_sprite.right = sprite.right + sprite_spacing;
-                        new_sprite.registration_point_x = sprite.registration_point_x + sprite_spacing;
-                        new_sprite.registration_point_y = sprite.registration_point_y + sprite_spacing;
+                        new_sprite.top = sprite.top - half_spacing;
+                        new_sprite.left = sprite.left - half_spacing;
+                        new_sprite.bottom = sprite.bottom + half_spacing;
+                        new_sprite.right = sprite.right + half_spacing;
+                        new_sprite.registration_point_x = sprite.registration_point_x + half_spacing;
+                        new_sprite.registration_point_y = sprite.registration_point_y + half_spacing;
 
                         break;
                     }

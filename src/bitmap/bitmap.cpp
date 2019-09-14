@@ -207,6 +207,7 @@ int main(int argc, char *argv[]) {
 
             case 'S':
                 sprite_spacing = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                sprite_spacing.value() += (sprite_spacing.value() % 2); // if an odd number, add 1
                 break;
 
             default:
@@ -311,7 +312,7 @@ int main(int argc, char *argv[]) {
             sprite_budget_count = bitmap_tag_header.sprite_budget_count;
         }
         if(!sprite_spacing.has_value()) {
-            sprite_spacing = bitmap_tag_header.sprite_spacing;
+            sprite_spacing = bitmap_tag_header.sprite_spacing * 2;
         }
 
         std::fclose(tag_read);
@@ -832,7 +833,7 @@ int main(int argc, char *argv[]) {
         new_tag_header.mipmap_count = max_mipmap_count.value() + 1;
     }
 
-    new_tag_header.sprite_spacing = sprite_spacing.value();
+    new_tag_header.sprite_spacing = sprite_spacing.value() / 2;
     new_tag_header.sprite_budget_count = sprite_budget_count.value();
     new_tag_header.sprite_usage = sprite_usage.value();
     auto &sprite_budget_value = sprite_budget.value();
