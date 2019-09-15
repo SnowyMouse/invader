@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
 - invader-bitmap: Changed how spacing is stored in the bitmap to effectively match how tool.exe calculates its spacing
 - invader-bitmap: Double multiply sprites now simply replaces the pixel like tool.exe rather than alpha blend into gray
+- invader-bitmap: Usage and the p8 compression flag are now preserved
+- invader-bitmap: Height maps now generate bump maps similar to tool.exe
 
 ### Fixed
 - invader-bitmap: Fixed some issues with spacing
