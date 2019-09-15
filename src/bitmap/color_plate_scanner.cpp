@@ -1080,19 +1080,28 @@ namespace Invader {
                 }
 
                 // Go through each sprite and bake it in
-                for(auto &sprite : sprite_sequence.sprites) {
-                    if(sprite.bitmap_index == s) {
-                        auto &bitmap = generated_bitmap.bitmaps[sprite.original_bitmap_index];
-                        const std::uint32_t SPRITE_WIDTH = bitmap.width;
-                        const std::uint32_t SPRITE_HEIGHT = bitmap.height;
-                        for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) {
-                            for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) {
-                                const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x];
-                                auto &output = new_bitmap.pixels[(y + sprite.top + half_spacing) * SHEET_WIDTH + (x + sprite.left + half_spacing)];
-                                output = output.alpha_blend(input);
-                            }
-                        }
-                    }
+                #define BAKE_SPRITE(fn) \
+                for(auto &sprite : sprite_sequence.sprites) { \
+                    if(sprite.bitmap_index == s) { \
+                        auto &bitmap = generated_bitmap.bitmaps[sprite.original_bitmap_index]; \
+                        const std::uint32_t SPRITE_WIDTH = bitmap.width; \
+                        const std::uint32_t SPRITE_HEIGHT = bitmap.height; \
+                        for(std::uint32_t y = 0; y < SPRITE_HEIGHT; y++) { \
+                            for(std::uint32_t x = 0; x < SPRITE_WIDTH; x++) { \
+                                const auto &input = bitmap.pixels[y * SPRITE_WIDTH + x]; \
+                                auto &output = new_bitmap.pixels[(y + sprite.top + half_spacing) * SHEET_WIDTH + (x + sprite.left + half_spacing)]; \
+                                output = output.fn(input); \
+                            } \
+                        } \
+                    } \
+                }
+
+                // If it's multiply, do an alpha blend. Otherwise it just replaces the pixel.
+                if(parameters.sprite_usage == BitmapSpriteUsage::BITMAP_SPRITE_USAGE_MULTIPLY_MIN) {
+                    BAKE_SPRITE(alpha_blend);
+                }
+                else {
+                    BAKE_SPRITE(replace);
                 }
             }
         }

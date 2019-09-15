@@ -56,6 +56,10 @@ namespace Invader {
             return output;
         }
 
+        ColorPlatePixel replace(const ColorPlatePixel &source) const {
+            return source;
+        };
+
         template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
         static std::uint16_t convert_to_16_bit(const ColorPlatePixel *color) {
             static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");

@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 ### Changed
 - invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
 - invader-bitmap: Changed how spacing is stored in the bitmap to effectively match how tool.exe calculates its spacing
+- invader-bitmap: Double multiply sprites now simply replaces the pixel like tool.exe rather than alpha blend into gray
 
 ### Fixed
 - invader-bitmap: Fixed some issues with spacing
