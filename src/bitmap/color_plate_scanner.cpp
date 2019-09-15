@@ -6,6 +6,7 @@
 
 #include <optional>
 
+#include "../hek/data_type.hpp"
 #include "color_plate_scanner.hpp"
 #include "../eprintf.hpp"
 
@@ -475,8 +476,64 @@ namespace Invader {
     }
 
     void ColorPlateScanner::process_height_maps(GeneratedBitmapData &generated_bitmap, float bump_height) {
-        eprintf("Height map generation is not yet implemented.\n");
-        std::terminate();
+        if(bump_height < 0.0000001F) {
+            bump_height = 0.0000001F;
+        }
+
+        for(auto &bitmap : generated_bitmap.bitmaps) {
+            std::vector<ColorPlatePixel> bitmap_pixels_copy = bitmap.pixels;
+
+            for(std::uint32_t y = 0; y < bitmap.height; y++) {
+                for(std::uint32_t x = 0; x < bitmap.width; x++) {
+                    // from https://stackoverflow.com/a/2368794
+
+                    #define CLAMP_SUBTRACT(a,b) (b > a ? 0 : (a - b))
+                    #define CLAMP_ADD(a,b,max) (a + b > (max - 1) ? (max - 1) : (a + b))
+
+                    #define MEME(...) if(x == 53 && y == 67) { eprintf(__VA_ARGS__); }
+
+                    static_assert(CLAMP_SUBTRACT(555,556) == 0);
+
+                    // Get the surrounding pixels' positions
+                    std::uint32_t down = CLAMP_SUBTRACT(y,1);
+                    std::uint32_t up = CLAMP_ADD(y,1,bitmap.height);
+                    std::uint32_t right = CLAMP_SUBTRACT(x,1);
+                    std::uint32_t left = CLAMP_ADD(x,1,bitmap.width);
+
+                    #define GET_COPY_PIXELS_INTENSITY(x,y) (static_cast<float>(ColorPlatePixel::convert_to_y8(bitmap_pixels_copy.data() + x + y * (bitmap.width))) / 255.0F)
+
+                    // Get all of our pixels
+                    float left_up_pixel = GET_COPY_PIXELS_INTENSITY(left,up);
+                    float up_pixel = GET_COPY_PIXELS_INTENSITY(x,up);
+                    float right_up_pixel = GET_COPY_PIXELS_INTENSITY(right,up);
+
+                    float left_pixel = GET_COPY_PIXELS_INTENSITY(left,y);
+                    //float center_pixel = GET_COPY_PIXELS_INTENSITY(x,y);
+                    float right_pixel = GET_COPY_PIXELS_INTENSITY(right,y);
+
+                    float left_down_pixel = GET_COPY_PIXELS_INTENSITY(left,down);
+                    float down_pixel = GET_COPY_PIXELS_INTENSITY(x,down);
+                    float right_down_pixel = GET_COPY_PIXELS_INTENSITY(right,down);
+
+                    #undef GET_COPY_PIXELS_INTENSITY
+
+                    auto &mut_pixel = bitmap.pixels[x + y * (bitmap.width)];
+
+                    float x_intensity = (right_up_pixel + 2.0F * right_pixel + right_down_pixel) - (left_up_pixel + 2.0F * left_pixel + left_down_pixel);
+                    float y_intensity = (left_down_pixel + 2.0F * down_pixel + right_down_pixel) - (left_up_pixel + 2.0F * up_pixel + right_up_pixel);
+                    float z_intensity = 1.5F / (bump_height / 0.02F);
+                    HEK::Vector3D<HEK::NativeEndian> v;
+                    v.i = x_intensity;
+                    v.j = y_intensity;
+                    v.k = z_intensity;
+                    v = v.normalize();
+
+                    mut_pixel.red = static_cast<std::uint8_t>((v.i + 1.0F) / 2.0F * 255);
+                    mut_pixel.green = static_cast<std::uint8_t>((v.j + 1.0F) / 2.0F * 255);
+                    mut_pixel.blue = static_cast<std::uint8_t>((v.k + 1.0F) / 2.0F * 255);
+                }
+            }
+        }
     }
 
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {
