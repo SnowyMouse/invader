@@ -61,6 +61,9 @@ int main(int argc, char *argv[]) {
     // Usage?
     std::optional<BitmapUsage> usage;
 
+    // Bump stuff
+    std::optional<float> bump_height;
+
     // Palettize to p8 bump?
     std::optional<bool> palettize;
 
@@ -326,6 +329,9 @@ int main(int argc, char *argv[]) {
         if(!palettize.has_value()) {
             palettize = !bitmap_tag_header.flags.read().disable_height_map_compression;
         }
+        if(!bump_height.has_value()) {
+            bump_height = bitmap_tag_header.bump_height;
+        }
 
         std::fclose(tag_read);
     }
@@ -344,6 +350,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
     DEFAULT_VALUE(sprite_spacing,4);
     DEFAULT_VALUE(palettize,false);
+    DEFAULT_VALUE(bump_height,0.0F);
 
     #undef DEFAULT_VALUE
 
@@ -394,7 +401,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), mipmap_fade.value());
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), mipmap_fade.value());
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -820,6 +827,7 @@ int main(int argc, char *argv[]) {
     // Set more parameters
     new_tag_header.type = bitmap_type.value();
     new_tag_header.usage = usage.value();
+    new_tag_header.bump_height = bump_height.value();
     new_tag_header.detail_fade_factor = mipmap_fade.value();
     new_tag_header.format = format.value();
     if(max_mipmap_count.value() >= INT16_MAX) {

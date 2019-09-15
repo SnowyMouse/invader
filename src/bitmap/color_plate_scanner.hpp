@@ -15,6 +15,7 @@
 namespace Invader {
     using BitmapType = HEK::BitmapType;
     using BitmapSpriteUsage = HEK::BitmapSpriteUsage;
+    using BitmapUsage = HEK::BitmapUsage;
 
     struct ColorPlatePixel {
         std::uint8_t blue;
@@ -176,13 +177,15 @@ namespace Invader {
          * @param  width              width of color plate
          * @param  height             height of color plate
          * @param  type               type of bitmap
+         * @param  usage              usage value for bitmap
+         * @param  bump_height        bump height value
+         * @param  sprite_parameters  sprite parameters for sprite generation (only necessary if making sprites)
          * @param  mipmaps            maximum number of mipmaps
          * @param  mipmap_type        type of mipmaps
          * @param  mipmap_fade_factor fade-to-gray factor for mipmaps
-         * @param  sprite_parameters  sprite parameters for sprite generation (only necessary if making sprites)
          * @return                    scanned color plate data
          */
-        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
+        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage = BitmapUsage::BITMAP_USAGE_DEFAULT, float bump_height = 0.0F, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, float mipmap_fade_factor = 0.0F);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
@@ -253,6 +256,13 @@ namespace Invader {
          * @param height           height of input
          */
         void read_single_bitmap(GeneratedBitmapData &generated_bitmap, const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height) const;
+
+        /**
+         * Process height maps for the bitmap
+         * @param generated_bitmap bitmap data to write to (output)
+         * @param bump_height      bump height value
+         */
+        static void process_height_maps(GeneratedBitmapData &generated_bitmap, float bump_height);
 
         /**
          * Generate mipmaps for the color plate

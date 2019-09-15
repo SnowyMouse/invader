@@ -41,7 +41,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
@@ -226,6 +226,11 @@ namespace Invader {
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
             process_sprites(generated_bitmap, sprite_parameters.value());
+        }
+
+        // If we're doing height maps, do this
+        if(usage == BitmapUsage::BITMAP_USAGE_HEIGHT_MAP) {
+            process_height_maps(generated_bitmap, bump_height);
         }
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
@@ -467,6 +472,11 @@ namespace Invader {
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
         return this->is_blue(color) || this->is_cyan(color) || (this->valid_color_plate && this->is_magenta(color));
+    }
+
+    void ColorPlateScanner::process_height_maps(GeneratedBitmapData &generated_bitmap, float bump_height) {
+        eprintf("Height map generation is not yet implemented.\n");
+        std::terminate();
     }
 
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {
