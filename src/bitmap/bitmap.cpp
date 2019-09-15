@@ -58,6 +58,12 @@ int main(int argc, char *argv[]) {
     // Format?
     std::optional<BitmapFormat> format;
 
+    // Usage?
+    std::optional<BitmapUsage> usage;
+
+    // Palettize to p8 bump?
+    std::optional<bool> palettize;
+
     // Mipmap fade factor
     std::optional<float> mipmap_fade;
 
@@ -314,42 +320,32 @@ int main(int argc, char *argv[]) {
         if(!sprite_spacing.has_value()) {
             sprite_spacing = bitmap_tag_header.sprite_spacing * 2;
         }
+        if(!usage.has_value()) {
+            usage = bitmap_tag_header.usage;
+        }
+        if(!palettize.has_value()) {
+            palettize = !bitmap_tag_header.flags.read().disable_height_map_compression;
+        }
 
         std::fclose(tag_read);
     }
 
-    // If format wasn't set, set it
-    if(!format.has_value()) {
-        format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
-    }
+    // If these values weren't set, set them
+    #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
 
-    // Same with bitmap type
-    if(!bitmap_type.has_value()) {
-        bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
-    }
+    DEFAULT_VALUE(format,BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR);
+    DEFAULT_VALUE(bitmap_type,BitmapType::BITMAP_TYPE_2D_TEXTURES);
+    DEFAULT_VALUE(max_mipmap_count,INT16_MAX);
+    DEFAULT_VALUE(sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
+    DEFAULT_VALUE(sprite_budget,32);
+    DEFAULT_VALUE(sprite_budget_count,0);
+    DEFAULT_VALUE(mipmap_scale_type,ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR);
+    DEFAULT_VALUE(mipmap_fade,0.0F);
+    DEFAULT_VALUE(usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
+    DEFAULT_VALUE(sprite_spacing,4);
+    DEFAULT_VALUE(palettize,false);
 
-    // And these other things too
-    if(!max_mipmap_count.has_value()) {
-        max_mipmap_count = INT16_MAX;
-    }
-    if(!sprite_usage.has_value()) {
-        sprite_usage = BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX;
-    }
-    if(!sprite_budget.has_value()) {
-        sprite_budget = 32;
-    }
-    if(!sprite_budget_count.has_value()) {
-        sprite_budget_count = 0;
-    }
-    if(!mipmap_scale_type.has_value()) {
-        mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
-    }
-    if(!sprite_spacing.has_value()) {
-        sprite_spacing = 4;
-    }
-    if(!mipmap_fade.has_value()) {
-        mipmap_fade = 0.0F;
-    }
+    #undef DEFAULT_VALUE
 
     // Have these variables handy
     std::uint32_t image_width = 0, image_height = 0;
@@ -823,7 +819,7 @@ int main(int argc, char *argv[]) {
 
     // Set more parameters
     new_tag_header.type = bitmap_type.value();
-    new_tag_header.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
+    new_tag_header.usage = usage.value();
     new_tag_header.detail_fade_factor = mipmap_fade.value();
     new_tag_header.format = format.value();
     if(max_mipmap_count.value() >= INT16_MAX) {
@@ -832,6 +828,10 @@ int main(int argc, char *argv[]) {
     else {
         new_tag_header.mipmap_count = max_mipmap_count.value() + 1;
     }
+
+    BitmapFlags flags = {};
+    flags.disable_height_map_compression = !palettize.value();
+    new_tag_header.flags = flags;
 
     new_tag_header.sprite_spacing = sprite_spacing.value() / 2;
     new_tag_header.sprite_budget_count = sprite_budget_count.value();
