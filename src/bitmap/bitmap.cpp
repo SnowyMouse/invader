@@ -105,11 +105,14 @@ int main(int argc, char *argv[]) {
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
         {"spacing", required_argument, 0, 'S' },
+        {"bump-palettize", required_argument, 0, 'p' },
+        {"bump-palettise", required_argument, 0, 'p' },
+        {"bump-height", required_argument, 0, 'h' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -202,6 +205,36 @@ int main(int argc, char *argv[]) {
                 dithering = true;
                 break;
 
+            case 'p':
+                if(strcmp(optarg,"on") == 0) {
+                    palettize = true;
+                }
+                else if(strcmp(optarg,"off") == 0) {
+                    palettize = false;
+                }
+                else {
+                    eprintf("Unknown palettize setting %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                break;
+
+            case 'u':
+                if(strcmp(optarg, "default") == 0) {
+                    usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
+                }
+                else if(strcmp(optarg, "bumpmap") == 0) {
+                    usage = BitmapUsage::BITMAP_USAGE_HEIGHT_MAP;
+                }
+                else {
+                    eprintf("Unknown usage %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
+                break;
+
+            case 'h':
+                bump_height = static_cast<float>(std::strtof(optarg, nullptr));
+                break;
+
             case 'm':
                 max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
                 break;
@@ -231,6 +264,8 @@ int main(int argc, char *argv[]) {
                 eprintf("Bitmap options:\n");
                 eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
                 eprintf("                               interface, sprite. Default (new tag): 2d\n");
+                eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap.\n");
+                eprintf("                               Default (new tag): default.\n");
                 eprintf("    --dithering,-D             Apply dithering. Only works on dxtn for now.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
@@ -239,6 +274,12 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
+                eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
+                eprintf("    --bump-height,-h <height>  Set the apparent bumpmap height from 0 to 1.\n");
+                eprintf("                               Default (new tag): 0.02\n");
+                //eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
+                //eprintf("                               not work with stock Halo. Can be: off or on.\n");
+                //eprintf("                               Default (new tag): off\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
@@ -350,7 +391,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
     DEFAULT_VALUE(sprite_spacing,4);
     DEFAULT_VALUE(palettize,false);
-    DEFAULT_VALUE(bump_height,0.0F);
+    DEFAULT_VALUE(bump_height,0.02F);
 
     #undef DEFAULT_VALUE
 

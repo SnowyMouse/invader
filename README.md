@@ -84,6 +84,7 @@ supported.
 | `--data,-d <dir>` | Data directory. |
 | `--tags,-t <dir>` | Tags directory. |
 | `--type,-T` | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`. |
+| `--usage,-u <usage>` | Set usage. Can be `default` (default) or `bumpmap`. |
 | `--dithering,-D` | Apply dithering. Only works on `dxt1`, `dxt3`, and `dxt5` for now. |
 | `--ignore-tag,-I` | Ignore the tag data if the tag exists. |
 | `--format,-F <format>` | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |
@@ -91,6 +92,7 @@ supported.
 | `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 | `--spacing,-S <px>` | Set minimum spacing between sprites in pixels. By default, this is 4. |
+| `--bump-height,-h <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02. |
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting. |
 | `--budget,-B <length>` | Set max length of sprite sheet. By default, this is 32. |
 
