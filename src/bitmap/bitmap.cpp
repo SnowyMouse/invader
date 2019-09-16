@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
         {"format", required_argument, 0, 'F' },
         {"type", required_argument, 0, 'T' },
         {"mipmap-count", required_argument, 0, 'm' },
-        {"mipmap-fade", required_argument, 0, 'f' },
+        {"detail-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
@@ -244,6 +244,9 @@ int main(int argc, char *argv[]) {
                 else if(strcmp(optarg, "bumpmap") == 0) {
                     usage = BitmapUsage::BITMAP_USAGE_HEIGHT_MAP;
                 }
+                else if(strcmp(optarg, "detail") == 0) {
+                    usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
+                }
                 else {
                     eprintf("Unknown usage %s\n", optarg);
                     return EXIT_FAILURE;
@@ -282,16 +285,15 @@ int main(int argc, char *argv[]) {
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
                 eprintf("    --type,-T <type>           Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
-                eprintf("                               interface, sprite. Default (new tag): 2d\n");
-                eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap.\n");
-                eprintf("                               Default (new tag): default\n");
+                eprintf("                               interface, or sprite. Default (new tag): 2d\n");
+                eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap,\n");
+                eprintf("                               or detail. Default (new tag): default\n");
                 eprintf("    --dithering,-D <channels>  Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
                 eprintf("                               Specify channels with letters (i.e. argb).\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
-                eprintf("    --mipmap-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
@@ -300,6 +302,8 @@ int main(int argc, char *argv[]) {
                 eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
                 eprintf("                               not work with stock Halo. Can be: off or on.\n");
                 eprintf("                               Default (new tag): off\n\n");
+                eprintf("Detail map options (only applies to detail bitmaps):\n");
+                eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
@@ -412,6 +416,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(sprite_spacing,4);
     DEFAULT_VALUE(palettize,false);
     DEFAULT_VALUE(bump_height,0.02F);
+    DEFAULT_VALUE(mipmap_fade,0.0F);
 
     #undef DEFAULT_VALUE
 
@@ -462,7 +467,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), mipmap_fade.value());
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? mipmap_fade : std::nullopt);
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -506,11 +511,6 @@ int main(int argc, char *argv[]) {
     // Now let's add the actual bitmap data
     std::vector<std::byte> bitmap_data_pixels;
     std::vector<BitmapData<BigEndian>> bitmap_data(bitmap_count);
-
-    // Default mipmap parameters
-    if(!mipmap_fade.has_value()) {
-        mipmap_fade = 0.0F;
-    }
 
     // Add our bitmap data
     printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");

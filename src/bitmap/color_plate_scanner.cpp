@@ -88,7 +88,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor) {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
@@ -581,7 +581,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, float mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
@@ -671,21 +671,24 @@ namespace Invader {
 
                         #undef INTERPOLATE_CHANNEL
 
-                        // Fade to gray?
-                        if(mipmap_fade_factor > 0.0F) {
-                            // Alpha -> white
-                            std::uint32_t alpha_delta = pixel.alpha * mipmap_fade_factor + 1;
-                            if(static_cast<std::uint32_t>(0xFF - pixel.alpha) < alpha_delta) {
-                                pixel.alpha = 0xFF;
+                        // Do fade-to-gray
+                        if(mipmap_fade_factor.has_value()) {
+                            // Get the old alpha
+                            std::uint8_t old_alpha = pixel.alpha;
+
+                            // Alpha blend to gray
+                            std::uint8_t alpha_delta = static_cast<std::uint8_t>(0xFF / max_mipmap_count);
+                            ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, alpha_delta };
+                            pixel.alpha *= (1.0F - mipmap_fade_factor.value());
+                            pixel = pixel.alpha_blend(FADE_TO_GRAY);
+
+                            // Fade alpha to white
+                            if(UINT8_MAX - old_alpha > alpha_delta) {
+                                pixel.alpha = old_alpha + alpha_delta;
                             }
                             else {
-                                pixel.alpha += alpha_delta;
+                                pixel.alpha = UINT8_MAX;
                             }
-
-                            // RGB -> gray
-                            pixel.red -= (static_cast<int>(pixel.red) - 0x7F) * mipmap_fade_factor;
-                            pixel.green -= (static_cast<int>(pixel.green) - 0x7F) * mipmap_fade_factor;
-                            pixel.blue -= (static_cast<int>(pixel.blue) - 0x7F) * mipmap_fade_factor;
                         }
                     }
                 }
