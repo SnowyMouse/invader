@@ -651,8 +651,10 @@ int main(int argc, char *argv[]) {
 
                         // Get the error
                         ColorPlatePixel p8_return = from_palette_fn(pixel_output);
+                        float alpha_error = static_cast<std::int16_t>(pixel.alpha) - p8_return.alpha;
                         float red_error = static_cast<std::int16_t>(pixel.red) - p8_return.red;
                         float green_error = static_cast<std::int16_t>(pixel.green) - p8_return.green;
+                        float blue_error = static_cast<std::int16_t>(pixel.blue) - p8_return.blue;
 
                         if(x > 0 && x < mip_width - 1 && y < mip_height - 1) {
                             // Apply the error
@@ -675,15 +677,23 @@ int main(int argc, char *argv[]) {
 
                             APPLY_ERROR(pixel_right, red, red_error, 7);
                             APPLY_ERROR(pixel_right, green, green_error, 7);
+                            APPLY_ERROR(pixel_right, blue, blue_error, 7);
+                            APPLY_ERROR(pixel_right, alpha, alpha_error, 7);
 
                             APPLY_ERROR(pixel_below_left, red, red_error, 3);
                             APPLY_ERROR(pixel_below_left, green, green_error, 3);
+                            APPLY_ERROR(pixel_below_left, blue, blue_error, 3);
+                            APPLY_ERROR(pixel_below_left, alpha, alpha_error, 3);
 
                             APPLY_ERROR(pixel_below_middle, red, red_error, 5);
                             APPLY_ERROR(pixel_below_middle, green, green_error, 5);
+                            APPLY_ERROR(pixel_below_middle, blue, blue_error, 5);
+                            APPLY_ERROR(pixel_below_middle, alpha, alpha_error, 5);
 
                             APPLY_ERROR(pixel_below_right, red, red_error, 1);
                             APPLY_ERROR(pixel_below_right, green, green_error, 1);
+                            APPLY_ERROR(pixel_below_right, blue, blue_error, 1);
+                            APPLY_ERROR(pixel_below_right, alpha, alpha_error, 1);
 
                             #undef APPLY_ERROR
                         }
