@@ -536,10 +536,6 @@ namespace Invader {
                     #define CLAMP_SUBTRACT(a,b) (b > a ? 0 : (a - b))
                     #define CLAMP_ADD(a,b,max) (a + b > (max - 1) ? (max - 1) : (a + b))
 
-                    #define MEME(...) if(x == 53 && y == 67) { eprintf(__VA_ARGS__); }
-
-                    static_assert(CLAMP_SUBTRACT(555,556) == 0);
-
                     // Get the surrounding pixels' positions
                     std::uint32_t down = CLAMP_SUBTRACT(y,1);
                     std::uint32_t up = CLAMP_ADD(y,1,bitmap.height);
