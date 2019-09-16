@@ -720,8 +720,73 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
 
-                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
-                    *pixel_8_bit = pixel->convert_to_p8();
+                // If we're dithering, do dithering things
+                if(dithering) {
+                    std::uint32_t mip_width = bitmap.width;
+                    std::uint32_t mip_height = bitmap.height;
+                    auto *mip_pixel = first_pixel;
+                    auto *mip_pixel_8_bit = pixel_8_bit;
+                    for(std::uint32_t m = 0; m <= bitmap.mipmap_count; m++) {
+                        for(std::uint32_t y = 0; y < mip_height; y++) {
+                            for(std::uint32_t x = 0; x < mip_width; x++) {
+                                // Get our pixels
+                                auto &pixel = mip_pixel[x + y * mip_width];
+                                auto &pixel_8_bit = mip_pixel_8_bit[x + y * mip_width];
+
+                                // Convert to p8
+                                pixel_8_bit = pixel.convert_to_p8();
+
+                                // Get the error
+                                ColorPlatePixel p8_return = ColorPlatePixel::p8_to_color(pixel_8_bit);
+                                pixel_8_bit = pixel.convert_to_p8();
+                                float red_error = static_cast<std::int16_t>(pixel.red) - p8_return.red;
+                                float green_error = static_cast<std::int16_t>(pixel.green) - p8_return.green;
+
+                                if(x > 0 && x < mip_width - 1 && y < mip_height - 1) {
+
+                                    // Apply the error
+                                    #define APPLY_ERROR(pixel, channel, error, multiply) {\
+                                        float delta = (error * multiply / 16);\
+                                        std::int16_t value = static_cast<std::int16_t>(pixel.channel) + delta;\
+                                        if(value < 0) {\
+                                            value = 0;\
+                                        }\
+                                        else if(value > UINT8_MAX) {\
+                                            value = UINT8_MAX;\
+                                        }\
+                                        pixel.channel = static_cast<std::uint8_t>(value);\
+                                    }
+
+                                    auto &pixel_right = mip_pixel[x + y * mip_width + 1];
+                                    auto &pixel_below_left = mip_pixel[x + (y + 1) * mip_width - 1];
+                                    auto &pixel_below_middle = mip_pixel[x + (y + 1) * mip_width];
+                                    auto &pixel_below_right = mip_pixel[x + (y + 1) * mip_width + 1];
+
+                                    APPLY_ERROR(pixel_right, red, red_error, 7);
+                                    APPLY_ERROR(pixel_right, green, green_error, 7);
+
+                                    APPLY_ERROR(pixel_below_left, red, red_error, 3);
+                                    APPLY_ERROR(pixel_below_left, green, green_error, 3);
+
+                                    APPLY_ERROR(pixel_below_middle, red, red_error, 5);
+                                    APPLY_ERROR(pixel_below_middle, green, green_error, 5);
+
+                                    APPLY_ERROR(pixel_below_right, red, red_error, 1);
+                                    APPLY_ERROR(pixel_below_right, green, green_error, 1);
+                                }
+                            }
+                        }
+
+                        mip_pixel_8_bit += mip_width * mip_height;
+                        mip_pixel += mip_width * mip_height;
+                        mip_height /= 2;
+                        mip_width /= 2;
+                    }
+                }
+                else {
+                    for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                        *pixel_8_bit = pixel->convert_to_p8();
+                    }
                 }
 
                 current_bitmap_pixels.clear();
