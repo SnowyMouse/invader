@@ -29,7 +29,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Removed the ability to create non 1:1 sprite sheets due to them not working well with particles
 
 ## [0.8.2] - 2019-09-11
-### Changed
+### Added
 - A changelog is now used to track changes
 
 ### Fixed
