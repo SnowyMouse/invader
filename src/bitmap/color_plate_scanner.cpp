@@ -27,6 +27,52 @@ namespace Invader {
         return log2_value;
     }
 
+    ColorPlatePixel ColorPlatePixel::alpha_blend(const ColorPlatePixel &source) const {
+        ColorPlatePixel output;
+
+        if(source.alpha == 0.0F) {
+            return *this;
+        }
+
+        float destination_alpha_float = this->alpha / 255.0F;
+        float source_alpha_float = source.alpha / 255.0F;
+
+        float blend = destination_alpha_float * (1.0F - source_alpha_float);
+        float output_alpha_float = source_alpha_float + blend;
+
+        output.alpha = static_cast<std::uint8_t>(output_alpha_float * UINT8_MAX);
+
+        #define ALPHA_BLEND_CHANNEL(channel) output.channel = static_cast<std::uint8_t>(((source.channel * source_alpha_float) + (this->channel * blend)) / output_alpha_float);
+
+        ALPHA_BLEND_CHANNEL(red);
+        ALPHA_BLEND_CHANNEL(green);
+        ALPHA_BLEND_CHANNEL(blue);
+
+        #undef ALPHA_BLEND_CHANNEL
+
+        return output;
+    }
+
+    std::uint8_t ColorPlatePixel::convert_to_y8() {
+        // Based on Luma
+        static const std::uint8_t RED_WEIGHT = 54;
+        static const std::uint8_t GREEN_WEIGHT = 182;
+        static const std::uint8_t BLUE_WEIGHT = 19;
+        static_assert(RED_WEIGHT + GREEN_WEIGHT + BLUE_WEIGHT == UINT8_MAX, "red + green + blue weights (grayscale) must equal 255");
+
+        std::uint8_t grayscale_output = 0;
+        #define COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(channel, weight) \
+            grayscale_output += (this->channel * weight + (UINT8_MAX + 1) / 2) / UINT8_MAX;
+
+        COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(red, RED_WEIGHT)
+        COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(green, GREEN_WEIGHT)
+        COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(blue, BLUE_WEIGHT)
+
+        #undef COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR
+
+        return grayscale_output;
+    }
+
     static inline bool same_color_ignore_opacity(const ColorPlatePixel &color_a, const ColorPlatePixel &color_b) {
         return color_a.red == color_b.red && color_a.blue == color_b.blue && color_a.green == color_b.green;
     }
@@ -500,7 +546,7 @@ namespace Invader {
                     std::uint32_t right = CLAMP_SUBTRACT(x,1);
                     std::uint32_t left = CLAMP_ADD(x,1,bitmap.width);
 
-                    #define GET_COPY_PIXELS_INTENSITY(x,y) (static_cast<float>(ColorPlatePixel::convert_to_y8(bitmap_pixels_copy.data() + x + y * (bitmap.width))) / 255.0F)
+                    #define GET_COPY_PIXELS_INTENSITY(x,y) (static_cast<float>(bitmap_pixels_copy[x + y * bitmap.width].convert_to_y8() / 255.0F))
 
                     // Get all of our pixels
                     float left_up_pixel = GET_COPY_PIXELS_INTENSITY(left,up);

@@ -540,7 +540,7 @@ int main(int argc, char *argv[]) {
         // If we need to do monochrome, check if the alpha equals luminosity
         if(format == BitmapFormat::BITMAP_FORMAT_MONOCHROME) {
             for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
-                std::uint8_t luminosity = ColorPlatePixel::convert_to_y8(pixel);
+                std::uint8_t luminosity = pixel->convert_to_y8();
 
                 // First, check if the luminosity is the same as alpha. If not, AY8 is not an option.
                 if(luminosity != pixel->alpha) {
@@ -646,17 +646,17 @@ int main(int argc, char *argv[]) {
             case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
             case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
-                uint16_t (*conversion_function)(const ColorPlatePixel *);
+                std::uint16_t (ColorPlatePixel::*conversion_function)();
 
                 switch(bitmap_format) {
                     case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
-                        conversion_function = ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
-                        conversion_function = ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
-                        conversion_function = ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
+                        conversion_function = &ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
                         break;
                     default:
                         std::terminate();
@@ -667,7 +667,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
-                    *pixel_16_bit = conversion_function(pixel_32_bit);
+                    *pixel_16_bit = (pixel_32_bit->*conversion_function)();
                 }
 
                 // Replace buffers
@@ -693,7 +693,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
-                    *pixel_8_bit = ColorPlatePixel::convert_to_y8(pixel);
+                    *pixel_8_bit = pixel->convert_to_y8();
                 }
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
@@ -703,7 +703,7 @@ int main(int argc, char *argv[]) {
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
-                    *pixel_16_bit = ColorPlatePixel::convert_to_a8y8(pixel);
+                    *pixel_16_bit = pixel->convert_to_a8y8();
                 }
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
@@ -822,9 +822,9 @@ int main(int argc, char *argv[]) {
 
         #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-        printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
+        std::printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
     }
-    printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
+    std::printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());

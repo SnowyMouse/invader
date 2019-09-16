@@ -23,53 +23,75 @@ namespace Invader {
         std::uint8_t red;
         std::uint8_t alpha;
 
-        bool operator==(const ColorPlatePixel &other) const {
+        /**
+         * Compare with another color and return if the color is the same
+         * @param  source color to compare with
+         * @return        true if the colors are equal
+         */
+        inline bool operator==(const ColorPlatePixel &other) const {
             return this->blue == other.blue && this->green == other.green && this->red == other.red && this->alpha == other.alpha;
         }
 
-        bool operator!=(const ColorPlatePixel &other) const {
+        /**
+         * Compare with another color and return if the color is not the same
+         * @param  source color to compare with
+         * @return        true if the colors are not equal
+         */
+        inline bool operator!=(const ColorPlatePixel &other) const {
             return !(*this == other);
         }
 
-        ColorPlatePixel alpha_blend(const ColorPlatePixel &source) const {
-            ColorPlatePixel output;
-
-            if(source.alpha == 0.0F) {
-                return *this;
-            }
-
-            float destination_alpha_float = this->alpha / 255.0F;
-            float source_alpha_float = source.alpha / 255.0F;
-
-            float blend = destination_alpha_float * (1.0F - source_alpha_float);
-            float output_alpha_float = source_alpha_float + blend;
-
-            output.alpha = static_cast<std::uint8_t>(output_alpha_float * UINT8_MAX);
-
-            #define ALPHA_BLEND_CHANNEL(channel) output.channel = static_cast<std::uint8_t>(((source.channel * source_alpha_float) + (this->channel * blend)) / output_alpha_float);
-
-            ALPHA_BLEND_CHANNEL(red);
-            ALPHA_BLEND_CHANNEL(green);
-            ALPHA_BLEND_CHANNEL(blue);
-
-            #undef ALPHA_BLEND_CHANNEL
-
-            return output;
-        }
-
-        ColorPlatePixel replace(const ColorPlatePixel &source) const {
+        /**
+         * Return the source color
+         * @param  source source color
+         * @return        source color
+         */
+        inline ColorPlatePixel replace(const ColorPlatePixel &source) const {
             return source;
         };
 
+        /**
+         * Alpha-blend the color with another color
+         * @param  source color to alpha blend with
+         * @return        alpha-blended color
+         */
+        ColorPlatePixel alpha_blend(const ColorPlatePixel &source) const;
+
+        /**
+         * Convert the color to 8-bit grayscale
+         * @return 8-bit grayscale representation of the color
+         */
+        std::uint8_t convert_to_y8();
+
+        /**
+         * Conver the color to alpha
+         * @return alpha of the color
+         */
+        inline std::uint8_t convert_to_a8() {
+            return this->alpha;
+        }
+
+        /**
+         * Convert the color to grayscale with alpha.
+         * @return A8Y8 representation of the color
+         */
+        inline std::uint16_t convert_to_a8y8() {
+            return (this->alpha << 8) | this->convert_to_y8();
+        }
+
+        /**
+         * Convert the color to a 16-bit integer.
+         * @return 16-bit representation of the color
+         */
         template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
-        static std::uint16_t convert_to_16_bit(const ColorPlatePixel *color) {
+        std::uint16_t convert_to_16_bit() {
             static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");
 
             std::uint16_t color_output = 0;
 
             #define COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(channel) if(channel) { \
                 color_output <<= channel; \
-                color_output |= (static_cast<std::uint16_t>(color->channel) * ((1 << (channel)) - 1) + (UINT8_MAX + 1) / 2) / UINT8_MAX; \
+                color_output |= (static_cast<std::uint16_t>(this->channel) * ((1 << (channel)) - 1) + (UINT8_MAX + 1) / 2) / UINT8_MAX; \
             }
 
             COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR(alpha);
@@ -80,34 +102,6 @@ namespace Invader {
             #undef COMPOSITE_BITMAP_COLOR_SET_CHANNEL_VALUE_FOR_COLOR
 
             return color_output;
-        }
-
-        static std::uint8_t convert_to_y8(const ColorPlatePixel *color) {
-            // Based on Luma
-            static const std::uint8_t RED_WEIGHT = 54;
-            static const std::uint8_t GREEN_WEIGHT = 182;
-            static const std::uint8_t BLUE_WEIGHT = 19;
-            static_assert(RED_WEIGHT + GREEN_WEIGHT + BLUE_WEIGHT == UINT8_MAX, "red + green + blue weights (grayscale) must equal 255");
-
-            std::uint8_t grayscale_output = 0;
-            #define COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(channel, weight) \
-                grayscale_output += (color->channel * weight + (UINT8_MAX + 1) / 2) / UINT8_MAX;
-
-            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(red, RED_WEIGHT)
-            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(green, GREEN_WEIGHT)
-            COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR(blue, BLUE_WEIGHT)
-
-            #undef COMPOSITE_BITMAP_GRAYSCALE_SET_CHANNEL_VALUE_FOR_COLOR
-
-            return grayscale_output;
-        }
-
-        static std::uint8_t convert_to_a8(const ColorPlatePixel *color) {
-            return color->alpha;
-        }
-
-        static std::uint16_t convert_to_a8y8(const ColorPlatePixel *color) {
-            return (color->alpha << 8) | convert_to_y8(color);
         }
     };
     static_assert(sizeof(ColorPlatePixel) == 4);
