@@ -277,9 +277,9 @@ int main(int argc, char *argv[]) {
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
                 eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
-                //eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
-                //eprintf("                               not work with stock Halo. Can be: off or on.\n");
-                //eprintf("                               Default (new tag): off\n\n");
+                eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
+                eprintf("                               not work with stock Halo. Can be: off or on.\n");
+                eprintf("                               Default (new tag): off\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
                 eprintf("                               pixels. Default (new tag): 4\n");
@@ -633,6 +633,13 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
         }
 
+        // Determine if we should use P8 bump
+        bool should_p8 = usage == BitmapUsage::BITMAP_USAGE_HEIGHT_MAP && palettize.value();
+        if(should_p8) {
+            compressed = false;
+            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_P8_BUMP;
+        }
+
         // Depending on the format, do something
         auto bitmap_format = bitmap.format.read();
         switch(bitmap_format) {
@@ -705,6 +712,18 @@ int main(int argc, char *argv[]) {
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
                     *pixel_16_bit = pixel->convert_to_a8y8();
                 }
+                current_bitmap_pixels.clear();
+                current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                break;
+            }
+            case BitmapDataFormat::BITMAP_FORMAT_P8_BUMP: {
+                std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
+                auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
+
+                for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
+                    *pixel_8_bit = pixel->convert_to_p8();
+                }
+
                 current_bitmap_pixels.clear();
                 current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
                 break;

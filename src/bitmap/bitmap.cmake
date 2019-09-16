@@ -5,6 +5,15 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
         src/bitmap/bitmap.cpp
         src/bitmap/color_plate_scanner.cpp
         src/bitmap/stb/stb_impl.c
+        "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+    )
+
+    # Include version script
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette" "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette"
     )
 
     set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)

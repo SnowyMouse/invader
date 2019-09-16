@@ -64,6 +64,27 @@ namespace Invader {
         std::uint8_t convert_to_y8();
 
         /**
+         * Convert the color to p8
+         * @return p8 index
+         */
+        std::uint8_t convert_to_p8() {
+            extern std::uint8_t rg_convert_to_p8(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha);
+            return rg_convert_to_p8(this->red, this->green, this->blue, this->alpha);
+        }
+
+        /**
+         * Convert p8 to color
+         * @param  p8 p8 index
+         * @return    color plate pixel
+         */
+        static inline ColorPlatePixel p8_to_color(std::uint8_t p8) {
+            extern void p8_convert_to_rgba(std::uint8_t p8, std::uint8_t &red, std::uint8_t &green, std::uint8_t &blue, std::uint8_t &alpha);
+            ColorPlatePixel color;
+            p8_convert_to_rgba(p8, color.red, color.green, color.blue, color.alpha);
+            return color;
+        }
+
+        /**
          * Conver the color to alpha
          * @return alpha of the color
          */

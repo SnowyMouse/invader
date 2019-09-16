@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Usage and the p8 compression flag are now preserved
 - invader-bitmap: Height maps now generate bump maps similar to tool.exe
 - invader-bitmap: Added --usage (default or bumpmap) and --bump-height parameters
+- invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
 
 ### Fixed
 - invader-bitmap: Fixed some issues with spacing
