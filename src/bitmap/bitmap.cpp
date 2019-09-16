@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
                 eprintf("                               interface, sprite. Default (new tag): 2d\n");
                 eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap.\n");
                 eprintf("                               Default (new tag): default.\n");
-                eprintf("    --dithering,-D             Apply dithering. Only works on dxtn for now.\n");
+                eprintf("    --dithering,-D             Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
@@ -633,7 +633,7 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
         }
 
-        // Do dithering
+        // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering
         auto dither_do = [](auto to_palette_fn, auto from_palette_fn, auto *from_pixels, auto *to_pixels, std::uint32_t width, std::uint32_t height, std::uint32_t mipmap_count) {
             std::uint32_t mip_width = width;
             std::uint32_t mip_height = height;
@@ -684,6 +684,8 @@ int main(int argc, char *argv[]) {
 
                             APPLY_ERROR(pixel_below_right, red, red_error, 1);
                             APPLY_ERROR(pixel_below_right, green, green_error, 1);
+
+                            #undef APPLY_ERROR
                         }
                     }
                 }
@@ -716,16 +718,20 @@ int main(int argc, char *argv[]) {
             case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
                 // Figure out what we'll be doing
                 std::uint16_t (ColorPlatePixel::*conversion_function)();
+                ColorPlatePixel (*deconversion_function)(std::uint16_t);
 
                 switch(bitmap_format) {
                     case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
                         conversion_function = &ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<1,5,5,5>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
                         conversion_function = &ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<4,4,4,4>;
                         break;
                     case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
                         conversion_function = &ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
+                        deconversion_function = ColorPlatePixel::convert_from_16_bit<0,5,6,5>;
                         break;
                     default:
                         std::terminate();
@@ -735,8 +741,15 @@ int main(int argc, char *argv[]) {
                 // Begin
                 std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                 auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
-                for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
-                    *pixel_16_bit = (pixel_32_bit->*conversion_function)();
+
+                if(dithering) {
+                    dither_do(conversion_function, deconversion_function, first_pixel, pixel_16_bit, bitmap.width, bitmap.height, mipmap_count);
+                }
+                else {
+                    for(ColorPlatePixel *pixel_32_bit = first_pixel; pixel_32_bit < last_pixel; pixel_32_bit++, pixel_16_bit++) {
+                        *pixel_32_bit = deconversion_function((pixel_32_bit->*conversion_function)());
+                        *pixel_16_bit = (pixel_32_bit->*conversion_function)();
+                    }
                 }
 
                 // Replace buffers
@@ -784,7 +797,7 @@ int main(int argc, char *argv[]) {
 
                 // If we're dithering, do dithering things
                 if(dithering) {
-                    dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::p8_to_color, first_pixel, pixel_8_bit, bitmap.width, bitmap.height, bitmap.mipmap_count);
+                    dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::p8_to_color, first_pixel, pixel_8_bit, bitmap.width, bitmap.height, mipmap_count);
                 }
                 else {
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {

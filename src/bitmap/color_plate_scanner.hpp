@@ -124,6 +124,33 @@ namespace Invader {
 
             return color_output;
         }
+
+        /**
+         * Convert the color to a 16-bit integer.
+         * @return 16-bit representation of the color
+         */
+        template<std::uint8_t alpha, std::uint8_t red, std::uint8_t green, std::uint8_t blue>
+        static ColorPlatePixel convert_from_16_bit(std::uint16_t color) {
+            static_assert(alpha + red + green + blue == 16, "alpha + red + green + blue must equal 16");
+
+            ColorPlatePixel color_output;
+
+            int shift_amount = 0;
+
+            #define COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR(channel) if(channel) { \
+                color_output.channel = static_cast<std::uint16_t>(UINT8_MAX * ((color >> shift_amount) & ((1 << channel) - 1))) / ((1 << channel) - 1); \
+                shift_amount += channel; \
+            }
+
+            COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR(blue);
+            COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR(green);
+            COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR(red);
+            COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR(alpha);
+
+            #undef COMPOSITE_BITMAP_COLOR_GET_CHANNEL_VALUE_FOR_COLOR
+
+            return color_output;
+        }
     };
     static_assert(sizeof(ColorPlatePixel) == 4);
 
