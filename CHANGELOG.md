@@ -11,6 +11,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Added --usage (default or bumpmap) and --bump-height parameters
 - invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
 - invader-bitmap: Dithering is now available for 16-bit and palettized bitmaps
+- invader-bitmap: Dithering now takes an argument: `<channels>`. Channels are letters (i.e. `argb`).
 
 ### Fixed
 - invader-bitmap: Fixed some issues with spacing

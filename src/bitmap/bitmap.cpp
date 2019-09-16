@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     std::optional<std::uint32_t> sprite_spacing;
 
     // Dithering?
-    bool dithering = false;
+    bool dither_alpha = false, dither_red = false, dither_green = false, dither_blue = false, dithering = false;
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
         {"info",  no_argument, 0, 'i'},
         {"ignore-tag",  no_argument, 0, 'I'},
         {"help",  no_argument, 0, 'h'},
-        {"dithering",  no_argument, 0, 'D'},
+        {"dithering",  required_argument, 0, 'D'},
         {"data",  required_argument, 0, 'd' },
         {"tags",  required_argument, 0, 't' },
         {"format", required_argument, 0, 'F' },
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -203,6 +203,25 @@ int main(int argc, char *argv[]) {
 
             case 'D':
                 dithering = true;
+                for(const char *c = optarg; *c; c++) {
+                    switch(*c) {
+                        case 'a':
+                            dither_alpha = true;
+                            break;
+                        case 'r':
+                            dither_red = true;
+                            break;
+                        case 'g':
+                            dither_green = true;
+                            break;
+                        case 'b':
+                            dither_blue = true;
+                            break;
+                        default:
+                            printf("Unknown channel %c.\n", *c);
+                            return EXIT_FAILURE;
+                    }
+                }
                 break;
 
             case 'p':
@@ -266,7 +285,8 @@ int main(int argc, char *argv[]) {
                 eprintf("                               interface, sprite. Default (new tag): 2d\n");
                 eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap.\n");
                 eprintf("                               Default (new tag): default.\n");
-                eprintf("    --dithering,-D             Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
+                eprintf("    --dithering,-D <channels>  Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
+                eprintf("                               Specify channels with letters (i.e. argb).\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
@@ -471,7 +491,7 @@ int main(int argc, char *argv[]) {
         new_tag_header.color_plate_width = image_width;
         new_tag_header.color_plate_height = image_height;
 
-        // Set decompressed size
+        // Set decompressed sizeblue_dither_alphadithering
         BigEndian<std::uint32_t> decompressed_size;
         decompressed_size = static_cast<std::uint32_t>(image_size);
 
@@ -634,7 +654,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering
-        auto dither_do = [](auto to_palette_fn, auto from_palette_fn, auto *from_pixels, auto *to_pixels, std::uint32_t width, std::uint32_t height, std::uint32_t mipmap_count) {
+        auto dither_do = [&dither_alpha, &dither_red, &dither_green, &dither_blue](auto to_palette_fn, auto from_palette_fn, auto *from_pixels, auto *to_pixels, std::uint32_t width, std::uint32_t height, std::uint32_t mipmap_count) {
             std::uint32_t mip_width = width;
             std::uint32_t mip_height = height;
             auto *mip_pixel = from_pixels;
@@ -675,25 +695,33 @@ int main(int argc, char *argv[]) {
                             auto &pixel_below_middle = mip_pixel[x + (y + 1) * mip_width];
                             auto &pixel_below_right = mip_pixel[x + (y + 1) * mip_width + 1];
 
-                            APPLY_ERROR(pixel_right, red, red_error, 7);
-                            APPLY_ERROR(pixel_right, green, green_error, 7);
-                            APPLY_ERROR(pixel_right, blue, blue_error, 7);
-                            APPLY_ERROR(pixel_right, alpha, alpha_error, 7);
+                            if(dither_alpha) {
+                                APPLY_ERROR(pixel_right, alpha, alpha_error, 7);
+                                APPLY_ERROR(pixel_below_left, alpha, alpha_error, 3);
+                                APPLY_ERROR(pixel_below_middle, alpha, alpha_error, 5);
+                                APPLY_ERROR(pixel_below_right, alpha, alpha_error, 1);
+                            }
 
-                            APPLY_ERROR(pixel_below_left, red, red_error, 3);
-                            APPLY_ERROR(pixel_below_left, green, green_error, 3);
-                            APPLY_ERROR(pixel_below_left, blue, blue_error, 3);
-                            APPLY_ERROR(pixel_below_left, alpha, alpha_error, 3);
+                            if(dither_red) {
+                                APPLY_ERROR(pixel_right, red, red_error, 7);
+                                APPLY_ERROR(pixel_below_left, red, red_error, 3);
+                                APPLY_ERROR(pixel_below_middle, red, red_error, 5);
+                                APPLY_ERROR(pixel_below_right, red, red_error, 1);
+                            }
 
-                            APPLY_ERROR(pixel_below_middle, red, red_error, 5);
-                            APPLY_ERROR(pixel_below_middle, green, green_error, 5);
-                            APPLY_ERROR(pixel_below_middle, blue, blue_error, 5);
-                            APPLY_ERROR(pixel_below_middle, alpha, alpha_error, 5);
+                            if(dither_green) {
+                                APPLY_ERROR(pixel_right, green, green_error, 7);
+                                APPLY_ERROR(pixel_below_left, green, green_error, 3);
+                                APPLY_ERROR(pixel_below_middle, green, green_error, 5);
+                                APPLY_ERROR(pixel_below_right, green, green_error, 1);
+                            }
 
-                            APPLY_ERROR(pixel_below_right, red, red_error, 1);
-                            APPLY_ERROR(pixel_below_right, green, green_error, 1);
-                            APPLY_ERROR(pixel_below_right, blue, blue_error, 1);
-                            APPLY_ERROR(pixel_below_right, alpha, alpha_error, 1);
+                            if(dither_blue) {
+                                APPLY_ERROR(pixel_right, blue, blue_error, 7);
+                                APPLY_ERROR(pixel_below_left, blue, blue_error, 3);
+                                APPLY_ERROR(pixel_below_middle, blue, blue_error, 5);
+                                APPLY_ERROR(pixel_below_right, blue, blue_error, 1);
+                            }
 
                             #undef APPLY_ERROR
                         }

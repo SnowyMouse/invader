@@ -85,7 +85,7 @@ supported.
 | `--tags,-t <dir>` | Tags directory. |
 | `--type,-T` | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`. |
 | `--usage,-u <usage>` | Set usage. Can be `default` (default) or `bumpmap`. |
-| `--dithering,-D` | Apply dithering for `dxt1`, `dxt3`, `dxt5`, `16-bit`, and palettized bitmaps. |
+| `--dithering,-D <channels>` | Apply dithering for dxt, 16-bit, and p8. Specify channels with letters (i.e. `argb`). |
 | `--ignore-tag,-I` | Ignore the tag data if the tag exists. |
 | `--format,-F <format>` | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |
 | `--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767. |
