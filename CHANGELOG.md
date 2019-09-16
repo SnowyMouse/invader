@@ -1,7 +1,7 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.10.0] - 2019-09-16
 ### Changed
 - invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
 - invader-bitmap: Changed how spacing is stored in the bitmap to effectively match how tool.exe calculates its spacing
@@ -18,7 +18,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 ### Fixed
 - invader-bitmap: Fixed some issues with spacing
 
-## [0.9.0]
+## [0.9.0] - 2019-09-13
 ### Changed
 - invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap
 - invader-bitmap: Removed -O (this is now done by default)
