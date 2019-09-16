@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
-                eprintf("    --type,-T                  Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
+                eprintf("    --type,-T <type>           Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
                 eprintf("                               interface, sprite. Default (new tag): 2d\n");
                 eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap.\n");
                 eprintf("                               Default (new tag): default\n");
