@@ -2,13 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.10.0] - 2019-09-16
+### Added
+- invader-bitmap: Added --usage (default, bumpmap, and detail) and --bump-height parameters
+
 ### Changed
 - invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
 - invader-bitmap: Changed how spacing is stored in the bitmap to effectively match how tool.exe calculates its spacing
 - invader-bitmap: Double multiply sprites now simply replaces the pixel like tool.exe rather than alpha blend into gray
 - invader-bitmap: Usage and the p8 compression flag are now preserved
 - invader-bitmap: Height maps now generate bump maps similar to tool.exe
-- invader-bitmap: Added --usage (default, bumpmap, and detail) and --bump-height parameters
 - invader-bitmap: --detail-fade replaces --mipmap-fade and is now only usable on detail maps.
 - invader-bitmap: --detail-fade now approximately matches how tool.exe does fade to gray
 - invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
@@ -21,6 +23,8 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 ## [0.9.0] - 2019-09-13
 ### Changed
 - invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap
+
+### Removed
 - invader-bitmap: Removed -O (this is now done by default)
 - invader-bitmap: Removed the ability to create non 1:1 sprite sheets due to them not working well with particles
 
