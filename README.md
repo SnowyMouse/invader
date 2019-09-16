@@ -92,7 +92,7 @@ supported.
 | `--mipmap-fade,-f <factor>` | Fade-to-gray factor for mipmaps. |
 | `--mipmap-scale,-s <type>` | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`. |
 | `--spacing,-S <px>` | Set minimum spacing between sprites in pixels. By default, this is 4. |
-| `--bump-height,-h <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02. |
+| `--bump-height,-H <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02. |
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting. |
 | `--budget,-B <length>` | Set max length of sprite sheet. By default, this is 32. |
 

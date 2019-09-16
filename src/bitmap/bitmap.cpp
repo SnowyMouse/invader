@@ -107,12 +107,12 @@ int main(int argc, char *argv[]) {
         {"spacing", required_argument, 0, 'S' },
         {"bump-palettize", required_argument, 0, 'p' },
         {"bump-palettise", required_argument, 0, 'p' },
-        {"bump-height", required_argument, 0, 'h' },
+        {"bump-height", required_argument, 0, 'H' },
         {0, 0, 0, 0 }
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "DiIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
-            case 'h':
+            case 'H':
                 bump_height = static_cast<float>(std::strtof(optarg, nullptr));
                 break;
 
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
-                eprintf("    --bump-height,-h <height>  Set the apparent bumpmap height from 0 to 1.\n");
+                eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
                 //eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
                 //eprintf("                               not work with stock Halo. Can be: off or on.\n");
