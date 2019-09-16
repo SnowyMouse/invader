@@ -529,6 +529,9 @@ namespace Invader {
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::vector<ColorPlatePixel> bitmap_pixels_copy = bitmap.pixels;
 
+            auto largest_dimension = bitmap.width > bitmap.height ? bitmap.height : bitmap.width;
+            float bump_scale = 1.5F / (largest_dimension / 256.0F);
+
             for(std::uint32_t y = 0; y < bitmap.height; y++) {
                 for(std::uint32_t x = 0; x < bitmap.width; x++) {
                     // from https://stackoverflow.com/a/2368794
@@ -563,7 +566,7 @@ namespace Invader {
 
                     float x_intensity = (right_up_pixel + 2.0F * right_pixel + right_down_pixel) - (left_up_pixel + 2.0F * left_pixel + left_down_pixel);
                     float y_intensity = (left_down_pixel + 2.0F * down_pixel + right_down_pixel) - (left_up_pixel + 2.0F * up_pixel + right_up_pixel);
-                    float z_intensity = 1.5F / (bump_height / 0.02F);
+                    float z_intensity = bump_scale / (bump_height / 0.02F);
                     HEK::Vector3D<HEK::NativeEndian> v;
                     v.i = x_intensity;
                     v.j = y_intensity;
