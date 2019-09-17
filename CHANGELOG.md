@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 ## [0.10.0] - 2019-09-16
 ### Added
 - invader-bitmap: Added --usage (default, bumpmap, and detail) and --bump-height parameters
+- invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
 
 ### Changed
 - invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
@@ -13,7 +14,6 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Height maps now generate bump maps similar to tool.exe
 - invader-bitmap: --detail-fade replaces --mipmap-fade and is now only usable on detail maps.
 - invader-bitmap: --detail-fade now approximately matches how tool.exe does fade to gray
-- invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
 - invader-bitmap: Dithering is now available for 16-bit and palettized bitmaps
 - invader-bitmap: Dithering now takes an argument: `<channels>`. Channels are letters (i.e. `argb`).
 
