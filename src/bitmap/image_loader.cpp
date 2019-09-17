@@ -1,3 +1,9 @@
+/*
+ * Invader (c) 2019 Kavawuvi
+ *
+ * This program is free software under the GNU General Public License v3.0. See LICENSE for more information.
+ */
+
 #include <tiffio.h>
 #include "image_loader.hpp"
 #include "../eprintf.hpp"

@@ -6,6 +6,7 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
         src/bitmap/color_plate_scanner.cpp
         src/bitmap/stb/stb_impl.c
         src/bitmap/image_loader.cpp
+        src/bitmap/bitmap_data_writer.cpp
         "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
     )
 
