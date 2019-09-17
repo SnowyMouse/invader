@@ -1,5 +1,5 @@
 /*
- * Invader (c) 2018 Kavawuvi
+ * Invader (c) 2019 Kavawuvi
  *
  * This program is free software under the GNU General Public License v3.0. See LICENSE for more information.
  */
