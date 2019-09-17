@@ -1,7 +1,7 @@
 /*
  * Invader (c) 2019 Kavawuvi
  *
- * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
+ * This program is free software under the GNU General Public License v3.0. See LICENSE for more information.
  */
 
 #ifndef INVADER__RESOURCE__LIST__RESOURCE_LIST_HPP

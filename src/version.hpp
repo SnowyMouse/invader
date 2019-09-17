@@ -1,7 +1,7 @@
 /*
  * Invader (c) 2018 Kavawuvi
  *
- * This program is free software under the GNU General Public License v3.0 or later. See LICENSE for more information.
+ * This program is free software under the GNU General Public License v3.0. See LICENSE for more information.
  */
 
 #ifndef INVADER__VERSION_HPP
@@ -36,7 +36,7 @@
 static_assert(sizeof(INVADER_FULL_VERSION_STRING) < sizeof(Invader::HEK::TagString), "version string " INVADER_FULL_VERSION_STRING " too long");
 
 #define INVADER_SHOW_INFO eprintf(INVADER_FULL_VERSION_STRING "\n\n"); \
-                          eprintf("This program is licensed under the GNU General Public License v3.0 or later.\n\n"); \
+                          eprintf("This program is licensed under the GNU General Public License v3.0.\n\n"); \
                           eprintf("Credits:\n"); \
                           eprintf("    Kavawuvi                       - Developer\n"); \
                           eprintf("    MosesofEgypt                   - Helped via Discord\n"); \
