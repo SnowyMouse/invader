@@ -96,6 +96,55 @@ supported.
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting. |
 | `--budget,-B <length>` | Set max length of sprite sheet. By default, this is 32. |
 
+#### Uncompressed Bitmap Formats
+These formats are uncompressed and use explicit (not interpolated) RGB and/or alpha values. This results in higher
+quality bitmaps than using any of the block compressed formats, but it comes with a file size tradeoff. Note that
+32-bit bitmaps are slightly buggy on stock Halo PC without a mod (e.g. [Chimera](https://github.com/Kavawuvi/Chimera)).
+
+If you use 16-bit, then using dithering (`-D rgb` or `-D argb` if you want dithered alpha) may help with banding.
+
+The exact storage format used will depend on the bitmap:
+* If 32-bit is specified and all pixels have 100% alpha, then X8R8G8B8 is used. Otherwise, A8R8G8B8 is used.
+* If 16-bit is specified and all pixels have 100% alpha, then R5G6B5 is used. If pixels have either 0% or 100% alpha,
+A1R5G5B5 is used. Otherwise, A4R4G4B4 is used.
+
+| Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes                 |
+| -------- | -------- | ------- | ------- | ----- | ----- | ----- | --------------------- |
+| `32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |                       |
+|          | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | All pixels 100% alpha |
+| `16-bit` | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | All pixels 100% alpha |
+|          | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                       |
+|          | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                       |
+
+#### Block-Compressed Bitmap Formats
+These formats utilize block compression. Basically, each bitmap is separated into 4x4 blocks, and each block has two
+16-bit (R5G6B5) colors which are interpolated at runtime. This provides massive space savings but at a significant
+loss in quality. Since the smallest block is 4x4, then mipmaps smaller than 4x4 will not be generated, nor will you be
+able to make bitmaps smaller than 4x4 while still being block-compressed.
+
+There is no difference in RGB quality between dxt1, dxt3, or dxt5. The only difference is in how alpha is handled.
+Therefore, if dxt3 or dxt5 is specified and a bitmap does not have any alpha, then dxt1 will automatically be used to
+keep the size as small as possible.
+
+| Format | Bits/px | Alpha              | RGB                 | Notes                                  |
+| ------ | ------- | ------------------ | ------------------- | -------------------------------------- |
+| `dxt1` | 4       |                    | 16-bit interpolated | All pixels 100% alpha                  |
+| `dxt3` | 8       | 4-bit explicit     | 16-bit interpolated | Better for shapes like HUDs            |
+| `dxt5` | 8       | 4-bit interpolated | 16-bit interpolated | Better for alpha gradients like clouds |
+
+#### More Formats
+These formats were originally available on Xbox and do not work on stock Halo PC without a mod (e.g.
+[Chimera](https://github.com/Kavawuvi/Chimera)). They all use explicit RGB and/or alpha.
+
+If you use monochrome with a monochrome bitmap used as input, then there will be no loss in quality.
+
+| Format       | Storage  | Bits/px | Alpha   | RGB     | Notes                                       |
+| ------------ | -------- | ------- | ------- | ------- | ------------------------------------------- |
+| `monochrome` | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)                           |
+|              | A8       | 8       | 8-bit   |         | All pixels 100% intensity                   |
+|              | Y8       | 8       |         | 8-bit   | All pixels 100% alpha                       |
+| palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only; based on palette from Stubbs |
+
 ### invader-build
 This program builds cache files.
 
