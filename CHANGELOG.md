@@ -3,8 +3,9 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 
 ## [Unreleased]
 ### Changed
-- Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as
+- invader-bitmap: Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as
 [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.
+- invader-bitmap: Now stores dithering and mipmapping settings in the tag
 
 ## [0.10.1] - 2019-09-17
 ### Changed

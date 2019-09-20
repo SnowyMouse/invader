@@ -219,16 +219,13 @@ namespace Invader::HEK {
         std::uint16_t disable_height_map_compression : 1;
         std::uint16_t uniform_sprite_sequences : 1;
         std::uint16_t filthy_sprite_bug_fix : 1;
-        std::uint16_t reserved : 1;
-        std::uint16_t reserved_1 : 1;
-        std::uint16_t reserved_2 : 1;
-        std::uint16_t reserved_3 : 1;
-        std::uint16_t reserved_4 : 1;
-        std::uint16_t reserved_5 : 1;
-        std::uint16_t reserved_6 : 1;
-        std::uint16_t reserved_7 : 1;
-        std::uint16_t reserved_8 : 1;
-        std::uint16_t never_share_resources : 1;
+        std::uint16_t invader_nearest_mipmap_alpha : 1;
+        std::uint16_t invader_nearest_mipmap_alpha_and_color : 1;
+        std::uint16_t invader_dither_alpha : 1;
+        std::uint16_t invader_dither_red : 1;
+        std::uint16_t invader_dither_green : 1;
+        std::uint16_t invader_dither_blue : 1;
+        std::uint16_t unused : 6;
     };
     static_assert(sizeof(BitmapFlags) == sizeof(std::uint16_t));
 

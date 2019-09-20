@@ -75,7 +75,8 @@ int main(int argc, char *argv[]) {
     std::optional<std::uint32_t> sprite_spacing;
 
     // Dithering?
-    bool dither_alpha = false, dither_red = false, dither_green = false, dither_blue = false;
+    std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
+    bool dithering = false;
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
@@ -197,6 +198,11 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'D':
+                dithering = true;
+                dither_alpha = false;
+                dither_red = false;
+                dither_green = false;
+                dither_blue = false;
                 for(const char *c = optarg; *c; c++) {
                     switch(*c) {
                         case 'a':
@@ -392,6 +398,25 @@ int main(int argc, char *argv[]) {
             bump_height = bitmap_tag_header.bump_height;
         }
 
+        auto header_flags = bitmap_tag_header.flags.read();
+        if(!mipmap_scale_type.has_value()) {
+            if(header_flags.invader_nearest_mipmap_alpha_and_color) {
+                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
+            }
+            else if(header_flags.invader_nearest_mipmap_alpha) {
+                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
+            }
+            else {
+                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
+            }
+        }
+        if(!dithering) {
+            dither_alpha = header_flags.invader_dither_alpha == 1;
+            dither_red = header_flags.invader_dither_red == 1;
+            dither_green = header_flags.invader_dither_green == 1;
+            dither_blue = header_flags.invader_dither_blue == 1;
+        }
+
         std::fclose(tag_read);
     }
 
@@ -411,6 +436,10 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(palettize,false);
     DEFAULT_VALUE(bump_height,0.02F);
     DEFAULT_VALUE(mipmap_fade,0.0F);
+    DEFAULT_VALUE(dither_alpha,false);
+    DEFAULT_VALUE(dither_red,false);
+    DEFAULT_VALUE(dither_green,false);
+    DEFAULT_VALUE(dither_blue,false);
 
     #undef DEFAULT_VALUE
 
@@ -510,7 +539,7 @@ int main(int argc, char *argv[]) {
 
     // Add our bitmap data
     printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
-    write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, usage.value(), format.value(), bitmap_type.value(), palettize.value(), dither_alpha, dither_red, dither_green, dither_blue);
+    write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, usage.value(), format.value(), bitmap_type.value(), palettize.value(), dither_alpha.value(), dither_red.value(), dither_green.value(), dither_blue.value());
     std::printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
@@ -567,6 +596,20 @@ int main(int argc, char *argv[]) {
 
     BitmapFlags flags = {};
     flags.disable_height_map_compression = !palettize.value();
+    switch(mipmap_scale_type.value()) {
+        case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR:
+            break;
+        case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA:
+            flags.invader_nearest_mipmap_alpha = 1;
+            break;
+        case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR:
+            flags.invader_nearest_mipmap_alpha_and_color = 1;
+            break;
+    };
+    flags.invader_dither_alpha = dither_alpha.value();
+    flags.invader_dither_red = dither_red.value();
+    flags.invader_dither_green = dither_green.value();
+    flags.invader_dither_blue = dither_blue.value();
     new_tag_header.flags = flags;
 
     new_tag_header.sprite_spacing = sprite_spacing.value() / 2;
