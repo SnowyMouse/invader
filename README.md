@@ -138,12 +138,12 @@ These formats were originally available on Xbox and do not work on stock Halo PC
 
 If you use monochrome with a monochrome bitmap used as input, then there will be no loss in quality.
 
-| Format       | Storage  | Bits/px | Alpha   | RGB     | Notes                                       |
-| ------------ | -------- | ------- | ------- | ------- | ------------------------------------------- |
-| `monochrome` | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)                           |
-|              | A8       | 8       | 8-bit   |         | All pixels 100% intensity                   |
-|              | Y8       | 8       |         | 8-bit   | All pixels 100% alpha                       |
-| palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only; based on palette from Stubbs |
+| Format       | Storage  | Bits/px | Alpha   | RGB     | Notes                     |
+| ------------ | -------- | ------- | ------- | ------- | ------------------------- |
+| `monochrome` | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)         |
+|              | A8       | 8       | 8-bit   |         | All pixels 100% intensity |
+|              | Y8       | 8       |         | 8-bit   | All pixels 100% alpha     |
+| palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only             |
 
 ### invader-build
 This program builds cache files.

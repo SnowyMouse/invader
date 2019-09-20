@@ -1,6 +1,11 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as
+[Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.
+
 ## [0.10.1] - 2019-09-17
 ### Changed
 - Modified the project license terms to strictly GPL version 3.
