@@ -896,7 +896,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ScenarioDecal<BigEndian>) == 0x10);
 
-    SINGLE_DEPENDENCY_STRUCT(ScenarioDecalPallete, reference); // decal
+    SINGLE_DEPENDENCY_STRUCT(ScenarioDecalPalette, reference); // decal
     SINGLE_DEPENDENCY_PADDED_STRUCT(ScenarioDetailObjectCollectionPalette, reference, 0x20); // detail_object_collection
     SINGLE_DEPENDENCY_STRUCT(ScenarioActorPalette, reference); // actor_variant
 
@@ -1706,7 +1706,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, ScenarioStartingEquipment> starting_equipment;
         TagReflexive<EndianType, ScenarioBSPSwitchTriggerVolume> bsp_switch_trigger_volumes;
         TagReflexive<EndianType, ScenarioDecal> decals;
-        TagReflexive<EndianType, ScenarioDecalPallete> decal_palette;
+        TagReflexive<EndianType, ScenarioDecalPalette> decal_palette;
         TagReflexive<EndianType, ScenarioDetailObjectCollectionPalette> detail_object_collection_palette;
         PAD(0x54);
         TagReflexive<EndianType, ScenarioActorPalette> actor_palette;
