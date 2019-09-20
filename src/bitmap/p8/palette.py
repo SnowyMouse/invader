@@ -23,12 +23,19 @@ with open(sys.argv[1], "rb") as palette_file:
 # Make the colors array
 colors = [(int(color_data[i * 4]), int(color_data[i * 4 + 1]), int(color_data[i * 4 + 2]), int(color_data[i * 4 + 3])) for i in range(0,256)]
 
+# Find the first black
+first_black = 0
+for c in range(0,256):
+    if colors[c][0] == 0:
+        first_black = c - 1
+        break
+
 # Go through each red and green. Since it's normalized, blue can be inferred
 for red in range(0,256):
     for green in range(0,256):
         closest_error = 65536
         closest_index = None
-        for color_index in range(0,253):
+        for color_index in range(0,first_black):
             color = colors[color_index]
             distance_x = (color[1] - red)
             distance_y = (color[2] - green)
