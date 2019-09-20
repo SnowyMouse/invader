@@ -12,10 +12,13 @@ palette_indices = []
 
 # Open and read it
 with open(sys.argv[1], "rb") as palette_file:
-    color_data = palette_file.read()
-    if len(color_data) != 256 * 4:
-        print("Error: Palette is invalid", file=sys.stderr)
+    palette_file.seek(0,2)
+    palette_file_size = palette_file.tell()
+    if palette_file_size != 256 * 4:
+        print("Error: Palette has an invalid size. Expected {} bytes but got {}".format(256 * 4, palette_file_size), file=sys.stderr)
         sys.exit(1)
+    palette_file.seek(0,0)
+    color_data = palette_file.read(256 * 4)
 
 # Make the colors array
 colors = [(int(color_data[i * 4]), int(color_data[i * 4 + 1]), int(color_data[i * 4 + 2]), int(color_data[i * 4 + 3])) for i in range(0,256)]
