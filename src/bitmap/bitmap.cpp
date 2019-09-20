@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     std::optional<std::uint32_t> sprite_spacing;
 
     // Dithering?
-    bool dither_alpha = false, dither_red = false, dither_green = false, dither_blue = false, dithering = false;
+    bool dither_alpha = false, dither_red = false, dither_green = false, dither_blue = false;
 
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
@@ -197,7 +197,6 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'D':
-                dithering = true;
                 for(const char *c = optarg; *c; c++) {
                     switch(*c) {
                         case 'a':
