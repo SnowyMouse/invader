@@ -7,6 +7,10 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
         src/bitmap/stb/stb_impl.c
         src/bitmap/image_loader.cpp
         src/bitmap/bitmap_data_writer.cpp
+    )
+
+    # P8 palette library (separate for slightly faster building)
+    add_library(invader-bitmap-p8-palette STATIC
         "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
     )
 
@@ -24,7 +28,7 @@ if(${TIFF_FOUND} AND ${ZLIB_FOUND})
         PUBLIC ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES})
+    target_link_libraries(invader-bitmap invader-bitmap-p8-palette invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES})
 else()
     message("A dependency is missing. invader-bitmap will not compile.")
 endif()
