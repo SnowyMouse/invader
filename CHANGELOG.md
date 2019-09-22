@@ -10,6 +10,9 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.
 - invader-bitmap: Now stores dithering and mipmapping settings in the tag
 
+### Fixed
+- invader-bitmap: Fixed blurring and sharpening values in the tag not being retained
+
 ## [0.10.1] - 2019-09-17
 ### Changed
 - Modified the project license terms to strictly GPL version 3.
