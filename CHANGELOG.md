@@ -2,6 +2,9 @@
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-bitmap: Added --mipmap-sharpen, a sharpening filter that can be applied to mipmaps
+
 ### Changed
 - invader-bitmap: Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as
 [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.

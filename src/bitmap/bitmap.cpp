@@ -78,6 +78,10 @@ int main(int argc, char *argv[]) {
     std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
     bool dithering = false;
 
+    // Sharpen and blur
+    std::optional<float> sharpen;
+    std::optional<float> blur;
+
     // Generate this many mipmaps
     std::optional<std::uint16_t> max_mipmap_count;
 
@@ -96,8 +100,9 @@ int main(int argc, char *argv[]) {
         {"format", required_argument, 0, 'F' },
         {"type", required_argument, 0, 'T' },
         {"mipmap-count", required_argument, 0, 'm' },
-        {"detail-fade", required_argument, 0, 'f' },
         {"mipmap-scale", required_argument, 0, 's' },
+        {"mipmap-sharpen", required_argument, 0, 'P' },
+        {"detail-fade", required_argument, 0, 'f' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
         {"spacing", required_argument, 0, 'S' },
@@ -108,7 +113,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:P:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -257,6 +262,14 @@ int main(int argc, char *argv[]) {
                 bump_height = static_cast<float>(std::strtof(optarg, nullptr));
                 break;
 
+            case 'P':
+                sharpen = static_cast<float>(std::strtof(optarg, nullptr));
+                if(sharpen.value() < 0.0F || sharpen.value() > 1.0F) {
+                    eprintf("Invalid sharpen value %f\n", sharpen.value());
+                    return EXIT_FAILURE;
+                }
+                break;
+
             case 'm':
                 max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
                 break;
@@ -293,9 +306,11 @@ int main(int argc, char *argv[]) {
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
                 eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
+                eprintf("Mipmap options:\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
+                eprintf("    --mipmap-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n");
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
                 eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
@@ -397,6 +412,12 @@ int main(int argc, char *argv[]) {
         if(!bump_height.has_value()) {
             bump_height = bitmap_tag_header.bump_height;
         }
+        if(!sharpen.has_value() && bitmap_tag_header.sharpen_amount > 0.0F && bitmap_tag_header.sharpen_amount <= 1.0F) {
+            sharpen = bitmap_tag_header.sharpen_amount;
+        }
+        if(!blur.has_value() && bitmap_tag_header.blur_filter_size > 0.0F) {
+            blur = bitmap_tag_header.blur_filter_size;
+        }
 
         auto header_flags = bitmap_tag_header.flags.read();
         if(!mipmap_scale_type.has_value()) {
@@ -490,7 +511,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? mipmap_fade : std::nullopt);
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? mipmap_fade : std::nullopt, sharpen, blur);
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -587,6 +608,8 @@ int main(int argc, char *argv[]) {
     new_tag_header.bump_height = bump_height.value();
     new_tag_header.detail_fade_factor = mipmap_fade.value();
     new_tag_header.format = format.value();
+    new_tag_header.sharpen_amount = sharpen.value_or(0.0F);
+    new_tag_header.blur_filter_size = blur.value_or(0.0F);
     if(max_mipmap_count.value() >= INT16_MAX) {
         new_tag_header.mipmap_count = 0;
     }

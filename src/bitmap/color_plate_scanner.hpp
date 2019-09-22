@@ -225,9 +225,11 @@ namespace Invader {
          * @param  mipmaps            maximum number of mipmaps
          * @param  mipmap_type        type of mipmaps
          * @param  mipmap_fade_factor fade-to-gray factor for mipmaps
+         * @param  sharpen            sharpening filter
+         * @param  blur               blur filter
          * @return                    scanned color plate data
          */
-        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage = BitmapUsage::BITMAP_USAGE_DEFAULT, float bump_height = 0.0F, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, std::optional<float> mipmap_fade_factor = std::nullopt);
+        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage = BitmapUsage::BITMAP_USAGE_DEFAULT, float bump_height = 0.0F, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, std::optional<float> mipmap_fade_factor = std::nullopt, std::optional<float> sharpen = std::nullopt, std::optional<float> blur = std::nullopt);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
@@ -313,8 +315,9 @@ namespace Invader {
          * @param mipmap_type        scaling filter to use for mipmaps
          * @param mipmap_fade_factor fade-to-gray factor for mipmaps
          * @param sprite_parameters  sprite parameters (if using sprites)
+         * @param sharpen            sharpen filter
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)
