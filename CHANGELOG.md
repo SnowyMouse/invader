@@ -3,7 +3,10 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 
 ## [Unreleased]
 ### Added
-- invader-bitmap: Added --mipmap-sharpen, a sharpening filter that can be applied to mipmaps
+- invader-bitmap: Added --mipmap-blur, a blurring filter that is applied before generating mipmaps that, unlike
+tool.exe, will not change the main bitmap. If you want the main bitmap changed, use an image editor.
+- invader-bitmap: Added --mipmap-sharpen, a sharpening filter that is applied to mipmaps that, unlike tool.exe will not
+change the main bitmap. If you want the main bitmap changed, use an image editor.
 
 ### Changed
 - invader-bitmap: Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as

@@ -631,6 +631,9 @@ namespace Invader {
             mipmap_height /= 2;
             mipmap_width /= 2;
 
+            // Get blur radius
+            std::uint32_t blur_pixels = static_cast<std::uint32_t>(blur.value_or(0.0F) + 0.5F);
+
             while(bitmap.mipmaps.size() < max_mipmap_count) {
                 // Begin creating the mipmap
                 auto &next_mipmap = bitmap.mipmaps.emplace_back();
@@ -644,6 +647,58 @@ namespace Invader {
                 bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
                 auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
                 auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
+
+                std::vector<ColorPlatePixel> last_mipmap_blurred;
+
+                // Blur?
+                if(bitmap.mipmaps.size() == 1 && blur_pixels > 0) {
+                    std::uint32_t image_width = mipmap_width * 2;
+                    std::uint32_t image_height = mipmap_height * 2;
+
+                    last_mipmap_blurred = std::vector<ColorPlatePixel>(last_mipmap_data, last_mipmap_data + image_width * image_height);
+                    last_mipmap_data = last_mipmap_blurred.data();
+
+                    std::uint32_t blur_size = blur_pixels * 2 + 1;
+
+                    // Allocate a filter of the correct size
+                    std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
+
+                    for(std::int64_t y = 0; y < image_height; y++) {
+                        for(std::int64_t x = 0; x < image_width; x++) {
+                            // Generate the filter
+                            for(std::uint32_t yf = 0; yf < blur_size; yf++) {
+                                for(std::uint32_t xf = 0; xf < blur_size; xf++) {
+                                    std::int64_t blur_x = static_cast<std::int64_t>(xf) - blur_pixels + x;
+                                    std::int64_t blur_y = static_cast<std::int64_t>(yf) - blur_pixels + y;
+
+                                    std::uint32_t pixel_x = (blur_x < 0) ? 0 : (blur_x >= image_width) ? (image_width - 1) : static_cast<std::uint32_t>(blur_x);
+                                    std::uint32_t pixel_y = (blur_y < 0) ? 0 : (blur_y >= image_height) ? (image_height - 1) : static_cast<std::uint32_t>(blur_y);
+
+                                    pixel_filter[xf + yf * blur_size] = last_mipmap_blurred.data() + pixel_x + pixel_y * image_width;
+                                }
+                            }
+
+                            // Do it
+                            #define BLUR_CHANNEL(channel) { \
+                                std::uint32_t channel_value = 0; \
+                                for(auto *color : pixel_filter) { \
+                                    channel_value += color->channel; \
+                                } \
+                                channel_value /= pixel_filter.size(); \
+                                if(channel_value > 0xFF) { \
+                                    channel_value = 0xFF; \
+                                } \
+                                last_mipmap_blurred[x + y * image_width].channel = static_cast<std::uint8_t>(channel_value); \
+                            }
+
+                            BLUR_CHANNEL(red);
+                            BLUR_CHANNEL(green);
+                            BLUR_CHANNEL(blue);
+
+                            #undef BLUR_CHANNEL
+                        }
+                    }
+                }
 
                 // Combine each 2x2 block based on the given algorithm
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
