@@ -1,6 +1,14 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.12.0] - 2019-09-22
+### Changed
+- invader-bitmap: Changed --mipmap-blur and --mipmap-sharpen to --filter-blur and --filter-sharpen. These now *only*
+affect the first bitmap even though image editors exist that can do these exact things. Oh well.
+
+### Fixed
+- invader-bitmap: Fixed the help list having an extra line break
+
 ## [0.11.0] - 2019-09-22
 ### Added
 - invader-bitmap: Added --mipmap-blur (`blur filter size`); this won't affect the bitmap unlike what tool.exe does

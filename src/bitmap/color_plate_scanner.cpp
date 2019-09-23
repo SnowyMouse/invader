@@ -628,11 +628,96 @@ namespace Invader {
                 mipmap_height = last_mipmap.mipmap_height;
             }
 
-            mipmap_height /= 2;
-            mipmap_width /= 2;
+            // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
+            if(sharpen.has_value() && sharpen.value() > 0.0F) {
+                const float &SHARPEN_VALUE = sharpen.value();
+
+                // Make a copy of the mipmap to work off of
+                auto *pixel_data = bitmap.pixels.data();
+                std::vector<ColorPlatePixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
+
+                // Go through each pixel and apply the sharpening filter
+                for(std::uint32_t y = 0; y < mipmap_height; y++) {
+                    for(std::uint32_t x = 0; x < mipmap_width; x++) {
+                        auto &center = unsharpened_pixels[x + y * mipmap_width];
+                        auto &left = (x == 0) ? center : unsharpened_pixels[x + y * mipmap_width - 1];
+                        auto &right = (x + 1 == mipmap_width) ? center : unsharpened_pixels[x + y * mipmap_width + 1];
+                        auto &top = (y == 0) ? center : unsharpened_pixels[x + (y - 1) * mipmap_width];
+                        auto &bottom = (y + 1 == mipmap_height) ? center : unsharpened_pixels[x + (y + 1) * mipmap_width];
+                        auto &this_pixel = pixel_data[x + y * mipmap_width];
+
+                        #define APPLY_SHARPEN(channel) { \
+                            std::int32_t modification = static_cast<std::int32_t>(center.channel) * (1.0 + 4.0F * SHARPEN_VALUE) - (static_cast<std::int32_t>(top.channel) + left.channel + bottom.channel + right.channel) * SHARPEN_VALUE; \
+                            if(modification > 0xFF) { \
+                                this_pixel.channel = 0xFF; \
+                            } \
+                            else if(modification < 0x00) { \
+                                this_pixel.channel = 0x00; \
+                            } \
+                            else { \
+                                this_pixel.channel = static_cast<std::uint8_t>(modification); \
+                            } \
+                        }
+
+                        APPLY_SHARPEN(red);
+                        APPLY_SHARPEN(green);
+                        APPLY_SHARPEN(blue);
+
+                        #undef APPLY_SHARPEN
+                    }
+                }
+            }
 
             // Get blur radius
             std::uint32_t blur_pixels = static_cast<std::uint32_t>(blur.value_or(0.0F) + 0.5F);
+            if(blur_pixels > 0) {
+                auto *pixel_data = bitmap.pixels.data();
+                std::vector<ColorPlatePixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
+
+                std::uint32_t blur_size = blur_pixels * 2 + 1;
+
+                // Allocate a filter of the correct size
+                std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
+
+                for(std::int64_t y = 0; y < mipmap_height; y++) {
+                    for(std::int64_t x = 0; x < mipmap_width; x++) {
+                        // Generate the filter
+                        for(std::uint32_t yf = 0; yf < blur_size; yf++) {
+                            for(std::uint32_t xf = 0; xf < blur_size; xf++) {
+                                std::int64_t blur_x = static_cast<std::int64_t>(xf) - blur_pixels + x;
+                                std::int64_t blur_y = static_cast<std::int64_t>(yf) - blur_pixels + y;
+
+                                std::uint32_t pixel_x = (blur_x < 0) ? 0 : (blur_x >= mipmap_width) ? (mipmap_width - 1) : static_cast<std::uint32_t>(blur_x);
+                                std::uint32_t pixel_y = (blur_y < 0) ? 0 : (blur_y >= mipmap_height) ? (mipmap_height - 1) : static_cast<std::uint32_t>(blur_y);
+
+                                pixel_filter[xf + yf * blur_size] = unblurred.data() + pixel_x + pixel_y * mipmap_width;
+                            }
+                        }
+
+                        // Do it
+                        #define BLUR_CHANNEL(channel) { \
+                            std::uint32_t channel_value = 0; \
+                            for(auto *color : pixel_filter) { \
+                                channel_value += color->channel; \
+                            } \
+                            channel_value /= pixel_filter.size(); \
+                            if(channel_value > 0xFF) { \
+                                channel_value = 0xFF; \
+                            } \
+                            pixel_data[x + y * mipmap_width].channel = static_cast<std::uint8_t>(channel_value); \
+                        }
+
+                        BLUR_CHANNEL(red);
+                        BLUR_CHANNEL(green);
+                        BLUR_CHANNEL(blue);
+
+                        #undef BLUR_CHANNEL
+                    }
+                }
+            }
+
+            mipmap_height /= 2;
+            mipmap_width /= 2;
 
             while(bitmap.mipmaps.size() < max_mipmap_count) {
                 // Begin creating the mipmap
@@ -647,58 +732,6 @@ namespace Invader {
                 bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
                 auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
                 auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
-
-                std::vector<ColorPlatePixel> last_mipmap_blurred;
-
-                // Blur?
-                if(bitmap.mipmaps.size() == 1 && blur_pixels > 0) {
-                    std::uint32_t image_width = mipmap_width * 2;
-                    std::uint32_t image_height = mipmap_height * 2;
-
-                    last_mipmap_blurred = std::vector<ColorPlatePixel>(last_mipmap_data, last_mipmap_data + image_width * image_height);
-                    last_mipmap_data = last_mipmap_blurred.data();
-
-                    std::uint32_t blur_size = blur_pixels * 2 + 1;
-
-                    // Allocate a filter of the correct size
-                    std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
-
-                    for(std::int64_t y = 0; y < image_height; y++) {
-                        for(std::int64_t x = 0; x < image_width; x++) {
-                            // Generate the filter
-                            for(std::uint32_t yf = 0; yf < blur_size; yf++) {
-                                for(std::uint32_t xf = 0; xf < blur_size; xf++) {
-                                    std::int64_t blur_x = static_cast<std::int64_t>(xf) - blur_pixels + x;
-                                    std::int64_t blur_y = static_cast<std::int64_t>(yf) - blur_pixels + y;
-
-                                    std::uint32_t pixel_x = (blur_x < 0) ? 0 : (blur_x >= image_width) ? (image_width - 1) : static_cast<std::uint32_t>(blur_x);
-                                    std::uint32_t pixel_y = (blur_y < 0) ? 0 : (blur_y >= image_height) ? (image_height - 1) : static_cast<std::uint32_t>(blur_y);
-
-                                    pixel_filter[xf + yf * blur_size] = last_mipmap_blurred.data() + pixel_x + pixel_y * image_width;
-                                }
-                            }
-
-                            // Do it
-                            #define BLUR_CHANNEL(channel) { \
-                                std::uint32_t channel_value = 0; \
-                                for(auto *color : pixel_filter) { \
-                                    channel_value += color->channel; \
-                                } \
-                                channel_value /= pixel_filter.size(); \
-                                if(channel_value > 0xFF) { \
-                                    channel_value = 0xFF; \
-                                } \
-                                last_mipmap_blurred[x + y * image_width].channel = static_cast<std::uint8_t>(channel_value); \
-                            }
-
-                            BLUR_CHANNEL(red);
-                            BLUR_CHANNEL(green);
-                            BLUR_CHANNEL(blue);
-
-                            #undef BLUR_CHANNEL
-                        }
-                    }
-                }
 
                 // Combine each 2x2 block based on the given algorithm
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
@@ -744,45 +777,6 @@ namespace Invader {
                             else {
                                 pixel.alpha = UINT8_MAX;
                             }
-                        }
-                    }
-                }
-
-                // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
-                if(sharpen.has_value() && sharpen.value() > 0.0F) {
-                    const float &SHARPEN_VALUE = sharpen.value();
-
-                    // Make a copy of the mipmap to work off of
-                    std::vector<ColorPlatePixel> unsharpened_pixels(this_mipmap_data, this_mipmap_data + mipmap_width * mipmap_height);
-
-                    // Go through each pixel and apply the sharpening filter
-                    for(std::uint32_t y = 0; y < mipmap_height; y++) {
-                        for(std::uint32_t x = 0; x < mipmap_width; x++) {
-                            auto &center = unsharpened_pixels[x + y * mipmap_width];
-                            auto &left = (x == 0) ? center : unsharpened_pixels[x + y * mipmap_width - 1];
-                            auto &right = (x + 1 == mipmap_width) ? center : unsharpened_pixels[x + y * mipmap_width + 1];
-                            auto &top = (y == 0) ? center : unsharpened_pixels[x + (y - 1) * mipmap_width];
-                            auto &bottom = (y + 1 == mipmap_height) ? center : unsharpened_pixels[x + (y + 1) * mipmap_width];
-                            auto &this_pixel = this_mipmap_data[x + y * mipmap_width];
-
-                            #define APPLY_SHARPEN(channel) { \
-                                std::int32_t modification = static_cast<std::int32_t>(center.channel) * (1.0 + 4.0F * SHARPEN_VALUE) - (static_cast<std::int32_t>(top.channel) + left.channel + bottom.channel + right.channel) * SHARPEN_VALUE; \
-                                if(modification > 0xFF) { \
-                                    this_pixel.channel = 0xFF; \
-                                } \
-                                else if(modification < 0x00) { \
-                                    this_pixel.channel = 0x00; \
-                                } \
-                                else { \
-                                    this_pixel.channel = static_cast<std::uint8_t>(modification); \
-                                } \
-                            }
-
-                            APPLY_SHARPEN(red);
-                            APPLY_SHARPEN(green);
-                            APPLY_SHARPEN(blue);
-
-                            #undef APPLY_SHARPEN
                         }
                     }
                 }

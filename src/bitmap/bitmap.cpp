@@ -101,8 +101,8 @@ int main(int argc, char *argv[]) {
         {"type", required_argument, 0, 'T' },
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-scale", required_argument, 0, 's' },
-        {"mipmap-sharpen", required_argument, 0, 'P' },
-        {"mipmap-blur", required_argument, 0, 'U' },
+        {"filter-sharpen", required_argument, 0, 'P' },
+        {"filter-blur", required_argument, 0, 'U' },
         {"detail-fade", required_argument, 0, 'f' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
@@ -319,9 +319,10 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n");
-                eprintf("    --mipmap-blur,-U <radius>  Blur the bitmap before mipmapping. Higher radii\n");
-                eprintf("                               are exponentially slower. Default (new tag): 0.0\n");
-                eprintf("    --mipmap-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n");
+                eprintf("Post processing:\n");
+                eprintf("    --filter-blur,-U <radius>  Blur the bitmap. Higher radii are exponentially\n");
+                eprintf("                               slower. Default (new tag): 0.0\n");
+                eprintf("    --filter-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n");
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
                 eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
