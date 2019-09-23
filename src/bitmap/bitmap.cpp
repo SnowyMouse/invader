@@ -314,21 +314,21 @@ int main(int argc, char *argv[]) {
                 eprintf("                               Specify channels with letters (i.e. argb).\n");
                 eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
                 eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
-                eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n");
+                eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n\n");
                 eprintf("Mipmap options:\n");
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
-                eprintf("                               nearest. Default (new tag): linear\n");
+                eprintf("                               nearest. Default (new tag): linear\n\n");
                 eprintf("Post processing:\n");
                 eprintf("    --filter-blur,-U <radius>  Blur the bitmap. Higher radii are exponentially\n");
                 eprintf("                               slower. Default (new tag): 0.0\n");
-                eprintf("    --filter-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n");
-                eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
+                eprintf("    --filter-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n\n");
+                eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n\n");
                 eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
                 eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
                 eprintf("                               not work with stock Halo. Can be: off or on.\n");
-                eprintf("                               Default (new tag): off\n");
+                eprintf("                               Default (new tag): off\n\n");
                 eprintf("Detail map options (only applies to detail bitmaps):\n");
                 eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
                 eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
                 eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
-                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n");
+                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n\n");
 
                 return EXIT_FAILURE;
         }

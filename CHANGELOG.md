@@ -7,7 +7,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 affect the first bitmap even though image editors exist that can do these exact things. Oh well.
 
 ### Fixed
-- invader-bitmap: Fixed the help list having an extra line break
+- invader-bitmap: Fixed the help list line breaks
 
 ## [0.11.0] - 2019-09-22
 ### Added
