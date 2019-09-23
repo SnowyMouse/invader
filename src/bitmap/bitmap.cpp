@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
                 eprintf("                               Default (new tag): 0.02\n");
                 eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
                 eprintf("                               not work with stock Halo. Can be: off or on.\n");
-                eprintf("                               Default (new tag): off\n\n");
+                eprintf("                               Default (new tag): off\n");
                 eprintf("Detail map options (only applies to detail bitmaps):\n");
                 eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
