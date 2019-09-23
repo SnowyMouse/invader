@@ -1,16 +1,16 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.11.0] - 2019-09-22
 ### Added
-- invader-bitmap: Added --mipmap-blur, a blurring filter that is applied before generating mipmaps that, unlike
-tool.exe, will not change the main bitmap. If you want the main bitmap changed, use an image editor.
-- invader-bitmap: Added --mipmap-sharpen, a sharpening filter that is applied to mipmaps that, unlike tool.exe will not
-change the main bitmap. If you want the main bitmap changed, use an image editor.
+- invader-bitmap: Added --mipmap-blur (`blur filter size`); this won't affect the bitmap unlike what tool.exe does
+(as Guerilla implies only the mipmaps are affected) - if you want to do this to the bitmap, itself, use an image editor
+- invader-bitmap: Added --mipmap-sharpen (`sharpen amount`); this won't affect the bitmap unlike what tool.exe does
+(as Guerilla implies only the mipmaps are affected) - if you want to do this to the bitmap, itself, use an image editor
 
 ### Changed
-- invader-bitmap: Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as well as
-[Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.
+- invader-bitmap: Switched to the Xbox P8 palette. This palette is probably worse, but the original Halo Editing Kit as
+well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so it's easier to use.
 - invader-bitmap: Now stores dithering and mipmapping settings in the tag
 
 ### Fixed
