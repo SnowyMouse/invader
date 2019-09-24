@@ -235,7 +235,9 @@ namespace Invader::HEK {
                                 ADD_DEPENDENCY_ADJUST_SIZES(tag.creation_effect); \
                                 ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.attachments, type); \
                                 ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.widgets, reference); \
-                                DEFAULT_VALUE(tag.render_bounding_radius, tag.bounding_radius); \
+                                if(tag.render_bounding_radius.read() < tag.bounding_radius.read()) { \
+                                    tag.render_bounding_radius = tag.bounding_radius; \
+                                } \
                                 ADD_REFLEXIVE_START(tag.functions) { \
                                     DEFAULT_VALUE(reflexive.period, 1.0f); \
                                     if(reflexive.bounds.from == 0.0f && reflexive.bounds.to == 0.0f) { \

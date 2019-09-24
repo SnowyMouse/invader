@@ -1,6 +1,10 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed not fixing the render bounding radius if it was less than the bounding radius but non-zero.
+
 ## [0.12.0] - 2019-09-22
 ### Changed
 - invader-bitmap: Changed --mipmap-blur and --mipmap-sharpen to --filter-blur and --filter-sharpen. These now *only*
