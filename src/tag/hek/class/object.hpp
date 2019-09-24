@@ -250,7 +250,6 @@ namespace Invader::HEK {
                                     reflexive.inverse_period = 1.0f / reflexive.period; \
                                 } ADD_REFLEXIVE_END; \
                                 ADD_REFLEXIVE_START(tag.change_colors) { \
-                                    std::uint32_t permutations_count = reflexive.permutations.count; \
                                     ADD_REFLEXIVE_START(reflexive.permutations) {\
                                         DEFAULT_VALUE(reflexive.weight, 1.0F); \
                                     } ADD_REFLEXIVE_END; \
