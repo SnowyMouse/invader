@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 ## [Unreleased]
 ### Fixed
 - invader-build: Fixed not fixing the render bounding radius if it was less than the bounding radius but non-zero.
+- invader-build: Fixed not setting the weight value for color change permutations in objects.
 
 ## [0.12.0] - 2019-09-22
 ### Changed
