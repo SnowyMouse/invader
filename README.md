@@ -90,7 +90,6 @@ supported.
 | `--format,-F <format>`      | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`. |
 | `--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767.                                        |
 | `--mipmap-scale,-s <type>`  | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`.           |
-| `--mipmap-sharpen,-s <amt>` | Mipmap sharpening. Must be 0 (default) to 1.                                                |
 | `--detail-fade,-f <factor>` | Set fade-to-gray factor for mipmaps of detail maps. By default, this is 0.                  |
 | `--spacing,-S <px>`         | Set minimum spacing between sprites in pixels. By default, this is 4.                       |
 | `--bump-height,-H <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02.                             |

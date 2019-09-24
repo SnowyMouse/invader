@@ -6,6 +6,10 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-build: Fixed not fixing the render bounding radius if it was less than the bounding radius but non-zero.
 - invader-build: Fixed not setting the weight value for color change permutations in objects.
 
+### Removed
+- invader-bitmap: Removed --filter-blur and --filter-sharpen. Tags that have these values set will still have the
+filter(s) applied. However, for newer tags, you should use an image editor, as you will get similar or better results.
+
 ## [0.12.0] - 2019-09-22
 ### Changed
 - invader-bitmap: Changed --mipmap-blur and --mipmap-sharpen to --filter-blur and --filter-sharpen. These now *only*

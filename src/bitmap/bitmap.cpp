@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
     bool dithering = false;
 
-    // Sharpen and blur
+    // Sharpen and blur; legacy support for older tags and should not be used in newer ones
     std::optional<float> sharpen;
     std::optional<float> blur;
 
@@ -101,8 +101,6 @@ int main(int argc, char *argv[]) {
         {"type", required_argument, 0, 'T' },
         {"mipmap-count", required_argument, 0, 'm' },
         {"mipmap-scale", required_argument, 0, 's' },
-        {"filter-sharpen", required_argument, 0, 'P' },
-        {"filter-blur", required_argument, 0, 'U' },
         {"detail-fade", required_argument, 0, 'f' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
@@ -114,7 +112,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:P:U:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -263,22 +261,6 @@ int main(int argc, char *argv[]) {
                 bump_height = static_cast<float>(std::strtof(optarg, nullptr));
                 break;
 
-            case 'P':
-                sharpen = static_cast<float>(std::strtof(optarg, nullptr));
-                if(sharpen.value() < 0.0F || sharpen.value() > 1.0F) {
-                    eprintf("Invalid sharpen value %f\n", sharpen.value());
-                    return EXIT_FAILURE;
-                }
-                break;
-
-            case 'U':
-                blur = static_cast<float>(std::strtof(optarg, nullptr));
-                if(blur.value() < 0.0F) {
-                    eprintf("Invalid blur value %f\n", blur.value());
-                    return EXIT_FAILURE;
-                }
-                break;
-
             case 'm':
                 max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
                 break;
@@ -319,10 +301,6 @@ int main(int argc, char *argv[]) {
                 eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
                 eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
                 eprintf("                               nearest. Default (new tag): linear\n\n");
-                eprintf("Post processing:\n");
-                eprintf("    --filter-blur,-U <radius>  Blur the bitmap. Higher radii are exponentially\n");
-                eprintf("                               slower. Default (new tag): 0.0\n");
-                eprintf("    --filter-sharpen,-P <amt>  Sharpen amount from 0 - 1. Default (new tag): 0.0\n\n");
                 eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n\n");
                 eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
                 eprintf("                               Default (new tag): 0.02\n");
