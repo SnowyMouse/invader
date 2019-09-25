@@ -72,7 +72,6 @@ int main(int argc, char *argv[]) {
     std::optional<BitmapSpriteUsage> sprite_usage;
     std::optional<std::uint32_t> sprite_budget;
     std::optional<std::uint32_t> sprite_budget_count;
-    std::optional<std::uint32_t> sprite_spacing;
 
     // Dithering?
     std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
@@ -104,7 +103,6 @@ int main(int argc, char *argv[]) {
         {"detail-fade", required_argument, 0, 'f' },
         {"budget", required_argument, 0, 'B' },
         {"budget-count", required_argument, 0, 'C' },
-        {"spacing", required_argument, 0, 'S' },
         {"bump-palettize", required_argument, 0, 'p' },
         {"bump-palettise", required_argument, 0, 'p' },
         {"bump-height", required_argument, 0, 'H' },
@@ -112,7 +110,7 @@ int main(int argc, char *argv[]) {
     };
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:S:B:C:p:h:u:H:", options, &longindex)) != -1) {
+    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:B:C:p:h:u:H:", options, &longindex)) != -1) {
         switch(opt) {
             case 'd':
                 data = optarg;
@@ -273,11 +271,6 @@ int main(int argc, char *argv[]) {
                 sprite_budget = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
                 break;
 
-            case 'S':
-                sprite_spacing = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
-                sprite_spacing.value() += (sprite_spacing.value() % 2); // if an odd number, add 1
-                break;
-
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -310,8 +303,6 @@ int main(int argc, char *argv[]) {
                 eprintf("Detail map options (only applies to detail bitmaps):\n");
                 eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
-                eprintf("    --spacing,-S <px>          Set the minimum spacing between sprites in\n");
-                eprintf("                               pixels. Default (new tag): 4\n");
                 eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
                 eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
                 eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
@@ -390,9 +381,6 @@ int main(int argc, char *argv[]) {
         if(!sprite_budget_count.has_value()) {
             sprite_budget_count = bitmap_tag_header.sprite_budget_count;
         }
-        if(!sprite_spacing.has_value()) {
-            sprite_spacing = bitmap_tag_header.sprite_spacing * 2;
-        }
         if(!usage.has_value()) {
             usage = bitmap_tag_header.usage;
         }
@@ -443,7 +431,6 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(mipmap_scale_type,ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR);
     DEFAULT_VALUE(mipmap_fade,0.0F);
     DEFAULT_VALUE(usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
-    DEFAULT_VALUE(sprite_spacing,4);
     DEFAULT_VALUE(palettize,false);
     DEFAULT_VALUE(bump_height,0.02F);
     DEFAULT_VALUE(mipmap_fade,0.0F);
@@ -496,7 +483,6 @@ int main(int argc, char *argv[]) {
         auto &p = sprite_parameters.value();
         p.sprite_budget = sprite_budget.value();
         p.sprite_budget_count = sprite_budget_count.value();
-        p.sprite_spacing = sprite_spacing.value();
         p.sprite_usage = sprite_usage.value();
     }
 
@@ -625,7 +611,7 @@ int main(int argc, char *argv[]) {
     flags.invader_dither_blue = dither_blue.value();
     new_tag_header.flags = flags;
 
-    new_tag_header.sprite_spacing = sprite_spacing.value() / 2;
+    new_tag_header.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
     new_tag_header.sprite_budget_count = sprite_budget_count.value();
     new_tag_header.sprite_usage = sprite_usage.value();
     auto &sprite_budget_value = sprite_budget.value();

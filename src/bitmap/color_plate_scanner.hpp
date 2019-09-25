@@ -229,7 +229,7 @@ namespace Invader {
          * @param  blur               blur filter
          * @return                    scanned color plate data
          */
-        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage = BitmapUsage::BITMAP_USAGE_DEFAULT, float bump_height = 0.0F, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters = std::nullopt, std::int16_t mipmaps = INT16_MAX, ScannedColorMipmapType mipmap_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR, std::optional<float> mipmap_fade_factor = std::nullopt, std::optional<float> sharpen = std::nullopt, std::optional<float> blur = std::nullopt);
+        static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur);
 
     private:
         /** Was valid color plate data used? If so, we need to check for multiple sequences. */
@@ -328,9 +328,10 @@ namespace Invader {
         /**
          * Process sprites
          * @param generated_bitmap bitmap data to do sprite stuff with
-         * @param parameters  sprite parameters
+         * @param parameters       sprite parameters
+         * @param mipmaps          mipmap count
          */
-        static void process_sprites(GeneratedBitmapData &generated_bitmap, const ColorPlateScannerSpriteParameters &parameters);
+        static void process_sprites(GeneratedBitmapData &generated_bitmap, ColorPlateScannerSpriteParameters &parameters, std::int16_t &mipmaps);
 
         ColorPlateScanner() = default;
     };

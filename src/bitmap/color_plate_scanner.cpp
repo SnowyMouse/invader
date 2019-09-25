@@ -88,7 +88,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
@@ -272,7 +272,7 @@ namespace Invader {
 
         // If we are doing sprites, we need to handle those now
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-            process_sprites(generated_bitmap, sprite_parameters.value());
+            process_sprites(generated_bitmap, sprite_parameters.value(), mipmaps);
         }
 
         // If we're doing height maps, do this
@@ -1212,7 +1212,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, const ColorPlateScannerSpriteParameters &parameters) {
+    void ColorPlateScanner::process_sprites(GeneratedBitmapData &generated_bitmap, ColorPlateScannerSpriteParameters &parameters, std::int16_t &mipmap) {
         // Pick the background color of the sprite sheet
         ColorPlatePixel background_color;
         switch(parameters.sprite_usage) {
@@ -1244,14 +1244,21 @@ namespace Invader {
             max_sheet_count = 1;
         }
 
+        // Make it so sprites have a limited number of mipmaps (only 1 or 2) since that's tool.exe's limitations
+        if(mipmap != 1) {
+            mipmap = 2;
+        }
+
+        // Set the spacing based on the mipmap count
+        std::uint32_t half_spacing = (mipmap == 1) ? 2 : 4;
+
         // First see if we can even fit things into this
-        std::uint32_t sprite_spacing = parameters.sprite_spacing;
-        std::uint32_t half_spacing = sprite_spacing / 2;
         auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
         if(!fit_sprites.has_value()) {
             eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
             std::terminate();
         }
+        parameters.sprite_spacing = half_spacing;
 
         auto &sprites_fit = fit_sprites.value();
         std::uint32_t sheet_count = number_of_sprite_sheets(sprites_fit);
