@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
                         break;
                     default:
                         eprintf("Invalid sprite budget %u.\n", sprite_budget.value());
-                        break;
+                        return EXIT_FAILURE;
                 }
 
                 break;
