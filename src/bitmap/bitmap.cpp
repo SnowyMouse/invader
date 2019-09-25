@@ -269,6 +269,18 @@ int main(int argc, char *argv[]) {
 
             case 'B':
                 sprite_budget = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                switch(sprite_budget.value()) {
+                    case 32:
+                    case 64:
+                    case 128:
+                    case 256:
+                    case 512:
+                        break;
+                    default:
+                        eprintf("Invalid sprite budget %u.\n", sprite_budget.value());
+                        break;
+                }
+
                 break;
 
             default:
@@ -305,8 +317,8 @@ int main(int argc, char *argv[]) {
                 eprintf("Sprite options (only applies to sprite bitmaps):\n");
                 eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
                 eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
-                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Values greater\n");
-                eprintf("                               than 512 aren't recorded. Default (new tag): 32\n\n");
+                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Can be 32, 64,\n");
+                eprintf("                               128, 256, or 512. Default (new tag): 32\n\n");
 
                 return EXIT_FAILURE;
         }

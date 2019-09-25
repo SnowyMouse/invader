@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on [Keep a
 - invader-bitmap: Removed --filter-blur and --filter-sharpen. Tags that have these values set will still have the
 filter(s) applied. However, for newer tags, you should use an image editor, as you will get similar or better results.
 - invader-bitmap: Removed --sprite-spacing and used tool.exe's broken functionality, instead.
+- invader-bitmap: Removed the ability to set sprite budgets below 32 or above 512.
 
 ## [0.12.0] - 2019-09-22
 ### Changed
