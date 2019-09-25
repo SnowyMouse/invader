@@ -1244,13 +1244,25 @@ namespace Invader {
             max_sheet_count = 1;
         }
 
-        // Make it so sprites have a limited number of mipmaps (only 1 or 2) since that's tool.exe's limitations
-        if(mipmap != 1) {
-            mipmap = 2;
-        }
-
         // Set the spacing based on the mipmap count
-        std::uint32_t half_spacing = (mipmap == 1) ? 2 : 4;
+        std::uint32_t half_spacing;
+        switch(mipmap) {
+            case 1:
+                half_spacing = 2;
+                break;
+
+            case 0:
+                half_spacing = 1;
+                break;
+
+            default:
+                mipmap = 2;
+                // fallthrough
+
+            case 2:
+                half_spacing = 4;
+                break;
+        }
 
         // First see if we can even fit things into this
         auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
