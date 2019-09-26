@@ -39,8 +39,8 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::compile_map(
         const char *scenario,
         std::vector<std::string> tags_directories,
-        std::string maps_directory,
         HEK::CacheFileEngine engine_target,
+        std::string maps_directory,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
         bool no_indexed_tags,
         bool always_index_tags,
@@ -56,6 +56,7 @@ namespace Invader {
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
             workload.always_index_tags = false;
             no_indexed_tags = true;
+            maps_directory = std::string();
         }
 
         // First set up indexed tags

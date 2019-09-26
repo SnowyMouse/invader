@@ -209,7 +209,7 @@ int main(int argc, char * const argv[]) {
             forged_crc_ptr = &forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, engine, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, engine, maps, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
 
         char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
         #ifdef _WIN32
