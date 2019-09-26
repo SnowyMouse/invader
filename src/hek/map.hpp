@@ -14,7 +14,8 @@ namespace Invader::HEK {
     enum CacheFileEngine : std::uint32_t {
         CACHE_FILE_XBOX = 0x5,
         CACHE_FILE_RETAIL = 0x7,
-        CACHE_FILE_CUSTOM_EDITION = 0x261
+        CACHE_FILE_CUSTOM_EDITION = 0x261,
+        CACHE_FILE_DARK_CIRCLET = 0x1A86
     };
 
     enum CacheFileType : TagEnum {

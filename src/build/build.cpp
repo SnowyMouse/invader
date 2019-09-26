@@ -42,7 +42,7 @@ int main(int argc, char * const argv[]) {
     std::string scenario;
     std::string last_argument;
     std::string index;
-    std::string engine = "ce";
+    HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
     bool no_indexed_tags = false;
     bool handled = true;
     bool quiet = false;
@@ -91,14 +91,14 @@ int main(int argc, char * const argv[]) {
                 always_index_tags = true;
                 break;
             case 'g':
-                engine = std::string(optarg);
-                if(engine != "ce" && engine != "retail") {
-                    eprintf("%s: Invalid engine. Expected ce or retail.\n", argv[0]);
-                    return EXIT_FAILURE;
+                if(std::strcmp(optarg, "custom") == 0) {
+                    engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
-                // Implicitly -n them
-                if(engine == "retail") {
-                    no_indexed_tags = true;
+                else if(std::strcmp(optarg, "retail") == 0) {
+                    engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                }
+                else if(std::strcmp(optarg, "dark") == 0) {
+                    engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
                 break;
             case 'c':
@@ -111,8 +111,8 @@ int main(int argc, char * const argv[]) {
                 eprintf("Usage: %s [options] <scenario>\n\n", argv[0]);
                 eprintf("Build cache files for Halo Custom Edition.\n\n");
                 eprintf("Options:\n");
-                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are: ce,\n");
-                eprintf("                               (default), retail\n");
+                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
+                eprintf("                               custom (default), retail, dark\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
                 eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
                 eprintf("  --no-indexed-tags,-n         Do not index tags. This can speed up build time\n");
@@ -209,11 +209,7 @@ int main(int argc, char * const argv[]) {
             forged_crc_ptr = &forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
-
-        if(engine == "retail") {
-            reinterpret_cast<Invader::HEK::CacheFileHeader *>(map.data())->engine = Invader::HEK::CACHE_FILE_RETAIL;
-        }
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, maps, engine, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
 
         char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
         #ifdef _WIN32

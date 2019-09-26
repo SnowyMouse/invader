@@ -112,7 +112,7 @@ int main(int argc, char * const *argv) {
 
     if(!single_tag) {
         // Build the map
-        auto map = Invader::BuildWorkload::compile_map(base_tag, tags, "", std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(), true, false, false);
+        auto map = Invader::BuildWorkload::compile_map(base_tag, tags, "");
 
         // Parse the map
         auto parsed_map = Invader::Map::map_with_pointer(map.data(), map.size());

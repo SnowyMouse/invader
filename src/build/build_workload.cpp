@@ -40,6 +40,7 @@ namespace Invader {
         const char *scenario,
         std::vector<std::string> tags_directories,
         std::string maps_directory,
+        HEK::CacheFileEngine engine_target,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
         bool no_indexed_tags,
         bool always_index_tags,
@@ -49,6 +50,13 @@ namespace Invader {
         BuildWorkload workload;
 
         workload.always_index_tags = always_index_tags;
+        workload.engine_target = engine_target;
+
+        // If we're building Dark Circlet or retail maps, don't use resource maps
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
+            workload.always_index_tags = false;
+            no_indexed_tags = true;
+        }
 
         // First set up indexed tags
         workload.compiled_tags.reserve(with_index.size());
@@ -305,7 +313,7 @@ namespace Invader {
         cache_file_header.head_literal = CACHE_FILE_HEAD;
         cache_file_header.foot_literal = CACHE_FILE_FOOT;
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
-        cache_file_header.engine = CACHE_FILE_CUSTOM_EDITION;
+        cache_file_header.engine = this->engine_target;
         cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), INVADER_FULL_VERSION_STRING);
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
