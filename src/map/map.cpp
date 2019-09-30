@@ -182,11 +182,33 @@ namespace Invader {
 
         // First get the tags
         const auto *tags = reinterpret_cast<const CacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count));
+
+        // Have a pointer for the end of the tag data so we can check to make sure things aren't null terminated
+        const char *tag_data_end = reinterpret_cast<const char *>(this->tag_data) + this->tag_data_length;
+
         for(std::size_t i = 0; i < tag_count; i++) {
             this->tags.push_back(Tag(*this));
             auto &tag = this->tags[i];
             tag.p_tag_class_int = tags[i].primary_class;
-            tag.p_path = reinterpret_cast<const char *>(this->resolve_tag_data_pointer(tags[i].tag_path));
+
+            try {
+                auto *path = reinterpret_cast<const char *>(this->resolve_tag_data_pointer(tags[i].tag_path));
+
+                // Make sure the path is null-terminated
+                bool zeroed = false;
+                for(auto *path_test = path; path < tag_data_end; path_test++) {
+                    if(*path_test == 0) {
+                        zeroed = true;
+                        break;
+                    }
+                }
+
+                // If it was null terminated, use it. Otherwise, don't.
+                if(zeroed) {
+                    tag.p_path = path;
+                }
+            }
+            catch (Invader::OutOfBoundsException &) {}
 
             if(tag.p_tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                 continue;
