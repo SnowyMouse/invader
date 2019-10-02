@@ -60,6 +60,7 @@ namespace Invader::HEK {
                 INCREMENT_DATA_PTR(samples_size)
                 reflexive.samples.pointer = 0;
                 reflexive.samples_pointer = -1;
+                reflexive.samples.external = 0;
 
                 std::size_t mouth_data_size = reflexive.mouth_data.size;
                 ADD_POINTER_FROM_INT32(reflexive.mouth_data.pointer, compiled.data.size());
