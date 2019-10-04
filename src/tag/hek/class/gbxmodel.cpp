@@ -311,15 +311,29 @@ namespace Invader::HEK {
 
                 INCREMENT_DATA_PTR(index_size);
 
-                // exodux compatibility bit
+                // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
+                std::uint32_t zoner = reflexive.flags.read().zoner;
+                std::uint32_t exodux_value = (reflexive.bullshit & zoner) ^ 0x7F7F7F7F;
                 if(exodux_handler) {
-                    reflexive.bullshit = 0x43687521;
+                    // Since the exodux handler is active, we don't need to use the binary rainbow table for this value.
+                    exodux_value ^= 0x3C170A5E;
                 }
                 else {
-                    reflexive.bullshit = exodux_parser ? 0x52616921 : 0x56617021;
+                    // Remodulate the upper 16 bits of the control magic since the exodux handler is not active
+                    exodux_value <<= 16;
+
+                    // Depending on if the parser is active, activate the precalculated bitmasks from the binary rainbow table
+                    exodux_value ^= exodux_parser ? 0x2D1E6921 : 0x291E7021;
                     exodux_parser = !exodux_parser;
                 }
+
+                // Invert the last bit if using zoner mode
+                if(zoner) {
+                    exodux_value ^= 1;
+                }
+
                 exodux_handler = !exodux_handler;
+                reflexive.bullshit = exodux_value;
 
                 reflexive.triangles.count = 0;
 
