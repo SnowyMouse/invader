@@ -1,7 +1,7 @@
 # Invader Changelog
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.13.0] - 2019-10-04
 ### Changed
 - invader-build: Changed how stubbed tags are created so tag extractors won't try to extract them
 - invader-bitmap: Errors if the tag contains uppercase characters in its path
