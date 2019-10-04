@@ -330,6 +330,15 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     std::string bitmap_tag = argv[argc - 1];
+
+    // Ensure it's lowercase
+    for(char &c : bitmap_tag) {
+        if(c >= 'A' && c <= 'Z') {
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", bitmap_tag.data());
+            return EXIT_FAILURE;
+        }
+    }
+
     std::filesystem::path data_path = data;
 
     // Get the path

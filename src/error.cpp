@@ -60,6 +60,6 @@ namespace Invader {
     }
 
     const char *InvalidTagPathException::what() const noexcept {
-        return "tag path is too long";
+        return "tag path is invalid";
     }
 }

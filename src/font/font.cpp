@@ -89,6 +89,14 @@ int main(int argc, char *argv[]) {
     }
     char *font_tag = argv[optind];
 
+    // Ensure it's lowercase
+    for(char *c = font_tag; *c; c++) {
+        if(*c >= 'A' && *c <= 'Z') {
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag);
+            return EXIT_FAILURE;
+        }
+    }
+
     #ifndef _WIN32
     for(char *c = font_tag; *c; c++) {
         if(*c == '\\') {

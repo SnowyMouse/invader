@@ -665,6 +665,13 @@ namespace Invader {
             return index;
         }
 
+        // Ensure the tag path contains no uppercase characters
+        for(const char *c = path; *c; c++) {
+            if(*c >= 'A' && *c <= 'Z') {
+                throw InvalidTagPathException();
+            }
+        }
+
         // If it's a model tag, correct it to a gbxmodel
         if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
             tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;

@@ -128,7 +128,7 @@ namespace Invader {
     };
 
     /**
-     * This is thrown when a tag path is too long
+     * This is thrown when a tag path is too long or is otherwise invalid
      */
     class InvalidTagPathException : public std::exception {
     public:
