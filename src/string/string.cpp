@@ -165,6 +165,14 @@ int main(int argc, char * const *argv) {
         string_tag = argv[optind];
     }
 
+    // Ensure it's lowercase
+    for(const char *c = string_tag; *c; c++) {
+        if(*c >= 'A' && *c <= 'Z') {
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag);
+            return EXIT_FAILURE;
+        }
+    }
+
     std::filesystem::path tags_path(tags);
     std::filesystem::path data_path(data);
 
