@@ -625,9 +625,8 @@ namespace Invader {
                 #endif
 
                 // Stub the tag
-                compiled_tag->path = std::string("stub\\") + tag_class_to_extension(compiled_tag->tag_class_int) + "\\" + compiled_tag->path;
-                compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
-                compiled_tag->data.insert(compiled_tag->data.begin(), 12, std::byte());
+                compiled_tag->path = "MISSINGNO.";
+                compiled_tag->tag_class_int = TagClassInt::TAG_CLASS_NONE;
             }
         }
 
