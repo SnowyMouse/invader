@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-build: Changed how stubbed tags are created so tag extractors won't try to extract them
+- invader-bitmap: Errors if the tag contains uppercase characters in its path
+- invader-build: Errors if any non-stubbed tags contain uppercase characters in their paths
+- invader-font: Errors if the tag contains uppercase characters in its path
+- invader-string: Errors if the tag contains uppercase characters in its path
+
 ### Fixed
 - invader-build: Fixed not fixing the render bounding radius if it was less than the bounding radius but non-zero.
 - invader-build: Fixed not setting the weight value for color change permutations in objects.
