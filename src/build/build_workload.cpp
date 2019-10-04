@@ -660,8 +660,8 @@ namespace Invader {
             index = this->compiled_tags.size();
         }
 
-        // If the tag has no class, exit
-        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+        // If the tag has no class and we aren't adding anything, exit
+        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE && !adding) {
             return index;
         }
 
