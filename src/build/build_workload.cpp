@@ -660,6 +660,11 @@ namespace Invader {
             index = this->compiled_tags.size();
         }
 
+        // If the tag has no class, exit
+        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+            return index;
+        }
+
         // If it's a model tag, correct it to a gbxmodel
         if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
             tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
