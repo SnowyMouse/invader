@@ -67,11 +67,11 @@ namespace Invader::HEK {
          * Check if the tag ID is null
          * @return true if the tag ID is null
          */
-        inline bool is_null() const {
+        bool is_null() const {
             return this->id == NULL_ID;
         }
 
-        static inline TagID null_tag_id() {
+        static TagID null_tag_id() {
             return { NULL_ID };
         }
     };
@@ -108,7 +108,7 @@ namespace Invader::HEK {
          * Create a null FlaggedInt
          * @return null FlaggedInt
          */
-        static inline FlaggedInt<T> null() {
+        static FlaggedInt<T> null() {
             return FlaggedInt<T> { (FLAG_BIT | MAX_VALUE) };
         }
 
@@ -116,7 +116,7 @@ namespace Invader::HEK {
          * Return true if the flag is set
          * @return true if flag is set
          */
-        inline bool flag_value() const noexcept {
+        bool flag_value() const noexcept {
             return this->value & FLAG_BIT;
         }
 
@@ -124,7 +124,7 @@ namespace Invader::HEK {
          * Return true if this is a null value
          * @return true if this is a null value
          */
-        inline bool is_null() const noexcept {
+        bool is_null() const noexcept {
             return this->value == (FLAG_BIT | MAX_VALUE);
         }
 
@@ -132,7 +132,7 @@ namespace Invader::HEK {
          * Get the value of the integer
          * @return value of the integer
          */
-        inline T int_value() const noexcept {
+        T int_value() const noexcept {
             return this->value & MAX_VALUE;
         }
 
@@ -140,7 +140,7 @@ namespace Invader::HEK {
          * Set the flag of the integer
          * @param new_flag_value value of the flag to set
          */
-        inline void set_flag(bool new_flag_value) noexcept {
+        void set_flag(bool new_flag_value) noexcept {
             this->value = this->int_value() | (FLAG_BIT * new_flag_value);
         }
 
@@ -148,15 +148,15 @@ namespace Invader::HEK {
          * Set the flag of the integer
          * @param new_int_value value of the integer to set
          */
-        inline void set_value(T new_int_value) noexcept {
+        void set_value(T new_int_value) noexcept {
             this->value = (new_int_value & MAX_VALUE) | (this->flag_value());
         }
 
-        inline operator T() const noexcept {
+        operator T() const noexcept {
             return this->int_value();
         }
 
-        inline bool operator ==(const FlaggedInt<T> &other) {
+        bool operator ==(const FlaggedInt<T> &other) {
             return this->value == other.value;
         }
     };
@@ -587,7 +587,7 @@ namespace Invader::HEK {
          * @param  plane Plane to check
          * @return       Distance in world units (positive if in front, negative if behind, zero if neither)
          */
-        inline float distance_from_plane(const Plane3D<EndianType> &plane) const {
+        float distance_from_plane(const Plane3D<EndianType> &plane) const {
             return ((plane.vector.i * this->x) + (plane.vector.j * this->y) + (plane.vector.k * this->z)) - plane.w;
         }
 
@@ -596,7 +596,7 @@ namespace Invader::HEK {
          * @param plane Plane to check
          * @return      distance from the plane in world units
          */
-        inline float operator-(const Plane3D<EndianType> &plane) const {
+        float operator-(const Plane3D<EndianType> &plane) const {
             return this->distance_from_plane(plane);
         }
 
@@ -605,7 +605,7 @@ namespace Invader::HEK {
          * @param point Other point to check
          * @return      vector calculated
          */
-        inline Vector3D<EndianType> operator-(const Point3D<EndianType> &point) const {
+        Vector3D<EndianType> operator-(const Point3D<EndianType> &point) const {
             Vector3D<EndianType> v;
             v.i = this->x - point.x;
             v.j = this->y - point.y;
@@ -618,7 +618,7 @@ namespace Invader::HEK {
          * @param  point Point to check
          * @return       Distance in world units
          */
-        inline float distance_from_point_squared(const Point3D<EndianType> &point) const {
+        float distance_from_point_squared(const Point3D<EndianType> &point) const {
             float x = point.x - this->x;
             float y = point.y - this->y;
             float z = point.z - this->z;
@@ -630,7 +630,7 @@ namespace Invader::HEK {
          * @param  point Point to check
          * @return       Distance in world units
          */
-        inline float distance_from_point(const Point3D<EndianType> &point) const {
+        float distance_from_point(const Point3D<EndianType> &point) const {
             return std::sqrt(this->distance_from_point_squared(point));
         }
 

@@ -28,7 +28,7 @@ namespace Invader {
          * @param  source color to compare with
          * @return        true if the colors are equal
          */
-        inline bool operator==(const ColorPlatePixel &other) const {
+        bool operator==(const ColorPlatePixel &other) const {
             return this->blue == other.blue && this->green == other.green && this->red == other.red && this->alpha == other.alpha;
         }
 
@@ -37,7 +37,7 @@ namespace Invader {
          * @param  source color to compare with
          * @return        true if the colors are not equal
          */
-        inline bool operator!=(const ColorPlatePixel &other) const {
+        bool operator!=(const ColorPlatePixel &other) const {
             return !(*this == other);
         }
 
@@ -46,7 +46,7 @@ namespace Invader {
          * @param  source source color
          * @return        source color
          */
-        inline ColorPlatePixel replace(const ColorPlatePixel &source) const {
+        ColorPlatePixel replace(const ColorPlatePixel &source) const {
             return source;
         };
 
@@ -77,7 +77,7 @@ namespace Invader {
          * @param  p8 p8 index
          * @return    color plate pixel
          */
-        static inline ColorPlatePixel p8_to_color(std::uint8_t p8) {
+        static ColorPlatePixel p8_to_color(std::uint8_t p8) {
             extern void p8_convert_to_rgba(std::uint8_t p8, std::uint8_t &red, std::uint8_t &green, std::uint8_t &blue, std::uint8_t &alpha);
             ColorPlatePixel color;
             p8_convert_to_rgba(p8, color.red, color.green, color.blue, color.alpha);
@@ -88,7 +88,7 @@ namespace Invader {
          * Conver the color to alpha
          * @return alpha of the color
          */
-        inline std::uint8_t convert_to_a8() {
+        std::uint8_t convert_to_a8() {
             return this->alpha;
         }
 
@@ -96,7 +96,7 @@ namespace Invader {
          * Convert the color to grayscale with alpha.
          * @return A8Y8 representation of the color
          */
-        inline std::uint16_t convert_to_a8y8() {
+        std::uint16_t convert_to_a8y8() {
             return (this->alpha << 8) | this->convert_to_y8();
         }
 

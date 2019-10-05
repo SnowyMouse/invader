@@ -28,7 +28,7 @@ namespace Invader::HEK {
          * Convert the value to host endian.
          * @return the value in host endian
          */
-        inline T read() const noexcept {
+        T read() const noexcept {
             std::byte value_copy_byte[sizeof(T)];
             for(std::size_t i = 0; i < sizeof(T); i++) {
                 value_copy_byte[i] = value[sizeof(T) - (i + 1)];
@@ -40,7 +40,7 @@ namespace Invader::HEK {
          * Convert the value to host endian.
          * @return the value in host endian
          */
-        inline operator T() const noexcept {
+        operator T() const noexcept {
             return this->read();
         }
 
@@ -48,7 +48,7 @@ namespace Invader::HEK {
          * Overwrite the value
          * @param new_value value to overwrite
          */
-        inline void write(const T &new_value) noexcept {
+        void write(const T &new_value) noexcept {
             *reinterpret_cast<T *>(this->value) = reinterpret_cast<const SwappedEndian<T> *>(&new_value)->read();
         }
 
@@ -56,7 +56,7 @@ namespace Invader::HEK {
          * Overwrite the value
          * @param new_value value to overwrite
          */
-        inline void operator =(const T &new_value) noexcept {
+        void operator =(const T &new_value) noexcept {
             return this->write(new_value);
         }
     };
@@ -72,7 +72,7 @@ namespace Invader::HEK {
          * Convert the value to host endian.
          * @return the value in host endian
          */
-        inline T read() const noexcept {
+        T read() const noexcept {
             return *reinterpret_cast<const T *>(value);
         }
 
@@ -80,7 +80,7 @@ namespace Invader::HEK {
          * Convert the value to host endian.
          * @return the value in host endian
          */
-        inline operator T() const noexcept {
+        operator T() const noexcept {
             return this->read();
         }
 
@@ -88,7 +88,7 @@ namespace Invader::HEK {
          * Overwrite the value
          * @param new_value value to overwrite
          */
-        inline void write(const T &new_value) noexcept {
+        void write(const T &new_value) noexcept {
             *reinterpret_cast<T *>(value) = new_value;
         }
 
@@ -96,7 +96,7 @@ namespace Invader::HEK {
          * Overwrite the value
          * @param new_value value to overwrite
          */
-        inline void operator =(const T &new_value) noexcept {
+        void operator =(const T &new_value) noexcept {
             return this->write(new_value);
         }
     };
