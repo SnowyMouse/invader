@@ -225,7 +225,7 @@ avoid linking errors.
     - You can use `std::make_unique` to create a `std::unique_ptr` instead of using `new` in the constructor
 - Do not use C-style casting, such as `(int)i`
     - Use `static_cast`, `reinterpret_cast`, `const_cast`, or `dynamic_cast` when necessary
-- For null pointers, use `std::nullptr`
+- For null pointers, use `nullptr`
 - When using the C or C++ standard library, use the `std::` namespace explicitly when possible, such as `std::printf`
 or `std::uint32_t`
     - The `using namespace std;` directive may result in collisions at some point, so using it is inadvisable
