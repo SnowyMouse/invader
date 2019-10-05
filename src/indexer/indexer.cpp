@@ -45,7 +45,7 @@ int main(int argc, const char **argv) {
     }
     std::fseek(f, 0, SEEK_END);
     std::size_t size = std::ftell(f);
-    std::unique_ptr<std::byte []> map_data(new std::byte[size]);
+    auto map_data = std::make_unique<std::byte []>(size);
     std::fseek(f, 0, SEEK_SET);
     if(std::fread(map_data.get(), size, 1, f) != 1) {
         eprintf("Failed to read %s\n", argv[1]);
