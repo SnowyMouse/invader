@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+// Changes done for Invader
+// - added GPL version 3 only identifier (the original code to this uses the below license, but my modifications are GPL version 3 only, as is Invader itself)
+// - commented out main function
+// - added a fake file handle data type and functions so this can be done with data in memory
+
 /*
  * CRC-32 forcer (C)
  *
@@ -18,10 +25,6 @@
  * along with this program (see COPYING.txt).
  * If not, see <http://www.gnu.org/licenses/>.
  */
-
-// Changes done for Invader
-// - commented out main function
-// - added a fake file handle data type and functions so this can be done with data in memory
 
 #include <inttypes.h>
 #include <limits.h>

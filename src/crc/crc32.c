@@ -1,3 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+// Changes done for Invader
+// - added GPL version 3 only identifier (the original code to this uses the below license, but my modifications are GPL version 3 only, as is Invader itself)
+// - added "crc32.h" include
+// - removed platform specific includes <sys/param.h> and <sys/systm.h>
+
+#include "crc32.h"
+
 /*-
  *  COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or
  *  code or tables extracted from it, as desired without restriction.
@@ -40,7 +49,8 @@
  * CRC32 code derived from work by Gary S. Brown.
  */
 
-#include "crc32.h"
+// #include <sys/param.h>
+// #include <sys/systm.h>
 
 static uint32_t crc32_tab[] = {
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
