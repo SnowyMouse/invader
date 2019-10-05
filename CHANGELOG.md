@@ -1,5 +1,6 @@
 # Invader Changelog
-This is used for recording Invader's changes. This changelog is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+This is used for recording Invader's changes. This changelog is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.13.0] - 2019-10-04
 ### Changed
@@ -55,7 +56,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 - invader-bitmap: Added p8-bump support based on Stubbs the Zombie's palette
 
 ### Changed
-- invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite sheet
+- invader-bitmap: Spacing now attempts to sort both vertical and horizontal to see if sprites will fit in a sprite
+sheet
 - invader-bitmap: Changed how spacing is stored in the bitmap to effectively match how tool.exe calculates its spacing
 - invader-bitmap: Double multiply sprites now simply replaces the pixel like tool.exe rather than alpha blend into gray
 - invader-bitmap: Usage and the p8 compression flag are now preserved
@@ -70,7 +72,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 
 ## [0.9.0] - 2019-09-13
 ### Changed
-- invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole image as one bitmap
+- invader-bitmap: Changed detection to first line is blue instead of first pixel for determining when to read a whole
+image as one bitmap
 
 ### Removed
 - invader-bitmap: Removed -O (this is now done by default)
@@ -110,7 +113,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 - invader-bitmap: Alpha is now ignored when checking if a pixel is blue, magenta, or cyan
 
 ### Fixed
-- invader-build: Fixed an issue with certain sounds not being played correctly, such as the "Come on! We've got to get the hell out of here!" dialogue at the start of the game
+- invader-build: Fixed an issue with certain sounds not being played correctly, such as the "Come on! We've got to get
+the hell out of here!" dialogue at the start of the game
 
 ### Removed
 - invader-bitmap: Removed being able to specify negative mipmaps to remove mipmaps
@@ -138,7 +142,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 ## [0.6.0] - 2019-08-26
 ### Changed
 - invader-build: Some hidden values are now calculated for machines
-- invader-build: All multiplayer maps use stock limits for indexed resource, while all singleplayer and UI maps can use the extended Invader resource limits
+- invader-build: All multiplayer maps use stock limits for indexed resource, while all singleplayer and UI maps can use
+the extended Invader resource limits
 
 ## [0.5.0] - 2019-08-24
 ### Changed
@@ -150,7 +155,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 
 ## [0.4.3] - 2019-08-23
 ### Changed
-- invader-build: Encounter firing positions and squad positions are now raycasted for determining the BSP for an encounter
+- invader-build: Encounter firing positions and squad positions are now raycasted for determining the BSP for an
+encounter
 - invader-font: The width of the 'X' character is now used for the dot width.
 
 ## [0.4.2] - 2019-08-23
@@ -189,7 +195,8 @@ well as [Mozzarilla](https://github.com/MosesofEgypt/mozzarilla) support it, so 
 ## [0.2.0] - 2019-08-21
 ### Added
 - invader-archive - Archives all tags needed to build a map
-- invader-bitmap - Creates bitmap tags (only supports 2D textures without color plate data but also has custom mipmap support)
+- invader-bitmap - Creates bitmap tags (only supports 2D textures without color plate data but also has custom mipmap
+support)
 - invader-build - Builds cache files
 - invader-crc - Displays and spoofs CRC32 checksums of cache files; this is useful for using modified multiplayer maps
 - invader-dependency - Outputs a list of tags that depend on a given tag
