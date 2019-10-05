@@ -46,6 +46,18 @@ unit in Halo is equal to 10 feet or 3.048 meters.
 - All text files must end with a newline
     - Most text editors do this for you
 
+## Scope guidelines
+Issues and pull requests must remain in the scope of Invader.
+
+- Invader only applies to the base Halo Custom Edition game. Code or definitions for functionality provided by a mod
+should not be added to Invader.
+    - For example, if you want to create a fork of Invader that creates Open Sauce maps, you are free to do so provided
+    you follow the terms of Invader's license, but you should not submit an issue or a pull request to add this
+    functionality as it goes outside the scope of Invader.
+- Invader is cross-platform. Platform-specific code such as the Windows API should be avoided in favor of the C/C++
+standard library when possible. If this is unavoidable, `#ifdefs` should be used, and functionality should stay the
+same on any platform.
+
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
 
