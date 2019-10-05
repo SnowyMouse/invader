@@ -4,13 +4,13 @@ Invader is an open source toolkit for creating Halo: Combat Evolved maps. It is 
 ## Building Invader
 There are a number of things you will need in order to successfully compile Invader.
 
-### Required Dependencies
+### Required dependencies
 * C++17 compiler
 * C99 compiler
 * CMake 3.10 or newer
 * Python 3.7 or newer
 
-### Optional Dependencies
+### Optional dependencies
 * LibArchive (invader-archive)
 * LibTIFF (invader-bitmap)
 * zlib (invader-bitmap)
@@ -96,7 +96,7 @@ supported.
 | `--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting.                            |
 | `--budget,-B <length>`      | Set max length of sprite sheet. By default, this is 32.                                     |
 
-#### Uncompressed Bitmap Formats
+#### Uncompressed bitmap formats
 These formats are uncompressed and use explicit (not interpolated) RGB and/or alpha values. This results in higher
 quality bitmaps than using any of the block compressed formats, but it comes with a file size tradeoff. Note that
 32-bit bitmaps are slightly buggy on stock Halo PC without a mod (e.g. [Chimera](https://github.com/Kavawuvi/Chimera)).
@@ -116,7 +116,7 @@ A1R5G5B5 is used. Otherwise, A4R4G4B4 is used.
 |          | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                       |
 |          | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                       |
 
-#### Block-Compressed Bitmap Formats
+#### Block-compressed bitmap formats
 These formats utilize block compression. Basically, each bitmap is separated into 4x4 blocks, and each block has two
 16-bit (R5G6B5) colors which are interpolated at runtime. This provides massive space savings but at a significant
 loss in quality. Since the smallest block is 4x4, then mipmaps smaller than 4x4 will not be generated, nor will you be
@@ -132,7 +132,7 @@ keep the size as small as possible.
 | `dxt3` | 8       | 4-bit explicit     | 16-bit interpolated | Better for shapes like HUDs            |
 | `dxt5` | 8       | 4-bit interpolated | 16-bit interpolated | Better for alpha gradients like clouds |
 
-#### More Formats
+#### More formats
 These formats were originally available on Xbox and do not work on stock Halo PC without a mod (e.g.
 [Chimera](https://github.com/Kavawuvi/Chimera)). They all use explicit RGB and/or alpha.
 
