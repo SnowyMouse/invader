@@ -19,6 +19,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Changes done for Invader
+// - commented out main function
+// - added a fake file handle data type and functions so this can be done with data in memory
+
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -275,7 +279,6 @@ static uint64_t reciprocal_mod(uint64_t x) {
     }
 }
 
-
 static int get_degree(uint64_t x) {
     int result = -1;
     for (; x != 0; x >>= 1)
@@ -283,6 +286,8 @@ static int get_degree(uint64_t x) {
     return result;
 }
 
+
+// Begin Invader-added functions
 void crc_spoof_fake_fclose(FakeFileHandle *f) {
 }
 
