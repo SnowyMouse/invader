@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Set things whether or not things worked
 if(${IN_GIT_REPO} STREQUAL "TRUE")
     execute_process(

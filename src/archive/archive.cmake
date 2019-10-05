@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Archive executable
 if(${LibArchive_FOUND})
     add_executable(invader-archive

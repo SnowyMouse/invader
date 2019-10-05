@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #define STB_DXT_IMPLEMENTATION
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb_dxt.h"

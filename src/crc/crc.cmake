@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # CRC executable
 add_executable(invader-crc
     src/crc/crc.cpp

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Check if we can build invader-bitmap
 if(${TIFF_FOUND} AND ${ZLIB_FOUND})
     # Bitmap executable

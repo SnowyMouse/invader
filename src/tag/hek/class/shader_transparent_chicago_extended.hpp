@@ -1,8 +1,4 @@
-/*
- * Invader (c) 2019 Kavawuvi
- *
- * This program is free software under the GNU General Public License v3.0. See LICENSE for more information.
- */
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_CHICAGO_EXTENDED_HPP
 #define INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_CHICAGO_EXTENDED_HPP

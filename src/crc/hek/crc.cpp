@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <vector>
 #include "../../map/map.hpp"
 #include "../crc32.h"

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef INVADER__CRC__CRC32_H
 #define INVADER__CRC__CRC32_H
 

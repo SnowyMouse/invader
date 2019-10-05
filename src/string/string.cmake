@@ -1,4 +1,6 @@
-# Indexer executable
+# SPDX-License-Identifier: GPL-3.0-only
+
+# String executable
 add_executable(invader-string
     src/string/string.cpp
 )

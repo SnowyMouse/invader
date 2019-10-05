@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Invader library
 add_library(invader STATIC
     src/hek/class_int.cpp

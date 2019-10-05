@@ -1,6 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Check if we can build invader-bitmap
 if(${FREETYPE_FOUND})
-    # Bitmap executable
+    # Font executable
     add_executable(invader-font
         src/font/font.cpp
     )
