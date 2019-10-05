@@ -25,6 +25,27 @@ release or not.
 Releases are used only for versioning and keeping track of changes. They are **not** an indication of stability. So, if
 the latest release uses code that is older than the Git master branch, then it is just as out-of-date.
 
+## Text conventions
+These are general conventions used for writing comments, issues, documentation, and code to ensure it is understandable
+by most people.
+
+- Use American English
+    - A specific dialect of English is chosen for consistency in spelling
+    - Comments inside of issues and pull requests do not specifically need to use the American English dialect, but
+    they should not require a translator for American English speakers to read, either.
+- Use ISO dates (YYYY-MM-DD)
+    - The ISO date format is universally easy to understand, as it removes ambiguity and puts the date components in a
+    logical order.
+- Use soft tabs of four spaces in length
+- Use commas (`,`) when separating thousands, and use decimal points (`.`) when a decimal point is needed
+- Use the metric system when applicable. The only exception to this is when talking about world units, which one world
+unit in Halo is equal to 10 feet or 3.048 meters.
+- Use IEC base-2 units when referring to a large number of bytes (i.e. KiB, MiB, GiB, TiB, etc.)
+    - This is to prevent confusion. Windows uses MB and GB as 2^20 and 2^30 bytes, respectively, while almost
+    everything else uses MB and GB as 10^3 and 10^6 bytes, respectively.
+- All text files must end with a newline
+    - Most text editors do this for you
+
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
 
@@ -55,7 +76,7 @@ somewhat lengthy, but it is organized to be easy to follow. Some conventions may
 case, they will be added here even if these conventions were discovered upon a pull request being submitted.
 
 If your code does not follow these conventions and you submit a pull request, then you will be asked to revise your
-code before it gets submitted.
+code before it gets merged.
 
 ### Exceptions and externally-added code
 By "externally-added" code, it is meant that non-Invader code was added into the project. Code that is trivial to
@@ -89,24 +110,6 @@ exceptions to this:
 - Generated executables use hyphens instead of underscores
 - CMakeLists.txt must be written as such because life is unfair
 - File extensions, if present, must be lowercase
-
-### Text conventions
-- Use American English
-    - The American English dialect is specifically used for consistency in spelling
-    - Comments inside of issues and pull requests do not specifically need to use the American English dialect, but
-    they should not require a translator for American English speakers to read, either.
-- Use ISO dates (YYYY-MM-DD)
-    - The ISO date format is universally easy to understand, as it removes ambiguity and puts the date components in a
-    logical order.
-- Use soft tabs of four spaces in length
-- Use commas (`,`) when separating thousands, and use decimal points (`.`) when a decimal point is needed
-- Use the metric system when applicable. The only exception to this is when talking about world units, which one world
-unit in Halo is equal to 10 feet or 3.048 meters.
-- Use IEC base-2 units when referring to a large number of bytes (i.e. KiB, MiB, GiB, TiB, etc.)
-    - This is to prevent confusion. Windows uses MB and GB as 2^20 and 2^30 bytes, respectively, while almost
-    everything else uses MB and GB as 10^3 and 10^6 bytes, respectively.
-- All text files must end with a newline
-    - Most text editors do this for you
 
 ### Markdown conventions
 - Capitalize the first letter of headings as well as any proper noun
