@@ -74,7 +74,7 @@ int main(int argc, const char **argv) {
 
     // Make sure we have a scripts directory
     if(!std::filesystem::exists(script_directory_path)) {
-        eprintf("Missing a scripts directory at %s.\n", script_directory_path.string().data());
+        eprintf("Missing a scripts directory at %s\n", script_directory_path.string().data());
         return EXIT_FAILURE;
     }
 }
