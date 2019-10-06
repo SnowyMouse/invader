@@ -29,13 +29,13 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1);
     options.emplace_back("output", 'o', 1);
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, 'h', archive_options, [](char opt, const auto &args, auto &archive_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, 'h', archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
-                archive_options.tags.push_back(optarg);
+                archive_options.tags.push_back(arguments[0]);
                 break;
             case 'o':
-                archive_options.output = optarg;
+                archive_options.output = arguments[0];
                 break;
             case 'i':
                 INVADER_SHOW_INFO
