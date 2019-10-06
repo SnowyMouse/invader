@@ -65,7 +65,7 @@ int main(int argc, char * const *argv) {
     }
 
     // Require a tag
-    char *tag_path_to_find;
+    std::vector<char> tag_path_to_find_data;
     if(remaining_arguments.size() == 0) {
         eprintf("A scenario tag path is required. Use -h for help.\n");
         return EXIT_FAILURE;
@@ -75,8 +75,10 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        tag_path_to_find = argv[optind];
+        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
+
+    char *tag_path_to_find = tag_path_to_find_data.data();
 
     // Get the tag path and extension
     char *c = nullptr;
