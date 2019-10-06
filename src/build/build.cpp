@@ -10,13 +10,12 @@ using clock_type = std::chrono::steady_clock;
 #include <vector>
 #include <cstring>
 
-#include <getopt.h>
-
 #include "build_workload.hpp"
 #include "../map/map.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
 #include "../eprintf.hpp"
+#include "../command_line_option.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -27,84 +26,83 @@ enum ReturnValue : int {
     RETURN_FAILED_EXCEPTION_ERROR = 5
 };
 
-int main(int argc, char * const argv[]) {
+int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
 
-    // Default parameters
-    std::string maps = "maps";
-    std::vector<std::string> tags;
-    std::string output;
-    std::string scenario;
-    std::string last_argument;
-    std::string index;
-    HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
-    bool no_indexed_tags = false;
-    bool handled = true;
-    bool quiet = false;
-    bool always_index_tags = false;
-    const char *forged_crc = nullptr;
+    // Parameters
+    struct BuildOptions {
+        const char *path;
+        std::string maps = "maps";
+        std::vector<std::string> tags;
+        std::string output;
+        std::string last_argument;
+        std::string index;
+        HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+        bool no_indexed_tags = false;
+        bool handled = true;
+        bool quiet = false;
+        bool always_index_tags = false;
+        const char *forged_crc = nullptr;
+    } build_options;
 
-    int opt;
-    int longindex = 0;
-    static struct option options[] = {
-        {"help",  no_argument, 0, 'h'},
-        {"no-indexed-tags", no_argument, 0, 'n' },
-        {"always-index-tags", no_argument, 0, 'a' },
-        {"quiet", no_argument, 0, 'q' },
-        {"info", no_argument, 0, 'i' },
-        {"game-engine",  required_argument, 0, 'g' },
-        {"with-index",  required_argument, 0, 'w' },
-        {"maps", required_argument, 0, 'm' },
-        {"tags", required_argument, 0, 't' },
-        {"output", required_argument, 0, 'o' },
-        {"forge-crc", required_argument, 0, 'c' },
-        {0, 0, 0, 0 }
-    };
+    build_options.path = argv[0];
 
-    // Go through every argument
-    while((opt = getopt_long(argc, argv, "naqhiw:m:t:o:g:c:", options, &longindex)) != -1) {
+    std::vector<CommandLineOption> options;
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("no-indexed-tags", 'n', 0);
+    options.emplace_back("always-index-tags", 'a', 0);
+    options.emplace_back("quiet", 'q', 0);
+    options.emplace_back("info", 'i', 0);
+    options.emplace_back("game-engine", 'g', 1);
+    options.emplace_back("with-index", 'w', 1);
+    options.emplace_back("maps", 'm', 1);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("output", 'o', 1);
+    options.emplace_back("forge-crc", 'c', 1);
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, 'h', build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
         switch(opt) {
             case 'n':
-                no_indexed_tags = true;
+                build_options.no_indexed_tags = true;
                 break;
             case 'q':
-                quiet = true;
+                build_options.quiet = true;
                 break;
             case 'w':
-                index = std::string(optarg);
+                build_options.index = std::string(arguments[0]);
                 break;
             case 't':
-                tags.emplace_back(optarg);
+                build_options.tags.emplace_back(arguments[0]);
                 break;
             case 'o':
-                output = std::string(optarg);
+                build_options.output = std::string(arguments[0]);
                 break;
             case 'm':
-                maps = std::string(optarg);
+                build_options.maps = std::string(arguments[0]);
                 break;
             case 'a':
-                always_index_tags = true;
+                build_options.always_index_tags = true;
                 break;
             case 'g':
-                if(std::strcmp(optarg, "custom") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                if(std::strcmp(arguments[0], "custom") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
-                else if(std::strcmp(optarg, "retail") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                else if(std::strcmp(arguments[0], "retail") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
-                else if(std::strcmp(optarg, "dark") == 0) {
-                    engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+                else if(std::strcmp(arguments[0], "dark") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
                 break;
             case 'c':
-                forged_crc = optarg;
+                build_options.forged_crc = arguments[0];
                 break;
             case 'i':
                 INVADER_SHOW_INFO
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             default:
-                eprintf("Usage: %s [options] <scenario>\n\n", argv[0]);
+                eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);
                 eprintf("Build cache files for Halo Custom Edition.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
@@ -124,37 +122,33 @@ int main(int argc, char * const argv[]) {
                 eprintf("                               precedence.\n");
                 eprintf("  --with-index,-w <file>       Use an index file for the tags, ensuring the\n");
                 eprintf("                               map's tags are ordered in the same way.\n\n");
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
-    if(always_index_tags && no_indexed_tags) {
+    if(build_options.always_index_tags && build_options.no_indexed_tags) {
         eprintf("%s: --no-index-tags conflicts with --always-index-tags.\n", argv[0]);
         return EXIT_FAILURE;
     }
 
+    std::string scenario;
+
     // Check if there's a scenario tag
-    if(optind == argc) {
-        eprintf("%s: A scenario tag path is required. Use -h for help.\n", argv[0]);
-        return EXIT_FAILURE;
+    if(remaining_arguments.size() == 0) {
+        eprintf("A scenario tag path is required. Use -h for help.\n");
+        return RETURN_FAILED_NOTHING_TO_DO;
     }
-    else if(optind < argc - 1) {
-        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
-        return EXIT_FAILURE;
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
+        return RETURN_FAILED_UNHANDLED_ARGUMENT;
     }
     else {
-        scenario = argv[optind];
-    }
-
-    // If something is missing, let the user know
-    if(!handled) {
-        eprintf("Unhandled argument: %s\n", last_argument.data());
-        return RETURN_FAILED_UNHANDLED_ARGUMENT;
+        scenario = remaining_arguments[0];
     }
 
     // By default, just use tags
-    if(tags.size() == 0) {
-        tags.emplace_back("tags");
+    if(build_options.tags.size() == 0) {
+        build_options.tags.emplace_back("tags");
     }
 
     try {
@@ -165,8 +159,8 @@ int main(int argc, char * const argv[]) {
 
         // Get the index
         std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
-        if(index.size()) {
-            std::fstream index_file(index, std::ios_base::in);
+        if(build_options.index.size()) {
+            std::fstream index_file(build_options.index, std::ios_base::in);
             std::size_t tag_count;
 
             // Get the tag count
@@ -188,24 +182,24 @@ int main(int argc, char * const argv[]) {
 
         std::uint32_t forged_crc_value = 0;
         std::uint32_t *forged_crc_ptr = nullptr;
-        if(forged_crc) {
-            std::size_t given_crc32_length = std::strlen(forged_crc);
+        if(build_options.forged_crc) {
+            std::size_t given_crc32_length = std::strlen(build_options.forged_crc);
             if(given_crc32_length > 8 || given_crc32_length < 1) {
                 eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
                 return 1;
             }
             for(std::size_t i = 0; i < given_crc32_length; i++) {
-                char c = std::tolower(forged_crc[i]);
+                char c = std::tolower(build_options.forged_crc[i]);
                 if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
                     eprintf("Invalid CRC32 %s (must be hexadecimal)\n", argv[2]);
                     return 1;
                 }
             }
-            forged_crc_value = std::strtoul(forged_crc, nullptr, 16);
+            forged_crc_value = std::strtoul(build_options.forged_crc, nullptr, 16);
             forged_crc_ptr = &forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), tags, engine, maps, with_index, no_indexed_tags, always_index_tags, !quiet, forged_crc_ptr);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc_ptr);
 
         char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
         #ifdef _WIN32
@@ -216,11 +210,11 @@ int main(int argc, char * const argv[]) {
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
-        if(!output.size()) {
-            final_file = std::string(maps) + (maps[maps.size() - 1] != *separator ? separator : "") + map_name + ".map";
+        if(!build_options.output.size()) {
+            final_file = std::string(build_options.maps) + (build_options.maps[build_options.maps.size() - 1] != *separator ? separator : "") + map_name + ".map";
         }
         else {
-            final_file = output;
+            final_file = build_options.output;
         }
 
         std::FILE *file = std::fopen(final_file.data(), "wb");
@@ -240,7 +234,7 @@ int main(int argc, char * const argv[]) {
         std::fclose(file);
 
         #ifndef NO_OUTPUT
-        if(!quiet) {
+        if(!build_options.quiet) {
             std::printf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
         }
         #endif
