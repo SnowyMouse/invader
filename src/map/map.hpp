@@ -167,10 +167,7 @@ namespace Invader {
          */
         const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
 
-        /**
-         * Copy constructor for Map
-         */
-        Map(const Map &copy);
+        Map(const Map &copy) = default;
     private:
         /** Map data if managed */
         std::vector<std::byte> data_m;
@@ -238,7 +235,7 @@ namespace Invader {
         void get_bsps();
 
 
-        Map() {};
+        Map() = default;
     };
 }
 #endif
