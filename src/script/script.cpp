@@ -142,7 +142,7 @@ int main(int argc, const char **argv) {
 
                 switch(t.type) {
                     case Tokenizer::TokenType::TOKEN_TYPE_STRING:
-                        eprintf("%-8sSTRING:  %s\n", line_str, clean_token(std::any_cast<std::string>(t.value).data()).data());
+                        eprintf("%-8sSTRING:  \"%s\"\n", line_str, clean_token(std::any_cast<std::string>(t.value).data()).data());
                         break;
                     case Tokenizer::TokenType::TOKEN_TYPE_DECIMAL:
                         eprintf("%-8sDECIMAL: %f\n", line_str, std::any_cast<float>(t.value));
