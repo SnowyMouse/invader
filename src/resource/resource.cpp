@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <filesystem>
-#include <getopt.h>
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
@@ -12,72 +11,72 @@
 #include "resource_map.hpp"
 #include "hek/resource_map.hpp"
 #include "list/resource_list.hpp"
+#include "../command_line_option.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char **argv) {
     using namespace Invader::HEK;
     using namespace Invader;
 
-    // Long options
-    int longindex = 0;
-    static struct option options[] = {
-        {"info", no_argument, 0, 'i'},
-        {"help", no_argument, 0, 'h'},
-        {"type", required_argument, 0, 'T' },
-        {"tags", required_argument, 0, 't' },
-        {"maps", required_argument, 0, 'm' },
-        {0, 0, 0, 0 }
-    };
+    std::vector<CommandLineOption> options;
+    options.emplace_back("info", 'i', 0);
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("type", 'T', 1);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("maps", 'm', 1);
 
-    // Tags directory
-    std::vector<const char *> tags;
+    struct ResourceOption {
+        // Program path
+        const char *path;
 
-    // Maps directory
-    const char *maps = "maps/";
+        // Tags directory
+        std::vector<const char *> tags;
 
-    // Resource map type
-    ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
-    const char **(*default_fn)() = get_default_bitmap_resources;
-    bool resource_map_set = false;
+        // Maps directory
+        const char *maps = "maps/";
 
-    int opt;
+        // Resource map type
+        ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
+        const char **(*default_fn)() = get_default_bitmap_resources;
+        bool resource_map_set = false;
+    } resource_options;
+    resource_options.path = argv[0];
 
-    // Go through each argument
-    while((opt = getopt_long(argc, argv, "hit:T:m:", options, &longindex)) != -1) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, 'h', resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {
             case 'i':
                 INVADER_SHOW_INFO
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
 
             case 't':
-                tags.push_back(optarg);
+                resource_options.tags.push_back(arguments[0]);
                 break;
 
             case 'm':
-                maps = optarg;
+                resource_options.maps = arguments[0];
                 break;
 
             case 'T':
-                if(std::strcmp(optarg, "bitmaps") == 0) {
-                    type = ResourceMapType::RESOURCE_MAP_BITMAP;
-                    default_fn = get_default_bitmap_resources;
+                if(std::strcmp(arguments[0], "bitmaps") == 0) {
+                    resource_options.type = ResourceMapType::RESOURCE_MAP_BITMAP;
+                    resource_options.default_fn = get_default_bitmap_resources;
                 }
-                else if(std::strcmp(optarg, "sounds") == 0) {
-                    type = ResourceMapType::RESOURCE_MAP_SOUND;
-                    default_fn = get_default_sound_resources;
+                else if(std::strcmp(arguments[0], "sounds") == 0) {
+                    resource_options.type = ResourceMapType::RESOURCE_MAP_SOUND;
+                    resource_options.default_fn = get_default_sound_resources;
                 }
-                else if(std::strcmp(optarg, "loc") == 0) {
-                    type = ResourceMapType::RESOURCE_MAP_LOC;
-                    default_fn = get_default_loc_resources;
+                else if(std::strcmp(arguments[0], "loc") == 0) {
+                    resource_options.type = ResourceMapType::RESOURCE_MAP_LOC;
+                    resource_options.default_fn = get_default_loc_resources;
                 }
                 else {
-                    eprintf("Invalid type %s. Use --help for more information.\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Invalid type %s. Use --help for more information.\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
-                resource_map_set = true;
+                resource_options.resource_map_set = true;
                 break;
 
             default:
-                eprintf("Usage: %s <options>\n\n", *argv);
+                eprintf("Usage: %s <options>\n\n", resource_options.path);
                 eprintf("Create or modify a bitmap tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("    --info,-i                  Show license and credits.\n");
@@ -89,33 +88,33 @@ int main(int argc, char *argv[]) {
                 eprintf("Resource options:\n");
                 eprintf("    --type,-T <type>           Set the resource map. This option is required for\n");
                 eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n\n");
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
-    if(optind < argc) {
-        eprintf("%s: Unexpected argument: %s\n", argv[0], argv[optind]);
+    if(remaining_arguments.size() > 0) {
+        eprintf("Unexpected argument: %s\n", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
 
-    if(!resource_map_set) {
+    if(!resource_options.resource_map_set) {
         eprintf("No resource map type was given. Use --help for more information.\n");
         return EXIT_FAILURE;
     }
 
     // If we don't have any tags directories, use a default one
-    if(tags.size() == 0) {
-        tags.push_back("tags/");
+    if(resource_options.tags.size() == 0) {
+        resource_options.tags.push_back("tags/");
     }
 
     // Get all the tags
     std::vector<std::string> tags_list;
-    for(const char **i = default_fn(); *i; i++) {
+    for(const char **i = resource_options.default_fn(); *i; i++) {
         tags_list.insert(tags_list.end(), *i);
     }
 
     ResourceMapHeader header = {};
-    header.type = type;
+    header.type = resource_options.type;
     header.resource_count = tags_list.size();
 
     // Read the amazing fun happy stuff
@@ -138,8 +137,8 @@ int main(int argc, char *argv[]) {
         }
 
         // Function to open a file
-        auto open_tag = [&tags, &tag_path](const char *extension) -> std::FILE * {
-            for(auto &tags_folder : tags) {
+        auto open_tag = [&resource_options, &tag_path](const char *extension) -> std::FILE * {
+            for(auto &tags_folder : resource_options.tags) {
                 auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string() + extension;
                 std::FILE *f = std::fopen(tag_path_str.data(), "rb");
                 if(f) {
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
             std::fclose(f); \
         }
 
-        switch(type) {
+        switch(resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
                 tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
                 ATTEMPT_TO_OPEN(".bitmap")
@@ -212,7 +211,7 @@ int main(int argc, char *argv[]) {
             CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
 
             // Now, adjust stuff for pointers
-            switch(type) {
+            switch(resource_options.type) {
                 case ResourceMapType::RESOURCE_MAP_BITMAP: {
                     // Pointers are stored as offsets here
                     for(auto &ptr : compiled_tag.pointers) {
@@ -321,7 +320,7 @@ int main(int argc, char *argv[]) {
 
     // Get the final path of the map
     const char *map;
-    switch(type) {
+    switch(resource_options.type) {
         case ResourceMapType::RESOURCE_MAP_BITMAP:
             map = "bitmaps.map";
             break;
@@ -334,7 +333,7 @@ int main(int argc, char *argv[]) {
         default:
             std::terminate();
     }
-    auto map_path = std::filesystem::path(maps) / map;
+    auto map_path = std::filesystem::path(resource_options.maps) / map;
 
     // Finish up building up the map
     std::size_t resource_count = paths.size();
