@@ -27,8 +27,9 @@ namespace Invader {
          * @param error        will be set to true if an error occured due to a token not being finished or false if an error didn't occur
          * @param error_line   if an error occured, this is the line of the token
          * @param error_column if an error occured, this is the column of the token
+         * @param error_token  if an error occured, this is a copy of the incomplete token
          */
-        static std::vector<Token> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column);
+        static std::vector<Token> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token);
 
     private:
         Tokenizer() = default;

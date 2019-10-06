@@ -4,7 +4,7 @@
 #include <optional>
 
 namespace Invader {
-    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column) {
+    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token) {
         // Token start
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;
@@ -92,6 +92,7 @@ namespace Invader {
             error = true;
             error_line = token_start_line;
             error_column = token_start_column;
+            error_token = token_start;
         }
         else {
             error = false;

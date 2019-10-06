@@ -9,6 +9,7 @@ add_library(invader STATIC
     src/map/map.cpp
     src/map/tag.cpp
     src/build/build_workload.cpp
+    src/script/tokenizer.cpp
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
