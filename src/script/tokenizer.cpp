@@ -133,7 +133,7 @@ namespace Invader {
                     auto &token = tokens.emplace_back();
                     token.line = line;
                     token.column = column;
-                    token.type = *c == '(' ? TokenType::TOKEN_TYPE_PARENTHESIS_BEGIN : TokenType::TOKEN_TYPE_PARENTHESIS_END;
+                    token.type = *c == '(' ? TokenType::TOKEN_TYPE_PARENTHESIS_OPEN : TokenType::TOKEN_TYPE_PARENTHESIS_CLOSE;
                 }
 
                 // If it's the start of a comment, end the line

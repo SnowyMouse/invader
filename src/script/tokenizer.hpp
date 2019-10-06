@@ -17,8 +17,8 @@ namespace Invader {
             TOKEN_TYPE_STRING,
             TOKEN_TYPE_INTEGER,
             TOKEN_TYPE_DECIMAL,
-            TOKEN_TYPE_PARENTHESIS_BEGIN,
-            TOKEN_TYPE_PARENTHESIS_END
+            TOKEN_TYPE_PARENTHESIS_OPEN,
+            TOKEN_TYPE_PARENTHESIS_CLOSE
         };
 
         /**

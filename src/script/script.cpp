@@ -150,11 +150,11 @@ int main(int argc, const char **argv) {
                     case Tokenizer::TokenType::TOKEN_TYPE_INTEGER:
                         eprintf("%-8sINTEGER: %i\n", line_str, std::any_cast<std::int32_t>(t.value));
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_BEGIN:
-                        eprintf("%-8sPARENTHESIS_BEGIN\n", line_str);
+                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_OPEN:
+                        eprintf("%-8sPARENTHESIS_OPEN\n", line_str);
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_END:
-                        eprintf("%-8sPARENTHESIS_END\n", line_str);
+                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_CLOSE:
+                        eprintf("%-8sPARENTHESIS_CLOSE\n", line_str);
                         break;
                 }
             }
