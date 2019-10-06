@@ -70,11 +70,19 @@ int main(int argc, const char **argv) {
     std::filesystem::path data(script_options.data);
 
     std::filesystem::path tag_path = tags / scenario;
-    std::filesystem::path script_directory_path = tags / scenario / "scripts";
+    std::filesystem::path script_directory_path = data / scenario / "scripts";
 
     // Make sure we have a scripts directory
     if(!std::filesystem::exists(script_directory_path)) {
         eprintf("Missing a scripts directory at %s\n", script_directory_path.string().data());
         return EXIT_FAILURE;
+    }
+
+    // Go through each script in the scripts directory
+    for(auto &file : std::filesystem::directory_iterator(script_directory_path)) {
+        auto &path = file.path();
+        if(file.is_regular_file() && path.extension() == ".hsc") {
+            eprintf("Script: %s\n", path.string().data());
+        }
     }
 }
