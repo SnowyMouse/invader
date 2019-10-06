@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-#include <archive.h>
-#include <archive_entry.h>
 #include "../version.hpp"
 #include "../eprintf.hpp"
 #include "../tag/compiled_tag.hpp"
