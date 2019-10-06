@@ -178,7 +178,8 @@ namespace Invader {
             if(remaining_options != 0) {
                 auto &arg = currently_handled_options[0];
                 int expected_argument_count = arg->get_argument_count();
-                std::fprintf(stderr, "-%c takes %i argument%s, but only %zu %s given.\n", arg->get_char_name(), expected_argument_count, expected_argument_count == 1 ? "" : "s", remaining_options, remaining_options == 1 ? "was" : "were");
+                std::size_t remaining_argument_count = currently_handled_option_arguments_handled.size();
+                std::fprintf(stderr, "-%c takes %i argument%s, but only %zu %s given.\n", arg->get_char_name(), expected_argument_count, expected_argument_count == 1 ? "" : "s", remaining_argument_count, remaining_argument_count == 1 ? "was" : "were");
                 handler(error_char_name, std::vector<const char *>(), user_data);
             }
 
