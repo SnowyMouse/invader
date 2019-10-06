@@ -46,7 +46,7 @@ int main(int argc, const char **argv) {
                 eprintf("Options:\n");
                 eprintf("  --help,-h                    Show this help directory.\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
+                eprintf("  --data,-d <dir>              Use a specific data directory.\n");
                 eprintf("  --tags,-t <dir>              Use a specific tags directory.\n\n");
                 std::exit(EXIT_FAILURE);
         }
