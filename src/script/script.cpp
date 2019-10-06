@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cstdlib>
+#include <filesystem>
 #include "../eprintf.hpp"
 #include "../command_line_option.hpp"
 #include "../version.hpp"
@@ -63,5 +64,17 @@ int main(int argc, const char **argv) {
     }
     else {
         scenario = remaining_options[0];
+    }
+
+    std::filesystem::path tags(script_options.tags);
+    std::filesystem::path data(script_options.data);
+
+    std::filesystem::path tag_path = tags / scenario;
+    std::filesystem::path script_directory_path = tags / scenario / "scripts";
+
+    // Make sure we have a scripts directory
+    if(!std::filesystem::exists(script_directory_path)) {
+        eprintf("Missing a scripts directory at %s.\n", script_directory_path.string().data());
+        return EXIT_FAILURE;
     }
 }
