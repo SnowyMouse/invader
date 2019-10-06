@@ -18,11 +18,11 @@ namespace Invader {
          */
         struct Token {
             enum Type {
-                TOKEN_TYPE_STRING,
-                TOKEN_TYPE_INTEGER,
-                TOKEN_TYPE_DECIMAL,
-                TOKEN_TYPE_PARENTHESIS_OPEN,
-                TOKEN_TYPE_PARENTHESIS_CLOSE
+                TYPE_STRING,
+                TYPE_INTEGER,
+                TYPE_DECIMAL,
+                TYPE_PARENTHESIS_OPEN,
+                TYPE_PARENTHESIS_CLOSE
             };
 
             using Value = std::variant<
