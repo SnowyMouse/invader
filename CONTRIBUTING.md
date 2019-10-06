@@ -54,9 +54,13 @@ should not be added to Invader.
     - For example, if you want to create a fork of Invader that creates Open Sauce maps, you are free to do so provided
     you follow the terms of Invader's license, but you should not submit an issue or a pull request to add this
     functionality as it goes outside the scope of Invader.
-- Invader is cross-platform. Platform-specific code such as the Windows API should be avoided in favor of the C/C++
-standard library when possible. If this is unavoidable, `#ifdefs` should be used, and functionality should stay the
-same on any platform.
+- Invader is cross-platform. Direct usage of platform-specific code such as the Windows API or Linux kernel API should
+be avoided in favor of the C/C++ standard library when possible. If this is unavoidable, `#ifdefs` should be used so it
+only applies to that platform.
+    - This means that you should avoid using platform-specific types and functions like the Windows API's `DWORD` or
+    `fopen_s` unless you are specifically using the Windows API for things.
+    - Usually the implementation of the C/C++ standard library will call these platform-specific functions for you,
+    anyways.
 
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
@@ -143,7 +147,8 @@ These conventions apply to code, specifically. Many of these are best-practices 
 but this is to maintain consistency nonetheless.
 
 #### Message output conventions
-- Messages output in the command line that are not variable in length must have no more than 80 characters per line.
+- Messages output in the command line that are not variable in length must have no more than 80 characters per line
+- Error messages (including usage) should use standard error (stderr)
 
 #### Naming conventions
 Note: These naming conventions do not need to be followed when interfacing with external libraries
@@ -161,10 +166,10 @@ strictly required at this moment. This can and probably will change in the futur
 
 #### C/C++ conventions
 - Static and global variables defined in your code may not be modified
+    - The reason for this is because it's usually not thread safe, and singletons are often a result of poor design
 - Directory separators in `#include` statements must use forward slashes (e.g. `#include "tag/compiled_tag.hpp"`)
-- Do not use Windows-specific types such as `DWORD` unless specifically using Windows API functions and structs
-- Never assume the size of fundamental types like `int`, `short`, `size_t`, etc. Use
-[fixed-width integer types](https://en.cppreference.com/w/cpp/types/integer) whenever you need a specific size.
+- Use [fixed-width integer types](https://en.cppreference.com/w/cpp/types/integer) whenever you need a specific size
+of integer. Never assume the size of fundamental types like `int`, `short`, `size_t`, etc.
 
 ##### Headers
 - Avoid defining things in the global namespace
@@ -204,7 +209,7 @@ avoid linking errors.
     - Use smart pointers such as `std::unique_ptr` or `std::vector` as these are less error-prone
     - You can use `std::make_unique` to create a `std::unique_ptr` instead of using `new` in the constructor
 - Do not use C-style casting, such as `(int)i`
-    - Use `static_cast`, `reinterpret_cast`, `const_cast`, or `dynamic_cast` when necessary
+    - Use the correct casting functions (e.g. `static_cast`, `reinterpret_cast`, `const_cast`, etc.) when necessary
 - For null pointers, use `nullptr`
 - When using the C or C++ standard library, use the `std::` namespace explicitly when possible, such as `std::printf`
 or `std::uint32_t`
