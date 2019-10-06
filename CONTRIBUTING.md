@@ -186,8 +186,9 @@ of integer. Never assume the size of fundamental types like `int`, `short`, `siz
 definitions.
 - Header files must use C standards-compliant header guards (`#ifdef`/`#define`/`#endif`, and **not** `#pragma once`)
 - Header guard constants must resemble the path of the file relative to the source tree to avoid collisions
+    - Guard constant must begin with with `INVADER__`
     - Use all-uppercase characters
-    - Use two underscores to separate directories
+    - Use two underscores to separate directories relative to src, not including the src folder itself
     - Use one underscore for dots
     - Here is an example header guard (from `invader/map/tag.hpp`):
         ```cpp
