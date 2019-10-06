@@ -156,28 +156,8 @@ Note: These naming conventions do not need to be followed when interfacing with 
 - Implementation code that is non-trivial or non-self explanatory should have commenting to indicate what it does
     - A good way to think about this: In 10 years, you might not be here to explain what your code does. Can anyone
     with decent amount of programming experience easily understand your code?
-- Each comment line should start with a space. (e.g. `// SPDX-License-Identifier: GPL-3.0-only`, `/* asdf */`,
-`# This is a comment in Python, CMake, Bash, etc.`, etc.)
 - Using [javadoc](https://en.wikipedia.org/wiki/Javadoc)-style documentation in headers is recommended but not
 strictly required at this moment. This can and probably will change in the future.
-
-#### Spacing conventions
-- Put spaces after commas (e.g. `int x[] = {1, 2, 3, 4, 5};`)
-- Do not put spaces after a left-parenthesis or before right-parenthesis (e.g. `printf("2 + 2 = %i\n", (2 + 2));`)
-- If there is no operator between a token and a left parenthesis, do not put a space (e.g. `while(true)`)
-- Put spaces before and after operators (e.g. `foo + bar` or `x += 10 + (5 + 6);`)
-- When writing blocks for functions, loops, and conditionals, put the curly brace on the same line as the function
-signature, loop, or conditional, separated by a single space. For example:
-    ```cpp
-    constexpr int my_function(int start, int end) noexcept {
-        // Initialize to 0
-        int x = 0;
-        for(int i = start; i < end; i++) {
-            x += i;
-        }
-        return x;
-    }
-    ```
 
 #### C/C++ conventions
 - Static and global variables defined in your code may not be modified
