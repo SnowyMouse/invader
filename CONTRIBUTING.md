@@ -60,7 +60,7 @@ only applies to that platform.
     - This means that you should avoid using platform-specific types and functions like the Windows API's `DWORD` or
     `fopen_s` unless you are specifically using the Windows API for things.
     - Usually the implementation of the C/C++ standard library will call these platform-specific functions for you,
-    anyways.
+    anyway.
 
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
