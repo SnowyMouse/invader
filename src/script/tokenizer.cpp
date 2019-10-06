@@ -33,7 +33,7 @@ namespace Invader {
                 if(!escape && ((expected_end == ' ' && whitespace) || expected_end == *c || parenthesis)) {
                     // Get the token string
                     std::size_t length = c - token_start;
-                    std::string raw_string = std::string(c, length);
+                    std::string raw_string = std::string(token_start, length);
 
                     // Set these so we can determine if a string is numeric or not
                     bool numeric = true;
@@ -49,11 +49,21 @@ namespace Invader {
                     // Get everything in the string
                     std::string s;
                     bool t_escape = false;
+                    bool quoted = raw_string[0] == '"';
                     for(char &c : raw_string) {
                         // If it's a quoted string, we aren't currently escaping anything, and we have a backslash, start escaping the next character
-                        if(c == '\\' && !t_escape && raw_string[0] == '"') {
+                        if(c == '\\' && !t_escape && quoted) {
                             t_escape = true;
                             numeric = false;
+                        }
+
+                        // If it's not a quoted string and we have a quote, that's bad
+                        else if(!quoted && c == '"') {
+                            error = true;
+                            error_line = token.line;
+                            error_column = token.column;
+                            error_token = raw_string;
+                            return std::vector<Token>();
                         }
 
                         // Otherwise business as usual
@@ -92,7 +102,7 @@ namespace Invader {
                     }
 
                     // Remove the parenthesis if needed
-                    if(raw_string[0] == '"') {
+                    if(quoted) {
                         s = s.substr(1, s.size() - 1);
                     }
 
@@ -177,6 +187,7 @@ namespace Invader {
             error_line = token_start_line;
             error_column = token_start_column;
             error_token = token_start;
+            return std::vector<Token>();
         }
         else {
             error = false;

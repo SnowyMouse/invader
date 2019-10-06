@@ -135,22 +135,26 @@ int main(int argc, const char **argv) {
                 return EXIT_FAILURE;
             }
 
+            char line_str[256];
+
             for(auto &t : tokens) {
+                std::snprintf(line_str, sizeof(line_str), "%zu:%zu", t.line, t.column);
+
                 switch(t.type) {
                     case Tokenizer::TokenType::TOKEN_TYPE_STRING:
-                        eprintf("STRING:  %s\n", clean_token(std::any_cast<std::string>(t.value).data()).data());
+                        eprintf("%-8sSTRING:  %s\n", line_str, clean_token(std::any_cast<std::string>(t.value).data()).data());
                         break;
                     case Tokenizer::TokenType::TOKEN_TYPE_DECIMAL:
-                        eprintf("DECIMAL: %f\n", std::any_cast<float>(t.value));
+                        eprintf("%-8sDECIMAL: %f\n", line_str, std::any_cast<float>(t.value));
                         break;
                     case Tokenizer::TokenType::TOKEN_TYPE_INTEGER:
-                        eprintf("INTEGER: %i\n", std::any_cast<std::int32_t>(t.value));
+                        eprintf("%-8sINTEGER: %i\n", line_str, std::any_cast<std::int32_t>(t.value));
                         break;
                     case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_BEGIN:
-                        eprintf("PARENTHESIS_BEGIN\n");
+                        eprintf("%-8sPARENTHESIS_BEGIN\n", line_str);
                         break;
                     case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_END:
-                        eprintf("PARENTHESIS_END\n");
+                        eprintf("%-8sPARENTHESIS_END\n", line_str);
                         break;
                 }
             }
