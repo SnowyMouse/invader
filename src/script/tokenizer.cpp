@@ -9,7 +9,6 @@ namespace Invader {
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;
         std::size_t token_start_column = 0;
-        bool escape = false;
 
         // The expected terminator of the token
         char expected_end = 0;
@@ -25,12 +24,12 @@ namespace Invader {
 
             // Is it a ( or ), and are we not in a string?
             bool parenthesis = (*c == '(' || *c == ')') && expected_end != '"';
-            bool parenthesis_killed_the_radio_star = parenthesis && token_start && !escape;
+            bool parenthesis_killed_the_radio_star = parenthesis && token_start;
 
             // Are we continuing a token?
             if(token_start != nullptr) {
-                // Are we breaking a token? Make sure we aren't escaping (backslash) too
-                if(!escape && ((expected_end == ' ' && whitespace) || expected_end == *c || parenthesis)) {
+                // Are we breaking a token?
+                if((expected_end == ' ' && whitespace) || expected_end == *c || parenthesis) {
                     // Get the token string
                     std::size_t length = c - token_start;
                     std::string raw_string = std::string(token_start, length);
@@ -48,17 +47,10 @@ namespace Invader {
 
                     // Get everything in the string
                     std::string s;
-                    bool t_escape = false;
                     bool quoted = raw_string[0] == '"';
                     for(char &c : raw_string) {
-                        // If it's a quoted string, we aren't currently escaping anything, and we have a backslash, start escaping the next character
-                        if(c == '\\' && !t_escape && quoted) {
-                            t_escape = true;
-                            numeric = false;
-                        }
-
                         // If it's not a quoted string and we have a quote, that's bad
-                        else if(!quoted && c == '"') {
+                        if(!quoted && c == '"') {
                             error = true;
                             error_line = token.line;
                             error_column = token.column;
@@ -68,36 +60,17 @@ namespace Invader {
 
                         // Otherwise business as usual
                         else {
-                            if(t_escape) {
-                                switch(c) {
-                                    case 'n':
-                                        s += '\n';
-                                        break;
-                                    case 'r':
-                                        s += '\r';
-                                        break;
-                                    case 't':
-                                        s += '\t';
-                                        break;
-                                    default:
-                                        s += c;
-                                        break;
+                            // Check to see if we are making something not numeric
+                            if((c < '0' || c > '9') && (c != '-' || s.size() > 0)) {
+                                // If it's a decimal, we aren't a decimal already, and the next character isn't a null terminator, set decimal to true
+                                if(c == '.' && *(&c + 1) != 0 && decimal == false) {
+                                    decimal = true;
+                                }
+                                else {
+                                    numeric = false;
                                 }
                             }
-                            else {
-                                // Check to see if we are making something not numeric
-                                if((c < '0' || c > '9') && (c != '-' || s.size() > 0)) {
-                                    // If it's a decimal, we aren't a decimal already, and the next character isn't a null terminator, set decimal to true
-                                    if(c == '.' && *(&c + 1) != 0 && decimal == false) {
-                                        decimal = true;
-                                    }
-                                    else {
-                                        numeric = false;
-                                    }
-                                }
-                                s += c;
-                            }
-                            t_escape = false;
+                            s += c;
                         }
                     }
 
@@ -161,14 +134,6 @@ namespace Invader {
             if(parenthesis_killed_the_radio_star) {
                 c--;
                 continue;
-            }
-
-            // If we used a backslash, we're escaping the next character
-            if(*c == '\\' && !escape) {
-                escape = true;
-            }
-            else {
-                escape = false;
             }
 
             // Increment the line and column counter
