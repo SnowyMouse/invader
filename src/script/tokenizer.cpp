@@ -50,10 +50,13 @@ namespace Invader {
                     std::string s;
                     bool t_escape = false;
                     for(char &c : raw_string) {
-                        if(c == '\\' && !t_escape) {
+                        // If it's a quoted string, we aren't currently escaping anything, and we have a backslash, start escaping the next character
+                        if(c == '\\' && !t_escape && raw_string[0] == '"') {
                             t_escape = true;
                             numeric = false;
                         }
+
+                        // Otherwise business as usual
                         else {
                             if(t_escape) {
                                 switch(c) {
