@@ -44,27 +44,26 @@ int main(int argc, char *argv[]) {
     options.emplace_back("info", 'i', 0);
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments(argc, argv, options, 0, &font_options, [](char opt, const auto &args, auto *options_v) {
-        auto &options = *reinterpret_cast<FontOptions *>(options_v);
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions>(argc, argv, options, 0, &font_options, [](char opt, const auto &args, auto *font_options) {
         switch(opt) {
             case 'd':
-                options.data = args[0];
+                font_options->data = args[0];
                 break;
 
             case 't':
-                options.tags = args[0];
+                font_options->tags = args[0];
                 break;
 
             case 's':
-                options.pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
-                if(options.pixel_size <= 0) {
+                font_options->pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
+                if(font_options->pixel_size <= 0) {
                     eprintf("Invalid font size %s\n", args[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
 
             default:
-                eprintf("Usage: %s [options] <font-tag>\n\n", options.path);
+                eprintf("Usage: %s [options] <font-tag>\n\n", font_options->path);
                 eprintf("Create font tags.\n\n");
                 eprintf("Options:\n");
                 eprintf("    --info,-i                  Show license and credits.\n");

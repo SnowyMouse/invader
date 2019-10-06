@@ -23,14 +23,6 @@ namespace Invader {
         int argument_count;
     public:
         /**
-         * Argument handler
-         * @param char_name char name of the command line option being handled
-         * @param arguments array of arguments
-         * @param user_data data passed into parse_arguments
-         */
-        using ArgumentHandler = void (*)(char char_name, const std::vector<const char *> &arguments, void *user_data);
-
-        /**
          * Initialize a command line option
          * @param full_name      full name of the command line option
          * @param char_name      char name of the command line option; this will be passed into the argument handler if this is correctly used
@@ -68,11 +60,12 @@ namespace Invader {
          * @param argv            pointer to the first argument
          * @param options         options to use
          * @param error_char_name char_name to use for errors
-         * @param handler         handler function to use
          * @param user_data       user data passed into the arguments
+         * @param handler         handler function to use
          * @return                a vector of all unhandled arguments
          */
-        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, char error_char_name, void *user_data, ArgumentHandler handler) {
+        template<typename DataType>
+        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, char error_char_name, DataType *user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType *user_data)) {
             // Hold all unhandled arguments
             std::vector<const char *> unhandled_arguments;
 
