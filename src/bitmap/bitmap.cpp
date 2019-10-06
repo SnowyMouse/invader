@@ -322,8 +322,12 @@ int main(int argc, char *argv[]) {
     });
 
     // Make sure we have the bitmap tag path
-    if(optind != argc - 1) {
-        eprintf("%s: Expected a bitmap tag path. Use -h for help.\n", argv[0]);
+    if(remaining_arguments.size() == 0) {
+        eprintf("Expected a bitmap tag path. Use -h for help.\n");
+        return EXIT_FAILURE;
+    }
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     std::string bitmap_tag = argv[argc - 1];

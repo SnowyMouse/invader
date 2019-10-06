@@ -149,11 +149,11 @@ int main(int argc, char * const *argv) {
     // Check if there's a string tag
     const char *string_tag;
     if(remaining_arguments.size() == 0) {
-        eprintf("%s: A string tag path is required. Use -h for help.\n", argv[0]);
+        eprintf("A string tag path is required. Use -h for help.\n");
         return EXIT_FAILURE;
     }
     else if(remaining_arguments.size() > 1) {
-        eprintf("%s: Unexpected argument %s\n", argv[0], remaining_arguments[1]);
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     else {

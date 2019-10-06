@@ -93,7 +93,7 @@ int main(int argc, const char **argv) {
     });
 
     if(remaining_arguments.size() > 0) {
-        eprintf("Unexpected argument: %s\n", remaining_arguments[0]);
+        eprintf("Unexpected argument %s\n", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
 

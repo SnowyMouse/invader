@@ -71,7 +71,7 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else if(optind < argc - 1) {
-        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
+        eprintf("Unexpected argument %s\n", argv[optind + 1]);
         return EXIT_FAILURE;
     }
     else {
