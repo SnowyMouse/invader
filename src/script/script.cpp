@@ -141,19 +141,19 @@ int main(int argc, const char **argv) {
                 std::snprintf(line_str, sizeof(line_str), "%zu:%zu", t.line, t.column);
 
                 switch(t.type) {
-                    case Tokenizer::TokenType::TOKEN_TYPE_STRING:
-                        eprintf("%-8sSTRING:  \"%s\"\n", line_str, clean_token(std::any_cast<std::string>(t.value).data()).data());
+                    case Tokenizer::Token::Type::TOKEN_TYPE_STRING:
+                        eprintf("%-8sSTRING:  \"%s\"\n", line_str, clean_token(std::get<std::string>(t.value).data()).data());
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_DECIMAL:
-                        eprintf("%-8sDECIMAL: %f\n", line_str, std::any_cast<float>(t.value));
+                    case Tokenizer::Token::Type::TOKEN_TYPE_DECIMAL:
+                        eprintf("%-8sDECIMAL: %f\n", line_str, std::get<float>(t.value));
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_INTEGER:
-                        eprintf("%-8sINTEGER: %i\n", line_str, std::any_cast<std::int32_t>(t.value));
+                    case Tokenizer::Token::Type::TOKEN_TYPE_INTEGER:
+                        eprintf("%-8sINTEGER: %i\n", line_str, std::get<std::int32_t>(t.value));
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_OPEN:
+                    case Tokenizer::Token::Type::TOKEN_TYPE_PARENTHESIS_OPEN:
                         eprintf("%-8sPARENTHESIS_OPEN\n", line_str);
                         break;
-                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_CLOSE:
+                    case Tokenizer::Token::Type::TOKEN_TYPE_PARENTHESIS_CLOSE:
                         eprintf("%-8sPARENTHESIS_CLOSE\n", line_str);
                         break;
                 }

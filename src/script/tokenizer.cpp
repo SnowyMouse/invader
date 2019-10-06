@@ -82,19 +82,19 @@ namespace Invader {
                     // If it's non-numeric, set the value as is
                     if(!numeric) {
                         token.value = s;
-                        token.type = TokenType::TOKEN_TYPE_STRING;
+                        token.type = Token::Type::TOKEN_TYPE_STRING;
                     }
 
                     // If it's a decimal, let's see it
                     else if(decimal) {
                         token.value = static_cast<float>(std::strtof(s.data(), nullptr));
-                        token.type = TokenType::TOKEN_TYPE_DECIMAL;
+                        token.type = Token::Type::TOKEN_TYPE_DECIMAL;
                     }
 
                     // Otherwise, if it's an integer, let's see it
                     else {
                         token.value = static_cast<std::int32_t>(std::strtol(s.data(), nullptr, 10));
-                        token.type = TokenType::TOKEN_TYPE_INTEGER;
+                        token.type = Token::Type::TOKEN_TYPE_INTEGER;
                     }
                 }
             }
@@ -106,7 +106,7 @@ namespace Invader {
                     auto &token = tokens.emplace_back();
                     token.line = line;
                     token.column = column;
-                    token.type = *c == '(' ? TokenType::TOKEN_TYPE_PARENTHESIS_OPEN : TokenType::TOKEN_TYPE_PARENTHESIS_CLOSE;
+                    token.type = *c == '(' ? Token::Type::TOKEN_TYPE_PARENTHESIS_OPEN : Token::Type::TOKEN_TYPE_PARENTHESIS_CLOSE;
                 }
 
                 // If it's the start of a comment, end the line

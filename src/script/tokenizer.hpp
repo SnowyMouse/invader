@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <string>
-#include <any>
+#include <variant>
 
 namespace Invader {
     /**
@@ -13,22 +13,28 @@ namespace Invader {
      */
     class Tokenizer {
     public:
-        enum TokenType {
-            TOKEN_TYPE_STRING,
-            TOKEN_TYPE_INTEGER,
-            TOKEN_TYPE_DECIMAL,
-            TOKEN_TYPE_PARENTHESIS_OPEN,
-            TOKEN_TYPE_PARENTHESIS_CLOSE
-        };
-
         /**
          * Struct to hold a raw token from tokenize()
          */
         struct Token {
-            std::any value;
+            enum Type {
+                TOKEN_TYPE_STRING,
+                TOKEN_TYPE_INTEGER,
+                TOKEN_TYPE_DECIMAL,
+                TOKEN_TYPE_PARENTHESIS_OPEN,
+                TOKEN_TYPE_PARENTHESIS_CLOSE
+            };
+
+            using Value = std::variant<
+                std::string,
+                std::int32_t,
+                float
+            >;
+
+            Value value;
             std::size_t line;
             std::size_t column;
-            TokenType type;
+            Type type;
         };
 
         /**
