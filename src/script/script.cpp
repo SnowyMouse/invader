@@ -134,6 +134,26 @@ int main(int argc, const char **argv) {
                 eprintf("Error parsing %s at %zu:%zu in script %s\n", clean_token(error_token.data()).data(), error_line, error_column, path_str.data());
                 return EXIT_FAILURE;
             }
+
+            for(auto &t : tokens) {
+                switch(t.type) {
+                    case Tokenizer::TokenType::TOKEN_TYPE_STRING:
+                        eprintf("STRING:  %s\n", clean_token(std::any_cast<std::string>(t.value).data()).data());
+                        break;
+                    case Tokenizer::TokenType::TOKEN_TYPE_DECIMAL:
+                        eprintf("DECIMAL: %f\n", std::any_cast<float>(t.value));
+                        break;
+                    case Tokenizer::TokenType::TOKEN_TYPE_INTEGER:
+                        eprintf("INTEGER: %i\n", std::any_cast<std::int32_t>(t.value));
+                        break;
+                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_BEGIN:
+                        eprintf("PARENTHESIS_BEGIN\n");
+                        break;
+                    case Tokenizer::TokenType::TOKEN_TYPE_PARENTHESIS_END:
+                        eprintf("PARENTHESIS_END\n");
+                        break;
+                }
+            }
         }
     }
 }

@@ -123,7 +123,6 @@ namespace Invader {
                     auto &token = tokens.emplace_back();
                     token.line = line;
                     token.column = column;
-                    token.value = std::string(c, 1);
                     token.type = *c == '(' ? TokenType::TOKEN_TYPE_PARENTHESIS_BEGIN : TokenType::TOKEN_TYPE_PARENTHESIS_END;
                 }
 
