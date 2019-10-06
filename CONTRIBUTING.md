@@ -201,8 +201,6 @@ definitions.
 ##### C conventions
 - Use `.c` for C source files
 - For null pointers, use `NULL`
-- Use `#ifdef __cplusplus` and `extern "C"` in header files that are to be included by C++ source and header files to
-avoid linking errors.
 
 ##### C++ conventions
 - Use `.cpp` for C++ source files
