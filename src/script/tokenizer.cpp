@@ -4,7 +4,7 @@
 #include <optional>
 
 namespace Invader {
-    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token) {
+    std::vector<Tokenizer::RawToken> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token) {
         // Token start
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;
@@ -14,7 +14,7 @@ namespace Invader {
         // The expected terminator of the token
         char expected_end = 0;
 
-        std::vector<Token> tokens;
+        std::vector<RawToken> tokens;
 
         // Go through each character until we hit a null terminator, then stop
         std::size_t line = 1;

@@ -15,7 +15,7 @@ namespace Invader {
         /**
          * Struct to hold a token
          */
-        struct Token {
+        struct RawToken {
             std::string token;
             std::size_t line;
             std::size_t column;
@@ -29,7 +29,7 @@ namespace Invader {
          * @param error_column if an error occured, this is the column of the token
          * @param error_token  if an error occured, this is a copy of the incomplete token
          */
-        static std::vector<Token> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token);
+        static std::vector<RawToken> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, const char *&error_token);
 
     private:
         Tokenizer() = default;
