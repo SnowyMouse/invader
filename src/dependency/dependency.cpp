@@ -34,7 +34,7 @@ int main(int argc, char * const *argv) {
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, 'h', dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
-                dependency_options.tags.push_back(optarg);
+                dependency_options.tags.push_back(arguments[0]);
                 break;
             case 'i':
                 INVADER_SHOW_INFO
