@@ -22,8 +22,6 @@ To compile on Windows, you will need to install 64-bit [MSYS2](https://www.msys2
 software (Python, etc.) through MSYS2 and NOT through their Windows installers. Ensure you are using the MSYS2 MinGW
 64-bit shell when building.
 
-MSVC is unsupported and will not work.
-
 ### Compiling
 First, you will need to download the Invader repository onto your computer. You can do this using the command:
 ```
