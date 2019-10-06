@@ -126,20 +126,12 @@ int main(int argc, const char **argv) {
             // Tokenize
             bool error;
             std::size_t error_line, error_column;
-            const char *error_token;
+            std::string error_token;
             auto tokens = Invader::Tokenizer::tokenize(file_data.data(), error, error_line, error_column, error_token);
 
             // On failure, explain what happened
             if(error) {
-                eprintf("Error tokenizing %s at %zu:%zu\n", path_str.data(), error_line, error_column);
-                auto cleaned_token = clean_token(error_token);
-
-                if(*error_token == '"') {
-                    eprintf("Expected a '\"' to terminate string %s\n", cleaned_token.data());
-                }
-                else {
-                    eprintf("Expected a whitespace to terminate token %s\n", cleaned_token.data());
-                }
+                eprintf("Error parsing %s at %zu:%zu in script %s\n", clean_token(error_token.data()).data(), error_line, error_column, path_str.data());
                 return EXIT_FAILURE;
             }
         }
