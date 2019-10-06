@@ -129,6 +129,16 @@ namespace Invader {
                                     handler(error_char_name, std::vector<const char *>(), user_data);
                                 }
                             }
+
+                            // Make sure only the last option takes arguments
+                            for(std::size_t i = 0; i < currently_handled_options.size() - 1; i++) {
+                                auto *option = currently_handled_options[i];
+                                if(option->argument_count) {
+                                    std::fprintf(stderr, "-%c (passed in \"%s\") takes %i argument%s.\n", option->char_name, argument, option->argument_count, option->argument_count == 1 ? "" : "s");
+                                    std::fprintf(stderr, "Only the last option in an array of options can take arguments.\n");
+                                    handler(error_char_name, std::vector<const char *>(), user_data);
+                                }
+                            }
                         }
                     }
 
