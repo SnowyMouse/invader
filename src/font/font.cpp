@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <getopt.h>
 #include <cstdio>
 #include <ft2build.h>
 #include <cassert>
@@ -12,6 +11,7 @@
 #include "../tag/hek/class/font.hpp"
 #include "../tag/hek/header.hpp"
 #include "../eprintf.hpp"
+#include "../command_line_option.hpp"
 #include FT_FREETYPE_H
 
 struct RenderedCharacter {
@@ -26,45 +26,44 @@ struct RenderedCharacter {
 };
 
 int main(int argc, char *argv[]) {
-    // Data directory
-    const char *data = "data/";
+    // Options struct
+    struct FontOptions {
+        const char *path;
+        const char *data = "data/";
+        const char *tags = "tags/";
+        int pixel_size = 14;
+    } font_options;
+    font_options.path = argv[0];
 
-    // Tags directory
-    const char *tags = "tags/";
+    // Command line options
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("data", 'd', 1);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("font-size", 'i', 1);
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("info", 'i', 0);
 
-    // Font size
-    int pixel_size = 14;
-
-    int opt = 0, longindex = 0;
-
-    static struct option options[] = {
-        {"data",  required_argument, 0, 'd' },
-        {"tags",  required_argument, 0, 't' },
-        {"help",  no_argument, 0, 'h' },
-        {"help",  no_argument, 0, 'i' },
-        {"font-size",  required_argument, 0, 's' },
-        {0, 0, 0, 0 }
-    };
-    while((opt = getopt_long(argc, argv, "ht:d:s:", options, &longindex)) != -1) {
+    // Do it!
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, 0, font_options, [](char opt, const auto &args, FontOptions &font_options) {
         switch(opt) {
             case 'd':
-                data = optarg;
+                font_options.data = args[0];
                 break;
 
             case 't':
-                tags = optarg;
+                font_options.tags = args[0];
                 break;
 
             case 's':
-                pixel_size = static_cast<int>(std::strtol(optarg, nullptr, 10));
-                if(pixel_size <= 0) {
-                    eprintf("Invalid font size %s\n", optarg);
-                    return EXIT_FAILURE;
+                font_options.pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
+                if(font_options.pixel_size <= 0) {
+                    eprintf("Invalid font size %s\n", args[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             default:
-                eprintf("Usage: %s [options] <font-tag>\n\n", *argv);
+                eprintf("Usage: %s [options] <font-tag>\n\n", font_options.path);
                 eprintf("Create font tags.\n\n");
                 eprintf("Options:\n");
                 eprintf("    --info,-i                  Show license and credits.\n");
@@ -74,40 +73,36 @@ int main(int argc, char *argv[]) {
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Font options:\n");
                 eprintf("    --font-size,-s <px>        Set the font size in pixels.\n\n");
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
     // Make sure we have the bitmap tag path
-    if(optind != argc - 1) {
-        eprintf("%s: Expected a font tag path. Use -h for help.\n", argv[0]);
+    if(remaining_arguments.size() == 0) {
+        eprintf("Expected a font tag path. Use -h for help.\n");
         return EXIT_FAILURE;
     }
-    char *font_tag = argv[optind];
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s. Use -h for help.\n", remaining_arguments[1]);
+        return EXIT_FAILURE;
+    }
+    const char *font_tag = remaining_arguments[0];
 
     // Ensure it's lowercase
-    for(char *c = font_tag; *c; c++) {
+    for(const char *c = font_tag; *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
             eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag);
             return EXIT_FAILURE;
         }
     }
 
-    #ifndef _WIN32
-    for(char *c = font_tag; *c; c++) {
-        if(*c == '\\') {
-            *c = '/';
-        }
-    }
-    #endif
-
     // Font tag path
-    std::filesystem::path tags_path(tags);
+    std::filesystem::path tags_path(font_options.tags);
     auto tag_path = tags_path / font_tag;
     auto final_tag_path = tag_path.string() + ".font";
 
     // TTf path
-    std::filesystem::path data_path(data);
+    std::filesystem::path data_path(font_options.data);
     auto ttf_path = data_path / font_tag;
     auto final_ttf_path = ttf_path.string() + ".ttf";
 
@@ -122,8 +117,8 @@ int main(int argc, char *argv[]) {
         eprintf("Failed to open %s.\n", final_ttf_path.data());
         return EXIT_FAILURE;
     }
-    if(FT_Set_Pixel_Sizes(face, pixel_size, pixel_size)) {
-        eprintf("Failed to set pixel size %i.\n", pixel_size);
+    if(FT_Set_Pixel_Sizes(face, font_options.pixel_size, font_options.pixel_size)) {
+        eprintf("Failed to set pixel size %i.\n", font_options.pixel_size);
         return EXIT_FAILURE;
     }
 
@@ -172,15 +167,15 @@ int main(int argc, char *argv[]) {
 
         // Dot
         if(i == 127) {
-            std::vector<unsigned char> data(pixel_size * pixel_size);
-            float radius_inner = pixel_size / 5.0F;
+            std::vector<unsigned char> data(font_options.pixel_size * font_options.pixel_size);
+            float radius_inner = font_options.pixel_size / 5.0F;
             float radius_inner_distance = radius_inner * radius_inner;
-            float center = pixel_size / 2.0F;
+            float center = font_options.pixel_size / 2.0F;
 
             // Make an antialiased circle of fun
-            for(int x = 0; x < pixel_size; x++) {
-                for(int y = 0; y < pixel_size; y++) {
-                    unsigned char &c = data[x * pixel_size + y];
+            for(int x = 0; x < font_options.pixel_size; x++) {
+                for(int y = 0; y < font_options.pixel_size; y++) {
+                    unsigned char &c = data[x * font_options.pixel_size + y];
 
                     // Subpixels
                     for(char sx = -2; sx < 3; sx++) {
@@ -200,8 +195,8 @@ int main(int argc, char *argv[]) {
             // Same as the width of the X character
             int width = characters['X'].x;
             tag_character.character = static_cast<std::uint16_t>(i);
-            tag_character.bitmap_height = pixel_size;
-            tag_character.bitmap_width = pixel_size;
+            tag_character.bitmap_height = font_options.pixel_size;
+            tag_character.bitmap_width = font_options.pixel_size;
             tag_character.character_width = width;
             tag_character.pixels_offset = static_cast<std::uint32_t>(pixels.size());
             tag_character.hardware_character_index = -1;

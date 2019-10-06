@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <getopt.h>
 #include <vector>
 #include <string>
 #include <filesystem>
@@ -8,6 +7,7 @@
 #include "../version.hpp"
 #include "../tag/hek/header.hpp"
 #include "../tag/hek/class/string_list.hpp"
+#include "../command_line_option.hpp"
 
 enum Format {
     STRING_LIST_FORMAT_UTF_16,
@@ -91,51 +91,50 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::string &)
 }
 
 int main(int argc, char * const *argv) {
-    static struct option options[] = {
-        {"help",  no_argument, 0, 'h'},
-        {"info", no_argument, 0, 'i' },
-        {"tags", required_argument, 0, 't' },
-        {"data", required_argument, 0, 'd' },
-        {"format", required_argument, 0, 'f' },
-        {0, 0, 0, 0 }
-    };
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("info", 'i', 0);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("data", 'd', 1);
+    options.emplace_back("format", 'f', 1);
 
-    int opt;
-    int longindex = 0;
+    struct StringOptions {
+        const char *path;
+        const char *data = "data";
+        const char *tags = "tags";
+        Format format = Format::STRING_LIST_FORMAT_UTF_16;
+        const char *output_extension = ".unicode_string_list";
+    } string_options;
 
-    const char *data = "data";
-    const char *tags = "tags";
-    Format format = Format::STRING_LIST_FORMAT_UTF_16;
-    const char *output_extension = ".unicode_string_list";
+    string_options.path = argv[0];
 
-    // Go through every argument
-    while((opt = getopt_long(argc, argv, "t:d:f:hi", options, &longindex)) != -1) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, 'h', string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
         switch(opt) {
             case 't':
-                tags = optarg;
+                string_options.tags = arguments[0];
                 break;
             case 'i':
                 INVADER_SHOW_INFO
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             case 'd':
-                data = optarg;
+                string_options.data = arguments[0];
                 break;
             case 'f':
-                if(std::strcmp(optarg, "utf-16") == 0) {
-                    format = Format::STRING_LIST_FORMAT_UTF_16;
-                    output_extension = ".unicode_string_list";
+                if(std::strcmp(arguments[0], "utf-16") == 0) {
+                    string_options.format = Format::STRING_LIST_FORMAT_UTF_16;
+                    string_options.output_extension = ".unicode_string_list";
                 }
-                else if(std::strcmp(optarg, "latin-1") == 0) {
-                    format = Format::STRING_LIST_FORMAT_LATIN1;
-                    output_extension = ".string_list";
+                else if(std::strcmp(arguments[0], "latin-1") == 0) {
+                    string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
+                    string_options.output_extension = ".string_list";
                 }
-                else if(std::strcmp(optarg, "hmt") == 0) {
-                    format = Format::STRING_LIST_FORMAT_HMT;
-                    output_extension = ".hud_message_text";
+                else if(std::strcmp(arguments[0], "hmt") == 0) {
+                    string_options.format = Format::STRING_LIST_FORMAT_HMT;
+                    string_options.output_extension = ".hud_message_text";
                 }
                 break;
             default:
-                eprintf("Usage: %s [options] <tag>\n\n", argv[0]);
+                eprintf("Usage: %s [options] <tag>\n\n", arguments[0]);
                 eprintf("Generate string list tags.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
@@ -143,22 +142,22 @@ int main(int argc, char * const *argv) {
                 eprintf("                               or latin-1. Default: utf-16\n");
                 eprintf("  --data,-d <dir>              Use the specified data directory.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory.\n");
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
     // Check if there's a string tag
     const char *string_tag;
-    if(optind == argc) {
-        eprintf("%s: A string tag path is required. Use -h for help.\n", argv[0]);
+    if(remaining_arguments.size() == 0) {
+        eprintf("A string tag path is required. Use -h for help.\n");
         return EXIT_FAILURE;
     }
-    else if(optind < argc - 1) {
-        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     else {
-        string_tag = argv[optind];
+        string_tag = remaining_arguments[0];
     }
 
     // Ensure it's lowercase
@@ -169,11 +168,11 @@ int main(int argc, char * const *argv) {
         }
     }
 
-    std::filesystem::path tags_path(tags);
-    std::filesystem::path data_path(data);
+    std::filesystem::path tags_path(string_options.tags);
+    std::filesystem::path data_path(string_options.data);
 
-    auto input_path = (data_path / string_tag).string() + (format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
-    auto output_path = (tags_path / string_tag).string() + output_extension;
+    auto input_path = (data_path / string_tag).string() + (string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+    auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
 
     // Open a file
     std::FILE *f = std::fopen(input_path.data(), "rb");
@@ -218,7 +217,7 @@ int main(int argc, char * const *argv) {
 
     // Generate the data
     std::vector<std::byte> final_data;
-    switch(format) {
+    switch(string_options.format) {
         case STRING_LIST_FORMAT_UTF_16:
             final_data = generate_string_list_tag<char16_t, Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;

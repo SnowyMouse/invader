@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <getopt.h>
 #include <zlib.h>
 #include <filesystem>
 #include <optional>
@@ -11,6 +10,7 @@
 #include "image_loader.hpp"
 #include "color_plate_scanner.hpp"
 #include "bitmap_data_writer.hpp"
+#include "../command_line_option.hpp"
 
 enum SUPPORTED_FORMATS_INT {
     SUPPORTED_FORMATS_TIF = 0,
@@ -35,237 +35,238 @@ static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTE
 int main(int argc, char *argv[]) {
     using namespace Invader::HEK;
     using namespace Invader;
-    int opt;
 
-    // Data directory
-    const char *data = "data/";
+    struct BitmapOptions {
+        // Program path
+        const char *path;
 
-    // Tags directory
-    const char *tags = "tags/";
+        // Data directory
+        const char *data = "data/";
 
-    // Scale type?
-    std::optional<ScannedColorMipmapType> mipmap_scale_type;
+        // Tags directory
+        const char *tags = "tags/";
 
-    // Format?
-    std::optional<BitmapFormat> format;
+        // Scale type?
+        std::optional<ScannedColorMipmapType> mipmap_scale_type;
 
-    // Usage?
-    std::optional<BitmapUsage> usage;
+        // Format?
+        std::optional<BitmapFormat> format;
 
-    // Bump stuff
-    std::optional<float> bump_height;
+        // Usage?
+        std::optional<BitmapUsage> usage;
 
-    // Palettize to p8 bump?
-    std::optional<bool> palettize;
+        // Bump stuff
+        std::optional<float> bump_height;
 
-    // Mipmap fade factor
-    std::optional<float> mipmap_fade;
+        // Palettize to p8 bump?
+        std::optional<bool> palettize;
 
-    // Bitmap type
-    std::optional<BitmapType> bitmap_type;
+        // Mipmap fade factor
+        std::optional<float> mipmap_fade;
 
-    // Sprite parameters
-    std::optional<BitmapSpriteUsage> sprite_usage;
-    std::optional<std::uint32_t> sprite_budget;
-    std::optional<std::uint32_t> sprite_budget_count;
+        // Bitmap type
+        std::optional<BitmapType> bitmap_type;
 
-    // Dithering?
-    std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
-    bool dithering = false;
+        // Sprite parameters
+        std::optional<BitmapSpriteUsage> sprite_usage;
+        std::optional<std::uint32_t> sprite_budget;
+        std::optional<std::uint32_t> sprite_budget_count;
 
-    // Sharpen and blur; legacy support for older tags and should not be used in newer ones
-    std::optional<float> sharpen;
-    std::optional<float> blur;
+        // Dithering?
+        std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
+        bool dithering = false;
 
-    // Generate this many mipmaps
-    std::optional<std::uint16_t> max_mipmap_count;
+        // Sharpen and blur; legacy support for older tags and should not be used in newer ones
+        std::optional<float> sharpen;
+        std::optional<float> blur;
 
-    // Ignore the tag data?
-    bool ignore_tag_data = false;
+        // Generate this many mipmaps
+        std::optional<std::uint16_t> max_mipmap_count;
 
-    // Long options
-    int longindex = 0;
-    static struct option options[] = {
-        {"info",  no_argument, 0, 'i'},
-        {"ignore-tag",  no_argument, 0, 'I'},
-        {"help",  no_argument, 0, 'h'},
-        {"dithering",  required_argument, 0, 'D'},
-        {"data",  required_argument, 0, 'd' },
-        {"tags",  required_argument, 0, 't' },
-        {"format", required_argument, 0, 'F' },
-        {"type", required_argument, 0, 'T' },
-        {"mipmap-count", required_argument, 0, 'm' },
-        {"mipmap-scale", required_argument, 0, 's' },
-        {"detail-fade", required_argument, 0, 'f' },
-        {"budget", required_argument, 0, 'B' },
-        {"budget-count", required_argument, 0, 'C' },
-        {"bump-palettize", required_argument, 0, 'p' },
-        {"bump-palettise", required_argument, 0, 'p' },
-        {"bump-height", required_argument, 0, 'H' },
-        {0, 0, 0, 0 }
-    };
+        // Ignore the tag data?
+        bool ignore_tag_data = false;
+    } bitmap_options;
+    bitmap_options.path = argv[0];
+
+    std::vector<CommandLineOption> options;
+    options.emplace_back("info", 'i', 0);
+    options.emplace_back("ignore-tag", 'I', 0);
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("dithering", 'D', 1);
+    options.emplace_back("data", 'd', 1);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("format", 'F', 1);
+    options.emplace_back("type", 'T', 1);
+    options.emplace_back("mipmap-count", 'm', 1);
+    options.emplace_back("mipmap-scale", 's', 1);
+    options.emplace_back("detail-fade", 'f', 1);
+    options.emplace_back("budget", 'B', 1);
+    options.emplace_back("budget-count", 'C', 1);
+    options.emplace_back("bump-palettize", 'p', 1);
+    options.emplace_back("bump-palettise", 'p', 1);
+    options.emplace_back("bump-height", 'H', 1);
 
     // Go through each argument
-    while((opt = getopt_long(argc, argv, "D:iIhd:t:f:s:f:F:m:T:B:C:p:h:u:H:", options, &longindex)) != -1) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, 'h', bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
         switch(opt) {
             case 'd':
-                data = optarg;
+                bitmap_options.data = arguments[0];
                 break;
 
             case 't':
-                tags = optarg;
+                bitmap_options.tags = arguments[0];
                 break;
 
             case 'i':
                 INVADER_SHOW_INFO
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
 
             case 'I':
-                ignore_tag_data = true;
+                bitmap_options.ignore_tag_data = true;
                 break;
 
             case 'f':
-                mipmap_fade = std::strtof(optarg, nullptr);
-                if(mipmap_fade < 0.0F || mipmap_fade > 1.0F) {
+                bitmap_options.mipmap_fade = std::strtof(arguments[0], nullptr);
+                if(bitmap_options.mipmap_fade < 0.0F || bitmap_options.mipmap_fade > 1.0F) {
                     eprintf("Mipmap fade must be between 0-1\n");
-                    return EXIT_FAILURE;
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 's':
-                if(std::strcmp(optarg, "linear") == 0) {
-                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
+                if(std::strcmp(arguments[0], "linear") == 0) {
+                    bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
                 }
-                else if(std::strcmp(optarg, "nearest") == 0) {
-                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
+                else if(std::strcmp(arguments[0], "nearest") == 0) {
+                    bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
                 }
-                else if(std::strcmp(optarg, "nearest-alpha") == 0) {
-                    mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
+                else if(std::strcmp(arguments[0], "nearest-alpha") == 0) {
+                    bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
                 }
                 else {
-                    eprintf("Unknown mipmap scale type %s\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Unknown mipmap scale type %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'F':
-                if(std::strcmp(optarg, "32-bit") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+                if(std::strcmp(arguments[0], "32-bit") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
                 }
-                else if(std::strcmp(optarg, "16-bit") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR;
+                else if(std::strcmp(arguments[0], "16-bit") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR;
                 }
-                else if(std::strcmp(optarg, "monochrome") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_MONOCHROME;
+                else if(std::strcmp(arguments[0], "monochrome") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_MONOCHROME;
                 }
-                else if(std::strcmp(optarg, "dxt5") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA;
+                else if(std::strcmp(arguments[0], "dxt5") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA;
                 }
-                else if(std::strcmp(optarg, "dxt3") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA;
+                else if(std::strcmp(arguments[0], "dxt3") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA;
                 }
-                else if(std::strcmp(optarg, "dxt1") == 0) {
-                    format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
+                else if(std::strcmp(arguments[0], "dxt1") == 0) {
+                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
                 else {
-                    eprintf("Unknown format %s\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Unknown format %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'T':
-                if(std::strcmp(optarg, "2d") == 0) {
-                    bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
+                if(std::strcmp(arguments[0], "2d") == 0) {
+                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
                 }
-                else if(std::strcmp(optarg, "3d") == 0) {
-                    bitmap_type = BitmapType::BITMAP_TYPE_3D_TEXTURES;
+                else if(std::strcmp(arguments[0], "3d") == 0) {
+                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_3D_TEXTURES;
                 }
-                else if(std::strcmp(optarg, "cubemap") == 0) {
-                    bitmap_type = BitmapType::BITMAP_TYPE_CUBE_MAPS;
+                else if(std::strcmp(arguments[0], "cubemap") == 0) {
+                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_CUBE_MAPS;
                 }
-                else if(std::strcmp(optarg, "interface") == 0) {
-                    bitmap_type = BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
+                else if(std::strcmp(arguments[0], "interface") == 0) {
+                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
                 }
-                else if(std::strcmp(optarg, "sprite") == 0) {
-                    bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
+                else if(std::strcmp(arguments[0], "sprite") == 0) {
+                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
                 }
                 else {
-                    eprintf("Unknown type %s\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Unknown type %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'D':
-                dithering = true;
-                dither_alpha = false;
-                dither_red = false;
-                dither_green = false;
-                dither_blue = false;
-                for(const char *c = optarg; *c; c++) {
+                bitmap_options.dithering = true;
+                bitmap_options.dither_alpha = false;
+                bitmap_options.dither_red = false;
+                bitmap_options.dither_green = false;
+                bitmap_options.dither_blue = false;
+                for(const char *c = arguments[0]; *c; c++) {
                     switch(*c) {
                         case 'a':
-                            dither_alpha = true;
+                            bitmap_options.dither_alpha = true;
                             break;
                         case 'r':
-                            dither_red = true;
+                            bitmap_options.dither_red = true;
                             break;
                         case 'g':
-                            dither_green = true;
+                            bitmap_options.dither_green = true;
                             break;
                         case 'b':
-                            dither_blue = true;
+                            bitmap_options.dither_blue = true;
                             break;
                         default:
                             printf("Unknown channel %c.\n", *c);
-                            return EXIT_FAILURE;
+                            std::exit(EXIT_FAILURE);
                     }
                 }
                 break;
 
             case 'p':
-                if(strcmp(optarg,"on") == 0) {
-                    palettize = true;
+                if(strcmp(arguments[0],"on") == 0) {
+                    bitmap_options.palettize = true;
                 }
-                else if(strcmp(optarg,"off") == 0) {
-                    palettize = false;
+                else if(strcmp(arguments[0],"off") == 0) {
+                    bitmap_options.palettize = false;
                 }
                 else {
-                    eprintf("Unknown palettize setting %s\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Unknown palettize setting %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'u':
-                if(strcmp(optarg, "default") == 0) {
-                    usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
+                if(strcmp(arguments[0], "default") == 0) {
+                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
                 }
-                else if(strcmp(optarg, "bumpmap") == 0) {
-                    usage = BitmapUsage::BITMAP_USAGE_HEIGHT_MAP;
+                else if(strcmp(arguments[0], "bumpmap") == 0) {
+                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_HEIGHT_MAP;
                 }
-                else if(strcmp(optarg, "detail") == 0) {
-                    usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
+                else if(strcmp(arguments[0], "detail") == 0) {
+                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
                 }
                 else {
-                    eprintf("Unknown usage %s\n", optarg);
-                    return EXIT_FAILURE;
+                    eprintf("Unknown usage %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'H':
-                bump_height = static_cast<float>(std::strtof(optarg, nullptr));
+                bitmap_options.bump_height = static_cast<float>(std::strtof(arguments[0], nullptr));
                 break;
 
             case 'm':
-                max_mipmap_count = static_cast<std::int32_t>(std::strtol(optarg, nullptr, 10));
+                bitmap_options.max_mipmap_count = static_cast<std::int32_t>(std::strtol(arguments[0], nullptr, 10));
                 break;
 
             case 'C':
-                sprite_budget_count = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
+                bitmap_options.sprite_budget_count = static_cast<std::uint32_t>(std::strtoul(arguments[0], nullptr, 10));
                 break;
 
             case 'B':
-                sprite_budget = static_cast<std::uint32_t>(std::strtoul(optarg, nullptr, 10));
-                switch(sprite_budget.value()) {
+                bitmap_options.sprite_budget = static_cast<std::uint32_t>(std::strtoul(arguments[0], nullptr, 10));
+                switch(bitmap_options.sprite_budget.value()) {
                     case 32:
                     case 64:
                     case 128:
@@ -273,14 +274,14 @@ int main(int argc, char *argv[]) {
                     case 512:
                         break;
                     default:
-                        eprintf("Invalid sprite budget %u.\n", sprite_budget.value());
-                        return EXIT_FAILURE;
+                        eprintf("Invalid sprite budget %u.\n", bitmap_options.sprite_budget.value());
+                        std::exit(EXIT_FAILURE);
                 }
 
                 break;
 
             default:
-                eprintf("Usage: %s [options] <bitmap-tag>\n\n", *argv);
+                eprintf("Usage: %s [options] <bitmap-tag>\n\n", bitmap_options.path);
                 eprintf("Create or modify a bitmap tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("    --info,-i                  Show license and credits.\n");
@@ -316,13 +317,17 @@ int main(int argc, char *argv[]) {
                 eprintf("    --budget,-B <length>       Set max length of sprite sheet. Can be 32, 64,\n");
                 eprintf("                               128, 256, or 512. Default (new tag): 32\n\n");
 
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
     // Make sure we have the bitmap tag path
-    if(optind != argc - 1) {
-        eprintf("%s: Expected a bitmap tag path. Use -h for help.\n", argv[0]);
+    if(remaining_arguments.size() == 0) {
+        eprintf("Expected a bitmap tag path. Use -h for help.\n");
+        return EXIT_FAILURE;
+    }
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     std::string bitmap_tag = argv[argc - 1];
@@ -335,16 +340,16 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::filesystem::path data_path = data;
+    std::filesystem::path data_path = bitmap_options.data;
 
     // Get the path
-    std::filesystem::path tags_path(tags);
+    std::filesystem::path tags_path(bitmap_options.tags);
     auto tag_path = tags_path / bitmap_tag;
     auto final_path = tag_path.string() + ".bitmap";
 
     // See if we can get anything out of this
     std::FILE *tag_read;
-    if(!ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
+    if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
         // Here's in case we do fail. It cleans up and exits.
         auto exit_on_failure = [&tag_read, &final_path]() {
             eprintf("%s could not be read.\n", final_path.data());
@@ -371,66 +376,66 @@ int main(int argc, char *argv[]) {
         }
 
         // Set some default values
-        if(!format.has_value()) {
-            format = bitmap_tag_header.format;
+        if(!bitmap_options.format.has_value()) {
+            bitmap_options.format = bitmap_tag_header.format;
         }
-        if(!mipmap_fade.has_value()) {
-            mipmap_fade = bitmap_tag_header.detail_fade_factor;
+        if(!bitmap_options.mipmap_fade.has_value()) {
+            bitmap_options.mipmap_fade = bitmap_tag_header.detail_fade_factor;
         }
-        if(!bitmap_type.has_value()) {
-            bitmap_type = bitmap_tag_header.type;
+        if(!bitmap_options.bitmap_type.has_value()) {
+            bitmap_options.bitmap_type = bitmap_tag_header.type;
         }
-        if(!max_mipmap_count.has_value()) {
+        if(!bitmap_options.max_mipmap_count.has_value()) {
             std::int16_t mipmap_count = bitmap_tag_header.mipmap_count.read();
             if(mipmap_count == 0) {
-                max_mipmap_count = INT16_MAX;
+                bitmap_options.max_mipmap_count = INT16_MAX;
             }
             else {
-                max_mipmap_count = mipmap_count - 1;
+                bitmap_options.max_mipmap_count = mipmap_count - 1;
             }
         }
-        if(!sprite_usage.has_value()) {
-            sprite_usage = bitmap_tag_header.sprite_usage;
+        if(!bitmap_options.sprite_usage.has_value()) {
+            bitmap_options.sprite_usage = bitmap_tag_header.sprite_usage;
         }
-        if(!sprite_budget.has_value()) {
-            sprite_budget = 32 << bitmap_tag_header.sprite_budget_size;
+        if(!bitmap_options.sprite_budget.has_value()) {
+            bitmap_options.sprite_budget = 32 << bitmap_tag_header.sprite_budget_size;
         }
-        if(!sprite_budget_count.has_value()) {
-            sprite_budget_count = bitmap_tag_header.sprite_budget_count;
+        if(!bitmap_options.sprite_budget_count.has_value()) {
+            bitmap_options.sprite_budget_count = bitmap_tag_header.sprite_budget_count;
         }
-        if(!usage.has_value()) {
-            usage = bitmap_tag_header.usage;
+        if(!bitmap_options.usage.has_value()) {
+            bitmap_options.usage = bitmap_tag_header.usage;
         }
-        if(!palettize.has_value()) {
-            palettize = !bitmap_tag_header.flags.read().disable_height_map_compression;
+        if(!bitmap_options.palettize.has_value()) {
+            bitmap_options.palettize = !bitmap_tag_header.flags.read().disable_height_map_compression;
         }
-        if(!bump_height.has_value()) {
-            bump_height = bitmap_tag_header.bump_height;
+        if(!bitmap_options.bump_height.has_value()) {
+            bitmap_options.bump_height = bitmap_tag_header.bump_height;
         }
-        if(!sharpen.has_value() && bitmap_tag_header.sharpen_amount > 0.0F && bitmap_tag_header.sharpen_amount <= 1.0F) {
-            sharpen = bitmap_tag_header.sharpen_amount;
+        if(!bitmap_options.sharpen.has_value() && bitmap_tag_header.sharpen_amount > 0.0F && bitmap_tag_header.sharpen_amount <= 1.0F) {
+            bitmap_options.sharpen = bitmap_tag_header.sharpen_amount;
         }
-        if(!blur.has_value() && bitmap_tag_header.blur_filter_size > 0.0F) {
-            blur = bitmap_tag_header.blur_filter_size;
+        if(!bitmap_options.blur.has_value() && bitmap_tag_header.blur_filter_size > 0.0F) {
+            bitmap_options.blur = bitmap_tag_header.blur_filter_size;
         }
 
         auto header_flags = bitmap_tag_header.flags.read();
-        if(!mipmap_scale_type.has_value()) {
+        if(!bitmap_options.mipmap_scale_type.has_value()) {
             if(header_flags.invader_nearest_mipmap_alpha_and_color) {
-                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
+                bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA_COLOR;
             }
             else if(header_flags.invader_nearest_mipmap_alpha) {
-                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
+                bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
             }
             else {
-                mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
+                bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
             }
         }
-        if(!dithering) {
-            dither_alpha = header_flags.invader_dither_alpha == 1;
-            dither_red = header_flags.invader_dither_red == 1;
-            dither_green = header_flags.invader_dither_green == 1;
-            dither_blue = header_flags.invader_dither_blue == 1;
+        if(!bitmap_options.dithering) {
+            bitmap_options.dither_alpha = header_flags.invader_dither_alpha == 1;
+            bitmap_options.dither_red = header_flags.invader_dither_red == 1;
+            bitmap_options.dither_green = header_flags.invader_dither_green == 1;
+            bitmap_options.dither_blue = header_flags.invader_dither_blue == 1;
         }
 
         std::fclose(tag_read);
@@ -439,22 +444,22 @@ int main(int argc, char *argv[]) {
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
 
-    DEFAULT_VALUE(format,BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR);
-    DEFAULT_VALUE(bitmap_type,BitmapType::BITMAP_TYPE_2D_TEXTURES);
-    DEFAULT_VALUE(max_mipmap_count,INT16_MAX);
-    DEFAULT_VALUE(sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
-    DEFAULT_VALUE(sprite_budget,32);
-    DEFAULT_VALUE(sprite_budget_count,0);
-    DEFAULT_VALUE(mipmap_scale_type,ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR);
-    DEFAULT_VALUE(mipmap_fade,0.0F);
-    DEFAULT_VALUE(usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
-    DEFAULT_VALUE(palettize,false);
-    DEFAULT_VALUE(bump_height,0.02F);
-    DEFAULT_VALUE(mipmap_fade,0.0F);
-    DEFAULT_VALUE(dither_alpha,false);
-    DEFAULT_VALUE(dither_red,false);
-    DEFAULT_VALUE(dither_green,false);
-    DEFAULT_VALUE(dither_blue,false);
+    DEFAULT_VALUE(bitmap_options.format,BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR);
+    DEFAULT_VALUE(bitmap_options.bitmap_type,BitmapType::BITMAP_TYPE_2D_TEXTURES);
+    DEFAULT_VALUE(bitmap_options.max_mipmap_count,INT16_MAX);
+    DEFAULT_VALUE(bitmap_options.sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
+    DEFAULT_VALUE(bitmap_options.sprite_budget,32);
+    DEFAULT_VALUE(bitmap_options.sprite_budget_count,0);
+    DEFAULT_VALUE(bitmap_options.mipmap_scale_type,ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR);
+    DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
+    DEFAULT_VALUE(bitmap_options.usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
+    DEFAULT_VALUE(bitmap_options.palettize,false);
+    DEFAULT_VALUE(bitmap_options.bump_height,0.02F);
+    DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
+    DEFAULT_VALUE(bitmap_options.dither_alpha,false);
+    DEFAULT_VALUE(bitmap_options.dither_red,false);
+    DEFAULT_VALUE(bitmap_options.dither_green,false);
+    DEFAULT_VALUE(bitmap_options.dither_blue,false);
 
     #undef DEFAULT_VALUE
 
@@ -486,7 +491,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(image_pixels == nullptr) {
-        eprintf("Failed to find %s in %s\nValid formats are:\n", bitmap_tag.data(), data);
+        eprintf("Failed to find %s in %s\nValid formats are:\n", bitmap_tag.data(), bitmap_options.data);
         for(auto *format : SUPPORTED_FORMATS) {
             eprintf("    %s\n", format);
         }
@@ -495,16 +500,16 @@ int main(int argc, char *argv[]) {
 
     // Set up sprite parameters
     std::optional<ColorPlateScannerSpriteParameters> sprite_parameters;
-    if(bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
+    if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
         sprite_parameters = ColorPlateScannerSpriteParameters {};
         auto &p = sprite_parameters.value();
-        p.sprite_budget = sprite_budget.value();
-        p.sprite_budget_count = sprite_budget_count.value();
-        p.sprite_usage = sprite_usage.value();
+        p.sprite_budget = bitmap_options.sprite_budget.value();
+        p.sprite_budget_count = bitmap_options.sprite_budget_count.value();
+        p.sprite_usage = bitmap_options.sprite_usage.value();
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_type.value(), usage.value(), bump_height.value(), sprite_parameters, max_mipmap_count.value(), mipmap_scale_type.value(), usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? mipmap_fade : std::nullopt, sharpen, blur);
+    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -553,7 +558,7 @@ int main(int argc, char *argv[]) {
 
     // Add our bitmap data
     printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
-    write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, usage.value(), format.value(), bitmap_type.value(), palettize.value(), dither_alpha.value(), dither_red.value(), dither_green.value(), dither_blue.value());
+    write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
     std::printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
@@ -596,23 +601,23 @@ int main(int argc, char *argv[]) {
     new_tag_header.bitmap_data.count = bitmap_data.size();
 
     // Set more parameters
-    new_tag_header.type = bitmap_type.value();
-    new_tag_header.usage = usage.value();
-    new_tag_header.bump_height = bump_height.value();
-    new_tag_header.detail_fade_factor = mipmap_fade.value();
-    new_tag_header.format = format.value();
-    new_tag_header.sharpen_amount = sharpen.value_or(0.0F);
-    new_tag_header.blur_filter_size = blur.value_or(0.0F);
-    if(max_mipmap_count.value() >= INT16_MAX) {
+    new_tag_header.type = bitmap_options.bitmap_type.value();
+    new_tag_header.usage = bitmap_options.usage.value();
+    new_tag_header.bump_height = bitmap_options.bump_height.value();
+    new_tag_header.detail_fade_factor = bitmap_options.mipmap_fade.value();
+    new_tag_header.format = bitmap_options.format.value();
+    new_tag_header.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
+    new_tag_header.blur_filter_size = bitmap_options.blur.value_or(0.0F);
+    if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
         new_tag_header.mipmap_count = 0;
     }
     else {
-        new_tag_header.mipmap_count = max_mipmap_count.value() + 1;
+        new_tag_header.mipmap_count = bitmap_options.max_mipmap_count.value() + 1;
     }
 
     BitmapFlags flags = {};
-    flags.disable_height_map_compression = !palettize.value();
-    switch(mipmap_scale_type.value()) {
+    flags.disable_height_map_compression = !bitmap_options.palettize.value();
+    switch(bitmap_options.mipmap_scale_type.value()) {
         case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR:
             break;
         case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA:
@@ -622,16 +627,16 @@ int main(int argc, char *argv[]) {
             flags.invader_nearest_mipmap_alpha_and_color = 1;
             break;
     };
-    flags.invader_dither_alpha = dither_alpha.value();
-    flags.invader_dither_red = dither_red.value();
-    flags.invader_dither_green = dither_green.value();
-    flags.invader_dither_blue = dither_blue.value();
+    flags.invader_dither_alpha = bitmap_options.dither_alpha.value();
+    flags.invader_dither_red = bitmap_options.dither_red.value();
+    flags.invader_dither_green = bitmap_options.dither_green.value();
+    flags.invader_dither_blue = bitmap_options.dither_blue.value();
     new_tag_header.flags = flags;
 
     new_tag_header.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
-    new_tag_header.sprite_budget_count = sprite_budget_count.value();
-    new_tag_header.sprite_usage = sprite_usage.value();
-    auto &sprite_budget_value = sprite_budget.value();
+    new_tag_header.sprite_budget_count = bitmap_options.sprite_budget_count.value();
+    new_tag_header.sprite_usage = bitmap_options.sprite_usage.value();
+    auto &sprite_budget_value = bitmap_options.sprite_budget.value();
     switch(sprite_budget_value) {
         case 32:
             new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;

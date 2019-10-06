@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <getopt.h>
 #include <filesystem>
 #include <archive.h>
 #include <archive_entry.h>
@@ -12,41 +11,42 @@
 #include "found_tag_dependency.hpp"
 #include "../build/build_workload.hpp"
 #include "../map/map.hpp"
+#include "../command_line_option.hpp"
 
 int main(int argc, char * const *argv) {
-    static struct option options[] = {
-        {"help",  no_argument, 0, 'h'},
-        {"info", no_argument, 0, 'i' },
-        {"tags", required_argument, 0, 't' },
-        {"reverse", no_argument, 0, 'r'},
-        {"recursive", no_argument, 0, 'R'},
-        {0, 0, 0, 0 }
-    };
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("help", 'h', 0);
+    options.emplace_back("info", 'i', 0);
+    options.emplace_back("tags", 't', 1);
+    options.emplace_back("reverse", 'r', 0);
+    options.emplace_back("recursive", 'R', 0);
 
-    int opt;
-    int longindex = 0;
-    bool reverse = false;
-    bool recursive = false;
+    struct DependencyOption {
+        const char *path;
+        bool reverse = false;
+        bool recursive = false;
+        std::vector<std::string> tags;
+        std::string output;
+    } dependency_options;
 
-    // Go through every argument
-    std::vector<std::string> tags;
-    std::string output;
-    while((opt = getopt_long(argc, argv, "t:ihrR", options, &longindex)) != -1) {
+    dependency_options.path = argv[0];
+
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, 'h', dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
-                tags.push_back(optarg);
+                dependency_options.tags.push_back(arguments[0]);
                 break;
             case 'i':
                 INVADER_SHOW_INFO
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             case 'r':
-                reverse = true;
+                dependency_options.reverse = true;
                 break;
             case 'R':
-                recursive = true;
+                dependency_options.recursive = true;
                 break;
             default:
-                eprintf("Usage: %s [options] <tag.class>\n\n", argv[0]);
+                eprintf("Usage: %s [options] <tag.class>\n\n", dependency_options.path);
                 eprintf("Check dependencies for a tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
@@ -55,28 +55,30 @@ int main(int argc, char * const *argv) {
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");
                 eprintf("                               precedence.\n");
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
         }
-    }
+    });
 
     // No tags folder? Use tags in current directory
-    if(tags.size() == 0) {
-        tags.emplace_back("tags");
+    if(dependency_options.tags.size() == 0) {
+        dependency_options.tags.emplace_back("tags");
     }
 
     // Require a tag
-    char *tag_path_to_find;
-    if(optind == argc) {
-        eprintf("%s: A scenario tag path is required. Use -h for help.\n", argv[0]);
+    std::vector<char> tag_path_to_find_data;
+    if(remaining_arguments.size() == 0) {
+        eprintf("A scenario tag path is required. Use -h for help.\n");
         return EXIT_FAILURE;
     }
-    else if(optind < argc - 1) {
-        eprintf("%s: Unexpected argument %s\n", argv[0], argv[optind + 1]);
+    else if(remaining_arguments.size() > 1) {
+        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
     else {
-        tag_path_to_find = argv[optind];
+        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
+
+    char *tag_path_to_find = tag_path_to_find_data.data();
 
     // Get the tag path and extension
     char *c = nullptr;
@@ -101,7 +103,7 @@ int main(int argc, char * const *argv) {
 
     // Here's an array we can use to hold what we got
     bool success;
-    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, tags, reverse, recursive, success);
+    auto found_tags = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, dependency_options.tags, dependency_options.reverse, dependency_options.recursive, success);
 
     if(!success) {
         return EXIT_FAILURE;
