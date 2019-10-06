@@ -2,6 +2,16 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- Added a CONTRIBUTING.md file which specifies guidelines for contributing to Invader
+
+### Changed
+- Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard
+library, allowing Invader to compile on more systems provided they support C++17.
+- Replaced the license header in each source file with a simpler `// SPDX-License-Identifier: GPL-3.0-only`. For more
+information on this header, go to https://spdx.org/ids-how
+
 ## [0.13.0] - 2019-10-04
 ### Changed
 - invader-build: Changed how stubbed tags are created so tag extractors won't try to extract them
