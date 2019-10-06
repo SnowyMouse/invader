@@ -67,6 +67,26 @@ int main(int argc, const char **argv) {
         scenario = remaining_options[0];
     }
 
+    // A simple function to clean tokens
+    auto clean_token = [](const char *token) -> std::string {
+        std::string s;
+        for(const char *c = token; *c; c++) {
+            if(*c == '\r') {
+                s += "\\r";
+            }
+            else if(*c == '\n') {
+                s += "\\n";
+            }
+            else if(*c == '\t') {
+                s += "\\t";
+            }
+            else {
+                s += *c;
+            }
+        }
+        return s;
+    };
+
     std::filesystem::path tags(script_options.tags);
     std::filesystem::path data(script_options.data);
 
@@ -112,11 +132,13 @@ int main(int argc, const char **argv) {
             // On failure, explain what happened
             if(error) {
                 eprintf("Error tokenizing %s at %zu:%zu\n", path_str.data(), error_line, error_column);
+                auto cleaned_token = clean_token(error_token);
+
                 if(*error_token == '"') {
-                    eprintf("Expected a '\"' to terminate %s.\n", error_token);
+                    eprintf("Expected a '\"' to terminate string %s\n", cleaned_token.data());
                 }
                 else {
-                    eprintf("Expected a whitespace to terminate %s.\n", error_token);
+                    eprintf("Expected a whitespace to terminate token %s\n", cleaned_token.data());
                 }
                 return EXIT_FAILURE;
             }
