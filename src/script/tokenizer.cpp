@@ -9,6 +9,7 @@ namespace Invader {
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;
         std::size_t token_start_column = 0;
+        bool escape = false;
 
         // The expected terminator of the token
         char expected_end = 0;
@@ -24,12 +25,12 @@ namespace Invader {
 
             // Is it a ( or ), and are we not in a string?
             bool parenthesis = (*c == '(' || *c == ')') && expected_end != '"';
-            bool parenthesis_killed_the_radio_star = parenthesis && token_start;
+            bool parenthesis_killed_the_radio_star = parenthesis && token_start && !escape;
 
             // Are we continuing a token?
             if(token_start != nullptr) {
-                // Are we breaking a token?
-                if((expected_end == ' ' && whitespace) || expected_end == *c || parenthesis) {
+                // Are we breaking a token? Make sure we aren't escaping (backslash) too
+                if(!escape && ((expected_end == ' ' && whitespace) || expected_end == *c || parenthesis)) {
                     std::size_t length = c - token_start;
                     auto &token = tokens.emplace_back();
                     token.line = token_start_line;
@@ -75,6 +76,14 @@ namespace Invader {
             if(parenthesis_killed_the_radio_star) {
                 c--;
                 continue;
+            }
+
+            // If we used a backslash, we're escaping the next character
+            if(*c == '\\' && !escape) {
+                escape = true;
+            }
+            else {
+                escape = false;
             }
 
             // Increment the line and column counter
