@@ -20,7 +20,8 @@ namespace Invader {
                 TYPE_BLOCK,
                 TYPE_TOKEN,
                 TYPE_GLOBAL,
-                TYPE_SCRIPT
+                TYPE_SCRIPT,
+                TYPE_FUNCTION_CALL
             };
 
             using Block = std::vector<Object>;
@@ -28,7 +29,12 @@ namespace Invader {
             struct Global {
                 std::string global_name;
                 HEK::ScenarioScriptValueType global_type;
-                Tokenizer::Token value;
+                Block block;
+            };
+
+            struct FunctionCall {
+                std::string function_name;
+                Block block;
             };
 
             struct Script {
@@ -42,7 +48,8 @@ namespace Invader {
                 Block,
                 Tokenizer::Token,
                 Global,
-                Script
+                Script,
+                FunctionCall
             >;
 
             Type type;

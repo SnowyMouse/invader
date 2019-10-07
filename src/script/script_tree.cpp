@@ -102,6 +102,8 @@ namespace Invader {
         }
     }
 
+    static std::optional<ScriptTree::Object::Block> get_block(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+
     static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         return std::nullopt;
     }
@@ -131,12 +133,27 @@ namespace Invader {
             RETURN_ERROR_TOKEN(first_token[2], "Invalid global type");
         }
 
+        // Get the global name
         auto &global_name = first_token[3];
         if(global_name.type != Tokenizer::Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[3], "Expected a string");
         }
+        global.global_name = std::get<std::string>(global_name.value);
 
-        global.value = first_token[4];
+        // Get the block
+        std::size_t advance_block;
+        auto block = get_block(first_token + 4, first_token + advance, advance_block, error, error_line, error_column, error_token, error_message);
+        if(error) {
+            return std::nullopt;
+        }
+        global.block = std::move(block.value());
+
+        // Make sure the block has exactly one element in it
+        if(global.block.size() != 1) {
+            char error_msg[256] = {};
+            std::snprintf(error_msg, sizeof(error_msg), "Expected exactly 1 value for global; found %zu", global.block.size());
+            RETURN_ERROR_TOKEN(first_token[4], error_msg);
+        }
 
         #undef SET_GLOBAL_STRING_OR_BAIL
 
@@ -147,6 +164,68 @@ namespace Invader {
         global_object.value = global;
 
         return r;
+    }
+
+    static std::optional<ScriptTree::Object::Block> get_block(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+        advance = 0;
+        ScriptTree::Object::Block block;
+        std::size_t max_advance = last_token - first_token;
+        for(advance = 0; advance < max_advance; advance++) {
+            auto &token = first_token[advance];
+
+            // If we're closing a block, break
+            if(token.type == Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE) {
+                advance++;
+                break;
+            }
+
+            // Function call
+            if(token.type == Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN) {
+                ScriptTree::Object::FunctionCall call;
+
+                // Get the function name?
+                auto *function_call = &token + 1;
+                auto *function_block = &token + 2;
+
+                // If it ends too soon, bail
+                if(function_call >= last_token) {
+                    RETURN_ERROR_TOKEN(token, "Expected a function");
+                }
+
+                // Make sure the function is a valid function name
+                if(function_call->type != Tokenizer::Token::Type::TYPE_STRING) {
+                    RETURN_ERROR_TOKEN(*function_call, "Expected a string");
+                }
+                call.function_name = std::get<std::string>(function_call->value);
+
+                // Make sure we've got a block
+                std::size_t function_block_advance;
+                auto returned_block = get_block(function_block, last_token, function_block_advance, error, error_line, error_column, error_token, error_message);
+
+                // If it failed, darn
+                if(error) {
+                    return std::nullopt;
+                }
+
+                // Get the block
+                call.block = returned_block.value();
+
+                // Advance it
+                advance += function_block_advance + 1;
+
+                auto &value = block.emplace_back();
+                value.value = call;
+                value.type = ScriptTree::Object::Type::TYPE_FUNCTION_CALL;
+            }
+
+            else {
+                auto &value = block.emplace_back();
+                value.value = token;
+                value.type = ScriptTree::Object::Type::TYPE_TOKEN;
+            }
+        }
+
+        return block;
     }
 
     #undef RETURN_ERROR_TOKEN
