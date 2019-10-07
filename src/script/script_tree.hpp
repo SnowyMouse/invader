@@ -17,17 +17,31 @@ namespace Invader {
         struct Object {
             enum Type {
                 TYPE_BLOCK,
-                TYPE_VALUE,
+                TYPE_TOKEN,
                 TYPE_GLOBAL,
                 TYPE_SCRIPT
             };
 
-            using ScriptBlock = std::vector<Object>;
+            using Block = std::vector<Object>;
+
+            struct Global {
+                std::string global_name;
+                std::string global_type;
+                Tokenizer::Token value;
+            };
+
+            struct Script {
+                std::string script_name;
+                std::string script_type;
+                std::string script_return_type;
+                Block block;
+            };
 
             using Value = std::variant<
-                ScriptBlock,
+                Block,
                 Tokenizer::Token,
-                std::string
+                Global,
+                Script
             >;
 
             Type type;

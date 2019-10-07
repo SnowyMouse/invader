@@ -44,6 +44,16 @@ namespace Invader {
         return objects;
     }
 
+    static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+
+    #define RETURN_ERROR_TOKEN(token, error_msg) \
+        error = true; \
+        error_line = (token).line; \
+        error_column = (token).column; \
+        error_token = (token).raw_value; \
+        error_message = error_msg; \
+        return std::nullopt;
+
     static std::optional<ScriptTree::Object> get_principal_object(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Get the remaining amount of tokens
         std::size_t remaining = last_token - first_token;
@@ -63,14 +73,6 @@ namespace Invader {
                 }
             }
         }
-
-        #define RETURN_ERROR_TOKEN(token, error_msg) \
-            error = true; \
-            error_line = (token).line; \
-            error_column = (token).column; \
-            error_token = (token).raw_value; \
-            error_message = error_msg; \
-            return std::nullopt;
 
         // If the depth is non-zero, it's unterminated
         if(depth > 0) {
@@ -92,12 +94,46 @@ namespace Invader {
             return std::nullopt;
         }
         else if(type == "global") {
-            return std::nullopt;
+            return get_global(first_token, advance, error, error_line, error_column, error_token, error_message);
         }
         else {
             RETURN_ERROR_TOKEN(type_token, "Expected \"global\" or \"script\"");
         }
-
-        #undef RETURN_ERROR_TOKEN
     }
+
+    static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+        // Make sure we have a complete global definition: "(" "global" <type> <name> <value> ")"
+        if(advance != 6) {
+            RETURN_ERROR_TOKEN(*first_token, "Invalid global definition");
+        }
+
+        // Begin!
+        ScriptTree::Object::Global global;
+
+        #define SET_GLOBAL_STRING_OR_BAIL(token, str) \
+            if(token.type != Tokenizer::Token::TYPE_STRING) { \
+                RETURN_ERROR_TOKEN(token, "Expected a string"); \
+            } \
+            global.str = std::get<std::string>(token.value);
+
+        auto &global_type = first_token[2];
+        SET_GLOBAL_STRING_OR_BAIL(global_type, global_type);
+
+        auto &global_name = first_token[3];
+        SET_GLOBAL_STRING_OR_BAIL(global_name, global_name);
+
+        global.value = first_token[4];
+
+        #undef SET_GLOBAL_STRING_OR_BAIL
+
+        // Initialize and get everything going
+        std::optional<ScriptTree::Object> r = ScriptTree::Object();
+        auto &global_object = r.value();
+        global_object.type = ScriptTree::Object::Type::TYPE_GLOBAL;
+        global_object.value = global;
+
+        return r;
+    }
+
+    #undef RETURN_ERROR_TOKEN
 }
