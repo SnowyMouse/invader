@@ -39,7 +39,7 @@ namespace Invader {
 
             struct Script {
                 std::string script_name;
-                std::string script_type;
+                HEK::ScenarioScriptType script_type;
                 HEK::ScenarioScriptValueType script_return_type;
                 Block block;
             };

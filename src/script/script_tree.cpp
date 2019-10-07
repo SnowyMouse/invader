@@ -105,7 +105,74 @@ namespace Invader {
     static std::optional<ScriptTree::Object::Block> get_block(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
     static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
-        return std::nullopt;
+        // Begin!
+        ScriptTree::Object::Script script;
+
+        // Get the script type
+        auto &script_type = first_token[2];
+        if(script_type.type != Tokenizer::Token::TYPE_STRING) {
+            RETURN_ERROR_TOKEN(first_token[2], "Expected a string");
+        }
+        auto &script_type_value = std::get<std::string>(script_type.value);
+
+        std::size_t name_index = 3;
+
+        if(script_type_value == "static") {
+            name_index++;
+            // Get the script return type
+            auto &script_return_type = first_token[3];
+            if(script_type.type != Tokenizer::Token::TYPE_STRING) {
+                RETURN_ERROR_TOKEN(first_token[3], "Expected a string");
+            }
+
+            // Make sure it's valid
+            script.script_return_type = HEK::string_to_value_type(std::get<std::string>(script_return_type.value).data());
+            if(script.script_return_type < HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID) {
+                RETURN_ERROR_TOKEN(first_token[3], "Invalid script return type");
+            }
+            script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC;
+        }
+        else {
+            script.script_return_type = HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID;
+            if(script_type_value == "stub") {
+                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB;
+            }
+            else if(script_type_value == "startup") {
+                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STARTUP;
+            }
+            else if(script_type_value == "continuous") {
+                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_CONTINUOUS;
+            }
+            else if(script_type_value == "dormant") {
+                script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_DORMANT;
+            }
+            else {
+                RETURN_ERROR_TOKEN(first_token[2], "Invalid script type");
+            }
+        }
+
+        // Get the script name
+        auto &script_name = first_token[name_index];
+        if(script_name.type != Tokenizer::Token::TYPE_STRING) {
+            RETURN_ERROR_TOKEN(first_token[name_index], "Expected a string");
+        }
+        script.script_name = std::get<std::string>(script_name.value);
+
+        // Get the block
+        std::size_t advance_block;
+        auto block = get_block(first_token + name_index + 1, first_token + advance, advance_block, error, error_line, error_column, error_token, error_message);
+        if(error) {
+            return std::nullopt;
+        }
+        script.block = std::move(block.value());
+
+        // Initialize and get everything going
+        std::optional<ScriptTree::Object> r = ScriptTree::Object();
+        auto &script_object = r.value();
+        script_object.type = ScriptTree::Object::Type::TYPE_SCRIPT;
+        script_object.value = script;
+
+        return r;
     }
 
     static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
