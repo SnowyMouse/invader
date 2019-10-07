@@ -91,7 +91,7 @@ int main(int argc, const char **argv) {
     std::filesystem::path tags(script_options.tags);
     std::filesystem::path data(script_options.data);
 
-    std::filesystem::path tag_path = tags / scenario;
+    std::filesystem::path tag_path = tags / scenario + ".scenario";
     std::filesystem::path script_directory_path = (data / scenario).parent_path() / "scripts";
 
     // Make sure we have a scripts directory
@@ -99,6 +99,12 @@ int main(int argc, const char **argv) {
         eprintf("Missing a scripts directory at %s\n", script_directory_path.string().data());
         return EXIT_FAILURE;
     }
+
+    // Put our nodes, scripts, and globals here
+    std::vector<HEK::ScenarioScriptNode<HEK::BigEndian>> nodes;
+    std::vector<HEK::ScenarioScript<HEK::BigEndian>> scripts;
+    std::vector<HEK::ScenarioGlobal<HEK::BigEndian>> globals;
+    std::vector<char> string_data;
 
     // Go through each script in the scripts directory
     for(auto &file : std::filesystem::directory_iterator(script_directory_path)) {
@@ -149,4 +155,7 @@ int main(int argc, const char **argv) {
             }
         }
     }
+
+    // Open the scenario tag=
+    std::vector<std::byte> scenario_tag_data;
 }

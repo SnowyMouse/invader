@@ -56,6 +56,16 @@ namespace Invader {
             Value value;
         };
 
+        /**
+         * Compile a syntax tree from tokens
+         * @param  tokens        token vector
+         * @param  error         if an error occurs, this will be set to true
+         * @param  error_line    if an error occurs, this will be set to the line of the token that caused an error
+         * @param  error_column  if an error occurs, this will be set to the column of the token that caused an error
+         * @param  error_token   if an error occurs, this will be set to the token string value
+         * @param  error_message if an error occurs, this will be the error message
+         * @return               vector of objects
+         */
         static std::vector<Object> compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
     private:
