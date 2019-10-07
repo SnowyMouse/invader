@@ -7,6 +7,7 @@
 #include "../version.hpp"
 #include "script_tree.hpp"
 #include "tokenizer.hpp"
+#include "../file/file.hpp"
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -110,32 +111,23 @@ int main(int argc, const char **argv) {
     for(auto &file : std::filesystem::directory_iterator(script_directory_path)) {
         auto &path = file.path();
         if(file.is_regular_file() && path.extension() == ".hsc") {
-            // Read the file data
             auto path_str = path.string();
-            std::FILE *f = std::fopen(path_str.data(), "rb");
-            if(!f) {
+            auto file_data_maybe = Invader::File::open_file(path_str.data());
+            if(!file_data_maybe.has_value()) {
                 eprintf("Failed to open %s\n", path_str.data());
                 return EXIT_FAILURE;
             }
-            std::fseek(f, 0, SEEK_END);
-            std::vector<char> file_data(std::ftell(f));
-            std::fseek(f, 0, SEEK_SET);
-            if(std::fread(file_data.data(), file_data.size(), 1, f) != 1) {
-                eprintf("Failed to read %s\n", path_str.data());
-                std::fclose(f);
-                return EXIT_FAILURE;
-            }
-            std::fclose(f);
+            auto &file_data = file_data_maybe.value();
 
             // Add a 0 to the end for null termination
-            file_data.push_back(0);
+            file_data.push_back(static_cast<std::byte>(0));
 
             // Tokenize
             bool error;
             std::string error_message;
             std::size_t error_line = 0, error_column = 0;
             std::string error_token;
-            auto tokens = Tokenizer::tokenize(file_data.data(), error, error_line, error_column, error_token, error_message);
+            auto tokens = Tokenizer::tokenize(reinterpret_cast<char *>(file_data.data()), error, error_line, error_column, error_token, error_message);
 
             // On failure, explain what happened
             if(error) {
