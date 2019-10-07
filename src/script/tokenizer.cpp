@@ -3,8 +3,8 @@
 #include "tokenizer.hpp"
 #include <optional>
 
-namespace Invader {
-    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+namespace Invader::Tokenizer {
+    std::vector<Token> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Token start
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;

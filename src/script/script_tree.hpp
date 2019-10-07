@@ -6,71 +6,62 @@
 #include "tokenizer.hpp"
 #include "../tag/hek/class/scenario.hpp"
 
-namespace Invader {
+namespace Invader::ScriptTree {
     /**
-     * Script tree library class
+     * Struct to hold an object in a script
      */
-    class ScriptTree {
-    public:
-        /**
-         * Struct to hold an object in a script
-         */
-        struct Object {
-            enum Type {
-                TYPE_BLOCK,
-                TYPE_TOKEN,
-                TYPE_GLOBAL,
-                TYPE_SCRIPT,
-                TYPE_FUNCTION_CALL
-            };
-
-            using Block = std::vector<Object>;
-
-            struct Global {
-                std::string global_name;
-                HEK::ScenarioScriptValueType global_type;
-                Block block;
-            };
-
-            struct FunctionCall {
-                std::string function_name;
-                Block block;
-            };
-
-            struct Script {
-                std::string script_name;
-                HEK::ScenarioScriptType script_type;
-                HEK::ScenarioScriptValueType script_return_type;
-                Block block;
-            };
-
-            using Value = std::variant<
-                Block,
-                Tokenizer::Token,
-                Global,
-                Script,
-                FunctionCall
-            >;
-
-            Type type;
-            Value value;
+    struct Object {
+        enum Type {
+            TYPE_BLOCK,
+            TYPE_TOKEN,
+            TYPE_GLOBAL,
+            TYPE_SCRIPT,
+            TYPE_FUNCTION_CALL
         };
 
-        /**
-         * Compile a syntax tree from tokens
-         * @param  tokens        token vector
-         * @param  error         if an error occurs, this will be set to true
-         * @param  error_line    if an error occurs, this will be set to the line of the token that caused an error
-         * @param  error_column  if an error occurs, this will be set to the column of the token that caused an error
-         * @param  error_token   if an error occurs, this will be set to the token string value
-         * @param  error_message if an error occurs, this will be the error message
-         * @return               vector of objects
-         */
-        static std::vector<Object> compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+        using Block = std::vector<Object>;
 
-    private:
-        ScriptTree() = default;
+        struct Global {
+            std::string global_name;
+            HEK::ScenarioScriptValueType global_type;
+            Block block;
+        };
+
+        struct FunctionCall {
+            std::string function_name;
+            Block block;
+        };
+
+        struct Script {
+            std::string script_name;
+            HEK::ScenarioScriptType script_type;
+            HEK::ScenarioScriptValueType script_return_type;
+            Block block;
+        };
+
+        using Value = std::variant<
+            Block,
+            Tokenizer::Token,
+            Global,
+            Script,
+            FunctionCall
+        >;
+
+        Type type;
+        Value value;
     };
+
+    /**
+     * Compile a syntax tree from tokens
+     * @param  tokens        token vector
+     * @param  error         if an error occurs, this will be set to true
+     * @param  error_line    if an error occurs, this will be set to the line of the token that caused an error
+     * @param  error_column  if an error occurs, this will be set to the column of the token that caused an error
+     * @param  error_token   if an error occurs, this will be set to the token string value
+     * @param  error_message if an error occurs, this will be the error message
+     * @return               vector of objects
+     */
+    std::vector<Object> compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 }
 
 #endif

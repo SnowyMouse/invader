@@ -3,11 +3,13 @@
 #include <optional>
 #include "script_tree.hpp"
 
-namespace Invader {
-    // Get a principal object (script or global)
-    static std::optional<ScriptTree::Object> get_principal_object(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+namespace Invader::ScriptTree {
+    using namespace Tokenizer;
 
-    std::vector<ScriptTree::Object> ScriptTree::compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    // Get a principal object (script or global)
+    static std::optional<Object> get_principal_object(const Token *first_token, const Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+
+    std::vector<Object> compile_script_tree(const std::vector<Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         std::vector<Object> objects;
         error = false;
 
@@ -17,7 +19,7 @@ namespace Invader {
         for(std::size_t i = 0; i < token_count; i++) {
             // See if we have something
             auto &token = tokens[i];
-            if(token.type == Tokenizer::Token::TYPE_PARENTHESIS_OPEN) {
+            if(token.type == Token::TYPE_PARENTHESIS_OPEN) {
                 std::size_t advance;
                 auto object = get_principal_object(&token, last_token, advance, error, error_line, error_column, error_token, error_message);
                 if(error) {
@@ -37,15 +39,15 @@ namespace Invader {
                 error_line = token.line;
                 error_column = token.column;
                 error_token = token.raw_value;
-                return std::vector<ScriptTree::Object>();
+                return std::vector<Object>();
             }
         }
 
         return objects;
     }
 
-    static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
-    static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+    static std::optional<Object> get_global(const Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+    static std::optional<Object> get_script(const Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
     #define RETURN_ERROR_TOKEN(token, error_msg) \
         error = true; \
@@ -55,7 +57,7 @@ namespace Invader {
         error_message = error_msg; \
         return std::nullopt;
 
-    static std::optional<ScriptTree::Object> get_principal_object(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    static std::optional<Object> get_principal_object(const Token *first_token, const Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Get the remaining amount of tokens
         std::size_t remaining = last_token - first_token;
 
@@ -63,10 +65,10 @@ namespace Invader {
         std::size_t depth = 0;
         for(advance = 0; advance < remaining; advance++) {
             auto &token = first_token[advance];
-            if(token.type == Tokenizer::Token::TYPE_PARENTHESIS_OPEN) {
+            if(token.type == Token::TYPE_PARENTHESIS_OPEN) {
                 depth++;
             }
-            else if(token.type == Tokenizer::Token::TYPE_PARENTHESIS_CLOSE) {
+            else if(token.type == Token::TYPE_PARENTHESIS_CLOSE) {
                 depth--;
                 if(depth == 0) {
                     advance++;
@@ -86,7 +88,7 @@ namespace Invader {
         }
 
         auto &type_token = first_token[1];
-        if(type_token.type != Tokenizer::Token::TYPE_STRING) {
+        if(type_token.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(type_token, "Non-string script or global type");
         }
         auto &type = std::get<std::string>(type_token.value);
@@ -102,15 +104,15 @@ namespace Invader {
         }
     }
 
-    static std::optional<ScriptTree::Object::Block> get_block(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+    static std::optional<Object::Block> get_block(const Token *first_token, const Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
-    static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    static std::optional<Object> get_script(const Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Begin!
-        ScriptTree::Object::Script script;
+        Object::Script script;
 
         // Get the script type
         auto &script_type = first_token[2];
-        if(script_type.type != Tokenizer::Token::TYPE_STRING) {
+        if(script_type.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[2], "Expected a string");
         }
         auto &script_type_value = std::get<std::string>(script_type.value);
@@ -121,7 +123,7 @@ namespace Invader {
             name_index++;
             // Get the script return type
             auto &script_return_type = first_token[3];
-            if(script_type.type != Tokenizer::Token::TYPE_STRING) {
+            if(script_type.type != Token::TYPE_STRING) {
                 RETURN_ERROR_TOKEN(first_token[3], "Expected a string");
             }
 
@@ -153,7 +155,7 @@ namespace Invader {
 
         // Get the script name
         auto &script_name = first_token[name_index];
-        if(script_name.type != Tokenizer::Token::TYPE_STRING) {
+        if(script_name.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[name_index], "Expected a string");
         }
         script.script_name = std::get<std::string>(script_name.value);
@@ -167,32 +169,32 @@ namespace Invader {
         script.block = std::move(block.value());
 
         // Initialize and get everything going
-        std::optional<ScriptTree::Object> r = ScriptTree::Object();
+        std::optional<Object> r = Object();
         auto &script_object = r.value();
-        script_object.type = ScriptTree::Object::Type::TYPE_SCRIPT;
+        script_object.type = Object::Type::TYPE_SCRIPT;
         script_object.value = script;
 
         return r;
     }
 
-    static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    static std::optional<Object> get_global(const Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Make sure we have a complete global definition: "(" "global" <type> <name> <value> ")"
         if(advance < 6) {
             RETURN_ERROR_TOKEN(*first_token, "Incomplete global definition");
         }
 
         // Begin!
-        ScriptTree::Object::Global global;
+        Object::Global global;
 
         #define SET_GLOBAL_STRING_OR_BAIL(token, str) \
-            if(token.type != Tokenizer::Token::TYPE_STRING) { \
+            if(token.type != Token::TYPE_STRING) { \
                 RETURN_ERROR_TOKEN(token, "Expected a string"); \
             } \
             global.str = std::get<std::string>(token.value);
 
         // Get the global type
         auto &global_type = first_token[2];
-        if(global_type.type != Tokenizer::Token::TYPE_STRING) {
+        if(global_type.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[2], "Expected a string");
         }
         global.global_type = HEK::string_to_value_type(std::get<std::string>(global_type.value).data());
@@ -202,7 +204,7 @@ namespace Invader {
 
         // Get the global name
         auto &global_name = first_token[3];
-        if(global_name.type != Tokenizer::Token::TYPE_STRING) {
+        if(global_name.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[3], "Expected a string");
         }
         global.global_name = std::get<std::string>(global_name.value);
@@ -225,30 +227,30 @@ namespace Invader {
         #undef SET_GLOBAL_STRING_OR_BAIL
 
         // Initialize and get everything going
-        std::optional<ScriptTree::Object> r = ScriptTree::Object();
+        std::optional<Object> r = Object();
         auto &global_object = r.value();
-        global_object.type = ScriptTree::Object::Type::TYPE_GLOBAL;
+        global_object.type = Object::Type::TYPE_GLOBAL;
         global_object.value = global;
 
         return r;
     }
 
-    static std::optional<ScriptTree::Object::Block> get_block(const Tokenizer::Token *first_token, const Tokenizer::Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    static std::optional<Object::Block> get_block(const Token *first_token, const Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         advance = 0;
-        ScriptTree::Object::Block block;
+        Object::Block block;
         std::size_t max_advance = last_token - first_token;
         for(advance = 0; advance < max_advance; advance++) {
             auto &token = first_token[advance];
 
             // If we're closing a block, break
-            if(token.type == Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE) {
+            if(token.type == Token::Type::TYPE_PARENTHESIS_CLOSE) {
                 advance++;
                 break;
             }
 
             // Function call
-            if(token.type == Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN) {
-                ScriptTree::Object::FunctionCall call;
+            if(token.type == Token::Type::TYPE_PARENTHESIS_OPEN) {
+                Object::FunctionCall call;
 
                 // Get the function name?
                 auto *function_call = &token + 1;
@@ -260,7 +262,7 @@ namespace Invader {
                 }
 
                 // Make sure the function is a valid function name
-                if(function_call->type != Tokenizer::Token::Type::TYPE_STRING) {
+                if(function_call->type != Token::Type::TYPE_STRING) {
                     RETURN_ERROR_TOKEN(*function_call, "Expected a string");
                 }
                 call.function_name = std::get<std::string>(function_call->value);
@@ -282,13 +284,13 @@ namespace Invader {
 
                 auto &value = block.emplace_back();
                 value.value = call;
-                value.type = ScriptTree::Object::Type::TYPE_FUNCTION_CALL;
+                value.type = Object::Type::TYPE_FUNCTION_CALL;
             }
 
             else {
                 auto &value = block.emplace_back();
                 value.value = token;
-                value.type = ScriptTree::Object::Type::TYPE_TOKEN;
+                value.type = Object::Type::TYPE_TOKEN;
             }
         }
 
