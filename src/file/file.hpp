@@ -22,6 +22,6 @@ namespace Invader::File {
      * @return      true on success; false on failure
      */
     bool save_file(const char *path, const std::vector<std::byte> &data);
-};
+}
 
 #endif
