@@ -4,6 +4,7 @@
 #define INVADER__SCRIPT__SCRIPT_TREE_HPP
 
 #include "tokenizer.hpp"
+#include "../tag/hek/class/scenario.hpp"
 
 namespace Invader {
     /**
@@ -26,14 +27,14 @@ namespace Invader {
 
             struct Global {
                 std::string global_name;
-                std::string global_type;
+                HEK::ScenarioScriptValueType global_type;
                 Tokenizer::Token value;
             };
 
             struct Script {
                 std::string script_name;
                 std::string script_type;
-                std::string script_return_type;
+                HEK::ScenarioScriptValueType script_return_type;
                 Block block;
             };
 

@@ -45,6 +45,7 @@ namespace Invader {
     }
 
     static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+    static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
     #define RETURN_ERROR_TOKEN(token, error_msg) \
         error = true; \
@@ -80,7 +81,7 @@ namespace Invader {
         }
 
         // We need at least enough room for the script/global definition and the parenthesis
-        if(advance < 6) {
+        if(advance < 5) {
             RETURN_ERROR_TOKEN(*first_token, "Incomplete script or global definition");
         }
 
@@ -91,7 +92,7 @@ namespace Invader {
         auto &type = std::get<std::string>(type_token.value);
 
         if(type == "script") {
-            return std::nullopt;
+            return get_script(first_token, advance, error, error_line, error_column, error_token, error_message);
         }
         else if(type == "global") {
             return get_global(first_token, advance, error, error_line, error_column, error_token, error_message);
@@ -101,10 +102,14 @@ namespace Invader {
         }
     }
 
+    static std::optional<ScriptTree::Object> get_script(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+        return std::nullopt;
+    }
+
     static std::optional<ScriptTree::Object> get_global(const Tokenizer::Token *first_token, std::size_t advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Make sure we have a complete global definition: "(" "global" <type> <name> <value> ")"
-        if(advance != 6) {
-            RETURN_ERROR_TOKEN(*first_token, "Invalid global definition");
+        if(advance < 6) {
+            RETURN_ERROR_TOKEN(*first_token, "Incomplete global definition");
         }
 
         // Begin!
@@ -116,11 +121,20 @@ namespace Invader {
             } \
             global.str = std::get<std::string>(token.value);
 
+        // Get the global type
         auto &global_type = first_token[2];
-        SET_GLOBAL_STRING_OR_BAIL(global_type, global_type);
+        if(global_type.type != Tokenizer::Token::TYPE_STRING) {
+            RETURN_ERROR_TOKEN(first_token[2], "Expected a string");
+        }
+        global.global_type = HEK::string_to_value_type(std::get<std::string>(global_type.value).data());
+        if(global.global_type <= HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID) {
+            RETURN_ERROR_TOKEN(first_token[2], "Invalid global type");
+        }
 
         auto &global_name = first_token[3];
-        SET_GLOBAL_STRING_OR_BAIL(global_name, global_name);
+        if(global_name.type != Tokenizer::Token::TYPE_STRING) {
+            RETURN_ERROR_TOKEN(first_token[3], "Expected a string");
+        }
 
         global.value = first_token[4];
 

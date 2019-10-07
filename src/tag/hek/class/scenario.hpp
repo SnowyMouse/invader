@@ -259,6 +259,8 @@ namespace Invader::HEK {
         SCENARIO_SCRIPT_VALUE_TYPE_SCENERY_NAME
     };
 
+    ScenarioScriptValueType string_to_value_type(const char *type) noexcept;
+
     enum ScenarioTextStyle : TagEnum {
         SCENARIO_TEXT_STYLE_PLAIN,
         SCENARIO_TEXT_STYLE_BOLD,
