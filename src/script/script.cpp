@@ -92,7 +92,7 @@ int main(int argc, const char **argv) {
     std::filesystem::path data(script_options.data);
 
     std::filesystem::path tag_path = tags / scenario;
-    std::filesystem::path script_directory_path = data / scenario / "scripts";
+    std::filesystem::path script_directory_path = (data / scenario).parent_path() / "scripts";
 
     // Make sure we have a scripts directory
     if(!std::filesystem::exists(script_directory_path)) {
