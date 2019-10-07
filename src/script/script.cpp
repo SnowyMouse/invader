@@ -5,6 +5,7 @@
 #include "../eprintf.hpp"
 #include "../command_line_option.hpp"
 #include "../version.hpp"
+#include "script_tree.hpp"
 #include "tokenizer.hpp"
 
 int main(int argc, const char **argv) {
@@ -125,38 +126,26 @@ int main(int argc, const char **argv) {
 
             // Tokenize
             bool error;
-            std::size_t error_line, error_column;
+            std::string error_message;
+            std::size_t error_line = 0, error_column = 0;
             std::string error_token;
-            auto tokens = Invader::Tokenizer::tokenize(file_data.data(), error, error_line, error_column, error_token);
+            auto tokens = Tokenizer::tokenize(file_data.data(), error, error_line, error_column, error_token, error_message);
 
             // On failure, explain what happened
             if(error) {
-                eprintf("Error parsing %s at %zu:%zu in script %s\n", clean_token(error_token.data()).data(), error_line, error_column, path_str.data());
+                eprintf("Error parsing script %s\n", path_str.data());
+                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.data()).data());
+                eprintf("The error was: %s\n", error_message.data());
                 return EXIT_FAILURE;
             }
 
-            char line_str[256];
-
-            for(auto &t : tokens) {
-                std::snprintf(line_str, sizeof(line_str), "%zu:%zu", t.line, t.column);
-
-                switch(t.type) {
-                    case Tokenizer::Token::Type::TYPE_STRING:
-                        eprintf("%-8sSTRING:  \"%s\"\n", line_str, clean_token(std::get<std::string>(t.value).data()).data());
-                        break;
-                    case Tokenizer::Token::Type::TYPE_DECIMAL:
-                        eprintf("%-8sDECIMAL: %f\n", line_str, std::get<float>(t.value));
-                        break;
-                    case Tokenizer::Token::Type::TYPE_INTEGER:
-                        eprintf("%-8sINTEGER: %i\n", line_str, std::get<std::int32_t>(t.value));
-                        break;
-                    case Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN:
-                        eprintf("%-8sPARENTHESIS_OPEN\n", line_str);
-                        break;
-                    case Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE:
-                        eprintf("%-8sPARENTHESIS_CLOSE\n", line_str);
-                        break;
-                }
+            // Make a syntax tree
+            auto tree = ScriptTree::compile_script_tree(tokens, error, error_line, error_column, error_token, error_message);
+            if(error) {
+                eprintf("Error compiling script %s\n", path_str.data());
+                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.data()).data());
+                eprintf("The error was: %s\n", error_message.data());
+                return EXIT_FAILURE;
             }
         }
     }

@@ -4,7 +4,7 @@
 #include <optional>
 
 namespace Invader {
-    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token) {
+    std::vector<Tokenizer::Token> Tokenizer::tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         // Token start
         const char *token_start = nullptr;
         std::size_t token_start_line = 0;
@@ -55,6 +55,7 @@ namespace Invader {
                             error_line = token.line;
                             error_column = token.column;
                             error_token = raw_string;
+                            error_message = "Unexpected quotation mark";
                             return std::vector<Token>();
                         }
 
@@ -73,6 +74,8 @@ namespace Invader {
                             s += c;
                         }
                     }
+
+                    token.raw_value = raw_string;
 
                     // Remove the parenthesis if needed
                     if(quoted) {
@@ -107,6 +110,7 @@ namespace Invader {
                     token.line = line;
                     token.column = column;
                     token.type = *c == '(' ? Token::Type::TYPE_PARENTHESIS_OPEN : Token::Type::TYPE_PARENTHESIS_CLOSE;
+                    token.raw_value = "(";
                 }
 
                 // If it's the start of a comment, end the line
@@ -152,6 +156,7 @@ namespace Invader {
             error_line = token_start_line;
             error_column = token_start_column;
             error_token = token_start;
+            error_message = "Unterminated token";
             return std::vector<Token>();
         }
         else {
