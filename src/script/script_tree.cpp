@@ -58,6 +58,7 @@ namespace Invader {
             else if(token.type == Tokenizer::Token::TYPE_PARENTHESIS_CLOSE) {
                 depth--;
                 if(depth == 0) {
+                    advance++;
                     break;
                 }
             }
