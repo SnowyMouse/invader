@@ -58,4 +58,4 @@ namespace Invader::File {
         std::fclose(f);
         return true;
     }
-};
+}
