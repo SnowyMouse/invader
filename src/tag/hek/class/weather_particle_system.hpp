@@ -21,21 +21,6 @@ namespace Invader::HEK {
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_ACCELERATION,
     };
 
-    enum WeatherParticleSystemAnimationFunction : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_ONE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_ZERO,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_COSINE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_COSINE_VARIABLE_PERIOD,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_DIAGONAL_WAVE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_DIAGONAL_WAVE_VARIABLE_PERIOD,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_SLIDE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_SLIDE_VARIABLE_PERIOD,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_NOISE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_JITTER,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_WANDER,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_SPARK
-    };
-
     struct WeatherParticleSystemParticleTypeFlags {
         std::uint32_t interpolate_colors_in_hsv : 1;
         std::uint32_t _along_long_hue_path : 1;
@@ -95,17 +80,17 @@ namespace Invader::HEK {
         EndianType<ParticleAnchor> anchor;
         EndianType<WeatherParticleSystemParticleTypeMapFlags> flags_1;
         EndianType<FunctionOut> u_animation_source;
-        EndianType<WeatherParticleSystemAnimationFunction> u_animation_function;
+        EndianType<WaveFunction> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
         EndianType<FunctionOut> v_animation_source;
-        EndianType<WeatherParticleSystemAnimationFunction> v_animation_function;
+        EndianType<WaveFunction> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
         EndianType<FunctionOut> rotation_animation_source;
-        EndianType<WeatherParticleSystemAnimationFunction> rotation_animation_function;
+        EndianType<WaveFunction> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;
         EndianType<float> rotation_animation_scale;

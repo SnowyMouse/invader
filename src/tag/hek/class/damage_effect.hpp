@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum DamageEffectScreenFlashType : TagEnum {
@@ -22,21 +23,6 @@ namespace Invader::HEK {
         DAMAGE_EFFECT_SCREEN_FLASH_PRIORITY_LOW,
         DAMAGE_EFFECT_SCREEN_FLASH_PRIORITY_MEDIUM,
         DAMAGE_EFFECT_SCREEN_FLASH_PRIORITY_HIGH
-    };
-
-    enum DamageEffectWobbleFunction : TagEnum {
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_ONE,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_ZERO,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_COSINE,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_COSINE_VARIABLE_PERIOD,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_DIAGONAL_WAVE,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_DIAGONAL_WAVE_VARIABLE_PERIOD,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_SLIDE,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_SLIDE_VARIABLE_PERIOD,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_NOISE,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_JITTER,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_WANDER,
-        DAMAGE_EFFECT_WOBBLE_FUNCTION_SPARK
     };
 
     enum DamageEffectSideEffect : TagEnum {
@@ -160,7 +146,7 @@ namespace Invader::HEK {
 
         // 0xE0
         PAD(0x8);
-        EndianType<DamageEffectWobbleFunction> camera_shaking_wobble_function;
+        EndianType<WaveFunction> camera_shaking_wobble_function;
         PAD(0x2);
         EndianType<float> camera_shaking_wobble_period; // seconds
 

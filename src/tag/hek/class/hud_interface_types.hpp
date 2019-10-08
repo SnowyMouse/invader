@@ -34,21 +34,6 @@ namespace Invader::HEK {
         HUD_INTERFACE_SOURCE_WEAPON_ZOOM_LEVEL
     };
 
-    enum HUDInterfacePeriodicFunction : TagEnum {
-        HUD_INTERFACE_PERIODIC_FUNCTION_ONE,
-        HUD_INTERFACE_PERIODIC_FUNCTION_ZERO,
-        HUD_INTERFACE_PERIODIC_FUNCTION_COSINE,
-        HUD_INTERFACE_PERIODIC_FUNCTION_COSINE_VARIABLE_PERIOD,
-        HUD_INTERFACE_PERIODIC_FUNCTION_DIAGONAL_WAVE,
-        HUD_INTERFACE_PERIODIC_FUNCTION_DIAGONAL_WAVE_VARIABLE_PERIOD,
-        HUD_INTERFACE_PERIODIC_FUNCTION_SLIDE,
-        HUD_INTERFACE_PERIODIC_FUNCTION_SLIDE_VARIABLE_PERIOD,
-        HUD_INTERFACE_PERIODIC_FUNCTION_NOISE,
-        HUD_INTERFACE_PERIODIC_FUNCTION_JITTER,
-        HUD_INTERFACE_PERIODIC_FUNCTION_WANDER,
-        HUD_INTERFACE_PERIODIC_FUNCTION_SPARK
-    };
-
     enum HUDInterfaceMultitextureOverlayAnchor : TagEnum {
         HUD_INTERFACE_MULTITEXTURE_OVERLAY_ANCHOR_TEXTURE,
         HUD_INTERFACE_MULTITEXTURE_OVERLAY_ANCHOR_SCREEN
@@ -102,7 +87,7 @@ namespace Invader::HEK {
         PAD(0x40);
         ColorRGB<EndianType> tint_color_lower_bound;
         ColorRGB<EndianType> tint_color_upper_bound;
-        EndianType<HUDInterfacePeriodicFunction> periodic_function;
+        EndianType<WaveFunction> periodic_function;
         PAD(0x2);
         EndianType<float> function_period;
         EndianType<float> function_phase;
