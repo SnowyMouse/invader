@@ -362,21 +362,17 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(WeaponHUDInterfaceOverlayElement<BigEndian>) == 0x68);
 
-    struct WeaponHUDInterfaceScreenEffectDefinitionMaskFlags {
+    struct WeaponHUDInterfaceScreenEffectMaskFlags {
         std::uint16_t only_when_zoomed : 1;
     };
 
-    struct WeaponHUDInterfaceScreenEffectDefinitionConvolutionFlags {
-        std::uint16_t only_when_zoomed : 1;
-    };
-
-    struct WeaponHUDInterfaceScreenEffectDefinitionNightVisionFlags {
+    struct WeaponHUDInterfaceScreenEffectNightVisionFlags {
         std::uint16_t only_when_zoomed : 1;
         std::uint16_t connect_to_flashlight : 1;
         std::uint16_t masked : 1;
     };
 
-    struct WeaponHUDInterfaceScreenEffectDefinitionDesaturationFlags {
+    struct WeaponHUDInterfaceScreenEffectDesaturationFlags {
         std::uint16_t only_when_zoomed : 1;
         std::uint16_t connect_to_flashlight : 1;
         std::uint16_t additive : 1;
@@ -385,22 +381,22 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct WeaponHUDInterfaceScreenEffect {
         PAD(0x4);
-        EndianType<WeaponHUDInterfaceScreenEffectDefinitionMaskFlags> mask_flags;
+        EndianType<WeaponHUDInterfaceScreenEffectMaskFlags> mask_flags;
         PAD(0x2);
         PAD(0x10);
         TagDependency<EndianType> mask_fullscreen; // bitmap
         TagDependency<EndianType> mask_splitscreen; // bitmap
         PAD(0x8);
-        EndianType<WeaponHUDInterfaceScreenEffectDefinitionConvolutionFlags> convolution_flags;
+        EndianType<WeaponHUDInterfaceScreenEffectMaskFlags> convolution_flags;
         PAD(0x2);
         Bounds<EndianType<float>> convolution_fov_in_bounds;
         Bounds<EndianType<float>> convolution_radius_out_bounds;
         PAD(0x18);
-        EndianType<WeaponHUDInterfaceScreenEffectDefinitionNightVisionFlags> even_more_flags;
+        EndianType<WeaponHUDInterfaceScreenEffectNightVisionFlags> even_more_flags;
         EndianType<std::int16_t> night_vision_script_source;
         EndianType<Fraction> night_vision_intensity;
         PAD(0x18);
-        EndianType<WeaponHUDInterfaceScreenEffectDefinitionDesaturationFlags> desaturation_flags;
+        EndianType<WeaponHUDInterfaceScreenEffectDesaturationFlags> desaturation_flags;
         EndianType<std::int16_t> desaturation_script_source;
         EndianType<Fraction> desaturation_intensity;
         ColorRGB<EndianType> effect_tint;
