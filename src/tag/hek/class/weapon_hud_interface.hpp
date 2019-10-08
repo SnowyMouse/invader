@@ -304,10 +304,6 @@ namespace Invader::HEK {
         std::uint16_t show_always : 1;
     };
 
-    struct WeaponHUDInterfaceOverlayFlags {
-        std::uint32_t flashes_when_active : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct WeaponHUDInterfaceOverlay {
         Point2DInt<EndianType> anchor_offset;
         EndianType<float> width_scale;
@@ -328,7 +324,7 @@ namespace Invader::HEK {
         PAD(0x2);
         EndianType<std::int16_t> sequence_index;
         EndianType<WeaponHUDInterfaceOverlayType> type;
-        EndianType<WeaponHUDInterfaceOverlayFlags> flags;
+        EndianType<HUDInterfaceOverlayFlashFlags> flags;
         PAD(0x10);
         PAD(0x28);
 
@@ -444,12 +440,6 @@ namespace Invader::HEK {
         std::uint16_t use_parent_hud_flashing_parameters : 1;
     };
 
-    struct WeaponHUDInterfaceMoreFlags {
-        std::uint8_t use_text_from_string_list_instead : 1;
-        std::uint8_t override_default_color : 1;
-        std::uint8_t width_offset_is_absolute_icon_width : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct WeaponHUDInterface {
         TagDependency<EndianType> child_hud; // weapon_hud_interface
         EndianType<WeaponHUDInterfaceFlags> flags;
@@ -476,7 +466,7 @@ namespace Invader::HEK {
         Point2DInt<EndianType> offset_from_reference_corner;
         EndianType<ColorARGBInt> override_icon_color;
         std::int8_t frame_rate;
-        WeaponHUDInterfaceMoreFlags more_flags;
+        HUDInterfaceMessagingFlags messaging_flags;
         EndianType<std::int16_t> text_index;
         PAD(0x30);
 

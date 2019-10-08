@@ -84,6 +84,16 @@ namespace Invader::HEK {
         std::uint8_t draw_a_trailing_m : 1;
     };
 
+    struct HUDInterfaceOverlayFlashFlags {
+        std::uint32_t flashes_when_active : 1;
+    };
+
+    struct HUDInterfaceMessagingFlags {
+        std::uint8_t use_text_from_string_list_instead : 1;
+        std::uint8_t override_default_color : 1;
+        std::uint8_t width_offset_is_absolute_icon_width : 1;
+    };
+
     ENDIAN_TEMPLATE(EndianType) struct HUDInterfaceMultitextureOverlayEffector {
         PAD(0x40);
         EndianType<HUDInterfaceDestinationType> destination_type;
