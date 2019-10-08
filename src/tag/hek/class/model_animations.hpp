@@ -67,33 +67,45 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationScale<BigEndian>) == 0x4);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationFrameInfoDxDy {
-        EndianType<std::uint32_t> ints[2];
+        EndianType<float> dx;
+        EndianType<float> dy;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationFrameInfoDxDy<NewType>() const noexcept {
             ModelAnimationFrameInfoDxDy<NewType> copy;
-            COPY_THIS_ARRAY(ints);
+            COPY_THIS(dx);
+            COPY_THIS(dy);
             return copy;
         }
     };
     static_assert(sizeof(ModelAnimationFrameInfoDxDy<BigEndian>) == 0x8);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationFrameInfoDxDyDyaw {
-        EndianType<std::uint32_t> ints[3];
+        EndianType<float> dx;
+        EndianType<float> dy;
+        EndianType<float> dyaw;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationFrameInfoDxDyDyaw<NewType>() const noexcept {
             ModelAnimationFrameInfoDxDyDyaw<NewType> copy;
-            COPY_THIS_ARRAY(ints);
+            COPY_THIS(dx);
+            COPY_THIS(dy);
+            COPY_THIS(dyaw);
             return copy;
         }
     };
     static_assert(sizeof(ModelAnimationFrameInfoDxDyDyaw<BigEndian>) == 0xC);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationFrameInfoDxDyDzDyaw {
-        EndianType<std::uint32_t> ints[4];
+        EndianType<float> dx;
+        EndianType<float> dy;
+        EndianType<float> dz;
+        EndianType<float> dyaw;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationFrameInfoDxDyDzDyaw<NewType>() const noexcept {
             ModelAnimationFrameInfoDxDyDzDyaw<NewType> copy;
-            COPY_THIS_ARRAY(ints);
+            COPY_THIS(dx);
+            COPY_THIS(dy);
+            COPY_THIS(dz);
+            COPY_THIS(dyaw);
             return copy;
         }
     };

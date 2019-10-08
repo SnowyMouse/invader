@@ -13,7 +13,7 @@ namespace Invader::HEK {
         // Jason Jones the weapon damage scaling
         switch(jason_jones) {
             case DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER:
-                tag.damage_modifiers[MATERIAL_TYPE_ELITE_ENERGY_SHIELD] = 0.8F;
+                tag.elite_energy_shield = 0.8F;
                 break;
             default:
                 break;

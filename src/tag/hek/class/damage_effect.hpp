@@ -205,7 +205,39 @@ namespace Invader::HEK {
         PAD(0x8);
 
         // 0x200
-        EndianType<float> damage_modifiers[33];
+        EndianType<float> dirt;
+        EndianType<float> sand;
+        EndianType<float> stone;
+        EndianType<float> snow;
+        EndianType<float> wood;
+        EndianType<float> metal_hollow;
+        EndianType<float> metal_thin;
+        EndianType<float> metal_thick;
+        EndianType<float> rubber;
+        EndianType<float> glass;
+        EndianType<float> force_field;
+        EndianType<float> grunt;
+        EndianType<float> hunter_armor;
+        EndianType<float> hunter_skin;
+        EndianType<float> elite;
+        EndianType<float> jackal;
+        EndianType<float> jackal_energy_shield;
+        EndianType<float> engineer_skin;
+        EndianType<float> engineer_force_field;
+        EndianType<float> flood_combat_form;
+        EndianType<float> flood_carrier_form;
+        EndianType<float> cyborg_armor;
+        EndianType<float> cyborg_energy_shield;
+        EndianType<float> human_armor;
+        EndianType<float> human_skin;
+        EndianType<float> sentinel;
+        EndianType<float> monitor;
+        EndianType<float> plastic;
+        EndianType<float> water;
+        EndianType<float> leaves;
+        EndianType<float> elite_energy_shield;
+        EndianType<float> ice;
+        EndianType<float> hunter_shield;
         PAD(0xC);
 
         // 0x290
@@ -264,7 +296,39 @@ namespace Invader::HEK {
             COPY_THIS(damage_maximum_stun);
             COPY_THIS(damage_stun_time);
             COPY_THIS(damage_instantaneous_acceleration);
-            COPY_THIS_ARRAY(damage_modifiers);
+            COPY_THIS(dirt);
+            COPY_THIS(sand);
+            COPY_THIS(stone);
+            COPY_THIS(snow);
+            COPY_THIS(wood);
+            COPY_THIS(metal_hollow);
+            COPY_THIS(metal_thin);
+            COPY_THIS(metal_thick);
+            COPY_THIS(rubber);
+            COPY_THIS(glass);
+            COPY_THIS(force_field);
+            COPY_THIS(grunt);
+            COPY_THIS(hunter_armor);
+            COPY_THIS(hunter_skin);
+            COPY_THIS(elite);
+            COPY_THIS(jackal);
+            COPY_THIS(jackal_energy_shield);
+            COPY_THIS(engineer_skin);
+            COPY_THIS(engineer_force_field);
+            COPY_THIS(flood_combat_form);
+            COPY_THIS(flood_carrier_form);
+            COPY_THIS(cyborg_armor);
+            COPY_THIS(cyborg_energy_shield);
+            COPY_THIS(human_armor);
+            COPY_THIS(human_skin);
+            COPY_THIS(sentinel);
+            COPY_THIS(monitor);
+            COPY_THIS(plastic);
+            COPY_THIS(water);
+            COPY_THIS(leaves);
+            COPY_THIS(elite_energy_shield);
+            COPY_THIS(ice);
+            COPY_THIS(hunter_shield);
 
             return copy;
         }
