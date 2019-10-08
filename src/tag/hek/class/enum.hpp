@@ -83,12 +83,12 @@ namespace Invader::HEK {
     };
 
     enum FunctionType : TagEnum {
-        FUNCTION_LINEAR,
-        FUNCTION_EARLY,
-        FUNCTION_VERY_EARLY,
-        FUNCTION_LATE,
-        FUNCTION_VERY_LATE,
-        FUNCTION_COSINE
+        FUNCTION_TYPE_LINEAR,
+        FUNCTION_TYPE_EARLY,
+        FUNCTION_TYPE_VERY_EARLY,
+        FUNCTION_TYPE_LATE,
+        FUNCTION_TYPE_VERY_LATE,
+        FUNCTION_TYPE_COSINE
     };
 
     enum FunctionBoundsMode : TagEnum {
@@ -98,15 +98,15 @@ namespace Invader::HEK {
     };
 
     enum FunctionScaleBy : TagEnum {
-        FUNCTION_SCALE_PERIOD_BY_NONE,
-        FUNCTION_SCALE_PERIOD_BY_A_IN,
-        FUNCTION_SCALE_PERIOD_BY_B_IN,
-        FUNCTION_SCALE_PERIOD_BY_C_IN,
-        FUNCTION_SCALE_PERIOD_BY_D_IN,
-        FUNCTION_SCALE_PERIOD_BY_A_OUT,
-        FUNCTION_SCALE_PERIOD_BY_B_OUT,
-        FUNCTION_SCALE_PERIOD_BY_C_OUT,
-        FUNCTION_SCALE_PERIOD_BY_D_OUT
+        FUNCTION_SCALE_BY_NONE,
+        FUNCTION_SCALE_BY_A_IN,
+        FUNCTION_SCALE_BY_B_IN,
+        FUNCTION_SCALE_BY_C_IN,
+        FUNCTION_SCALE_BY_D_IN,
+        FUNCTION_SCALE_BY_A_OUT,
+        FUNCTION_SCALE_BY_B_OUT,
+        FUNCTION_SCALE_BY_C_OUT,
+        FUNCTION_SCALE_BY_D_OUT
     };
 
     enum FunctionNameNullable : TagEnum {
