@@ -73,7 +73,7 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
+        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]) + 1);
     }
 
     char *tag_path_to_find = tag_path_to_find_data.data();
