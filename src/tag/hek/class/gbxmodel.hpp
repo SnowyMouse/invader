@@ -98,7 +98,6 @@ namespace Invader::HEK {
     struct GBXModelRegionPermutationFlags {
         std::uint32_t cannot_be_chosen_randomly : 1;
     };
-    static_assert(sizeof(GBXModelRegionPermutationFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelRegionPermutation {
         TagString name;

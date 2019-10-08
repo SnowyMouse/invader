@@ -39,7 +39,6 @@ namespace Invader::HEK {
         std::uint32_t affects_exteriors : 1;
         std::uint32_t affects_interiors : 1;
     };
-    static_assert(sizeof(SkyLightFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct SkyLight {
         TagDependency<EndianType> lens_flare; // lens_flare

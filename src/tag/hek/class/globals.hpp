@@ -309,9 +309,8 @@ namespace Invader::HEK {
     static_assert(sizeof(GlobalsGrenade<BigEndian>) == 0x44);
 
     struct GlobalsRasterizerDataFlags {
-        std::uint16_t tint_edge_density;
+        std::uint16_t tint_edge_density : 1;
     };
-    static_assert(sizeof(GlobalsRasterizerDataFlags) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct GlobalsRasterizerData {
         TagDependency<EndianType> distance_attenuation; // bitmap
@@ -564,7 +563,6 @@ namespace Invader::HEK {
         std::uint32_t interpolate_color_in_hsv : 1;
         std::uint32_t _more_colors : 1;
     };
-    static_assert(sizeof(GlobalsBreakableSurfaceParticleEffectFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct GlobalsBreakableSurfaceParticleEffect {
         TagDependency<EndianType> particle_type; // particle

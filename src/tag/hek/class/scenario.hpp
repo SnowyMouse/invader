@@ -282,7 +282,6 @@ namespace Invader::HEK {
         std::uint32_t additive : 1;
         std::uint32_t always_active : 1;
     };
-    static_assert(sizeof(ScenarioFunctionFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioFunction {
         EndianType<ScenarioFunctionFlags> flags;
@@ -367,7 +366,6 @@ namespace Invader::HEK {
         std::uint16_t on_normal : 1;
         std::uint16_t on_hard : 1;
     };
-    static_assert(sizeof(ScenarioSpawnNotPlaced) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct SpawnPrelude {
         EndianType<std::int16_t> type;
@@ -404,7 +402,6 @@ namespace Invader::HEK {
     struct ScenarioUnitFlags {
         std::uint32_t dead : 1;
     };
-    static_assert(sizeof(ScenarioUnitFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioBiped : SpawnPrelude<EndianType> {
         PAD(0x8);
@@ -447,7 +444,6 @@ namespace Invader::HEK {
         std::uint16_t unused_6 : 1;
         std::uint16_t unused_7 : 1;
     };
-    static_assert(sizeof(ScenarioVehicleMultiplayerSpawnFlags) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioVehicle : SpawnPrelude<EndianType> {
         PAD(0x8);
@@ -487,7 +483,6 @@ namespace Invader::HEK {
         std::uint16_t obsolete : 1;
         std::uint16_t does_accelerate : 1;
     };
-    static_assert(sizeof(ScenarioItemFlags) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioEquipment : SpawnPrelude<EndianType> {
         PAD(0x2);
@@ -533,7 +528,6 @@ namespace Invader::HEK {
     struct ScenarioDeviceGroupFlags {
         std::uint32_t can_change_only_once : 1;
     };
-    static_assert(sizeof(ScenarioDeviceGroupFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioDeviceGroup {
         TagString name;
@@ -558,7 +552,6 @@ namespace Invader::HEK {
         std::uint32_t position_reversed : 1;
         std::uint32_t not_usable_from_any_side : 1;
     };
-    static_assert(sizeof(ScenarioDeviceFlags) == sizeof(std::uint32_t));
 
     struct ScenarioMachineFlags {
         std::uint32_t does_not_operate_automatically : 1;
@@ -566,7 +559,6 @@ namespace Invader::HEK {
         std::uint32_t never_appears_locked : 1;
         std::uint32_t opened_by_melee_attack : 1;
     };
-    static_assert(sizeof(ScenarioMachineFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioMachine : SpawnPrelude<EndianType> {
         PAD(0x8);
@@ -593,7 +585,6 @@ namespace Invader::HEK {
     struct ScenarioControlFlags {
         std::uint32_t usable_from_both_sides : 1;
     };
-    static_assert(sizeof(ScenarioControlFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioControl : SpawnPrelude<EndianType> {
         PAD(0x8);
@@ -1540,7 +1531,6 @@ namespace Invader::HEK {
         std::uint16_t cortana_hack : 1;
         std::uint16_t use_demo_ui : 1;
     };
-    static_assert(sizeof(ScenarioFlags) == sizeof(std::uint16_t));
 
     union ScenarioScriptNodeValue {
         std::uint8_t bool_int;

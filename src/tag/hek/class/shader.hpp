@@ -15,7 +15,6 @@ namespace Invader::HEK {
         std::uint16_t ignore_normals : 1;
         std::uint16_t transparent_lit : 1;
     };
-    static_assert(sizeof(ShaderFlags) == sizeof(std::uint16_t));
 
     struct ShaderPhysicsFlags {
         std::uint16_t unused : 1;

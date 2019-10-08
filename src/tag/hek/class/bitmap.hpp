@@ -169,7 +169,6 @@ namespace Invader::HEK {
         std::uint16_t make_it_actually_work : 1;
         std::uint16_t external : 1;
     };
-    static_assert(sizeof(BitmapDataFlags) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct BitmapData {
         EndianType<TagClassInt> bitmap_class;
@@ -221,9 +220,7 @@ namespace Invader::HEK {
         std::uint16_t invader_dither_red : 1;
         std::uint16_t invader_dither_green : 1;
         std::uint16_t invader_dither_blue : 1;
-        std::uint16_t unused : 6;
     };
-    static_assert(sizeof(BitmapFlags) == sizeof(std::uint16_t));
 
     ENDIAN_TEMPLATE(EndianType) struct Bitmap {
         // 0x0

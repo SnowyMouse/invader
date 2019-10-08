@@ -77,12 +77,10 @@ namespace Invader::HEK {
         std::uint32_t can_cause_multiplayer_headshots : 1;
         std::uint32_t infection_form_pop : 1;
     };
-    static_assert(sizeof(DamageEffectDamageFlags) == sizeof(std::uint32_t));
 
     struct DamageEffectFlags {
         std::uint32_t do_not_scale_damage_by_distance : 1;
     };
-    static_assert(sizeof(DamageEffectFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct DamageEffect {
         // 0x00
@@ -242,7 +240,7 @@ namespace Invader::HEK {
             COPY_THIS(color);
             COPY_THIS(low_frequency_vibrate_frequency);
             COPY_THIS(low_frequency_vibrate_duration);
-            COPY_THIS(low_frequency_vibrate_fade_function );
+            COPY_THIS(low_frequency_vibrate_fade_function);
             COPY_THIS(high_frequency_vibrate_frequency);
             COPY_THIS(high_frequency_vibrate_duration);
             COPY_THIS(high_frequency_vibrate_fade_function);
