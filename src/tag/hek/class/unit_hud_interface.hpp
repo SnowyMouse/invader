@@ -243,7 +243,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> shield_panel_meter_color_at_meter_maximum;
         EndianType<ColorARGBInt> shield_panel_meter_flash_color;
         EndianType<ColorARGBInt> shield_panel_meter_empty_color;
-        EndianType<UnitHUDInterfaceFlags> shield_panel_meter_flags;
+        EndianType<HUDInterfaceMeterFlags> shield_panel_meter_flags;
         std::int8_t shield_panel_meter_minimum_meter_value;
         EndianType<std::int16_t> shield_panel_meter_sequence_index;
         std::int8_t shield_panel_meter_alpha_multiplier;
@@ -289,7 +289,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> health_panel_meter_color_at_meter_maximum;
         EndianType<ColorARGBInt> health_panel_meter_flash_color;
         EndianType<ColorARGBInt> health_panel_meter_empty_color;
-        EndianType<UnitHUDInterfaceFlags> health_panel_meter_flags;
+        EndianType<HUDInterfaceMeterFlags> health_panel_meter_flags;
         std::int8_t health_panel_meter_minimum_meter_value;
         EndianType<std::int16_t> health_panel_meter_sequence_index;
         std::int8_t health_panel_meter_alpha_multiplier;

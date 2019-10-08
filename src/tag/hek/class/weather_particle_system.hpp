@@ -22,12 +22,6 @@ namespace Invader::HEK {
         std::uint32_t random_rotation : 1;
     };
 
-    struct WeatherParticleSystemParticleTypeShaderFlags {
-        std::uint16_t sort_bias : 1;
-        std::uint16_t nonlinear_tint : 1;
-        std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct WeatherParticleSystemParticleType {
         TagString name;
         EndianType<WeatherParticleSystemParticleTypeFlags> flags;
@@ -61,7 +55,7 @@ namespace Invader::HEK {
         EndianType<WeatherParticleSystemRenderDirectionSource> render_direction_source;
         PAD(0x24);
         LittleEndian<std::uint32_t> not_broken;
-        EndianType<WeatherParticleSystemParticleTypeShaderFlags> shader_flags;
+        EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<IsUnfilteredFlag> map_flags;

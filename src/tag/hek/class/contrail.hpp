@@ -8,7 +8,6 @@
 #include "../header.hpp"
 #include "enum.hpp"
 #include "particle.hpp"
-#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum ContrailRenderType : TagEnum {
@@ -76,12 +75,6 @@ namespace Invader::HEK {
         std::uint16_t texture_animation_v : 1;
     };
 
-    struct ContrailShaderFlags {
-        std::uint16_t sort_bias : 1;
-        std::uint16_t nonlinear_tint : 1;
-        std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct Contrail {
         EndianType<ContrailFlags> flags;
         EndianType<ContrailScaleFlags> scale_flags;
@@ -102,7 +95,7 @@ namespace Invader::HEK {
         PAD(0x40);
         PAD(0x24);
         EndianType<std::uint32_t> unknown_int;
-        EndianType<ContrailShaderFlags> shader_flags;
+        EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<IsUnfilteredFlag> map_flags;

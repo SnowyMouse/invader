@@ -79,12 +79,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ParticleSystemTypeStates<BigEndian>) == 0xC0);
 
-    struct ParticleSystemTypeParticleStateShaderFlags {
-        std::uint16_t sort_bias : 1;
-        std::uint16_t nonlinear_tint : 1;
-        std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystemTypeParticleState {
         TagString name;
         Bounds<EndianType<float>> duration_bounds;
@@ -103,7 +97,7 @@ namespace Invader::HEK {
         PAD(0x24);
         PAD(0x24);
         LittleEndian<std::uint32_t> unknown_int;
-        EndianType<ParticleSystemTypeParticleStateShaderFlags> shader_flags;
+        EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<IsUnfilteredFlag> map_flags;

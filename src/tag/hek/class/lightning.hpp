@@ -8,6 +8,7 @@
 #include "../header.hpp"
 #include "enum.hpp"
 #include "bitfield.hpp"
+#include "particle.hpp"
 
 namespace Invader::HEK {
     struct LightningMarkerFlag {
@@ -41,16 +42,10 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(LightningMarker<NativeEndian>) == 0xE4);
 
-    struct LightningShaderFlags {
-        std::uint16_t sort_bias : 1;
-        std::uint16_t nonlinear_tint : 1;
-        std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct LightningShader {
         PAD(0x24);
         LittleEndian<std::uint32_t> make_it_work;
-        EndianType<LightningShaderFlags> shader_flags;
+        EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<IsUnfilteredFlag> map_flags;
