@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "particle.hpp"
 
 namespace Invader::HEK {
     enum ParticleSystemParticleCreationPhysics : TagEnum {
@@ -33,12 +34,6 @@ namespace Invader::HEK {
         PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_NONE,
         PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
         PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
-    enum ParticleSystemAnchor : TagEnum {
-        PARTICLE_SYSTEM_ANCHOR_WITH_PRIMARY,
-        PARTICLE_SYSTEM_ANCHOR_WITH_SCREEN_SPACE,
-        PARTICLE_SYSTEM_ANCHOR_ZSPRITE
     };
 
     enum ParticleSystemAnimationSource : TagEnum {
@@ -141,7 +136,7 @@ namespace Invader::HEK {
         EndianType<ParticleSystemTypeParticleStateMapFlags> map_flags;
         PAD(0x1C);
         TagDependency<EndianType> secondary_map_bitmap; // bitmap
-        EndianType<ParticleSystemAnchor> anchor;
+        EndianType<ParticleAnchor> anchor;
         EndianType<ParticleSystemTypeParticleStateMapFlags> flags;
         EndianType<ParticleSystemAnimationSource> u_animation_source;
         EndianType<FunctionType2> u_animation_function;

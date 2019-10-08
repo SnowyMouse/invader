@@ -8,6 +8,7 @@
 #include "../../compiled_tag.hpp"
 #include "../header.hpp"
 #include "object.hpp"
+#include "actor.hpp"
 
 namespace Invader::HEK {
     enum ScenarioSpawnType : TagEnum {
@@ -172,25 +173,6 @@ namespace Invader::HEK {
         SCENARIO_SELECTION_TYPE_ANY_ACTOR,
         SCENARIO_SELECTION_TYPE_RADIO_UNIT,
         SCENARIO_SELECTION_TYPE_RADIO_SERGEANT
-    };
-
-    enum ScenarioActorType : TagEnum {
-        SCENARIO_ACTOR_TYPE_ELITE,
-        SCENARIO_ACTOR_TYPE_JACKAL,
-        SCENARIO_ACTOR_TYPE_GRUNT,
-        SCENARIO_ACTOR_TYPE_HUNTER,
-        SCENARIO_ACTOR_TYPE_ENGINEER,
-        SCENARIO_ACTOR_TYPE_ASSASSIN,
-        SCENARIO_ACTOR_TYPE_PLAYER,
-        SCENARIO_ACTOR_TYPE_MARINE,
-        SCENARIO_ACTOR_TYPE_CREW,
-        SCENARIO_ACTOR_TYPE_COMBAT_FORM,
-        SCENARIO_ACTOR_TYPE_INFECTION_FORM,
-        SCENARIO_ACTOR_TYPE_CARRIER_FORM,
-        SCENARIO_ACTOR_TYPE_MONITOR,
-        SCENARIO_ACTOR_TYPE_SENTINEL,
-        SCENARIO_ACTOR_TYPE_NONE,
-        SCENARIO_ACTOR_TYPE_MOUNTED_WEAPON
     };
 
     enum ScenarioAddressee : TagEnum {
@@ -1269,7 +1251,7 @@ namespace Invader::HEK {
         PAD(0x2);
         EndianType<ScenarioAIConversationParticipantFlags> flags;
         EndianType<ScenarioSelectionType> selection_type;
-        EndianType<ScenarioActorType> actor_type;
+        EndianType<ActorType> actor_type;
         EndianType<std::int16_t> use_this_object;
         EndianType<std::int16_t> set_new_name;
         PAD(0xC);

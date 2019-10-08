@@ -6,29 +6,6 @@
 #include "object.hpp"
 
 namespace Invader::HEK {
-    enum ItemFunctionIn : TagEnum {
-        ITEM_FUNCTION_IN_NONE,
-        ITEM_FUNCTION_IN_BODY_VITALITY,
-        ITEM_FUNCTION_IN_SHIELD_VITALITY,
-        ITEM_FUNCTION_IN_RECENT_BODY_DAMAGE,
-        ITEM_FUNCTION_IN_RECENT_SHIELD_DAMAGE,
-        ITEM_FUNCTION_IN_RANDOM_CONSTANT,
-        ITEM_FUNCTION_IN_UMBRELLA_SHIELD_VITALITY,
-        ITEM_FUNCTION_IN_SHIELD_STUN,
-        ITEM_FUNCTION_IN_RECENT_UMBRELLA_SHIELD_VITALITY,
-        ITEM_FUNCTION_IN_UMBRELLA_SHIELD_STUN,
-        ITEM_FUNCTION_IN_REGION,
-        ITEM_FUNCTION_IN_REGION_1,
-        ITEM_FUNCTION_IN_REGION_2,
-        ITEM_FUNCTION_IN_REGION_3,
-        ITEM_FUNCTION_IN_REGION_4,
-        ITEM_FUNCTION_IN_REGION_5,
-        ITEM_FUNCTION_IN_REGION_6,
-        ITEM_FUNCTION_IN_REGION_7,
-        ITEM_FUNCTION_IN_ALIVE,
-        ITEM_FUNCTION_IN_COMPASS
-    };
-
     struct ItemFlags {
         std::uint32_t always_maintains_z_up : 1;
         std::uint32_t destroyed_by_explosions : 1;
@@ -43,10 +20,10 @@ namespace Invader::HEK {
         EndianType<std::int16_t> hud_message_value_scale;
         PAD(0x2);
         PAD(0x10);
-        EndianType<std::int16_t> item_a_in;
-        EndianType<std::int16_t> item_b_in;
-        EndianType<std::int16_t> item_c_in;
-        EndianType<std::int16_t> item_d_in;
+        EndianType<ObjectFunctionIn> item_a_in;
+        EndianType<ObjectFunctionIn> item_b_in;
+        EndianType<ObjectFunctionIn> item_c_in;
+        EndianType<ObjectFunctionIn> item_d_in;
         PAD(0xA4);
         TagDependency<EndianType> material_effects; // material_effects
         TagDependency<EndianType> collision_sound; // sound

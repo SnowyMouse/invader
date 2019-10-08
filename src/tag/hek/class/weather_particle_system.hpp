@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "particle.hpp"
 
 namespace Invader::HEK {
     enum WeatherParticleSystemRenderMode : TagEnum {
@@ -34,12 +35,6 @@ namespace Invader::HEK {
         WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_NONE,
         WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
         WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
-    enum WeatherParticleSystemAnchor : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_ANCHOR_WITH_PRIMARY,
-        WEATHER_PARTICLE_SYSTEM_ANCHOR_WITH_SCREEN_SPACE,
-        WEATHER_PARTICLE_SYSTEM_ANCHOR_ZSPRITE
     };
 
     enum WeatherParticleSystemAnimationSource : TagEnum {
@@ -121,7 +116,7 @@ namespace Invader::HEK {
         PAD(0x1C);
 
         TagDependency<EndianType> bitmap; // .bitmap
-        EndianType<WeatherParticleSystemAnchor> anchor;
+        EndianType<ParticleAnchor> anchor;
         EndianType<WeatherParticleSystemParticleTypeMapFlags> flags_1;
         EndianType<WeatherParticleSystemAnimationSource> u_animation_source;
         EndianType<WeatherParticleSystemAnimationFunction> u_animation_function;

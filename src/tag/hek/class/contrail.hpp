@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "particle.hpp"
 
 namespace Invader::HEK {
     enum ContrailRenderType : TagEnum {
@@ -32,12 +33,6 @@ namespace Invader::HEK {
         CONTRAIL_FRAMEBUFFER_FADE_MODE_NONE,
         CONTRAIL_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
         CONTRAIL_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
-    enum ContrailAnchor : TagEnum {
-        CONTRAIL_ANCHOR_WITH_PRIMARY,
-        CONTRAIL_ANCHOR_WITH_SCREEN_SPACE,
-        CONTRAIL_ANCHOR_ZSPRITE
     };
 
     enum ContrailAnimationSource : TagEnum {
@@ -141,7 +136,7 @@ namespace Invader::HEK {
         PAD(0xC);
         PAD(0x10);
         TagDependency<EndianType> secondary_bitmap; // bitmap
-        EndianType<ContrailAnchor> anchor;
+        EndianType<ParticleAnchor> anchor;
         EndianType<ContrailMapFlags> secondary_map_flags;
         EndianType<ContrailAnimationSource> u_animation_source;
         EndianType<FunctionType2> u_animation_function;

@@ -4,6 +4,7 @@
 #define INVADER__TAG__HEK__CLASS__UNIT_HPP
 
 #include "object.hpp"
+#include "equipment.hpp"
 
 namespace Invader::HEK {
     enum UnitFunctionIn : TagEnum {
@@ -42,11 +43,6 @@ namespace Invader::HEK {
         UNIT_MOTION_SENSOR_BLIP_SIZE_MEDIUM,
         UNIT_MOTION_SENSOR_BLIP_SIZE_SMALL,
         UNIT_MOTION_SENSOR_BLIP_SIZE_LARGE
-    };
-
-    enum UnitGrenadeType : TagEnum {
-        UNIT_GRENADE_TYPE_HUMAN_FRAGMENTATION,
-        UNIT_GRENADE_TYPE_COVENANT_PLASMA
     };
 
     ENDIAN_TEMPLATE(EndianType) struct UnitPoweredSeat {
@@ -231,7 +227,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, UnitUnitHudInterface> new_hud_interfaces;
         TagReflexive<EndianType, UnitDialogueVariant> dialogue_variants;
         EndianType<float> grenade_velocity;
-        EndianType<UnitGrenadeType> grenade_type;
+        EndianType<EquipmentGrenadeType> grenade_type;
         EndianType<std::int16_t> grenade_count;
         EndianType<std::int16_t> unknown_shorts[2];
         TagReflexive<EndianType, UnitPoweredSeat> powered_seats;
