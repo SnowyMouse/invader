@@ -10,12 +10,6 @@
 #include "enum.hpp"
 
 namespace Invader::HEK {
-    enum WeatherParticleSystemRenderMode : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_RENDER_MODE_SCREEN_FACING,
-        WEATHER_PARTICLE_SYSTEM_RENDER_MODE_PARALLEL_TO_DIRECTION,
-        WEATHER_PARTICLE_SYSTEM_RENDER_MODE_PERPENDICULAR_TO_DIRECTION,
-    };
-
     enum WeatherParticleSystemRenderDirectionSource : TagEnum {
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_VELOCITY,
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_ACCELERATION,
@@ -66,7 +60,7 @@ namespace Invader::HEK {
         PAD(0x3C);
 
         TagDependency<EndianType> sprite_bitmap; // .bitmap
-        EndianType<WeatherParticleSystemRenderMode> render_mode;
+        EndianType<ParticleOrientation> render_mode;
         EndianType<WeatherParticleSystemRenderDirectionSource> render_direction_source;
         PAD(0x24);
         LittleEndian<std::uint32_t> not_broken;

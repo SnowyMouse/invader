@@ -19,12 +19,6 @@ namespace Invader::HEK {
         std::uint16_t no_random_phase : 1;
     };
 
-    enum ShaderModelDetailFunction : TagEnum {
-        SHADER_MODEL_DETAIL_FUNCTION_DOUBLE_BIASED_MULTIPLY,
-        SHADER_MODEL_DETAIL_FUNCTION_MULTIPLY,
-        SHADER_MODEL_DETAIL_FUNCTION_DOUBLE_BIASED_ADD
-    };
-
     enum ShaderModelDetailMask : TagEnum {
         SHADER_MODEL_DETAIL_MASK_NONE,
         SHADER_MODEL_DETAIL_MASK_REFLECTION_MASK_INVERSE,
@@ -60,7 +54,7 @@ namespace Invader::HEK {
         PAD(0x8);
         TagDependency<EndianType> multipurpose_map; // bitmap
         PAD(0x8);
-        EndianType<ShaderModelDetailFunction> detail_function;
+        EndianType<ShaderDetailFunction> detail_function;
         EndianType<ShaderModelDetailMask> detail_mask;
         EndianType<float> detail_map_scale;
         TagDependency<EndianType> detail_map; // bitmap

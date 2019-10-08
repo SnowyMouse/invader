@@ -66,6 +66,12 @@ namespace Invader::HEK {
         SHADER_TYPE_SHADER_TRANSPARENT_PLASMA = 0xB
     };
 
+    enum ShaderDetailFunction : TagEnum {
+        SHADER_DETAIL_FUNCTION_DOUBLE_BIASED_MULTIPLY,
+        SHADER_DETAIL_FUNCTION_MULTIPLY,
+        SHADER_DETAIL_FUNCTION_DOUBLE_BIASED_ADD
+    };
+
     ENDIAN_TEMPLATE(EndianType) struct Shader {
         EndianType<ShaderFlags> shader_flags;
         EndianType<ShaderDetailLevel> detail_level;

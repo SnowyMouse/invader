@@ -43,12 +43,6 @@ namespace Invader::HEK {
         SHADER_ENVIRONMENT_REFLECTION_TYPE__BUMPED_RADIOSITY
     };
 
-    enum ShaderEnvironmentDetailMapFunction : TagEnum {
-        SHADER_ENVIRONMENT_DETAIL_MAP_FUNCTION_DOUBLE_BIASED_MULTIPLY,
-        SHADER_ENVIRONMENT_DETAIL_MAP_FUNCTION_MULTIPLY,
-        SHADER_ENVIRONMENT_DETAIL_MAP_FUNCTION_DOUBLE_BIASED_ADD
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ShaderEnvironment : Shader<EndianType> {
         EndianType<ShaderEnvironmentFlags> shader_environment_flags;
         EndianType<ShaderEnvironmentType> shader_environment_type;
@@ -60,14 +54,14 @@ namespace Invader::HEK {
         PAD(0x18);
         TagDependency<EndianType> base_map; // bitmap
         PAD(0x18);
-        EndianType<ShaderEnvironmentDetailMapFunction> detail_map_function;
+        EndianType<ShaderDetailFunction> detail_map_function;
         PAD(0x2);
         EndianType<float> primary_detail_map_scale;
         TagDependency<EndianType> primary_detail_map; // bitmap
         EndianType<float> secondary_detail_map_scale;
         TagDependency<EndianType> secondary_detail_map; // bitmap
         PAD(0x18);
-        EndianType<ShaderEnvironmentDetailMapFunction> micro_detail_map_function;
+        EndianType<ShaderDetailFunction> micro_detail_map_function;
         PAD(0x2);
         EndianType<float> micro_detail_map_scale;
         TagDependency<EndianType> micro_detail_map; // bitmap
