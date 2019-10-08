@@ -33,13 +33,12 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(SkyAnimation<BigEndian>) == 0x24); // max count: 8
+    static_assert(sizeof(SkyAnimation<BigEndian>) == 0x24);
 
     struct SkyLightFlags {
         std::uint32_t affects_exteriors : 1;
         std::uint32_t affects_interiors : 1;
     };
-    static_assert(sizeof(SkyLightFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct SkyLight {
         TagDependency<EndianType> lens_flare; // lens_flare

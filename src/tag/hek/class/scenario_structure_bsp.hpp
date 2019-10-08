@@ -75,6 +75,8 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(ScenarioStructureBSPArrayVertex<BigEndian>) == 2);
+
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPSurface {
         ScenarioStructureBSPArrayVertex<EndianType> vertices[3];
 

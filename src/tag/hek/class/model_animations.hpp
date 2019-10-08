@@ -429,6 +429,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(ModelAnimationArrayNodeTransformFlagData<BigEndian>) == 4);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationArrayNodeRotationFlagData {
         EndianType<std::int32_t> no_name;
@@ -439,6 +440,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(ModelAnimationArrayNodeRotationFlagData<BigEndian>) == 4);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationArrayNodeScaleFlagData {
         EndianType<std::int32_t> no_name;
@@ -449,6 +451,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(ModelAnimationArrayNodeScaleFlagData<BigEndian>) == 4);
 
     struct ModelAnimationAnimationFlags {
         std::uint16_t compressed_data : 1;

@@ -22,12 +22,10 @@ namespace Invader::HEK {
         std::uint16_t true_atmospheric_fog : 1;
         std::uint16_t disable_two_sided_culling : 1;
     };
-    static_assert(sizeof(ShaderModelFlags) == sizeof(std::uint16_t));
 
     struct ShaderModelMoreFlags {
         std::uint16_t no_random_phase : 1;
     };
-    static_assert(sizeof(ShaderModelMoreFlags) == sizeof(std::uint16_t));
 
     enum ShaderModelDetailFunction : TagEnum {
         SHADER_MODEL_DETAIL_FUNCTION_DOUBLE_BIASED_MULTIPLY,

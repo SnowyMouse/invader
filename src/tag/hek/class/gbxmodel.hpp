@@ -43,7 +43,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelMarker<BigEndian>) == 0x40 );
+    static_assert(sizeof(GBXModelMarker<BigEndian>) == 0x40);
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelNode {
         TagString name;
@@ -98,7 +98,6 @@ namespace Invader::HEK {
     struct GBXModelRegionPermutationFlags {
         std::uint32_t cannot_be_chosen_randomly : 1;
     };
-    static_assert(sizeof(GBXModelRegionPermutationFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelRegionPermutation {
         TagString name;
@@ -169,7 +168,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelVertexUncompressed<BigEndian>) == 0x44 );
+    static_assert(sizeof(GBXModelVertexUncompressed<BigEndian>) == 0x44);
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexCompressed {
         Point3D<EndianType> position;
@@ -196,7 +195,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelVertexCompressed<BigEndian>) == 0x20 );
+    static_assert(sizeof(GBXModelVertexCompressed<BigEndian>) == 0x20);
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelTriangle {
         EndianType<std::int16_t> vertex0_index;
@@ -211,7 +210,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelTriangle<BigEndian>) == 0x6 );
+    static_assert(sizeof(GBXModelTriangle<BigEndian>) == 0x6);
 
     struct GBXModelGeometryPartFlags {
         std::uint32_t stripped_internal : 1;
@@ -307,7 +306,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelGeometry<BigEndian>) == 0x30 );
+    static_assert(sizeof(GBXModelGeometry<BigEndian>) == 0x30);
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelShaderReference {
         TagDependency<EndianType> shader; // shader
@@ -322,7 +321,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(GBXModelShaderReference<BigEndian>) == 0x20 );
+    static_assert(sizeof(GBXModelShaderReference<BigEndian>) == 0x20);
 
     struct GBXModelFlags {
         std::uint32_t blend_shared_normals : 1;

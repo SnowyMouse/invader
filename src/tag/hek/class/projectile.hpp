@@ -55,7 +55,7 @@ namespace Invader::HEK {
     };
 
     struct ProjectileMaterialResponsePotentialFlags {
-        std::uint16_t only_against_units;
+        std::uint16_t only_against_units : 1;
     };
 
     ENDIAN_TEMPLATE(EndianType) struct ProjectileMaterialResponse {

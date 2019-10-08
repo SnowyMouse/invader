@@ -83,7 +83,6 @@ namespace Invader::HEK {
         std::uint32_t crouch_when_in_line_of_fire : 1;
         std::uint32_t avoid_friends_line_of_fire : 1;
     };
-    static_assert(sizeof(ActorFlags) == sizeof(std::uint32_t));
 
     struct ActorMoreFlags {
         std::uint32_t avoid_all_enemy_attack_vectors : 1;
@@ -94,7 +93,6 @@ namespace Invader::HEK {
         std::uint32_t panic_in_groups : 1;
         std::uint32_t no_corpse_shooting : 1;
     };
-    static_assert(sizeof(ActorMoreFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct Actor {
         EndianType<ActorFlags> flags;

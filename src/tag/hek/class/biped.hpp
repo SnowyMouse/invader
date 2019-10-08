@@ -16,7 +16,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
-    static_assert(sizeof(BipedContactPoint<BigEndian>) == 0x40); // max count: 2
+    static_assert(sizeof(BipedContactPoint<BigEndian>) == 0x40);
 
     struct BipedFlags {
         std::uint32_t turns_without_animating : 1;

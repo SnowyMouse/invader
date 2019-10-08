@@ -91,7 +91,6 @@ namespace Invader::HEK {
         std::uint32_t integrated_light_cntrls_weapon : 1;
         std::uint32_t integrated_light_lasts_forever : 1;
     };
-    static_assert(sizeof(UnitFlags) == sizeof(std::uint32_t));
 
     SINGLE_DEPENDENCY_PADDED_STRUCT(UnitCameraTrack, track, 0xC); // camera_track
     SINGLE_DEPENDENCY_PADDED_STRUCT(UnitUnitHudInterface, hud, 0x20); // unit_hud_interface

@@ -72,7 +72,6 @@ namespace Invader::HEK {
         std::uint32_t ai_driver_can_sidestep : 1;
         std::uint32_t ai_driver_hovering : 1;
     };
-    static_assert(sizeof(VehicleFlags) == sizeof(std::uint32_t));
 
     ENDIAN_TEMPLATE(EndianType) struct Vehicle : Unit<EndianType> {
         EndianType<VehicleFlags> vehicle_flags;
