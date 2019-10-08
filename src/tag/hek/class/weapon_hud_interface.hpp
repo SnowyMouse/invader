@@ -97,14 +97,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(WeaponHUDInterfaceStaticElement<BigEndian>) == 0xB4);
 
-    struct WeaponHUDInterfaceMeterFlags {
-        std::uint8_t use_min_max_for_state_changes : 1;
-        std::uint8_t interpolate_between_min_max_flash_colors_as_state_changes : 1;
-        std::uint8_t interpolate_color_along_hsv_space : 1;
-        std::uint8_t _more_colors_for_hsv_interpolation : 1;
-        std::uint8_t invert_interpolation : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct WeaponHUDInterfaceMeter {
         EndianType<WeaponHUDInterfaceStateAttachedTo> state_attached_to;
         PAD(0x2);
@@ -122,7 +114,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> color_at_meter_maximum;
         EndianType<ColorARGBInt> flash_color;
         EndianType<ColorARGBInt> empty_color;
-        EndianType<WeaponHUDInterfaceMeterFlags> flags;
+        EndianType<HUDInterfaceMeterFlags> flags;
         std::int8_t minumum_meter_value;
         EndianType<std::int16_t> sequence_index;
         std::int8_t alpha_multiplier;

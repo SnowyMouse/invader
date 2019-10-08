@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum MeterInterpolateColors : TagEnum {
@@ -21,12 +22,8 @@ namespace Invader::HEK {
         METER_ANCHOR_COLORS_AT_FULL
     };
 
-    struct MeterFlags {
-        std::uint32_t unused : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct Meter {
-        EndianType<MeterFlags> flags;
+        EndianType<IsUnusedFlag> flags;
         TagDependency<EndianType> stencil_bitmaps; // bitmap
         TagDependency<EndianType> source_bitmap; // bitmap
         EndianType<std::uint16_t> stencil_sequence_index;

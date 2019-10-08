@@ -90,14 +90,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(UnitHUDInterfaceHUDSound<BigEndian>) == 0x38);
 
-    struct UnitHUDInterfaceFlags {
-        std::uint8_t use_min_max_for_state_changes : 1;
-        std::uint8_t interpolate_between_min_max_flash_colors_as_state_changes : 1;
-        std::uint8_t interpolate_color_along_hsv_space : 1;
-        std::uint8_t _more_colors_for_hsv_interpolation : 1;
-        std::uint8_t invert_interpolation : 1;
-    };
-
     struct UnitHUDInterfaceAuxiliaryPanelMeterMoreFlags {
         std::uint32_t show_only_when_active : 1;
         std::uint32_t flash_once_if_activated_while_disabled : 1;
@@ -138,7 +130,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> meter_color_at_meter_maximum;
         EndianType<ColorARGBInt> meter_flash_color;
         EndianType<ColorARGBInt> meter_empty_color;
-        EndianType<UnitHUDInterfaceFlags> meter_flags;
+        EndianType<HUDInterfaceMeterFlags> meter_flags;
         std::int8_t meter_minimum_meter_value;
         EndianType<std::int16_t> meter_sequence_index;
         std::int8_t meter_alpha_multiplier;

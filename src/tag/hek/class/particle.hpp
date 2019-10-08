@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum ParticleOrientation : TagEnum {
@@ -40,10 +41,6 @@ namespace Invader::HEK {
         std::uint16_t sort_bias : 1;
         std::uint16_t nonlinear_tint : 1;
         std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
-    struct ParticleMapFlags {
-        std::uint16_t unfiltered : 1;
     };
 
     ENDIAN_TEMPLATE(EndianType) struct Particle {
@@ -80,11 +77,11 @@ namespace Invader::HEK {
         EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<ParticleMapFlags> map_flags;
+        EndianType<IsUnfilteredFlag> map_flags;
         PAD(0x1C);
         TagDependency<EndianType> bitmap1; // bitmap
         EndianType<ParticleAnchor> anchor;
-        EndianType<ParticleMapFlags> map_flags1;
+        EndianType<IsUnfilteredFlag> map_flags1;
         EndianType<FunctionOut> u_animation_source;
         EndianType<WaveFunction> u_animation_function;
         EndianType<float> u_animation_period;

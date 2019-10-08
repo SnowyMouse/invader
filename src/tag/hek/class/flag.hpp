@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct FlagAttachmentPoint {
@@ -36,12 +37,8 @@ namespace Invader::HEK {
         FLAG_ATTACHED_EDGE_SHAPE_CONCAVE_TRIANGULAR
     };
 
-    struct FlagFlags {
-        std::uint32_t unused : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct Flag {
-        EndianType<FlagFlags> flags;
+        EndianType<IsUnusedFlag> flags;
         EndianType<FlagTrailingEdgeShape> trailing_edge_shape;
         EndianType<std::int16_t> trailing_edge_shape_offset;
         EndianType<FlagAttachedEdgeShape> attached_edge_shape;

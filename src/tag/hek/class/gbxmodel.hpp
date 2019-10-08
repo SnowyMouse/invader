@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GBXModelMarkerInstance {
@@ -291,11 +292,8 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(GBXModelGeometryPart<BigEndian>) == 0x84);
 
-    struct GBXModelGeometryFlags {
-        std::uint32_t unused : 1;
-    };
     ENDIAN_TEMPLATE(EndianType) struct GBXModelGeometry {
-        EndianType<GBXModelGeometryFlags> flags;
+        EndianType<IsUnusedFlag> flags;
         PAD(0x20);
         TagReflexive<EndianType, GBXModelGeometryPart> parts;
 

@@ -8,6 +8,7 @@
 #include "../header.hpp"
 #include "particle.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum WeatherParticleSystemRenderDirectionSource : TagEnum {
@@ -25,10 +26,6 @@ namespace Invader::HEK {
         std::uint16_t sort_bias : 1;
         std::uint16_t nonlinear_tint : 1;
         std::uint16_t don_t_overdraw_fp_weapon : 1;
-    };
-
-    struct WeatherParticleSystemParticleTypeMapFlags {
-        std::uint16_t unfiltered : 1;
     };
 
     ENDIAN_TEMPLATE(EndianType) struct WeatherParticleSystemParticleType {
@@ -67,12 +64,12 @@ namespace Invader::HEK {
         EndianType<WeatherParticleSystemParticleTypeShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<WeatherParticleSystemParticleTypeMapFlags> map_flags;
+        EndianType<IsUnfilteredFlag> map_flags;
         PAD(0x1C);
 
         TagDependency<EndianType> bitmap; // .bitmap
         EndianType<ParticleAnchor> anchor;
-        EndianType<WeatherParticleSystemParticleTypeMapFlags> flags_1;
+        EndianType<IsUnfilteredFlag> flags_1;
         EndianType<FunctionOut> u_animation_source;
         EndianType<WaveFunction> u_animation_function;
         EndianType<float> u_animation_period;
@@ -148,11 +145,8 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(WeatherParticleSystemParticleType<BigEndian>) == 0x25C);
 
-    struct WeatherParticleSystemFlags {
-        std::uint32_t unused : 1;
-    };
     ENDIAN_TEMPLATE(EndianType) struct WeatherParticleSystem {
-        EndianType<WeatherParticleSystemFlags> flags;
+        EndianType<IsUnusedFlag> flags;
         PAD(0x20);
         TagReflexive<EndianType, WeatherParticleSystemParticleType> particle_types;
 

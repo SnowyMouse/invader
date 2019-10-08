@@ -8,6 +8,7 @@
 #include "../header.hpp"
 #include "particle.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum ParticleSystemParticleCreationPhysics : TagEnum {
@@ -84,10 +85,6 @@ namespace Invader::HEK {
         std::uint16_t don_t_overdraw_fp_weapon : 1;
     };
 
-    struct ParticleSystemTypeParticleStateMapFlags {
-        std::uint16_t unfiltered : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystemTypeParticleState {
         TagString name;
         Bounds<EndianType<float>> duration_bounds;
@@ -109,11 +106,11 @@ namespace Invader::HEK {
         EndianType<ParticleSystemTypeParticleStateShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<ParticleSystemTypeParticleStateMapFlags> map_flags;
+        EndianType<IsUnfilteredFlag> map_flags;
         PAD(0x1C);
         TagDependency<EndianType> secondary_map_bitmap; // bitmap
         EndianType<ParticleAnchor> anchor;
-        EndianType<ParticleSystemTypeParticleStateMapFlags> flags;
+        EndianType<IsUnfilteredFlag> flags;
         EndianType<FunctionOut> u_animation_source;
         EndianType<WaveFunction> u_animation_function;
         EndianType<float> u_animation_period;
@@ -201,10 +198,6 @@ namespace Invader::HEK {
         std::uint32_t don_t_draw_in_third_person : 1;
     };
 
-    struct ParticleSystemPhysicsFlags {
-        std::uint32_t unused : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystemType {
         TagString name;
         EndianType<ParticleSystemTypeFlags> flags;
@@ -216,7 +209,7 @@ namespace Invader::HEK {
         PAD(0x24);
         EndianType<ParticleSystemParticleCreationPhysics> particle_creation_physics;
         PAD(0x2);
-        EndianType<ParticleSystemPhysicsFlags> physics_flags;
+        EndianType<IsUnusedFlag> physics_flags;
         TagReflexive<EndianType, ParticleSystemPhysicsConstant> physics_constants;
         TagReflexive<EndianType, ParticleSystemTypeStates> states;
         TagReflexive<EndianType, ParticleSystemTypeParticleState> particle_states;
@@ -238,17 +231,13 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ParticleSystemType<BigEndian>) == 0x80);
 
-    struct ParticleSystemFlags {
-        std::uint32_t unused : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystem {
         PAD(0x4);
         PAD(0x34);
         TagDependency<EndianType> point_physics; // point_physics
         EndianType<ParticleSystemSystemUpdatePhysics> system_update_physics;
         PAD(0x2);
-        EndianType<ParticleSystemFlags> physics_flags;
+        EndianType<IsUnusedFlag> physics_flags;
         TagReflexive<EndianType, ParticleSystemPhysicsConstant> physics_constants;
         TagReflexive<EndianType, ParticleSystemType> particle_types;
 

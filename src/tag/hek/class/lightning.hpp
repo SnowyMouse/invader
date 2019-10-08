@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     struct LightningMarkerFlag {
@@ -46,17 +47,13 @@ namespace Invader::HEK {
         std::uint16_t don_t_overdraw_fp_weapon : 1;
     };
 
-    struct LightningShaderMapFlags {
-        std::uint16_t unfiltered : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct LightningShader {
         PAD(0x24);
         LittleEndian<std::uint32_t> make_it_work;
         EndianType<LightningShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<LightningShaderMapFlags> map_flags;
+        EndianType<IsUnfilteredFlag> map_flags;
         PAD(0x1C);
         PAD(0xC);
         LittleEndian<std::uint32_t> some_more_stuff_that_should_be_set_for_some_reason;

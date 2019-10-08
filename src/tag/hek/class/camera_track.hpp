@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct CameraTrackControlPoint {
@@ -22,12 +23,8 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CameraTrackControlPoint<BigEndian>) == 0x3C);
 
-    struct CameraTrackFlags {
-        std::uint32_t unused : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct CameraTrack {
-        EndianType<CameraTrackFlags> flags;
+        EndianType<IsUnusedFlag> flags;
         TagReflexive<EndianType, CameraTrackControlPoint> control_points;
         PAD(0x20);
 

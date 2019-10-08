@@ -4,6 +4,7 @@
 #define INVADER__TAG__HEK__CLASS__SHADER_ENVIRONMENT_HPP
 
 #include "shader.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     struct ShaderEnvironmentFlags {
@@ -15,10 +16,6 @@ namespace Invader::HEK {
     struct ShaderEnvironmentDiffuseFlags {
         std::uint16_t rescale_detail_maps : 1;
         std::uint16_t rescale_bump_map : 1;
-    };
-
-    struct ShaderEnvironmentSelfIlluminationFlags {
-        std::uint16_t unfiltered : 1;
     };
 
     struct ShaderEnvironmentSpecularFlags {
@@ -80,7 +77,7 @@ namespace Invader::HEK {
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_scale;
         PAD(0x18);
-        EndianType<ShaderEnvironmentSelfIlluminationFlags> self_illumination_flags;
+        EndianType<IsUnfilteredFlag> self_illumination_flags;
         PAD(0x2);
         PAD(0x18);
         ColorRGB<EndianType> primary_on_color;
