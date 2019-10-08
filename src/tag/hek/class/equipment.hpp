@@ -16,7 +16,7 @@ namespace Invader::HEK {
         EQUIPMENT_POWERUP_TYPE_GRENADE
     };
 
-    enum EquipmentGrenadeType : TagEnum  {
+    enum EquipmentGrenadeType : TagEnum {
         EQUIPMENT_GRENADE_TYPE_HUMAN_FRAGMENTATION,
         EQUIPMENT_GRENADE_TYPE_COVENANT_PLASMA
     };

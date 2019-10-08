@@ -31,7 +31,7 @@ namespace Invader::HEK {
         FLAG_TRAILING_EDGE_SHAPE_TRAPEZOID_SHORT_BOTTOM
     };
 
-    enum AttachedEdgeShape : TagEnum {
+    enum FlagAttachedEdgeShape : TagEnum {
         FLAG_ATTACHED_EDGE_SHAPE_FLAT,
         FLAG_ATTACHED_EDGE_SHAPE_CONCAVE_TRIANGULAR
     };
@@ -44,7 +44,7 @@ namespace Invader::HEK {
         EndianType<FlagFlags> flags;
         EndianType<FlagTrailingEdgeShape> trailing_edge_shape;
         EndianType<std::int16_t> trailing_edge_shape_offset;
-        EndianType<AttachedEdgeShape> attached_edge_shape;
+        EndianType<FlagAttachedEdgeShape> attached_edge_shape;
         PAD(0x2);
         EndianType<std::int16_t> width;
         EndianType<std::int16_t> height;

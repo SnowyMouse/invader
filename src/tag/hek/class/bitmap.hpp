@@ -17,58 +17,58 @@ namespace Invader::HEK {
 
     enum BitmapDataFormat : TagEnum {
         /** 8-bit alpha */
-        BITMAP_FORMAT_A8,
+        BITMAP_DATA_FORMAT_A8,
 
         /** 8-bit luminosity */
-        BITMAP_FORMAT_Y8,
+        BITMAP_DATA_FORMAT_Y8,
 
         /** 8-bit alpha & luminosity (luminosity = alpha) */
-        BITMAP_FORMAT_AY8,
+        BITMAP_DATA_FORMAT_AY8,
 
         /** 8-bit alpha, 8-bit luminosity */
-        BITMAP_FORMAT_A8Y8,
+        BITMAP_DATA_FORMAT_A8Y8,
 
         /** Unused */
-        BITMAP_FORMAT_UNUSED1,
+        BITMAP_DATA_FORMAT_UNUSED1,
 
         /** Unused */
-        BITMAP_FORMAT_UNUSED2,
+        BITMAP_DATA_FORMAT_UNUSED2,
 
         /** 5-bit red, 6-bit green, 5-bit blue */
-        BITMAP_FORMAT_R5G6B5,
+        BITMAP_DATA_FORMAT_R5G6B5,
 
         /** Unused */
-        BITMAP_FORMAT_UNUSED3,
+        BITMAP_DATA_FORMAT_UNUSED3,
 
         /** 16-bit ARGB, 1-bit alpha */
-        BITMAP_FORMAT_A1R5G5B5,
+        BITMAP_DATA_FORMAT_A1R5G5B5,
 
         /** 16-bit ARGB */
-        BITMAP_FORMAT_A4R4G4B4,
+        BITMAP_DATA_FORMAT_A4R4G4B4,
 
         /** 32-bit ARGB */
-        BITMAP_FORMAT_X8R8G8B8,
+        BITMAP_DATA_FORMAT_X8R8G8B8,
 
         /** 32-bit ARGB */
-        BITMAP_FORMAT_A8R8G8B8,
+        BITMAP_DATA_FORMAT_A8R8G8B8,
 
         /** Unused */
-        BITMAP_FORMAT_UNUSED4,
+        BITMAP_DATA_FORMAT_UNUSED4,
 
         /** Unused */
-        BITMAP_FORMAT_UNUSED5,
+        BITMAP_DATA_FORMAT_UNUSED5,
 
         /** DDS, DXT1 compression */
-        BITMAP_FORMAT_DXT1,
+        BITMAP_DATA_FORMAT_DXT1,
 
         /** DDS, DXT3 compression */
-        BITMAP_FORMAT_DXT3,
+        BITMAP_DATA_FORMAT_DXT3,
 
         /** DDS, DXT5 compression */
-        BITMAP_FORMAT_DXT5,
+        BITMAP_DATA_FORMAT_DXT5,
 
         /** 8-bit palette bump */
-        BITMAP_FORMAT_P8_BUMP
+        BITMAP_DATA_FORMAT_P8_BUMP
     };
 
     const char *bitmap_data_format_name(BitmapDataFormat format);

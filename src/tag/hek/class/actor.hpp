@@ -8,7 +8,7 @@
 #include "../header.hpp"
 
 namespace Invader::HEK {
-    enum ACTOR_TYPE : TagEnum {
+    enum ActorType : TagEnum {
         ACTOR_TYPE_ELITE,
         ACTOR_TYPE_JACKAL,
         ACTOR_TYPE_GRUNT,
@@ -27,7 +27,7 @@ namespace Invader::HEK {
         ACTOR_TYPE_MOUNTED_WEAPON
     };
 
-    enum ACTOR_UNREACHABLE_DANGER_TRIGGER : TagEnum {
+    enum ActorUnreachableDangerTrigger : TagEnum {
         ACTOR_UNREACHABLE_DANGER_TRIGGER_NEVER,
         ACTOR_UNREACHABLE_DANGER_TRIGGER_VISIBLE,
         ACTOR_UNREACHABLE_DANGER_TRIGGER_SHOOTING,
@@ -40,7 +40,7 @@ namespace Invader::HEK {
         ACTOR_UNREACHABLE_DANGER_TRIGGER_UNUSED_4
     };
 
-    enum ACTOR_DEFENSIVE_CROUCH_TYPE : TagEnum {
+    enum ActorDefensiveCrouchType : TagEnum {
         ACTOR_DEFENSIVE_CROUCH_TYPE_NEVER,
         ACTOR_DEFENSIVE_CROUCH_TYPE_DANGER,
         ACTOR_DEFENSIVE_CROUCH_TYPE_LOW_SHIELDS,
@@ -98,7 +98,7 @@ namespace Invader::HEK {
         EndianType<ActorFlags> flags;
         EndianType<ActorMoreFlags> more_flags;
         PAD(0xC);
-        EndianType<ACTOR_TYPE> type;
+        EndianType<ActorType> type;
         PAD(0x2);
 
         EndianType<float> max_vision_distance;
@@ -157,9 +157,9 @@ namespace Invader::HEK {
         PAD(0x10C);
         TagDependency<EndianType> do_not_use_1; // projectile
 
-        EndianType<ACTOR_UNREACHABLE_DANGER_TRIGGER> unreachable_danger_trigger;
-        EndianType<ACTOR_UNREACHABLE_DANGER_TRIGGER> vehicle_danger_trigger;
-        EndianType<ACTOR_UNREACHABLE_DANGER_TRIGGER> player_danger_trigger;
+        EndianType<ActorUnreachableDangerTrigger> unreachable_danger_trigger;
+        EndianType<ActorUnreachableDangerTrigger> vehicle_danger_trigger;
+        EndianType<ActorUnreachableDangerTrigger> player_danger_trigger;
         PAD(0x2);
         Bounds<EndianType<float>> danger_trigger_time;
         EndianType<std::int16_t> friends_killed_trigger;
@@ -170,7 +170,7 @@ namespace Invader::HEK {
 
         Bounds<EndianType<float>> cowering_time;
         EndianType<float> friend_killed_panic_chance;
-        EndianType<ACTOR_TYPE> leader_type;
+        EndianType<ActorType> leader_type;
         PAD(0x2);
         EndianType<float> leader_killed_panic_chance;
         EndianType<float> panic_damage_threshold;
@@ -183,7 +183,7 @@ namespace Invader::HEK {
         EndianType<float> attack_shield_fraction;
         EndianType<float> pursue_shield_fraction;
         PAD(0x10);
-        EndianType<ACTOR_DEFENSIVE_CROUCH_TYPE> defensive_crouch_type;
+        EndianType<ActorDefensiveCrouchType> defensive_crouch_type;
         PAD(0x2);
         EndianType<float> attacking_crouch_threshold;
         EndianType<float> defending_crouch_threshold;
