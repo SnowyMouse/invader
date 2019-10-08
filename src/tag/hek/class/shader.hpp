@@ -51,19 +51,19 @@ namespace Invader::HEK {
         SHADER_FIRST_MAP_TYPE_FIRST_MAP_IS_VIEWER_CENTERED_CUBE_MAP
     };
 
-    enum ShaderType : std::uint8_t {
-        SHADER_UNKN0 = 0x0, //unknown
-        SHADER_UNKN1 = 0x1, //unknown
-        SHADER_UNKN2 = 0x2, //unknown
-        SHADER_TYPE_SHADER_ENVIRONMENT = 0x3,
-        SHADER_TYPE_SHADER_MODEL = 0x4,
-        SHADER_TYPE_SHADER_TRANSPARENT_GENERIC = 0x5,
-        SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO = 0x6,
-        SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED = 0x7,
-        SHADER_TYPE_SHADER_TRANSPARENT_WATER = 0x8,
-        SHADER_TYPE_SHADER_TRANSPARENT_GLASS = 0x9,
-        SHADER_TYPE_SHADER_TRANSPARENT_METER = 0xA,
-        SHADER_TYPE_SHADER_TRANSPARENT_PLASMA = 0xB
+    enum ShaderType : TagEnum {
+        SHADER_TYPE_UNKN0,
+        SHADER_TYPE_UNKN1,
+        SHADER_TYPE_UNKN2,
+        SHADER_TYPE_SHADER_ENVIRONMENT,
+        SHADER_TYPE_SHADER_MODEL,
+        SHADER_TYPE_SHADER_TRANSPARENT_GENERIC,
+        SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO,
+        SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED,
+        SHADER_TYPE_SHADER_TRANSPARENT_WATER,
+        SHADER_TYPE_SHADER_TRANSPARENT_GLASS,
+        SHADER_TYPE_SHADER_TRANSPARENT_METER,
+        SHADER_TYPE_SHADER_TRANSPARENT_PLASMA
     };
 
     enum ShaderDetailFunction : TagEnum {
@@ -80,8 +80,8 @@ namespace Invader::HEK {
         ColorRGB<EndianType> tint_color;
         ShaderPhysicsFlags physics_flags;
         EndianType<MaterialType> material_type;
-        std::uint8_t shader_type;
-        PAD(0x3);
+        LittleEndian<ShaderType> shader_type;
+        PAD(0x2);
     };
     static_assert(sizeof(Shader<BigEndian>) == 0x28);
 
