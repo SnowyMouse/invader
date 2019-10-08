@@ -134,8 +134,8 @@ namespace Invader::HEK {
         EndianType<HUDInterfaceAnchor> primary_anchor;
         EndianType<HUDInterfaceMultitextureOverlayAnchor> secondary_anchor;
         EndianType<HUDInterfaceMultitextureOverlayAnchor> tertiary_anchor;
-        EndianType<HUDInterfaceZeroToOneBlendFunction> zero_to_one_blend_func;
-        EndianType<HUDInterfaceZeroToOneBlendFunction> one_to_two_blend_func;
+        EndianType<HUDInterfaceZeroToOneBlendFunction> zero_to_one_blend_function;
+        EndianType<HUDInterfaceZeroToOneBlendFunction> one_to_two_blend_function;
         PAD(0x2);
         Point2D<EndianType> primary_scale;
         Point2D<EndianType> secondary_scale;
@@ -157,12 +157,12 @@ namespace Invader::HEK {
         ENDIAN_TEMPLATE(NewType) operator HUDInterfaceMultitextureOverlay<NewType>() const noexcept {
             HUDInterfaceMultitextureOverlay<NewType> copy = {};
             COPY_THIS(type);
-            COPY_THIS(framebuffer_blend_func);
+            COPY_THIS(framebuffer_blend_function);
             COPY_THIS(primary_anchor);
             COPY_THIS(secondary_anchor);
             COPY_THIS(tertiary_anchor);
-            COPY_THIS(zero_to_one_blend_func);
-            COPY_THIS(one_to_two_blend_func);
+            COPY_THIS(zero_to_one_blend_function);
+            COPY_THIS(one_to_two_blend_function);
             COPY_THIS(primary_scale);
             COPY_THIS(secondary_scale);
             COPY_THIS(tertiary_scale);

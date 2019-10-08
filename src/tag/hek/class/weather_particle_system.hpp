@@ -21,12 +21,6 @@ namespace Invader::HEK {
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_ACCELERATION,
     };
 
-    enum WeatherParticleSystemFramebufferFadeMode : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_NONE,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     enum WeatherParticleSystemAnimationSource : TagEnum {
         WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_NONE,
         WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_A_OUT,
@@ -101,7 +95,7 @@ namespace Invader::HEK {
         LittleEndian<std::uint32_t> not_broken;
         EndianType<WeatherParticleSystemParticleTypeShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
-        EndianType<WeatherParticleSystemFramebufferFadeMode> framebuffer_fade_mode;
+        EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<WeatherParticleSystemParticleTypeMapFlags> map_flags;
         PAD(0x1C);
 

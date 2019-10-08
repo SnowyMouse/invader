@@ -19,12 +19,6 @@ namespace Invader::HEK {
         CONTRAIL_RENDER_TYPE_DOUBLE_MARKER_LINKED
     };
 
-    enum ContrailFramebufferFadeMode : TagEnum {
-        CONTRAIL_FRAMEBUFFER_FADE_MODE_NONE,
-        CONTRAIL_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        CONTRAIL_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     enum ContrailAnimationSource : TagEnum {
         CONTRAIL_ANIMATION_SOURCE_NONE,
         CONTRAIL_ANIMATION_SOURCE_A_OUT,
@@ -121,7 +115,7 @@ namespace Invader::HEK {
         EndianType<std::uint32_t> unknown_int;
         EndianType<ContrailShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
-        EndianType<ContrailFramebufferFadeMode> framebuffer_fade_mode;
+        EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ContrailMapFlags> map_flags;
         PAD(0xC);
         PAD(0x10);

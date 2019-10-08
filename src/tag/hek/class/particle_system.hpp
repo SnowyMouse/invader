@@ -20,12 +20,6 @@ namespace Invader::HEK {
         PARTICLE_SYSTEM_PARTICLE_UPDATE_PHYSICS_DEFAULT
     };
 
-    enum ParticleSystemFramebufferFadeMode : TagEnum {
-        PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_NONE,
-        PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        PARTICLE_SYSTEM_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     enum ParticleSystemAnimationSource : TagEnum {
         PARTICLE_SYSTEM_ANIMATION_SOURCE_NONE,
         PARTICLE_SYSTEM_ANIMATION_SOURCE_A_OUT,
@@ -122,7 +116,7 @@ namespace Invader::HEK {
         LittleEndian<std::uint32_t> unknown_int;
         EndianType<ParticleSystemTypeParticleStateShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
-        EndianType<ParticleSystemFramebufferFadeMode> framebuffer_fade_mode;
+        EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ParticleSystemTypeParticleStateMapFlags> map_flags;
         PAD(0x1C);
         TagDependency<EndianType> secondary_map_bitmap; // bitmap

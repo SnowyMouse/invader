@@ -24,12 +24,6 @@ namespace Invader::HEK {
         LIGHTNING_TINT_MODULATION_SOURCE_D,
     };
 
-    enum LightningFramebufferFadeMode : TagEnum {
-        LIGHTNING_FRAMEBUFFER_FADE_MODE_NONE,
-        LIGHTNING_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        LIGHTNING_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     struct LightningMarkerFlag {
         std::uint16_t not_connected_to_next_marker : 1;
     };
@@ -76,7 +70,7 @@ namespace Invader::HEK {
         LittleEndian<std::uint32_t> make_it_work;
         EndianType<LightningShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
-        EndianType<LightningFramebufferFadeMode> framebuffer_fade_mode;
+        EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<LightningShaderMapFlags> map_flags;
         PAD(0x1C);
         PAD(0xC);

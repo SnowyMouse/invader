@@ -59,12 +59,6 @@ namespace Invader::HEK {
         SHADER_FIRST_MAP_TYPE_FIRST_MAP_IS_VIEWER_CENTERED_CUBE_MAP
     };
 
-    enum ShaderFramebufferFadeMode : TagEnum {
-        SHADER_FRAMEBUFFER_FADE_MODE_NONE,
-        SHADER_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        SHADER_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     enum ShaderType : std::uint8_t {
         SHADER_UNKN0 = 0x0, //unknown
         SHADER_UNKN1 = 0x1, //unknown

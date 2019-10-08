@@ -15,12 +15,6 @@ namespace Invader::HEK {
         PARTICLE_ORIENTATION_PERPENDICULAR_TO_DIRECTION
     };
 
-    enum ParticleFramebufferFadeMode : TagEnum {
-        PARTICLE_FRAMEBUFFER_FADE_MODE_NONE,
-        PARTICLE_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
-        PARTICLE_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
-    };
-
     enum ParticleAnchor : TagEnum {
         PARTICLE_ANCHOR_WITH_PRIMARY,
         PARTICLE_ANCHOR_WITH_SCREEN_SPACE,
@@ -93,7 +87,7 @@ namespace Invader::HEK {
         LittleEndian<std::uint32_t> one;
         EndianType<ParticleShaderFlags> shader_flags;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
-        EndianType<ParticleFramebufferFadeMode> framebuffer_fade_mode;
+        EndianType<FramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ParticleMapFlags> map_flags;
         PAD(0x1C);
         TagDependency<EndianType> bitmap1; // bitmap
