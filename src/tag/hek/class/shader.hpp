@@ -101,6 +101,7 @@ namespace Invader::HEK {
         std::uint8_t shader_type;
         PAD(0x3);
     };
+    static_assert(sizeof(Shader<BigEndian>) == 0x28);
 
     #define MAKE_WHITE_IF_BLACK(what) if(what.red == 0.0f && what.green == 0.0f && what.blue == 0.0f) { what.red = 1.0f; what.green = 1.0f; what.blue = 1.0f; }
     #define MAKE_ONE_IF_ZERO(what) if(what == 0.0f) { what = 1.0f; }

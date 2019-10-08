@@ -375,6 +375,7 @@ namespace Invader::HEK {
         Point3D<EndianType> position;
         Euler3D<EndianType> rotation;
     };
+    static_assert(sizeof(SpawnPrelude<BigEndian>) == 0x20);
 
     #define COPY_SPAWN_PRELUDE COPY_THIS(type); \
                                COPY_THIS(name); \

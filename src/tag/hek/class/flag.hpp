@@ -21,6 +21,7 @@ namespace Invader::HEK {
             return copy;
         }
     };
+    static_assert(sizeof(FlagAttachmentPoint<BigEndian>) == 0x34);
 
     enum FlagTrailingEdgeShape : TagEnum {
         FLAG_TRAILING_EDGE_SHAPE_FLAT,
