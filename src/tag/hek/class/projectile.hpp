@@ -25,14 +25,6 @@ namespace Invader::HEK {
         PROJECTILE_DETONATION_TIMER_STARTS_WHEN_AT_REST
     };
 
-    enum ProjectileImpactNoise : TagEnum {
-        PROJECTILE_IMPACT_NOISE_SILENT,
-        PROJECTILE_IMPACT_NOISE_MEDIUM,
-        PROJECTILE_IMPACT_NOISE_LOUD,
-        PROJECTILE_IMPACT_NOISE_SHOUT,
-        PROJECTILE_IMPACT_NOISE_QUIET
-    };
-
     enum ProjectileFunctionIn : TagEnum {
         PROJECTILE_FUNCTION_IN_NONE,
         PROJECTILE_FUNCTION_IN_RANGE_REMAINING,
@@ -108,7 +100,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Projectile : Object<EndianType> {
         EndianType<ProjectileFlags> flags;
         EndianType<ProjectileDetonationTimerStarts> detonation_timer_starts;
-        EndianType<ProjectileImpactNoise> impact_noise;
+        EndianType<ObjectNoise> impact_noise;
         EndianType<ProjectileFunctionIn> projectile_a_in;
         EndianType<ProjectileFunctionIn> projectile_b_in;
         EndianType<ProjectileFunctionIn> projectile_c_in;
@@ -129,7 +121,7 @@ namespace Invader::HEK {
         EndianType<float> initial_velocity;
         EndianType<float> final_velocity;
         EndianType<Angle> guided_angular_velocity;
-        EndianType<ProjectileImpactNoise> detonation_noise;
+        EndianType<ObjectNoise> detonation_noise;
         PAD(0x2);
         TagDependency<EndianType> detonation_started; // effect
         TagDependency<EndianType> flyby_sound; // sound

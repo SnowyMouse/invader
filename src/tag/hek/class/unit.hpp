@@ -31,14 +31,6 @@ namespace Invader::HEK {
         UNIT_DEFAULT_TEAM_UNUSED_9
     };
 
-    enum UnitConstantSoundVolume : TagEnum {
-        UNIT_CONSTANT_SOUND_VOLUME_SILENT,
-        UNIT_CONSTANT_SOUND_VOLUME_MEDIUM,
-        UNIT_CONSTANT_SOUND_VOLUME_LOUD,
-        UNIT_CONSTANT_SOUND_VOLUME_SHOUT,
-        UNIT_CONSTANT_SOUND_VOLUME_QUIET
-    };
-
     enum UnitMotionSensorBlipSize : TagEnum {
         UNIT_MOTION_SENSOR_BLIP_SIZE_MEDIUM,
         UNIT_MOTION_SENSOR_BLIP_SIZE_SMALL,
@@ -180,7 +172,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Unit : Object<EndianType> {
         EndianType<UnitFlags> unit_flags;
         EndianType<UnitDefaultTeam> default_team;
-        EndianType<UnitConstantSoundVolume> constant_sound_volume;
+        EndianType<ObjectNoise> constant_sound_volume;
         EndianType<float> rider_damage_fraction;
         TagDependency<EndianType> integrated_light_toggle; // effect
         EndianType<UnitFunctionIn> unit_a_in;

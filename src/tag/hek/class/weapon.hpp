@@ -50,14 +50,6 @@ namespace Invader::HEK {
         WEAPON_TYPE_PLASMA_RIFLE
     };
 
-    enum WeaponFiringNoise : TagEnum {
-        WEAPON_FIRING_NOISE_SILENT,
-        WEAPON_FIRING_NOISE_MEDIUM,
-        WEAPON_FIRING_NOISE_LOUD,
-        WEAPON_FIRING_NOISE_SHOUT,
-        WEAPON_FIRING_NOISE_QUIET
-    };
-
     enum WeaponOverchargedAction : TagEnum {
         WEAPON_OVERCHARGED_ACTION_NONE,
         WEAPON_OVERCHARGED_ACTION_EXPLODE,
@@ -178,7 +170,7 @@ namespace Invader::HEK {
         EndianType<std::int16_t> minimum_rounds_loaded;
         EndianType<std::int16_t> rounds_between_tracers;
         PAD(0x6);
-        EndianType<WeaponFiringNoise> firing_noise;
+        EndianType<ObjectNoise> firing_noise;
         Bounds<EndianType<float>> error;
         EndianType<float> error_acceleration_time;
         EndianType<float> error_deceleration_time;

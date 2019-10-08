@@ -22,6 +22,13 @@ namespace Invader::HEK {
         OBJECT_ATTACHMENT_CHANGE_COLOR_C,
         OBJECT_ATTACHMENT_CHANGE_COLOR_D
     };
+    enum ObjectNoise : TagEnum {
+        OBJECT_NOISE_SILENT,
+        OBJECT_NOISE_MEDIUM,
+        OBJECT_NOISE_LOUD,
+        OBJECT_NOISE_SHOUT,
+        OBJECT_NOISE_QUIET
+    };
 
     ENDIAN_TEMPLATE(EndianType) struct ObjectAttachment {
         TagDependency<EndianType> type; // light, light_volume, contrail, particle_system, effect, sound_looping
