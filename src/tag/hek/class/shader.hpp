@@ -9,7 +9,7 @@
 #include "enum.hpp"
 
 namespace Invader::HEK {
-    SINGLE_DEPENDENCY_STRUCT(ShaderTransparentExtraLayer, shader); //shader
+    SINGLE_DEPENDENCY_STRUCT(ShaderTransparentExtraLayer, shader); // shader
 
     struct ShaderFlags {
         std::uint16_t simple_parameterization : 1;

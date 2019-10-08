@@ -39,7 +39,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ObjectAttachment<BigEndian>) == 0x48);
 
-    SINGLE_DEPENDENCY_PADDED_STRUCT(ObjectWidget, reference, 0x10);
+    SINGLE_DEPENDENCY_PADDED_STRUCT(ObjectWidget, reference, 0x10); // antenna, glow, light_volume, lightning
 
     struct ObjectFunctionFlags {
         std::uint32_t invert : 1;

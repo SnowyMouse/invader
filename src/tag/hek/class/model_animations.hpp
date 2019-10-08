@@ -387,7 +387,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ModelAnimationAnimationGraphFirstPersonWeaponAnimations<BigEndian>) == 0x1C);
 
-    SINGLE_DEPENDENCY_PADDED_STRUCT(ModelAnimationAnimationGraphSoundReference, sound, 0x4);
+    SINGLE_DEPENDENCY_PADDED_STRUCT(ModelAnimationAnimationGraphSoundReference, sound, 0x4); // sound
 
     struct ModelAnimationAnimationGraphNodeFlags {
         std::uint32_t ball_socket : 1;

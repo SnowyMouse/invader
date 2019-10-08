@@ -8,7 +8,7 @@
 #include "../header.hpp"
 
 namespace Invader::HEK {
-    SINGLE_DEPENDENCY_STRUCT(TagCollectionTag, reference);
+    SINGLE_DEPENDENCY_STRUCT(TagCollectionTag, reference); // item
 
     ENDIAN_TEMPLATE(EndianType) struct TagCollection {
         TagReflexive<EndianType, TagCollectionTag> tags;

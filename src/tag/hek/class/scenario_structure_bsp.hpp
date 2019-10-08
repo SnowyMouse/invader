@@ -209,7 +209,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ScenarioStructureBSPLightmap<BigEndian>) == 0x20);
 
-    SINGLE_DEPENDENCY_STRUCT(ScenarioStructureBSPLensFlare, lens);
+    SINGLE_DEPENDENCY_STRUCT(ScenarioStructureBSPLensFlare, lens); // lens_flare
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPLensFlareMarker {
         Point3D<EndianType> position;
