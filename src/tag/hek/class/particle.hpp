@@ -82,7 +82,8 @@ namespace Invader::HEK {
         TagDependency<EndianType> collision_effect; // sound, effect
         TagDependency<EndianType> death_effect; // sound, effect
         EndianType<float> minimum_size;
-        BigEndian<float> unknown_floats[2]; // 2 and 1, respectively, sometimes - copied as-is. no known usage
+        LittleEndian<float> unknown_float_a;
+        LittleEndian<float> unknown_float_b;
         Bounds<EndianType<float>> radius_animation;
         PAD(0x4);
         Bounds<EndianType<float>> animation_rate;
@@ -140,7 +141,8 @@ namespace Invader::HEK {
             COPY_THIS(collision_effect);
             COPY_THIS(death_effect);
             COPY_THIS(minimum_size);
-            COPY_THIS_ARRAY(unknown_floats);
+            COPY_THIS(unknown_float_a);
+            COPY_THIS(unknown_float_b);
             COPY_THIS(radius_animation);
             COPY_THIS(animation_rate);
             COPY_THIS(contact_deterioration);

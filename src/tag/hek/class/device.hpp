@@ -52,34 +52,34 @@ namespace Invader::HEK {
         LittleEndian<float> inverse_position_transition_time;
         PAD(0x4);
 
-        #define COPY_DEVICE_DATA COPY_OBJECT_DATA \
-                                 COPY_THIS(device_flags); \
-                                 COPY_THIS(power_transition_time); \
-                                 COPY_THIS(power_acceleration_time); \
-                                 COPY_THIS(position_transition_time); \
-                                 COPY_THIS(position_acceleration_time); \
-                                 COPY_THIS(depowered_position_transition_time); \
-                                 COPY_THIS(depowered_position_acceleration_time); \
-                                 COPY_THIS(device_a_in); \
-                                 COPY_THIS(device_b_in); \
-                                 COPY_THIS(device_c_in); \
-                                 COPY_THIS(device_d_in); \
-                                 COPY_THIS(open); \
-                                 COPY_THIS(close); \
-                                 COPY_THIS(opened); \
-                                 COPY_THIS(closed); \
-                                 COPY_THIS(depowered); \
-                                 COPY_THIS(repowered); \
-                                 COPY_THIS(delay_time); \
-                                 COPY_THIS(delay_effect); \
-                                 COPY_THIS(automatic_activation_radius); \
-                                 COPY_THIS(inverse_position_acceleration_time);\
-                                 COPY_THIS(inverse_position_transition_time); \
-                                 COPY_THIS(inverse_power_acceleration_time); \
-                                 COPY_THIS(inverse_power_transition_time);
-
         ENDIAN_TEMPLATE(NewType) operator Device<NewType>() const noexcept {
             Device<NewType> copy = {};
+
+            #define COPY_DEVICE_DATA COPY_OBJECT_DATA \
+                                     COPY_THIS(device_flags); \
+                                     COPY_THIS(power_transition_time); \
+                                     COPY_THIS(power_acceleration_time); \
+                                     COPY_THIS(position_transition_time); \
+                                     COPY_THIS(position_acceleration_time); \
+                                     COPY_THIS(depowered_position_transition_time); \
+                                     COPY_THIS(depowered_position_acceleration_time); \
+                                     COPY_THIS(device_a_in); \
+                                     COPY_THIS(device_b_in); \
+                                     COPY_THIS(device_c_in); \
+                                     COPY_THIS(device_d_in); \
+                                     COPY_THIS(open); \
+                                     COPY_THIS(close); \
+                                     COPY_THIS(opened); \
+                                     COPY_THIS(closed); \
+                                     COPY_THIS(depowered); \
+                                     COPY_THIS(repowered); \
+                                     COPY_THIS(delay_time); \
+                                     COPY_THIS(delay_effect); \
+                                     COPY_THIS(automatic_activation_radius); \
+                                     COPY_THIS(inverse_position_acceleration_time);\
+                                     COPY_THIS(inverse_position_transition_time); \
+                                     COPY_THIS(inverse_power_acceleration_time); \
+                                     COPY_THIS(inverse_power_transition_time);
             COPY_DEVICE_DATA
             return copy;
         }

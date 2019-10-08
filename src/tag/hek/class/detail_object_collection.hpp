@@ -14,7 +14,8 @@ namespace Invader::HEK {
     };
 
     struct DetailObjectCollectionTypeFlags {
-        std::uint8_t unused : 2;
+        std::uint8_t unused_a : 1;
+        std::uint8_t unused_b : 1;
         std::uint8_t interpolate_color_in_hsv : 1;
         std::uint8_t more_colors : 1;
     };
