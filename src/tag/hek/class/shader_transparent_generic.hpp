@@ -258,15 +258,15 @@ namespace Invader::HEK {
     static_assert(sizeof(ShaderTransparentGenericStage<BigEndian>) == 0x70);
 
     struct ShaderTransparentGenericFlags {
-		std::uint8_t alpha_tested : 1;
-		std::uint8_t decal : 1;
-		std::uint8_t two_sided : 1;
-		std::uint8_t first_map_is_in_screenspace : 1;
-		std::uint8_t draw_before_water : 1;
-		std::uint8_t ignore_effect : 1;
-		std::uint8_t scale_first_map_with_distance : 1;
-		std::uint8_t numeric : 1;
-	};
+        std::uint8_t alpha_tested : 1;
+        std::uint8_t decal : 1;
+        std::uint8_t two_sided : 1;
+        std::uint8_t first_map_is_in_screenspace : 1;
+        std::uint8_t draw_before_water : 1;
+        std::uint8_t ignore_effect : 1;
+        std::uint8_t scale_first_map_with_distance : 1;
+        std::uint8_t numeric : 1;
+    };
 
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentGeneric : Shader<EndianType> {
         std::uint8_t numeric_counter_limit;
