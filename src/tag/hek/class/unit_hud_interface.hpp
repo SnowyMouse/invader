@@ -7,7 +7,7 @@
 
 namespace Invader::HEK {
     enum UnitHUDInterfacePanelType : TagEnum {
-        UNIT_HUD_INTERFACE_PANEL_INTEGRATED_LIGHT
+        UNIT_HUD_INTERFACE_PANEL_TYPE_INTEGRATED_LIGHT
     };
 
     struct UnitHUDInterfaceAuxiliaryOverlayFlags {

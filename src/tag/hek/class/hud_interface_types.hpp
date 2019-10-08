@@ -73,8 +73,8 @@ namespace Invader::HEK {
     };
 
     enum HUDInterfaceWrapMode : TagEnum {
-        HUD_INTERFACE_PRIMARY_WRAP_MODE_CLAMP,
-        HUD_INTERFACE_PRIMARY_WRAP_MODE_WRAP
+        HUD_INTERFACE_WRAP_MODE_CLAMP,
+        HUD_INTERFACE_WRAP_MODE_WRAP
     };
 
     enum HUDInterfaceAnchor : TagEnum {
