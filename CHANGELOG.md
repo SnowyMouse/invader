@@ -12,6 +12,9 @@ library, allowing Invader to compile on more systems provided they support C++17
 - Replaced the license header in each source file with a simpler `// SPDX-License-Identifier: GPL-3.0-only`. For more
 information on this header, go to https://spdx.org/ids-how
 
+### Fixed
+- Fixed an issue where invader-dependency didn't include a null terminator, causing some tags to fail to open
+
 ## [0.13.0] - 2019-10-04
 ### Changed
 - invader-build: Changed how stubbed tags are created so tag extractors won't try to extract them
