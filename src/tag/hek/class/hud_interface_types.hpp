@@ -5,6 +5,7 @@
 
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
+#include "enum.hpp"
 #include "../header.hpp"
 
 namespace Invader::HEK {
@@ -46,17 +47,6 @@ namespace Invader::HEK {
         HUD_INTERFACE_PERIODIC_FUNCTION_JITTER,
         HUD_INTERFACE_PERIODIC_FUNCTION_WANDER,
         HUD_INTERFACE_PERIODIC_FUNCTION_SPARK
-    };
-
-    enum HUDInterfaceFramebufferBlendFunction : TagEnum {
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        HUD_INTERFACE_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum HUDInterfaceMultitextureOverlayAnchor : TagEnum {
@@ -138,7 +128,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct HUDInterfaceMultitextureOverlay {
         PAD(0x2);
         EndianType<std::int16_t> type;
-        EndianType<HUDInterfaceFramebufferBlendFunction> framebuffer_blend_func;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         PAD(0x2);
         PAD(0x20);
         EndianType<HUDInterfaceAnchor> primary_anchor;

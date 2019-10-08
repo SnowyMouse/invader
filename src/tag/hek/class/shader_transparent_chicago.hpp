@@ -105,7 +105,7 @@ namespace Invader::HEK {
         std::uint8_t numeric_counter_limit;
         ShaderTransparentChicagoFlags shader_transparent_chicago_extended_flags;
         EndianType<ShaderFirstMapType> first_map_type;
-        EndianType<ShaderFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<ShaderFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ShaderAnimationSource> framebuffer_fade_source;
         PAD(0x2);

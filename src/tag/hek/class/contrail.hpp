@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 #include "particle.hpp"
 
 namespace Invader::HEK {
@@ -16,17 +17,6 @@ namespace Invader::HEK {
         CONTRAIL_RENDER_TYPE_GROUND_MAPPED,
         CONTRAIL_RENDER_TYPE_VIEWER_FACING,
         CONTRAIL_RENDER_TYPE_DOUBLE_MARKER_LINKED
-    };
-
-    enum ContrailFramebufferBlendFunction : TagEnum {
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        CONTRAIL_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum ContrailFramebufferFadeMode : TagEnum {
@@ -130,7 +120,7 @@ namespace Invader::HEK {
         PAD(0x24);
         EndianType<std::uint32_t> unknown_int;
         EndianType<ContrailShaderFlags> shader_flags;
-        EndianType<ContrailFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<ContrailFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ContrailMapFlags> map_flags;
         PAD(0xC);

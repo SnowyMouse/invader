@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     SINGLE_DEPENDENCY_STRUCT(ShaderTransparentExtraLayer, shader); //shader
@@ -56,17 +57,6 @@ namespace Invader::HEK {
         SHADER_FIRST_MAP_TYPE_FIRST_MAP_IS_REFLECTION_CUBE_MAP,
         SHADER_FIRST_MAP_TYPE_FIRST_MAP_IS_OBJECT_CENTERED_CUBE_MAP,
         SHADER_FIRST_MAP_TYPE_FIRST_MAP_IS_VIEWER_CENTERED_CUBE_MAP
-    };
-
-    enum ShaderFramebufferBlendFunction : TagEnum {
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        SHADER_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum ShaderFramebufferFadeMode : TagEnum {

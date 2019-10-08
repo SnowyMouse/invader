@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "particle.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum ParticleSystemParticleCreationPhysics : TagEnum {
@@ -17,17 +18,6 @@ namespace Invader::HEK {
 
     enum ParticleSystemParticleUpdatePhysics : TagEnum {
         PARTICLE_SYSTEM_PARTICLE_UPDATE_PHYSICS_DEFAULT
-    };
-
-    enum ParticleSystemFramebufferBlendFunction : TagEnum {
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum ParticleSystemFramebufferFadeMode : TagEnum {
@@ -131,7 +121,7 @@ namespace Invader::HEK {
         PAD(0x24);
         LittleEndian<std::uint32_t> unknown_int;
         EndianType<ParticleSystemTypeParticleStateShaderFlags> shader_flags;
-        EndianType<ParticleSystemFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<ParticleSystemFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ParticleSystemTypeParticleStateMapFlags> map_flags;
         PAD(0x1C);

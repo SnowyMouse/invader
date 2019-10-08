@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum LightningScaleSource : TagEnum {
@@ -23,16 +24,6 @@ namespace Invader::HEK {
         LIGHTNING_TINT_MODULATION_SOURCE_D,
     };
 
-    enum LightningFramebufferBlendFunction : TagEnum {
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        LIGHTNING_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
-    };
     enum LightningFramebufferFadeMode : TagEnum {
         LIGHTNING_FRAMEBUFFER_FADE_MODE_NONE,
         LIGHTNING_FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
@@ -84,7 +75,7 @@ namespace Invader::HEK {
         PAD(0x24);
         LittleEndian<std::uint32_t> make_it_work;
         EndianType<LightningShaderFlags> shader_flags;
-        EndianType<LightningFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<LightningFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<LightningShaderMapFlags> map_flags;
         PAD(0x1C);

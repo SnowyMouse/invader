@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "particle.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum WeatherParticleSystemRenderMode : TagEnum {
@@ -18,17 +19,6 @@ namespace Invader::HEK {
     enum WeatherParticleSystemRenderDirectionSource : TagEnum {
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_VELOCITY,
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_ACCELERATION,
-    };
-
-    enum WeatherParticleSystemFramebufferBlendFunction : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        WEATHER_PARTICLE_SYSTEM_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum WeatherParticleSystemFramebufferFadeMode : TagEnum {
@@ -110,7 +100,7 @@ namespace Invader::HEK {
         PAD(0x24);
         LittleEndian<std::uint32_t> not_broken;
         EndianType<WeatherParticleSystemParticleTypeShaderFlags> shader_flags;
-        EndianType<WeatherParticleSystemFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<WeatherParticleSystemFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<WeatherParticleSystemParticleTypeMapFlags> map_flags;
         PAD(0x1C);

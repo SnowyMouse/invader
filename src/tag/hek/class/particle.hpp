@@ -6,23 +6,13 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum ParticleOrientation : TagEnum {
         PARTICLE_ORIENTATION_SCREEN_FACING,
         PARTICLE_ORIENTATION_PARALLEL_TO_DIRECTION,
         PARTICLE_ORIENTATION_PERPENDICULAR_TO_DIRECTION
-    };
-
-    enum ParticleFramebufferBlendFunction : TagEnum {
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_BLEND,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_MULTIPLY,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_ADD,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_SUBTRACT,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MIN,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_COMPONENT_MAX,
-        PARTICLE_FRAMEBUFFER_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     enum ParticleFramebufferFadeMode : TagEnum {
@@ -102,7 +92,7 @@ namespace Invader::HEK {
         PAD(0x24);
         LittleEndian<std::uint32_t> one;
         EndianType<ParticleShaderFlags> shader_flags;
-        EndianType<ParticleFramebufferBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<ParticleFramebufferFadeMode> framebuffer_fade_mode;
         EndianType<ParticleMapFlags> map_flags;
         PAD(0x1C);

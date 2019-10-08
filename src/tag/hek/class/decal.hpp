@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum DecalType : TagEnum {
@@ -20,16 +21,6 @@ namespace Invader::HEK {
         DECAL_LAYER_LIGHT,
         DECAL_LAYER_ALPHA_TESTED,
         DECAL_LAYER_WATER
-    };
-    enum DecalBlendFunction : TagEnum {
-        DECAL_BLEND_FUNCTION_ALPHA_BLEND,
-        DECAL_BLEND_FUNCTION_MULTIPLY,
-        DECAL_BLEND_FUNCTION_DOUBLE_MULTIPLY,
-        DECAL_BLEND_FUNCTION_ADD,
-        DECAL_BLEND_FUNCTION_SUBTRACT,
-        DECAL_BLEND_FUNCTION_COMPONENT_MIN,
-        DECAL_BLEND_FUNCTION_COMPONENT_MAX,
-        DECAL_BLEND_FUNCTION_ALPHA_MULTIPLY_ADD
     };
 
     struct DecalFlags {
@@ -65,7 +56,7 @@ namespace Invader::HEK {
         PAD(0x28);
         PAD(0x2);
         PAD(0x2);
-        EndianType<DecalBlendFunction> framebuffer_blend_function;
+        EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         PAD(0x2);
         PAD(0x14);
         TagDependency<EndianType> map; // bitmap
