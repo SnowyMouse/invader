@@ -20,14 +20,6 @@ namespace Invader::HEK {
         PARTICLE_SYSTEM_PARTICLE_UPDATE_PHYSICS_DEFAULT
     };
 
-    enum ParticleSystemAnimationSource : TagEnum {
-        PARTICLE_SYSTEM_ANIMATION_SOURCE_NONE,
-        PARTICLE_SYSTEM_ANIMATION_SOURCE_A_OUT,
-        PARTICLE_SYSTEM_ANIMATION_SOURCE_B_OUT,
-        PARTICLE_SYSTEM_ANIMATION_SOURCE_C_OUT,
-        PARTICLE_SYSTEM_ANIMATION_SOURCE_D_OUT
-    };
-
     enum ParticleSystemComplexSpriteRenderModes : TagEnum {
         PARTICLE_SYSTEM_COMPLEX_SPRITE_RENDER_MODES_SIMPLE,
         PARTICLE_SYSTEM_COMPLEX_SPRITE_RENDER_MODES_ROTATIONAL
@@ -122,17 +114,17 @@ namespace Invader::HEK {
         TagDependency<EndianType> secondary_map_bitmap; // bitmap
         EndianType<ParticleAnchor> anchor;
         EndianType<ParticleSystemTypeParticleStateMapFlags> flags;
-        EndianType<ParticleSystemAnimationSource> u_animation_source;
+        EndianType<FunctionOut> u_animation_source;
         EndianType<FunctionType2> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
-        EndianType<ParticleSystemAnimationSource> v_animation_source;
+        EndianType<FunctionOut> v_animation_source;
         EndianType<FunctionType2> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
-        EndianType<ParticleSystemAnimationSource> rotation_animation_source;
+        EndianType<FunctionOut> rotation_animation_source;
         EndianType<FunctionType2> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;

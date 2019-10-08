@@ -6,15 +6,9 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
-    enum ObjectAttachmentPrimaryScale : TagEnum {
-        OBJECT_ATTACHMENT_PRIMARY_SCALE_NONE,
-        OBJECT_ATTACHMENT_PRIMARY_SCALE_A_OUT,
-        OBJECT_ATTACHMENT_PRIMARY_SCALE_B_OUT,
-        OBJECT_ATTACHMENT_PRIMARY_SCALE_C_OUT,
-        OBJECT_ATTACHMENT_PRIMARY_SCALE_D_OUT
-    };
     enum ObjectAttachmentChangeColor : TagEnum {
         OBJECT_ATTACHMENT_CHANGE_COLOR_NONE,
         OBJECT_ATTACHMENT_CHANGE_COLOR_A,
@@ -33,8 +27,8 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ObjectAttachment {
         TagDependency<EndianType> type; // light, light_volume, contrail, particle_system, effect, sound_looping
         TagString marker;
-        EndianType<ObjectAttachmentPrimaryScale> primary_scale;
-        EndianType<ObjectAttachmentPrimaryScale> secondary_scale;
+        EndianType<FunctionOut> primary_scale;
+        EndianType<FunctionOut> secondary_scale;
         EndianType<ObjectAttachmentChangeColor> change_color;
         PAD(0x2);
         PAD(0x10);

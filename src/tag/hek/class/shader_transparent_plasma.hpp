@@ -6,14 +6,6 @@
 #include "shader.hpp"
 
 namespace Invader::HEK {
-    enum ShaderTransparentPlasmaSource : TagEnum {
-        SHADER_TRANSPARENT_PLASMA_SOURCE_NONE,
-        SHADER_TRANSPARENT_PLASMA_SOURCE_A_OUT,
-        SHADER_TRANSPARENT_PLASMA_SOURCE_B_OUT,
-        SHADER_TRANSPARENT_PLASMA_SOURCE_C_OUT,
-        SHADER_TRANSPARENT_PLASMA_SOURCE_D_OUT
-    };
-
     enum ShaderTransparentPlasmaTintColorSource : TagEnum {
         SHADER_TRANSPARENT_PLASMA_TINT_COLOR_SOURCE_NONE,
         SHADER_TRANSPARENT_PLASMA_TINT_COLOR_SOURCE_A,
@@ -25,10 +17,10 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentPlasma : Shader<EndianType> {
         PAD(0x2);
         PAD(0x2);
-        EndianType<ShaderTransparentPlasmaSource> intensity_source;
+        EndianType<FunctionOut> intensity_source;
         PAD(0x2);
         EndianType<float> intensity_exponent;
-        EndianType<ShaderTransparentPlasmaSource> offset_source;
+        EndianType<FunctionOut> offset_source;
         PAD(0x2);
         EndianType<float> offset_amount;
         EndianType<float> offset_exponent;

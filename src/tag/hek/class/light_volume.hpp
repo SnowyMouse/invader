@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct LightVolumeFrame {
@@ -41,14 +42,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(LightVolumeFrame<BigEndian>) == 0xB0);
 
-    enum LightVolumeScaleSource : TagEnum {
-        LIGHT_VOLUME_SCALE_SOURCE_NONE,
-        LIGHT_VOLUME_SCALE_SOURCE_A_OUT,
-        LIGHT_VOLUME_SCALE_SOURCE_B_OUT,
-        LIGHT_VOLUME_SCALE_SOURCE_C_OUT,
-        LIGHT_VOLUME_SCALE_SOURCE_D_OUT
-    };
-
     struct LightVolumeFlags {
         std::uint16_t interpolate_color_in_hsv : 1;
         std::uint16_t _more_colors : 1;
@@ -63,14 +56,14 @@ namespace Invader::HEK {
         EndianType<float> far_fade_distance;
         EndianType<Fraction> perpendicular_brightness_scale;
         EndianType<Fraction> parallel_brightness_scale;
-        EndianType<LightVolumeScaleSource> brightness_scale_source;
+        EndianType<FunctionOut> brightness_scale_source;
         PAD(0x2);
         PAD(0x14);
         TagDependency<EndianType> map; // bitmap
         EndianType<std::int16_t> sequence_index;
         EndianType<std::int16_t> count;
         PAD(0x48);
-        EndianType<LightVolumeScaleSource> frame_animation_source;
+        EndianType<FunctionOut> frame_animation_source;
         PAD(0x2);
         PAD(0x24);
         PAD(0x40);

@@ -9,13 +9,6 @@
 #include "enum.hpp"
 
 namespace Invader::HEK {
-    enum LightningScaleSource : TagEnum {
-        LIGHTNING_SCALE_SOURCE_NONE,
-        LIGHTNING_SCALE_SOURCE_A_OUT,
-        LIGHTNING_SCALE_SOURCE_B_OUT,
-        LIGHTNING_SCALE_SOURCE_C_OUT,
-        LIGHTNING_SCALE_SOURCE_D_OUT
-    };
     enum LightningTintModulationSource : TagEnum {
         LIGHTNING_TINT_MODULATION_SOURCE_NONE,
         LIGHTNING_TINT_MODULATION_SOURCE_A,
@@ -100,10 +93,10 @@ namespace Invader::HEK {
         EndianType<float> near_fade_distance;
         EndianType<float> far_fade_distance;
         PAD(0x10);
-        EndianType<LightningScaleSource> jitter_scale_source;
-        EndianType<LightningScaleSource> thickness_scale_source;
+        EndianType<FunctionOut> jitter_scale_source;
+        EndianType<FunctionOut> thickness_scale_source;
         EndianType<LightningTintModulationSource> tint_modulation_source;
-        EndianType<LightningScaleSource> brightness_scale_source;
+        EndianType<FunctionOut> brightness_scale_source;
         TagDependency<EndianType> bitmap; // bitmap
         PAD(0x54);
         TagReflexive<EndianType, LightningMarker> markers;

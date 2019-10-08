@@ -19,14 +19,6 @@ namespace Invader::HEK {
         CONTRAIL_RENDER_TYPE_DOUBLE_MARKER_LINKED
     };
 
-    enum ContrailAnimationSource : TagEnum {
-        CONTRAIL_ANIMATION_SOURCE_NONE,
-        CONTRAIL_ANIMATION_SOURCE_A_OUT,
-        CONTRAIL_ANIMATION_SOURCE_B_OUT,
-        CONTRAIL_ANIMATION_SOURCE_C_OUT,
-        CONTRAIL_ANIMATION_SOURCE_D_OUT
-    };
-
     struct ContrailPointStateScaleFlags {
         std::uint32_t duration : 1;
         std::uint32_t duration_delta : 1;
@@ -122,17 +114,17 @@ namespace Invader::HEK {
         TagDependency<EndianType> secondary_bitmap; // bitmap
         EndianType<ParticleAnchor> anchor;
         EndianType<ContrailMapFlags> secondary_map_flags;
-        EndianType<ContrailAnimationSource> u_animation_source;
+        EndianType<FunctionOut> u_animation_source;
         EndianType<FunctionType2> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
-        EndianType<ContrailAnimationSource> v_animation_source;
+        EndianType<FunctionOut> v_animation_source;
         EndianType<FunctionType2> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
-        EndianType<ContrailAnimationSource> rotation_animation_source;
+        EndianType<FunctionOut> rotation_animation_source;
         EndianType<FunctionType2> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;

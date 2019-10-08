@@ -22,6 +22,14 @@ namespace Invader::HEK {
         FRAMEBUFFER_FADE_MODE_FADE_WHEN_PERPENDICULAR,
         FRAMEBUFFER_FADE_MODE_FADE_WHEN_PARALLEL
     };
+
+    enum FunctionOut : TagEnum {
+        FUNCTION_OUT_NONE,
+        FUNCTION_OUT_A_OUT,
+        FUNCTION_OUT_B_OUT,
+        FUNCTION_OUT_C_OUT,
+        FUNCTION_OUT_D_OUT
+    };
 }
 
 #endif

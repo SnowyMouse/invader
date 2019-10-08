@@ -21,14 +21,6 @@ namespace Invader::HEK {
         WEATHER_PARTICLE_SYSTEM_RENDER_DIRECTION_SOURCE_FROM_ACCELERATION,
     };
 
-    enum WeatherParticleSystemAnimationSource : TagEnum {
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_NONE,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_A_OUT,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_B_OUT,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_C_OUT,
-        WEATHER_PARTICLE_SYSTEM_ANIMATION_SOURCE_D_OUT
-    };
-
     enum WeatherParticleSystemAnimationFunction : TagEnum {
         WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_ONE,
         WEATHER_PARTICLE_SYSTEM_ANIMATION_FUNCTION_ZERO,
@@ -102,17 +94,17 @@ namespace Invader::HEK {
         TagDependency<EndianType> bitmap; // .bitmap
         EndianType<ParticleAnchor> anchor;
         EndianType<WeatherParticleSystemParticleTypeMapFlags> flags_1;
-        EndianType<WeatherParticleSystemAnimationSource> u_animation_source;
+        EndianType<FunctionOut> u_animation_source;
         EndianType<WeatherParticleSystemAnimationFunction> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
-        EndianType<WeatherParticleSystemAnimationSource> v_animation_source;
+        EndianType<FunctionOut> v_animation_source;
         EndianType<WeatherParticleSystemAnimationFunction> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
-        EndianType<WeatherParticleSystemAnimationSource> rotation_animation_source;
+        EndianType<FunctionOut> rotation_animation_source;
         EndianType<WeatherParticleSystemAnimationFunction> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;

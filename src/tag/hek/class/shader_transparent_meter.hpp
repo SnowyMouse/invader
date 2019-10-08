@@ -14,14 +14,6 @@ namespace Invader::HEK {
         std::uint16_t unfiltered : 1;
     };
 
-    enum ShaderTransparentMeterSource : TagEnum {
-        SHADER_TRANSPARENT_METER_SOURCE_NONE,
-        SHADER_TRANSPARENT_METER_SOURCE_A_OUT,
-        SHADER_TRANSPARENT_METER_SOURCE_B_OUT,
-        SHADER_TRANSPARENT_METER_SOURCE_C_OUT,
-        SHADER_TRANSPARENT_METER_SOURCE_D_OUT
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentMeter : Shader<EndianType> {
         EndianType<ShaderTransparentMeterFlags> meter_flags;
         PAD(0x2);
@@ -36,11 +28,11 @@ namespace Invader::HEK {
         EndianType<Fraction> meter_transparency;
         EndianType<Fraction> background_transparency;
         PAD(0x18);
-        EndianType<ShaderTransparentMeterSource> meter_brightness_source;
-        EndianType<ShaderTransparentMeterSource> flash_brightness_source;
-        EndianType<ShaderTransparentMeterSource> value_source;
-        EndianType<ShaderTransparentMeterSource> gradient_source;
-        EndianType<ShaderTransparentMeterSource> flash_extension_source;
+        EndianType<FunctionOut> meter_brightness_source;
+        EndianType<FunctionOut> flash_brightness_source;
+        EndianType<FunctionOut> value_source;
+        EndianType<FunctionOut> gradient_source;
+        EndianType<FunctionOut> flash_extension_source;
         PAD(0x2);
         PAD(0x20);
 

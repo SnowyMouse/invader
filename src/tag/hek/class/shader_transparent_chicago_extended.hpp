@@ -12,7 +12,7 @@ namespace Invader::HEK {
         EndianType<ShaderFirstMapType> first_map_type;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<ShaderAnimationSource> framebuffer_fade_source;
+        EndianType<FunctionOut> framebuffer_fade_source;
         PAD(0x2);
         EndianType<float> lens_flare_spacing;
         TagDependency<EndianType> lens_flare; // lens_flare

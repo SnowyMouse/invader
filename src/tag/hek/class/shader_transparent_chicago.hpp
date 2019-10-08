@@ -28,17 +28,17 @@ namespace Invader::HEK {
         EndianType<Fraction> mipmap_bias;
         TagDependency<EndianType> map; // bitmap
         PAD(0x28);
-        EndianType<ShaderAnimationSource> u_animation_source;
+        EndianType<FunctionOut> u_animation_source;
         EndianType<FunctionType2> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
-        EndianType<ShaderAnimationSource> v_animation_source;
+        EndianType<FunctionOut> v_animation_source;
         EndianType<FunctionType2> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
-        EndianType<ShaderAnimationSource> rotation_animation_source;
+        EndianType<FunctionOut> rotation_animation_source;
         EndianType<FunctionType2> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;
@@ -107,7 +107,7 @@ namespace Invader::HEK {
         EndianType<ShaderFirstMapType> first_map_type;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
-        EndianType<ShaderAnimationSource> framebuffer_fade_source;
+        EndianType<FunctionOut> framebuffer_fade_source;
         PAD(0x2);
         EndianType<float> lens_flare_spacing;
         TagDependency<EndianType> lens_flare; // lens_flare

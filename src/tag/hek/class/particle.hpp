@@ -21,14 +21,6 @@ namespace Invader::HEK {
         PARTICLE_ANCHOR_ZSPRITE
     };
 
-    enum ParticleAnimationSource : TagEnum {
-        PARTICLE_ANIMATION_SOURCE_NONE,
-        PARTICLE_ANIMATION_SOURCE_A_OUT,
-        PARTICLE_ANIMATION_SOURCE_B_OUT,
-        PARTICLE_ANIMATION_SOURCE_C_OUT,
-        PARTICLE_ANIMATION_SOURCE_D_OUT
-    };
-
     struct ParticleFlags {
         std::uint32_t can_animate_backwards : 1;
         std::uint32_t animation_stops_at_rest : 1;
@@ -93,17 +85,17 @@ namespace Invader::HEK {
         TagDependency<EndianType> bitmap1; // bitmap
         EndianType<ParticleAnchor> anchor;
         EndianType<ParticleMapFlags> map_flags1;
-        EndianType<ParticleAnimationSource> u_animation_source;
+        EndianType<FunctionOut> u_animation_source;
         EndianType<FunctionType2> u_animation_function;
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_phase;
         EndianType<float> u_animation_scale;
-        EndianType<ParticleAnimationSource> v_animation_source;
+        EndianType<FunctionOut> v_animation_source;
         EndianType<FunctionType2> v_animation_function;
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_phase;
         EndianType<float> v_animation_scale;
-        EndianType<ParticleAnimationSource> rotation_animation_source;
+        EndianType<FunctionOut> rotation_animation_source;
         EndianType<FunctionType2> rotation_animation_function;
         EndianType<float> rotation_animation_period;
         EndianType<float> rotation_animation_phase;
