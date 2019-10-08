@@ -286,16 +286,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(WeaponHUDInterfaceCrosshair<BigEndian>) == 0x68);
 
-    struct WeaponHUDInterfaceOverlayScalingFlags {
-        std::uint16_t don_t_scale_offset : 1;
-        std::uint16_t don_t_scale_size : 1;
-        std::uint16_t use_high_res_scale : 1;
-    };
-
-    struct WeaponHUDInterfaceOverlayFlashFlags {
-        std::uint16_t reverse_default_flashing_colors : 1;
-    };
-
     struct WeaponHUDInterfaceOverlayType {
         std::uint16_t show_on_flashing : 1;
         std::uint16_t show_on_empty : 1;
@@ -308,7 +298,7 @@ namespace Invader::HEK {
         Point2DInt<EndianType> anchor_offset;
         EndianType<float> width_scale;
         EndianType<float> height_scale;
-        EndianType<WeaponHUDInterfaceOverlayScalingFlags> scaling_flags;
+        EndianType<HUDInterfaceScalingFlags> scaling_flags;
         PAD(0x2);
         PAD(0x14);
         EndianType<ColorARGBInt> default_color;
@@ -316,7 +306,7 @@ namespace Invader::HEK {
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
         EndianType<std::int16_t> number_of_flashes;
-        EndianType<WeaponHUDInterfaceOverlayFlashFlags> flash_flags;
+        EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
