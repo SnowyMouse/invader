@@ -13,6 +13,11 @@ namespace Invader::HEK {
     struct IsUnfilteredFlag {
         std::uint16_t unfiltered : 1;
     };
+
+    struct ColorInterpolationFlags {
+        std::uint32_t blend_in_hsv : 1;
+        std::uint32_t _more_colors : 1;
+    };
 }
 
 #endif

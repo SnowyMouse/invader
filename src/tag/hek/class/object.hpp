@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     enum ObjectNoise : TagEnum {
@@ -119,15 +120,10 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ObjectChangeColorsPermutation<BigEndian>) == 0x1C);
 
-    struct ObjectChangeColorsScaleFlags {
-        std::uint32_t blend_in_hsv : 1;
-        std::uint32_t _more_colors : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct ObjectChangeColors {
         EndianType<FunctionScaleBy> darken_by;
         EndianType<FunctionScaleBy> scale_by;
-        EndianType<ObjectChangeColorsScaleFlags> flags;
+        EndianType<ColorInterpolationFlags> flags;
         ColorRGB<EndianType> color_lower_bound;
         ColorRGB<EndianType> color_upper_bound;
         TagReflexive<EndianType, ObjectChangeColorsPermutation> permutations;

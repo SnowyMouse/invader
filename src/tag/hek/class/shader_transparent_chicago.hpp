@@ -3,7 +3,7 @@
 #ifndef INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_CHICAGO_HPP
 #define INVADER__TAG__HEK__CLASS__SHADER_TRANSPARENT_CHICAGO_HPP
 
-#include "shader.hpp"
+#include "shader_transparent_generic.hpp"
 
 namespace Invader::HEK {
     struct ShaderTransparentChicagoMapFlags {
@@ -85,17 +85,6 @@ namespace Invader::HEK {
                                                   INITIALIZE_SHADER_ANIMATION(reflexive); \
                                               } ADD_REFLEXIVE_END
 
-    struct ShaderTransparentChicagoFlags {
-        std::uint8_t alpha_tested : 1;
-        std::uint8_t decal : 1;
-        std::uint8_t two_sided : 1;
-        std::uint8_t first_map_is_in_screenspace : 1;
-        std::uint8_t draw_before_water : 1;
-        std::uint8_t ignore_effect : 1;
-        std::uint8_t scale_first_map_with_distance : 1;
-        std::uint8_t numeric : 1;
-    };
-
     struct ShaderTransparentChicagoExtraFlags {
         std::uint32_t don_t_fade_active_camouflage : 1;
         std::uint32_t numeric_countdown_timer : 1;
@@ -103,7 +92,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentChicago : Shader<EndianType> {
         std::uint8_t numeric_counter_limit;
-        ShaderTransparentChicagoFlags shader_transparent_chicago_extended_flags;
+        ShaderTransparentGenericFlags shader_transparent_chicago_flags;
         EndianType<ShaderFirstMapType> first_map_type;
         EndianType<FramebufferBlendFunction> framebuffer_blend_function;
         EndianType<FramebufferFadeMode> framebuffer_fade_mode;
@@ -120,7 +109,7 @@ namespace Invader::HEK {
             ShaderTransparentChicago<NewType> copy = {};
             COPY_SHADER_DATA
             COPY_THIS(numeric_counter_limit);
-            COPY_THIS(shader_transparent_chicago_extended_flags);
+            COPY_THIS(shader_transparent_chicago_flags);
             COPY_THIS(first_map_type);
             COPY_THIS(framebuffer_blend_function);
             COPY_THIS(framebuffer_fade_mode);

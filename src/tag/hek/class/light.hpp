@@ -7,6 +7,7 @@
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
 #include "enum.hpp"
+#include "bitfield.hpp"
 
 namespace Invader::HEK {
     struct LightFlags {
@@ -16,11 +17,6 @@ namespace Invader::HEK {
         std::uint32_t supersize_in_first_person : 1;
         std::uint32_t first_person_flashlight : 1;
         std::uint32_t don_t_fade_active_camouflage : 1;
-    };
-
-    struct LightInterpolationFlags {
-        std::uint32_t blend_in_hsv : 1;
-        std::uint32_t _more_colors : 1;
     };
 
     ENDIAN_TEMPLATE(EndianType) struct Light {
@@ -35,7 +31,7 @@ namespace Invader::HEK {
         EndianType<float> unknown_two;
         EndianType<float> sin_cutoff_angle;
         PAD(0x8);
-        EndianType<LightInterpolationFlags> interpolation_flags;
+        EndianType<ColorInterpolationFlags> interpolation_flags;
         ColorARGB<EndianType> color_lower_bound;
         ColorARGB<EndianType> color_upper_bound;
         PAD(0xC);
