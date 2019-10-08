@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     struct LightFlags {
@@ -40,17 +41,17 @@ namespace Invader::HEK {
         PAD(0xC);
         TagDependency<EndianType> primary_cube_map; // bitmap
         PAD(0x2);
-        EndianType<FunctionType2> texture_animation_function;
+        EndianType<WaveFunction> texture_animation_function;
         EndianType<float> texture_animation_period;
         TagDependency<EndianType> secondary_cube_map; // bitmap
         PAD(0x2);
-        EndianType<FunctionType2> yaw_function;
+        EndianType<WaveFunction> yaw_function;
         EndianType<float> yaw_period;
         PAD(0x2);
-        EndianType<FunctionType2> roll_function;
+        EndianType<WaveFunction> roll_function;
         EndianType<float> roll_period;
         PAD(0x2);
-        EndianType<FunctionType2> pitch_function;
+        EndianType<WaveFunction> pitch_function;
         EndianType<float> pitch_period;
         PAD(0x8);
         TagDependency<EndianType> lens_flare; // lens_flare

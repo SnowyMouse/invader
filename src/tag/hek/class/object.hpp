@@ -57,9 +57,9 @@ namespace Invader::HEK {
         EndianType<ObjectFunctionFlags> flags;
         EndianType<float> period;
         EndianType<FunctionScaleBy> scale_period_by;
-        EndianType<FunctionType2> function;
+        EndianType<WaveFunction> function;
         EndianType<FunctionScaleBy> scale_function_by;
-        EndianType<FunctionType2> wobble_function;
+        EndianType<WaveFunction> wobble_function;
         EndianType<float> wobble_period;
         EndianType<float> wobble_magnitude;
         EndianType<Fraction> square_wave_threshold;

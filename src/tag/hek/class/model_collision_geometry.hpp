@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     struct ModelCollisionGeometryMaterialFlags {

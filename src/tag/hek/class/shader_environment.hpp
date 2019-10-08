@@ -77,11 +77,11 @@ namespace Invader::HEK {
         TagDependency<EndianType> bump_map; // bitmap
         Point2D<LittleEndian> bump_map_scale_xy;
         PAD(0x10);
-        EndianType<FunctionType2> u_animation_function;
+        EndianType<WaveFunction> u_animation_function;
         PAD(0x2);
         EndianType<float> u_animation_period;
         EndianType<float> u_animation_scale;
-        EndianType<FunctionType2> v_animation_function;
+        EndianType<WaveFunction> v_animation_function;
         PAD(0x2);
         EndianType<float> v_animation_period;
         EndianType<float> v_animation_scale;
@@ -91,21 +91,21 @@ namespace Invader::HEK {
         PAD(0x18);
         ColorRGB<EndianType> primary_on_color;
         ColorRGB<EndianType> primary_off_color;
-        EndianType<FunctionType2> primary_animation_function;
+        EndianType<WaveFunction> primary_animation_function;
         PAD(0x2);
         EndianType<float> primary_animation_period;
         EndianType<float> primary_animation_phase;
         PAD(0x18);
         ColorRGB<EndianType> secondary_on_color;
         ColorRGB<EndianType> secondary_off_color;
-        EndianType<FunctionType2> secondary_animation_function;
+        EndianType<WaveFunction> secondary_animation_function;
         PAD(0x2);
         EndianType<float> secondary_animation_period;
         EndianType<float> secondary_animation_phase;
         PAD(0x18);
         ColorRGB<EndianType> plasma_on_color;
         ColorRGB<EndianType> plasma_off_color;
-        EndianType<FunctionType2> plasma_animation_function;
+        EndianType<WaveFunction> plasma_animation_function;
         PAD(0x2);
         EndianType<float> plasma_animation_period;
         EndianType<float> plasma_animation_phase;

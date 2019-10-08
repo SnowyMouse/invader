@@ -6,6 +6,7 @@
 #include "../../compiled_tag.hpp"
 #include "../../../hek/data_type.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
     enum LensFlareRadiusScaledBy : TagEnum {
@@ -60,7 +61,7 @@ namespace Invader::HEK {
         ColorARGB<EndianType> color_lower_bound;
         ColorARGB<EndianType> color_upper_bound;
         EndianType<LensFlareReflectionMoreFlags> more_flags;
-        EndianType<FunctionType2> animation_function;
+        EndianType<WaveFunction> animation_function;
         EndianType<float> animation_period;
         EndianType<float> animation_phase;
         PAD(0x4);
