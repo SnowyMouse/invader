@@ -6,14 +6,6 @@
 #include "shader.hpp"
 
 namespace Invader::HEK {
-    enum ShaderChangeColorSource : TagEnum {
-        SHADER_CHANGE_COLOR_SOURCE_NONE,
-        SHADER_CHANGE_COLOR_SOURCE_A,
-        SHADER_CHANGE_COLOR_SOURCE_B,
-        SHADER_CHANGE_COLOR_SOURCE_C,
-        SHADER_CHANGE_COLOR_SOURCE_D
-    };
-
     struct ShaderModelFlags {
         std::uint16_t detail_after_reflection : 1;
         std::uint16_t two_sided : 1;
@@ -51,12 +43,12 @@ namespace Invader::HEK {
         PAD(0xC);
         EndianType<Fraction> translucency;
         PAD(0x10);
-        EndianType<ShaderChangeColorSource> change_color_source;
+        EndianType<FunctionNameNullable> change_color_source;
         PAD(0x2);
         PAD(0x1C);
         EndianType<ShaderModelMoreFlags> shader_model_more_flags;
         PAD(0x2);
-        EndianType<ShaderChangeColorSource> color_source;
+        EndianType<FunctionNameNullable> color_source;
         EndianType<WaveFunction> animation_function;
         EndianType<float> animation_period;
         ColorRGB<EndianType> animation_color_lower_bound;

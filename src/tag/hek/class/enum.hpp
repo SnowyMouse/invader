@@ -108,6 +108,14 @@ namespace Invader::HEK {
         FUNCTION_SCALE_PERIOD_BY_C_OUT,
         FUNCTION_SCALE_PERIOD_BY_D_OUT
     };
+
+    enum FunctionNameNullable : TagEnum {
+        FUNCTION_NAME_NULLABLE_NONE,
+        FUNCTION_NAME_NULLABLE_A,
+        FUNCTION_NAME_NULLABLE_B,
+        FUNCTION_NAME_NULLABLE_C,
+        FUNCTION_NAME_NULLABLE_D
+    };
 }
 
 #endif

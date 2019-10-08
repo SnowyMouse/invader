@@ -70,14 +70,6 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(ShaderTransparentGenericMap<BigEndian>) == 0x64);
 
-    enum ShaderTransparentGenericStageColorSource : TagEnum {
-        SHADER_TRANSPARENT_GENERIC_STAGE_COLOR_SOURCE_NONE,
-        SHADER_TRANSPARENT_GENERIC_STAGE_COLOR_SOURCE_A,
-        SHADER_TRANSPARENT_GENERIC_STAGE_COLOR_SOURCE_B,
-        SHADER_TRANSPARENT_GENERIC_STAGE_COLOR_SOURCE_C,
-        SHADER_TRANSPARENT_GENERIC_STAGE_COLOR_SOURCE_D
-    };
-
     enum ShaderTransparentGenericStageInputColor : TagEnum {
         SHADER_TRANSPARENT_GENERIC_STAGE_INPUT_COLOR_ZERO,
         SHADER_TRANSPARENT_GENERIC_STAGE_INPUT_COLOR_ONE,
@@ -180,7 +172,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentGenericStage {
         EndianType<ShaderTransparentGenericStageFlags> flags;
         PAD(0x2);
-        EndianType<ShaderTransparentGenericStageColorSource> color0_source;
+        EndianType<FunctionNameNullable> color0_source;
         EndianType<FunctionOut> color0_animation_function;
         EndianType<float> color0_animation_period;
         ColorARGB<EndianType> color0_animation_lower_bound;

@@ -9,13 +9,6 @@
 #include "enum.hpp"
 
 namespace Invader::HEK {
-    enum ObjectAttachmentChangeColor : TagEnum {
-        OBJECT_ATTACHMENT_CHANGE_COLOR_NONE,
-        OBJECT_ATTACHMENT_CHANGE_COLOR_A,
-        OBJECT_ATTACHMENT_CHANGE_COLOR_B,
-        OBJECT_ATTACHMENT_CHANGE_COLOR_C,
-        OBJECT_ATTACHMENT_CHANGE_COLOR_D
-    };
     enum ObjectNoise : TagEnum {
         OBJECT_NOISE_SILENT,
         OBJECT_NOISE_MEDIUM,
@@ -29,7 +22,7 @@ namespace Invader::HEK {
         TagString marker;
         EndianType<FunctionOut> primary_scale;
         EndianType<FunctionOut> secondary_scale;
-        EndianType<ObjectAttachmentChangeColor> change_color;
+        EndianType<FunctionNameNullable> change_color;
         PAD(0x2);
         PAD(0x10);
 

@@ -9,14 +9,6 @@
 #include "enum.hpp"
 
 namespace Invader::HEK {
-    enum LightningTintModulationSource : TagEnum {
-        LIGHTNING_TINT_MODULATION_SOURCE_NONE,
-        LIGHTNING_TINT_MODULATION_SOURCE_A,
-        LIGHTNING_TINT_MODULATION_SOURCE_B,
-        LIGHTNING_TINT_MODULATION_SOURCE_C,
-        LIGHTNING_TINT_MODULATION_SOURCE_D,
-    };
-
     struct LightningMarkerFlag {
         std::uint16_t not_connected_to_next_marker : 1;
     };
@@ -95,7 +87,7 @@ namespace Invader::HEK {
         PAD(0x10);
         EndianType<FunctionOut> jitter_scale_source;
         EndianType<FunctionOut> thickness_scale_source;
-        EndianType<LightningTintModulationSource> tint_modulation_source;
+        EndianType<FunctionNameNullable> tint_modulation_source;
         EndianType<FunctionOut> brightness_scale_source;
         TagDependency<EndianType> bitmap; // bitmap
         PAD(0x54);
