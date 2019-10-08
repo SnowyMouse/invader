@@ -481,7 +481,7 @@ namespace Invader::HEK {
             COPY_THIS(offset_from_reference_corner);
             COPY_THIS(override_icon_color);
             COPY_THIS(frame_rate);
-            COPY_THIS(more_flags);
+            COPY_THIS(messaging_flags);
             COPY_THIS(text_index);
             return copy;
         }
