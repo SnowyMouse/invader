@@ -7,31 +7,23 @@
 #include "../../../hek/data_type.hpp"
 #include "../../../hek/map.hpp"
 #include "../header.hpp"
+#include "enum.hpp"
 
 namespace Invader::HEK {
-    enum GlowBoundaryEffect : std::uint16_t {
+    enum GlowBoundaryEffect : TagEnum {
         GLOW_BOUNDARY_EFFECT_BOUNCE,
         GLOW_BOUNDARY_EFFECT_WRAP,
     };
 
-    enum GlowNormalParticleDistribution : std::uint16_t {
+    enum GlowNormalParticleDistribution : TagEnum {
         GLOW_NORMAL_PARTICLE_DISTRIBUTION_DISTRIBUTED_RANDOMLY,
         GLOW_NORMAL_PARTICLE_DISTRIBUTION_DISTRIBUTED_UNIFORMLY,
     };
 
-    enum GlowTrailingParticleDistribution : std::uint16_t {
+    enum GlowTrailingParticleDistribution : TagEnum {
         GLOW_TRAILING_PARTICLE_DISTRIBUTION_EMIT_VERTICALLY,
         GLOW_TRAILING_PARTICLE_DISTRIBUTION_EMIT_NORMAL_UP,
         GLOW_TRAILING_PARTICLE_DISTRIBUTION_EMIT_RANDOMLY,
-    };
-
-    // Increase by 1 if BigEndian.
-    enum GlowAttachment : std::uint16_t {
-        GLOW_ATTACHMENT_NONE = 0xFFFF,
-        GLOW_ATTACHMENT_A_OUT = 0,
-        GLOW_ATTACHMENT_B_OUT = 1,
-        GLOW_ATTACHMENT_C_OUT = 2,
-        GLOW_ATTACHMENT_D_OUT = 3,
     };
 
     struct GlowFlags {
@@ -54,33 +46,33 @@ namespace Invader::HEK {
         PAD(0x2);
         PAD(0x2);
         PAD(0x4);
-        EndianType<GlowAttachment> attachment_0;
+        EndianType<FunctionOut> attachment_0;
         PAD(0x2);
         EndianType<float> particle_rotational_velocity;
         EndianType<float> particle_rot_vel_mul_low;
         EndianType<float> particle_rot_vel_mul_high;
-        EndianType<GlowAttachment> attachment_1;
+        EndianType<FunctionOut> attachment_1;
         PAD(0x2);
         EndianType<float> effect_rotational_velocity;
         EndianType<float> effect_rot_vel_mul_low;
         EndianType<float> effect_rot_vel_mul_high;
-        EndianType<GlowAttachment> attachment_2;
+        EndianType<FunctionOut> attachment_2;
         PAD(0x2);
         EndianType<float> effect_translational_velocity;
         EndianType<float> effect_trans_vel_mul_low;
         EndianType<float> effect_trans_vel_mul_high;
-        EndianType<GlowAttachment> attachment_3;
+        EndianType<FunctionOut> attachment_3;
         PAD(0x2);
         EndianType<float> min_distance_particle_to_object;
         EndianType<float> max_distance_particle_to_object;
         EndianType<float> distance_to_object_mul_low;
         EndianType<float> distance_to_object_mul_high;
         PAD(0x8);
-        EndianType<GlowAttachment> attachment_4;
+        EndianType<FunctionOut> attachment_4;
         PAD(0x2);
         Bounds<EndianType<float>> particle_size_bounds;
         Bounds<EndianType<float>> size_attachment_multiplier;
-        EndianType<GlowAttachment> attachment_5;
+        EndianType<FunctionOut> attachment_5;
         PAD(0x2);
         ColorARGB<EndianType> color_bound_0;
         ColorARGB<EndianType> color_bound_1;
