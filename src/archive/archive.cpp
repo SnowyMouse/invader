@@ -262,7 +262,16 @@ int main(int argc, const char **argv) {
         // Get the modified time
         struct stat s;
         stat(path, &s);
+
+        #ifdef _WIN32
+        #define st_mtim st_mtime
+        #endif
+
         archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
+
+        #ifdef _WIN32
+        #undef st_mtim
+        #endif
 
         // Archive that bastard
         archive_entry_set_size(entry, data.size());
