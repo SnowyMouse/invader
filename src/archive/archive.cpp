@@ -20,6 +20,7 @@ int main(int argc, const char **argv) {
         bool single_tag = false;
         std::vector<std::string> tags;
         std::string output;
+        bool use_filesystem_path = false;
     } archive_options;
     archive_options.path = argv[0];
 
@@ -29,6 +30,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("single-tag", 's', 0);
     options.emplace_back("tags", 't', 1);
     options.emplace_back("output", 'o', 1);
+    options.emplace_back("fs-path", 'P', 0);
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, 'h', archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -44,6 +46,9 @@ int main(int argc, const char **argv) {
             case 's':
                 archive_options.single_tag = true;
                 break;
+            case 'P':
+                archive_options.use_filesystem_path = true;
+                break;
             default:
                 eprintf("Usage: %s [options] <scenario | -s tag.class>\n\n", archive_options.path);
                 eprintf("Generate .tar.xz archives of the tags required to build a cache file.\n\n");
@@ -52,6 +57,7 @@ int main(int argc, const char **argv) {
                 eprintf("  --output,-o <file>           Output to a specific file. Extension must be\n");
                 eprintf("                               .tar.xz.\n");
                 eprintf("  --single-tag,-s              Archive a tag tree instead of a cache file.\n");
+                eprintf("  --fs-path,-P                 Use a filesystem path for the tag.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");
                 eprintf("                               precedence.\n");
@@ -74,16 +80,25 @@ int main(int argc, const char **argv) {
         eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
-    else {
+    else if(archive_options.use_filesystem_path) {
         // See if the tag path is valid
-        auto base_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], archive_options.tags, archive_options.single_tag ? std::nullopt : std::optional(std::string(".scenario")));
+        std::optional<std::string> base_tag_maybe;
+        if(archive_options.single_tag) {
+            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true);
+        }
+        else {
+            base_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], archive_options.tags, std::string(".scenario"));
+        }
         if(base_tag_maybe.has_value()) {
             base_tag = base_tag_maybe.value();
         }
         else {
-            eprintf("Could not find %s\n", remaining_arguments[0]);
+            eprintf("Could not find tag %s\n", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
+    }
+    else {
+        base_tag = remaining_arguments[0];
     }
 
     // Variables to hold this
