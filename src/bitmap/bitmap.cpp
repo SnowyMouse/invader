@@ -11,8 +11,9 @@
 #include "color_plate_scanner.hpp"
 #include "bitmap_data_writer.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 
-enum SUPPORTED_FORMATS_INT {
+enum SupportedFormatsInt {
     SUPPORTED_FORMATS_TIF = 0,
     SUPPORTED_FORMATS_TIFF,
     SUPPORTED_FORMATS_PNG,
@@ -330,7 +331,19 @@ int main(int argc, char *argv[]) {
         eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
-    std::string bitmap_tag = argv[argc - 1];
+
+    // See if we can figure out the bitmap tag using extensions
+    std::string bitmap_tag = remaining_arguments[0];
+    SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
+    std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
+    for(SupportedFormatsInt i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+        auto bitmap_tag_maybe = Invader::File::attempt_to_resolve_tag_path(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
+        if(bitmap_tag_maybe.has_value()) {
+            bitmap_tag = bitmap_tag_maybe.value();
+            found_format = i;
+            break;
+        }
+    }
 
     // Ensure it's lowercase
     for(char &c : bitmap_tag) {
@@ -468,8 +481,8 @@ int main(int argc, char *argv[]) {
     std::size_t image_size = 0;
     ColorPlatePixel *image_pixels = nullptr;
 
-    // Load the bitmap file
-    for(auto i = SUPPORTED_FORMATS_TIF; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SUPPORTED_FORMATS_INT>(i + 1)) {
+    // Try to figure out the extension
+    for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
         std::string image_path = (data_path / (bitmap_tag + SUPPORTED_FORMATS[i])).string();
         if(std::filesystem::exists(image_path)) {
             switch(i) {
