@@ -154,4 +154,37 @@ namespace Invader::File {
             }
         }
     }
+
+    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension) {
+        std::size_t EXTENSION_LENGTH = expected_extension.size();
+        std::size_t TAG_PATH_LENGTH = tag_path.size();
+
+        // If the path is too small to have the extension, no dice
+        if(EXTENSION_LENGTH >= tag_path.size()) {
+            return std::nullopt;
+        }
+
+        // Otherwise, check if we have the extension
+        if(TAG_PATH_LENGTH > EXTENSION_LENGTH && std::strcmp(tag_path.data() + TAG_PATH_LENGTH - EXTENSION_LENGTH, expected_extension.data()) == 0) {
+            // If the user simply put ".scenario" at the end, remove it
+            if(Invader::File::tag_path_to_file_path(tag_path, tags, true).has_value()) {
+                return tag_path.substr(0, TAG_PATH_LENGTH - EXTENSION_LENGTH);
+            }
+
+            // Otherwise see if we can find it
+            else {
+                auto tag_maybe = Invader::File::file_path_to_tag_path(tag_path, tags, true);
+                if(tag_maybe.has_value()) {
+                    auto &tag = tag_maybe.value();
+                    return tag.substr(0, tag.size() - EXTENSION_LENGTH);
+                }
+                else {
+                    return std::nullopt;
+                }
+            }
+        }
+
+        // We don't? Give up.
+        return std::nullopt;
+    }
 }

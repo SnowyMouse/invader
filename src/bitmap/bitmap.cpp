@@ -86,6 +86,9 @@ int main(int argc, char *argv[]) {
 
         // Ignore the tag data?
         bool ignore_tag_data = false;
+
+        // Use a filesystem path?
+        bool filesystem_path = false;
     } bitmap_options;
     bitmap_options.path = argv[0];
 
@@ -106,6 +109,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("bump-palettize", 'p', 1);
     options.emplace_back("bump-palettise", 'p', 1);
     options.emplace_back("bump-height", 'H', 1);
+    options.emplace_back("fs-path", 'P', 0);
 
     // Go through each argument
     auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, 'h', bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
@@ -281,6 +285,10 @@ int main(int argc, char *argv[]) {
 
                 break;
 
+            case 'P':
+                bitmap_options.filesystem_path = true;
+                break;
+
             default:
                 eprintf("Usage: %s [options] <bitmap-tag>\n\n", bitmap_options.path);
                 eprintf("Create or modify a bitmap tag.\n\n");
@@ -288,6 +296,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --info,-i                  Show license and credits.\n");
                 eprintf("    --help,-h                  Show help\n\n");
                 eprintf("Directory options:\n");
+                eprintf("    --fs-path,-P               Use an explicit filesystem path.\n");
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
@@ -335,13 +344,16 @@ int main(int argc, char *argv[]) {
     // See if we can figure out the bitmap tag using extensions
     std::string bitmap_tag = remaining_arguments[0];
     SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
-    std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
-    for(SupportedFormatsInt i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-        auto bitmap_tag_maybe = Invader::File::attempt_to_resolve_tag_path(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
-        if(bitmap_tag_maybe.has_value()) {
-            bitmap_tag = bitmap_tag_maybe.value();
-            found_format = i;
-            break;
+
+    if(bitmap_options.filesystem_path) {
+        std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
+        for(SupportedFormatsInt i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+            auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
+            if(bitmap_tag_maybe.has_value()) {
+                bitmap_tag = bitmap_tag_maybe.value();
+                found_format = i;
+                break;
+            }
         }
     }
 

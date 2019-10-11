@@ -42,6 +42,14 @@ namespace Invader::File {
     std::optional<std::string> file_path_to_tag_path(const std::string &file_path, const std::vector<std::string> &tags, bool must_exist);
 
     /**
+     * Attempt to resolve a file path to a tag path using an extension
+     * @param tag_path           tag path to use
+     * @param tags               tags directory to use
+     * @param expected_extension extension to use and remove from the path, if found
+     */
+    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension);
+
+    /**
      * Attempt to resolve a tag path using both methods
      * @param tag_path           tag path to use
      * @param tags               tags directory to use
