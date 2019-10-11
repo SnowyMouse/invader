@@ -263,14 +263,11 @@ int main(int argc, const char **argv) {
         struct stat s;
         stat(path, &s);
 
+        // Windows uses mtime which is a time_t rather than a struct with nanoseconds
         #ifdef _WIN32
-        #define st_mtim st_mtime
-        #endif
-
+        archive_entry_set_mtime(entry, s.st_mtime, 0);
+        #else
         archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
-
-        #ifdef _WIN32
-        #undef st_mtim
         #endif
 
         // Archive that bastard
