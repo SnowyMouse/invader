@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     }
     else if(font_options.use_filesystem_path) {
         std::vector<std::string> data(&font_options.data, &font_options.data + 1);
-        auto font_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], data, ".ttf");
+        auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, ".ttf");
         if(font_tag_maybe.has_value()) {
             font_tag = font_tag_maybe.value();
         }
