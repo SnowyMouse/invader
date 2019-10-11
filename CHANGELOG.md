@@ -10,7 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now accepts filesystem paths for the scenario tag if `-P` is passed
 - invader-dependency: Now accepts filesystem paths for the tag if `-P` is passed
 - invader-font: Now accepts filesystem paths for the the TTF file if `-P` is passed
-- invader-string: Now accepts filesystem paths for the data
+- invader-string: Now accepts filesystem paths for the text file if `-P` is passed
 
 ### Changed
 - Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard

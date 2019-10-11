@@ -98,6 +98,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1);
     options.emplace_back("data", 'd', 1);
     options.emplace_back("format", 'f', 1);
+    options.emplace_back("fs-path", 'P', 0);
 
     struct StringOptions {
         const char *path;
@@ -105,6 +106,7 @@ int main(int argc, char * const *argv) {
         const char *tags = "tags";
         Format format = Format::STRING_LIST_FORMAT_UTF_16;
         const char *output_extension = ".unicode_string_list";
+        bool use_filesystem_path = false;
     } string_options;
 
     string_options.path = argv[0];
@@ -119,6 +121,9 @@ int main(int argc, char * const *argv) {
                 std::exit(EXIT_FAILURE);
             case 'd':
                 string_options.data = arguments[0];
+                break;
+            case 'P':
+                string_options.use_filesystem_path = true;
                 break;
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
@@ -139,6 +144,7 @@ int main(int argc, char * const *argv) {
                 eprintf("Generate string list tags.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
+                eprintf("  --fs-path,-P                 Use a filesystem path for the text file.\n");
                 eprintf("  --format,-f <format>         Set string list format. Can be utf-16, hmt, or\n");
                 eprintf("                               or latin-1. Default: utf-16\n");
                 eprintf("  --data,-d <dir>              Use the specified data directory.\n");
@@ -146,6 +152,8 @@ int main(int argc, char * const *argv) {
                 std::exit(EXIT_FAILURE);
         }
     });
+
+    const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
 
     // Check if there's a string tag
     std::string string_tag;
@@ -157,16 +165,19 @@ int main(int argc, char * const *argv) {
         eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
-    else {
+    else if(string_options.use_filesystem_path) {
         std::vector<std::string> data(&string_options.data, &string_options.data + 1);
-        auto string_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
         if(string_tag_maybe.has_value()) {
             string_tag = string_tag_maybe.value();
         }
         else {
-            eprintf("Failed to find %s in the data directory\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
             return EXIT_FAILURE;
         }
+    }
+    else {
+        string_tag = remaining_arguments[0];
     }
 
     // Ensure it's lowercase
@@ -180,7 +191,7 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tags_path(string_options.tags);
     std::filesystem::path data_path(string_options.data);
 
-    auto input_path = (data_path / string_tag).string() + (string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+    auto input_path = (data_path / string_tag).string() + valid_extension;
     auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
 
     // Open a file
