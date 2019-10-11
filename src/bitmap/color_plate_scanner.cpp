@@ -618,6 +618,7 @@ namespace Invader {
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
+
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
             std::uint32_t mipmap_height = bitmap.height;
@@ -805,8 +806,8 @@ namespace Invader {
             // Do fade-to-gray for each mipmap
             if(mipmap_fade_factor.has_value()) {
                 std::size_t mipmap_count = bitmap.mipmaps.size();
-                std::size_t mipmap_count_plus_one = mipmap_count + 1; // although Guerilla only mentions mipmaps in the fade-to-gray stuff, it includes the first bitmap in the calculation
-                float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(fade) * mipmap_count_plus_one;
+                float mipmap_count_plus_one = mipmap_count + 1.0F; // although Guerilla only mentions mipmaps in the fade-to-gray stuff, it includes the first bitmap in the calculation
+                float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(fade) * (mipmap_count_plus_one - 1.0F + (1.0F - fade)); // excuse me what the fuck
 
                 for(std::size_t m = 0; m < mipmap_count; m++) {
                     auto &mipmap = bitmap.mipmaps[m];
@@ -820,7 +821,7 @@ namespace Invader {
 
                         // If we're fading to gray instantly, do that so we don't divide by 0
                         if(fade >= 1.0F) {
-                            alpha_delta = 0xFF;
+                            alpha_delta = UINT8_MAX;
                         }
                         else {
                             // Basically, a higher mipmap fade factor scales faster
@@ -832,8 +833,14 @@ namespace Invader {
                             }
 
                             // Round
-                            float gray_multiplied = std::floor(0xFF * gray_multiplier + 0.5F);
-                            alpha_delta = static_cast<std::uint32_t>(gray_multiplied);
+                            float gray_multiplied = std::floor(UINT8_MAX * gray_multiplier + 0.5F);
+                            auto new_gray = static_cast<std::uint32_t>(gray_multiplied);
+                            if(new_gray > UINT8_MAX) {
+                                alpha_delta = UINT8_MAX;
+                            }
+                            else {
+                                alpha_delta = static_cast<std::uint8_t>(new_gray);
+                            }
                         }
 
                         ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
