@@ -10,6 +10,7 @@
 #include "../build/build_workload.hpp"
 #include "../map/map.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
@@ -73,7 +74,26 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]) + 1);
+        std::string tag_path = remaining_arguments[0];
+
+        // See if the tag path is valid
+        if(Invader::File::tag_path_to_file_path(tag_path, dependency_options.tags, true).has_value()) {
+            tag_path_to_find_data = std::vector<char>(tag_path.begin(), tag_path.end());
+        }
+        else {
+            auto tag_path_maybe = Invader::File::file_path_to_tag_path(tag_path, dependency_options.tags, true);
+            if(tag_path_maybe.has_value()) {
+                auto &file_path = tag_path_maybe.value();
+                tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
+            }
+            else {
+                eprintf("Failed to find tag %s\n", tag_path.data());
+                return EXIT_FAILURE;
+            }
+        }
+
+        // Add a null terminator
+        tag_path_to_find_data.emplace_back(0);
     }
 
     char *tag_path_to_find = tag_path_to_find_data.data();
