@@ -21,6 +21,7 @@ information on this header, go to https://spdx.org/ids-how
 ### Fixed
 - Fixed an issue where invader-dependency didn't include a null terminator, causing some tags to fail to open
 - invader-archive: Fixed an issue where some stock HEK .gbxmodel tags tried (and failed) to be archived as .model tags
+- invader-bitmap: Fixed an issue where sprites spanning the entire width wouldn't be detected
 
 ## [0.13.0] - 2019-10-04
 ### Changed

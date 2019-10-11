@@ -308,113 +308,145 @@ namespace Invader {
             // This is used for the registration point
             const std::int32_t MID_Y = divide_by_two_round(static_cast<std::int32_t>(Y_START + Y_END));
 
-            std::optional<std::uint32_t> bitmap_x_start;
-
+            // Go through each pixel
             for(std::uint32_t x = 0; x < X_END; x++) {
                 for(std::uint32_t y = Y_START; y < Y_END; y++) {
                     auto &pixel = GET_PIXEL(x,y);
-                    // Basically, if it's not blue and not magenta, it's the start of a bitmap. Otherwise, it's the end of one if there is a bitmap
+
+                    // Ignore? Okay.
                     if(this->is_blue(pixel) || this->is_magenta(pixel)) {
-                        // If we're in a bitmap, let's add it
-                        if(y + 1 == Y_END && bitmap_x_start.has_value()) {
-                            std::optional<std::uint32_t> min_x;
-                            std::optional<std::uint32_t> max_x;
-                            std::optional<std::uint32_t> min_y;
-                            std::optional<std::uint32_t> max_y;
-
-                            // Find the minimum x, y, max x, and max y stuff
-                            std::uint32_t xb;
-                            for(xb = bitmap_x_start.value(); xb < x; xb++) {
-                                for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
-                                    auto &pixel = GET_PIXEL(xb, yb);
-
-                                    // This is for anything that's not a cyan/magenta/blue pixel
-                                    if(!this->is_ignored(pixel)) {
-                                        if(min_x.has_value()) {
-                                            if(min_x.value() > xb) {
-                                                min_x = xb;
-                                            }
-                                            if(min_y.value() > yb) {
-                                                min_y = yb;
-                                            }
-                                            if(max_x.value() < xb) {
-                                                max_x = xb;
-                                            }
-                                            if(max_y.value() < yb) {
-                                                max_y = yb;
-                                            }
-                                        }
-                                        else {
-                                            min_x = xb;
-                                            min_y = yb;
-                                            max_x = xb;
-                                            max_y = yb;
-                                        }
-                                    }
-                                }
-                            }
-
-                            // If we never got a minimum x, then give up on life
-                            if(!min_x.has_value()) {
-                                eprintf("Error: Found a 0x0 bitmap.\n");
-                                std::terminate();
-                            }
-
-                            // Get the width and height
-                            std::uint32_t bitmap_width = max_x.value() - min_x.value() + 1;
-                            std::uint32_t bitmap_height = max_y.value() - min_y.value() + 1;
-
-                            // If we require power-of-two, check
-                            if(power_of_two) {
-                                if(!is_power_of_two(bitmap_width)) {
-                                    eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
-                                    std::terminate();
-                                }
-                                if(!is_power_of_two(bitmap_height)) {
-                                    eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
-                                    std::terminate();
-                                }
-                            }
-
-                            // Add the bitmap
-                            auto &bitmap = generated_bitmap.bitmaps.emplace_back();
-                            bitmap.width = bitmap_width;
-                            bitmap.height = bitmap_height;
-                            bitmap.color_plate_x = min_x.value();
-                            bitmap.color_plate_y = min_y.value();
-
-                            // Calculate registration point.
-                            const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(xb + bitmap_x_start.value()));
-
-                            // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
-                            bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
-
-                            // The x point is the midpoint of the height of the entire sequence relative to the top
-                            bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
-
-                            // Load the pixels
-                            for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
-                                for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
-                                    auto &pixel = GET_PIXEL(bx, by);
-                                    if(this->is_ignored(pixel)) {
-                                        bitmap.pixels.push_back(ColorPlatePixel {});
-                                    }
-                                    else {
-                                        bitmap.pixels.push_back(pixel);
-                                    }
-                                }
-                            }
-
-                            bitmap_x_start.reset();
-                            sequence.bitmap_count++;
-                        }
-
                         continue;
                     }
 
-                    if(!bitmap_x_start.has_value()) {
-                        bitmap_x_start = x;
+                    // Begin.
+                    std::optional<std::uint32_t> min_x;
+                    std::optional<std::uint32_t> max_x;
+                    std::optional<std::uint32_t> min_y;
+                    std::optional<std::uint32_t> max_y;
+
+                    std::optional<std::uint32_t> virtual_min_x;
+                    std::optional<std::uint32_t> virtual_max_x;
+                    std::optional<std::uint32_t> virtual_min_y;
+                    std::optional<std::uint32_t> virtual_max_y;
+
+                    // Find the minimum x, y, max x, and max y stuff
+                    for(std::uint32_t xb = x; xb < X_END; xb++) {
+                        // Set this to false if we got something this column
+                        bool ignored_this_x = true;
+
+                        for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
+                            auto &pixel = GET_PIXEL(xb, yb);
+
+                            // This is for anything that's not a cyan/magenta/blue pixel
+                            if(!this->is_ignored(pixel)) {
+                                if(min_x.has_value()) {
+                                    if(min_x.value() > xb) {
+                                        min_x = xb;
+                                    }
+                                    if(min_y.value() > yb) {
+                                        min_y = yb;
+                                    }
+                                    if(max_x.value() < xb) {
+                                        max_x = xb;
+                                    }
+                                    if(max_y.value() < yb) {
+                                        max_y = yb;
+                                    }
+                                }
+                                else {
+                                    min_x = xb;
+                                    min_y = yb;
+                                    max_x = xb;
+                                    max_y = yb;
+                                }
+                            }
+
+                            // Anything that's not a magenta/blue pixel then
+                            if(!this->is_blue(pixel) && !this->is_magenta(pixel)) {
+                                ignored_this_x = false;
+
+                                if(virtual_min_x.has_value()) {
+                                    if(virtual_min_x.value() > xb) {
+                                        virtual_min_x = xb;
+                                    }
+                                    if(virtual_min_y.value() > yb) {
+                                        virtual_min_y = yb;
+                                    }
+                                    if(virtual_max_x.value() < xb) {
+                                        virtual_max_x = xb;
+                                    }
+                                    if(virtual_max_y.value() < yb) {
+                                        virtual_max_y = yb;
+                                    }
+                                }
+                                else {
+                                    virtual_min_x = xb;
+                                    virtual_max_x = yb;
+                                    virtual_min_y = xb;
+                                    virtual_max_y = yb;
+                                }
+                            }
+                        }
+
+                        if(ignored_this_x) {
+                            break;
+                        }
                     }
+
+                    // If we never got a minimum x, then continue on
+                    if(!min_x.has_value()) {
+                        continue;
+                    }
+
+                    // Get the width and height
+                    std::uint32_t bitmap_width = max_x.value() - min_x.value() + 1;
+                    std::uint32_t bitmap_height = max_y.value() - min_y.value() + 1;
+
+                    // If we require power-of-two, check
+                    if(power_of_two) {
+                        if(!is_power_of_two(bitmap_width)) {
+                            eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
+                            std::terminate();
+                        }
+                        if(!is_power_of_two(bitmap_height)) {
+                            eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
+                            std::terminate();
+                        }
+                    }
+
+                    // Add the bitmap
+                    auto &bitmap = generated_bitmap.bitmaps.emplace_back();
+                    bitmap.width = bitmap_width;
+                    bitmap.height = bitmap_height;
+                    bitmap.color_plate_x = min_x.value();
+                    bitmap.color_plate_y = min_y.value();
+
+                    // Calculate registration point.
+                    const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(1 + virtual_max_x.value() + virtual_min_x.value()));
+
+                    // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
+                    bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
+
+                    // The x point is the midpoint of the height of the entire sequence relative to the top
+                    bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
+
+                    // Load the pixels
+                    for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
+                        for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
+                            auto &pixel = GET_PIXEL(bx, by);
+                            if(this->is_ignored(pixel)) {
+                                bitmap.pixels.push_back(ColorPlatePixel {});
+                            }
+                            else {
+                                bitmap.pixels.push_back(pixel);
+                            }
+                        }
+                    }
+
+                    sequence.bitmap_count++;
+
+                    // Set it to the max value. Add 1 since sprites can't possibly be adjacent to each other. Then, the for loop will add 1 again to get to the minimum possible x value.
+                    x = virtual_max_x.value() + 1;
                     break;
                 }
             }
