@@ -54,7 +54,13 @@ namespace Invader {
                                 continue;
                             }
 
-                            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.tag_class_int);
+                            // Fix .model dependencies so they're .gbxmodel (this is only an issue with HEK stock tags)
+                            auto class_to_use = dependency.tag_class_int;
+                            if(class_to_use == HEK::TagClassInt::TAG_CLASS_MODEL) {
+                                class_to_use = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
+                            }
+
+                            std::string path_copy = dependency.path + "." + tag_class_to_extension(class_to_use);
                             #ifndef _WIN32
                             for(char &c : path_copy) {
                                 if(c == '\\') {
@@ -67,17 +73,17 @@ namespace Invader {
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.path, dependency.tag_class_int, false, complete_tag_path.string());
+                                    found_tags.emplace_back(dependency.path, class_to_use, false, complete_tag_path.string());
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.path, dependency.tag_class_int, true, "");
+                                found_tags.emplace_back(dependency.path, class_to_use, true, "");
                             }
                             else if(recursive) {
-                                recursion(dependency.path.data(), dependency.tag_class_int, recursion);
+                                recursion(dependency.path.data(), class_to_use, recursion);
                             }
                         }
                         found = true;
