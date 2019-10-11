@@ -134,14 +134,7 @@ namespace Invader {
         }
         workload.verbose = verbose;
 
-        auto scenario_path = Invader::File::attempt_to_resolve_tag_path(scenario, tags_directories, ".scenario");
-        if(scenario_path.has_value()) {
-            workload.scenario = scenario_path.value();
-        }
-        else {
-            eprintf("Failed to find scenario %s\n", scenario);
-            throw InvalidTagPathException();
-        }
+        workload.scenario = scenario;
 
         // Replace forward slashes in scenario tag path with backslashes
         for(char &c : workload.scenario) {

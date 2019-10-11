@@ -16,6 +16,7 @@ using clock_type = std::chrono::steady_clock;
 #include "../version.hpp"
 #include "../eprintf.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -44,6 +45,7 @@ int main(int argc, const char **argv) {
         bool quiet = false;
         bool always_index_tags = false;
         const char *forged_crc = nullptr;
+        bool use_filesystem_path = false;
     } build_options;
 
     build_options.path = argv[0];
@@ -60,6 +62,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1);
     options.emplace_back("output", 'o', 1);
     options.emplace_back("forge-crc", 'c', 1);
+    options.emplace_back("fs-path", 'P', 0);
 
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, 'h', build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
         switch(opt) {
@@ -98,6 +101,9 @@ int main(int argc, const char **argv) {
             case 'c':
                 build_options.forged_crc = arguments[0];
                 break;
+            case 'P':
+                build_options.use_filesystem_path = true;
+                break;
             case 'i':
                 INVADER_SHOW_INFO
                 std::exit(EXIT_FAILURE);
@@ -105,10 +111,11 @@ int main(int argc, const char **argv) {
                 eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);
                 eprintf("Build cache files for Halo Custom Edition.\n\n");
                 eprintf("Options:\n");
-                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
-                eprintf("                               custom (default), retail, dark\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
                 eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
+                eprintf("  --fs-path,-P                 Use a filesystem path for the scenario tag.\n");
+                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
+                eprintf("                               custom (default), retail, dark\n");
                 eprintf("  --no-indexed-tags,-n         Do not index tags. This can speed up build time\n");
                 eprintf("                               at the cost of a much larger file size.\n");
                 eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
@@ -133,6 +140,11 @@ int main(int argc, const char **argv) {
 
     std::string scenario;
 
+    // By default, just use tags
+    if(build_options.tags.size() == 0) {
+        build_options.tags.emplace_back("tags");
+    }
+
     // Check if there's a scenario tag
     if(remaining_arguments.size() == 0) {
         eprintf("A scenario tag path is required. Use -h for help.\n");
@@ -142,13 +154,18 @@ int main(int argc, const char **argv) {
         eprintf("Unexpected argument %s\n", remaining_arguments[1]);
         return RETURN_FAILED_UNHANDLED_ARGUMENT;
     }
+    else if(build_options.use_filesystem_path) {
+        auto scenario_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], build_options.tags, ".scenario");
+        if(scenario_maybe.has_value()) {
+            scenario = scenario_maybe.value();
+        }
+        else {
+            eprintf("Could not find a valid scenario at path %s\n", remaining_arguments[0]);
+            return RETURN_FAILED_UNHANDLED_ARGUMENT;
+        }
+    }
     else {
         scenario = remaining_arguments[0];
-    }
-
-    // By default, just use tags
-    if(build_options.tags.size() == 0) {
-        build_options.tags.emplace_back("tags");
     }
 
     try {
