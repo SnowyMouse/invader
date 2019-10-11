@@ -197,7 +197,7 @@ int main(int argc, const char **argv) {
             std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), tag_path);
+                archive_list.emplace_back(tag_path.string(), base_tag);
                 break;
             }
         }
@@ -255,6 +255,14 @@ int main(int argc, const char **argv) {
             return EXIT_FAILURE;
         }
         auto &data = data_maybe.value();
+
+        // Get the filesystem path and write time
+        std::filesystem::path path_path = path;
+
+        // Get the modified time
+        struct stat s;
+        stat(path, &s);
+        archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
 
         // Archive that bastard
         archive_entry_set_size(entry, data.size());

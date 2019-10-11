@@ -17,11 +17,13 @@ This is used for recording Invader's changes. This changelog is based on
 library, allowing Invader to compile on more systems provided they support C++17.
 - Replaced the license header in each source file with a simpler `// SPDX-License-Identifier: GPL-3.0-only`. For more
 information on this header, go to https://spdx.org/ids-how
+- invader-archive: Now uses stat() to get the modification date of a file
 
 ### Fixed
 - Fixed an issue where invader-dependency didn't include a null terminator, causing some tags to fail to open
 - invader-archive: Fixed an issue where some stock HEK .gbxmodel tags tried (and failed) to be archived as .model tags
 - invader-bitmap: Fixed an issue where sprites spanning the entire width wouldn't be detected
+- invader-archive: Fixed an issue where the root tag would have its full system path included when using `-s`
 
 ## [0.13.0] - 2019-10-04
 ### Changed
