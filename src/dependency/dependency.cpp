@@ -87,7 +87,7 @@ int main(int argc, char * const *argv) {
             tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
         }
         else {
-            eprintf("Failed to find a valid tag %s\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }

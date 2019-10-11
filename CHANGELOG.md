@@ -9,7 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Now accepts filesystem paths for the image input if `-P` is passed
 - invader-build: Now accepts filesystem paths for the scenario tag if `-P` is passed
 - invader-dependency: Now accepts filesystem paths for the tag if `-P` is passed
-- invader-font: Now accepts filesystem paths for the data
+- invader-font: Now accepts filesystem paths for the the TTF file if `-P` is passed
 - invader-string: Now accepts filesystem paths for the data
 
 ### Changed

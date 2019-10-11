@@ -93,7 +93,7 @@ int main(int argc, const char **argv) {
             base_tag = base_tag_maybe.value();
         }
         else {
-            eprintf("Failed to find a valid tag %s\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }

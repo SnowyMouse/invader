@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
         const char *data = "data/";
         const char *tags = "tags/";
         int pixel_size = 14;
+        bool use_filesystem_path = false;
     } font_options;
     font_options.path = argv[0];
 
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("font-size", 'i', 1);
     options.emplace_back("help", 'h', 0);
     options.emplace_back("info", 'i', 0);
+    options.emplace_back("fs-path", 'P', 0);
 
     // Do it!
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, 0, font_options, [](char opt, const auto &args, FontOptions &font_options) {
@@ -55,6 +57,10 @@ int main(int argc, char *argv[]) {
                 font_options.tags = args[0];
                 break;
 
+            case 'P':
+                font_options.use_filesystem_path = true;
+                break;
+
             case 's':
                 font_options.pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
                 if(font_options.pixel_size <= 0) {
@@ -65,8 +71,9 @@ int main(int argc, char *argv[]) {
 
             default:
                 eprintf("Usage: %s [options] <font-tag>\n\n", font_options.path);
-                eprintf("Create font tags.\n\n");
+                eprintf("Create font tags from TTF files.\n\n");
                 eprintf("Options:\n");
+                eprintf("    --fs-path,-P               Use a filesystem path for the TTF file.\n");
                 eprintf("    --info,-i                  Show license and credits.\n");
                 eprintf("    --help,-h                  Show help\n\n");
                 eprintf("Directory options:\n");
@@ -88,16 +95,19 @@ int main(int argc, char *argv[]) {
         eprintf("Unexpected argument %s. Use -h for help.\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
-    else {
+    else if(font_options.use_filesystem_path) {
         std::vector<std::string> data(&font_options.data, &font_options.data + 1);
         auto font_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], data, ".ttf");
         if(font_tag_maybe.has_value()) {
             font_tag = font_tag_maybe.value();
         }
         else {
-            eprintf("Failed to find %s in the data directory\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid ttf %s in the data directory\n", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
+    }
+    else {
+        font_tag = remaining_arguments[0];
     }
 
     // Ensure it's lowercase

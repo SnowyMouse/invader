@@ -354,6 +354,10 @@ int main(int argc, char *argv[]) {
                 found_format = i;
                 break;
             }
+            else {
+                eprintf("Failed to find a valid bitmap %s in the data directory.\n", remaining_arguments[0]);
+                return EXIT_FAILURE;
+            }
         }
     }
 

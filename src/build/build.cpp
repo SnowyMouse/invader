@@ -160,7 +160,7 @@ int main(int argc, const char **argv) {
             scenario = scenario_maybe.value();
         }
         else {
-            eprintf("Could not find a valid scenario at path %s\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
             return RETURN_FAILED_UNHANDLED_ARGUMENT;
         }
     }
