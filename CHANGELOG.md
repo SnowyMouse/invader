@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - Added a CONTRIBUTING.md file which specifies guidelines for contributing to Invader
 - invader-archive: Now accepts filesystem paths for the tag
+- invader-bitmap: Now accepts filesystem paths for the data
+- invader-bitmap: Now allows the image format to be specified by specifying extension
 - invader-build: Now accepts filesystem paths for the scenario tag
 - invader-dependency: Now accepts filesystem paths for the tag
 - invader-font: Now accepts filesystem paths for the data
