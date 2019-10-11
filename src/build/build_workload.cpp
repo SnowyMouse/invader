@@ -28,13 +28,14 @@
 #include "../error.hpp"
 #include "../hek/map.hpp"
 #include "../crc/hek/crc.hpp"
+#include "../file/file.hpp"
 
 #include "build_workload.hpp"
 
 namespace Invader {
     std::vector<std::byte> BuildWorkload::compile_map(
         const char *scenario,
-        std::vector<std::string> tags_directories,
+        const std::vector<std::string> &tags_directories,
         HEK::CacheFileEngine engine_target,
         std::string maps_directory,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
@@ -133,8 +134,38 @@ namespace Invader {
         }
         workload.verbose = verbose;
 
+        // Let's see if we can get the tag path
+        constexpr const char SCENARIO_EXTENSION[] = ".scenario";
+        constexpr std::size_t SCENARIO_EXTENSION_LENGTH = sizeof(SCENARIO_EXTENSION) - 1;
+        const std::size_t SCENARIO_NAME_LENGTH = std::strlen(scenario);
+
+        // Check if it ends with ".scenario"
+        if(SCENARIO_NAME_LENGTH > SCENARIO_EXTENSION_LENGTH && std::strcmp(scenario + SCENARIO_NAME_LENGTH - SCENARIO_EXTENSION_LENGTH, SCENARIO_EXTENSION) == 0) {
+            // If the user simply put ".scenario" at the end, remove it
+            if(Invader::File::tag_path_to_file_path(scenario, tags_directories, true).has_value()) {
+                workload.scenario = std::string(scenario, SCENARIO_NAME_LENGTH - SCENARIO_EXTENSION_LENGTH);
+            }
+
+            // Otherwise,
+            else {
+                auto new_scenario_maybe = Invader::File::file_path_to_tag_path(scenario, tags_directories, true);
+                if(new_scenario_maybe.has_value()) {
+                    auto &new_scenario = new_scenario_maybe.value();
+                    workload.scenario = new_scenario.substr(0, new_scenario.size() - SCENARIO_EXTENSION_LENGTH);
+                }
+                else {
+                    eprintf("Failed to find scenario %s\n", scenario);
+                    throw InvalidTagPathException();
+                }
+            }
+
+
+        }
+        else {
+            workload.scenario = scenario;
+        }
+
         // Replace forward slashes in scenario tag path with backslashes
-        workload.scenario = scenario;
         for(char &c : workload.scenario) {
             if(c == '/') {
                 c = '\\';

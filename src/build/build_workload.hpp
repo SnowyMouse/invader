@@ -29,7 +29,7 @@ namespace Invader {
          */
         static std::vector<std::byte> compile_map(
             const char *scenario,
-            std::vector<std::string> tags_directories,
+            const std::vector<std::string> &tags_directories,
             HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET,
             std::string maps_directory = std::string(),
             const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),
