@@ -12,6 +12,7 @@
 #include "../map/map.hpp"
 #include "../dependency/found_tag_dependency.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 
 int main(int argc, const char **argv) {
     struct ArchiveOptions {
@@ -74,7 +75,15 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
     else {
-        base_tag = remaining_arguments[0];
+        // See if the tag path is valid
+        auto base_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], archive_options.tags, archive_options.single_tag ? std::nullopt : std::optional(std::string(".scenario")));
+        if(base_tag_maybe.has_value()) {
+            base_tag = base_tag_maybe.value();
+        }
+        else {
+            eprintf("Could not find %s\n", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
 
     // Variables to hold this
@@ -166,16 +175,14 @@ int main(int argc, const char **argv) {
             eprintf("No extension for %s. Archive could not be made.\n", tag_path_to_find);
             return EXIT_FAILURE;
         }
-        *(c - 1) = 0;
         Invader::HEK::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            auto name_with_extension = std::string(base_tag) + "." + c;
-            std::filesystem::path tag_path = std::filesystem::path(dir) / name_with_extension;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), name_with_extension);
+                archive_list.emplace_back(tag_path.string(), tag_path);
                 break;
             }
         }
@@ -186,7 +193,7 @@ int main(int argc, const char **argv) {
         }
 
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
         if(!success) {
             eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
