@@ -381,8 +381,8 @@ namespace Invader {
                                 }
                                 else {
                                     virtual_min_x = xb;
-                                    virtual_max_x = yb;
-                                    virtual_min_y = xb;
+                                    virtual_min_y = yb;
+                                    virtual_max_x = xb;
                                     virtual_max_y = yb;
                                 }
                             }
