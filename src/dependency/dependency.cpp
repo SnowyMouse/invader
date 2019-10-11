@@ -74,22 +74,15 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        std::string tag_path = remaining_arguments[0];
+        auto tag_path_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], dependency_options.tags, std::nullopt);
 
-        // See if the tag path is valid
-        if(Invader::File::tag_path_to_file_path(tag_path, dependency_options.tags, true).has_value()) {
-            tag_path_to_find_data = std::vector<char>(tag_path.begin(), tag_path.end());
+        if(tag_path_maybe.has_value()) {
+            auto &file_path = tag_path_maybe.value();
+            tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
         }
         else {
-            auto tag_path_maybe = Invader::File::file_path_to_tag_path(tag_path, dependency_options.tags, true);
-            if(tag_path_maybe.has_value()) {
-                auto &file_path = tag_path_maybe.value();
-                tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
-            }
-            else {
-                eprintf("Failed to find tag %s\n", tag_path.data());
-                return EXIT_FAILURE;
-            }
+            eprintf("Failed to find tag %s\n", remaining_arguments[0]);
+            return EXIT_FAILURE;
         }
 
         // Add a null terminator
