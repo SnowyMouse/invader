@@ -12,7 +12,7 @@ namespace Invader::File {
         std::filesystem::path file_path(path);
 
         // Make sure we're dealing with a file we can open
-        if(std::filesystem::is_regular_file(file_path)) {
+        if(!std::filesystem::is_regular_file(file_path)) {
             return std::nullopt;
         }
 

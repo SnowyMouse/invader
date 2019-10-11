@@ -241,31 +241,25 @@ int main(int argc, const char **argv) {
 
     // Go through each tag path we got
     for(std::size_t i = 0; i < archive_list.size(); i++) {
+        const char *path = archive_list[i].first.data();
+
         // Begin
         auto *entry = archive_entry_new();
         archive_entry_set_pathname(entry, archive_list[i].second.data());
         archive_entry_set_perm(entry, 0644);
         archive_entry_set_filetype(entry, AE_IFREG);
 
-        // Open the tag
-        std::FILE *t = std::fopen(archive_list[i].first.data(), "rb");
-        if(!t) {
-            eprintf("Failed to open %s for reading.\n", archive_list[i].first.data());
+        auto data_maybe = Invader::File::open_file(path);
+        if(!data_maybe.has_value()) {
+            eprintf("Failed to open %s\n", path);
             return EXIT_FAILURE;
         }
-        std::fseek(t, 0, SEEK_END);
-        long size = std::ftell(t);
-        archive_entry_set_size(entry, size);
-        std::fseek(t, 0, SEEK_SET);
-
-        // Make a pointer and read the data
-        std::unique_ptr<std::byte[]> data = std::make_unique<std::byte[]>(size);
-        std::fread(data.get(), size, 1, t);
-        std::fclose(t);
+        auto &data = data_maybe.value();
 
         // Archive that bastard
+        archive_entry_set_size(entry, data.size());
         archive_write_header(archive, entry);
-        archive_write_data(archive, data.get(), size);
+        archive_write_data(archive, data.data(), data.size());
 
         // Close it
         archive_entry_free(entry);
