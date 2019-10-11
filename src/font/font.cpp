@@ -12,6 +12,7 @@
 #include "../tag/hek/header.hpp"
 #include "../eprintf.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 #include FT_FREETYPE_H
 
 struct RenderedCharacter {
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
     });
 
     // Make sure we have the bitmap tag path
+    std::string font_tag;
     if(remaining_arguments.size() == 0) {
         eprintf("Expected a font tag path. Use -h for help.\n");
         return EXIT_FAILURE;
@@ -86,12 +88,22 @@ int main(int argc, char *argv[]) {
         eprintf("Unexpected argument %s. Use -h for help.\n", remaining_arguments[1]);
         return EXIT_FAILURE;
     }
-    const char *font_tag = remaining_arguments[0];
+    else {
+        std::vector<std::string> data(&font_options.data, &font_options.data + 1);
+        auto font_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], data, ".ttf");
+        if(font_tag_maybe.has_value()) {
+            font_tag = font_tag_maybe.value();
+        }
+        else {
+            eprintf("Failed to find %s in the data directory\n", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
+    }
 
     // Ensure it's lowercase
-    for(const char *c = font_tag; *c; c++) {
+    for(const char *c = font_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag);
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag.data());
             return EXIT_FAILURE;
         }
     }
