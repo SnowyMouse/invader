@@ -88,6 +88,12 @@ namespace Invader {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
+        // TODO: Fix 3D textures
+        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+            std::fprintf(stderr, "fixme:stub:fucked:3D textures do not work right now\n");
+            std::terminate();
+        }
+
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
