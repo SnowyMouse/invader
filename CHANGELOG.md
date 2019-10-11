@@ -5,6 +5,9 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - Added a CONTRIBUTING.md file which specifies guidelines for contributing to Invader
+- invader-archive: Now accepts filesystem paths for the tag
+- invader-build: Now accepts filesystem paths for the scenario tag
+- invader-dependency: Now accepts filesystem paths for the tag
 
 ### Changed
 - Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard
