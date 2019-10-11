@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
                 eprintf("    --info,-i                  Show license and credits.\n");
                 eprintf("    --help,-h                  Show help\n\n");
                 eprintf("Directory options:\n");
-                eprintf("    --fs-path,-P               Use an explicit filesystem path.\n");
+                eprintf("    --fs-path,-P               Use a filesystem path for the input bitmap.\n");
                 eprintf("    --data,-d <path>           Set the data directory.\n");
                 eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
                 eprintf("Bitmap options:\n");
