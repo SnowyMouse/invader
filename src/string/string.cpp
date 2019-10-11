@@ -8,6 +8,7 @@
 #include "../tag/hek/header.hpp"
 #include "../tag/hek/class/string_list.hpp"
 #include "../command_line_option.hpp"
+#include "../file/file.hpp"
 
 enum Format {
     STRING_LIST_FORMAT_UTF_16,
@@ -147,7 +148,7 @@ int main(int argc, char * const *argv) {
     });
 
     // Check if there's a string tag
-    const char *string_tag;
+    std::string string_tag;
     if(remaining_arguments.size() == 0) {
         eprintf("A string tag path is required. Use -h for help.\n");
         return EXIT_FAILURE;
@@ -157,13 +158,21 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     else {
-        string_tag = remaining_arguments[0];
+        std::vector<std::string> data(&string_options.data, &string_options.data + 1);
+        auto string_tag_maybe = Invader::File::attempt_to_resolve_tag_path(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+        if(string_tag_maybe.has_value()) {
+            string_tag = string_tag_maybe.value();
+        }
+        else {
+            eprintf("Failed to find %s in the data directory\n", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
 
     // Ensure it's lowercase
-    for(const char *c = string_tag; *c; c++) {
+    for(const char *c = string_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag);
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.data());
             return EXIT_FAILURE;
         }
     }
