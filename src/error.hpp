@@ -131,5 +131,23 @@ namespace Invader {
         /** What happened? */
         const char *what() const noexcept;
     };
+
+    /**
+     * This is thrown when invalid bitmap input is given when making a bitmap tag
+     */
+    class InvalidInputBitmapException : public std::exception {
+    public:
+        /** What happened? */
+        const char *what() const noexcept;
+    };
+
+    /**
+     * This is thrown when invalid bitmap format is used
+     */
+    class InvalidBitmapFormatException : public std::exception {
+    public:
+        /** What happened? */
+        const char *what() const noexcept;
+    };
 }
 #endif

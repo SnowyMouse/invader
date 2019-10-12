@@ -148,7 +148,7 @@ namespace Invader {
 
                 default:
                     eprintf("Unsupported bitmap format.\n");
-                    std::exit(EXIT_FAILURE);
+                    throw InvalidBitmapFormatException();
             }
 
             // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering

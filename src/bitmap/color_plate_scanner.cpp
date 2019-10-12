@@ -138,7 +138,7 @@ namespace Invader {
                             // Otherwise, bad!
                             else {
                                 eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, 1);
-                                std::exit(1);
+                                throw InvalidInputBitmapException();
                             }
                         }
                     }
@@ -169,7 +169,7 @@ namespace Invader {
                                 // Otherwise we only got part of a sequence divider and that's not fine
                                 else {
                                     eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, y);
-                                    std::exit(1);
+                                    throw InvalidInputBitmapException();
                                 }
                             }
                         }
@@ -213,7 +213,7 @@ namespace Invader {
                     }
                     else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
                         eprintf("Error: Sprites must have blue borders or a valid color plate.\n");
-                        std::exit(1);
+                        throw InvalidInputBitmapException();
                     }
                     else {
                         scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
@@ -406,11 +406,11 @@ namespace Invader {
                     if(power_of_two) {
                         if(!is_power_of_two(bitmap_width)) {
                             eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
-                            std::terminate();
+                            throw InvalidInputBitmapException();
                         }
                         if(!is_power_of_two(bitmap_height)) {
                             eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
-                            std::terminate();
+                            throw InvalidInputBitmapException();
                         }
                     }
 
@@ -460,7 +460,7 @@ namespace Invader {
 
         if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
             eprintf("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
-            std::terminate();
+            throw InvalidInputBitmapException();
         }
 
         auto get_pixel_transformed = [&pixels, &width, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t relative_x, std::uint32_t relative_y, std::uint32_t rotation) {
@@ -519,11 +519,11 @@ namespace Invader {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             if(!is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
-                std::terminate();
+                throw InvalidInputBitmapException();
             }
             if(!is_power_of_two(height)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, height);
-                std::terminate();
+                throw InvalidInputBitmapException();
             }
         }
 
@@ -866,7 +866,7 @@ namespace Invader {
 
             if(FACES == 0) {
                 eprintf("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
-                std::terminate();
+                throw InvalidInputBitmapException();
             }
 
             auto *bitmaps = generated_bitmap.bitmaps.data() + sequence.first_bitmap;
@@ -886,11 +886,11 @@ namespace Invader {
             if(generated_bitmap.type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
                 if(FACES != 6) {
                     eprintf("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
-                    std::terminate();
+                    throw InvalidInputBitmapException();
                 }
                 if(BITMAP_WIDTH != BITMAP_HEIGHT) {
                     eprintf("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
-                    std::terminate();
+                    throw InvalidInputBitmapException();
                 }
             }
 
@@ -923,13 +923,13 @@ namespace Invader {
                 // Ensure it's the same dimensions
                 if(bitmap.height != BITMAP_HEIGHT || bitmap.width != BITMAP_WIDTH) {
                     eprintf("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
-                    std::terminate();
+                    throw InvalidInputBitmapException();
                 }
 
                 // Also ensure it has the same # of mipmaps. I don't know how it wouldn't, but you never know
                 if(bitmap.mipmaps.size() != MIPMAP_COUNT) {
                     eprintf("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
-                    std::terminate();
+                    throw InvalidInputBitmapException();
                 }
 
                 // One of the only do/while loops I will ever do in Invader while writing it.
@@ -1332,7 +1332,7 @@ namespace Invader {
         auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
         if(!fit_sprites.has_value()) {
             eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
-            std::terminate();
+            throw InvalidInputBitmapException();
         }
         parameters.sprite_spacing = half_spacing;
 
@@ -1362,7 +1362,7 @@ namespace Invader {
 
                 if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
                     eprintf("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
-                    std::terminate();
+                    throw InvalidInputBitmapException();
                 }
 
                 // Go through each sprite and bake it in
