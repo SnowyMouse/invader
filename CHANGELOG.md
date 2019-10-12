@@ -13,6 +13,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-string: Now accepts filesystem paths for the text file if `-P` is passed
 - invader-crc: Now prints a warning to stderr if the CRC32 in the cache file header is wrong
 - invader-crc: Now errors with a useful error message if a resource map is loaded with it
+- Map parser: Now errors if the internal map name overflows into the build string
 
 ### Changed
 - Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard
