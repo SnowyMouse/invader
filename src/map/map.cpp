@@ -153,7 +153,7 @@ namespace Invader {
         const auto &header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
 
         // Check if invalid
-        if(header.file_size > this->data_length || header.head_literal != CACHE_FILE_HEAD || header.foot_literal != CACHE_FILE_FOOT || header.build.string[31] != 0) {
+        if(header.file_size > this->data_length || header.head_literal != CACHE_FILE_HEAD || header.foot_literal != CACHE_FILE_FOOT || header.build.string[31] != 0 || header.name.string[31] != 0) {
             throw InvalidMapException();
         }
 
