@@ -59,6 +59,10 @@ namespace Invader {
         return "tag path is invalid";
     }
 
+    const char *InvalidInputBitmapException::what() const noexcept {
+        return "input bitmap is invalid";
+    }
+
     const char *InvalidBitmapFormatException::what() const noexcept {
         return "bitmap format is invalid";
     }
