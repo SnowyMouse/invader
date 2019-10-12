@@ -19,6 +19,7 @@ library, allowing Invader to compile on more systems provided they support C++17
 information on this header, go to https://spdx.org/ids-how
 - invader-archive: Now uses stat() to get the modification date of a file
 - invader-bitmap: Made detail fade factor closer to tool.exe's output - still needs more work but it's remarkably close
+- invader-build: Build output now includes the version of Invader
 
 ### Fixed
 - Fixed an issue where invader-dependency didn't include a null terminator, causing some tags to fail to open
