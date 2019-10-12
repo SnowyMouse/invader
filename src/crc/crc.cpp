@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
             return EXIT_SUCCESS;
         }
         catch(std::exception &e) {
-            eprintf("Failed to find the CRC for %s\n", *argv);
+            eprintf("Failed to find the CRC for %s\n", argv[1]);
             eprintf("%s\n", e.what());
             return EXIT_FAILURE;
         }
