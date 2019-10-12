@@ -498,8 +498,9 @@ int main(int argc, char *argv[]) {
     ColorPlatePixel *image_pixels = nullptr;
 
     // Try to figure out the extension
+    auto bitmap_data_path = (data_path / bitmap_tag).string();
     for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-        std::string image_path = (data_path / (bitmap_tag + SUPPORTED_FORMATS[i])).string();
+        std::string image_path = bitmap_data_path + SUPPORTED_FORMATS[i];
         if(std::filesystem::exists(image_path)) {
             switch(i) {
                 case SUPPORTED_FORMATS_TIF:
