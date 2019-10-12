@@ -29,6 +29,7 @@
 #include "../hek/map.hpp"
 #include "../crc/hek/crc.hpp"
 #include "../file/file.hpp"
+#include "../version.hpp"
 
 #include "build_workload.hpp"
 
@@ -48,6 +49,12 @@ namespace Invader {
 
         workload.always_index_tags = always_index_tags;
         workload.engine_target = engine_target;
+
+        #ifndef NO_OUTPUT
+        if(verbose) {
+            std::printf("Invader version:   %s\n", INVADER_VERSION_STRING);
+        }
+        #endif
 
         // If we're building Dark Circlet or retail maps, don't use resource maps
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
