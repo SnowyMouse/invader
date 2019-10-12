@@ -12,7 +12,7 @@ int main(int argc, const char **argv) {
     // Make sure an argument was passed. If not, give the usage
     if(argc != 2) {
         eprintf("Usage: %s <map>\n", argv[0]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Open the map
@@ -20,7 +20,7 @@ int main(int argc, const char **argv) {
     std::FILE *f = std::fopen(file, "rb");
     if(!f) {
         eprintf("Failed to open %s\n", file);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::fseek(f, 0, SEEK_END);
     std::size_t size = std::ftell(f);
@@ -31,15 +31,35 @@ int main(int argc, const char **argv) {
     if(std::fread(data.get(), size, 1, f) != 1) {
         eprintf("Failed to read %s\n", file);
         std::fclose(f);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::fclose(f);
 
     // Calculate CRC32
-    auto map_crc = calculate_map_crc(data.get(), size);
-    std::printf("%08X\n", map_crc);
-    if(map_crc != reinterpret_cast<HEK::CacheFileHeader *>(data.get())->crc32) {
-        eprintf("Warning: Cache file is dirty. The CRC in the header is wrong.\n");
+    if(size < 0x800) {
+        eprintf("Error: Invalid map\n");
+        return EXIT_FAILURE;
     }
-    return 0;
+
+    // Check if it's obviously a resource map
+    else if(*reinterpret_cast<std::uint32_t *>(data.get()) < 256) {
+        eprintf("Error: Resource maps cannot be used with this tool.\n");
+        return EXIT_FAILURE;
+    }
+
+    else {
+        try {
+            auto map_crc = calculate_map_crc(data.get(), size);
+            std::printf("%08X\n", map_crc);
+            if(map_crc != reinterpret_cast<HEK::CacheFileHeader *>(data.get())->crc32) {
+                eprintf("Warning: Cache file is dirty. The CRC in the header is wrong.\n");
+            }
+            return EXIT_SUCCESS;
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to find the CRC for %s\n", *argv);
+            eprintf("%s\n", e.what());
+            return EXIT_FAILURE;
+        }
+    }
 }
