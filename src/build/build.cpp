@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef NO_OUTPUT
 #include <iostream>
 #include <chrono>
 #include <fstream>
 using clock_type = std::chrono::steady_clock;
-#endif
 
 #include <vector>
 #include <cstring>
@@ -170,9 +168,7 @@ int main(int argc, const char **argv) {
 
     try {
         // Start benchmark
-        #ifndef NO_OUTPUT
         auto start = clock_type::now();
-        #endif
 
         // Get the index
         std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
@@ -250,11 +246,9 @@ int main(int argc, const char **argv) {
 
         std::fclose(file);
 
-        #ifndef NO_OUTPUT
         if(!build_options.quiet) {
             oprintf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
         }
-        #endif
 
         return RETURN_OK;
     }

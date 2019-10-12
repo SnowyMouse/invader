@@ -50,11 +50,9 @@ namespace Invader {
         workload.always_index_tags = always_index_tags;
         workload.engine_target = engine_target;
 
-        #ifndef NO_OUTPUT
         if(verbose) {
             oprintf("Invader version:   %s\n", INVADER_VERSION_STRING);
         }
-        #endif
 
         // If we're building Dark Circlet or retail maps, don't use resource maps
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
@@ -192,7 +190,6 @@ namespace Invader {
         // Get the tag data header
         auto &tag_data_header = *reinterpret_cast<CacheFileTagDataHeaderPC *>(tag_data.data());
 
-        #ifndef NO_OUTPUT
         if(this->verbose) {
             oprintf("Scenario name:     %s\n", cache_file_header.name.string);
 
@@ -204,13 +201,10 @@ namespace Invader {
             }
             oprintf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
         }
-        #endif
 
         // Get the largest BSP tag as well as usage of the indexed tag space
         std::size_t largest_bsp_size = 0;
-        #ifndef NO_OUTPUT
         std::size_t largest_bsp = 0;
-        #endif
         std::vector<std::size_t> bsps;
         std::size_t total_bsp_size = 0;
         std::size_t bsp_count = 0;
@@ -222,9 +216,7 @@ namespace Invader {
                 bsp_count++;
                 if(size > largest_bsp_size) {
                     largest_bsp_size = size;
-                    #ifndef NO_OUTPUT
                     largest_bsp = i;
-                    #endif
                 }
                 bsps.emplace_back(i);
             }
@@ -233,7 +225,6 @@ namespace Invader {
         std::size_t max_tag_data_size = tag_data.size() + largest_bsp_size + total_indexed_data;
 
         // Output BSP info
-        #ifndef NO_OUTPUT
         if(this->verbose) {
             oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
             for(auto bsp : bsps) {
@@ -241,7 +232,6 @@ namespace Invader {
             }
             oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
         }
-        #endif
 
         // Check if we've exceeded the max amount of tag data
         if(max_tag_data_size > CACHE_FILE_MEMORY_LENGTH) {
@@ -273,17 +263,14 @@ namespace Invader {
         this->add_model_tag_data(vertices, indices, tag_data);
         auto model_data_size = vertices.size() + indices.size();
 
-        #ifndef NO_OUTPUT
         if(this->verbose) {
             oprintf("Model data:        %.02f MiB\n", BYTES_TO_MiB(model_data_size));
         }
-        #endif
 
         // Add bitmap and sound data
         file.reserve(file.size() + bitmap_sound_size + model_data_size + tag_data.size() + 4);
         this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
-        #ifndef NO_OUTPUT
         if(this->verbose) {
             std::size_t indexed_count = 0;
 
@@ -296,7 +283,6 @@ namespace Invader {
             oprintf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
             oprintf("Indexed tags:      %zu\n", indexed_count);
         }
-        #endif
 
         // Get the size and offsets of model data
         auto model_data_offset = file.size();
@@ -336,11 +322,10 @@ namespace Invader {
             cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size());
         }
 
-        #ifndef NO_OUTPUT
+        // Show the CRC32
         if(this->verbose) {
             oprintf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
         }
-        #endif
 
         // Set eXoDux compatibility mode.
         if(x_dux) {
@@ -358,11 +343,9 @@ namespace Invader {
         }
 
         // Output the file size
-        #ifndef NO_OUTPUT
         if(this->verbose) {
             oprintf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
         }
-        #endif
 
         // Check if we've exceeded the max file size.
         if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
@@ -616,18 +599,14 @@ namespace Invader {
         this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
 
         // If we're using an indexed list of tags to maintain the same tag order as another map, check to make sure bad things won't happen when using this map due to missing tags.
-        #ifndef NO_OUTPUT
         bool network_issue = false;
-        #endif
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
                 // Damage effects and object tags that are not in the correct location will break things
-                #ifndef NO_OUTPUT
                 if(this->cache_file_type == CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
                     eprintf("Warning: Network object %s.%s is missing.\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                     network_issue = true;
                 }
-                #endif
 
                 // Stub the tag
                 compiled_tag->path = "MISSINGNO.";

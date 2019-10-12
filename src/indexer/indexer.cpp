@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef NO_OUTPUT
-#include <chrono>
-using clock_type = std::chrono::steady_clock;
-#include <iostream>
-#endif
-
 #include <vector>
 #include <cstring>
 #include <regex>
