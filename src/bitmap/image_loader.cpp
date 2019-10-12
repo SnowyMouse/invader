@@ -2,7 +2,7 @@
 
 #include <tiffio.h>
 #include "image_loader.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "stb/stb_image.h"
 
 namespace Invader {

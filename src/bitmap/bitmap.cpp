@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <optional>
 
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "../version.hpp"
 #include "../tag/hek/class/bitmap.hpp"
 #include "image_loader.hpp"
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
                             bitmap_options.dither_blue = true;
                             break;
                         default:
-                            printf("Unknown channel %c.\n", *c);
+                            eprintf("Unknown channel %c.\n", *c);
                             std::exit(EXIT_FAILURE);
                     }
                 }
@@ -586,9 +586,9 @@ int main(int argc, char *argv[]) {
     #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
     // Add our bitmap data
-    printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
+    oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
     write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
-    std::printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
+    oprintf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());

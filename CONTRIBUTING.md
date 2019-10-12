@@ -210,9 +210,8 @@ definitions.
 - Do not use C-style casting, such as `(int)i`
     - Use the correct casting functions (e.g. `static_cast`, `reinterpret_cast`, `const_cast`, etc.) when necessary
 - For null pointers, use `nullptr`
-- When using the C or C++ standard library, use the `std::` namespace explicitly when possible, such as `std::printf`
-or `std::uint32_t`
+- When using the C or C++ standard library, use the `std::` namespace explicitly when possible, such as `std::uint32_t`
     - The `using namespace std;` directive may result in collisions at some point, so using it is inadvisable
-- Do not use `std::cout` or `std::err` for console output. Instead, use `std::printf` and `eprintf`
-(`src/eprintf.hpp`), respectively.
+- Do not use `std::cout` or `std::err` for console output. Instead, use `oprintf` and `eprintf` (`src/printf.hpp`),
+respectively.
 - Use C++17's `std::byte` type for raw memory instead of an integer type like `char` or `std::uint8_t`

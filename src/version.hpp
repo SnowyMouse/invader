@@ -3,7 +3,7 @@
 #ifndef INVADER__VERSION_HPP
 #define INVADER__VERSION_HPP
 
-#include "eprintf.hpp"
+#include "printf.hpp"
 #include "hek/data_type.hpp"
 
 #define TOSTR2(str) # str

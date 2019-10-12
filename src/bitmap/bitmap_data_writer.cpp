@@ -4,7 +4,7 @@
 #include "stb/stb_dxt.h"
 
 #include "bitmap_data_writer.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<HEK::BitmapData<HEK::BigEndian>> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
@@ -458,7 +458,7 @@ namespace Invader {
 
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-            std::printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
+            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
         }
     }
 }

@@ -6,7 +6,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include "../version.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 
 #include "../build/build_workload.hpp"
 #include "../map/map.hpp"

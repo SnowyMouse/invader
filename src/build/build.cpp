@@ -14,7 +14,7 @@ using clock_type = std::chrono::steady_clock;
 #include "../map/map.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "../command_line_option.hpp"
 #include "../file/file.hpp"
 
@@ -252,7 +252,7 @@ int main(int argc, const char **argv) {
 
         #ifndef NO_OUTPUT
         if(!build_options.quiet) {
-            std::printf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
+            oprintf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
         }
         #endif
 

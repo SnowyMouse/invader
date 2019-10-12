@@ -4,7 +4,7 @@
 #include <string>
 #include <filesystem>
 #include "../version.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "found_tag_dependency.hpp"
 #include "../build/build_workload.hpp"
@@ -131,6 +131,6 @@ int main(int argc, char * const *argv) {
 
     // See what depended on it or what depends on this
     for(auto &tag : found_tags) {
-        std::printf("%s.%s%s\n", tag.path.data(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
+        oprintf("%s.%s%s\n", tag.path.data(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
     }
 }

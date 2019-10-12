@@ -11,7 +11,7 @@
 // This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
 #define MAX_PATH_LENGTH 254
 
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "../tag/hek/class/biped.hpp"
 #include "../tag/hek/class/bitmap.hpp"
 #include "../tag/hek/class/detail_object_collection.hpp"
@@ -52,7 +52,7 @@ namespace Invader {
 
         #ifndef NO_OUTPUT
         if(verbose) {
-            std::printf("Invader version:   %s\n", INVADER_VERSION_STRING);
+            oprintf("Invader version:   %s\n", INVADER_VERSION_STRING);
         }
         #endif
 
@@ -194,7 +194,7 @@ namespace Invader {
 
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("Scenario name:     %s\n", cache_file_header.name.string);
+            oprintf("Scenario name:     %s\n", cache_file_header.name.string);
 
             std::size_t total_tag_size = 0;
             for(auto &tag : this->compiled_tags) {
@@ -202,7 +202,7 @@ namespace Invader {
                     total_tag_size += tag->data_size;
                 }
             }
-            std::printf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
+            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
         }
         #endif
 
@@ -235,11 +235,11 @@ namespace Invader {
         // Output BSP info
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
+            oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
             for(auto bsp : bsps) {
-                std::printf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
+                oprintf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
             }
-            std::printf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
+            oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
         }
         #endif
 
@@ -275,7 +275,7 @@ namespace Invader {
 
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("Model data:        %.02f MiB\n", BYTES_TO_MiB(model_data_size));
+            oprintf("Model data:        %.02f MiB\n", BYTES_TO_MiB(model_data_size));
         }
         #endif
 
@@ -293,8 +293,8 @@ namespace Invader {
                 }
             }
 
-            std::printf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
-            std::printf("Indexed tags:      %zu\n", indexed_count);
+            oprintf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
+            oprintf("Indexed tags:      %zu\n", indexed_count);
         }
         #endif
 
@@ -338,7 +338,7 @@ namespace Invader {
 
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
+            oprintf("CRC32 checksum:    0x%08X\n", cache_file_header_file.crc32.read());
         }
         #endif
 
@@ -360,7 +360,7 @@ namespace Invader {
         // Output the file size
         #ifndef NO_OUTPUT
         if(this->verbose) {
-            std::printf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
+            oprintf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
         }
         #endif
 

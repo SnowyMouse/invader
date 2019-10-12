@@ -10,7 +10,7 @@
 #include <vector>
 #include "../tag/hek/class/font.hpp"
 #include "../tag/hek/header.hpp"
-#include "../eprintf.hpp"
+#include "../printf.hpp"
 #include "../command_line_option.hpp"
 #include "../file/file.hpp"
 #include FT_FREETYPE_H
