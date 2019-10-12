@@ -58,7 +58,7 @@ should not be added to Invader.
 be avoided in favor of the C/C++ standard library when possible. If this is unavoidable, `#ifdefs` should be used so it
 only applies to that platform.
     - This means that you should avoid using platform-specific types and functions like the Windows API's `DWORD` or
-    `fopen_s` unless you are specifically using the Windows API for things.
+    `fopen_s` unless you are specifically using one system's API for things.
     - Usually the implementation of the C/C++ standard library will call these platform-specific functions for you,
     anyway.
 
