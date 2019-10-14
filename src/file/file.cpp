@@ -84,14 +84,16 @@ namespace Invader::File {
             return std::nullopt;
         }
         auto absolute_file_path_str = absolute_file_path.string();
+        auto root_path_str = absolute_file_path.root_path();
 
         for(auto &tags_directory_string : tags) {
             // Get the absolute path
-            auto tags_directory = std::filesystem::absolute(tags_directory_string);
+            bool ends_with_separator = tags_directory_string[tags_directory_string.size() - 1] == '/' || tags_directory_string[tags_directory_string.size() - 1] == std::filesystem::path::preferred_separator;
+            auto tags_directory = std::filesystem::absolute(ends_with_separator ? tags_directory_string.substr(0,tags_directory_string.size() - 1) : tags_directory_string);
 
             // Go back until we get something that's the same
             auto path_check = absolute_file_path;
-            while(path_check.has_parent_path()) {
+            while(path_check.has_parent_path() && path_check != root_path_str) {
                 path_check = path_check.parent_path();
                 if(path_check == tags_directory) {
                     auto path_check_str = path_check.string();
