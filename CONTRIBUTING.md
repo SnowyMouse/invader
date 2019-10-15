@@ -27,7 +27,7 @@ the latest release uses code that is older than the Git master branch, then it i
 
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation, and code to ensure it is understandable
-by most people.
+by most people. This may be subject to change.
 
 - Use American English
     - A specific dialect of English is chosen for consistency in spelling
@@ -47,13 +47,13 @@ unit in Halo is equal to 10 feet or 3.048 meters.
     - Most text editors do this for you
 
 ## Scope guidelines
-Issues and pull requests must remain in the scope of Invader.
+Issues and pull requests must remain in the scope of Invader. This may be subject to change.
 
 - Invader only applies to the base Halo Custom Edition game. Code or definitions for functionality provided by a mod
 should not be added to Invader.
     - For example, if you want to create a fork of Invader that creates Open Sauce maps, you are free to do so provided
-    you follow the terms of Invader's license, but you should not submit an issue or a pull request to add this
-    functionality as it goes outside the scope of Invader.
+    you follow the terms of Invader's license **AND** Open Sauce's license (they are both GPL version 3), but you must
+    not submit an issue or a pull request to add this functionality, as it goes outside the scope of Invader.
 - Invader is cross-platform. Direct usage of platform-specific code such as the Windows API or Linux kernel API should
 be avoided in favor of the C/C++ standard library when possible. If this is unavoidable, `#ifdefs` should be used so it
 only applies to that platform.
@@ -63,7 +63,7 @@ only applies to that platform.
     anyway.
 
 ## Issue guidelines
-Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
+Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page. This may be subject to change.
 
 For all issues:
 - Ensure your issue is not a duplicate of another issue. Check both [open](https://github.com/Kavawuvi/Invader/issues)
@@ -92,7 +92,7 @@ somewhat lengthy, but it is organized to be easy to follow. Some conventions may
 case, they will be added here even if these conventions were discovered upon a pull request being submitted.
 
 If your code does not follow these conventions and you submit a pull request, then you will be asked to revise your
-code before it gets merged.
+code before it gets merged. These conventions may be subject to change.
 
 ### Exceptions and externally-added code
 By "externally-added" code, it is meant that non-Invader code was added into the project. Code that is trivial to
