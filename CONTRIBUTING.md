@@ -54,13 +54,14 @@ should not be added to Invader.
     - For example, if you want to create a fork of Invader that creates Open Sauce maps, you are free to do so provided
     you follow the terms of Invader's license **AND** Open Sauce's license (they are both GPL version 3), but you must
     not submit an issue or a pull request to add this functionality, as it goes outside the scope of Invader.
-- Invader is cross-platform. Direct usage of platform-specific code such as the Windows API or Linux kernel API should
-be avoided in favor of the C/C++ standard library when possible. If this is unavoidable, `#ifdefs` should be used so it
-only applies to that platform.
-    - This means that you should avoid using platform-specific types and functions like the Windows API's `DWORD` or
-    `fopen_s` unless you are specifically using one system's API for things.
-    - Usually the implementation of the C/C++ standard library will call these platform-specific functions for you,
-    anyway.
+- Invader is cross-platform.
+    - Direct usage of platform-specific code such as the Windows API or Linux kernel API should be avoided in favor of
+    the C/C++ standard library when possible.
+        - If this is unavoidable, `#ifdef`s should be used to separate platform-specific code.
+    - The implementation of the C/C++ standard library will usually call these platform-specific functions in a
+    portable manner.
+    - Avoid using platform-specific types and functions like the Windows API's `DWORD` or `fopen_s` unless your code
+    specifically targets one platform.
 
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page. This may be subject to change.
