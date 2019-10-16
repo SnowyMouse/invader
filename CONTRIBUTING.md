@@ -46,22 +46,33 @@ unit in Halo is equal to 10 feet or 3.048 meters.
 - All text files must end with a newline
     - Most text editors do this for you
 
-## Scope guidelines
-Issues and pull requests must remain in the scope of Invader. This may be subject to change.
+## Scope conventions
+Issues and pull requests must remain in the scope of Invader. Here are some things to keep in mind:
 
-- Invader only applies to the base Halo Custom Edition game. Code or definitions for functionality provided by a mod
-should not be added to Invader.
-    - For example, if you want to create a fork of Invader that creates Open Sauce maps, you are free to do so provided
-    you follow the terms of Invader's license **AND** Open Sauce's license (they are both GPL version 3), but you must
-    not submit an issue or a pull request to add this functionality, as it goes outside the scope of Invader.
-- Invader is cross-platform.
-    - Direct usage of platform-specific code such as the Windows API or Linux kernel API should be avoided in favor of
-    the C/C++ standard library when possible.
-        - If this is unavoidable, `#ifdef`s should be used to separate platform-specific code.
-    - The implementation of the C/C++ standard library will usually call these platform-specific functions in a
-    portable manner.
-    - Avoid using platform-specific types and functions like the Windows API's `DWORD` or `fopen_s` unless your code
-    specifically targets one platform.
+- Invader targets the base Halo Custom Edition game as released on PC.
+- Invader is cross-platform and does not target any single operating system.
+- Invader does not (usually) care about the limitations of the original Halo Editing Kit.
+
+Remember, these conventions only apply to contributions towards the main Invader repository, not forks. This means that
+you are allowed to create a fork of Invader that targets a specific mod of the game (e.g. Chimera, Open Sauce, etc.),
+provided you follow the license of Invader and, if necessary, the mod you are targeting. However, code or definitions
+for functionality provided by these mods will not be accepted.
+
+Also, if you contribute to Invader and write C/C++ code, remember to use functions and data types standard to C/C++. Do
+not use platform-specific types or functions such as the Windows API's `DWORD` or `fopen_s` when writing any
+platform-independent code. There may be times where such platform-specific code is necessary. If so, ensure you use
+`#ifdef`s so the code is only compiled when that platform is being targeted.
+
+Lastly, it is well known that the Halo Editing Kit imposes limitations on structures. For example:
+- tool.exe limits the maximum size of a bitmap to 16 MiB
+- tool.exe limits the maximum number of structs in most tags
+- tool.exe limits the file size of maps to 128 MiB (multiplayer) and 384 MiB (singleplayer)
+- and so on...
+
+As long as it is otherwise valid data, then Invader should not prevent the user from creating assets, even if these
+assets may not work with the Halo Editing Kit. In fact, Invader should not be expected to warn the user if such assets
+will not work with the original Halo Editing Kit. Usage of the original Halo Editing Kit should be discouraged whenever
+possible.
 
 ## Issue guidelines
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page. This may be subject to change.
