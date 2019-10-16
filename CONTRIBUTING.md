@@ -134,6 +134,8 @@ but above the original license header, including the modification to add the lic
 list, itself, of course.
 
 ### License conventions
+These apply to license headers and licensing.
+
 - The first line of every source file must be a single-line comment, `SPDX-License-Identifier: GPL-3.0-only`, unless
 comments are not supported for that particular file type (e.g. `.tag_indices`)
 - Everything must be contributed under the project's license, the GNU General Public License version 3 **only**
@@ -142,6 +144,8 @@ of the file (below the aforementioned single-line comment) that this version of 
 This is done for clarity.
 
 ### File name conventions
+This applies to how files and directories are named.
+
 - Files and directories should use all-lowercase `snake_case` names with all nouns being singular. There are some
 exceptions to this:
 - Markdown filenames and the LICENSE file must be written in all caps
@@ -150,6 +154,8 @@ exceptions to this:
 - File extensions, if present, must be lowercase
 
 ### Markdown conventions
+This applies to how markdown files are created and edited.
+
 - Capitalize the first letter of headings as well as any proper noun
     - Do not use title case (e.g. write "Coding conventions" instead of "Coding Conventions")
 - Markdown file lines must be no more than 120 characters in length unless it is part of a table
@@ -169,6 +175,8 @@ These conventions apply to code, specifically. Many of these are best-practices 
 but this is to maintain consistency nonetheless.
 
 #### Message output conventions
+This applies to feedback given to the user by the program.
+
 - Messages output in the command line that are not variable in length must have no more than 80 characters per line
 - Error messages (including usage) should use standard error (stderr)
 
@@ -180,6 +188,8 @@ Note: These naming conventions do not need to be followed when interfacing with 
 - Besides counters, variables, function names, and type names should be self-explanatory
 
 #### Comment conventions
+These apply to comments and when to comment.
+
 - Implementation code that is non-trivial or non-self explanatory should have commenting to indicate what it does
     - A good way to think about this: In 10 years, you might not be here to explain what your code does. Can anyone
     with decent amount of programming experience easily understand your code?
@@ -187,6 +197,8 @@ Note: These naming conventions do not need to be followed when interfacing with 
 strictly required at this moment. This can and probably will change in the future.
 
 #### C/C++ conventions
+These apply to C/C++ code specifically.
+
 - Static and global variables defined in your code may not be modified
     - The reason for this is because it's usually not thread safe, and singletons are often a result of poor design
 - Directory separators in `#include` statements must use forward slashes (e.g. `#include "tag/compiled_tag.hpp"`)
@@ -194,6 +206,8 @@ strictly required at this moment. This can and probably will change in the futur
 of integer. Never assume the size of fundamental types like `int`, `short`, `size_t`, etc.
 
 ##### Headers
+These apply to C/C++ header files.
+
 - Avoid defining things in the global namespace
     - Invader-specific code should use the `Invader` namespace
     - HEK-specific definitions used in Invader should use the `Invader::HEK` namespace
@@ -221,10 +235,14 @@ definitions.
         ```
 
 ##### C conventions
+These apply to C code.
+
 - Use `.c` for C source files
 - For null pointers, use `NULL`
 
 ##### C++ conventions
+These apply to C++ code.
+
 - Use `.cpp` for C++ source files
 - Do not directly use `malloc`, `calloc`, `free`, `new`, `delete`, or `delete[]` unless absolutely necessary
     - Use smart pointers such as `std::unique_ptr` or `std::vector` as these are less error-prone
