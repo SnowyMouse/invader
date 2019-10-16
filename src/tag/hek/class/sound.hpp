@@ -141,15 +141,6 @@ namespace Invader::HEK {
     struct SoundFlags {
         std::uint32_t fit_to_adpcm_blocksize : 1;
         std::uint32_t split_long_sound_into_permutations : 1;
-        std::uint32_t reserved : 1;
-        std::uint32_t reserved_1 : 1;
-        std::uint32_t reserved_2 : 1;
-        std::uint32_t reserved_3 : 1;
-        std::uint32_t reserved_4 : 1;
-        std::uint32_t reserved_5 : 1;
-        std::uint32_t reserved_6 : 1;
-        std::uint32_t reserved_7 : 1;
-        std::uint32_t never_share_resources : 1;
     };
 
     ENDIAN_TEMPLATE(EndianType) struct Sound {
