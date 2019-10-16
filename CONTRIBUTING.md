@@ -29,9 +29,15 @@ Releases are used only for versioning and keeping track of changes. They are **n
 the latest release uses code that is older than the Git master branch, then it is just as out-of-date and, therefore,
 less "stable" as a result.
 
+# Conventions
+These conventions apply only for contributing to the official Invader repository. Forks or other derivatives of Invader
+may use completely different conventions.
+
+These conventions are subject to change.
+
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation, and code to ensure it is understandable
-by most people. This may be subject to change.
+by most people.
 
 - Use American English
     - A specific dialect of English is chosen for consistency in spelling
@@ -79,7 +85,7 @@ will not work with the original Halo Editing Kit. Usage of the original Halo Edi
 possible.
 
 ## Issue conventions
-Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page. This may be subject to change.
+Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page.
 
 For all issues:
 - Ensure your issue is not a duplicate of another issue. Check both [open](https://github.com/Kavawuvi/Invader/issues)
