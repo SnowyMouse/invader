@@ -43,9 +43,8 @@ by most people.
     - A specific dialect of English is chosen for consistency in spelling
     - Comments inside of issues and pull requests do not specifically need to use the American English dialect, but
     they should not require a translator for American English speakers to read, either.
-- Use ISO dates (YYYY-MM-DD)
-    - The ISO date format is universally easy to understand, as it removes ambiguity and puts the date components in a
-    logical order.
+- Use ISO dates (YYYY-MM-DD). This date format is universally easy to understand as there is no ambiguity, and the
+components of the date is ordered logically from most significant (year) to least significant (day).
 - Use soft tabs of four spaces in length
 - Use commas (`,`) when separating thousands, and use decimal points (`.`) when a decimal point is needed
 - Use the metric system when applicable. The only exception to this is when talking about world units, which one world
@@ -53,8 +52,7 @@ unit in Halo is equal to 10 feet or 3.048 meters.
 - Use IEC base-2 units when referring to a large number of bytes (i.e. KiB, MiB, GiB, TiB, etc.)
     - This is to prevent confusion. Windows uses MB and GB as 2^20 and 2^30 bytes, respectively, while almost
     everything else uses MB and GB as 10^3 and 10^6 bytes, respectively.
-- All text files must end with a newline
-    - Most text editors do this for you
+- All text files must end with a newline. Most modern text editors will do this for you.
 
 ## Scope conventions
 Issues and pull requests must remain in the scope of Invader. Here are some things to keep in mind:
@@ -112,9 +110,6 @@ A simple way to remember this is: If a bug cannot be reproduced, then it isn't a
 The Invader repository uses these conventions. If contributing code to Invader, be sure to follow it. This may be
 somewhat lengthy, but it is organized to be easy to follow. Some conventions may have been missed, and if this is the
 case, they will be added here even if these conventions were discovered upon a pull request being submitted.
-
-If your code does not follow these conventions and you submit a pull request, then you will be asked to revise your
-code before it gets merged. These conventions may be subject to change.
 
 ### Exceptions and externally-added code
 By "externally-added" code, it is meant that non-Invader code was added into the project. Code that is trivial to
@@ -181,8 +176,9 @@ This applies to feedback given to the user by the program.
 - Error messages (including usage) should use standard error (stderr)
 
 #### Naming conventions
-Note: These naming conventions do not need to be followed when interfacing with external libraries
-- Use snake_case for variables and function definitions
+These apply to the definitions of variables, functions, types, structs, class, enums, etc.
+
+- Use snake_case for variable and function definitions
 - Constants and enum definitions must be all uppercase
 - Use PascalCase for struct, class, enum, and other type definitions
 - Besides counters, variables, function names, and type names should be self-explanatory
