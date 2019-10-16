@@ -59,14 +59,18 @@ namespace Invader::HEK {
                 reflexive.samples.external = 0;
 
                 std::size_t mouth_data_size = reflexive.mouth_data.size;
-                ADD_POINTER_FROM_INT32(reflexive.mouth_data.pointer, compiled.data.size());
-                compiled.data.insert(compiled.data.end(), data, data + mouth_data_size);
-                INCREMENT_DATA_PTR(mouth_data_size)
+                if(mouth_data_size) {
+                    ADD_POINTER_FROM_INT32(reflexive.mouth_data.pointer, compiled.data.size());
+                    compiled.data.insert(compiled.data.end(), data, data + mouth_data_size);
+                    INCREMENT_DATA_PTR(mouth_data_size)
+                }
 
                 std::size_t subtitle_data_size = reflexive.subtitle_data.size;
-                // ADD_POINTER_FROM_INT32(reflexive.subtitle_data.pointer, compiled.data.size());
-                compiled.data.insert(compiled.data.end(), data, data + subtitle_data_size);
-                INCREMENT_DATA_PTR(subtitle_data_size)
+                if(subtitle_data_size) {
+                    ADD_POINTER_FROM_INT32(reflexive.subtitle_data.pointer, compiled.data.size());
+                    compiled.data.insert(compiled.data.end(), data, data + subtitle_data_size);
+                    INCREMENT_DATA_PTR(subtitle_data_size)
+                }
 
                 DEFAULT_VALUE(reflexive.gain, 1.0f);
                 PAD_32_BIT
