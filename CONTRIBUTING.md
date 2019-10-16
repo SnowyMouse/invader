@@ -1,5 +1,6 @@
 # How to contribute to Invader
 Thank you for your interest! There are a number of ways you can help this project:
+
 - Testing (we need more testers!)
 - Submitting [issues](https://github.com/Kavawuvi/Invader/issues)
 - Submitting [pull requests](https://github.com/Kavawuvi/Invader/pulls)
@@ -25,7 +26,8 @@ release or not.
 
 ## Stable releases
 Releases are used only for versioning and keeping track of changes. They are **not** an indication of stability. So, if
-the latest release uses code that is older than the Git master branch, then it is just as out-of-date.
+the latest release uses code that is older than the Git master branch, then it is just as out-of-date and, therefore,
+less "stable" as a result.
 
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation, and code to ensure it is understandable
