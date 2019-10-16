@@ -4,8 +4,9 @@ Thank you for your interest! There are a number of ways you can help this projec
 - Submitting [issues](https://github.com/Kavawuvi/Invader/issues)
 - Submitting [pull requests](https://github.com/Kavawuvi/Invader/pulls)
 
-## Testing Invader
+# Testing Invader
 There are a few ways to obtain builds of Invader:
+
 - Compiling from source (recommended) - Follow the [readme](https://github.com/Kavawuvi/Invader#windows) instructions.
 If you're on Arch Linux, you can use the package on the [AUR](https://aur.archlinux.org/packages/invader-git/) for
 this, too.
@@ -22,6 +23,7 @@ You should always test using the latest [Git master branch](https://github.com/K
 testing Invader. It is not recommended to test even slightly outdated versions of Invader, regardless of if it is a
 release or not.
 
+## Stable releases
 Releases are used only for versioning and keeping track of changes. They are **not** an indication of stability. So, if
 the latest release uses code that is older than the Git master branch, then it is just as out-of-date.
 
@@ -74,7 +76,7 @@ assets may not work with the Halo Editing Kit. In fact, Invader should not be ex
 will not work with the original Halo Editing Kit. Usage of the original Halo Editing Kit should be discouraged whenever
 possible.
 
-## Issue guidelines
+## Issue conventions
 Create your issue in the [issues](https://github.com/Kavawuvi/Invader/issues) page. This may be subject to change.
 
 For all issues:
