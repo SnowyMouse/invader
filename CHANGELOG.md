@@ -20,6 +20,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Building retail and demo maps now uses the resource maps
 - invader-build: The gain modifier for `sound\sfx\impulse\ting\ting.sound` is now changed to 0.2 if building for retail
 or demo and 1.0 otherwise
+- invader-build: Now shows the target engine of the map
 
 ### Changed
 - Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard
