@@ -55,8 +55,10 @@ namespace Invader {
         // If we're building Dark Circlet or retail maps, don't use resource maps
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL || engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
             workload.always_index_tags = false;
+        // If we're building dark circlet maps, set no_indexed_tags to true
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             no_indexed_tags = true;
-            maps_directory = std::string();
+            maps_directory.clear(); // don't even bother loading the resource maps
         }
 
         // If using a custom tag data address
