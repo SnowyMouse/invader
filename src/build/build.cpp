@@ -194,7 +194,7 @@ int main(int argc, const char **argv) {
         }
 
         std::uint32_t forged_crc_value = 0;
-        std::uint32_t *forged_crc_ptr = nullptr;
+        std::optional<std::uint32_t> forged_crc;
         if(build_options.forged_crc) {
             std::size_t given_crc32_length = std::strlen(build_options.forged_crc);
             if(given_crc32_length > 8 || given_crc32_length < 1) {
@@ -209,10 +209,10 @@ int main(int argc, const char **argv) {
                 }
             }
             forged_crc_value = std::strtoul(build_options.forged_crc, nullptr, 16);
-            forged_crc_ptr = &forged_crc_value;
+            forged_crc = forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc_ptr);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
 
         char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
         #ifdef _WIN32

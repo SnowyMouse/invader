@@ -4,6 +4,7 @@
 #define INVADER__BUILD__BUILD_WORKLOAD_HPP
 
 #include <vector>
+#include <optional>
 #include <string>
 #include "../hek/map.hpp"
 #include "../resource/resource_map.hpp"
@@ -36,7 +37,7 @@ namespace Invader {
             bool no_indexed_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
-            const std::uint32_t *forge_crc = nullptr
+            std::optional<std::uint32_t> forge_crc = std::nullopt
         );
 
     private:
@@ -130,10 +131,9 @@ namespace Invader {
 
         /**
          * Build a cache file
-         * @param   forge_crc  forge the CRC32 of the map
          * @return  cache file data
          */
-        std::vector<std::byte> build_cache_file(const std::uint32_t *forge_crc = nullptr);
+        std::vector<std::byte> build_cache_file();
 
         /**
          * Index tags that can be indexed
@@ -218,6 +218,11 @@ namespace Invader {
          * @return     index of the BSP
          */
         std::size_t get_bsp_tag_index(std::uint32_t bsp);
+
+        /**
+         * CRC to forge the map to, if required
+         */
+        std::optional<std::uint32_t> forge_crc;
     };
 }
 #endif

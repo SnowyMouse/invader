@@ -43,13 +43,13 @@ namespace Invader {
         bool no_indexed_tags,
         bool always_index_tags,
         bool verbose,
-        const std::uint32_t *forge_crc
+        std::optional<std::uint32_t> forge_crc
     ) {
         BuildWorkload workload;
 
         workload.always_index_tags = always_index_tags;
         workload.engine_target = engine_target;
-        
+
         // If we're building Dark Circlet or retail maps, don't use resource maps
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
             workload.always_index_tags = false;
@@ -144,10 +144,10 @@ namespace Invader {
             }
         }
 
-        return workload.build_cache_file(forge_crc);
+        return workload.build_cache_file();
     }
 
-    std::vector<std::byte> BuildWorkload::build_cache_file(const std::uint32_t *forge_crc) {
+    std::vector<std::byte> BuildWorkload::build_cache_file() {
         using namespace HEK;
 
         // Get all the tags
@@ -308,9 +308,9 @@ namespace Invader {
 
         // Get the CRC and set it in the header
         CacheFileHeader &cache_file_header_file = *reinterpret_cast<CacheFileHeader *>(file.data());
-        if(forge_crc) {
+        if(this->forge_crc.has_value()) {
             std::uint32_t new_random;
-            cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size(), forge_crc, &new_random);
+            cache_file_header_file.crc32 = calculate_map_crc(file.data(), file.size(), &this->forge_crc.value(), &new_random);
             CacheFileTagDataHeader &header = *reinterpret_cast<CacheFileTagDataHeader *>(file.data() + cache_file_header.tag_data_offset);
             header.random_number = new_random;
         }
