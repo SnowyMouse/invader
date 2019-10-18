@@ -29,20 +29,25 @@ namespace Invader::HEK {
         CACHE_FILE_FOOT_DEMO = 0x47666F74
     };
 
+    enum CacheFileTagDataBaseMemoryAddress : std::uint32_t {
+        CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
+        CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
+        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000000
+    };
+
     enum CacheFileLimits : std::size_t {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
+        #if SIZE_MAX > 0xFFFFFFFF
+        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = static_cast<std::size_t>(0x100000000 - CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS),
+        #else
+        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = static_cast<std::size_t>(0xFFFFFFFF - CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS),
+        #endif
         #if SIZE_MAX > 0xFFFFFFFF
         CACHE_FILE_MAXIMUM_FILE_LENGTH = 0x100000000,
         #else
         CACHE_FILE_MAXIMUM_FILE_LENGTH = SIZE_MAX,
         #endif
         CACHE_FILE_MAX_TAG_COUNT = 65535
-    };
-
-    enum CacheFileTagDataBaseMemoryAddress : std::uint32_t {
-        CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
-        CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
-        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000134
     };
 
     struct CacheFileDemoHeader;

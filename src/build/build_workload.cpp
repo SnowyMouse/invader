@@ -239,7 +239,8 @@ namespace Invader {
             for(auto bsp : bsps) {
                 oprintf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
             }
-            oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(CACHE_FILE_MEMORY_LENGTH), max_tag_data_size * 100.0 / CACHE_FILE_MEMORY_LENGTH);
+            auto maximum_allowed_tag_space = this->engine_target == CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : CACHE_FILE_MEMORY_LENGTH;
+            oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(maximum_allowed_tag_space), max_tag_data_size * 100.0 / maximum_allowed_tag_space);
         }
 
         // Check if we've exceeded the max amount of tag data
