@@ -61,7 +61,7 @@ int main(int argc, const char **argv) {
                 auto &tag = map[i];
 
                 // Replace double slashes (or more) with one slash
-                std::string path = std::regex_replace(tag.name, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
+                std::string path = std::regex_replace(tag.path, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
 
                 std::fprintf(f, "%s\n", path.data());
             }
