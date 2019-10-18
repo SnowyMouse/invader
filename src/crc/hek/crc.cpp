@@ -87,7 +87,7 @@ namespace Invader {
         else {
             std::uint32_t crc_value = ~crc;
             if(check_dirty) {
-                *check_dirty = crc_value == cache_file_header.crc32;
+                *check_dirty = crc_value != cache_file_header.crc32;
             }
             return crc_value;
         }
