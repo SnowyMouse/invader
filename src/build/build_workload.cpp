@@ -43,18 +43,31 @@ namespace Invader {
         bool no_indexed_tags,
         bool always_index_tags,
         bool verbose,
-        std::optional<std::uint32_t> forge_crc
+        std::optional<std::uint32_t> forge_crc,
+        std::optional<std::uint32_t> tag_data_address
     ) {
         BuildWorkload workload;
 
         workload.always_index_tags = always_index_tags;
         workload.engine_target = engine_target;
+        workload.forge_crc = forge_crc;
 
         // If we're building Dark Circlet or retail maps, don't use resource maps
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL) {
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL || engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
             workload.always_index_tags = false;
             no_indexed_tags = true;
             maps_directory = std::string();
+        }
+
+        // If using a custom tag data address
+        if(tag_data_address.has_value()) {
+            workload.tag_data_address = tag_data_address.value();
+        }
+        else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            workload.tag_data_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+        }
+        else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            workload.tag_data_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
         }
 
         // First set up indexed tags
@@ -347,6 +360,13 @@ namespace Invader {
         if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
             eprintf("Maximum file size exceeds budget.\n");
             throw MaximumFileSizeException();
+        }
+
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            CacheFileDemoHeader demo_header = cache_file_header;
+            demo_header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
+            demo_header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
+            *reinterpret_cast<CacheFileDemoHeader *>(file.data()) = demo_header;
         }
 
         return file;

@@ -27,6 +27,7 @@ namespace Invader {
          * @param always_index_tags always use cached tags; ignored if building a Dark Circlet map
          * @param verbose           output non-error messages to console
          * @param forge_crc         forge the CRC32 of the map
+         * @param tag_data_pointer  address the tag data will be loaded to
          */
         static std::vector<std::byte> compile_map(
             const char *scenario,
@@ -37,7 +38,8 @@ namespace Invader {
             bool no_indexed_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
-            std::optional<std::uint32_t> forge_crc = std::nullopt
+            std::optional<std::uint32_t> forge_crc = std::nullopt,
+            std::optional<std::uint32_t> tag_data_address = std::nullopt
         );
 
     private:

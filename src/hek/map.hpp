@@ -9,6 +9,7 @@
 namespace Invader::HEK {
     enum CacheFileEngine : std::uint32_t {
         CACHE_FILE_XBOX = 0x5,
+        CACHE_FILE_DEMO = 0x6,
         CACHE_FILE_RETAIL = 0x7,
         CACHE_FILE_CUSTOM_EDITION = 0x261,
         CACHE_FILE_DARK_CIRCLET = 0x1A86
@@ -23,7 +24,9 @@ namespace Invader::HEK {
     enum CacheFileLiteral : std::uint32_t {
         CACHE_FILE_HEAD = 0x68656164,
         CACHE_FILE_FOOT = 0x666F6F74,
-        CACHE_FILE_TAGS = 0x74616773
+        CACHE_FILE_TAGS = 0x74616773,
+        CACHE_FILE_HEAD_DEMO = 0x45686564,
+        CACHE_FILE_FOOT_DEMO = 0x47666F74
     };
 
     enum CacheFileLimits : std::size_t {
@@ -37,8 +40,12 @@ namespace Invader::HEK {
     };
 
     enum CacheFileTagDataBaseMemoryAddress : std::uint32_t {
-        CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000
+        CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
+        CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
+        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000134
     };
+
+    struct CacheFileDemoHeader;
 
     struct CacheFileHeader {
         LittleEndian<CacheFileLiteral> head_literal;
@@ -55,8 +62,36 @@ namespace Invader::HEK {
         LittleEndian<std::uint32_t> crc32;
         PAD(0x794);
         LittleEndian<CacheFileLiteral> foot_literal;
+
+        CacheFileHeader() = default;
+        CacheFileHeader(const CacheFileHeader &copy) = default;
+        CacheFileHeader(const CacheFileDemoHeader &copy);
     };
     static_assert(sizeof(CacheFileHeader) == 0x800);
+
+    struct CacheFileDemoHeader {
+        PAD(0x2);
+        LittleEndian<CacheFileType> map_type;
+        PAD(0x2BC);
+        LittleEndian<CacheFileLiteral> head_literal;
+        LittleEndian<std::uint32_t> tag_data_size;
+        TagString build;
+        PAD(0x2A0);
+        LittleEndian<CacheFileEngine> engine;
+        TagString name;
+        PAD(0x4);
+        LittleEndian<std::uint32_t> crc32;
+        PAD(0x34);
+        LittleEndian<std::uint32_t> file_size;
+        LittleEndian<std::uint32_t> tag_data_offset;
+        LittleEndian<CacheFileLiteral> foot_literal;
+        PAD(0x20C);
+
+        CacheFileDemoHeader() = default;
+        CacheFileDemoHeader(const CacheFileDemoHeader &copy) = default;
+        CacheFileDemoHeader(const CacheFileHeader &copy);
+    };
+    static_assert(sizeof(CacheFileDemoHeader) == 0x800);
 
     struct CacheFileTagDataHeader {
         LittleEndian<std::uint32_t> tag_array_address;

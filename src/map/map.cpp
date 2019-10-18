@@ -150,14 +150,30 @@ namespace Invader {
         using namespace Invader::HEK;
 
         // Get header
-        const auto &header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+        CacheFileHeader header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
 
-        // Check if invalid
-        if(header.file_size > this->data_length || header.head_literal != CACHE_FILE_HEAD || header.foot_literal != CACHE_FILE_FOOT || header.build.string[31] != 0 || header.name.string[31] != 0) {
+        // Check if the literals are invalid
+        if(header.head_literal != CACHE_FILE_HEAD || header.foot_literal != CACHE_FILE_FOOT) {
+            // Maybe it's a demo map?
+            header = *reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+            if(header.head_literal != CACHE_FILE_HEAD_DEMO || header.foot_literal != CACHE_FILE_FOOT_DEMO) {
+                throw InvalidMapException();
+            }
+        }
+
+        // Check if any overflowing occurs
+        if(header.file_size > this->data_length || header.build.string[31] != 0 || header.name.string[31] != 0) {
             throw InvalidMapException();
         }
 
         // Get tag data
+        if(header.engine == CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            this->base_memory_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
+        }
+        else if(header.engine == CacheFileEngine::CACHE_FILE_DEMO) {
+            this->base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+        }
+
         this->tag_data_length = header.tag_data_size;
         this->tag_data = this->get_data_at_offset(header.tag_data_offset, this->tag_data_length);
 

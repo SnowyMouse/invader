@@ -92,6 +92,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "retail") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
+                else if(std::strcmp(arguments[0], "demo") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                }
                 else if(std::strcmp(arguments[0], "dark") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
@@ -113,7 +116,7 @@ int main(int argc, const char **argv) {
                 eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
                 eprintf("  --fs-path,-P                 Use a filesystem path for the scenario tag.\n");
                 eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
-                eprintf("                               custom (default), retail, dark\n");
+                eprintf("                               custom (default), retail, demo, dark\n");
                 eprintf("  --no-indexed-tags,-n         Do not index tags. This can speed up build time\n");
                 eprintf("                               at the cost of a much larger file size.\n");
                 eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
@@ -214,7 +217,13 @@ int main(int argc, const char **argv) {
 
         auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
 
-        char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
+        const char *map_name = scenario.data();
+        for(const char &c : scenario) {
+            if(c == '/' || c == '\\') {
+                map_name = &c + 1;
+            }
+        }
+
         #ifdef _WIN32
         const char *separator = "\\";
         #else
