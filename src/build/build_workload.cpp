@@ -144,7 +144,10 @@ namespace Invader {
             };
             workload.bitmaps = load_map(workload.maps_directory + "bitmaps.map");
             workload.sounds = load_map(workload.maps_directory + "sounds.map");
-            workload.loc = load_map(workload.maps_directory + "loc.map");
+
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                workload.loc = load_map(workload.maps_directory + "loc.map");
+            }
         }
         workload.verbose = verbose;
 
