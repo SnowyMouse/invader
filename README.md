@@ -65,6 +65,7 @@ This program generates a .tar.xz archive containing all of the tags used to buil
 | -------------------- | ----------------------------------------------------------- |
 | `--info,-i`          | Show credits, source info, and other info.                  |
 | `--help,-h`          | Show help.                                                  |
+| `--fs-path,-P`       | Use a filesystem path for the tag.                          |
 | `--output,-o <file>` | Output to a specific file. Extension must be .tar.xz.       |
 | `--single-tag,-s`    | Archive a tag tree instead of a cache file tree.            |
 | `--tags,-t <dir>`    | Tags directory. Use multiple times to add tags directories. |
@@ -74,12 +75,13 @@ This program generates bitmap tags from images. For source images, .tif, .tiff, 
 supported.
 
 #### Usage
-`invader-bitmap [options] <bitmap-tag>`
+`invader-bitmap [options] <bitmap-data>`
 
 | Option                      | Description                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------- |
 | `--info,-i`                 | Show credits, source info, and other info.                                                  |
 | `--help,-h`                 | Show help.                                                                                  |
+| `--fs-path,-P`              | Use a filesystem path for the bitmap data path.                                             |
 | `--data,-d <dir>`           | Data directory.                                                                             |
 | `--tags,-t <dir>`           | Tags directory.                                                                             |
 | `--type,-T`                 | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`.          |
@@ -150,21 +152,24 @@ This program builds cache files.
 #### Usage
 `invader-build [options] <scenario-tag>`
 
-| Option                   | Description                                                 |
-| ------------------------ | ----------------------------------------------------------- |
-| `--info,-i`              | Show credits, source info, and other info.                  |
-| `--help,-h`              | Show help.                                                  |
-| `--maps,-m <dir>`        | Use a specific maps directory.                              |
-| `--always-index-tags,-a` | Always index tags with resource maps when possible.         |
-| `--no-indexed-tags,-n`   | Do not index tags with resource maps.                       |
-| `--forge-crc,-c <crc>`   | Forge the CRC.                                              |
-| `--output,-o <file>`     | Output to a specific file.                                  |
-| `--quiet,-q`             | Only output error messages.                                 |
-| `--tags,-t <dir>`        | Tags directory. Use multiple times to add tags directories. |
-| `--with-index,-w <file>` | Use an index file for the tags.                             |
+| Option                    | Description                                                          |
+| ------------------------- | -------------------------------------------------------------------- |
+| `--info,-i`               | Show credits, source info, and other info.                           |
+| `--help,-h`               | Show help.                                                           |
+| `--fs-path,-P`            | Use a filesystem path for the scenario tag.                          |
+| `--game-engine,-g` <type> | Set target map type. Can be `ce` (default), `retail`, `demo`, `dark` |
+| `--maps,-m <dir>`         | Use a specific maps directory.                                       |
+| `--tags,-t <dir>`         | Tags directory. Use multiple times to add tags directories.          |
+| `--always-index-tags,-a`  | Always index tags with resource maps when possible.                  |
+| `--no-indexed-tags,-n`    | Do not index tags with resource maps.                                |
+| `--forge-crc,-c <crc>`    | Forge the CRC.                                                       |
+| `--output,-o <file>`      | Output to a specific file.                                           |
+| `--quiet,-q`              | Only output error messages.                                          |
+| `--with-index,-w <file>`  | Use an index file for the tags.                                      |
 
 ### invader-crc
-This program calculates the CRC32 of a map file.
+This program calculates the CRC32 of a map file. If the CRC value calculated differs from the value stored in the cache
+file header, then a warning will be printed to standard error.
 
 #### Usage
 `invader-crc <map>`
@@ -179,6 +184,7 @@ This program finds tags that directly depend on a given tag.
 | ----------------- | ----------------------------------------------------------- |
 | `--help,-h`       | Show help.                                                  |
 | `--info,-i`       | Show credits, source info, and other info.                  |
+| `--fs-path,-P`    | Use a filesystem path for the tag.                          |
 | `--recursive,-R`  | Recursively get all depended tags.                          |
 | `--reverse,-r`    | Find all tags that depend on the tag, instead.              |
 | `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories. |
@@ -193,6 +199,7 @@ This program generates font tags.
 | --------------------- | ------------------------------------------ |
 | `--help,-h`           | Show help.                                 |
 | `--info,-i`           | Show credits, source info, and other info. |
+| `--fs-path,-P`        | Use a filesystem path for the font data.   |
 | `--data,-d <dir>`     | Data directory.                            |
 | `--maps,-m <dir>`     | Maps directory.                            |
 | `--font-size,-s <px>` | Use a font size in pixels.                 |
@@ -204,7 +211,7 @@ This program builds index files for usage with `--with-index` with invader-build
 `invader-indexer <input map> <output index>`
 
 ### invader-resource
-This program builds resource maps.
+This program builds resource maps. Only maps with stock tags can be built.
 
 #### Usage
 `invader-resource <options>`
