@@ -9,8 +9,10 @@
 
 namespace Invader {
     struct Resource {
-        std::string name;
+        std::string path;
         std::vector<std::byte> data;
+        std::size_t path_offset;
+        std::size_t data_offset;
     };
 
     /**

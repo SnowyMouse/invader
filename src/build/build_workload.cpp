@@ -408,7 +408,7 @@ namespace Invader {
                 switch(tag->tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         for(std::size_t b = 1; b < this->bitmaps.size(); b+=2) {
-                            if(this->bitmaps[b].name == tag->path) {
+                            if(this->bitmaps[b].path == tag->path) {
                                 total_removed_data += tag->data.size();
                                 tag->indexed = true;
                                 tag->index = static_cast<std::uint32_t>(b);
@@ -420,7 +420,7 @@ namespace Invader {
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         for(std::size_t s = 1; s < this->sounds.size(); s+=2) {
-                            if(this->sounds[s].name == tag->path) {
+                            if(this->sounds[s].path == tag->path) {
                                 tag->indexed = true;
                                 tag->asset_data.clear();
                                 break;
@@ -431,7 +431,7 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
-                            if(this->loc[l].name == tag->path) {
+                            if(this->loc[l].path == tag->path) {
                                 tag->indexed = true;
                                 tag->data.clear();
                                 tag->index = static_cast<std::uint32_t>(l);
@@ -463,7 +463,7 @@ namespace Invader {
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
-                            if(this->sounds[s].data == tag->asset_data && this->sounds[s].name == tag->path + "__permutations") {
+                            if(this->sounds[s].data == tag->asset_data && this->sounds[s].path == tag->path + "__permutations") {
                                 tag->indexed = true;
                                 tag->asset_data.clear();
                                 break;
@@ -473,7 +473,7 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_FONT:
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
-                            if(loc_tag.name == tag->path) {
+                            if(loc_tag.path == tag->path) {
                                 auto *tag_font = reinterpret_cast<Font<LittleEndian> *>(tag->data.data());
                                 auto *loc_font = reinterpret_cast<Font<LittleEndian> *>(loc_tag.data.data());
 
@@ -505,7 +505,7 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
-                            if(loc_tag.name == tag->path) {
+                            if(loc_tag.path == tag->path) {
                                 auto *tag_base = tag->data.data();
                                 auto *loc_base = loc_tag.data.data();
 
@@ -554,7 +554,7 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
-                            if(loc_tag.name == tag->path) {
+                            if(loc_tag.path == tag->path) {
                                 // TODO: Compare tag data.
                                 if(loc_tag.data.size() == tag->data.size()) {
                                     tag->index = static_cast<std::uint32_t>(l);

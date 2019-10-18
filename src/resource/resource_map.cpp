@@ -45,7 +45,13 @@ namespace Invader {
                 }
             }
 
-            returned_resources.push_back(Resource { resource_path, std::vector<std::byte>(resource_data, resource_data + resource_data_size) });
+            Resource resource;
+            resource.path = resource_path;
+            resource.data = std::vector<std::byte>(resource_data, resource_data + resource_data_size);
+            resource.path_offset = resource_path_offset;
+            resource.data_offset = resource_data_offset;
+
+            returned_resources.push_back(resource);
         }
 
         return returned_resources;
