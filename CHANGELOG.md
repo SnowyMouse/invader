@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.14.0] - 2019-10-18
 ### Added
 - Added a CONTRIBUTING.md file which specifies guidelines for contributing to Invader
 - invader-archive: Now accepts filesystem paths for the tag if `-P` is passed
