@@ -387,7 +387,7 @@ namespace Invader {
         }
 
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-            CacheFileDemoHeader demo_header = cache_file_header;
+            CacheFileDemoHeader demo_header = cache_file_header_file;
             demo_header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
             demo_header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
             *reinterpret_cast<CacheFileDemoHeader *>(file.data()) = demo_header;
