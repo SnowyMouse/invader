@@ -209,6 +209,9 @@ namespace Invader {
         this->fix_scenario_tag_encounters();
         this->fix_scenario_tag_command_lists();
 
+        // Meme up the ting tag
+        this->modify_ting_tag();
+
         // Add tag data
         this->add_tag_data(tag_data, file);
 
@@ -2319,5 +2322,23 @@ namespace Invader {
         }
 
         return sbsp_tag;
+    }
+
+    void BuildWorkload::modify_ting_tag() {
+        for(auto &tag : this->compiled_tags) {
+            if(tag->path == "sound\\sfx\\impulse\\ting\\ting" && tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_SOUND) {
+                auto &sound_header = *reinterpret_cast<HEK::Sound<HEK::LittleEndian> *>(tag->data.data());
+                switch(this->engine_target) {
+                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                        sound_header.random_gain_modifier = 0.2F;
+                        break;
+                    default:
+                        sound_header.random_gain_modifier = 1.0F;
+                        break;
+                }
+                return;
+            }
+        }
     }
 }

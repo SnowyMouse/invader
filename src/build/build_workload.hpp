@@ -124,6 +124,11 @@ namespace Invader {
         void load_required_tags();
 
         /**
+         * Modify the ting tag volume depending on the target engine
+         */
+        void modify_ting_tag();
+
+        /**
          * Compile a tag recursively if tag is not present
          * @param  path          path of tag
          * @param  tag_class_int class of tag

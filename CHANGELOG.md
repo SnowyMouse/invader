@@ -18,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-crc: Halo Demo / Trial maps can now be used
 - invader-build: --no-indexed-tags was renamed to --no-external-tags
 - invader-build: Building retail and demo maps now uses the resource maps
+- invader-build: The gain modifier for `sound\sfx\impulse\ting\ting.sound` is now changed to 0.2 if building for retail
+or demo and 1.0 otherwise
 
 ### Changed
 - Replaced the command line arg parser. The new one was made from scratch and uses only functions from the C++ standard
