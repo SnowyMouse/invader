@@ -40,7 +40,7 @@ namespace Invader {
         HEK::CacheFileEngine engine_target,
         std::string maps_directory,
         const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
-        bool no_indexed_tags,
+        bool no_external_tags,
         bool always_index_tags,
         bool verbose,
         std::optional<std::uint32_t> forge_crc,
@@ -57,7 +57,7 @@ namespace Invader {
             workload.always_index_tags = false;
         // If we're building dark circlet maps, set no_indexed_tags to true
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            no_indexed_tags = true;
+            no_external_tags = true;
             maps_directory.clear(); // don't even bother loading the resource maps
         }
 
@@ -106,7 +106,7 @@ namespace Invader {
         // Load resource maps if we need to do so
         workload.tags_directories = new_tag_dirs;
         workload.maps_directory = maps_directory;
-        if(!no_indexed_tags && workload.maps_directory != "") {
+        if(!no_external_tags && workload.maps_directory != "") {
             // End with a directory separator if not already done so
             #ifdef _WIN32
             if(workload.maps_directory[workload.maps_directory.size() - 1] != '\\' || workload.maps_directory[workload.maps_directory.size() - 1] != '/') {

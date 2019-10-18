@@ -161,7 +161,7 @@ This program builds cache files.
 | `--maps,-m <dir>`         | Use a specific maps directory.                                       |
 | `--tags,-t <dir>`         | Tags directory. Use multiple times to add tags directories.          |
 | `--always-index-tags,-a`  | Always index tags with resource maps when possible.                  |
-| `--no-indexed-tags,-n`    | Do not index tags with resource maps.                                |
+| `--no-external-tags,-n`   | Do not external tags from resource maps.                             |
 | `--forge-crc,-c <crc>`    | Forge the CRC.                                                       |
 | `--output,-o <file>`      | Output to a specific file.                                           |
 | `--quiet,-q`              | Only output error messages.                                          |

@@ -38,7 +38,7 @@ int main(int argc, const char **argv) {
         std::string last_argument;
         std::string index;
         HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
-        bool no_indexed_tags = false;
+        bool no_external_tags = false;
         bool handled = true;
         bool quiet = false;
         bool always_index_tags = false;
@@ -50,7 +50,7 @@ int main(int argc, const char **argv) {
 
     std::vector<CommandLineOption> options;
     options.emplace_back("help", 'h', 0);
-    options.emplace_back("no-indexed-tags", 'n', 0);
+    options.emplace_back("no-external-tags", 'n', 0);
     options.emplace_back("always-index-tags", 'a', 0);
     options.emplace_back("quiet", 'q', 0);
     options.emplace_back("info", 'i', 0);
@@ -65,7 +65,7 @@ int main(int argc, const char **argv) {
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, 'h', build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
         switch(opt) {
             case 'n':
-                build_options.no_indexed_tags = true;
+                build_options.no_external_tags = true;
                 break;
             case 'q':
                 build_options.quiet = true;
@@ -117,8 +117,8 @@ int main(int argc, const char **argv) {
                 eprintf("  --fs-path,-P                 Use a filesystem path for the scenario tag.\n");
                 eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
                 eprintf("                               custom (default), retail, demo, dark\n");
-                eprintf("  --no-indexed-tags,-n         Do not index tags. This can speed up build time\n");
-                eprintf("                               at the cost of a much larger file size.\n");
+                eprintf("  --no-external-tags,-n        Do not use external tags. This can speed up build\n");
+                eprintf("                               time at the cost of a much larger file size.\n");
                 eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
                 eprintf("                               up build time, but stock tags can't be modified.\n");
                 eprintf("  --forge-crc,-c <crc>         Forge the CRC32 value of a map. This is useful\n");
@@ -134,7 +134,7 @@ int main(int argc, const char **argv) {
         }
     });
 
-    if(build_options.always_index_tags && build_options.no_indexed_tags) {
+    if(build_options.always_index_tags && build_options.no_external_tags) {
         eprintf("%s: --no-index-tags conflicts with --always-index-tags.\n", argv[0]);
         return EXIT_FAILURE;
     }
@@ -215,7 +215,7 @@ int main(int argc, const char **argv) {
             forged_crc = forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
+        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_external_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
 
         const char *map_name = scenario.data();
         for(const char &c : scenario) {

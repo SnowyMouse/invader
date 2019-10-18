@@ -23,7 +23,7 @@ namespace Invader {
          * @param engine_target     target a specific engine
          * @param maps_directory    maps directory to use; ignored if building a Dark Circlet map
          * @param with_index        tag index to use
-         * @param no_indexed_tags   do not use cached tags; ignored if building a Dark Circlet map
+         * @param no_external_tags  do not use cached tags; ignored if building a Dark Circlet map
          * @param always_index_tags always use cached tags; ignored if building a Dark Circlet map
          * @param verbose           output non-error messages to console
          * @param forge_crc         forge the CRC32 of the map
@@ -35,7 +35,7 @@ namespace Invader {
             HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET,
             std::string maps_directory = std::string(),
             const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),
-            bool no_indexed_tags = false,
+            bool no_external_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
             std::optional<std::uint32_t> forge_crc = std::nullopt,
