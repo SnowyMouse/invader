@@ -708,9 +708,9 @@ namespace Invader::HEK {
     static_assert(sizeof(PredictedResource<BigEndian>) == 0x8);
 
     ENDIAN_TEMPLATE(EndianType) struct TagDataOffset {
-        EndianType<std::int32_t> size;
+        EndianType<std::uint32_t> size;
         LittleEndian<std::int32_t> external;
-        EndianType<std::int32_t> file_offset;
+        EndianType<std::uint32_t> file_offset;
         EndianType<Pointer> pointer;
         PAD(0x4);
 

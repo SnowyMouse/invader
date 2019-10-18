@@ -52,10 +52,15 @@ namespace Invader {
         workload.engine_target = engine_target;
         workload.forge_crc = forge_crc;
 
-        // If we're building Dark Circlet or retail maps, don't use resource maps
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL || engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-            workload.always_index_tags = false;
-        // If we're building dark circlet maps, set no_indexed_tags to true
+        // If we're building non-custom edition maps, set workload.always_index_tags to false
+        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(workload.always_index_tags) {
+                eprintf("Warning: '-a' is ineffectual if not building a Halo Custom Edition cache file.\n");
+                workload.always_index_tags = false;
+            }
+        }
+
+        // If we're building dark circlet maps, set no_external_tags to true
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             no_external_tags = true;
             maps_directory.clear(); // don't even bother loading the resource maps
@@ -177,7 +182,13 @@ namespace Invader {
         }
 
         // Remove anything we don't need
-        std::size_t total_indexed_data = this->index_tags();
+        std::size_t total_indexed_data = 0;
+        if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            total_indexed_data = this->index_tags();
+        }
+        else {
+            this->find_external_resource_offsets();
+        }
 
         // Initialize our header and file data vector, also grabbing scenario information
         CacheFileHeader cache_file_header = {};
@@ -580,6 +591,112 @@ namespace Invader {
         return total_removed_data;
     }
 
+    std::size_t BuildWorkload::find_external_resource_offsets() noexcept {
+        using namespace Invader::HEK;
+
+        std::size_t total_removed_data = 0;
+
+        for(auto &tag : this->compiled_tags) {
+            switch(tag->tag_class_int) {
+                case TagClassInt::TAG_CLASS_BITMAP: {
+                    // Go through each bitmap in the tag
+                    auto &bitmap_header = *reinterpret_cast<Bitmap<LittleEndian> *>(tag->data.data());
+                    std::uint32_t bitmap_data_count = bitmap_header.bitmap_data.count;
+                    auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&bitmap_header.bitmap_data.pointer));
+                    for(std::uint32_t bitmap_data = 0; bitmap_data < bitmap_data_count; bitmap_data++) {
+                        auto &bitmap = bitmaps[bitmap_data];
+
+                        // Record this data
+                        std::uint32_t pixel_count = bitmap.pixels_count;
+                        std::uint32_t pixel_offset = bitmap.pixels_offset;
+                        std::size_t end = static_cast<std::size_t>(pixel_count) + pixel_offset;
+                        auto *bitmap_pixels = tag->asset_data.data() + bitmap.pixels_offset;
+
+                        // Iterate through each bitmap resource
+                        for(auto &b : this->bitmaps) {
+                            // Check if we have a match
+                            if(b.data.size() == pixel_count && std::memcmp(bitmap_pixels, b.data.data(), pixel_count) == 0) {
+                                // Set the external flags
+                                auto flags = bitmap.flags.read();
+                                flags.external = 1;
+                                bitmap.flags = flags;
+                                bitmap.pixels_offset = static_cast<std::uint32_t>(b.data_offset);
+
+                                // Next, adjust all pointers after this
+                                for(std::uint32_t bitmap_data_remove = bitmap_data + 1; bitmap_data_remove < bitmap_data_count; bitmap_data_remove++) {
+                                    auto &bitmap_remove = bitmaps[bitmap_data_remove];
+                                    bitmap_remove.pixels_offset = bitmap_remove.pixels_offset.read() - pixel_count;
+                                }
+
+                                // Lastly, delete the data we just removed
+                                std::vector<std::byte> new_asset_data(tag->asset_data.data(), tag->asset_data.data() + pixel_offset);
+                                new_asset_data.insert(new_asset_data.end(), tag->asset_data.data() + end, tag->asset_data.data() + tag->asset_data.size());
+                                tag->asset_data = new_asset_data;
+                                total_removed_data += pixel_count;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case TagClassInt::TAG_CLASS_SOUND: {
+                    auto &sound_header = *reinterpret_cast<Sound<LittleEndian> *>(tag->data.data());
+                    auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&sound_header.pitch_ranges.pointer));
+                    std::uint32_t pitch_range_count = sound_header.pitch_ranges.count;
+                    for(std::uint32_t pr = 0; pr < pitch_range_count; pr++) {
+                        auto &pitch_range = pitch_ranges[pr];
+                        auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&pitch_range.permutations.pointer));
+                        std::uint32_t permutations_count = pitch_range.permutations.count;
+                        for(std::uint32_t p = 0; p < permutations_count; p++) {
+                            auto &permutation = permutations[p];
+                            std::uint32_t sound_size = permutation.samples.size;
+                            std::uint32_t sound_offset = permutation.samples.file_offset;
+                            std::uint32_t end = sound_size + sound_offset;
+                            auto *sound_data = tag->asset_data.data() + sound_offset;
+
+                            // Iterate through each sound resource
+                            for(auto &s : this->sounds) {
+                                // Check if we have a match
+                                if(s.data.size() == sound_size && std::memcmp(sound_data, s.data.data(), sound_size) == 0) {
+                                    // Set the external flags
+                                    permutation.samples.external = 1;
+
+                                    // Set the pointer
+                                    permutation.samples.file_offset = s.data_offset;
+
+                                    // Next, adjust all pointers after this
+                                    for(std::uint32_t pr_remove = pr; pr_remove < pitch_range_count; pr_remove++) {
+                                        auto &pitch_range_remove = pitch_ranges[pr_remove];
+                                        std::uint32_t permutations_remove_count = pitch_range_remove.permutations.count;
+                                        auto *permutations_remove = reinterpret_cast<SoundPermutation<LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&pitch_range_remove.permutations.pointer));
+                                        std::uint32_t first_permutation_to_remove = pr_remove == pr ? p + 1 : 0;
+
+                                        for(std::uint32_t p_remove = first_permutation_to_remove; p_remove < permutations_remove_count; p_remove++) {
+                                            auto &permutation_remove = permutations_remove[p_remove];
+                                            permutation_remove.samples.file_offset = permutation_remove.samples.file_offset.read() - sound_size;
+                                        }
+                                    }
+
+                                    // Lastly, delete the data we just removed
+                                    std::vector<std::byte> new_asset_data(tag->asset_data.data(), tag->asset_data.data() + sound_offset);
+                                    new_asset_data.insert(new_asset_data.end(), tag->asset_data.data() + end, tag->asset_data.data() + tag->asset_data.size());
+                                    tag->asset_data = new_asset_data;
+                                    total_removed_data += sound_size;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        return total_removed_data;
+    }
+
     void BuildWorkload::load_required_tags() {
         using namespace HEK;
 
@@ -588,33 +705,35 @@ namespace Invader {
         auto scenario_name = this->get_scenario_name();
 
         // Depending on the type of map we're building, use a certain resource limit
-        std::size_t bitmap_limit, sound_limit, loc_limit;
+        if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            std::size_t bitmap_limit, sound_limit, loc_limit;
 
-        // Singleplayer / UI limits - use the internal list
-        if(this->cache_file_type != CacheFileType::CACHE_FILE_MULTIPLAYER) {
-            bitmap_limit = get_default_bitmap_resources_count();
-            sound_limit = get_default_sound_resources_count();
-            loc_limit = get_default_loc_resources_count();
-        }
+            // Singleplayer / UI limits - use the internal list
+            if(this->cache_file_type != CacheFileType::CACHE_FILE_MULTIPLAYER) {
+                bitmap_limit = get_default_bitmap_resources_count();
+                sound_limit = get_default_sound_resources_count();
+                loc_limit = get_default_loc_resources_count();
+            }
 
-        // Multiplayer limits
-        else {
-            bitmap_limit = 853;
-            sound_limit = 376;
-            loc_limit = 176;
-        }
+            // Multiplayer limits
+            else {
+                bitmap_limit = 853;
+                sound_limit = 376;
+                loc_limit = 176;
+            }
 
-        bitmap_limit *= 2;
-        sound_limit *= 2;
+            bitmap_limit *= 2;
+            sound_limit *= 2;
 
-        while(this->bitmaps.size() > bitmap_limit) {
-            this->bitmaps.erase(this->bitmaps.begin() + this->bitmaps.size() - 1);
-        }
-        while(this->sounds.size() > sound_limit) {
-            this->sounds.erase(this->sounds.begin() + this->sounds.size() - 1);
-        }
-        while(this->loc.size() > loc_limit) {
-            this->loc.erase(this->loc.begin() + this->loc.size() - 1);
+            while(this->bitmaps.size() > bitmap_limit) {
+                this->bitmaps.erase(this->bitmaps.begin() + this->bitmaps.size() - 1);
+            }
+            while(this->sounds.size() > sound_limit) {
+                this->sounds.erase(this->sounds.begin() + this->sounds.size() - 1);
+            }
+            while(this->loc.size() > loc_limit) {
+                this->loc.erase(this->loc.begin() + this->loc.size() - 1);
+            }
         }
 
         // We'll need to load these tags for all map types
@@ -1535,6 +1654,11 @@ namespace Invader {
                     // Get the offsets of each bitmap, making sure each offset is valid
                     std::vector<std::size_t> offsets(bitmaps_count);
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
+                        // Skip over external pointers
+                        if(bitmaps_data[b].flags.read().external) {
+                            continue;
+                        }
+
                         std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
                         if(pixels_offset > tag_asset_data_size) {
                             eprintf("Invalid pixels offset for bitmap %zu for %s.%s\n", b, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
@@ -1546,6 +1670,11 @@ namespace Invader {
                     // Calculate the sizes of each bitmap
                     std::vector<std::size_t> sizes(bitmaps_count);
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
+                        // Skip over external pointers
+                        if(bitmaps_data[b].flags.read().external) {
+                            continue;
+                        }
+
                         std::size_t size = tag_asset_data_size - offsets[b];
                         for(std::size_t b2 = 0; b2 < bitmaps_count; b2++) {
                             if(offsets[b2] > offsets[b]) {
@@ -1560,6 +1689,11 @@ namespace Invader {
 
                     // Write the data
                     for(std::size_t b = 0; b < bitmaps_count; b++) {
+                        // Skip over external pointers
+                        if(bitmaps_data[b].flags.read().external) {
+                            continue;
+                        }
+
                         bitmaps_data[b].pixels_count = static_cast<std::int32_t>(sizes[b]);
 
                         // Make sure it's not duplicate
@@ -1596,23 +1730,27 @@ namespace Invader {
                         // Write the data
                         for(std::size_t r = 0; r < permutation_count; r++) {
                             auto &permutation = permutation_data[r];
-                            std::size_t size = permutation.samples.size;
-                            std::size_t offset = permutation.samples.file_offset;
 
-                            // Make sure it's not duplicate
-                            bool duped = false;
-                            for(auto &asset : all_asset_data) {
-                                if(asset.size == size && std::memcmp(tag_asset_data + offset, file.data() + asset.offset, asset.size) == 0) {
-                                    permutation.samples.file_offset = static_cast<std::int32_t>(asset.offset);
-                                    duped = true;
-                                    break;
+                            // Skip over external pointers
+                            if(!permutation.samples.external) {
+                                std::size_t size = permutation.samples.size;
+                                std::size_t offset = permutation.samples.file_offset;
+
+                                // Make sure it's not duplicate
+                                bool duped = false;
+                                for(auto &asset : all_asset_data) {
+                                    if(asset.size == size && std::memcmp(tag_asset_data + offset, file.data() + asset.offset, asset.size) == 0) {
+                                        permutation.samples.file_offset = static_cast<std::int32_t>(asset.offset);
+                                        duped = true;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if(!duped) {
-                                permutation.samples.file_offset = static_cast<std::int32_t>(file.size());
-                                all_asset_data.push_back(DedupingAssetData { file.size(), size });
-                                file.insert(file.end(), tag_asset_data + offset, tag_asset_data + offset + size);
+                                if(!duped) {
+                                    permutation.samples.file_offset = static_cast<std::int32_t>(file.size());
+                                    all_asset_data.push_back(DedupingAssetData { file.size(), size });
+                                    file.insert(file.end(), tag_asset_data + offset, tag_asset_data + offset + size);
+                                }
                             }
 
                             permutation.tag_id_0 = tag.tag_id;
