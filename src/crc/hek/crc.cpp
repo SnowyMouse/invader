@@ -8,7 +8,7 @@
 #include "../crc_spoof.h"
 
 namespace Invader {
-    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random) {
+    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
         std::vector<std::byte> data_crc;
         std::uint32_t crc = 0;
 
@@ -76,10 +76,20 @@ namespace Invader {
             std::uint32_t newcrc = ~crc_spoof_reverse_bits(*new_crc);
             crc_spoof_modify_file_crc32(&handle, random_number_offset_in_memory, newcrc, false);
             *new_random = *reinterpret_cast<std::uint32_t *>(data_crc.data() + random_number_offset_in_memory);
+
+            // We have no way of knowing if the map was dirty or not because we just forged the CRC
+            if(check_dirty) {
+                *check_dirty = false;
+            }
+
             return ~crc32(0, data_crc.data(), data_crc.size());
         }
         else {
-            return ~crc;
+            std::uint32_t crc_value = ~crc;
+            if(check_dirty) {
+                *check_dirty = crc_value == cache_file_header.crc32;
+            }
+            return crc_value;
         }
     }
 }

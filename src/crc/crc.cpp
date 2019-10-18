@@ -49,9 +49,10 @@ int main(int argc, const char **argv) {
 
     else {
         try {
-            auto map_crc = calculate_map_crc(data.get(), size);
+            bool dirty;
+            auto map_crc = calculate_map_crc(data.get(), size, nullptr, nullptr, &dirty);
             std::printf("%08X\n", map_crc);
-            if(map_crc != reinterpret_cast<HEK::CacheFileHeader *>(data.get())->crc32) {
+            if(dirty) {
                 eprintf("Warning: Cache file is dirty. The CRC in the header is wrong.\n");
             }
             return EXIT_SUCCESS;

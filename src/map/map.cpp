@@ -138,44 +138,40 @@ namespace Invader {
         return const_cast<Map *>(this)->get_tag_data_header();
     }
 
-    HEK::CacheFileHeader &Map::get_cache_file_header() noexcept {
-        return *reinterpret_cast<HEK::CacheFileHeader *>(this->data);
-    }
-
     const HEK::CacheFileHeader &Map::get_cache_file_header() const noexcept {
-        return const_cast<Map *>(this)->get_cache_file_header();
+        return this->header;
     }
 
     void Map::load_map() {
         using namespace Invader::HEK;
 
         // Get header
-        CacheFileHeader header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+        this->header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
 
         // Check if the literals are invalid
-        if(header.head_literal != CACHE_FILE_HEAD || header.foot_literal != CACHE_FILE_FOOT) {
+        if(this->header.head_literal != CACHE_FILE_HEAD || this->header.foot_literal != CACHE_FILE_FOOT) {
             // Maybe it's a demo map?
-            header = *reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
-            if(header.head_literal != CACHE_FILE_HEAD_DEMO || header.foot_literal != CACHE_FILE_FOOT_DEMO) {
+            this->header = *reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+            if(this->header.head_literal != CACHE_FILE_HEAD_DEMO || this->header.foot_literal != CACHE_FILE_FOOT_DEMO) {
                 throw InvalidMapException();
             }
         }
 
         // Check if any overflowing occurs
-        if(header.file_size > this->data_length || header.build.string[31] != 0 || header.name.string[31] != 0) {
+        if(this->header.file_size > this->data_length || this->header.build.string[31] != 0 || this->header.name.string[31] != 0) {
             throw InvalidMapException();
         }
 
         // Get tag data
-        if(header.engine == CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(this->header.engine == CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             this->base_memory_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
         }
-        else if(header.engine == CacheFileEngine::CACHE_FILE_DEMO) {
+        else if(this->header.engine == CacheFileEngine::CACHE_FILE_DEMO) {
             this->base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
         }
 
-        this->tag_data_length = header.tag_data_size;
-        this->tag_data = this->get_data_at_offset(header.tag_data_offset, this->tag_data_length);
+        this->tag_data_length = this->header.tag_data_size;
+        this->tag_data = this->get_data_at_offset(this->header.tag_data_offset, this->tag_data_length);
 
         this->populate_tag_array();
     }

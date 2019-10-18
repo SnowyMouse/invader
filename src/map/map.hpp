@@ -159,12 +159,6 @@ namespace Invader {
          * Get the cache file header
          * @return reference to the cache file header
          */
-        HEK::CacheFileHeader &get_cache_file_header() noexcept;
-
-        /**
-         * Get the cache file header
-         * @return reference to the cache file header
-         */
         const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
 
         Map(const Map &copy) = default;
@@ -223,6 +217,9 @@ namespace Invader {
 
         /** Base memory address */
         std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+
+        /** Header */
+        HEK::CacheFileHeader header;
 
 
         /** Load the map now */
