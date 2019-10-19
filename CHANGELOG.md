@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed some error messages not being shown using the correct directory separators
+- invader-build: Fixed indexing tags with retail/demo resources
+
 ## [0.14.1] - 2019-10-19
 ### Changed
 - invader-build: The diagnostic messages now show tags using external raw data when building a retail or demo map

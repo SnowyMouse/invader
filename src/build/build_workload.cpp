@@ -449,8 +449,8 @@ namespace Invader {
             for(auto &tag : this->compiled_tags) {
                 switch(tag->tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
-                        for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
-                            if(this->bitmaps[b].data == tag->asset_data) {
+                        for(std::size_t b = 0; b + 1 < this->bitmaps.size(); b+=2) {
+                            if(this->bitmaps[b].data == tag->asset_data && this->bitmaps[b + 1].path == tag->path) {
                                 total_removed_tag_data += tag->data.size();
                                 asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
@@ -464,7 +464,7 @@ namespace Invader {
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
-                            if(this->sounds[s].data == tag->asset_data && this->sounds[s].path == tag->path + "__permutations") {
+                            if(this->sounds[s].data == tag->asset_data && this->sounds[s + 1].path == tag->path) {
                                 asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->asset_data.clear();
