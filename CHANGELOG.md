@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.14.1] - 2019-10-19
 ### Changed
 - invader-build: The diagnostic messages now show tags using external raw data when building a retail or demo map
 - invader-build: The BSP path is now shown using the system's preferred path separator
