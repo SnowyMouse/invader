@@ -3,6 +3,7 @@
 #include "found_tag_dependency.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "../printf.hpp"
+#include "../file/file.hpp"
 
 #include <filesystem>
 
@@ -13,16 +14,7 @@ namespace Invader {
 
         if(!reverse) {
             auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, auto recursion) -> void {
-                std::string tag_path_to_find = tag_path_to_find_2;
-
-                // Forwardslashafy it
-                #ifndef _WIN32
-                for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-                    if(tag_path_to_find[i] == '\\') {
-                        tag_path_to_find[i] = '/';
-                    }
-                }
-                #endif
+                std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
                 bool found = false;
@@ -60,14 +52,7 @@ namespace Invader {
                                 class_to_use = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
                             }
 
-                            std::string path_copy = dependency.path + "." + tag_class_to_extension(class_to_use);
-                            #ifndef _WIN32
-                            for(char &c : path_copy) {
-                                if(c == '\\') {
-                                    c = '/';
-                                }
-                            }
-                            #endif
+                            std::string path_copy = File::preferred_path_to_halo_path(dependency.path + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
@@ -107,14 +92,7 @@ namespace Invader {
         }
         else {
             // Turn all forward slashes into backslashes if not on Windows
-            std::string tag_path_to_find = tag_path_to_find_2;
-            #ifndef _WIN32
-            for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-                if(tag_path_to_find[i] == '/') {
-                    tag_path_to_find[i] = '\\';
-                }
-            }
-            #endif
+            std::string tag_path_to_find = File::preferred_path_to_halo_path(tag_path_to_find_2);
 
             // Iterate
             for(auto &tags_directory : tags) {

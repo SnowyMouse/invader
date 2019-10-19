@@ -7,6 +7,7 @@ using clock_type = std::chrono::steady_clock;
 
 #include <vector>
 #include <cstring>
+#include <filesystem>
 
 #include "build_workload.hpp"
 #include "../map/map.hpp"
@@ -224,16 +225,10 @@ int main(int argc, const char **argv) {
             }
         }
 
-        #ifdef _WIN32
-        const char *separator = "\\";
-        #else
-        const char *separator = "/";
-        #endif
-
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
         if(!build_options.output.size()) {
-            final_file = std::string(build_options.maps) + (build_options.maps[build_options.maps.size() - 1] != *separator ? separator : "") + map_name + ".map";
+            final_file = std::filesystem::path(build_options.maps) / (std::string(map_name) + ".map");
         }
         else {
             final_file = build_options.output;

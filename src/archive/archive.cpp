@@ -98,7 +98,7 @@ int main(int argc, const char **argv) {
         }
     }
     else {
-        base_tag = remaining_arguments[0];
+        base_tag = Invader::File::preferred_path_to_halo_path(remaining_arguments[0]);
     }
 
     // Variables to hold this
@@ -109,7 +109,7 @@ int main(int argc, const char **argv) {
     if(archive_options.output.size() == 0) {
         const char *base_name = base_tag.data();
         for(const char *c = base_name; *c; c++) {
-            if(*c == '\\' || *c == '/') {
+            if(*c == '\\') {
                 base_name = c + 1;
             }
         }
@@ -142,14 +142,7 @@ int main(int argc, const char **argv) {
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
             auto &tag = parsed_map.get_tag(i);
-            std::string full_tag_path = std::string(tag.path()) + "." + tag_class_to_extension(tag.tag_class_int());
-
-            // Replace all backslashes with forward slashes if needed
-            #ifndef _WIN32
-            for(char &c : full_tag_path) {
-                if(c == '\\') c = '/';
-            }
-            #endif
+            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.path()) + "." + tag_class_to_extension(tag.tag_class_int()));
 
             // Check each tag directory if it exists. If so, archive it
             bool exists = false;
@@ -170,16 +163,10 @@ int main(int argc, const char **argv) {
     }
     else {
         // Turn it into something the filesystem can understand
-        #ifndef _WIN32
-        for(char *c = base_tag.data(); *c; c++) {
-            if(*c == '\\') {
-                *c = '/';
-            }
-        }
-        #endif
+        auto base_tag_path = Invader::File::halo_path_to_preferred_path(base_tag);
 
         // Split the extension
-        char *tag_path_to_find = base_tag.data();
+        char *tag_path_to_find = base_tag_path.data();
         char *c = nullptr;
         for(char *d = tag_path_to_find; *d; d++) {
             if(*d == '.') {
@@ -194,10 +181,10 @@ int main(int argc, const char **argv) {
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag_path;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), base_tag);
+                archive_list.emplace_back(tag_path.string(), base_tag_path);
                 break;
             }
         }
@@ -208,7 +195,7 @@ int main(int argc, const char **argv) {
         }
 
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_path.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
         if(!success) {
             eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
@@ -221,14 +208,7 @@ int main(int argc, const char **argv) {
                 return EXIT_FAILURE;
             }
 
-            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.class_int);
-            #ifndef _WIN32
-            for(char &c : path_copy) {
-                if(c == '\\') {
-                    c = '/';
-                }
-            }
-            #endif
+            std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
             archive_list.emplace_back(dependency.file_path, path_copy);
         }
     }

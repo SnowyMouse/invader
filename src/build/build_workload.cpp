@@ -83,45 +83,17 @@ namespace Invader {
             workload.compiled_tags.emplace_back(std::make_unique<CompiledTag>(std::get<1>(tag), std::get<0>(tag)));
         }
 
-        // Add directory separator to the end of each directory
-        std::vector<std::string> new_tag_dirs;
-        new_tag_dirs.reserve(tags_directories.size());
+        // Convert to paths
+        workload.tags_directories.reserve(tags_directories.size());
         for(const auto &dir : tags_directories) {
-            // Skip empty paths
-            if(dir.size() == 0) {
-                continue;
-            }
-
-            // End with a directory separator
-            std::string new_dir = dir;
-            #ifdef _WIN32
-            if(new_dir[new_dir.size() - 1] != '\\' || new_dir[new_dir.size() - 1] != '/') {
-                new_dir += '\\';
-            }
-            #else
-            if(new_dir[new_dir.size() - 1] != '/') {
-                new_dir += '/';
-            }
-            #endif
-
-            // Add to the tags directory list
-            new_tag_dirs.emplace_back(new_dir);
+            workload.tags_directories.emplace_back(dir);
         }
 
         // Load resource maps if we need to do so
-        workload.tags_directories = new_tag_dirs;
         workload.maps_directory = maps_directory;
         if(!no_external_tags && workload.maps_directory != "") {
             // End with a directory separator if not already done so
-            #ifdef _WIN32
-            if(workload.maps_directory[workload.maps_directory.size() - 1] != '\\' || workload.maps_directory[workload.maps_directory.size() - 1] != '/') {
-                workload.maps_directory += "\\";
-            }
-            #else
-            if(workload.maps_directory[workload.maps_directory.size() - 1] != '/') {
-                workload.maps_directory += "/";
-            }
-            #endif
+            auto maps_path = std::filesystem::path(workload.maps_directory);
 
             std::vector<std::byte> resource_data_buffer;
 
@@ -149,11 +121,11 @@ namespace Invader {
                 std::fclose(f);
                 return load_resource_map(resource_data_buffer.data(), data_size);
             };
-            workload.bitmaps = load_map(workload.maps_directory + "bitmaps.map");
-            workload.sounds = load_map(workload.maps_directory + "sounds.map");
+            workload.bitmaps = load_map(maps_path / "bitmaps.map");
+            workload.sounds = load_map(maps_path / "sounds.map");
 
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                workload.loc = load_map(workload.maps_directory + "loc.map");
+                workload.loc = load_map(maps_path / "loc.map");
             }
         }
         workload.verbose = verbose;
@@ -856,20 +828,12 @@ namespace Invader {
         if(this->tag_buffer.size() < path_size) {
             this->tag_buffer.resize(path_size);
         }
-        char *tag_base_path = reinterpret_cast<char *>(this->tag_buffer.data());
-        std::size_t actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path, tag_class_to_extension(tag_class_int));
+        char *tag_base_path_str = reinterpret_cast<char *>(this->tag_buffer.data());
+        std::size_t actual_path_size = std::snprintf(tag_base_path_str, MAX_PATH_LENGTH, "%s.%s", path, tag_class_to_extension(tag_class_int));
         if(actual_path_size >= path_size) {
             throw InvalidTagPathException();
         }
-
-        #ifndef _WIN32
-        for(std::size_t i = 0; i < actual_path_size; i++) {
-            char &c = tag_base_path[i];
-            if(c == '\\') {
-                c = '/';
-            }
-        }
-        #endif
+        std::string tag_base_path = File::halo_path_to_preferred_path(tag_base_path_str);
 
         for(const auto &tag_dir : this->tags_directories) {
             // Open the tag file
@@ -878,25 +842,18 @@ namespace Invader {
             // If it's not purely an object tag try to open it
             if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
                 // Concatenate the tag path
-                std::string tag_path = tag_dir + tag_base_path;
+                std::string tag_path = tag_dir / tag_base_path.data();
                 file = std::fopen(tag_path.data(), "rb");
             }
             // Otherwise, see if we can go through the different object types
             else {
                 auto attempt_to_open_tag = [&tag_dir, &path](TagClassInt class_int) -> std::FILE * {
-                    std::string tag_path = tag_dir + path + "." + tag_class_to_extension(class_int);
-                    #ifndef _WIN32
-                    for(char &c : tag_path) {
-                        if(c == '\\') {
-                            c = '/';
-                        }
-                    }
-                    #endif
+                    std::string tag_path = File::halo_path_to_preferred_path(tag_dir / (std::string(path) + "." + tag_class_to_extension(class_int)));
                     return std::fopen(tag_path.data(), "rb");
                 };
                 #define MAKE_ATTEMPT(class_int) if(file == nullptr) { file = attempt_to_open_tag(class_int); if(file) tag_class_int = class_int; }
 
-                std::string tag_path = tag_dir + tag_base_path;
+                std::string tag_path = tag_dir / tag_base_path;
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_BIPED);
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE);
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_CONTROL);

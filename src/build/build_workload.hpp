@@ -6,6 +6,7 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include <filesystem>
 #include "../hek/map.hpp"
 #include "../resource/resource_map.hpp"
 #include "../tag/compiled_tag.hpp"
@@ -56,7 +57,7 @@ namespace Invader {
         /**
          * Array of tag directories to use
          */
-        std::vector<std::string> tags_directories;
+        std::vector<std::filesystem::path> tags_directories;
 
         /**
          * Cache file engine target

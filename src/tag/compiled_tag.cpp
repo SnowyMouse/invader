@@ -1,13 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifdef _WIN32
-#include <windows.h>
-#define PATH_BUFFER_LENGTH MAX_PATH
-#else
-#include <linux/limits.h>
-#define PATH_BUFFER_LENGTH PATH_MAX
-#endif
-
 #include <memory>
 #include <cstdio>
 
