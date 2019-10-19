@@ -52,7 +52,7 @@ namespace Invader {
                                 class_to_use = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
                             }
 
-                            std::string path_copy = File::preferred_path_to_halo_path(dependency.path + "." + tag_class_to_extension(class_to_use));
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
@@ -75,7 +75,7 @@ namespace Invader {
                         break;
                     }
                     catch (std::exception &e) {
-                        eprintf("Failed to compile tag %s. %s\n", tag_path.string().data(), e.what());
+                        eprintf("Failed to compile tag %s: %s\n", tag_path.string().data(), e.what());
                         success = false;
                         return;
                     }
@@ -156,7 +156,7 @@ namespace Invader {
                                 }
                             }
                             catch (std::exception &e) {
-                                eprintf("Failed to compile tag %s. %s\n", file.path().string().data(), e.what());
+                                eprintf("Warning: Failed to compile tag %s: %s\n", file.path().string().data(), e.what());
                             }
                         }
                     }
