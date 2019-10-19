@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+## Added
+- invader-resource: Added `--retail` / `-R` which will allow you to build retail maps
+
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their combined total in the diagnostic output
 - invader-build: The number of tags that could be cached/indexed is now shown

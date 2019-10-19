@@ -24,6 +24,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("type", 'T', 1);
     options.emplace_back("tags", 't', 1);
     options.emplace_back("maps", 'm', 1);
+    options.emplace_back("retail", 'R', 0);
 
     struct ResourceOption {
         // Program path
@@ -39,6 +40,8 @@ int main(int argc, const char **argv) {
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
         const char **(*default_fn)() = get_default_bitmap_resources;
         bool resource_map_set = false;
+
+        bool retail = false;
     } resource_options;
     resource_options.path = argv[0];
 
@@ -54,6 +57,10 @@ int main(int argc, const char **argv) {
 
             case 'm':
                 resource_options.maps = arguments[0];
+                break;
+
+            case 'R':
+                resource_options.retail = true;
                 break;
 
             case 'T':
@@ -88,7 +95,8 @@ int main(int argc, const char **argv) {
                 eprintf("                               multiple directories in order of precedence.\n\n");
                 eprintf("Resource options:\n");
                 eprintf("    --type,-T <type>           Set the resource map. This option is required for\n");
-                eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n\n");
+                eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n");
+                eprintf("    --retail,-R                Build a retail resource map (bitmaps/sounds only)\n\n");
                 std::exit(EXIT_FAILURE);
         }
     });
@@ -103,9 +111,14 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
+    if(resource_options.retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
+        eprintf("Only bitmaps.map and sounds.map can be made for retail.\n");
+        return EXIT_FAILURE;
+    }
+
     // If we don't have any tags directories, use a default one
     if(resource_options.tags.size() == 0) {
-        resource_options.tags.push_back("tags/");
+        resource_options.tags.push_back("tags");
     }
 
     // Get all the tags
@@ -210,6 +223,7 @@ int main(int argc, const char **argv) {
         // Compile the tags
         try {
             CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
+            char path_temp[256];
 
             // Now, adjust stuff for pointers
             switch(resource_options.type) {
@@ -219,36 +233,56 @@ int main(int argc, const char **argv) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
                     }
 
-                    // Push the asset data first
-                    std::size_t bitmap_data_offset = resource_data.size();
-                    offsets.push_back(bitmap_data_offset);
-                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
-                    paths.push_back(tag + "__pixels");
-                    sizes.push_back(compiled_tag.asset_data.size());
-
-                    PAD_RESOURCES_32_BIT
-
                     // Do stuff to the tag data
                     auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag.data.data());
                     std::size_t bitmap_count = bitmap.bitmap_data.count;
                     if(bitmap_count) {
                         auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&bitmap.bitmap_data.pointer));
-                        auto *bitmaps_end = bitmaps + bitmap_count;
-                        for(auto *bitmap = bitmaps; bitmap < bitmaps_end; bitmap++) {
-                            auto flags = bitmap->flags.read();
-                            flags.external = 1;
-                            bitmap->flags = flags;
-                            bitmap->pixels_offset = bitmap_data_offset + bitmap->pixels_offset;
+                        for(std::size_t b = 0; b < bitmap_count; b++) {
+                            auto *bitmap = bitmaps + b;
+
+                            // If we're on retail, push the pixel data
+                            if(resource_options.retail) {
+                                // Generate the path to add
+                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", tag.data(), b);
+
+                                // Push it good
+                                paths.push_back(path_temp);
+                                std::size_t size = bitmap->pixels_count.read();
+                                std::size_t offset = bitmap->pixels_offset.read();
+                                sizes.push_back(size);
+                                offsets.push_back(resource_data.size());
+                                resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+
+                                PAD_RESOURCES_32_BIT
+                            }
+                            // Otherwise set the sizes
+                            else {
+                                bitmap->pixels_offset = resource_data.size() + bitmap->pixels_offset;
+                                auto flags = bitmap->flags.read();
+                                flags.external = 1;
+                                bitmap->flags = flags;
+                            }
                         }
                     }
 
-                    // Push the tag data
-                    offsets.push_back(resource_data.size());
-                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
-                    paths.push_back(tag);
-                    sizes.push_back(compiled_tag.data.size());
+                    // Push the asset data and tag data if we aren't on retail
+                    if(!resource_options.retail) {
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        paths.push_back(tag + "__pixels");
+                        sizes.push_back(compiled_tag.asset_data.size());
 
-                    PAD_RESOURCES_32_BIT
+                        PAD_RESOURCES_32_BIT
+
+                        // Push the tag data
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        paths.push_back(tag);
+                        sizes.push_back(compiled_tag.data.size());
+
+                        PAD_RESOURCES_32_BIT
+                    }
 
                     break;
                 }
@@ -258,41 +292,59 @@ int main(int argc, const char **argv) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
                     }
 
-                    // Push the asset data first
-                    std::size_t bitmap_data_offset = resource_data.size();
-                    offsets.push_back(bitmap_data_offset);
-                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
-                    paths.push_back(tag + "__permutations");
-                    sizes.push_back(compiled_tag.asset_data.size());
-
-                    PAD_RESOURCES_32_BIT
-
                     // Do stuff to the tag data
                     auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag.data.data());
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     if(pitch_range_count) {
                         auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&sound.pitch_ranges.pointer));
-                        auto *pitch_ranges_end = pitch_ranges + pitch_range_count;
-                        for(auto *pitch_range = pitch_ranges; pitch_range < pitch_ranges_end; pitch_range++) {
+                        for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                            auto *pitch_range = pitch_ranges + pr;
                             std::size_t permutation_count = pitch_range->permutations.count;
                             if(permutation_count) {
                                 auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&pitch_range->permutations.pointer));
-                                auto *permutations_end = permutations + permutation_count;
-                                for(auto *permutation = permutations; permutation < permutations_end; permutation++) {
-                                    permutation->samples.external = 1;
-                                    permutation->samples.file_offset = bitmap_data_offset + permutation->samples.file_offset;
+                                for(std::size_t p = 0; p < permutation_count; p++) {
+                                    auto *permutation = permutations + p;
+                                    if(resource_options.retail) {
+                                        // Generate the path to add
+                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", tag.data(), pr, p);
+
+                                        // Push it REAL good
+                                        paths.push_back(path_temp);
+                                        std::size_t size = permutation->samples.size.read();
+                                        sizes.push_back(size);
+                                        offsets.push_back(resource_data.size());
+                                        std::size_t offset = permutation->samples.file_offset.read();
+                                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+
+                                        PAD_RESOURCES_32_BIT
+                                    }
+                                    else {
+                                        permutation->samples.external = 1;
+                                        permutation->samples.file_offset = resource_data.size() + permutation->samples.file_offset;
+                                    }
                                 }
                             }
                         }
                     }
 
-                    // Push the tag data
-                    offsets.push_back(resource_data.size());
-                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
-                    paths.push_back(tag);
-                    sizes.push_back(compiled_tag.data.size());
+                    // If we're not on retail, push asset and tag data
+                    if(!resource_options.retail) {
+                        // Push the asset data first
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        paths.push_back(tag + "__permutations");
+                        sizes.push_back(compiled_tag.asset_data.size());
 
-                    PAD_RESOURCES_32_BIT
+                        PAD_RESOURCES_32_BIT
+
+                        // Push the tag data
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        paths.push_back(tag);
+                        sizes.push_back(compiled_tag.data.size());
+
+                        PAD_RESOURCES_32_BIT
+                    }
 
                     break;
                 }

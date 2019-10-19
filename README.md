@@ -211,7 +211,8 @@ This program builds index files for usage with `--with-index` with invader-build
 `invader-indexer <input map> <output index>`
 
 ### invader-resource
-This program builds resource maps. Only maps with stock tags can be built.
+This program builds resource maps. Only maps with stock tags can be built. These files are not guaranteed to work with
+existing cache files.
 
 #### Usage
 `invader-resource <options>`
@@ -223,3 +224,4 @@ This program builds resource maps. Only maps with stock tags can be built.
 | `--maps,-m <dir>`  | Use a specific maps directory.                                     |
 | `--tags,-t <dir>`  | Tags directory. Use multiple times to add tags directories.        |
 | `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
+| `--retail,-R`      | Build a retail/demo resource map.                                  |
