@@ -76,12 +76,19 @@ namespace Invader::HEK {
             // Calculate number of pixels
             std::size_t mipmap_width = reflexive.width;
             std::size_t mipmap_height = reflexive.height;
+            std::size_t mipmap_depth = reflexive.depth;
             for(std::size_t mipmap = 0; mipmap <= total_mipmap_count; mipmap++) {
-                total_pixel_count += mipmap_height * mipmap_width;
-                total_pixel_count_dxt += (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height);
+                total_pixel_count += mipmap_height * mipmap_width * mipmap_depth;
+
+                std::size_t dxt_size = (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height) * mipmap_depth;
+                total_pixel_count_dxt += dxt_size;
 
                 mipmap_height /= 2;
                 mipmap_width /= 2;
+
+                if(reflexive.type == BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+                    mipmap_depth /= 2;
+                }
             }
 
             // Now, set the size based on number of pixels
@@ -129,7 +136,7 @@ namespace Invader::HEK {
                     reflexive.pixels_count = reflexive.pixels_count * 6;
                     break;
                 case BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                    reflexive.pixels_count = reflexive.pixels_count * reflexive.depth.read();
+                    reflexive.pixels_count = reflexive.pixels_count;
                     break;
                 default:
                     break;
