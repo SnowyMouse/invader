@@ -167,7 +167,7 @@ int main(int argc, const char **argv) {
         }
     }
     else {
-        scenario = remaining_arguments[0];
+        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
     }
 
     try {
@@ -220,7 +220,7 @@ int main(int argc, const char **argv) {
 
         const char *map_name = scenario.data();
         for(const char &c : scenario) {
-            if(c == '/' || c == '\\') {
+            if(c == std::filesystem::path::preferred_separator) {
                 map_name = &c + 1;
             }
         }

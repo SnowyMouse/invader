@@ -133,11 +133,7 @@ namespace Invader {
         workload.scenario = scenario;
 
         // Replace forward slashes in scenario tag path with backslashes
-        for(char &c : workload.scenario) {
-            if(c == '/') {
-                c = '\\';
-            }
-        }
+        File::preferred_path_to_halo_path_chars(workload.scenario.data());
 
         return workload.build_cache_file();
     }
@@ -1367,7 +1363,7 @@ namespace Invader {
     std::string BuildWorkload::get_scenario_name() {
         std::string map_name = this->scenario;
         for(const char *map_name_i = this->scenario.data(); *map_name_i; map_name_i++) {
-            if(*map_name_i == '\\' || *map_name_i == '/') {
+            if(*map_name_i == '\\') {
                 map_name = map_name_i + 1;
             }
         }
