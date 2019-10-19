@@ -828,12 +828,12 @@ namespace Invader {
         if(this->tag_buffer.size() < path_size) {
             this->tag_buffer.resize(path_size);
         }
-        char *tag_base_path_str = reinterpret_cast<char *>(this->tag_buffer.data());
-        std::size_t actual_path_size = std::snprintf(tag_base_path_str, MAX_PATH_LENGTH, "%s.%s", path, tag_class_to_extension(tag_class_int));
+        char *tag_base_path = reinterpret_cast<char *>(this->tag_buffer.data());
+        std::size_t actual_path_size = std::snprintf(tag_base_path, MAX_PATH_LENGTH, "%s.%s", path, tag_class_to_extension(tag_class_int));
         if(actual_path_size >= path_size) {
             throw InvalidTagPathException();
         }
-        std::string tag_base_path = File::halo_path_to_preferred_path(tag_base_path_str);
+        File::halo_path_to_preferred_path_chars(tag_base_path);
 
         for(const auto &tag_dir : this->tags_directories) {
             // Open the tag file
@@ -842,7 +842,7 @@ namespace Invader {
             // If it's not purely an object tag try to open it
             if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
                 // Concatenate the tag path
-                std::string tag_path = tag_dir / tag_base_path.data();
+                std::string tag_path = tag_dir / tag_base_path;
                 file = std::fopen(tag_path.data(), "rb");
             }
             // Otherwise, see if we can go through the different object types

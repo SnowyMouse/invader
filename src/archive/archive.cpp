@@ -163,10 +163,10 @@ int main(int argc, const char **argv) {
     }
     else {
         // Turn it into something the filesystem can understand
-        auto base_tag_path = Invader::File::halo_path_to_preferred_path(base_tag);
+        Invader::File::halo_path_to_preferred_path_chars(base_tag.data());
 
         // Split the extension
-        char *tag_path_to_find = base_tag_path.data();
+        char *tag_path_to_find = base_tag.data();
         char *c = nullptr;
         for(char *d = tag_path_to_find; *d; d++) {
             if(*d == '.') {
@@ -181,10 +181,10 @@ int main(int argc, const char **argv) {
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag_path;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), base_tag_path);
+                archive_list.emplace_back(tag_path.string(), base_tag);
                 break;
             }
         }
@@ -195,7 +195,7 @@ int main(int argc, const char **argv) {
         }
 
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_path.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
         if(!success) {
             eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
