@@ -261,10 +261,11 @@ namespace Invader {
             throw MaximumTagDataSizeException();
         }
 
-        // Calculate approximate amount of data to reduce allocations needed
+        // Calculate approximate amount of data to reduce allocations needed as well as show more useful diagnostic information
         std::size_t model_size = 0;
         std::size_t bitmap_size = 0;
         std::size_t sound_size = 0;
+        std::size_t bitmap_sound_tag_count = 0;
         for(auto &tag : compiled_tags) {
             auto asset_size = tag->asset_data.size();
             if(asset_size) {
@@ -277,6 +278,10 @@ namespace Invader {
                 else if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
                     sound_size += asset_size;
                 }
+            }
+
+            if(tag->tag_class_int == TagClassInt::TAG_CLASS_BITMAP || tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                bitmap_sound_tag_count++;
             }
         }
         std::size_t bitmap_sound_size = bitmap_size + sound_size;
@@ -299,16 +304,16 @@ namespace Invader {
         this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         if(this->verbose) {
-            oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps + %.02f MiB sounds)\n", BYTES_TO_MiB(bitmap_sound_size), BYTES_TO_MiB(bitmap_size), BYTES_TO_MiB(sound_size));
+            oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(bitmap_sound_size), BYTES_TO_MiB(bitmap_size), BYTES_TO_MiB(sound_size));
         }
 
         // Show indexed / external tags
         if(this->verbose) {
             if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf("Indexed tags:      %zu (%.02f MiB tag data, %.02f MiB raw data)\n", external_count, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size));
+                oprintf("Indexed tags:      %zu / %zu tags (%.02f %%, %.02f MiB tag data, %.02f MiB raw data)\n", external_count, bitmap_sound_tag_count, bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size));
             }
             else if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                oprintf("Cached raw data:   %zu tags (%.02f MiB)\n", external_count, BYTES_TO_MiB(external_size));
+                oprintf("Cached raw data:   %zu / %zu tags (%.02f %%, %.02f MiB)\n", external_count, bitmap_sound_tag_count, bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F, BYTES_TO_MiB(external_size));
             }
         }
 
