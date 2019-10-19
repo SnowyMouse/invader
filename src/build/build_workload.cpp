@@ -154,11 +154,12 @@ namespace Invader {
         std::size_t external_size;
         std::size_t external_count;
         std::size_t partial_count;
+        std::size_t potential_count;
         if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-            total_indexed_data = this->index_tags(external_count, external_size);
+            total_indexed_data = this->index_tags(external_count, external_size, potential_count);
         }
         else {
-            this->find_external_resource_offsets(external_count, external_size, partial_count);
+            this->find_external_resource_offsets(external_count, external_size, partial_count, potential_count);
         }
 
         // Initialize our header and file data vector, also grabbing scenario information
@@ -266,7 +267,6 @@ namespace Invader {
         std::size_t model_size = 0;
         std::size_t bitmap_size = 0;
         std::size_t sound_size = 0;
-        std::size_t bitmap_sound_tag_count = 0;
         for(auto &tag : compiled_tags) {
             auto asset_size = tag->asset_data.size();
             if(asset_size) {
@@ -279,10 +279,6 @@ namespace Invader {
                 else if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
                     sound_size += asset_size;
                 }
-            }
-
-            if(tag->tag_class_int == TagClassInt::TAG_CLASS_BITMAP || tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
-                bitmap_sound_tag_count++;
             }
         }
         std::size_t bitmap_sound_size = bitmap_size + sound_size;
@@ -310,12 +306,12 @@ namespace Invader {
 
         // Show indexed / external tags
         if(this->verbose) {
-            const char *TAG_PLURAL = (bitmap_sound_tag_count == 1) ? "" : "s";
+            const char *TAG_PLURAL = (potential_count == 1) ? "" : "s";
             if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf("Indexed tags:      %zu / %zu tag%s (%.02f MiB tag data, %.02f MiB raw data, %.02f %%)\n", external_count, bitmap_sound_tag_count, TAG_PLURAL, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
+                oprintf("Indexed tags:      %zu / %zu tag%s (%.02f MiB tag data, %.02f MiB raw data, %.02f %%)\n", external_count, potential_count, TAG_PLURAL, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size), potential_count ? static_cast<float>(external_count * 100) / potential_count : 100.0F);
             }
             else if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                oprintf("Cached raw data:   %zu / %zu tag%s (%zu partial, %.02f MiB raw data, %.02f %%)\n", external_count, bitmap_sound_tag_count, TAG_PLURAL, partial_count, BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
+                oprintf("Cached raw data:   %zu / %zu tag%s (%zu partial, %.02f MiB raw data, %.02f %%)\n", external_count, potential_count, TAG_PLURAL, partial_count, BYTES_TO_MiB(external_size), potential_count ? static_cast<float>(external_count * 100) / potential_count : 100.0F);
             }
         }
 
@@ -398,19 +394,21 @@ namespace Invader {
         return file;
     }
 
-    std::size_t BuildWorkload::index_tags(std::size_t &count, std::size_t &asset_data_removed) noexcept {
+    std::size_t BuildWorkload::index_tags(std::size_t &count, std::size_t &asset_data_removed, std::size_t &potential) noexcept {
         using namespace HEK;
 
         // Get the amount of data removed
         std::size_t total_removed_tag_data = 0;
         count = 0;
         asset_data_removed = 0;
+        potential = 0;
 
         // If we're always indexing tags when possible, match by path
         if(this->always_index_tags) {
             for(auto &tag : this->compiled_tags) {
                 switch(tag->tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
+                        potential++;
                         for(std::size_t b = 1; b < this->bitmaps.size(); b+=2) {
                             if(this->bitmaps[b].path == tag->path) {
                                 total_removed_tag_data += tag->data.size();
@@ -425,6 +423,7 @@ namespace Invader {
                         }
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
+                        potential++;
                         for(std::size_t s = 1; s < this->sounds.size(); s+=2) {
                             if(this->sounds[s].path == tag->path) {
                                 asset_data_removed += tag->asset_data.size();
@@ -438,6 +437,7 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_FONT:
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                        potential++;
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             if(this->loc[l].path == tag->path) {
                                 total_removed_tag_data += tag->data.size();
@@ -461,6 +461,7 @@ namespace Invader {
             for(auto &tag : this->compiled_tags) {
                 switch(tag->tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
+                        potential++;
                         for(std::size_t b = 0; b + 1 < this->bitmaps.size(); b+=2) {
                             if(this->bitmaps[b].data == tag->asset_data && this->bitmaps[b + 1].path == tag->path) {
                                 total_removed_tag_data += tag->data.size();
@@ -475,6 +476,7 @@ namespace Invader {
                         }
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
+                        potential++;
                         for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
                             if(this->sounds[s].data == tag->asset_data && this->sounds[s + 1].path == tag->path) {
                                 asset_data_removed += tag->asset_data.size();
@@ -486,6 +488,7 @@ namespace Invader {
                         }
                         break;
                     case TagClassInt::TAG_CLASS_FONT:
+                        potential++;
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
                             if(loc_tag.path == tag->path) {
@@ -519,6 +522,7 @@ namespace Invader {
                         }
                         break;
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                        potential++;
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
                             if(loc_tag.path == tag->path) {
@@ -569,6 +573,7 @@ namespace Invader {
                         }
                         break;
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                        potential++;
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             auto &loc_tag = this->loc[l];
                             if(loc_tag.path == tag->path) {
@@ -593,18 +598,21 @@ namespace Invader {
         return total_removed_tag_data;
     }
 
-    void BuildWorkload::find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial) noexcept {
+    void BuildWorkload::find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial, std::size_t &potential) noexcept {
         using namespace Invader::HEK;
 
         count = 0;
         asset_data_removed = 0;
         partial = 0;
+        potential = 0;
 
         for(auto &tag : this->compiled_tags) {
             bool hit = false;
             bool at_least_one_fail = false;
             switch(tag->tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP: {
+                    potential++;
+
                     // Go through each bitmap in the tag
                     auto &bitmap_header = *reinterpret_cast<Bitmap<LittleEndian> *>(tag->data.data());
                     std::uint32_t bitmap_data_count = bitmap_header.bitmap_data.count;
@@ -653,6 +661,7 @@ namespace Invader {
                     break;
                 }
                 case TagClassInt::TAG_CLASS_SOUND: {
+                    potential++;
                     auto &sound_header = *reinterpret_cast<Sound<LittleEndian> *>(tag->data.data());
                     auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&sound_header.pitch_ranges.pointer));
                     std::uint32_t pitch_range_count = sound_header.pitch_ranges.count;

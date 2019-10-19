@@ -145,18 +145,21 @@ namespace Invader {
 
         /**
          * Index tags that can be indexed
-         * @param   count number of tags indexed
+         * @param   count               number of tags indexed
+         * @param   asset_data_removed  asset data removed
+         * @param   potential           potential number of tags that can be indexed
          * @return  tag data removed
          */
-        std::size_t index_tags(std::size_t &count, std::size_t &asset_data_removed) noexcept;
+        std::size_t index_tags(std::size_t &count, std::size_t &asset_data_removed, std::size_t &potential) noexcept;
 
         /**
          * Find the external resource offsets for tags (retail and demo)
          * @param   count               number of tags made external
          * @param   asset_data_removed  asset data removed
          * @param   partial             number of partial tags found
+         * @param   potential           potential number of tags that can be cached
          */
-        void find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial) noexcept;
+        void find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial, std::size_t &potential) noexcept;
 
         /**
          * Get the scenario name
