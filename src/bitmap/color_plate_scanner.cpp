@@ -893,6 +893,12 @@ namespace Invader {
                     throw InvalidInputBitmapException();
                 }
             }
+            else if(generated_bitmap.type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+                if(!FACES || !is_power_of_two(FACES)) {
+                    eprintf("Error: 3D texture depth must be a power of two. Got %u\n", FACES);
+                    throw InvalidInputBitmapException();
+                }
+            }
 
             std::uint32_t mipmap_width = BITMAP_WIDTH;
             std::uint32_t mipmap_height = BITMAP_HEIGHT;
