@@ -1,6 +1,6 @@
 # Invader
-Invader is an open source toolkit for creating Halo: Combat Evolved maps. It is written in C++ using the C++17 standard
-and is licensed under the GNU General Public License version 3. Read LICENSE for more information.
+Invader is an open source toolkit for creating maps for Halo: Combat Evolved on the PC. It is written in C++ using the
+C++17 standard and is licensed under the GNU General Public License version 3. Read LICENSE for more information.
 
 ## Building Invader
 There are a number of things you will need in order to successfully compile Invader.
