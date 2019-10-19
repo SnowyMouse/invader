@@ -310,10 +310,10 @@ namespace Invader {
         // Show indexed / external tags
         if(this->verbose) {
             if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf("Indexed tags:      %zu / %zu tags (%.02f %%, %.02f MiB tag data, %.02f MiB raw data)\n", external_count, bitmap_sound_tag_count, bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size));
+                oprintf("Indexed tags:      %zu / %zu tags (%.02f MiB tag data, %.02f MiB raw data, %.02f %%)\n", external_count, bitmap_sound_tag_count, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
             }
             else if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                oprintf("Cached raw data:   %zu / %zu tags (%.02f %%, %.02f MiB)\n", external_count, bitmap_sound_tag_count, bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F, BYTES_TO_MiB(external_size));
+                oprintf("Cached raw data:   %zu / %zu tags (%.02f MiB, %.02f %%)\n", external_count, bitmap_sound_tag_count, BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
             }
         }
 
