@@ -48,6 +48,20 @@ namespace Invader::File {
      * @param expected_extension extension to use and remove from the path, if found
      */
     std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension);
+
+    /**
+     * Convert the tag path to a path using the system's preferred separators
+     * @param  tag_path tag path input
+     * @return          output path
+     */
+    std::string halo_path_to_preferred_path(const std::string &tag_path);
+
+    /**
+     * Convert the tag path to a path using the Halo's separators (backslashes)
+     * @param  tag_path tag path input
+     * @return          output path
+     */
+    std::string preferred_path_to_halo_path(const std::string &tag_path);
 }
 
 #endif

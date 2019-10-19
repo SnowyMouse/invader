@@ -138,4 +138,30 @@ namespace Invader::File {
         // We don't? Give up.
         return std::nullopt;
     }
+
+    constexpr char SYSTEM_PATH_SEPARATOR = std::filesystem::path::preferred_separator;
+    constexpr char HALO_PATH_SEPARATOR = '\\';
+    constexpr char PORTABLE_PATH_SEPARATOR = '/';
+
+    std::string halo_path_to_preferred_path(const std::string &tag_path) {
+        auto path_copy = tag_path;
+        if(SYSTEM_PATH_SEPARATOR != HALO_PATH_SEPARATOR) {
+            for(char &c : path_copy) {
+                if(c == HALO_PATH_SEPARATOR) {
+                    c = SYSTEM_PATH_SEPARATOR;
+                }
+            }
+        }
+        return path_copy;
+    }
+
+    std::string preferred_path_to_halo_path(const std::string &tag_path) {
+        auto path_copy = tag_path;
+        for(char &c : path_copy) {
+            if(c == SYSTEM_PATH_SEPARATOR || c == PORTABLE_PATH_SEPARATOR) {
+                c = HALO_PATH_SEPARATOR;
+            }
+        }
+        return path_copy;
+    }
 }
