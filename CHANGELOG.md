@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their combined total in the diagnostic output
+- invader-build: The number of tags that could be cached/indexed is now shown
 
 ### Fixed
 - invader-build: Fixed some error messages not being shown using the correct directory separators
