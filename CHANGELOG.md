@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+## Changed
+- invader-build: Bitmaps and sound data are now shown separately next to their combined total in the diagnostic output
+
 ### Fixed
 - invader-build: Fixed some error messages not being shown using the correct directory separators
 - invader-build: Fixed indexing tags with retail/demo resources

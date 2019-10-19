@@ -263,18 +263,23 @@ namespace Invader {
 
         // Calculate approximate amount of data to reduce allocations needed
         std::size_t model_size = 0;
-        std::size_t bitmap_sound_size = 0;
+        std::size_t bitmap_size = 0;
+        std::size_t sound_size = 0;
         for(auto &tag : compiled_tags) {
             auto asset_size = tag->asset_data.size();
             if(asset_size) {
                 if(tag->tag_class_int == TagClassInt::TAG_CLASS_GBXMODEL || tag->tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
                     model_size += asset_size;
                 }
-                else {
-                    bitmap_sound_size += asset_size;
+                else if(tag->tag_class_int == TagClassInt::TAG_CLASS_BITMAP) {
+                    bitmap_size += asset_size;
+                }
+                else if(tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                    sound_size += asset_size;
                 }
             }
         }
+        std::size_t bitmap_sound_size = bitmap_size + sound_size;
 
         // Add model data
         std::vector<std::byte> vertices;
@@ -294,7 +299,7 @@ namespace Invader {
         this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         if(this->verbose) {
-            oprintf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
+            oprintf("Bitmaps/sounds:    %.02f MiB (%.02f MiB bitmaps + %.02f MiB sounds)\n", BYTES_TO_MiB(bitmap_sound_size), BYTES_TO_MiB(bitmap_size), BYTES_TO_MiB(sound_size));
         }
 
         // Show indexed / external tags
