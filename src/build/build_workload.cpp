@@ -1041,12 +1041,12 @@ namespace Invader {
                     // Make sure we're referencing the right things
                     auto &dobc = *reinterpret_cast<DetailObjectCollection<LittleEndian> *>(tag_ptr->data.data());
                     if(dobc.sprite_plate.tag_id.read().is_null()) {
-                        eprintf("%s.detail_object_collection has no bitmap.\n", tag_ptr->path.data());
+                        eprintf("Sprite plate tag ID is null\n");
                         throw;
                     }
                     auto &bitmap_tag = this->compiled_tags[dobc.sprite_plate.tag_id.read().index];
                     if(bitmap_tag->tag_class_int != TagClassInt::TAG_CLASS_BITMAP) {
-                        eprintf("%s.detail_object_collection does not reference a bitmap.\n", tag_ptr->path.data());
+                        eprintf("Sprite plate is not a bitmap\n");
                         throw;
                     }
 
@@ -1072,7 +1072,7 @@ namespace Invader {
                 else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_PARTICLE) {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
                     if(particle.bitmap.tag_id.read().is_null()) {
-                        eprintf("%s.particle has no bitmap.\n", tag_ptr->path.data());
+                        eprintf("Particle has no bitmap.\n");
                         throw;
                     }
                     else {
@@ -1090,7 +1090,7 @@ namespace Invader {
                         for(std::uint32_t p = 0; p < particle_count; p++) {
                             auto &type = types[p];
                             if(type.sprite_bitmap.tag_id.read().is_null()) {
-                                eprintf("%s.weather_particle_system particle #%zu has no bitmap.\n", tag_ptr->path.data(), static_cast<std::size_t>(p));
+                                eprintf("Weather particle system particle #%zu has no bitmap.\n", static_cast<std::size_t>(p));
                                 throw;
                             }
                             else {
@@ -1351,12 +1351,12 @@ namespace Invader {
                 return index;
             }
             catch(...) {
-                eprintf("Failed to compile %s.%s\n", path, tag_class_to_extension(tag_class_int));
+                eprintf("Failed to compile %s.%s\n", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
                 throw;
             }
         }
 
-        eprintf("Could not find %s.%s\n", path, tag_class_to_extension(tag_class_int));
+        eprintf("Could not find %s.%s\n", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
         throw FailedToOpenTagException();
     }
 
