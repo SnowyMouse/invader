@@ -52,6 +52,18 @@ namespace Invader::File {
     /**
      * Convert the tag path to a path using the system's preferred separators
      * @param  tag_path tag path input
+     */
+    void halo_path_to_preferred_path_chars(char *tag_path) noexcept;
+
+    /**
+     * Convert the tag path to a path using the Halo's separators (backslashes)
+     * @param  tag_path tag path input
+     */
+    void preferred_path_to_halo_path_chars(char *tag_path) noexcept;
+
+    /**
+     * Convert the tag path to a path using the system's preferred separators
+     * @param  tag_path tag path input
      * @return          output path
      */
     std::string halo_path_to_preferred_path(const std::string &tag_path);
