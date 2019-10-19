@@ -88,12 +88,6 @@ namespace Invader {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
-        // TODO: Fix 3D textures
-        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
-            std::fprintf(stderr, "fixme:stub:fucked:3D textures do not work right now\n");
-            std::terminate();
-        }
-
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
 
@@ -290,6 +284,11 @@ namespace Invader {
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
         if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS || type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
             consolidate_stacked_bitmaps(generated_bitmap);
+        }
+
+        // 3D textures also halve in depth, too
+        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+            merge_3d_texture_mipmaps(generated_bitmap);
         }
 
         return generated_bitmap;
@@ -914,6 +913,7 @@ namespace Invader {
                     mipmap.pixel_count = mipmap_size;
                     mipmap.mipmap_height = mipmap_height;
                     mipmap.mipmap_width = mipmap_width;
+                    mipmap.mipmap_depth = FACES;
                 }
 
                 new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
@@ -969,6 +969,56 @@ namespace Invader {
 
         generated_bitmap.bitmaps = std::move(new_bitmaps);
         generated_bitmap.sequences = std::move(new_sequences);
+    }
+
+    void ColorPlateScanner::merge_3d_texture_mipmaps(GeneratedBitmapData &generated_bitmap) {
+        for(auto &bitmap : generated_bitmap.bitmaps) {
+            std::uint32_t bitmaps_to_merge = 2;
+            std::uint32_t bitmap_pixel_count = bitmap.height * bitmap.width;
+            std::vector<ColorPlatePixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
+            std::vector<GeneratedBitmapDataBitmapMipmap> new_mipmaps;
+            for(auto &mipmap : bitmap.mipmaps) {
+                if(bitmaps_to_merge > bitmap.depth) {
+                    break;
+                }
+
+                // Make the new mipmap metadata
+                auto &new_mipmap = new_mipmaps.emplace_back();
+                new_mipmap.first_pixel = new_pixels.size();
+                std::size_t layer_size = mipmap.mipmap_height * mipmap.mipmap_width;
+                new_mipmap.mipmap_height = mipmap.mipmap_height;
+                new_mipmap.mipmap_width = mipmap.mipmap_width;
+                new_mipmap.mipmap_depth = mipmap.mipmap_depth / bitmaps_to_merge;
+                new_mipmap.pixel_count = static_cast<std::uint32_t>(layer_size * new_mipmap.mipmap_depth);
+
+                // Go through each pixel and average
+                for(std::uint32_t d = 0; d < new_mipmap.mipmap_depth; d++) {
+                    for(std::uint32_t y = 0; y < new_mipmap.mipmap_height; y++) {
+                        for(std::uint32_t x = 0; x < new_mipmap.mipmap_width; x++) {
+                                std::size_t alpha = 0, red = 0, green = 0, blue = 0;
+                                for(std::uint32_t d_inner = d * bitmaps_to_merge; d_inner < (d + 1) * bitmaps_to_merge; d_inner++) {
+                                    auto &pixel = *(bitmap.pixels.data() + (x + y * new_mipmap.mipmap_height) + layer_size * d_inner + mipmap.first_pixel);
+                                    alpha += pixel.alpha;
+                                    red += pixel.red;
+                                    green += pixel.green;
+                                    blue += pixel.blue;
+                                }
+
+                                auto &new_pixel = new_pixels.emplace_back();
+                                new_pixel.alpha = static_cast<std::uint8_t>(alpha / bitmaps_to_merge);
+                                new_pixel.red = static_cast<std::uint8_t>(red / bitmaps_to_merge);
+                                new_pixel.green = static_cast<std::uint8_t>(green / bitmaps_to_merge);
+                                new_pixel.blue = static_cast<std::uint8_t>(blue / bitmaps_to_merge);
+                            }
+                        }
+                }
+
+                bitmaps_to_merge *= 2;
+            }
+
+            bitmap.mipmaps = new_mipmaps;
+            bitmap.pixels = new_pixels;
+        }
     }
 
     static std::uint32_t number_of_sprite_sheets(const std::vector<GeneratedBitmapDataSequence> &sequences) {

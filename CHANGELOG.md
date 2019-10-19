@@ -8,6 +8,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: The BSP path is now shown using the system's preferred path separator
 - invader-dependency: Tag paths are now shown using the system's preferred path separator
 
+### Fixed
+- invader-bitmap: Fully implemented and fixed 3D textures
+
 ## [0.14.0] - 2019-10-18
 ### Added
 - Added a CONTRIBUTING.md file which specifies guidelines for contributing to Invader

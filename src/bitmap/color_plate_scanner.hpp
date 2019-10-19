@@ -155,6 +155,7 @@ namespace Invader {
         std::uint32_t pixel_count;
         std::uint32_t mipmap_width;
         std::uint32_t mipmap_height;
+        std::uint32_t mipmap_depth = 1;
     };
 
     struct GeneratedBitmapDataBitmap {
@@ -320,6 +321,11 @@ namespace Invader {
          * @param generated_bitmap bitmap data to do cubemap stuff with
          */
         static void consolidate_stacked_bitmaps(GeneratedBitmapData &generated_bitmap);
+
+        /**
+         * Merge the mipmaps for 3D textures for depth
+         */
+        static void merge_3d_texture_mipmaps(GeneratedBitmapData &generated_bitmap);
 
         /**
          * Process sprites
