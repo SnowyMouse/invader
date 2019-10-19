@@ -253,7 +253,7 @@ namespace Invader {
         if(this->verbose) {
             oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(total_bsp_size));
             for(auto bsp : bsps) {
-                oprintf("                   %s (%.02f MiB)%s\n", compiled_tags[bsp]->path.data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
+                oprintf("                   %s (%.02f MiB)%s\n", File::halo_path_to_preferred_path(compiled_tags[bsp]->path).data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
             }
             auto maximum_allowed_tag_space = this->engine_target == CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : CACHE_FILE_MEMORY_LENGTH;
             oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(maximum_allowed_tag_space), max_tag_data_size * 100.0 / maximum_allowed_tag_space);
