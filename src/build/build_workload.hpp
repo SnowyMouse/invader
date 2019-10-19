@@ -154,8 +154,9 @@ namespace Invader {
          * Find the external resource offsets for tags (retail and demo)
          * @param   count               number of tags made external
          * @param   asset_data_removed  asset data removed
+         * @param   partial             number of partial tags found
          */
-        void find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed) noexcept;
+        void find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial) noexcept;
 
         /**
          * Get the scenario name

@@ -153,11 +153,12 @@ namespace Invader {
         std::size_t total_indexed_data = 0;
         std::size_t external_size;
         std::size_t external_count;
+        std::size_t partial_count;
         if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             total_indexed_data = this->index_tags(external_count, external_size);
         }
         else {
-            this->find_external_resource_offsets(external_count, external_size);
+            this->find_external_resource_offsets(external_count, external_size, partial_count);
         }
 
         // Initialize our header and file data vector, also grabbing scenario information
@@ -313,7 +314,7 @@ namespace Invader {
                 oprintf("Indexed tags:      %zu / %zu tags (%.02f MiB tag data, %.02f MiB raw data, %.02f %%)\n", external_count, bitmap_sound_tag_count, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
             }
             else if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                oprintf("Cached raw data:   %zu / %zu tags (%.02f MiB, %.02f %%)\n", external_count, bitmap_sound_tag_count, BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
+                oprintf("Cached raw data:   %zu / %zu tags (%zu partial, %.02f MiB raw data, %.02f %%)\n", external_count, bitmap_sound_tag_count, partial_count, BYTES_TO_MiB(external_size), bitmap_sound_tag_count ? static_cast<float>(external_count * 100) / bitmap_sound_tag_count : 100.0F);
             }
         }
 
@@ -591,14 +592,16 @@ namespace Invader {
         return total_removed_tag_data;
     }
 
-    void BuildWorkload::find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed) noexcept {
+    void BuildWorkload::find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial) noexcept {
         using namespace Invader::HEK;
 
         count = 0;
         asset_data_removed = 0;
+        partial = 0;
 
         for(auto &tag : this->compiled_tags) {
             bool hit = false;
+            bool at_least_one_fail = false;
             switch(tag->tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP: {
                     // Go through each bitmap in the tag
@@ -615,6 +618,7 @@ namespace Invader {
                         auto *bitmap_pixels = tag->asset_data.data() + bitmap.pixels_offset;
 
                         // Iterate through each bitmap resource
+                        bool success = false;
                         for(auto &b : this->bitmaps) {
                             // Check if we have a match
                             if(b.data.size() == pixel_count && std::memcmp(bitmap_pixels, b.data.data(), pixel_count) == 0) {
@@ -636,8 +640,13 @@ namespace Invader {
                                 tag->asset_data = new_asset_data;
                                 asset_data_removed += pixel_count;
                                 hit = true;
+                                success = true;
                                 break;
                             }
+                        }
+
+                        if(!success) {
+                            at_least_one_fail = true;
                         }
                     }
                     break;
@@ -656,6 +665,7 @@ namespace Invader {
                             std::uint32_t sound_offset = permutation.samples.file_offset;
                             std::uint32_t end = sound_size + sound_offset;
                             auto *sound_data = tag->asset_data.data() + sound_offset;
+                            bool success = false;
 
                             // Iterate through each sound resource
                             for(auto &s : this->sounds) {
@@ -686,8 +696,13 @@ namespace Invader {
                                     tag->asset_data = new_asset_data;
                                     asset_data_removed += sound_size;
                                     hit = true;
+                                    success = true;
                                     break;
                                 }
+                            }
+
+                            if(!success) {
+                                at_least_one_fail = true;
                             }
                         }
                     }
@@ -698,6 +713,7 @@ namespace Invader {
             }
 
             count += hit;
+            partial += hit && at_least_one_fail;
         }
     }
 
