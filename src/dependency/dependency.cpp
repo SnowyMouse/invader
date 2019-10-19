@@ -131,6 +131,6 @@ int main(int argc, char * const *argv) {
 
     // See what depended on it or what depends on this
     for(auto &tag : found_tags) {
-        oprintf("%s.%s%s\n", tag.path.data(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
+        oprintf("%s.%s%s\n", Invader::File::halo_path_to_preferred_path(tag.path).data(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
     }
 }
