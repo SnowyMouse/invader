@@ -195,20 +195,20 @@ namespace Invader {
 
             const char *engine_name;
             switch(this->engine_target) {
+                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    engine_name = "Dark Circlet";
+                    break;
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     engine_name = "Halo Custom Edition";
                     break;
                 case CacheFileEngine::CACHE_FILE_RETAIL:
-                    engine_name = "Halo Combat Evolved (PC)";
+                    engine_name = "Halo: Combat Evolved (PC)";
                     break;
                 case CacheFileEngine::CACHE_FILE_XBOX:
-                    engine_name = "Halo Combat Evolved (Xbox)";
+                    engine_name = "Halo: Combat Evolved (Xbox)";
                     break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     engine_name = "Halo Demo / Trial";
-                    break;
-                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    engine_name = "Dark Circlet";
                     break;
                 default:
                     engine_name = "Unknown";
