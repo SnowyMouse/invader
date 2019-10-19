@@ -183,11 +183,13 @@ namespace Invader {
 
         // Remove anything we don't need
         std::size_t total_indexed_data = 0;
+        std::size_t external_size;
+        std::size_t external_count;
         if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-            total_indexed_data = this->index_tags();
+            total_indexed_data = this->index_tags(external_count, external_size);
         }
         else {
-            this->find_external_resource_offsets();
+            this->find_external_resource_offsets(external_count, external_size);
         }
 
         // Initialize our header and file data vector, also grabbing scenario information
@@ -324,16 +326,17 @@ namespace Invader {
         this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         if(this->verbose) {
-            std::size_t indexed_count = 0;
-
-            for(auto &t : this->compiled_tags) {
-                if(t->indexed) {
-                    indexed_count++;
-                }
-            }
-
             oprintf("Bitmaps/sounds:    %.02f MiB\n", BYTES_TO_MiB(bitmap_sound_size));
-            oprintf("Indexed tags:      %zu\n", indexed_count);
+        }
+
+        // Show indexed / external tags
+        if(this->verbose) {
+            if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                oprintf("Indexed tags:      %zu (%.02f MiB tag data, %.02f MiB raw data)\n", external_count, BYTES_TO_MiB(total_indexed_data), BYTES_TO_MiB(external_size));
+            }
+            else if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                oprintf("Cached raw data:   %zu tags (%.02f MiB)\n", external_count, BYTES_TO_MiB(external_size));
+            }
         }
 
         // Get the size and offsets of model data
@@ -415,11 +418,13 @@ namespace Invader {
         return file;
     }
 
-    std::size_t BuildWorkload::index_tags() noexcept {
+    std::size_t BuildWorkload::index_tags(std::size_t &count, std::size_t &asset_data_removed) noexcept {
         using namespace HEK;
 
         // Get the amount of data removed
-        std::size_t total_removed_data = 0;
+        std::size_t total_removed_tag_data = 0;
+        count = 0;
+        asset_data_removed = 0;
 
         // If we're always indexing tags when possible, match by path
         if(this->always_index_tags) {
@@ -428,11 +433,13 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         for(std::size_t b = 1; b < this->bitmaps.size(); b+=2) {
                             if(this->bitmaps[b].path == tag->path) {
-                                total_removed_data += tag->data.size();
+                                total_removed_tag_data += tag->data.size();
+                                asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->index = static_cast<std::uint32_t>(b);
                                 tag->asset_data.clear();
                                 tag->data.clear();
+                                count++;
                                 break;
                             }
                         }
@@ -440,8 +447,10 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_SOUND:
                         for(std::size_t s = 1; s < this->sounds.size(); s+=2) {
                             if(this->sounds[s].path == tag->path) {
+                                asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->asset_data.clear();
+                                count++;
                                 break;
                             }
                         }
@@ -451,9 +460,12 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
                         for(std::size_t l = 0; l < this->loc.size(); l++) {
                             if(this->loc[l].path == tag->path) {
+                                total_removed_tag_data += tag->data.size();
+                                asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->data.clear();
                                 tag->index = static_cast<std::uint32_t>(l);
+                                count++;
                                 break;
                             }
                         }
@@ -471,11 +483,13 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         for(std::size_t b = 0; b < this->bitmaps.size(); b+=2) {
                             if(this->bitmaps[b].data == tag->asset_data) {
+                                total_removed_tag_data += tag->data.size();
+                                asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->index = static_cast<std::uint32_t>(b + 1);
                                 tag->asset_data.clear();
-                                total_removed_data += this->bitmaps[b + 1].data.size();
                                 tag->data.clear();
+                                count++;
                                 break;
                             }
                         }
@@ -483,8 +497,10 @@ namespace Invader {
                     case TagClassInt::TAG_CLASS_SOUND:
                         for(std::size_t s = 0; s < this->sounds.size(); s+=2) {
                             if(this->sounds[s].data == tag->asset_data && this->sounds[s].path == tag->path + "__permutations") {
+                                asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->asset_data.clear();
+                                count++;
                                 break;
                             }
                         }
@@ -512,7 +528,8 @@ namespace Invader {
                                         if(std::memcmp(tag_font_pixel_data, loc_font_pixel_data, tag_font_pixel_size) == 0) {
                                             tag->index = static_cast<std::uint32_t>(l);
                                             tag->indexed = true;
-                                            total_removed_data += loc_tag.data.size();
+                                            total_removed_tag_data += tag->data.size();
+                                            count++;
                                             tag->data.clear();
                                         }
                                     }
@@ -563,7 +580,8 @@ namespace Invader {
                                 if(!removed) {
                                     tag->index = static_cast<std::uint32_t>(l);
                                     tag->indexed = true;
-                                    total_removed_data += loc_tag.data.size();
+                                    total_removed_tag_data += tag->data.size();
+                                    count++;
                                     tag->data.clear();
                                     break;
                                 }
@@ -578,7 +596,8 @@ namespace Invader {
                                 if(loc_tag.data.size() == tag->data.size()) {
                                     tag->index = static_cast<std::uint32_t>(l);
                                     tag->indexed = true;
-                                    total_removed_data += loc_tag.data.size();
+                                    total_removed_tag_data += tag->data.size();
+                                    count++;
                                     tag->data.clear();
                                     break;
                                 }
@@ -591,15 +610,17 @@ namespace Invader {
             }
         }
 
-        return total_removed_data;
+        return total_removed_tag_data;
     }
 
-    std::size_t BuildWorkload::find_external_resource_offsets() noexcept {
+    void BuildWorkload::find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed) noexcept {
         using namespace Invader::HEK;
 
-        std::size_t total_removed_data = 0;
+        count = 0;
+        asset_data_removed = 0;
 
         for(auto &tag : this->compiled_tags) {
+            bool hit = false;
             switch(tag->tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP: {
                     // Go through each bitmap in the tag
@@ -635,7 +656,8 @@ namespace Invader {
                                 std::vector<std::byte> new_asset_data(tag->asset_data.data(), tag->asset_data.data() + pixel_offset);
                                 new_asset_data.insert(new_asset_data.end(), tag->asset_data.data() + end, tag->asset_data.data() + tag->asset_data.size());
                                 tag->asset_data = new_asset_data;
-                                total_removed_data += pixel_count;
+                                asset_data_removed += pixel_count;
+                                hit = true;
                                 break;
                             }
                         }
@@ -684,20 +706,21 @@ namespace Invader {
                                     std::vector<std::byte> new_asset_data(tag->asset_data.data(), tag->asset_data.data() + sound_offset);
                                     new_asset_data.insert(new_asset_data.end(), tag->asset_data.data() + end, tag->asset_data.data() + tag->asset_data.size());
                                     tag->asset_data = new_asset_data;
-                                    total_removed_data += sound_size;
+                                    asset_data_removed += sound_size;
+                                    hit = true;
                                     break;
                                 }
                             }
                         }
                     }
-
                     break;
                 }
                 default:
                     break;
             }
+
+            count += hit;
         }
-        return total_removed_data;
     }
 
     void BuildWorkload::load_required_tags() {
