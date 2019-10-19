@@ -79,7 +79,6 @@ namespace Invader::HEK {
             std::size_t mipmap_depth = reflexive.depth;
             for(std::size_t mipmap = 0; mipmap <= total_mipmap_count; mipmap++) {
                 total_pixel_count += mipmap_height * mipmap_width * mipmap_depth;
-
                 std::size_t dxt_size = (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height) * mipmap_depth;
                 total_pixel_count_dxt += dxt_size;
 
@@ -88,6 +87,14 @@ namespace Invader::HEK {
 
                 if(reflexive.type == BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
                     mipmap_depth /= 2;
+                }
+
+                if(mipmap_height == 0) {
+                    mipmap_height = 1;
+                }
+
+                if(mipmap_width == 0) {
+                    mipmap_width = 1;
                 }
             }
 
