@@ -299,7 +299,7 @@ namespace Invader {
         this->add_bitmap_and_sound_data(file, tag_data);
         file.insert(file.end(), REQUIRED_PADDING_32_BIT(file.size()), std::byte());
         if(this->verbose) {
-            oprintf("Bitmaps/sounds:    %.02f MiB (%.02f MiB bitmaps + %.02f MiB sounds)\n", BYTES_TO_MiB(bitmap_sound_size), BYTES_TO_MiB(bitmap_size), BYTES_TO_MiB(sound_size));
+            oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps + %.02f MiB sounds)\n", BYTES_TO_MiB(bitmap_sound_size), BYTES_TO_MiB(bitmap_size), BYTES_TO_MiB(sound_size));
         }
 
         // Show indexed / external tags
