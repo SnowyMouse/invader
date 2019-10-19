@@ -12,6 +12,7 @@
 #include "hek/resource_map.hpp"
 #include "list/resource_list.hpp"
 #include "../command_line_option.hpp"
+#include "../printf.hpp"
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -44,7 +45,7 @@ int main(int argc, const char **argv) {
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, 'h', resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {
             case 'i':
-                INVADER_SHOW_INFO
+                show_version_info();
                 std::exit(EXIT_FAILURE);
 
             case 't':

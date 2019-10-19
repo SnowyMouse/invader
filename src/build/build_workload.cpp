@@ -342,7 +342,7 @@ namespace Invader {
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = this->engine_target;
         cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
-        std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), INVADER_FULL_VERSION_STRING);
+        std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "%s", full_version());
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 
         // Get the CRC and set it in the header

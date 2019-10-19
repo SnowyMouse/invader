@@ -107,7 +107,7 @@ int main(int argc, const char **argv) {
                 build_options.use_filesystem_path = true;
                 break;
             case 'i':
-                INVADER_SHOW_INFO
+                show_version_info();
                 std::exit(EXIT_FAILURE);
             default:
                 eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);

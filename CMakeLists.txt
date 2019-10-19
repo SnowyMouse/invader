@@ -52,9 +52,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -march=native")
 endif()
 
-# Here's to set up constants for version.hpp
-add_definitions(-DINVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DINVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} "-DINVADER_FORK=\"${PROJECT_NAME}\"")
-
 # Turn on console messages
 option(NO_OUTPUT "don't show any console messages" OFF)
 if(NO_OUTPUT)

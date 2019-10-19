@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'i':
-                INVADER_SHOW_INFO
+                show_version_info();
                 std::exit(EXIT_FAILURE);
 
             case 'I':

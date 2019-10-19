@@ -41,7 +41,7 @@ int main(int argc, const char **argv) {
                 archive_options.output = arguments[0];
                 break;
             case 'i':
-                INVADER_SHOW_INFO
+                Invader::show_version_info();
                 std::exit(EXIT_FAILURE);
             case 's':
                 archive_options.single_tag = true;

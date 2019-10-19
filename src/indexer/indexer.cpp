@@ -8,6 +8,7 @@
 #include "../resource/resource_map.hpp"
 #include "../tag/compiled_tag.hpp"
 #include "../version.hpp"
+#include "../printf.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,
