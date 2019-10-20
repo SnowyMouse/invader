@@ -127,17 +127,32 @@ int main(int argc, const char **argv) {
 
     if(!archive_options.single_tag) {
         // Build the map
-        auto map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+        std::vector<std::byte> map;
+
+        try {
+            map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to compile scenario %s into a map\n", base_tag.data());
+            return EXIT_FAILURE;
+        }
 
         // Parse the map
-        auto parsed_map = Invader::Map::map_with_pointer(map.data(), map.size());
-        auto tag_count = parsed_map.tag_count();
+        std::unique_ptr<Invader::Map> parsed_map;
+        try {
+            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_pointer(map.data(), map.size()));
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to parse the map file generated with scenario %s\n", base_tag.data());
+            return EXIT_FAILURE;
+        }
+        auto tag_count = parsed_map->tag_count();
 
         // Go through each tag and see if we can find everything.
         archive_list.reserve(tag_count);
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
-            auto &tag = parsed_map.get_tag(i);
+            auto &tag = parsed_map->get_tag(i);
             std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.path()) + "." + tag_class_to_extension(tag.tag_class_int()));
 
             // Check each tag directory if it exists. If so, archive it
