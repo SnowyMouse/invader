@@ -50,6 +50,11 @@ namespace Invader {
         std::string scenario;
 
         /**
+         * Scenario base name
+         */
+        std::string scenario_base_name;
+
+        /**
          * Index of the scenario tag to use
          */
         std::size_t scenario_index;
@@ -162,10 +167,9 @@ namespace Invader {
         void find_external_resource_offsets(std::size_t &count, std::size_t &asset_data_removed, std::size_t &partial, std::size_t &potential) noexcept;
 
         /**
-         * Get the scenario name
-         * @return the scenario name
+         * Get the scenario base name
          */
-        std::string get_scenario_name();
+        void get_scenario_base_name();
 
         /**
          * Populate the tag array

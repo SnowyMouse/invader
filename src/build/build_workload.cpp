@@ -142,6 +142,9 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         using namespace HEK;
 
+        // Get the scenario base name
+        get_scenario_base_name();
+
         // Get all the tags
         this->load_required_tags();
         this->tag_count = this->compiled_tags.size();
@@ -166,7 +169,7 @@ namespace Invader {
         // Initialize our header and file data vector, also grabbing scenario information
         CacheFileHeader cache_file_header = {};
         std::vector<std::byte> file(sizeof(cache_file_header));
-        std::strncpy(cache_file_header.name.string, get_scenario_name().data(), sizeof(cache_file_header.name.string) - 1);
+        std::strcpy(cache_file_header.name.string, this->scenario_base_name.data());
         cache_file_header.map_type = this->cache_file_type;
 
         // eXoDux-specific bit
@@ -733,7 +736,7 @@ namespace Invader {
 
         this->scenario_index = this->compile_tag_recursively(this->scenario.data(), TagClassInt::TAG_CLASS_SCENARIO);
         this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(this->compiled_tags[this->scenario_index]->data.data())->type;
-        auto scenario_name = this->get_scenario_name();
+        auto scenario_name = this->scenario_base_name;
 
         // Depending on the type of map we're building, use a certain resource limit
         if(this->engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
@@ -1397,20 +1400,17 @@ namespace Invader {
         throw FailedToOpenTagException();
     }
 
-    std::string BuildWorkload::get_scenario_name() {
-        std::string map_name = this->scenario;
-        for(const char *map_name_i = this->scenario.data(); *map_name_i; map_name_i++) {
-            if(*map_name_i == '\\') {
-                map_name = map_name_i + 1;
-            }
-        }
+    void BuildWorkload::get_scenario_base_name() {
+        // Get the base name string
+        std::string map_name = Invader::File::base_name(this->scenario);
 
         // Get name length
         std::size_t map_name_length = map_name.length();
+        const std::size_t MAX_SCENARIO_LENGTH = sizeof(HEK::CacheFileHeader::name) - 1;
 
         // Error if greater than 31 characters.
-        if(map_name_length > 31) {
-            eprintf("Scenario name %s exceeds 31 characters.\n", map_name.data());
+        if(map_name_length > MAX_SCENARIO_LENGTH) {
+            eprintf("Scenario name %s exceeds %zu characters.\n", map_name.data(), MAX_SCENARIO_LENGTH);
             throw InvalidScenarioNameException();
         }
 
@@ -1419,7 +1419,7 @@ namespace Invader {
             c = std::tolower(c);
         }
 
-        return map_name;
+        this->scenario_base_name = map_name;
     }
 
     struct DedupingAssetData {
