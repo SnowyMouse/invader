@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <tiffio.h>
-#include "image_loader.hpp"
-#include "../printf.hpp"
+#include "invader/bitmap/image_loader.hpp"
+#include "invader/printf.hpp"
 #include "stb/stb_image.h"
 
 namespace Invader {

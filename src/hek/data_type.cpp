@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "data_type.hpp"
+#include "invader/hek/data_type.hpp"
 
 namespace Invader::HEK {
     Vector3D<NativeEndian> euler2d_to_vector(const Euler2D<NativeEndian> &rotation) noexcept {

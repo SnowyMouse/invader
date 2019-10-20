@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "map.hpp"
+#include "invader/hek/map.hpp"
 
 namespace Invader::HEK {
     CacheFileHeader::CacheFileHeader(const CacheFileDemoHeader &copy) {

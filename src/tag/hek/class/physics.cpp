@@ -3,8 +3,8 @@
 #include <cmath>
 #include <vector>
 
-#include "../compile.hpp"
-#include "physics.hpp"
+#include "invader/tag/hek/compile.hpp"
+#include "invader/tag/hek/class/physics.hpp"
 
 namespace Invader::HEK {
     void compile_physics_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

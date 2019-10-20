@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../../../hek/constants.hpp"
-#include "../compile.hpp"
+#include "invader/hek/constants.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "actor_variant.hpp"
+#include "invader/tag/hek/class/actor_variant.hpp"
 
 namespace Invader::HEK {
     void compile_actor_variant_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

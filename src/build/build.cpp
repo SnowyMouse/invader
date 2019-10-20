@@ -9,13 +9,13 @@ using clock_type = std::chrono::steady_clock;
 #include <cstring>
 #include <filesystem>
 
-#include "build_workload.hpp"
-#include "../map/map.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "../version.hpp"
-#include "../printf.hpp"
-#include "../command_line_option.hpp"
-#include "../file/file.hpp"
+#include "invader/build/build_workload.hpp"
+#include "invader/map/map.hpp"
+#include "invader/tag/compiled_tag.hpp"
+#include "invader/version.hpp"
+#include "invader/printf.hpp"
+#include "invader/command_line_option.hpp"
+#include "invader/file/file.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,

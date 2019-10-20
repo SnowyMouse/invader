@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <vector>
-#include "../../map/map.hpp"
+#include "invader/map/map.hpp"
 #include "../crc32.h"
-#include "../../tag/hek/class/scenario.hpp"
-#include "crc.hpp"
+#include "invader/tag/hek/class/scenario.hpp"
+#include "invader/crc/hek/crc.hpp"
 #include "../crc_spoof.h"
 
 namespace Invader {

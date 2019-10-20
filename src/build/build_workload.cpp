@@ -4,34 +4,34 @@
 #include <cmath>
 #include <thread>
 
-#include "../resource/list/resource_list.hpp"
+#include "invader/resource/list/resource_list.hpp"
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
 // This is the maximum length. 255 crashes Guerilla, and anything higher will not be loaded.
 #define MAX_PATH_LENGTH 254
 
-#include "../printf.hpp"
-#include "../tag/hek/class/biped.hpp"
-#include "../tag/hek/class/bitmap.hpp"
-#include "../tag/hek/class/detail_object_collection.hpp"
-#include "../tag/hek/class/fog.hpp"
-#include "../tag/hek/class/font.hpp"
-#include "../tag/hek/class/gbxmodel.hpp"
-#include "../tag/hek/class/particle.hpp"
-#include "../tag/hek/class/scenario.hpp"
-#include "../tag/hek/class/scenario_structure_bsp.hpp"
-#include "../tag/hek/class/weather_particle_system.hpp"
-#include "../tag/hek/class/sound.hpp"
-#include "../tag/hek/class/string_list.hpp"
-#include "../version.hpp"
-#include "../error.hpp"
-#include "../hek/map.hpp"
-#include "../crc/hek/crc.hpp"
-#include "../file/file.hpp"
-#include "../version.hpp"
+#include "invader/printf.hpp"
+#include "invader/tag/hek/class/biped.hpp"
+#include "invader/tag/hek/class/bitmap.hpp"
+#include "invader/tag/hek/class/detail_object_collection.hpp"
+#include "invader/tag/hek/class/fog.hpp"
+#include "invader/tag/hek/class/font.hpp"
+#include "invader/tag/hek/class/gbxmodel.hpp"
+#include "invader/tag/hek/class/particle.hpp"
+#include "invader/tag/hek/class/scenario.hpp"
+#include "invader/tag/hek/class/scenario_structure_bsp.hpp"
+#include "invader/tag/hek/class/weather_particle_system.hpp"
+#include "invader/tag/hek/class/sound.hpp"
+#include "invader/tag/hek/class/string_list.hpp"
+#include "invader/version.hpp"
+#include "invader/error.hpp"
+#include "invader/hek/map.hpp"
+#include "invader/crc/hek/crc.hpp"
+#include "invader/file/file.hpp"
+#include "invader/version.hpp"
 
-#include "build_workload.hpp"
+#include "invader/build/build_workload.hpp"
 
 namespace Invader {
     std::vector<std::byte> BuildWorkload::compile_map(

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "material_effects.hpp"
+#include "invader/tag/hek/class/material_effects.hpp"
 
 namespace Invader::HEK {
     void compile_material_effects_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

@@ -11,6 +11,9 @@ add_library(invader STATIC
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
+    src/bitmap/color_plate_scanner.cpp
+    src/bitmap/image_loader.cpp
+    src/bitmap/bitmap_data_writer.cpp
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
@@ -95,6 +98,19 @@ add_library(invader STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
 )
 
+# P8 palette library (separate for slightly faster building)
+add_library(invader-bitmap-p8-palette STATIC
+    "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+)
+
+# Include version script
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette" "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette"
+)
+
 # Include version script
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
@@ -117,3 +133,6 @@ set_source_files_properties(src/version.cpp
 
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# Add libraries
+target_link_libraries(invader invader-bitmap-p8-palette)

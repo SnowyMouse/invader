@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "error.hpp"
+#include "invader/error.hpp"
 
 namespace Invader {
     const char *InvalidScenarioNameException::what() const noexcept {

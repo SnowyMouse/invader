@@ -8,11 +8,11 @@
 #include <cstdint>
 #include <filesystem>
 #include <vector>
-#include "../tag/hek/class/font.hpp"
-#include "../tag/hek/header.hpp"
-#include "../printf.hpp"
-#include "../command_line_option.hpp"
-#include "../file/file.hpp"
+#include "invader/tag/hek/class/font.hpp"
+#include "invader/tag/hek/header.hpp"
+#include "invader/printf.hpp"
+#include "invader/command_line_option.hpp"
+#include "invader/file/file.hpp"
 #include FT_FREETYPE_H
 
 struct RenderedCharacter {

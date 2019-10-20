@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include "../hek/data_type.hpp"
-#include "color_plate_scanner.hpp"
-#include "../printf.hpp"
+#include "invader/hek/data_type.hpp"
+#include "invader/bitmap/color_plate_scanner.hpp"
+#include "invader/printf.hpp"
 
 namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";

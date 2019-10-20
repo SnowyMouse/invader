@@ -2,10 +2,10 @@
 
 #include <cmath>
 
-#include "../../../hek/constants.hpp"
-#include "../compile.hpp"
+#include "invader/hek/constants.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "globals.hpp"
+#include "invader/tag/hek/class/globals.hpp"
 
 namespace Invader::HEK {
     void compile_globals_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, CacheFileType type) {

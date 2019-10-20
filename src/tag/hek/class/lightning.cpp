@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "lightning.hpp"
+#include "invader/tag/hek/class/lightning.hpp"
 
 namespace Invader::HEK {
     void compile_lightning_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

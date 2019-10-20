@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "contrail.hpp"
+#include "invader/tag/hek/class/contrail.hpp"
 
 namespace Invader::HEK {
     void compile_contrail_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

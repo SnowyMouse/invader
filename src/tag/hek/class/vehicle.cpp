@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "vehicle.hpp"
+#include "invader/tag/hek/compile.hpp"
+#include "invader/tag/hek/class/vehicle.hpp"
 
 namespace Invader::HEK {
     void compile_vehicle_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

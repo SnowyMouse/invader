@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "resource_map.hpp"
-
-#include "hek/resource_map.hpp"
+#include "invader/resource/resource_map.hpp"
+#include "invader/resource/hek/resource_map.hpp"
 
 namespace Invader {
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size) {

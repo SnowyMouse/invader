@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../../../hek/constants.hpp"
-#include "../compile.hpp"
+#include "invader/hek/constants.hpp"
+#include "invader/tag/hek/compile.hpp"
 
-#include "model_collision_geometry.hpp"
+#include "invader/tag/hek/class/model_collision_geometry.hpp"
 
 namespace Invader::HEK {
     void compile_model_collision_geometry_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

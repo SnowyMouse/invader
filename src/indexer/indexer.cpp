@@ -4,11 +4,11 @@
 #include <cstring>
 #include <regex>
 
-#include "../map/map.hpp"
-#include "../resource/resource_map.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "../version.hpp"
-#include "../printf.hpp"
+#include "invader/map/map.hpp"
+#include "invader/resource/resource_map.hpp"
+#include "invader/tag/compiled_tag.hpp"
+#include "invader/version.hpp"
+#include "invader/printf.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,

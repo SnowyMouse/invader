@@ -3,14 +3,14 @@
 #include <memory>
 #include <cstdio>
 
-#include "compiled_tag.hpp"
+#include "invader/tag/compiled_tag.hpp"
 
-#include "../error.hpp"
-#include "hek/header.hpp"
-#include "hek/class/globals.hpp"
-#include "hek/class/damage_effect.hpp"
-#include "hek/class/object.hpp"
-#include "hek/class/weapon.hpp"
+#include "invader/error.hpp"
+#include "invader/tag/hek/header.hpp"
+#include "invader/tag/hek/class/globals.hpp"
+#include "invader/tag/hek/class/damage_effect.hpp"
+#include "invader/tag/hek/class/object.hpp"
+#include "invader/tag/hek/class/weapon.hpp"
 
 namespace Invader::HEK {
     /**
