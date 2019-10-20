@@ -98,10 +98,11 @@ namespace Invader {
             std::vector<std::byte> resource_data_buffer;
 
             // Load all resource maps
-            auto load_map = [&resource_data_buffer](const std::string &path) -> std::vector<Resource> {
-                std::FILE *f = std::fopen(path.data(), "rb");
+            auto load_map = [&resource_data_buffer](const std::filesystem::path &path) -> std::vector<Resource> {
+                auto path_str = path.string();
+                std::FILE *f = std::fopen(path_str.data(), "rb");
                 if(!f) {
-                    eprintf("Failed to open %s\n", path.data());
+                    eprintf("Failed to open %s\n", path_str.data());
                     return std::vector<Resource>();
                 }
                 std::fseek(f, 0, SEEK_END);
@@ -113,7 +114,7 @@ namespace Invader {
                 }
 
                 if(std::fread(resource_data_buffer.data(), data_size, 1, f) != 1) {
-                    eprintf("Failed to open %s\n", path.data());
+                    eprintf("Failed to open %s\n", path_str.data());
                     std::fclose(f);
                     return std::vector<Resource>();
                 }
@@ -874,13 +875,13 @@ namespace Invader {
             // If it's not purely an object tag try to open it
             if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
                 // Concatenate the tag path
-                std::string tag_path = tag_dir / tag_base_path;
+                std::string tag_path = (tag_dir / tag_base_path).string();
                 file = std::fopen(tag_path.data(), "rb");
             }
             // Otherwise, see if we can go through the different object types
             else {
                 auto attempt_to_open_tag = [&tag_dir, &path](TagClassInt class_int) -> std::FILE * {
-                    std::string tag_path = File::halo_path_to_preferred_path(tag_dir / (std::string(path) + "." + tag_class_to_extension(class_int)));
+                    std::string tag_path = (tag_dir / File::halo_path_to_preferred_path((std::string(path) + "." + tag_class_to_extension(class_int)))).string();
                     return std::fopen(tag_path.data(), "rb");
                 };
                 #define MAKE_ATTEMPT(class_int) if(file == nullptr) { file = attempt_to_open_tag(class_int); if(file) tag_class_int = class_int; }
