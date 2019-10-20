@@ -172,4 +172,36 @@ namespace Invader::File {
         preferred_path_to_halo_path_chars(path_copy.data());
         return path_copy;
     }
+
+    const char *base_name_chars(const char *tag_path) noexcept {
+        const char *base_name = tag_path;
+        while(*tag_path) {
+            if(*tag_path == '\\' || *tag_path == '/' || *tag_path == std::filesystem::path::preferred_separator) {
+                base_name = tag_path + 1;
+            }
+            tag_path++;
+        }
+        return base_name;
+    }
+
+    char *base_name_chars(char *tag_path) noexcept {
+        return const_cast<char *>(base_name_chars(const_cast<const char *>(tag_path)));
+    }
+
+    std::string base_name(const std::string &tag_path, bool drop_extension) {
+        const char *base_name = base_name_chars(tag_path.data());
+
+        if(drop_extension) {
+            const char *base_name_end = nullptr;
+            for(const char *c = base_name; *c; c++) {
+                if(*c == '.') {
+                    base_name_end = c;
+                }
+            }
+            if(base_name_end) {
+                return std::string(base_name, base_name_end);
+            }
+        }
+        return std::string(base_name);
+    }
 }

@@ -74,6 +74,28 @@ namespace Invader::File {
      * @return          output path
      */
     std::string preferred_path_to_halo_path(const std::string &tag_path);
+
+    /**
+     * Get the base name of the tag path
+     * @param  tag_path tag path to get
+     * @return          base name
+     */
+    const char *base_name_chars(const char *tag_path) noexcept;
+
+    /**
+     * Get the base name of the tag path
+     * @param  tag_path tag path to get
+     * @return          base name
+     */
+    char *base_name_chars(char *tag_path) noexcept;
+
+    /**
+     * Get the base name of the tag path
+     * @param  tag_path       tag path to get
+     * @param  drop_extension drop the extension
+     * @return                base name
+     */
+    std::string base_name(const std::string &tag_path, bool drop_extension = false);
 }
 
 #endif
