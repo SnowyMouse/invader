@@ -218,12 +218,7 @@ int main(int argc, const char **argv) {
 
         auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_external_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
 
-        const char *map_name = scenario.data();
-        for(const char &c : scenario) {
-            if(c == std::filesystem::path::preferred_separator) {
-                map_name = &c + 1;
-            }
-        }
+        const char *map_name = File::base_name_chars(scenario.data());
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
