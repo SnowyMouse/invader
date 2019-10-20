@@ -93,7 +93,10 @@ int main(int argc, const char **argv) {
             base_tag = base_tag_maybe.value();
         }
         else {
-            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
+            eprintf("Failed to find a valid%stag %s in the tags directory\n", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
+            if(!archive_options.single_tag && Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true).has_value()) {
+                eprintf("A file was detected there, but it isn't a .scenario tag, so you need to use -s\n");
+            }
             return EXIT_FAILURE;
         }
     }
@@ -107,15 +110,8 @@ int main(int argc, const char **argv) {
     // If no output filename was given, make one
     static const char extension[] = ".tar.xz";
     if(archive_options.output.size() == 0) {
-        const char *base_name = base_tag.data();
-        for(const char *c = base_name; *c; c++) {
-            if(*c == '\\') {
-                base_name = c + 1;
-            }
-        }
-
         // Set output
-        archive_options.output = std::string(base_name) + extension;
+        archive_options.output = Invader::File::base_name(base_tag) + extension;
     }
     else {
         bool fail = true;
