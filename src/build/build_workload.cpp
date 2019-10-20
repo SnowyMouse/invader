@@ -886,7 +886,7 @@ namespace Invader {
                 };
                 #define MAKE_ATTEMPT(class_int) if(file == nullptr) { file = attempt_to_open_tag(class_int); if(file) tag_class_int = class_int; }
 
-                std::string tag_path = tag_dir / tag_base_path;
+                std::string tag_path = (tag_dir / tag_base_path).string();
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_BIPED);
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE);
                 MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_CONTROL);
