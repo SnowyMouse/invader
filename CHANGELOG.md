@@ -9,10 +9,13 @@ This is used for recording Invader's changes. This changelog is based on
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their combined total in the diagnostic output
 - invader-build: The number of tags that could be cached/indexed is now shown
+- invader-archive: Now handles exceptions instead of calling abort() while either compiling or parsing cache files
+- C++ header files to include were moved to an include directory
 
 ### Fixed
 - invader-build: Fixed some error messages not being shown using the correct directory separators
 - invader-build: Fixed indexing tags with retail/demo resources
+- invader-archive: Fixed some issues with `-P`
 
 ## [0.14.1] - 2019-10-19
 ### Changed
