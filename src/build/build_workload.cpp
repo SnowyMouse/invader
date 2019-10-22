@@ -250,6 +250,7 @@ namespace Invader {
         }
 
         std::size_t max_tag_data_size = tag_data.size() + largest_bsp_size + total_indexed_data;
+        const std::size_t MAXIMUM_ALLOWED_TAG_SPACE = this->engine_target == CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : CACHE_FILE_MEMORY_LENGTH;
 
         // Output BSP info
         if(this->verbose) {
@@ -257,12 +258,11 @@ namespace Invader {
             for(auto bsp : bsps) {
                 oprintf("                   %s (%.02f MiB)%s\n", File::halo_path_to_preferred_path(compiled_tags[bsp]->path).data(), BYTES_TO_MiB(compiled_tags[bsp]->data_size), (bsp == largest_bsp) ? "*" : "");
             }
-            auto maximum_allowed_tag_space = this->engine_target == CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : CACHE_FILE_MEMORY_LENGTH;
-            oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(maximum_allowed_tag_space), max_tag_data_size * 100.0 / maximum_allowed_tag_space);
+            oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_tag_data_size), BYTES_TO_MiB(MAXIMUM_ALLOWED_TAG_SPACE), max_tag_data_size * 100.0 / MAXIMUM_ALLOWED_TAG_SPACE);
         }
 
         // Check if we've exceeded the max amount of tag data
-        if(max_tag_data_size > CACHE_FILE_MEMORY_LENGTH) {
+        if(max_tag_data_size > MAXIMUM_ALLOWED_TAG_SPACE) {
             eprintf("Maximum tag data size exceeds budget.\n");
             throw MaximumTagDataSizeException();
         }
