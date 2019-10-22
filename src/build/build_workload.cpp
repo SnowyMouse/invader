@@ -1568,7 +1568,12 @@ namespace Invader {
 
                     // Add it
                     bsp_struct.bsp_size = static_cast<std::uint32_t>(bsp_compiled_tag->data.size());
-                    bsp_struct.bsp_address = this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - bsp_struct.bsp_size;
+                    if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        bsp_struct.bsp_address = 0;
+                    }
+                    else {
+                        bsp_struct.bsp_address = this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - bsp_struct.bsp_size;
+                    }
                     bsp_struct.bsp_start = static_cast<std::uint32_t>(add_tag_data_for_tag(file, tag_array.data(), bsp_index));
                     bsp_compiled_tag->data.clear();
                 }
@@ -1599,7 +1604,12 @@ namespace Invader {
             }
             std::uint32_t new_offset;
             if(compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                new_offset = static_cast<std::uint32_t>(this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - compiled_tag->data.size() + pointer.offset_pointed);
+                if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    new_offset = static_cast<std::uint32_t>(this->tag_data_address + CACHE_FILE_MEMORY_LENGTH - compiled_tag->data.size() + pointer.offset_pointed);
+                }
+                else {
+                    new_offset = pointer.offset_pointed;
+                }
             }
             else {
                 new_offset = static_cast<std::uint32_t>(this->tag_data_address + offset + pointer.offset_pointed);
