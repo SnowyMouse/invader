@@ -252,7 +252,7 @@ existing cache files.
 | `--retail,-R`      | Build a retail/demo resource map.                                  |
 
 ## Frequently Asked Questions
-These are a selection of questions that I've received over the course of Invader's development.
+These are a selection of questions that have been asked over the course of Invader's development.
 
 - [What operating systems are supported?](#what-operating-systems-are-supported)
 - [How can I contribute?](#how-can-i-contribute)
@@ -264,7 +264,8 @@ These are a selection of questions that I've received over the course of Invader
 - [Should I use invader-build or tool.exe?](#should-i-use-invader-build-or-toolexe)
 
 ### What operating systems are supported?
-Invader does not support any one operating system.
+Invader does not support any one operating system, but Invader is developed on Arch Linux. Windows builds are also
+uploaded on [Open Carnage](https://invader.opencarnage.net/builds/nightly/download-latest.html).
 
 ### How can I contribute?
 That information is in CONTRIBUTING.md.
