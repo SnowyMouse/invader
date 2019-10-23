@@ -101,6 +101,14 @@ make
 To remove the reliance of one huge executable, something that has caused issues
 with Halo Custom Edition's tool.exe, as well as make things easier for me to
 work with, this project is split into different programs.
+- [invader-archive]
+- [invader-bitmap]
+- [invader-build]
+- [invader-crc]
+- [invader-dependency]
+- [invader-font]
+- [invader-indexer]
+- [invader-resource]
 
 ### invader-archive
 This program generates a .tar.xz archive containing all of the tags used to
@@ -363,3 +371,12 @@ for multiplayer maps.
 [How close to completion is Invader?]: #how-close-to-completion-is-invader
 [Should I use invader-bitmap or tool.exe?]: #should-i-use-invader-bitmap-or-toolexe
 [Should I use invader-build or tool.exe?]: #should-i-use-invader-build-or-toolexe
+
+[invader-archive]: #invader-archive
+[invader-bitmap]: #invader-bitmap
+[invader-build]: #invader-build
+[invader-crc]: #invader-crc
+[invader-dependency]: #invader-dependency
+[invader-font]: #invader-font
+[invader-indexer]: #invader-indexer
+[invader-resource]: #invader-resource
