@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## Added
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
+- invader-build: Copying TagString data now checks for string overflow
 
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their
@@ -14,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-archive: Now handles exceptions instead of calling abort() while
   either compiling or parsing cache files
 - C++ header files to include were moved to an include directory
+- invader-build: No longer errors when orphaned model nodes exist
 
 ### Fixed
 - invader-build: Fixed some error messages not being shown using the correct
