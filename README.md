@@ -9,13 +9,17 @@ This readme addresses a few topics:
 * [Frequently asked questions](#frequently-asked-questions)
 
 ## Getting Invader
-Invader can be obtained by either downloading pre-compiled binaries or compiling from source. You can obtain Windows
-builds on [Open Carnage](https://invader.opencarnage.net/builds/nightly/download-latest.html).
+Invader can be obtained by either downloading pre-compiled binaries or compiling from source.
+
+You can obtain Windows builds on [Open Carnage](https://invader.opencarnage.net/builds/nightly/download-latest.html).
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader binaries, this section probably doesn't apply to
 you, but you are welcome to compile Invader. Regardless, you can browse and download the source code for free on
 [GitHub](https://github.com/Kavawuvi/invader).
+
+If you use Arch Linux, the [Arch Linux AUR](https://aur.archlinux.org/packages/invader-git/) has a package you can use
+to build Invader.
 
 #### Dependencies
 Invader depends on software in order for it to build and work properly. This section lists the dependencies required to
