@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "invader/tag/hek/compile.hpp"
-
 #include "invader/tag/hek/class/gbxmodel.hpp"
+#include "invader/file/file.hpp"
 
 namespace Invader::HEK {
     struct TempMarker {
@@ -184,8 +184,7 @@ namespace Invader::HEK {
         // Make sure we don't have any stragglers
         for(std::size_t n = 0; n < nodes_count; n++) {
             if(!node_done[n]) {
-                eprintf("orphaned model node %zu\n", n);
-                throw OutOfBoundsException();
+                eprintf("Warning: Orphaned node #%zu in %s.%s\n", n, File::halo_path_to_preferred_path(compiled.path.data()).data(), tag_class_to_extension(compiled.tag_class_int));
             }
         }
 
