@@ -4,9 +4,13 @@ information about the license.
 
 ## Getting started
 This readme addresses a few topics:
+* [Contributing](#contributing)
 * [Getting Invader](#getting-invader)
 * [Programs](#programs)
 * [Frequently asked questions](#frequently-asked-questions)
+
+## Contributing
+See CONTRIBUTING.md.
 
 ## Getting Invader
 Invader can be obtained by either downloading pre-compiled binaries or compiling from source.
@@ -255,7 +259,6 @@ existing cache files.
 These are a selection of questions that have been asked over the course of Invader's development.
 
 - [What operating systems are supported?](#what-operating-systems-are-supported)
-- [How can I contribute?](#how-can-i-contribute)
 - [Can invader-build create .yelo maps?](#can-invader-build-create-yelo-maps)
 - [Can invader-build create Xbox maps?](#can-invader-build-create-xbox-maps)
 - [The HEK says my bitmap tag is "too large" when opening.](#the-hek-says-my-bitmap-tag-is-too-large-when-opening)
@@ -266,9 +269,6 @@ These are a selection of questions that have been asked over the course of Invad
 ### What operating systems are supported?
 Invader does not support any one operating system, but Invader is developed on Arch Linux. Windows builds are also
 uploaded on [Open Carnage](https://invader.opencarnage.net/builds/nightly/download-latest.html).
-
-### How can I contribute?
-That information is in CONTRIBUTING.md.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for the Gearbox port of Halo on the PC. The .yelo file format is specific
