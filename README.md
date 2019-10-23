@@ -1,55 +1,84 @@
 # Invader
-Invader is an open source toolkit for creating maps for Halo: Combat Evolved on the PC. It is written in C++ using the
-C++17 standard and is licensed under the GNU General Public License version 3. Read LICENSE for more information.
+Invader is an open source toolkit for creating maps and assets for Halo: Combat Evolved on the PC. See LICENSE for more
+information about the license.
 
-## Building Invader
-There are a number of things you will need in order to successfully compile Invader.
+## Getting started
+This readme addresses a few topics:
+* [Getting Invader](#getting-invader)
+* [Programs](#programs)
+* [Frequently asked questions](#frequently-asked-questions)
 
-### Required dependencies
+## Getting Invader
+Invader can be obtained by either downloading pre-compiled binaries or compiling from source. You can obtain Windows
+builds on [Open Carnage](https://invader.opencarnage.net/builds/nightly/download-latest.html).
+
+### Building Invader
+If you got this readme from an archive containing pre-compiled Invader binaries, this section probably doesn't apply to
+you, but you are welcome to compile Invader. Regardless, you can browse and download the source code for free on
+[GitHub](https://github.com/Kavawuvi/invader).
+
+#### Dependencies
+Invader depends on software in order for it to build and work properly. This section lists the dependencies required to
+fully utilize Invader. Note that some of these dependencies may have their own dependencies.
+
+##### Required dependencies
 * C++17 compiler
 * C99 compiler
 * CMake 3.10 or newer
 * Python 3.7 or newer
 
-### Optional dependencies
+##### Optional dependencies
 * LibArchive (invader-archive)
 * LibTIFF (invader-bitmap)
 * zlib (invader-bitmap)
 * freetype (invader-font)
 * git (git commit hash in version - build only)
 
-### Windows
-To compile on Windows, you will need to install 64-bit [MSYS2](https://www.msys2.org/), installing the aforementioned
-software (Python, etc.) through MSYS2 and NOT through their Windows installers. Ensure you are using the MSYS2 MinGW
-64-bit shell when building.
+#### Compiling (Windows)
+You can compile Invader using MSYS2 and MinGW. Make sure that you install all of the required dependencies through
+MSYS2 and not their respective Windows installers. See README.md for a list of the requirements. You can use the
+`pacman` command to install these dependencies. Also, make sure that when you compile Invader, you are using the 64-bit
+MSYS2 shell.
 
-### Compiling
+The rest of the instructions are the same as POSIX, except that when you go to use the `make` command, you specify that
+you want CMake to generate MSYS Makefiles. You can do so using `-G "MSYS Makefiles"` like this:
+
+```
+cmake ../invader -DCMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
+```
+
+If you forget to do this, then CMake may create a Microsoft Visual Studio solution, instead. Invader will probably
+work if built for MSVC, but the dependencies will have to be obtained differently, and the command to compile is
+different. If you accidentally do this, delete all of the files in `invader-build` and re-run the `cmake` command.
+
+#### Compiling (POSIX)
 First, you will need to download the Invader repository onto your computer. You can do this using the command:
+
 ```
-git clone https://github.com/Kavawuvi/Invader
+git clone https://github.com/Kavawuvi/invader
 ```
 
-Everything from this point on assumes the Invader repository was cloned in a directory called "Invader" in the
-current directory.
+Everything in this section, from this point on, assumes the Invader repository was cloned in a directory called
+"invader" in the current directory.
 
 Next, you will need to create an out-of-source build directory. You can use this command to make the build
-directory:
+directory and CD into it upon success:
+
 ```
 mkdir invader-build && cd invader-build
 ```
 
-Next, use this command to set up the CMake build directory if you're on Linux:
+Next, use the `cmake` command to set up your build directory, optionally specifying the build type to Release:
+
 ```
-cmake ../Invader -D CMAKE_BUILD_TYPE=Release
+cmake ../invader -DCMAKE_BUILD_TYPE=Release
 ```
 
-If you're building this with MSYS (Windows), use this, instead:
-```
-cmake ../Invader -D CMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
-```
+Lastly, you can compile this using the `make` command.
 
-Lastly, you can compile this using the `make` command, optionally using `-j#` to specify the maximum number of jobs if
-you want to build using multiple processing threads.
+```
+make
+```
 
 ## Programs
 To remove the reliance of one huge executable, something that has caused issues with Halo Custom Edition's tool.exe, as
@@ -58,8 +87,7 @@ well as make things easier for me to work with, this project is split into diffe
 ### invader-archive
 This program generates a .tar.xz archive containing all of the tags used to build a map.
 
-#### Usage
-`invader-archive [options] <scenario-tag | -s tag.class>`
+**Usage:** `invader-archive [options] <scenario-tag | -s tag.class>`
 
 | Option               | Description                                                 |
 | -------------------- | ----------------------------------------------------------- |
@@ -74,8 +102,7 @@ This program generates a .tar.xz archive containing all of the tags used to buil
 This program generates bitmap tags from images. For source images, .tif, .tiff, .png, .tga, and .bmp extensions are
 supported.
 
-#### Usage
-`invader-bitmap [options] <bitmap-data>`
+**Usage:** `invader-bitmap [options] <bitmap-data>`
 
 | Option                      | Description                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------- |
@@ -149,8 +176,7 @@ If you use monochrome with a monochrome bitmap used as input, then there will be
 ### invader-build
 This program builds cache files.
 
-#### Usage
-`invader-build [options] <scenario-tag>`
+**Usage:** `invader-build [options] <scenario-tag>`
 
 | Option                    | Description                                                          |
 | ------------------------- | -------------------------------------------------------------------- |
@@ -171,14 +197,12 @@ This program builds cache files.
 This program calculates the CRC32 of a map file. If the CRC value calculated differs from the value stored in the cache
 file header, then a warning will be printed to standard error.
 
-#### Usage
-`invader-crc <map>`
+**Usage:** `invader-crc <map>`
 
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
 
-#### Usage
-`invader-dependency [options] <tag.class>`
+**Usage:** `invader-dependency [options] <tag.class>`
 
 | Option            | Description                                                 |
 | ----------------- | ----------------------------------------------------------- |
@@ -192,8 +216,7 @@ This program finds tags that directly depend on a given tag.
 ### invader-font
 This program generates font tags.
 
-#### Usage
-`invader-font [options] <font-tag>`
+**Usage:** `invader-font [options] <font-tag>`
 
 | Option                | Description                                |
 | --------------------- | ------------------------------------------ |
@@ -207,15 +230,13 @@ This program generates font tags.
 ### invader-indexer
 This program builds index files for usage with `--with-index` with invader-build.
 
-#### Usage
-`invader-indexer <input map> <output index>`
+**Usage:** `invader-indexer <input map> <output index>`
 
 ### invader-resource
 This program builds resource maps. Only maps with stock tags can be built. These files are not guaranteed to work with
 existing cache files.
 
-#### Usage
-`invader-resource <options>`
+**Usage:** `invader-resource <options>`
 
 | Option             | Description                                                        |
 | ------------------ | ------------------------------------------------------------------ |
@@ -225,3 +246,63 @@ existing cache files.
 | `--tags,-t <dir>`  | Tags directory. Use multiple times to add tags directories.        |
 | `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`. |
 | `--retail,-R`      | Build a retail/demo resource map.                                  |
+
+## Frequently Asked Questions
+These are a selection of questions that I've received over the course of Invader's development.
+
+- [What operating systems are supported?](#what-operating-systems-are-supported)
+- [How can I contribute?](#how-can-i-contribute)
+- [Can invader-build create .yelo maps?](#can-invader-build-create-yelo-maps)
+- [Can invader-build create Xbox maps?](#can-invader-build-create-xbox-maps)
+- [The HEK says my bitmap tag is "too large" when opening.](#the-hek-says-my-bitmap-tag-is-too-large-when-opening)
+- [How close to completion is Invader?](#how-close-to-completion-is-invader)
+- [Should I use invader-bitmap or tool.exe?](#should-i-use-invader-bitmap-or-toolexe)
+- [Should I use invader-build or tool.exe?](#should-i-use-invader-build-or-toolexe)
+
+### What operating systems are supported?
+Invader does not support any one operating system.
+
+### How can I contribute?
+That information is in CONTRIBUTING.md.
+
+### Can invader-build create .yelo maps?
+Officially, invader-build only creates maps for the Gearbox port of Halo on the PC. The .yelo file format is specific
+to Open Sauce, a mod of Halo Custom Edition. Therefore, the Invader project does not support it. However, this does not
+mean that you can't make a fork of Invader that supports it, and there are people who have said they were willing to do
+this.
+
+### Can invader-build create Xbox maps?
+Officially, invader-build only creates maps for the Gearbox port of Halo on the PC. While Xbox maps are very similar
+in format to PC maps, there exists enough differences to make supporting the Xbox version non-trivial. Kavawuvi also
+does not have a modded Xbox or a retail copy of the Xbox version of the game, so there is no means to debug or test.
+
+### The HEK says my bitmap tag is "too large" when opening.
+The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this limitation, and you can use the MEK to view
+bitmap tags that exceed 16 MiB. Halo PC also does not have any problems loading bitmaps that exceed 16 MiB. That said,
+some DirectX 9 GPUs and/or implementations won't support textures larger than 2048x2048 (2D textures) or 256x256x256
+(3D textures).
+
+It is worth noting that invader-build and various other tools let you specify multiple tag directories. If you need
+to use Sapien, you can put a lower quality, compressed version of your bitmap in your main tags folder, and you can put
+the higher quality version in a tags directory that takes priority. Sapien will use the lower quality bitmap and load
+happily, and invader-build will use the higher quality bitmap when building.
+
+### How close to completion is Invader?
+There is still a lot to do in Invader. Check the Issues page for more information.
+
+### Should I use invader-bitmap or tool.exe?
+In this case, invader-bitmap is either mostly or completely feature-complete, and it has a number of features tool.exe
+does not have, such as support for the .tga format (goes well with Refinery's data extraction) as well as dithering.
+Therefore, invader-bitmap is the superior choice.
+
+### Should I use invader-build or tool.exe?
+It depends. Right now, invader-build isn't finished and has a number of issues that need ironed out before this FAQ can
+confidently recommend it for *every* use case, while tool.exe is basically the reference when it comes to building
+cache files.
+
+Most singleplayer maps will probably work, but until the stock campaign works as it did when built with tool.exe, then
+it is not recommended to use invader-build for singleplayer maps except for testing.
+
+Most multiplayer maps work fine when built under invader-build. Because tool.exe has a number of bugs and invader-build
+does quite a few things tool.exe doesn't do, there are a few reasons to use invader-build over tool.exe for multiplayer
+maps.
