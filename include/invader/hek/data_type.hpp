@@ -12,6 +12,7 @@
 #include "pad.hpp"
 #include "class_int.hpp"
 #include "endian.hpp"
+#include "../printf.hpp"
 
 /**
  * Calculate the required amount of padding to make a size divisible by 32 bits
@@ -77,6 +78,23 @@ namespace Invader::HEK {
      */
     struct TagString {
         char string[0x20] = {};
+
+        TagString() = default;
+        TagString(const TagString &copy) {
+            if(copy.string[sizeof(copy.string) - 1] != 0) {
+                eprintf("string overflow detected\n");
+                throw OutOfBoundsException();
+            }
+            std::copy(copy.string, copy.string + sizeof(copy.string), this->string);
+        }
+        TagString &operator=(const TagString &copy) {
+            if(copy.string[sizeof(copy.string) - 1] != 0) {
+                eprintf("string overflow detected\n");
+                throw OutOfBoundsException();
+            }
+            std::copy(copy.string, copy.string + sizeof(copy.string), this->string);
+            return *this;
+        }
     };
 
     /**
