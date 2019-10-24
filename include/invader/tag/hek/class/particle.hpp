@@ -91,7 +91,7 @@ namespace Invader::HEK {
         EndianType<float> fade_start_size;
         EndianType<float> fade_end_size;
         PAD(0x4);
-        EndianType<std::int16_t> first_sequence_index;
+        EndianType<Index> first_sequence_index;
         EndianType<std::int16_t> initial_sequence_count;
         EndianType<std::int16_t> looping_sequence_count;
         EndianType<std::int16_t> final_sequence_count;

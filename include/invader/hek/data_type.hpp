@@ -40,6 +40,7 @@ namespace Invader::HEK {
     using TagEnum = std::uint16_t;
     using Angle = float;
     using Fraction = float;
+    using Index = std::uint16_t;
 
     /**
      * This refers to a tag ID when compiled.
@@ -712,7 +713,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct PredictedResource {
         EndianType<PredictedResourceType> type;
-        EndianType<std::int16_t> resource_index;
+        EndianType<Index> resource_index;
         EndianType<TagID> tag;
 
         ENDIAN_TEMPLATE(OtherType) operator PredictedResource<OtherType>() const noexcept {

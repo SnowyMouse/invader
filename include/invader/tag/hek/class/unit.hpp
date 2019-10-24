@@ -135,7 +135,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, UnitCameraTrack> camera_tracks;
         TagReflexive<EndianType, UnitUnitHudInterface> unit_hud_interface;
         PAD(0x4);
-        EndianType<std::int16_t> hud_text_message_index;
+        EndianType<Index> hud_text_message_index;
         PAD(0x2);
         EndianType<Angle> yaw_minimum;
         EndianType<Angle> yaw_maximum;

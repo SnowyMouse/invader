@@ -122,7 +122,7 @@ namespace Invader::HEK {
         Bounds<EndianType<float>> duration_bounds;
         Bounds<EndianType<float>> transition_time_bounds;
         TagDependency<EndianType> bitmaps; // bitmap
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         PAD(0x2);
         PAD(0x4);
         Bounds<EndianType<float>> scale;

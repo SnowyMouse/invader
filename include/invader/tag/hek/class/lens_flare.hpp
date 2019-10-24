@@ -44,7 +44,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct LensFlareReflection {
         EndianType<LensFlareReflectionFlags> flags;
         PAD(0x2);
-        EndianType<std::int16_t> bitmap_index;
+        EndianType<Index> bitmap_index;
         PAD(0x2);
         PAD(0x14);
         EndianType<float> position;

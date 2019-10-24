@@ -15,7 +15,7 @@ namespace Invader::HEK {
         EndianType<float> animation_velocity;
         Vector2D<EndianType> map_offset;
         EndianType<std::int16_t> map_repeats;
-        EndianType<std::int16_t> map_index;
+        EndianType<Index> map_index;
         PAD(0x10);
 
         ENDIAN_TEMPLATE(NewType) operator ShaderTransparentWaterRipple<NewType>() const noexcept {

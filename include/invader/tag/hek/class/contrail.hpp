@@ -129,7 +129,7 @@ namespace Invader::HEK {
         EndianType<float> texture_animation_v;
         EndianType<float> animation_rate;
         TagDependency<EndianType> bitmap; // bitmap
-        EndianType<std::int16_t> first_sequence_index;
+        EndianType<Index> first_sequence_index;
         EndianType<std::int16_t> sequence_count;
         PAD(0x40);
         PAD(0x24);

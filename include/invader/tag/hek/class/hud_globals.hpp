@@ -13,13 +13,13 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct HUDGlobalsButtonIcon {
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         EndianType<std::int16_t> width_offset;
         Point2DInt<EndianType> offset_from_reference_corner;
         EndianType<ColorARGBInt> override_icon_color;
         std::int8_t frame_rate;
         EndianType<HUDGlobalButtonIconFlags> flags;
-        EndianType<std::int16_t> text_index;
+        EndianType<Index> text_index;
 
         ENDIAN_TEMPLATE(NewType) operator HUDGlobalsButtonIcon<NewType>() const noexcept {
             HUDGlobalsButtonIcon<NewType> copy;
@@ -44,9 +44,9 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> color;
         EndianType<float> opacity;
         EndianType<float> translucency;
-        EndianType<std::int16_t> on_screen_sequence_index;
-        EndianType<std::int16_t> off_screen_sequence_index;
-        EndianType<std::int16_t> occluded_sequence_index;
+        EndianType<Index> on_screen_sequence_index;
+        EndianType<Index> off_screen_sequence_index;
+        EndianType<Index> occluded_sequence_index;
         PAD(0x2);
         PAD(0x10);
         EndianType<HUDGlobalsWaypointArrowFlags> flags;
@@ -130,8 +130,8 @@ namespace Invader::HEK {
         EndianType<std::int16_t> hud_damage_right_offset;
         PAD(0x20);
         TagDependency<EndianType> hud_damage_indicator_bitmap; // bitmap
-        EndianType<std::int16_t> hud_damage_sequence_index;
-        EndianType<std::int16_t> hud_damage_multiplayer_sequence_index;
+        EndianType<Index> hud_damage_sequence_index;
+        EndianType<Index> hud_damage_multiplayer_sequence_index;
         EndianType<ColorARGBInt> hud_damage_color;
         PAD(0x10);
         EndianType<ColorARGBInt> not_much_time_left_default_color;
@@ -154,10 +154,10 @@ namespace Invader::HEK {
         PAD(0x4);
         PAD(0x28);
         TagDependency<EndianType> carnage_report_bitmap; // bitmap
-        EndianType<std::int16_t> loading_begin_text;
-        EndianType<std::int16_t> loading_end_text;
-        EndianType<std::int16_t> checkpoint_begin_text;
-        EndianType<std::int16_t> checkpoint_end_text;
+        EndianType<Index> loading_begin_text;
+        EndianType<Index> loading_end_text;
+        EndianType<Index> checkpoint_begin_text;
+        EndianType<Index> checkpoint_end_text;
         TagDependency<EndianType> checkpoint_sound; // sound
         PAD(0x60);
 

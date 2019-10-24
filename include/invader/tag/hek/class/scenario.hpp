@@ -368,10 +368,10 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct SpawnPrelude {
-        EndianType<std::int16_t> type;
-        EndianType<std::int16_t> name;
+        EndianType<Index> type;
+        EndianType<Index> name;
         EndianType<ScenarioSpawnNotPlaced> not_placed;
-        EndianType<std::int16_t> desired_permutation;
+        EndianType<Index> desired_permutation;
         Point3D<EndianType> position;
         Euler3D<EndianType> rotation;
     };
@@ -563,8 +563,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioMachine : SpawnPrelude<EndianType> {
         PAD(0x8);
-        EndianType<std::int16_t> power_group;
-        EndianType<std::int16_t> position_group;
+        EndianType<Index> power_group;
+        EndianType<Index> position_group;
         EndianType<ScenarioDeviceFlags> device_flags;
         EndianType<ScenarioMachineFlags> machine_flags;
         PAD(0xC);
@@ -589,8 +589,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioControl : SpawnPrelude<EndianType> {
         PAD(0x8);
-        EndianType<std::int16_t> power_group;
-        EndianType<std::int16_t> position_group;
+        EndianType<Index> power_group;
+        EndianType<Index> position_group;
         EndianType<ScenarioDeviceFlags> device_flags;
         EndianType<ScenarioControlFlags> control_flags;
         EndianType<std::int16_t> no_name;
@@ -614,8 +614,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioLightFixture : SpawnPrelude<EndianType> {
         PAD(0x8);
-        EndianType<std::int16_t> power_group;
-        EndianType<std::int16_t> position_group;
+        EndianType<Index> power_group;
+        EndianType<Index> position_group;
         EndianType<ScenarioDeviceFlags> device_flags;
         ColorRGB<EndianType> color;
         EndianType<float> intensity;
@@ -692,8 +692,8 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioPlayerStartingLocation {
         Point3D<EndianType> position;
         EndianType<Angle> facing;
-        EndianType<std::int16_t> team_index;
-        EndianType<std::int16_t> bsp_index;
+        EndianType<Index> team_index;
+        EndianType<Index> bsp_index;
         EndianType<ScenarioSpawnType> type_0;
         EndianType<ScenarioSpawnType> type_1;
         EndianType<ScenarioSpawnType> type_2;
@@ -761,7 +761,7 @@ namespace Invader::HEK {
         Point3D<EndianType> position;
         EndianType<Angle> facing;
         EndianType<ScenarioNetgameFlagType> type;
-        EndianType<std::int16_t> team_index;
+        EndianType<Index> team_index;
         TagDependency<EndianType> weapon_group; // item_collection
         PAD(0x70);
 
@@ -787,7 +787,7 @@ namespace Invader::HEK {
         EndianType<ScenarioSpawnType> type_1;
         EndianType<ScenarioSpawnType> type_2;
         EndianType<ScenarioSpawnType> type_3;
-        EndianType<std::int16_t> team_index;
+        EndianType<Index> team_index;
         EndianType<std::int16_t> spawn_time;
         PAD(0x30);
         Point3D<EndianType> position;
@@ -851,9 +851,9 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStartingEquipment<BigEndian>) == 0xCC);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioBSPSwitchTriggerVolume {
-        EndianType<std::int16_t> trigger_volume;
-        EndianType<std::int16_t> source;
-        EndianType<std::int16_t> destination;
+        EndianType<Index> trigger_volume;
+        EndianType<Index> source;
+        EndianType<Index> destination;
         LittleEndian<std::uint16_t> unknown;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioBSPSwitchTriggerVolume<NewType>() const noexcept {
@@ -868,7 +868,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioBSPSwitchTriggerVolume<BigEndian>) == 0x8);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioDecal {
-        EndianType<std::int16_t> decal_type;
+        EndianType<Index> decal_type;
         std::int8_t yaw;
         std::int8_t pitch;
         Point3D<EndianType> position;
@@ -893,7 +893,7 @@ namespace Invader::HEK {
         EndianType<Angle> facing;
         EndianType<float> weight;
         Bounds<EndianType<float>> time;
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
         std::int8_t sequence_id;
         PAD(0x1);
         PAD(0x2C);
@@ -925,8 +925,8 @@ namespace Invader::HEK {
         EndianType<ScenarioActorStartingLocationFlags> flags;
         EndianType<ScenarioReturnState> return_state;
         EndianType<ScenarioReturnState> initial_state;
-        EndianType<std::int16_t> actor_type;
-        EndianType<std::int16_t> command_list;
+        EndianType<Index> actor_type;
+        EndianType<Index> command_list;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioActorStartingLocation<NewType>() const noexcept {
             ScenarioActorStartingLocation<NewType> copy = {};
@@ -984,8 +984,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioSquad {
         TagString name;
-        EndianType<std::int16_t> actor_type;
-        EndianType<std::int16_t> platoon;
+        EndianType<Index> actor_type;
+        EndianType<Index> platoon;
         EndianType<ScenarioReturnState> Tinitial_state;
         EndianType<ScenarioReturnState> Treturn_state;
         EndianType<ScenarioSquadFlags> flags;
@@ -993,7 +993,7 @@ namespace Invader::HEK {
         PAD(0x2);
         PAD(0x1C);
         PAD(0x2);
-        EndianType<std::int16_t> maneuver_to_squad;
+        EndianType<Index> maneuver_to_squad;
         EndianType<float> squad_delay_time;
         EndianType<ScenarioSquadAttacking> attacking;
         EndianType<ScenarioSquadAttacking> attacking_search;
@@ -1061,11 +1061,11 @@ namespace Invader::HEK {
         EndianType<ScenarioPlatoonFlags> flags;
         PAD(0xC);
         EndianType<ScenarioChangeAttackingDefendingStateWhen> change_attacking_defending_state_when;
-        EndianType<std::int16_t> happens_to;
+        EndianType<Index> happens_to;
         PAD(0x4);
         PAD(0x4);
         EndianType<ScenarioChangeAttackingDefendingStateWhen> maneuver_when;
-        EndianType<std::int16_t> happens_to_1;
+        EndianType<Index> happens_to_1;
         PAD(0x4);
         PAD(0x4);
         PAD(0x40);
@@ -1117,7 +1117,7 @@ namespace Invader::HEK {
         EndianType<ScenarioTeamIndex> team_index;
         LittleEndian<std::int16_t> one;
         EndianType<ScenarioSearchBehavior> search_behavior;
-        EndianType<std::int16_t> manual_bsp_index;
+        EndianType<Index> manual_bsp_index;
         Bounds<EndianType<float>> respawn_delay;
         PAD(0x4A);
         LittleEndian<std::uint16_t> precomputed_bsp_index;
@@ -1150,13 +1150,13 @@ namespace Invader::HEK {
         EndianType<std::int16_t> atom_modifier;
         EndianType<float> parameter1;
         EndianType<float> parameter2;
-        EndianType<std::int16_t> point_1;
-        EndianType<std::int16_t> point_2;
-        EndianType<std::int16_t> animation;
-        EndianType<std::int16_t> script;
-        EndianType<std::int16_t> recording;
-        EndianType<std::int16_t> command;
-        EndianType<std::int16_t> object_name;
+        EndianType<Index> point_1;
+        EndianType<Index> point_2;
+        EndianType<Index> animation;
+        EndianType<Index> script;
+        EndianType<Index> recording;
+        EndianType<Index> command;
+        EndianType<Index> object_name;
         PAD(0x6);
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioCommand<NewType>() const noexcept {
@@ -1202,8 +1202,8 @@ namespace Invader::HEK {
         TagString name;
         EndianType<ScenarioCommandListFlags> flags;
         PAD(0x8);
-        EndianType<std::int16_t> manual_bsp_index;
-        EndianType<std::int16_t> precomputed_bsp_index;
+        EndianType<Index> manual_bsp_index;
+        EndianType<Index> precomputed_bsp_index;
         TagReflexive<EndianType, ScenarioCommand> commands;
         TagReflexive<EndianType, ScenarioCommandPoint> points;
         PAD(0x18);
@@ -1302,9 +1302,9 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioAIConversationLine {
         EndianType<ScenarioAIConversationLineFlags> flags;
-        EndianType<std::int16_t> participant;
+        EndianType<Index> participant;
         EndianType<ScenarioAddressee> addressee;
-        EndianType<std::int16_t> addressee_participant;
+        EndianType<Index> addressee_participant;
         PAD(0x4);
         EndianType<float> line_delay_time;
         PAD(0xC);
@@ -1473,7 +1473,7 @@ namespace Invader::HEK {
         TagString name;
         PAD(0x4);
         Rectangle2D<EndianType> text_bounds;
-        EndianType<std::int16_t> string_index;
+        EndianType<Index> string_index;
         EndianType<ScenarioTextStyle> text_style;
         EndianType<ScenarioJustification> justification;
         PAD(0x2);

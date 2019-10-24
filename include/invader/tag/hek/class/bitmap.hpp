@@ -114,7 +114,7 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct BitmapGroupSprite {
-        EndianType<std::int16_t> bitmap_index;
+        EndianType<Index> bitmap_index;
         PAD(0x2);
         PAD(0x4);
         EndianType<float> left;
@@ -140,7 +140,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct BitmapGroupSequence {
         TagString name;
-        EndianType<std::int16_t> first_bitmap_index;
+        EndianType<Index> first_bitmap_index;
         EndianType<std::int16_t> bitmap_count;
         PAD(0x10);
         TagReflexive<EndianType, BitmapGroupSprite> sprites;

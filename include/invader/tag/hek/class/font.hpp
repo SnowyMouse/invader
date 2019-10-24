@@ -9,7 +9,7 @@
 
 namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct FontCharacterIndex {
-        EndianType<std::int16_t> character_index;
+        EndianType<Index> character_index;
 
         ENDIAN_TEMPLATE(NewType) operator FontCharacterIndex<NewType>() const noexcept {
             FontCharacterIndex<NewType> copy;
@@ -31,13 +31,13 @@ namespace Invader::HEK {
     static_assert(sizeof(FontCharacterTables<BigEndian>) == 0xC);
 
     ENDIAN_TEMPLATE(EndianType) struct FontCharacter {
-        EndianType<std::int16_t> character;
+        EndianType<Index> character;
         EndianType<std::int16_t> character_width;
         EndianType<std::int16_t> bitmap_width;
         EndianType<std::int16_t> bitmap_height;
         EndianType<std::int16_t> bitmap_origin_x;
         EndianType<std::int16_t> bitmap_origin_y;
-        EndianType<std::int16_t> hardware_character_index;
+        EndianType<Index> hardware_character_index;
         PAD(0x2);
         EndianType<std::int32_t> pixels_offset;
 

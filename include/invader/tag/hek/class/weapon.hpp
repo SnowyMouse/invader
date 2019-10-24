@@ -173,7 +173,7 @@ namespace Invader::HEK {
         EndianType<float> deceleration_time;
         EndianType<Fraction> blurred_rate_of_fire;
         PAD(0x8);
-        EndianType<std::int16_t> magazine;
+        EndianType<Index> magazine;
         EndianType<std::int16_t> rounds_per_shot;
         EndianType<std::int16_t> minimum_rounds_loaded;
         EndianType<std::int16_t> rounds_between_tracers;

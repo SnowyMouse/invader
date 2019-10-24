@@ -100,7 +100,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationFrameInfoDxDyDzDyaw<BigEndian>) == 0x10);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationGraphObjectOverlay {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
         EndianType<AnimationFunction> function;
         EndianType<AnimationFunctionControls> function_controls;
         PAD(0x2);
@@ -117,7 +117,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationGraphObjectOverlay<BigEndian>) == 0x14);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationUnitSeatAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationUnitSeatAnimation<NewType>() const noexcept {
             ModelAnimationUnitSeatAnimation<NewType> copy = {};
@@ -141,7 +141,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationGraphUnitSeatikPoint<BigEndian>) == 0x40);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationWeaponClassAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationAnimationWeaponClassAnimation<NewType>() const noexcept {
             ModelAnimationAnimationWeaponClassAnimation<NewType> copy = {};
@@ -152,7 +152,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationWeaponClassAnimation<BigEndian>) == 0x2);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationWeaponTypeAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationAnimationWeaponTypeAnimation<NewType>() const noexcept {
             ModelAnimationAnimationWeaponTypeAnimation<NewType> copy = {};
@@ -249,7 +249,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationGraphUnitSeat<BigEndian>) == 0x64);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationWeaponAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationWeaponAnimation<NewType>() const noexcept {
             ModelAnimationWeaponAnimation<NewType> copy = {};
@@ -272,7 +272,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationGraphWeaponAnimations<BigEndian>) == 0x1C);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationVehicleAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationVehicleAnimation<NewType>() const noexcept {
             ModelAnimationVehicleAnimation<NewType> copy = {};
@@ -283,8 +283,8 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationVehicleAnimation<BigEndian>) == 0x2);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationSuspensionAnimation {
-        EndianType<std::int16_t> mass_point_index;
-        EndianType<std::int16_t> animation;
+        EndianType<Index> mass_point_index;
+        EndianType<Index> animation;
         EndianType<float> full_extension_ground_depth;
         EndianType<float> full_compression_ground_depth;
         PAD(0x8);
@@ -331,7 +331,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationAnimationGraphVehicleAnimations<BigEndian>) == 0x74);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationDeviceAnimation {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationDeviceAnimation<NewType>() const noexcept {
             ModelAnimationDeviceAnimation<NewType> copy = {};
@@ -354,7 +354,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationDeviceAnimations<BigEndian>) == 0x60);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationUnitDamageAnimations {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationUnitDamageAnimations<NewType>() const noexcept {
             ModelAnimationUnitDamageAnimations<NewType> copy = {};
@@ -365,7 +365,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelAnimationUnitDamageAnimations<BigEndian>) == 0x2);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationFirstPersonWeapon {
-        EndianType<std::int16_t> animation;
+        EndianType<Index> animation;
 
         ENDIAN_TEMPLATE(NewType) operator ModelAnimationFirstPersonWeapon<NewType>() const noexcept {
             ModelAnimationFirstPersonWeapon<NewType> copy = {};
@@ -397,9 +397,9 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationGraphNode {
         TagString name;
-        EndianType<std::int16_t> next_sibling_node_index;
-        EndianType<std::int16_t> first_child_node_index;
-        EndianType<std::int16_t> parent_node_index;
+        EndianType<Index> next_sibling_node_index;
+        EndianType<Index> first_child_node_index;
+        EndianType<Index> parent_node_index;
         PAD(0x2);
         EndianType<ModelAnimationAnimationGraphNodeFlags> node_joint_flags;
         Vector3D<EndianType> base_vector;
@@ -467,14 +467,14 @@ namespace Invader::HEK {
         EndianType<AnimationFrameInfoType> frame_info_type;
         EndianType<std::uint32_t> node_list_checksum;
         EndianType<std::int16_t> node_count;
-        EndianType<std::int16_t> loop_frame_index;
+        EndianType<Index> loop_frame_index;
         EndianType<Fraction> weight;
-        EndianType<std::int16_t> key_frame_index;
-        EndianType<std::int16_t> second_key_frame_index;
-        EndianType<std::int16_t> next_animation;
+        EndianType<Index> key_frame_index;
+        EndianType<Index> second_key_frame_index;
+        EndianType<Index> next_animation;
         EndianType<ModelAnimationAnimationFlags> flags;
-        EndianType<std::int16_t> sound;
-        EndianType<std::int16_t> sound_frame_index;
+        EndianType<Index> sound;
+        EndianType<Index> sound_frame_index;
         std::int8_t left_foot_frame_index;
         std::int8_t right_foot_frame_index;
         LittleEndian<std::uint16_t> main_animation_index;

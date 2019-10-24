@@ -83,7 +83,7 @@ namespace Invader::HEK {
         EndianType<Fraction> skip_fraction;
         EndianType<Fraction> gain;
         EndianType<SoundCompression> compression;
-        EndianType<std::int16_t> next_permutation_index;
+        EndianType<Index> next_permutation_index;
         LittleEndian<std::uint32_t> samples_pointer;
         PAD(0x4);
         EndianType<TagID> tag_id_0;

@@ -23,8 +23,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct HUDMessageTextMessage {
         TagString name;
-        EndianType<std::int16_t> start_index_into_text_blob;
-        EndianType<std::int16_t> start_index_of_message_block;
+        EndianType<Index> start_index_into_text_blob;
+        EndianType<Index> start_index_of_message_block;
         std::int8_t panel_count;
         PAD(0x3);
         PAD(0x18);

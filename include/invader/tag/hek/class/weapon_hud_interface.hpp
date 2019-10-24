@@ -67,7 +67,7 @@ namespace Invader::HEK {
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> multitex_overlay;
         PAD(0x4);
@@ -124,7 +124,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> empty_color;
         EndianType<WeaponHUDInterfaceMeterFlags> flags;
         std::int8_t minumum_meter_value;
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         std::int8_t alpha_multiplier;
         std::int8_t alpha_bias;
         EndianType<std::int16_t> value_scale;
@@ -247,7 +247,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
         EndianType<std::int16_t> frame_rate;
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         EndianType<WeaponHUDInterfaceCrosshairOverlayFlags> flags;
         PAD(0x20);
 
@@ -334,7 +334,7 @@ namespace Invader::HEK {
         PAD(0x4);
         EndianType<std::int16_t> frame_rate;
         PAD(0x2);
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         EndianType<WeaponHUDInterfaceOverlayType> type;
         EndianType<WeaponHUDInterfaceOverlayFlags> flags;
         PAD(0x10);
@@ -479,13 +479,13 @@ namespace Invader::HEK {
         PAD(0xC);
         TagReflexive<EndianType, WeaponHUDInterfaceScreenEffect> screen_effect;
         PAD(0x84);
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         EndianType<std::int16_t> width_offset;
         Point2DInt<EndianType> offset_from_reference_corner;
         EndianType<ColorARGBInt> override_icon_color;
         std::int8_t frame_rate;
         WeaponHUDInterfaceMoreFlags more_flags;
-        EndianType<std::int16_t> text_index;
+        EndianType<Index> text_index;
         PAD(0x30);
 
         ENDIAN_TEMPLATE(NewType) operator WeaponHUDInterface<NewType>() const noexcept {

@@ -393,7 +393,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> widget_tag; // ui_widget_definition
         TagString name;
         EndianType<ConditionalWidgetReferenceFlags> flags;
-        EndianType<std::int16_t> custom_controller_index;
+        EndianType<Index> custom_controller_index;
         PAD(0x1A);
 
         ENDIAN_TEMPLATE(NewType) operator ConditionalWidgetReference<NewType>() const noexcept {
@@ -415,7 +415,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> widget_tag; // ui_widget_definition
         TagString name;
         EndianType<ChildWidgetReferenceFlags> flags;
-        EndianType<std::int16_t> custom_controller_index;
+        EndianType<Index> custom_controller_index;
         EndianType<std::int16_t> vertical_offset;
         EndianType<std::int16_t> horizontal_offset;
         PAD(0x16);
@@ -485,7 +485,7 @@ namespace Invader::HEK {
         EndianType<UIJustification> justification;
         EndianType<UIWidgetDefinitionFlags1> flags_1;
         PAD(0xC);
-        EndianType<std::int16_t> string_list_index;
+        EndianType<Index> string_list_index;
         EndianType<std::int16_t> horiz_offset;
         EndianType<std::int16_t> vert_offset;
         PAD(0x1A);

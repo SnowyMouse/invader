@@ -275,8 +275,8 @@ namespace Invader::HEK {
         EndianType<ObjectFunctionIn> c_in;
         EndianType<ObjectFunctionIn> d_in;
         PAD(0x2C);
-        EndianType<std::int16_t> hud_text_message_index;
-        EndianType<std::int16_t> forced_shader_permutation_index;
+        EndianType<Index> hud_text_message_index;
+        EndianType<Index> forced_shader_permutation_index;
         TagReflexive<EndianType, ObjectAttachment> attachments;
         TagReflexive<EndianType, ObjectWidget> widgets;
         TagReflexive<EndianType, ObjectFunction> functions;

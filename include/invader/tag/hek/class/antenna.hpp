@@ -13,7 +13,7 @@ namespace Invader::HEK {
         PAD(0x18);
         Euler2D<EndianType> angles;
         EndianType<float> length;
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         PAD(0x2);
         ColorARGB<EndianType> color;
         ColorARGB<EndianType> lod_color;

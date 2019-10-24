@@ -37,7 +37,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct Item : Object<EndianType> {
         EndianType<ItemFlags> item_flags;
-        EndianType<std::int16_t> message_index;
+        EndianType<Index> message_index;
         EndianType<std::int16_t> sort_order;
         EndianType<float> scale;
         EndianType<std::int16_t> hud_message_value_scale;

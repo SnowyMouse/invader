@@ -34,7 +34,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
         EndianType<float> frame_rate;
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         EndianType<GrenadeHUDInterfaceOverlayType> type;
         EndianType<GrenadeHUDInterfaceOverlayFlags> flags;
         PAD(0x10);
@@ -111,7 +111,7 @@ namespace Invader::HEK {
         EndianType<float> background_flash_length;
         EndianType<ColorARGBInt> background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> background_sequence_index;
+        EndianType<Index> background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> background_multitex_overlay;
         PAD(0x4);
@@ -131,7 +131,7 @@ namespace Invader::HEK {
         EndianType<float> total_grenades_background_flash_length;
         EndianType<ColorARGBInt> total_grenades_background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> total_grenades_background_sequence_index;
+        EndianType<Index> total_grenades_background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> total_grenades_background_multitex_overlay;
         PAD(0x4);
@@ -161,13 +161,13 @@ namespace Invader::HEK {
         TagReflexive<EndianType, GrenadeHUDInterfaceOverlay> total_grenades_overlays;
         TagReflexive<EndianType, GrenadeHUDInterfaceSound> total_grenades_warning_sounds;
         PAD(0x44);
-        EndianType<std::int16_t> messaging_information_sequence_index;
+        EndianType<Index> messaging_information_sequence_index;
         EndianType<std::int16_t> messaging_information_width_offset;
         Point2DInt<EndianType> messaging_information_offset_from_reference_corner;
         EndianType<ColorARGBInt> messaging_information_override_icon_color;
         std::int8_t messaging_information_frame_rate;
         GrenadeHUDInterfaceFlags messaging_information_flags;
-        EndianType<std::int16_t> messaging_information_text_index;
+        EndianType<Index> messaging_information_text_index;
         PAD(0x30);
 
         ENDIAN_TEMPLATE(NewType) operator GrenadeHUDInterface<NewType>() const noexcept {

@@ -31,7 +31,7 @@ namespace Invader::HEK {
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> sequence_index;
+        EndianType<Index> sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> multitex_overlay;
         PAD(0x4);
@@ -123,7 +123,7 @@ namespace Invader::HEK {
         EndianType<float> background_flash_length;
         EndianType<ColorARGBInt> background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> background_sequence_index;
+        EndianType<Index> background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> background_multitex_overlay;
         PAD(0x4);
@@ -140,7 +140,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> meter_empty_color;
         EndianType<UnitHUDInterfaceFlags> meter_flags;
         std::int8_t meter_minimum_meter_value;
-        EndianType<std::int16_t> meter_sequence_index;
+        EndianType<Index> meter_sequence_index;
         std::int8_t meter_alpha_multiplier;
         std::int8_t meter_alpha_bias;
         EndianType<std::int16_t> meter_value_scale;
@@ -216,7 +216,7 @@ namespace Invader::HEK {
         EndianType<float> hud_background_flash_length;
         EndianType<ColorARGBInt> hud_background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> hud_background_sequence_index;
+        EndianType<Index> hud_background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> hud_background_multitex_overlay;
         PAD(0x4);
@@ -236,7 +236,7 @@ namespace Invader::HEK {
         EndianType<float> shield_panel_background_flash_length;
         EndianType<ColorARGBInt> shield_panel_background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> shield_panel_background_sequence_index;
+        EndianType<Index> shield_panel_background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> shield_panel_background_multitex_overlay;
         PAD(0x4);
@@ -253,7 +253,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> shield_panel_meter_empty_color;
         EndianType<UnitHUDInterfaceFlags> shield_panel_meter_flags;
         std::int8_t shield_panel_meter_minimum_meter_value;
-        EndianType<std::int16_t> shield_panel_meter_sequence_index;
+        EndianType<Index> shield_panel_meter_sequence_index;
         std::int8_t shield_panel_meter_alpha_multiplier;
         std::int8_t shield_panel_meter_alpha_bias;
         EndianType<std::int16_t> shield_panel_meter_value_scale;
@@ -282,7 +282,7 @@ namespace Invader::HEK {
         EndianType<float> health_panel_background_flash_length;
         EndianType<ColorARGBInt> health_panel_background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> health_panel_background_sequence_index;
+        EndianType<Index> health_panel_background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> health_panel_background_multitex_overlay;
         PAD(0x4);
@@ -299,7 +299,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> health_panel_meter_empty_color;
         EndianType<UnitHUDInterfaceFlags> health_panel_meter_flags;
         std::int8_t health_panel_meter_minimum_meter_value;
-        EndianType<std::int16_t> health_panel_meter_sequence_index;
+        EndianType<Index> health_panel_meter_sequence_index;
         std::int8_t health_panel_meter_alpha_multiplier;
         std::int8_t health_panel_meter_alpha_bias;
         EndianType<std::int16_t> health_panel_meter_value_scale;
@@ -327,7 +327,7 @@ namespace Invader::HEK {
         EndianType<float> motion_sensor_background_flash_length;
         EndianType<ColorARGBInt> motion_sensor_background_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> motion_sensor_background_sequence_index;
+        EndianType<Index> motion_sensor_background_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> motion_sensor_background_multitex_overlays;
         PAD(0x4);
@@ -347,7 +347,7 @@ namespace Invader::HEK {
         EndianType<float> motion_sensor_foreground_flash_length;
         EndianType<ColorARGBInt> motion_sensor_foreground_disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> motion_sensor_foreground_sequence_index;
+        EndianType<Index> motion_sensor_foreground_sequence_index;
         PAD(0x2);
         TagReflexive<EndianType, HUDInterfaceMultitextureOverlay> motion_sensor_foreground_multitex_overlays;
         PAD(0x4);

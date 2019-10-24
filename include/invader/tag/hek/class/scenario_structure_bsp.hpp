@@ -38,7 +38,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPLeaf {
         LittleEndian<std::uint16_t> vertices[3];
         PAD(0x2);
-        EndianType<std::int16_t> cluster;
+        EndianType<Index> cluster;
         EndianType<std::int16_t> surface_reference_count;
         EndianType<std::int32_t> surface_references;
 
@@ -142,7 +142,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterial {
         TagDependency<EndianType> shader; // shader
-        EndianType<std::int16_t> shader_permutation;
+        EndianType<Index> shader_permutation;
         EndianType<ScenarioStructureBSPMaterialFlags> flags;
         EndianType<std::int32_t> surfaces;
         EndianType<std::int32_t> surface_count;
@@ -159,7 +159,7 @@ namespace Invader::HEK {
         Vector3D<EndianType> shadow_vector;
         ColorRGB<EndianType> shadow_color;
         Plane3D<EndianType> plane;
-        EndianType<std::int16_t> breakable_surface;
+        EndianType<Index> breakable_surface;
         PAD(0x2);
         ScenarioStructureBSPArrayVertexBuffer<EndianType> rendered_vertices;
         ScenarioStructureBSPArrayVertexBuffer<EndianType> lightmap_vertices;
@@ -195,7 +195,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSPMaterial<BigEndian>) == 0x100);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPLightmap {
-        EndianType<std::int16_t> bitmap;
+        EndianType<Index> bitmap;
         PAD(0x2);
         PAD(0x10);
         TagReflexive<EndianType, ScenarioStructureBSPMaterial> materials;
@@ -297,7 +297,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSPMirror<BigEndian>) == 0x40);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPClusterPortalIndex {
-        EndianType<std::int16_t> portal;
+        EndianType<Index> portal;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPClusterPortalIndex<NewType>() const noexcept {
             ScenarioStructureBSPClusterPortalIndex<NewType> copy;
@@ -308,18 +308,18 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSPClusterPortalIndex<BigEndian>) == 0x2);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPCluster {
-        EndianType<std::int16_t> sky;
-        EndianType<std::int16_t> fog;
-        EndianType<std::int16_t> background_sound;
-        EndianType<std::int16_t> sound_environment;
-        EndianType<std::int16_t> weather;
-        EndianType<std::int16_t> transition_structure_bsp;
-        LittleEndian<std::int16_t> first_decal_index;
+        EndianType<Index> sky;
+        EndianType<Index> fog;
+        EndianType<Index> background_sound;
+        EndianType<Index> sound_environment;
+        EndianType<Index> weather;
+        EndianType<Index> transition_structure_bsp;
+        LittleEndian<Index> first_decal_index;
         LittleEndian<std::int16_t> decal_count;
         PAD(0x18);
         TagReflexive<EndianType, PredictedResource> predicted_resources;
         TagReflexive<EndianType, ScenarioStructureBSPSubcluster> subclusters;
-        EndianType<std::int16_t> first_lens_flare_marker_index;
+        EndianType<Index> first_lens_flare_marker_index;
         EndianType<std::int16_t> lens_flare_marker_count;
         TagReflexive<EndianType, ScenarioStructureBSPClusterSurfaceIndex> surface_indices;
         TagReflexive<EndianType, ScenarioStructureBSPMirror> mirrors;
@@ -361,8 +361,8 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPClusterPortal {
-        EndianType<std::int16_t> front_cluster;
-        EndianType<std::int16_t> back_cluster;
+        EndianType<Index> front_cluster;
+        EndianType<Index> back_cluster;
         EndianType<std::int32_t> plane_index;
         Point3D<EndianType> centroid;
         EndianType<float> bounding_radius;
@@ -412,7 +412,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ScenarioStructureBSPFogPlaneVertex<BigEndian>) == 0xC);
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPFogPlane {
-        EndianType<std::int16_t> front_region;
+        EndianType<Index> front_region;
         LittleEndian<std::int16_t> material_type;
         Plane3D<EndianType> plane;
         TagReflexive<EndianType, ScenarioStructureBSPFogPlaneVertex> vertices;
@@ -430,8 +430,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPFogRegion {
         PAD(0x24);
-        EndianType<std::int16_t> fog_palette;
-        EndianType<std::int16_t> weather_palette;
+        EndianType<Index> fog_palette;
+        EndianType<Index> weather_palette;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPFogRegion<NewType>() const noexcept {
             ScenarioStructureBSPFogRegion<NewType> copy = {};
@@ -675,7 +675,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPRuntimeDecal {
         Point3D<EndianType> position;
-        EndianType<std::int16_t> decal_type;
+        EndianType<Index> decal_type;
         std::int8_t yaw;
         std::int8_t pitch;
 

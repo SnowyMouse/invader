@@ -47,9 +47,9 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelNode {
         TagString name;
-        EndianType<std::int16_t> next_sibling_node_index;
-        EndianType<std::int16_t> first_child_node_index;
-        EndianType<std::int16_t> parent_node_index;
+        EndianType<Index> next_sibling_node_index;
+        EndianType<Index> first_child_node_index;
+        EndianType<Index> parent_node_index;
         PAD(0x2);
         Point3D<EndianType> default_translation;
         Quaternion<EndianType> default_rotation;
@@ -78,7 +78,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelRegionPermutationMarker {
         TagString name;
-        EndianType<std::int16_t> node_index;
+        EndianType<Index> node_index;
         PAD(0x2);
         Quaternion<EndianType> rotation;
         Point3D<EndianType> translation;
@@ -105,11 +105,11 @@ namespace Invader::HEK {
         LittleEndian<std::uint16_t> permutation_number;
         PAD(0x2);
         PAD(0x18);
-        EndianType<std::int16_t> super_low;
-        EndianType<std::int16_t> low;
-        EndianType<std::int16_t> medium;
-        EndianType<std::int16_t> high;
-        EndianType<std::int16_t> super_high;
+        EndianType<Index> super_low;
+        EndianType<Index> low;
+        EndianType<Index> medium;
+        EndianType<Index> high;
+        EndianType<Index> super_high;
         PAD(0x2);
         TagReflexive<EndianType, GBXModelRegionPermutationMarker> markers;
 
@@ -149,8 +149,8 @@ namespace Invader::HEK {
         Vector3D<EndianType> binormal;
         Vector3D<EndianType> tangent;
         Point2D<EndianType> texture_coords;
-        EndianType<std::int16_t> node0_index;
-        EndianType<std::int16_t> node1_index;
+        EndianType<Index> node0_index;
+        EndianType<Index> node1_index;
         EndianType<float> node0_weight;
         EndianType<float> node1_weight;
 
@@ -198,9 +198,9 @@ namespace Invader::HEK {
     static_assert(sizeof(GBXModelVertexCompressed<BigEndian>) == 0x20);
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelTriangle {
-        EndianType<std::int16_t> vertex0_index;
-        EndianType<std::int16_t> vertex1_index;
-        EndianType<std::int16_t> vertex2_index;
+        EndianType<Index> vertex0_index;
+        EndianType<Index> vertex1_index;
+        EndianType<Index> vertex2_index;
 
         ENDIAN_TEMPLATE(NewType) operator GBXModelTriangle<NewType>() const noexcept {
             GBXModelTriangle<NewType> copy;
@@ -219,11 +219,11 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelGeometryPart {
         EndianType<GBXModelGeometryPartFlags> flags;
-        EndianType<std::int16_t> shader_index;
+        EndianType<Index> shader_index;
         std::int8_t prev_filthy_part_index;
         std::int8_t next_filthy_part_index;
-        EndianType<std::int16_t> centroid_primary_node;
-        EndianType<std::int16_t> centroid_secondary_node;
+        EndianType<Index> centroid_primary_node;
+        EndianType<Index> centroid_secondary_node;
         EndianType<Fraction> centroid_primary_weight;
         EndianType<Fraction> centroid_secondary_weight;
         Point3D<EndianType> centroid;
@@ -310,7 +310,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelShaderReference {
         TagDependency<EndianType> shader; // shader
-        EndianType<std::int16_t> permutation;
+        EndianType<Index> permutation;
         PAD(0x2);
         PAD(0xC);
 
