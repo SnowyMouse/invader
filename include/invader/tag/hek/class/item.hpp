@@ -43,10 +43,10 @@ namespace Invader::HEK {
         EndianType<std::int16_t> hud_message_value_scale;
         PAD(0x2);
         PAD(0x10);
-        EndianType<std::int16_t> item_a_in;
-        EndianType<std::int16_t> item_b_in;
-        EndianType<std::int16_t> item_c_in;
-        EndianType<std::int16_t> item_d_in;
+        EndianType<ItemFunctionIn> item_a_in;
+        EndianType<ItemFunctionIn> item_b_in;
+        EndianType<ItemFunctionIn> item_c_in;
+        EndianType<ItemFunctionIn> item_d_in;
         PAD(0xA4);
         TagDependency<EndianType> material_effects; // material_effects
         TagDependency<EndianType> collision_sound; // sound
