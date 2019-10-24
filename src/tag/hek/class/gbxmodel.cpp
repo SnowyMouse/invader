@@ -247,7 +247,7 @@ namespace Invader::HEK {
                 for(std::size_t v = 0; v < vertex_count; v++) {
                     vertices_little[v] = vertices_big[v];
 
-                    if(vertices_little[v].node1_index == -1) {
+                    if(vertices_little[v].node1_index == NULL_INDEX) {
                         vertices_little[v].node1_index = 0;
                     }
                 }
@@ -268,13 +268,13 @@ namespace Invader::HEK {
                 std::size_t additional_triangles_to_subtract = 0;
                 if(triangle_count > 0) {
                     auto &last_triangle = triangles_big[triangle_count - 1];
-                    if(last_triangle.vertex0_index == -1) {
+                    if(last_triangle.vertex0_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 3;
                     }
-                    else if(last_triangle.vertex1_index == -1) {
+                    else if(last_triangle.vertex1_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 2;
                     }
-                    else if(last_triangle.vertex2_index == -1) {
+                    else if(last_triangle.vertex2_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 1;
                     }
                 }

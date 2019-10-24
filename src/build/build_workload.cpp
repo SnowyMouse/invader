@@ -1214,7 +1214,7 @@ namespace Invader {
                                             if(x >= subcluster.world_bounds_x.from && x <= subcluster.world_bounds_x.to &&
                                                y >= subcluster.world_bounds_y.from && y <= subcluster.world_bounds_y.to &&
                                                z >= subcluster.world_bounds_z.from && z <= subcluster.world_bounds_z.to) {
-                                                possible[d] = decal.decal_type != -1;
+                                                possible[d] = decal.decal_type != NULL_INDEX;
                                             }
                                         }
                                     }

@@ -32,7 +32,7 @@ namespace Invader::HEK {
         std::size_t last_sequence;
         for(last_sequence = 0; last_sequence < sequence_data.size(); last_sequence++) {
             auto &sequence = sequence_data[last_sequence];
-            if(sequence.first_bitmap_index == -1) {
+            if(sequence.first_bitmap_index == NULL_INDEX) {
                 break;
             }
         }
