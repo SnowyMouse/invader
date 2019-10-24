@@ -413,7 +413,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPFogPlane {
         EndianType<Index> front_region;
-        LittleEndian<std::int16_t> material_type;
+        LittleEndian<MaterialType> material_type;
         Plane3D<EndianType> plane;
         TagReflexive<EndianType, ScenarioStructureBSPFogPlaneVertex> vertices;
 
