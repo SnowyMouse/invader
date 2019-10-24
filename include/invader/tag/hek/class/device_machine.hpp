@@ -29,7 +29,7 @@ namespace Invader::HEK {
         EndianType<float> door_open_time;
         PAD(0x50);
         EndianType<MachineCollisionResponse> collision_response;
-        EndianType<std::int16_t> elevator_node;
+        EndianType<Index> elevator_node;
         PAD(0x34);
         LittleEndian<std::uint32_t> door_open_time_ticks;
 

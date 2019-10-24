@@ -66,7 +66,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct EffectPart {
         EndianType<EffectCreateIn1> create_in_1;
         EndianType<EffectCreateIn2> create_in_2;
-        EndianType<std::int16_t> location;
+        EndianType<Index> location;
         EndianType<EffectPartFlags> flags;
         PAD(0xC);
         LittleEndian<std::uint32_t> type_type;
@@ -127,7 +127,7 @@ namespace Invader::HEK {
         EndianType<EffectCreateIn2> create_in_2;
         EndianType<EffectCreate> create;
         PAD(0x2);
-        EndianType<std::int16_t> location;
+        EndianType<Index> location;
         PAD(0x2);
         Euler2D<EndianType> relative_direction;
         Vector3D<EndianType> relative_offset;
@@ -208,8 +208,8 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct Effect {
         EndianType<EffectFlags> flags;
-        EndianType<std::int16_t> loop_start_event;
-        EndianType<std::int16_t> loop_stop_event;
+        EndianType<Index> loop_start_event;
+        EndianType<Index> loop_stop_event;
         PAD(0x20);
         TagReflexive<EndianType, EffectLocation> locations;
         TagReflexive<EndianType, EffectEvent> events;
