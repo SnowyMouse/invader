@@ -22,6 +22,7 @@ This is used for recording Invader's changes. This changelog is based on
   directory separators
 - invader-build: Fixed indexing tags with retail/demo resources
 - invader-archive: Fixed some issues with `-P`
+- invader-build: Fixed decals with null references crashing the game
 
 ## [0.14.1] - 2019-10-19
 ### Changed
