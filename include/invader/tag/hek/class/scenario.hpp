@@ -897,7 +897,7 @@ namespace Invader::HEK {
         std::int8_t sequence_id;
         PAD(0x1);
         PAD(0x2C);
-        EndianType<std::int32_t> surface_index;
+        EndianType<std::uint32_t> surface_index;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioMovePosition<NewType>() const noexcept {
             ScenarioMovePosition<NewType> copy = {};

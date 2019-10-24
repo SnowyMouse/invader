@@ -1720,20 +1720,20 @@ namespace Invader {
                             continue;
                         }
 
-                        bitmaps_data[b].pixels_count = static_cast<std::int32_t>(sizes[b]);
+                        bitmaps_data[b].pixels_count = static_cast<std::uint32_t>(sizes[b]);
 
                         // Make sure it's not duplicate
                         bool duped = false;
                         for(auto &asset : all_asset_data) {
                             if(asset.size == sizes[b] && std::memcmp(tag_asset_data + offsets[b], file.data() + asset.offset, asset.size) == 0) {
-                                bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(asset.offset);
+                                bitmaps_data[b].pixels_offset = static_cast<std::uint32_t>(asset.offset);
                                 duped = true;
                                 break;
                             }
                         }
 
                         if(!duped) {
-                            bitmaps_data[b].pixels_offset = static_cast<std::int32_t>(file.size());
+                            bitmaps_data[b].pixels_offset = static_cast<std::uint32_t>(file.size());
                             all_asset_data.push_back(DedupingAssetData { file.size(), sizes[b] });
                             file.insert(file.end(), tag_asset_data + offsets[b], tag_asset_data + offsets[b] + sizes[b]);
                         }
@@ -1766,14 +1766,14 @@ namespace Invader {
                                 bool duped = false;
                                 for(auto &asset : all_asset_data) {
                                     if(asset.size == size && std::memcmp(tag_asset_data + offset, file.data() + asset.offset, asset.size) == 0) {
-                                        permutation.samples.file_offset = static_cast<std::int32_t>(asset.offset);
+                                        permutation.samples.file_offset = static_cast<std::uint32_t>(asset.offset);
                                         duped = true;
                                         break;
                                     }
                                 }
 
                                 if(!duped) {
-                                    permutation.samples.file_offset = static_cast<std::int32_t>(file.size());
+                                    permutation.samples.file_offset = static_cast<std::uint32_t>(file.size());
                                     all_asset_data.push_back(DedupingAssetData { file.size(), size });
                                     file.insert(file.end(), tag_asset_data + offset, tag_asset_data + offset + size);
                                 }

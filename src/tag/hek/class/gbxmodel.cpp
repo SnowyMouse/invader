@@ -127,7 +127,7 @@ namespace Invader::HEK {
 
                 auto instance_count = temp_marker.instances.size();
                 auto instance_offset = compiled.data.size();
-                marker_struct.instances.count = static_cast<std::int32_t>(instance_count);
+                marker_struct.instances.count = static_cast<std::uint32_t>(instance_count);
 
                 add_pointer(compiled, reinterpret_cast<std::uintptr_t>(marker_struct.instances.pointer.value) - reinterpret_cast<std::uintptr_t>(compiled.data.data()), instance_offset);
                 compiled.data.insert(compiled.data.end(), instance_count * sizeof(GBXModelMarkerInstance<LittleEndian>), std::byte());

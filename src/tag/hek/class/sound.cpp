@@ -48,15 +48,15 @@ namespace Invader::HEK {
             tag.unknown_ffffffff_1 = 0xFFFFFFFF;
 
             ADD_REFLEXIVE_START(reflexive.permutations) {
-                reflexive.samples.pointer = static_cast<std::int32_t>(compiled.data.size());
+                reflexive.samples.pointer = static_cast<std::uint32_t>(compiled.data.size());
 
                 std::size_t samples_size = reflexive.samples.size;
                 std::size_t asset_offset = compiled.asset_data.size();
-                reflexive.samples.file_offset = static_cast<std::int32_t>(asset_offset);
+                reflexive.samples.file_offset = static_cast<std::uint32_t>(asset_offset);
                 compiled.asset_data.insert(compiled.asset_data.end(), data, data + samples_size);
                 INCREMENT_DATA_PTR(samples_size)
                 reflexive.samples.pointer = 0;
-                reflexive.samples_pointer = -1;
+                reflexive.samples_pointer = 0xFFFFFFFF;
                 reflexive.samples.external = 0;
 
                 // If no compression, then swap the endianness of this stuff

@@ -472,8 +472,8 @@ namespace Invader::HEK {
         TagString name;
         Rectangle2D<EndianType> bounds;
         EndianType<UIWidgetDefinitionFlags> flags;
-        EndianType<std::int32_t> milliseconds_to_auto_close;
-        EndianType<std::int32_t> milliseconds_auto_close_fade_time;
+        EndianType<std::uint32_t> milliseconds_to_auto_close;
+        EndianType<std::uint32_t> milliseconds_auto_close_fade_time;
         TagDependency<EndianType> background_bitmap; // bitmap
         TagReflexive<EndianType, GameDataInputReference> game_data_inputs;
         TagReflexive<EndianType, EventHandlerReference> event_handlers;

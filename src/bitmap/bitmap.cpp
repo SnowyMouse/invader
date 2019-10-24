@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'm':
-                bitmap_options.max_mipmap_count = static_cast<std::int32_t>(std::strtol(arguments[0], nullptr, 10));
+                bitmap_options.max_mipmap_count = static_cast<std::uint32_t>(std::strtol(arguments[0], nullptr, 10));
                 break;
 
             case 'C':

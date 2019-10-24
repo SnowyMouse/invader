@@ -10,7 +10,7 @@ namespace Invader::HEK {
             std::size_t data_size = reflexive.string.size;
             ASSERT_SIZE(data_size);
             ADD_POINTER_FROM_INT32(reflexive.string.pointer, compiled.data.size());
-            reflexive.string.file_offset = static_cast<std::int32_t>(compiled.data.size());
+            reflexive.string.file_offset = static_cast<std::uint32_t>(compiled.data.size());
             compiled.data.insert(compiled.data.end(), data, data + data_size);
             PAD_32_BIT
             INCREMENT_DATA_PTR(data_size);

@@ -172,14 +172,14 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexCompressed {
         Point3D<EndianType> position;
-        EndianType<std::int32_t> normal;
-        EndianType<std::int32_t> binormal;
-        EndianType<std::int32_t> tangent;
+        EndianType<std::uint32_t> normal;
+        EndianType<std::uint32_t> binormal;
+        EndianType<std::uint32_t> tangent;
         EndianType<std::int16_t> texture_coordinate_u;
         EndianType<std::int16_t> texture_coordinate_v;
         std::int8_t node0_index;
         std::int8_t node1_index;
-        EndianType<std::int16_t> node0_weight;
+        EndianType<std::uint16_t> node0_weight;
 
         ENDIAN_TEMPLATE(NewType) operator GBXModelVertexCompressed<NewType>() const noexcept {
             GBXModelVertexCompressed<NewType> copy;

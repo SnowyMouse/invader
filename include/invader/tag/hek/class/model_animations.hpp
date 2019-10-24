@@ -465,7 +465,7 @@ namespace Invader::HEK {
         EndianType<std::int16_t> frame_count;
         EndianType<std::int16_t> frame_size;
         EndianType<AnimationFrameInfoType> frame_info_type;
-        EndianType<std::int32_t> node_list_checksum;
+        EndianType<std::uint32_t> node_list_checksum;
         EndianType<std::int16_t> node_count;
         EndianType<std::int16_t> loop_frame_index;
         EndianType<Fraction> weight;
@@ -486,7 +486,7 @@ namespace Invader::HEK {
         PAD(0x8);
         ModelAnimationArrayNodeScaleFlagData<EndianType> node_scale_flag_data[2];
         PAD(0x4);
-        EndianType<std::int32_t> offset_to_compressed_data;
+        EndianType<std::uint32_t> offset_to_compressed_data;
         TagDataOffset<EndianType> default_data;
         TagDataOffset<EndianType> frame_data;
 
