@@ -91,7 +91,7 @@ namespace Invader::HEK {
     static_assert(sizeof(ModelCollisionGeometryModifier<BigEndian>) == 0x34);
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometrySphere {
-        EndianType<std::int16_t> node;
+        EndianType<Index> node;
         PAD(0x2);
         PAD(0xC);
         Point3D<EndianType> center;
@@ -192,7 +192,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> first_edge;
         ModelCollisionGeometrySurfaceFlags flags;
         std::int8_t breakable_surface;
-        EndianType<std::int16_t> material;
+        EndianType<Index> material;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometrySurface<NewType>() const noexcept {
             ModelCollisionGeometrySurface<NewType> copy;
@@ -267,10 +267,10 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryNode {
         TagString name;
-        EndianType<std::int16_t> region;
-        EndianType<std::int16_t> parent_node;
-        EndianType<std::int16_t> next_sibling_node;
-        EndianType<std::int16_t> first_child_node;
+        EndianType<Index> region;
+        EndianType<Index> parent_node;
+        EndianType<Index> next_sibling_node;
+        EndianType<Index> first_child_node;
         PAD(0xC);
         TagReflexive<EndianType, ModelCollisionGeometryBSP> bsps;
 
@@ -299,7 +299,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometry {
         EndianType<ModelCollisionGeometryFlags> flags;
-        EndianType<std::int16_t> indirect_damage_material;
+        EndianType<Index> indirect_damage_material;
         PAD(0x2);
         EndianType<float> maximum_body_vitality;
         EndianType<float> body_system_shock;

@@ -169,7 +169,7 @@ namespace Invader::HEK {
         EndianType<float> body_vitality;
         EndianType<float> shield_vitality;
         EndianType<float> shield_sapping_radius;
-        EndianType<std::int16_t> forced_shader_permutation;
+        EndianType<Index> forced_shader_permutation;
         PAD(0x2);
         PAD(0x10);
         PAD(0xC);
