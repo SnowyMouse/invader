@@ -139,7 +139,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryLeaf {
         EndianType<ModelCollisionGeometryLeafFlags> flags;
-        EndianType<std::int16_t> bsp2d_reference_count;
+        EndianType<std::uint16_t> bsp2d_reference_count;
         EndianType<std::int32_t> first_bsp2d_reference;
 
         ENDIAN_TEMPLATE(NewType) operator ModelCollisionGeometryLeaf<NewType>() const noexcept {

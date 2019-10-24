@@ -69,7 +69,7 @@ namespace Invader::HEK {
     };
 
     ENDIAN_TEMPLATE(EndianType) struct WeaponMagazineObject {
-        EndianType<std::int16_t> rounds;
+        EndianType<std::uint16_t> rounds;
         PAD(0xA);
         TagDependency<EndianType> equipment; // equipment
 
@@ -89,13 +89,13 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct WeaponMagazine {
         EndianType<WeaponMagazineFlags> flags;
-        EndianType<std::int16_t> rounds_recharged;
-        EndianType<std::int16_t> rounds_total_initial;
-        EndianType<std::int16_t> rounds_total_maximum;
-        EndianType<std::int16_t> rounds_loaded_maximum;
+        EndianType<std::uint16_t> rounds_recharged;
+        EndianType<std::uint16_t> rounds_total_initial;
+        EndianType<std::uint16_t> rounds_total_maximum;
+        EndianType<std::uint16_t> rounds_loaded_maximum;
         PAD(0x8);
         EndianType<float> reload_time;
-        EndianType<std::int16_t> rounds_reloaded;
+        EndianType<std::uint16_t> rounds_reloaded;
         PAD(0x2);
         EndianType<float> chamber_time;
         PAD(0x8);
@@ -124,8 +124,8 @@ namespace Invader::HEK {
     static_assert(sizeof(WeaponMagazine<BigEndian>) == 0x70);
 
     ENDIAN_TEMPLATE(EndianType) struct WeaponTriggerFiringEffect {
-        EndianType<std::int16_t> shot_count_lower_bound;
-        EndianType<std::int16_t> shot_count_upper_bound;
+        EndianType<std::uint16_t> shot_count_lower_bound;
+        EndianType<std::uint16_t> shot_count_upper_bound;
         PAD(0x20);
         TagDependency<EndianType> firing_effect; // sound, effect
         TagDependency<EndianType> misfire_effect; // sound, effect
@@ -174,9 +174,9 @@ namespace Invader::HEK {
         EndianType<Fraction> blurred_rate_of_fire;
         PAD(0x8);
         EndianType<Index> magazine;
-        EndianType<std::int16_t> rounds_per_shot;
-        EndianType<std::int16_t> minimum_rounds_loaded;
-        EndianType<std::int16_t> rounds_between_tracers;
+        EndianType<std::uint16_t> rounds_per_shot;
+        EndianType<std::uint16_t> minimum_rounds_loaded;
+        EndianType<std::uint16_t> rounds_between_tracers;
         PAD(0x6);
         EndianType<WeaponFiringNoise> firing_noise;
         Bounds<EndianType<float>> error;
@@ -191,7 +191,7 @@ namespace Invader::HEK {
         EndianType<float> spew_time;
         TagDependency<EndianType> charging_effect; // sound, effect
         EndianType<WeaponDistributionFunction> distribution_function;
-        EndianType<std::int16_t> projectiles_per_shot;
+        EndianType<std::uint16_t> projectiles_per_shot;
         EndianType<float> distribution_angle;
         PAD(0x4);
         EndianType<Angle> minimum_error;
@@ -278,7 +278,7 @@ namespace Invader::HEK {
         EndianType<WeaponFlags> flags;
         TagString label;
         EndianType<WeaponSecondaryTriggerMode> secondary_trigger_mode;
-        EndianType<std::int16_t> maximum_alternate_shots_loaded;
+        EndianType<std::uint16_t> maximum_alternate_shots_loaded;
         EndianType<WeaponFunctionIn> weapon_a_in;
         EndianType<WeaponFunctionIn> weapon_b_in;
         EndianType<WeaponFunctionIn> weapon_c_in;
@@ -302,7 +302,7 @@ namespace Invader::HEK {
         EndianType<float> far_reticle_range;
         EndianType<float> intersection_reticle_range;
         PAD(0x2);
-        EndianType<std::int16_t> magnification_levels;
+        EndianType<std::uint16_t> magnification_levels;
         Bounds<EndianType<float>> magnification_range;
         EndianType<Angle> autoaim_angle;
         EndianType<float> autoaim_range;

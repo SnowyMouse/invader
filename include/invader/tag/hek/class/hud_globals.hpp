@@ -92,7 +92,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> hud_help_flashing_color;
         EndianType<float> hud_help_flash_period;
         EndianType<float> hud_help_flash_delay;
-        EndianType<std::int16_t> hud_help_number_of_flashes;
+        EndianType<std::uint16_t> hud_help_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> hud_help_flash_flags;
         EndianType<float> hud_help_flash_length;
         EndianType<ColorARGBInt> hud_help_disabled_color;
@@ -102,12 +102,12 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> objective_flashing_color;
         EndianType<float> objective_flash_period;
         EndianType<float> objective_flash_delay;
-        EndianType<std::int16_t> objective_number_of_flashes;
+        EndianType<std::uint16_t> objective_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> objective_flash_flags;
         EndianType<float> objective_flash_length;
         EndianType<ColorARGBInt> objective_disabled_color;
-        EndianType<std::int16_t> objective_uptime_ticks;
-        EndianType<std::int16_t> objective_fade_ticks;
+        EndianType<std::uint16_t> objective_uptime_ticks;
+        EndianType<std::uint16_t> objective_fade_ticks;
         EndianType<float> top_offset;
         EndianType<float> bottom_offset;
         EndianType<float> left_offset;
@@ -138,7 +138,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> not_much_time_left_flashing_color;
         EndianType<float> not_much_time_left_flash_period;
         EndianType<float> not_much_time_left_flash_delay;
-        EndianType<std::int16_t> not_much_time_left_number_of_flashes;
+        EndianType<std::uint16_t> not_much_time_left_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> not_much_time_left_flash_flags;
         EndianType<float> not_much_time_left_flash_length;
         EndianType<ColorARGBInt> not_much_time_left_disabled_color;
@@ -147,7 +147,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> time_out_flash_flashing_color;
         EndianType<float> time_out_flash_flash_period;
         EndianType<float> time_out_flash_flash_delay;
-        EndianType<std::int16_t> time_out_flash_number_of_flashes;
+        EndianType<std::uint16_t> time_out_flash_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> time_out_flash_flash_flags;
         EndianType<float> time_out_flash_flash_length;
         EndianType<ColorARGBInt> time_out_flash_disabled_color;

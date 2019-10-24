@@ -182,12 +182,12 @@ namespace Invader::HEK {
         TagString hand_marker;
         EndianType<Angle> right_yaw_per_frame;
         EndianType<Angle> left_yaw_per_frame;
-        EndianType<std::int16_t> right_frame_count;
-        EndianType<std::int16_t> left_frame_count;
+        EndianType<std::uint16_t> right_frame_count;
+        EndianType<std::uint16_t> left_frame_count;
         EndianType<Angle> down_pitch_per_frame;
         EndianType<Angle> up_pitch_per_frame;
-        EndianType<std::int16_t> down_pitch_frame_count;
-        EndianType<std::int16_t> up_pitch_frame_count;
+        EndianType<std::uint16_t> down_pitch_frame_count;
+        EndianType<std::uint16_t> up_pitch_frame_count;
         PAD(0x20);
         TagReflexive<EndianType, ModelAnimationAnimationWeaponClassAnimation> animations;
         TagReflexive<EndianType, ModelAnimationAnimationGraphUnitSeatikPoint> ik_point;
@@ -218,12 +218,12 @@ namespace Invader::HEK {
         TagString label;
         EndianType<Angle> right_yaw_per_frame;
         EndianType<Angle> left_yaw_per_frame;
-        EndianType<std::int16_t> right_frame_count;
-        EndianType<std::int16_t> left_frame_count;
+        EndianType<std::uint16_t> right_frame_count;
+        EndianType<std::uint16_t> left_frame_count;
         EndianType<Angle> down_pitch_per_frame;
         EndianType<Angle> up_pitch_per_frame;
-        EndianType<std::int16_t> down_pitch_frame_count;
-        EndianType<std::int16_t> up_pitch_frame_count;
+        EndianType<std::uint16_t> down_pitch_frame_count;
+        EndianType<std::uint16_t> up_pitch_frame_count;
         PAD(0x8);
         TagReflexive<EndianType, ModelAnimationAnimationWeaponClassAnimation> animations;
         TagReflexive<EndianType, ModelAnimationAnimationGraphUnitSeatikPoint> ik_points;
@@ -303,12 +303,12 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationGraphVehicleAnimations {
         EndianType<Angle> right_yaw_per_frame;
         EndianType<Angle> left_yaw_per_frame;
-        EndianType<std::int16_t> right_frame_count;
-        EndianType<std::int16_t> left_frame_count;
+        EndianType<std::uint16_t> right_frame_count;
+        EndianType<std::uint16_t> left_frame_count;
         EndianType<Angle> down_pitch_per_frame;
         EndianType<Angle> up_pitch_per_frame;
-        EndianType<std::int16_t> down_pitch_frame_count;
-        EndianType<std::int16_t> up_pitch_frame_count;
+        EndianType<std::uint16_t> down_pitch_frame_count;
+        EndianType<std::uint16_t> up_pitch_frame_count;
         PAD(0x44);
         TagReflexive<EndianType, ModelAnimationVehicleAnimation> animations;
         TagReflexive<EndianType, ModelAnimationSuspensionAnimation> suspension_animations;
@@ -462,11 +462,11 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimation {
         TagString name;
         EndianType<AnimationType> type;
-        EndianType<std::int16_t> frame_count;
-        EndianType<std::int16_t> frame_size;
+        EndianType<std::uint16_t> frame_count;
+        EndianType<std::uint16_t> frame_size;
         EndianType<AnimationFrameInfoType> frame_info_type;
         EndianType<std::uint32_t> node_list_checksum;
-        EndianType<std::int16_t> node_count;
+        EndianType<std::uint16_t> node_count;
         EndianType<Index> loop_frame_index;
         EndianType<Fraction> weight;
         EndianType<Index> key_frame_index;

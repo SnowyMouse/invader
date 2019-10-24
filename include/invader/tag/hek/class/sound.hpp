@@ -116,7 +116,7 @@ namespace Invader::HEK {
         TagString name;
         EndianType<float> natural_pitch;
         Bounds<EndianType<float>> bend_bounds;
-        EndianType<std::int16_t> actual_permutation_count;
+        EndianType<std::uint16_t> actual_permutation_count;
         PAD(0x2);
         EndianType<float> playback_rate;
         LittleEndian<std::uint32_t> unknown_ffffffff_0;
@@ -168,7 +168,7 @@ namespace Invader::HEK {
         EndianType<SoundEncoding> encoding;
         EndianType<SoundCompression> compression;
         TagDependency<EndianType> promotion_sound; // sound
-        EndianType<std::int16_t> promotion_count;
+        EndianType<std::uint16_t> promotion_count;
         PAD(0x2);
         EndianType<std::uint32_t> unknown_int;
         PAD(0x8);

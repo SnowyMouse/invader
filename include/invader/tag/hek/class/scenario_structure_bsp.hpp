@@ -39,7 +39,7 @@ namespace Invader::HEK {
         LittleEndian<std::uint16_t> vertices[3];
         PAD(0x2);
         EndianType<Index> cluster;
-        EndianType<std::int16_t> surface_reference_count;
+        EndianType<std::uint16_t> surface_reference_count;
         EndianType<std::int32_t> surface_references;
 
         ENDIAN_TEMPLATE(NewType) operator ScenarioStructureBSPLeaf<NewType>() const noexcept {
@@ -148,7 +148,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> surface_count;
         Point3D<EndianType> centroid;
         ColorRGB<EndianType> ambient_color;
-        EndianType<std::int16_t> distant_light_count;
+        EndianType<std::uint16_t> distant_light_count;
         PAD(0x2);
         ColorRGB<EndianType> distant_light_0_color;
         Vector3D<EndianType> distant_light_0_direction;
@@ -315,12 +315,12 @@ namespace Invader::HEK {
         EndianType<Index> weather;
         EndianType<Index> transition_structure_bsp;
         LittleEndian<Index> first_decal_index;
-        LittleEndian<std::int16_t> decal_count;
+        LittleEndian<std::uint16_t> decal_count;
         PAD(0x18);
         TagReflexive<EndianType, PredictedResource> predicted_resources;
         TagReflexive<EndianType, ScenarioStructureBSPSubcluster> subclusters;
         EndianType<Index> first_lens_flare_marker_index;
-        EndianType<std::int16_t> lens_flare_marker_count;
+        EndianType<std::uint16_t> lens_flare_marker_count;
         TagReflexive<EndianType, ScenarioStructureBSPClusterSurfaceIndex> surface_indices;
         TagReflexive<EndianType, ScenarioStructureBSPMirror> mirrors;
         TagReflexive<EndianType, ScenarioStructureBSPClusterPortalIndex> portals;

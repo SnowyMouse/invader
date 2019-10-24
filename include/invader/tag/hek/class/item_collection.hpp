@@ -25,7 +25,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct ItemCollection {
         TagReflexive<EndianType, ItemCollectionPermutation> permutations;
-        EndianType<std::int16_t> spawn_time; // seconds
+        EndianType<std::uint16_t> spawn_time; // seconds
         PAD(0x2);
         PAD(0x4C);
 

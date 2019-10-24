@@ -26,7 +26,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
@@ -118,7 +118,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> background_flashing_color;
         EndianType<float> background_flash_period;
         EndianType<float> background_flash_delay;
-        EndianType<std::int16_t> background_number_of_flashes;
+        EndianType<std::uint16_t> background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> background_flash_flags;
         EndianType<float> background_flash_length;
         EndianType<ColorARGBInt> background_disabled_color;
@@ -211,7 +211,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> hud_background_flashing_color;
         EndianType<float> hud_background_flash_period;
         EndianType<float> hud_background_flash_delay;
-        EndianType<std::int16_t> hud_background_number_of_flashes;
+        EndianType<std::uint16_t> hud_background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> hud_background_flash_flags;
         EndianType<float> hud_background_flash_length;
         EndianType<ColorARGBInt> hud_background_disabled_color;
@@ -231,7 +231,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> shield_panel_background_flashing_color;
         EndianType<float> shield_panel_background_flash_period;
         EndianType<float> shield_panel_background_flash_delay;
-        EndianType<std::int16_t> shield_panel_background_number_of_flashes;
+        EndianType<std::uint16_t> shield_panel_background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> shield_panel_background_flash_flags;
         EndianType<float> shield_panel_background_flash_length;
         EndianType<ColorARGBInt> shield_panel_background_disabled_color;
@@ -277,7 +277,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> health_panel_background_flashing_color;
         EndianType<float> health_panel_background_flash_period;
         EndianType<float> health_panel_background_flash_delay;
-        EndianType<std::int16_t> health_panel_background_number_of_flashes;
+        EndianType<std::uint16_t> health_panel_background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> health_panel_background_flash_flags;
         EndianType<float> health_panel_background_flash_length;
         EndianType<ColorARGBInt> health_panel_background_disabled_color;
@@ -322,7 +322,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> motion_sensor_background_flashing_color;
         EndianType<float> motion_sensor_background_flash_period;
         EndianType<float> motion_sensor_background_flash_delay;
-        EndianType<std::int16_t> motion_sensor_background_number_of_flashes;
+        EndianType<std::uint16_t> motion_sensor_background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> motion_sensor_background_flash_flags;
         EndianType<float> motion_sensor_background_flash_length;
         EndianType<ColorARGBInt> motion_sensor_background_disabled_color;
@@ -342,7 +342,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> motion_sensor_foreground_flashing_color;
         EndianType<float> motion_sensor_foreground_flash_period;
         EndianType<float> motion_sensor_foreground_flash_delay;
-        EndianType<std::int16_t> motion_sensor_foreground_number_of_flashes;
+        EndianType<std::uint16_t> motion_sensor_foreground_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> motion_sensor_foreground_flash_flags;
         EndianType<float> motion_sensor_foreground_flash_length;
         EndianType<ColorARGBInt> motion_sensor_foreground_disabled_color;

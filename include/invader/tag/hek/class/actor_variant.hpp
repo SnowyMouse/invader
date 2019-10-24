@@ -147,7 +147,7 @@ namespace Invader::HEK {
         EndianType<ActorVariantGrenadeType> grenade_type;
         EndianType<ActorVariantTrajectoryType> trajectory_type;
         EndianType<ActorVariantGrenadeStimulus> grenade_stimulus;
-        EndianType<std::int16_t> minimum_enemy_count;
+        EndianType<std::uint16_t> minimum_enemy_count;
         EndianType<float> enemy_radius;
         PAD(0x4);
         EndianType<float> grenade_velocity;
@@ -159,10 +159,10 @@ namespace Invader::HEK {
         PAD(0x14);
 
         TagDependency<EndianType> equipment; // equipment
-        Bounds<EndianType<std::int16_t>> grenade_count;
+        Bounds<EndianType<std::uint16_t>> grenade_count;
         EndianType<float> dont_drop_grenades_chance;
         Bounds<EndianType<float>> drop_weapon_loaded;
-        Bounds<EndianType<std::int16_t>> drop_weapon_ammo;
+        Bounds<EndianType<std::uint16_t>> drop_weapon_ammo;
         PAD(0xC);
         PAD(0x10);
 

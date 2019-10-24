@@ -137,7 +137,7 @@ namespace Invader::HEK {
         EndianType<EffectParticleFlags> flags;
         EndianType<EffectDistributionFunction> distribution_function;
         PAD(0x2);
-        Bounds<EndianType<std::int16_t>> count;
+        Bounds<EndianType<std::uint16_t>> count;
         Bounds<EndianType<float>> distribution_radius;
         PAD(0xC);
         Bounds<EndianType<float>> velocity;

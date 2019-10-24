@@ -110,7 +110,7 @@ namespace Invader::HEK {
 
     ENDIAN_TEMPLATE(EndianType) struct Lightning {
         PAD(0x2);
-        EndianType<std::int16_t> count;
+        EndianType<std::uint16_t> count;
         PAD(0x10);
         EndianType<float> near_fade_distance;
         EndianType<float> far_fade_distance;

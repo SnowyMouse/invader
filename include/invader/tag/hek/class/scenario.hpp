@@ -294,9 +294,9 @@ namespace Invader::HEK {
         EndianType<float> wobble_period;
         EndianType<float> wobble_magnitude;
         EndianType<Fraction> square_wave_threshold;
-        EndianType<std::int16_t> step_count;
+        EndianType<std::uint16_t> step_count;
         EndianType<FunctionType> map_to;
-        EndianType<std::int16_t> sawtooth_count;
+        EndianType<std::uint16_t> sawtooth_count;
         PAD(0x2);
         EndianType<FunctionScaleBy> scale_result_by;
         EndianType<FunctionBoundsMode> bounds_mode;
@@ -507,8 +507,8 @@ namespace Invader::HEK {
         PAD(0x8);
         PAD(0x8);
 
-        EndianType<std::int16_t> rounds_left;
-        EndianType<std::int16_t> rounds_loaded;
+        EndianType<std::uint16_t> rounds_left;
+        EndianType<std::uint16_t> rounds_loaded;
         EndianType<ScenarioItemFlags> flags;
         PAD(0x2);
         PAD(0xC);
@@ -658,11 +658,11 @@ namespace Invader::HEK {
         EndianType<Fraction> starting_health_modifier;
         EndianType<Fraction> starting_shield_modifier;
         TagDependency<EndianType> primary_weapon; // weapon
-        EndianType<std::int16_t> rounds_loaded;
-        EndianType<std::int16_t> rounds_total;
+        EndianType<std::uint16_t> rounds_loaded;
+        EndianType<std::uint16_t> rounds_total;
         TagDependency<EndianType> secondary_weapon; // weapon
-        EndianType<std::int16_t> rounds_loaded_1;
-        EndianType<std::int16_t> rounds_total_1;
+        EndianType<std::uint16_t> rounds_loaded_1;
+        EndianType<std::uint16_t> rounds_total_1;
         std::int8_t starting_fragmentation_grenade_count;
         std::int8_t starting_plasma_grenade_count;
         std::int8_t starting_custom_2_grenade_count;
@@ -739,7 +739,7 @@ namespace Invader::HEK {
         std::int8_t raw_animation_data;
         std::int8_t unit_control_data_version;
         PAD(0x1);
-        EndianType<std::int16_t> length_of_animation;
+        EndianType<std::uint16_t> length_of_animation;
         PAD(0x2);
         PAD(0x4);
         TagDataOffset<EndianType> recorded_animation_event_stream;
@@ -788,7 +788,7 @@ namespace Invader::HEK {
         EndianType<ScenarioSpawnType> type_2;
         EndianType<ScenarioSpawnType> type_3;
         EndianType<Index> team_index;
-        EndianType<std::int16_t> spawn_time;
+        EndianType<std::uint16_t> spawn_time;
         PAD(0x30);
         Point3D<EndianType> position;
         EndianType<Angle> facing;
@@ -1004,13 +1004,13 @@ namespace Invader::HEK {
         EndianType<ScenarioSquadAttacking> pursuing;
         PAD(0x4);
         PAD(0x8);
-        EndianType<std::int16_t> normal_diff_count;
-        EndianType<std::int16_t> insane_diff_count;
+        EndianType<std::uint16_t> normal_diff_count;
+        EndianType<std::uint16_t> insane_diff_count;
         EndianType<ScenarioMajorUpgrade> major_upgrade;
         PAD(0x2);
-        EndianType<std::int16_t> respawn_min_actors;
-        EndianType<std::int16_t> respawn_max_actors;
-        EndianType<std::int16_t> respawn_total;
+        EndianType<std::uint16_t> respawn_min_actors;
+        EndianType<std::uint16_t> respawn_max_actors;
+        EndianType<std::uint16_t> respawn_total;
         PAD(0x2);
         Bounds<EndianType<float>> respawn_delay;
         PAD(0x30);

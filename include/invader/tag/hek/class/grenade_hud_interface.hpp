@@ -28,7 +28,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
@@ -106,7 +106,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> background_flashing_color;
         EndianType<float> background_flash_period;
         EndianType<float> background_flash_delay;
-        EndianType<std::int16_t> background_number_of_flashes;
+        EndianType<std::uint16_t> background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> background_flash_flags;
         EndianType<float> background_flash_length;
         EndianType<ColorARGBInt> background_disabled_color;
@@ -126,7 +126,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> total_grenades_background_flashing_color;
         EndianType<float> total_grenades_background_flash_period;
         EndianType<float> total_grenades_background_flash_delay;
-        EndianType<std::int16_t> total_grenades_background_number_of_flashes;
+        EndianType<std::uint16_t> total_grenades_background_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> total_grenades_background_flash_flags;
         EndianType<float> total_grenades_background_flash_length;
         EndianType<ColorARGBInt> total_grenades_background_disabled_color;
@@ -145,7 +145,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> total_grenades_numbers_flashing_color;
         EndianType<float> total_grenades_numbers_flash_period;
         EndianType<float> total_grenades_numbers_flash_delay;
-        EndianType<std::int16_t> total_grenades_numbers_number_of_flashes;
+        EndianType<std::uint16_t> total_grenades_numbers_number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> total_grenades_numbers_flash_flags;
         EndianType<float> total_grenades_numbers_flash_length;
         EndianType<ColorARGBInt> total_grenades_numbers_disabled_color;
@@ -155,7 +155,7 @@ namespace Invader::HEK {
         std::int8_t total_grenades_numbers_number_of_fractional_digits;
         PAD(0x1);
         PAD(0xC);
-        EndianType<std::int16_t> flash_cutoff;
+        EndianType<std::uint16_t> flash_cutoff;
         PAD(0x2);
         TagDependency<EndianType> total_grenades_overlay_bitmap; // bitmap
         TagReflexive<EndianType, GrenadeHUDInterfaceOverlay> total_grenades_overlays;

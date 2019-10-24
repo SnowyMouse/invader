@@ -337,11 +337,11 @@ namespace Invader::HEK {
         EndianType<float> medium_detail_cutoff;
         EndianType<float> low_detail_cutoff;
         EndianType<float> super_low_detail_cutoff;
-        EndianType<std::int16_t> super_high_detail_node_count;
-        EndianType<std::int16_t> high_detail_node_count;
-        EndianType<std::int16_t> medium_detail_node_count;
-        EndianType<std::int16_t> low_detail_node_count;
-        EndianType<std::int16_t> super_low_detail_node_count;
+        EndianType<std::uint16_t> super_high_detail_node_count;
+        EndianType<std::uint16_t> high_detail_node_count;
+        EndianType<std::uint16_t> medium_detail_node_count;
+        EndianType<std::uint16_t> low_detail_node_count;
+        EndianType<std::uint16_t> super_low_detail_node_count;
         PAD(0x2);
         PAD(0x8);
         EndianType<float> base_map_u_scale;

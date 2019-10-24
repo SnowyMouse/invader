@@ -62,7 +62,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
@@ -181,7 +181,7 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
@@ -241,12 +241,12 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<HUDInterfaceFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> frame_rate;
+        EndianType<std::uint16_t> frame_rate;
         EndianType<Index> sequence_index;
         EndianType<WeaponHUDInterfaceCrosshairOverlayFlags> flags;
         PAD(0x20);
@@ -327,12 +327,12 @@ namespace Invader::HEK {
         EndianType<ColorARGBInt> flashing_color;
         EndianType<float> flash_period;
         EndianType<float> flash_delay;
-        EndianType<std::int16_t> number_of_flashes;
+        EndianType<std::uint16_t> number_of_flashes;
         EndianType<WeaponHUDInterfaceOverlayFlashFlags> flash_flags;
         EndianType<float> flash_length;
         EndianType<ColorARGBInt> disabled_color;
         PAD(0x4);
-        EndianType<std::int16_t> frame_rate;
+        EndianType<std::uint16_t> frame_rate;
         PAD(0x2);
         EndianType<Index> sequence_index;
         EndianType<WeaponHUDInterfaceOverlayType> type;
@@ -462,10 +462,10 @@ namespace Invader::HEK {
         TagDependency<EndianType> child_hud; // weapon_hud_interface
         EndianType<WeaponHUDInterfaceFlags> flags;
         PAD(0x2);
-        EndianType<std::int16_t> total_ammo_cutoff;
-        EndianType<std::int16_t> loaded_ammo_cutoff;
-        EndianType<std::int16_t> heat_cutoff;
-        EndianType<std::int16_t> age_cutoff;
+        EndianType<std::uint16_t> total_ammo_cutoff;
+        EndianType<std::uint16_t> loaded_ammo_cutoff;
+        EndianType<std::uint16_t> heat_cutoff;
+        EndianType<std::uint16_t> age_cutoff;
         PAD(0x20);
         EndianType<HUDInterfaceAnchor> anchor;
         PAD(0x2);

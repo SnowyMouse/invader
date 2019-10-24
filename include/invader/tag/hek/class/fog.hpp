@@ -34,7 +34,7 @@ namespace Invader::HEK {
         EndianType<float> distance_to_water_plane;
         ColorRGB<EndianType> color;
         EndianType<FogScreenFlags> flags_1;
-        EndianType<std::int16_t> layer_count;
+        EndianType<std::uint16_t> layer_count;
         Bounds<EndianType<float>> distance_gradient;
         Bounds<EndianType<Fraction>> density_gradient;
         EndianType<float> start_distance_from_fog_plane;

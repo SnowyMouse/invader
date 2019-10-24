@@ -35,8 +35,8 @@ namespace Invader::HEK {
         EndianType<float> look_default_yaw_rate;
         EndianType<float> look_autolevelling_scale;
         PAD(0x14);
-        EndianType<std::int16_t> minimum_weapon_swap_ticks;
-        EndianType<std::int16_t> minimum_autolevelling_ticks;
+        EndianType<std::uint16_t> minimum_weapon_swap_ticks;
+        EndianType<std::uint16_t> minimum_autolevelling_ticks;
         EndianType<float> minimum_angle_for_vehicle_flipping;
         TagReflexive<EndianType, GlobalsLookFunction> look_function;
 
@@ -288,8 +288,8 @@ namespace Invader::HEK {
     static_assert(sizeof(GlobalsDifficulty<BigEndian>) == 0x284);
 
     ENDIAN_TEMPLATE(EndianType) struct GlobalsGrenade {
-        EndianType<std::int16_t> maximum_count;
-        EndianType<std::int16_t> mp_spawn_default;
+        EndianType<std::uint16_t> maximum_count;
+        EndianType<std::uint16_t> mp_spawn_default;
         TagDependency<EndianType> throwing_effect; // effect
         TagDependency<EndianType> hud_interface; // grenade_hud_interface
         TagDependency<EndianType> equipment; // equipment

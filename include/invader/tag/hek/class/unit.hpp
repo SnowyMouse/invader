@@ -214,7 +214,7 @@ namespace Invader::HEK {
         EndianType<float> feign_death_chance;
         EndianType<float> feign_repeat_chance;
         TagDependency<EndianType> spawned_actor; // actor_variant
-        Bounds<EndianType<std::int16_t>> spawned_actor_count;
+        Bounds<EndianType<std::uint16_t>> spawned_actor_count;
         EndianType<float> spawned_velocity;
         EndianType<Angle> aiming_velocity_maximum;
         EndianType<Angle> aiming_acceleration_maximum;
@@ -232,7 +232,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, UnitDialogueVariant> dialogue_variants;
         EndianType<float> grenade_velocity;
         EndianType<UnitGrenadeType> grenade_type;
-        EndianType<std::int16_t> grenade_count;
+        EndianType<std::uint16_t> grenade_count;
         EndianType<std::int16_t> unknown_shorts[2];
         TagReflexive<EndianType, UnitPoweredSeat> powered_seats;
         TagReflexive<EndianType, UnitWeapon> weapons;

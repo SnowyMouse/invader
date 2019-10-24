@@ -68,7 +68,7 @@ namespace Invader::HEK {
         PAD(0x14);
         TagDependency<EndianType> map; // bitmap
         EndianType<Index> sequence_index;
-        EndianType<std::int16_t> count;
+        EndianType<std::uint16_t> count;
         PAD(0x48);
         EndianType<LightVolumeScaleSource> frame_animation_source;
         PAD(0x2);

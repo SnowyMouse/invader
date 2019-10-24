@@ -205,8 +205,8 @@ namespace Invader::HEK {
         Bounds<EndianType<float>> uncover_delay_time;
         Bounds<EndianType<float>> target_search_time;
         Bounds<EndianType<float>> pursuit_position_time;
-        EndianType<std::int16_t> num_positions;
-        EndianType<std::int16_t> num_positions_1;
+        EndianType<std::uin16_t> num_positions;
+        EndianType<std::uin16_t> num_positions_1;
         PAD(0x20);
 
         EndianType<float> melee_attack_delay;

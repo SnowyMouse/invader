@@ -62,9 +62,9 @@ namespace Invader::HEK {
         EndianType<float> wobble_period;
         EndianType<float> wobble_magnitude;
         EndianType<Fraction> square_wave_threshold;
-        EndianType<std::int16_t> step_count;
+        EndianType<std::uint16_t> step_count;
         EndianType<FunctionType> map_to;
-        EndianType<std::int16_t> sawtooth_count;
+        EndianType<std::uint16_t> sawtooth_count;
         EndianType<FunctionScaleBy> add;
         EndianType<FunctionScaleBy> scale_result_by;
         EndianType<FunctionBoundsMode> bounds_mode;

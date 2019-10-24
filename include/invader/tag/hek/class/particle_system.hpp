@@ -237,7 +237,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystemType {
         TagString name;
         EndianType<ParticleSystemTypeFlags> flags;
-        EndianType<std::int16_t> initial_particle_count;
+        EndianType<std::uint16_t> initial_particle_count;
         PAD(0x2);
         EndianType<ParticleSystemComplexSpriteRenderModes> complex_sprite_render_modes;
         PAD(0x2);

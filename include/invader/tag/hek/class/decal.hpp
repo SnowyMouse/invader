@@ -56,8 +56,8 @@ namespace Invader::HEK {
         ColorRGB<EndianType> color_lower_bounds;
         ColorRGB<EndianType> color_upper_bounds;
         PAD(0xC);
-        EndianType<std::int16_t> animation_loop_frame;
-        EndianType<std::int16_t> animation_speed;
+        EndianType<std::uint16_t> animation_loop_frame;
+        EndianType<std::uint16_t> animation_speed;
         PAD(0x1C);
         Bounds<EndianType<float>> lifetime;
         Bounds<EndianType<float>> decay_time;

@@ -92,9 +92,9 @@ namespace Invader::HEK {
         EndianType<float> fade_end_size;
         PAD(0x4);
         EndianType<Index> first_sequence_index;
-        EndianType<std::int16_t> initial_sequence_count;
-        EndianType<std::int16_t> looping_sequence_count;
-        EndianType<std::int16_t> final_sequence_count;
+        EndianType<std::uint16_t> initial_sequence_count;
+        EndianType<std::uint16_t> looping_sequence_count;
+        EndianType<std::uint16_t> final_sequence_count;
         PAD(0x8);
         EndianType<float> unknown;
         EndianType<ParticleOrientation> orientation;
