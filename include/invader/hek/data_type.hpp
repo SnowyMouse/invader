@@ -42,6 +42,8 @@ namespace Invader::HEK {
     using Fraction = float;
     using Index = std::uint16_t;
 
+    #define NULL_INDEX (0xFFFF)
+
     /**
      * This refers to a tag ID when compiled.
      */
@@ -745,7 +747,8 @@ namespace Invader::HEK {
     static_assert(sizeof(TagDataOffset<BigEndian>) == 0x14);
 
     enum MaterialType : TagEnum {
-        MATERIAL_TYPE_DIRT,
+        MATERIAL_TYPE_NONE = NULL_INDEX,
+        MATERIAL_TYPE_DIRT = 0x00,
         MATERIAL_TYPE_SAND,
         MATERIAL_TYPE_STONE,
         MATERIAL_TYPE_SNOW,
