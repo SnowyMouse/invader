@@ -146,19 +146,23 @@ namespace Invader {
         using namespace Invader::HEK;
 
         // Get header
-        this->header = *reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
+        auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
 
         // Check if the literals are invalid
-        if(this->header.head_literal != CACHE_FILE_HEAD || this->header.foot_literal != CACHE_FILE_FOOT) {
+        if(header_maybe->head_literal != CACHE_FILE_HEAD || header_maybe->foot_literal != CACHE_FILE_FOOT) {
             // Maybe it's a demo map?
-            this->header = *reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
-            if(this->header.head_literal != CACHE_FILE_HEAD_DEMO || this->header.foot_literal != CACHE_FILE_FOOT_DEMO) {
+            auto *demo_header_maybe = reinterpret_cast<const CacheFileDemoHeader *>(this->get_data_at_offset(0, sizeof(CacheFileDemoHeader)));
+            if(demo_header_maybe->head_literal != CACHE_FILE_HEAD_DEMO || demo_header_maybe->foot_literal != CACHE_FILE_FOOT_DEMO) {
                 throw InvalidMapException();
             }
+            this->header = *demo_header_maybe;
+        }
+        else {
+            this->header = *header_maybe;
         }
 
         // Check if any overflowing occurs
-        if(this->header.file_size > this->data_length || this->header.build.string[31] != 0 || this->header.name.string[31] != 0) {
+        if(this->header.file_size > this->data_length || this->header.build.overflows() || this->header.name.overflows()) {
             throw InvalidMapException();
         }
 

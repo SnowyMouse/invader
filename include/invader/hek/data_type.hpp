@@ -82,16 +82,29 @@ namespace Invader::HEK {
     struct TagString {
         char string[0x20] = {};
 
+        /**
+         * Check if the string overflows
+         * @return true if the string overflows
+         */
+        bool overflows() const noexcept {
+            for(const char &c : this->string) {
+                if(c == 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         TagString() = default;
         TagString(const TagString &copy) {
-            if(copy.string[sizeof(copy.string) - 1] != 0) {
+            if(copy.overflows()) {
                 eprintf("string overflow detected\n");
                 throw OutOfBoundsException();
             }
             std::copy(copy.string, copy.string + sizeof(copy.string), this->string);
         }
         TagString &operator=(const TagString &copy) {
-            if(copy.string[sizeof(copy.string) - 1] != 0) {
+            if(copy.overflows()) {
                 eprintf("string overflow detected\n");
                 throw OutOfBoundsException();
             }
