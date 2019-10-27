@@ -162,7 +162,7 @@ namespace Invader {
         }
 
         // Check if any overflowing occurs
-        if(this->header.file_size > this->data_length || this->header.build.overflows() || this->header.name.overflows()) {
+        if(this->header.decompressed_file_size > this->data_length || this->header.build.overflows() || this->header.name.overflows()) {
             throw InvalidMapException();
         }
 

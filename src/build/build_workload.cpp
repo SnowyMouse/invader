@@ -341,7 +341,7 @@ namespace Invader {
         cache_file_header.foot_literal = CACHE_FILE_FOOT;
         cache_file_header.tag_data_size = static_cast<std::uint32_t>(tag_data.size());
         cache_file_header.engine = this->engine_target;
-        cache_file_header.file_size = 0; // do NOT set file size; this breaks Halo!
+        cache_file_header.decompressed_file_size = 0; // do NOT set file size; this breaks Halo!
         std::snprintf(cache_file_header.build.string, sizeof(cache_file_header.build), "%s", full_version());
         std::copy(reinterpret_cast<std::byte *>(&cache_file_header), reinterpret_cast<std::byte *>(&cache_file_header + 1), file.data());
 

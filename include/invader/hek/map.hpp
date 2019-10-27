@@ -55,7 +55,7 @@ namespace Invader::HEK {
     struct CacheFileHeader {
         LittleEndian<CacheFileLiteral> head_literal;
         LittleEndian<CacheFileEngine> engine;
-        LittleEndian<std::uint32_t> file_size;
+        LittleEndian<std::uint32_t> decompressed_file_size;
         PAD(0x4);
         LittleEndian<std::uint32_t> tag_data_offset;
         LittleEndian<std::uint32_t> tag_data_size;
@@ -87,7 +87,7 @@ namespace Invader::HEK {
         PAD(0x4);
         LittleEndian<std::uint32_t> crc32;
         PAD(0x34);
-        LittleEndian<std::uint32_t> file_size;
+        LittleEndian<std::uint32_t> decompressed_file_size;
         LittleEndian<std::uint32_t> tag_data_offset;
         LittleEndian<CacheFileLiteral> foot_literal;
         PAD(0x20C);

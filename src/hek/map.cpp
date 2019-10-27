@@ -7,7 +7,7 @@ namespace Invader::HEK {
         std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), static_cast<std::byte>(0));
         this->head_literal = copy.head_literal;
         this->engine = copy.engine;
-        this->file_size = copy.file_size;
+        this->decompressed_file_size = copy.decompressed_file_size;
         this->tag_data_offset = copy.tag_data_offset;
         this->tag_data_size = copy.tag_data_size;
         this->name = copy.name;
@@ -21,7 +21,7 @@ namespace Invader::HEK {
         std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), static_cast<std::byte>(0));
         this->head_literal = copy.head_literal;
         this->engine = copy.engine;
-        this->file_size = copy.file_size;
+        this->decompressed_file_size = copy.decompressed_file_size;
         this->tag_data_offset = copy.tag_data_offset;
         this->tag_data_size = copy.tag_data_size;
         this->name = copy.name;
