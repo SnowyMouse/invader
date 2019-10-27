@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 # Project name - You should change this if you're making a fork
 project(Invader
     VERSION 0.14.1
-    DESCRIPTION "Modding toolkit for Halo Custom Edition"
+    DESCRIPTION "Modding toolkit for Halo Combat Evolved on the PC"
     LANGUAGES C CXX
 )
 
