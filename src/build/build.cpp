@@ -111,7 +111,7 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_FAILURE);
             default:
                 eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);
-                eprintf("Build cache files for Halo Custom Edition.\n\n");
+                eprintf("Build cache files for Halo Combat Evolved on the PC.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
                 eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
