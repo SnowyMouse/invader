@@ -6,148 +6,100 @@
 #include <exception>
 
 namespace Invader {
+    #define DEFINE_EXCEPTION(exception_class, error_text) \
+    class exception_class : public std::exception {\
+        /** What happened? */ \
+        const char *what() const noexcept override { return error_text; } \
+    }
+
     /**
      * This is thrown when a map has an invalid name.
      */
-    class InvalidScenarioNameException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidScenarioNameException, "scenario name is invalid");
 
     /**
      * This is thrown when a pointer is invalid.
      */
-    class InvalidPointerException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidPointerException, "pointer is invalid");
 
     /**
      * This is thrown when a dependency is invalid.
      */
-    class InvalidDependencyException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidDependencyException, "dependency is invalid");
 
     /**
      * This is thrown when tag data exceeds the maximum tag data size
      */
-    class MaximumTagDataSizeException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(MaximumTagDataSizeException, "maximum tag data size exceeded");
 
     /**
      * This is thrown when tag data exceeds the maximum file size
      */
-    class MaximumFileSizeException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(MaximumFileSizeException, "maximum file size exceeded");
 
     /**
      * This is thrown when tag data is out of bounds.
      */
-    class OutOfBoundsException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(OutOfBoundsException, "data is out of bounds");
 
     /**
      * This is thrown when an invalid cyclic loop is present, likely resulting in infinite recursion.
      */
-    class InvalidCyclicLoopException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidCyclicLoopException, "invalid cyclic loop");
 
     /**
      * This is thrown when tag data remains
      */
-    class ExtraTagDataException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(ExtraTagDataException, "expected EOF found extra tag data");
 
     /**
      * This is thrown when a tag cannot be compiled because its tag class is wrong
      */
-    class UnexpectedTagClassException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(UnexpectedTagClassException, "unexpected tag class");
 
     /**
      * This is thrown when a tag cannot be compiled because it's unknown
      */
-    class UnknownTagClassException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(UnknownTagClassException, "unknown tag class");
 
     /**
      * This is thrown when a tag cannot be compiled because it's not found or could not be opened
      */
-    class FailedToOpenTagException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(FailedToOpenTagException, "failed to open a tag");
 
     /**
      * This is thrown when some other tag related error occurs.
      */
-    class TagErrorException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(TagErrorException, "an error occured with a tag");
 
     /**
      * This is thrown when a map isn't valid and tried to be opened
      */
-    class InvalidMapException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidMapException, "tried to open an invalid map");
 
     /**
      * This is thrown when a tag path is too long or is otherwise invalid
      */
-    class InvalidTagPathException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidTagPathException, "tag path is invalid");
 
     /**
-     * This is thrown when invalid bitmap input is given when making a bitmap tag
+     * This is thrown when an invalid bitmap input is given when making a bitmap tag
      */
-    class InvalidInputBitmapException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidInputBitmapException, "input bitmap is invalid");
 
     /**
-     * This is thrown when invalid bitmap format is used
+     * This is thrown when an invalid bitmap format is used
      */
-    class InvalidBitmapFormatException : public std::exception {
-    public:
-        /** What happened? */
-        const char *what() const noexcept;
-    };
+    DEFINE_EXCEPTION(InvalidBitmapFormatException, "bitmap format is invalid");
+
+    /**
+     * This is thrown when a map needs decompressed, first
+     */
+    DEFINE_EXCEPTION(MapNeedsDecompressedException, "compressed map needs to be decompressed");
+
+    /**
+     * This is thrown when a map needs decompressed, first
+     */
+    DEFINE_EXCEPTION(UnknownMapEngineException, "map engine is unknown");
 }
 #endif

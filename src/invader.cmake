@@ -92,7 +92,6 @@ add_library(invader STATIC
     src/crc/crc_spoof.c
     src/crc/hek/crc.cpp
 
-    src/error.cpp
     src/version.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
