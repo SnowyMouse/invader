@@ -73,8 +73,9 @@ namespace Invader::HEK {
         LittleEndian<CacheFileLiteral> foot_literal;
 
         CacheFileHeader() = default;
-        CacheFileHeader(const CacheFileHeader &copy) = default;
+        CacheFileHeader(const CacheFileHeader &copy);
         CacheFileHeader(const CacheFileDemoHeader &copy);
+        CacheFileHeader &operator =(const CacheFileHeader &copy);
 
         bool valid() const noexcept;
     };
@@ -99,8 +100,9 @@ namespace Invader::HEK {
         PAD(0x20C);
 
         CacheFileDemoHeader() = default;
-        CacheFileDemoHeader(const CacheFileDemoHeader &copy) = default;
+        CacheFileDemoHeader(const CacheFileDemoHeader &copy);
         CacheFileDemoHeader(const CacheFileHeader &copy);
+        CacheFileDemoHeader &operator =(const CacheFileDemoHeader &copy);
 
         bool valid() const noexcept;
     };
