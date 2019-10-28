@@ -50,7 +50,7 @@ int main(int argc, const char **argv) {
     else {
         try {
             bool dirty;
-            auto map_crc = calculate_map_crc(data.get(), size, nullptr, nullptr, &dirty);
+            auto map_crc = calculate_map_crc(data.get(), size, nullptr, nullptr, &dirty, true);
             std::printf("%08X\n", map_crc);
             if(dirty) {
                 eprintf("Warning: Cache file is dirty. The CRC in the header is wrong.\n");

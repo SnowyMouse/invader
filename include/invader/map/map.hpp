@@ -118,6 +118,18 @@ namespace Invader {
         const std::byte *resolve_tag_data_pointer(std::uint32_t offset, std::size_t minimum_size = 0) const;
 
         /**
+         * Get the data pointer
+         * @return data
+         */
+        std::byte *get_data() noexcept;
+
+        /**
+         * Get the data length in bytes
+         * @return data length in bytes
+         */
+        std::size_t get_data_length() const noexcept;
+
+        /**
          * Get the tag count
          * @return the tag count
          */

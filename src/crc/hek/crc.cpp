@@ -8,7 +8,7 @@
 #include "../crc_spoof.h"
 
 namespace Invader {
-    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
+    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty, bool allow_compressed) {
         std::vector<std::byte> data_crc;
         std::uint32_t crc = 0;
 
@@ -20,6 +20,13 @@ namespace Invader {
             data_crc.reserve(size);
         }
 
+        // Parse the map
+        Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
+
+        // Reassign variables if needed
+        data = map.get_data();
+        size = map.get_data_length();
+
         #define CRC_DATA(data_start, data_end) \
             if(new_crc) { \
                 data_crc.insert(data_crc.end(), data + data_start, data + data_end); \
@@ -28,8 +35,6 @@ namespace Invader {
                 crc = crc32(crc, data + data_start, data_end - data_start); \
             }
 
-        // Parse the map
-        Map map = Map::map_with_pointer(const_cast<std::byte *>(data), size);
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
         auto &scenario = scenario_tag.get_base_struct<HEK::Scenario>();
         std::size_t bsp_count = scenario.structure_bsps.count.read();

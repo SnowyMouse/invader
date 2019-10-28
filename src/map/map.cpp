@@ -113,6 +113,14 @@ namespace Invader {
         }
     }
 
+    std::byte *Map::get_data() noexcept {
+        return this->data;
+    }
+
+    std::size_t Map::get_data_length() const noexcept {
+        return this->data_length;
+    }
+
     const std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) const {
         return const_cast<Map *>(this)->get_data_at_offset(offset, minimum_size, map_type);
     }
