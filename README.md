@@ -240,7 +240,7 @@ Option                         | Description
 `--info,-i`                    | Show credits, source info, and other info.                          
 `--help,-h`                    | Show help.                                                          
 `--output,-o <file>`           | Output to a specific file.
-`--compression-level,-C <lvl>` | Set compression level (1-22). Levels > 19 use more RAM. Default: 3
+`--compression-level,-l <lvl>` | Set compression level (1-22). Levels > 19 use more RAM. Default: 3
 `--decompress,-D`              | Decompress instead of compress.                             
 
 ### invader-crc

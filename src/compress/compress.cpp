@@ -23,7 +23,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("help", 'h', 0);
     options.emplace_back("info", 'i', 0);
     options.emplace_back("output", 'o', 1);
-    options.emplace_back("compression-level", 'C', 1);
+    options.emplace_back("compression-level", 'l', 1);
     options.emplace_back("decompress", 'D', 0);
 
     auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, 'h', compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
@@ -53,7 +53,7 @@ int main(int argc, const char **argv) {
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
                 eprintf("  --output,-o <path>           Emit the resulting map at the given path. By\n");
                 eprintf("                               default, this is the map path (overwrite).\n");
-                eprintf("  --compression-level,-C <lvl> Use the compression level. Must be between 1 and\n");
+                eprintf("  --compression-level,-l <lvl> Use the compression level. Must be between 1 and\n");
                 eprintf("                               22. Values > 19 use more memory. Default: 3\n");
                 eprintf("  --decompress,-D              Decompress instead of compress.\n\n");
                 std::exit(EXIT_FAILURE);
