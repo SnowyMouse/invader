@@ -327,3 +327,4 @@ image as one bitmap
 - invader-resource - Builds resource map files
 
 [Mozzarilla]: https://github.com/MosesofEgypt/mozzarilla
+[Zstandard]: https://github.com/Facebook/zstd
