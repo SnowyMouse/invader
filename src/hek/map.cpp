@@ -24,7 +24,7 @@ namespace Invader::HEK {
         }
 
         // Make sure the head/foot things are valid
-        if(this->engine == CacheFileEngine::CACHE_FILE_DEMO || this->engine == CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED) {
+        if(this->engine == CacheFileEngine::CACHE_FILE_DEMO) {
             if(this->head_literal != CacheFileLiteral::CACHE_FILE_HEAD_DEMO || this->foot_literal != CacheFileLiteral::CACHE_FILE_FOOT_DEMO) {
                 return false;
             }

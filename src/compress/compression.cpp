@@ -40,6 +40,8 @@ namespace Invader::Compression {
         auto &header_out = *reinterpret_cast<HEK::CacheFileHeader *>(header_output);
         header_out = header;
         header_out.engine = new_engine_version;
+        header_out.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT;
+        header_out.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD;
         if(decompressed_size > UINT32_MAX) {
             throw MaximumFileSizeException();
         }
@@ -85,6 +87,8 @@ namespace Invader::Compression {
 
         // if demo, convert the header, otherwise copy the header
         if(new_engine_version == HEK::CACHE_FILE_DEMO) {
+            header_copy.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
+            header_copy.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
             *reinterpret_cast<HEK::CacheFileDemoHeader *>(header_output) = header_copy;
         }
         else {

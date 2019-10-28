@@ -174,6 +174,7 @@ namespace Invader {
                 break;
             case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+            case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
                 throw MapNeedsDecompressedException();
             default:
                 throw UnsupportedMapEngineException();
