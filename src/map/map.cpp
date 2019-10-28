@@ -161,6 +161,24 @@ namespace Invader {
             this->header = *header_maybe;
         }
 
+        // If we don't know the type of engine, bail
+        switch(this->header.engine) {
+            case CacheFileEngine::CACHE_FILE_DEMO:
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                break;
+            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                if(this->header.decompressed_file_size != 0) {
+                    throw MapNeedsDecompressedException();
+                }
+                break;
+            case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                throw MapNeedsDecompressedException();
+            default:
+                throw UnsupportedMapEngineException();
+        }
+
         // Check if any overflowing occurs
         if(this->header.decompressed_file_size > this->data_length || this->header.build.overflows() || this->header.name.overflows()) {
             throw InvalidMapException();

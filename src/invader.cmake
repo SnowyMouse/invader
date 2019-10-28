@@ -14,6 +14,7 @@ add_library(invader STATIC
     src/bitmap/color_plate_scanner.cpp
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
+    src/compress/compression.cpp
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
@@ -133,5 +134,8 @@ set_source_files_properties(src/version.cpp
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# Build zstd
+include(src/compress/zstd/zstd.cmake)
+
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette)
+target_link_libraries(invader invader-bitmap-p8-palette zstd)

@@ -7,6 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
 - invader-build: Copying TagString data now checks for string overflow
+- invader-compress - Compresses cache files using the [Zstandard] algorithm
 
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their

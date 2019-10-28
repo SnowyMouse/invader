@@ -98,8 +98,23 @@ namespace Invader {
     DEFINE_EXCEPTION(MapNeedsDecompressedException, "compressed map needs to be decompressed");
 
     /**
-     * This is thrown when a map needs decompressed, first
+     * This is thrown when a map needs compressed, first
      */
-    DEFINE_EXCEPTION(UnknownMapEngineException, "map engine is unknown");
+    DEFINE_EXCEPTION(MapNeedsCompressedException, "decompressed map needs to be compressed");
+
+    /**
+     * This is thrown when a map engine is unsupported
+     */
+    DEFINE_EXCEPTION(UnsupportedMapEngineException, "map engine is unsupported");
+
+    /**
+     * This is thrown when compression failed
+     */
+    DEFINE_EXCEPTION(CompressionFailureException, "failed to compress");
+
+    /**
+     * This is thrown when decompression failed
+     */
+    DEFINE_EXCEPTION(DecompressionFailureException, "failed to decompress");
 }
 #endif

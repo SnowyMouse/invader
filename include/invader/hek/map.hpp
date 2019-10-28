@@ -12,7 +12,11 @@ namespace Invader::HEK {
         CACHE_FILE_DEMO = 0x6,
         CACHE_FILE_RETAIL = 0x7,
         CACHE_FILE_CUSTOM_EDITION = 0x261,
-        CACHE_FILE_DARK_CIRCLET = 0x1A86
+        CACHE_FILE_DARK_CIRCLET = 0x1A86,
+
+        CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
+        CACHE_FILE_RETAIL_COMPRESSED = 0x861A0007,
+        CACHE_FILE_CUSTOM_EDITION_COMPRESSED = 0x85AC0261
     };
 
     enum CacheFileType : TagEnum {
@@ -71,6 +75,8 @@ namespace Invader::HEK {
         CacheFileHeader() = default;
         CacheFileHeader(const CacheFileHeader &copy) = default;
         CacheFileHeader(const CacheFileDemoHeader &copy);
+
+        bool valid() const noexcept;
     };
     static_assert(sizeof(CacheFileHeader) == 0x800);
 
@@ -95,6 +101,8 @@ namespace Invader::HEK {
         CacheFileDemoHeader() = default;
         CacheFileDemoHeader(const CacheFileDemoHeader &copy) = default;
         CacheFileDemoHeader(const CacheFileHeader &copy);
+
+        bool valid() const noexcept;
     };
     static_assert(sizeof(CacheFileDemoHeader) == 0x800);
 
