@@ -79,7 +79,7 @@ int main(int argc, const char **argv) {
     // If not, it's probably a cache file
     else {
         try {
-            auto map = Map::map_with_pointer(map_data.get(), size);
+            auto map = Map::map_with_copy(map_data.get(), size);
 
             // Open output
             f = std::fopen(output, "wb");

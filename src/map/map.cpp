@@ -6,6 +6,7 @@
 #include "invader/tag/hek/class/scenario.hpp"
 #include "invader/tag/hek/class/sound.hpp"
 #include "invader/resource/hek/resource_map.hpp"
+#include "invader/compress/compression.hpp"
 
 #include "invader/map/map.hpp"
 
@@ -15,18 +16,46 @@ namespace Invader {
                            const std::byte *loc_data, std::size_t loc_data_size,
                            const std::byte *sounds_data, std::size_t sounds_data_size) {
         Map map;
-        map.data_m.insert(map.data_m.end(), data, data + data_size);
+        const auto *potential_header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        bool needs_decompressed = false;
+        if(data_size > sizeof(*potential_header) && potential_header->valid()) {
+            // Check if it needs decompressed
+            switch(potential_header->engine.read()) {
+                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    if(potential_header->decompressed_file_size != 0) {
+                        needs_decompressed = true;
+                    }
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    needs_decompressed = true;
+                default:
+                    break;
+            }
+
+            // If so, decompress it
+            if(needs_decompressed) {
+                map.data_m = Compression::decompress_map_data(data, data_size);
+            }
+        }
+
+        if(!needs_decompressed) {
+            map.data_m.insert(map.data_m.end(), data, data + data_size);
+        }
         map.data = map.data_m.data();
+        map.data_length = map.data_m.size();
+
+
         map.bitmap_data_m.insert(map.bitmap_data_m.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
         map.bitmap_data = map.bitmap_data_m.data();
+        map.bitmap_data_length = bitmaps_data_size;
         map.sound_data_m.insert(map.sound_data_m.end(), sounds_data, sounds_data + sounds_data_size);
         map.sound_data = map.sound_data_m.data();
+        map.sound_data_length = sounds_data_size;
         map.loc_data_m.insert(map.loc_data_m.end(), loc_data, loc_data + loc_data_size);
         map.loc_data = map.loc_data_m.data();
-        map.data_length = data_size;
-        map.bitmap_data_length = bitmaps_data_size;
         map.loc_data_length = loc_data_size;
-        map.sound_data_length = sounds_data_size;
         map.load_map();
         return map;
     }

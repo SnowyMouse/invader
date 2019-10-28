@@ -27,7 +27,8 @@ namespace Invader {
         };
 
         /**
-         * Create a Map by copying the given data, bitmaps, loc, and sound data.
+         * Create a Map by copying the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this
+         * way.
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
@@ -45,7 +46,8 @@ namespace Invader {
 
         /**
          * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
-         * responsible for ensuring that these pointers are valid for the lifespan of the Map.
+         * responsible for ensuring that these pointers are valid for the lifespan of the Map. Compressed maps cannot
+         * be loaded this way.
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
