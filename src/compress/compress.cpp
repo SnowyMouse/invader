@@ -31,7 +31,7 @@ int main(int argc, const char **argv) {
             case 'D':
                 compress_options.decompress = true;
                 break;
-            case 'q':
+            case 'l':
                 compress_options.compression_level = std::strtol(arguments[0], nullptr, 10);
                 if(compress_options.compression_level < 1 || compress_options.compression_level > 22) {
                     eprintf("Compression level must be between 1 and 22\n");
