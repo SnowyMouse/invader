@@ -122,6 +122,10 @@ namespace Invader::Compression {
         // Check the header
         const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         if(sizeof(*header) > data_size || !header->valid()) {
+            auto demo_header = static_cast<const HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header));
+            if(demo_header.valid() && demo_header.engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                throw MapNeedsCompressedException();
+            }
             throw InvalidMapException();
         }
 
