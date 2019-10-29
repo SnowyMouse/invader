@@ -16,37 +16,11 @@ namespace Invader {
                            const std::byte *loc_data, std::size_t loc_data_size,
                            const std::byte *sounds_data, std::size_t sounds_data_size) {
         Map map;
-        const auto *potential_header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
-        bool needs_decompressed = false;
-        if(data_size > sizeof(*potential_header) && potential_header->valid()) {
-            // Check if it needs decompressed
-            switch(potential_header->engine.read()) {
-                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    if(potential_header->decompressed_file_size != 0) {
-                        needs_decompressed = true;
-                    }
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    needs_decompressed = true;
-                default:
-                    break;
-            }
-
-            // If so, decompress it
-            if(needs_decompressed) {
-                map.data_m = Compression::decompress_map_data(data, data_size);
-            }
-        }
-
-        if(!needs_decompressed) {
+        if(!map.decompress_if_needed(data, data_size)) {
             map.data_m.insert(map.data_m.end(), data, data + data_size);
         }
         map.data = map.data_m.data();
         map.data_length = map.data_m.size();
-
-
         map.bitmap_data_m.insert(map.bitmap_data_m.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
         map.bitmap_data = map.bitmap_data_m.data();
         map.bitmap_data_length = bitmaps_data_size;
@@ -75,6 +49,34 @@ namespace Invader {
         map.sound_data_length = sounds_data_size;
         map.load_map();
         return map;
+    }
+
+    bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
+        const auto *potential_header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        bool needs_decompressed = false;
+        if(data_size > sizeof(*potential_header) && potential_header->valid()) {
+            // Check if it needs decompressed
+            switch(potential_header->engine.read()) {
+                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    if(potential_header->decompressed_file_size != 0) {
+                        needs_decompressed = true;
+                    }
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    needs_decompressed = true;
+                default:
+                    break;
+            }
+
+            // If so, decompress it
+            if(needs_decompressed) {
+                this->data_m = Compression::decompress_map_data(data, data_size);
+            }
+        }
+
+        return needs_decompressed;
     }
 
     std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {

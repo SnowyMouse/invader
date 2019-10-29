@@ -245,6 +245,13 @@ namespace Invader {
         /** Get BSPs */
         void get_bsps();
 
+        /**
+         * Decompress if we are compressed
+         * @param data      pointer to data
+         * @param data_size size of data buffer
+         * @return true if it was decompressed
+         */
+        bool decompress_if_needed(const std::byte *data, std::size_t data_size);
 
         Map() = default;
     };
