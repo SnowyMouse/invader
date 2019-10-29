@@ -138,4 +138,4 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include(src/compress/zstd/zstd.cmake)
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd)
+target_link_libraries(invader invader-bitmap-p8-palette invader-zstd)
