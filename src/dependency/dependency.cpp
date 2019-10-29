@@ -17,8 +17,8 @@ int main(int argc, char * const *argv) {
     options.emplace_back("help", 'h', 0);
     options.emplace_back("info", 'i', 0);
     options.emplace_back("tags", 't', 1);
-    options.emplace_back("reverse", 'r', 0);
-    options.emplace_back("recursive", 'R', 0);
+    options.emplace_back("reverse", 'R', 0);
+    options.emplace_back("recursive", 'r', 0);
     options.emplace_back("fs-path", 'P', 0);
 
     struct DependencyOption {
@@ -54,8 +54,8 @@ int main(int argc, char * const *argv) {
                 eprintf("Check dependencies for a tag.\n\n");
                 eprintf("Options:\n");
                 eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --recursive,-R               Recursively get all depended tags.\n");
-                eprintf("  --reverse,-r                 Find all tags that depend on the tag, instead.\n");
+                eprintf("  --recursive,-r               Recursively get all depended tags.\n");
+                eprintf("  --reverse,-R                 Find all tags that depend on the tag, instead.\n");
                 eprintf("  --fs-path,-P                 Use a filesystem path for the tag.\n");
                 eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
                 eprintf("                               times to add more directories, ordered by\n");

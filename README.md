@@ -241,7 +241,7 @@ Option                         | Description
 `--help,-h`                    | Show help.                                                          
 `--output,-o <file>`           | Output to a specific file.
 `--compression-level,-l <lvl>` | Set compression level (1-22). Levels > 19 use more RAM. Default: 3
-`--decompress,-D`              | Decompress instead of compress.                             
+`--decompress,-d`              | Decompress instead of compress.                             
 
 ### invader-crc
 This program calculates the CRC32 of a map file. If the CRC value calculated
@@ -260,8 +260,8 @@ Option            | Description
 `--help,-h`       | Show help.                                                 
 `--info,-i`       | Show credits, source info, and other info.                 
 `--fs-path,-P`    | Use a filesystem path for the tag.                         
-`--recursive,-R`  | Recursively get all depended tags.                         
-`--reverse,-r`    | Find all tags that depend on the tag, instead.             
+`--recursive,-r`  | Recursively get all depended tags.                         
+`--reverse,-R`    | Find all tags that depend on the tag, instead.             
 `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories.
 
 ### invader-font

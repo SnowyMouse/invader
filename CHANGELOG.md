@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.15.1] - 2019-10-29
+## Changed
+- invader-compress: Now uses `-d` instead of `-D` to decompress
+- invader-dependency: Now uses `-R` instead of `-r` for reverse dependencies
+- invader-dependency: Now uses `-r` instead of `-R` for recursive dependencies
+
 ## [0.15.0] - 2019-10-29
 ## Added
 - invader-compress - Compresses cache files using the [Zstandard] algorithm
