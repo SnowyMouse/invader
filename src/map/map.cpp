@@ -39,7 +39,10 @@ namespace Invader {
                            std::vector<std::byte> &&loc_data,
                            std::vector<std::byte> &&sounds_data) {
         Map map;
-        if(!map.decompress_if_needed(data.data(), data.size())) {
+        if(map.decompress_if_needed(data.data(), data.size())) {
+            data.clear();
+        }
+        else {
             map.data_m = data;
         }
         map.data = map.data_m.data();
