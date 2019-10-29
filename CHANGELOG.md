@@ -2,12 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.15.0] - 2019-10-29
 ## Added
+- invader-compress - Compresses cache files using the [Zstandard] algorithm
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
 - invader-build: Copying TagString data now checks for string overflow
-- invader-compress - Compresses cache files using the [Zstandard] algorithm
+- invader-crc: Works with maps compressed with invader-compress
+- invader-indexer: Works with maps compressed with invader-compress
 
 ## Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their
