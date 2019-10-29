@@ -34,6 +34,32 @@ namespace Invader {
         return map;
     }
 
+    Map Map::map_with_move(std::vector<std::byte> &&data,
+                           std::vector<std::byte> &&bitmaps_data,
+                           std::vector<std::byte> &&loc_data,
+                           std::vector<std::byte> &&sounds_data) {
+        Map map;
+        if(!map.decompress_if_needed(data.data(), data.size())) {
+            map.data_m = data;
+        }
+        map.data = map.data_m.data();
+        map.data_length = map.data_m.size();
+
+        map.bitmap_data_m = bitmaps_data;
+        map.bitmap_data = map.bitmap_data_m.data();
+        map.bitmap_data_length = map.bitmap_data_m.size();
+
+        map.sound_data_m = sounds_data;
+        map.sound_data = map.sound_data_m.data();
+        map.sound_data_length = map.sound_data_m.size();
+
+        map.loc_data_m = loc_data;
+        map.loc_data = map.loc_data_m.data();
+        map.loc_data_length = map.loc_data_m.size();
+        map.load_map();
+        return map;
+    }
+
     Map Map::map_with_pointer(std::byte *data, std::size_t data_size,
                               std::byte *bitmaps_data, std::size_t bitmaps_data_size,
                               std::byte *loc_data, std::size_t loc_data_size,

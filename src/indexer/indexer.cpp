@@ -9,6 +9,7 @@
 #include "invader/tag/compiled_tag.hpp"
 #include "invader/version.hpp"
 #include "invader/printf.hpp"
+#include "invader/file/file.hpp"
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -28,30 +29,24 @@ int main(int argc, const char **argv) {
     const char *output = argv[2];
     const char *input = argv[1];
 
-    // Open input map
-    FILE *f = std::fopen(input, "rb");
-    if(!f) {
-        eprintf("Failed to open %s.\n", input);
-        return RETURN_FAILED_ERROR;
-    }
-    std::fseek(f, 0, SEEK_END);
-    std::size_t size = std::ftell(f);
-    auto map_data = std::make_unique<std::byte []>(size);
-    std::fseek(f, 0, SEEK_SET);
-    if(std::fread(map_data.get(), size, 1, f) != 1) {
-        eprintf("Failed to read %s\n", argv[1]);
-        return RETURN_FAILED_ERROR;
-    }
-    std::fclose(f);
+    auto input_map_data = File::open_file(input);
 
-    f = nullptr;
+    // Open input map
+    if(!input_map_data.has_value()) {
+        eprintf("Failed to read %s\n", input);
+        return RETURN_FAILED_ERROR;
+    }
+
+    auto input_map = std::move(*input_map_data);
+
+    std::FILE *f;
 
     // If it's a resource map, try parsing that
-    if(size >= 4 && *reinterpret_cast<std::uint32_t *>(map_data.get()) <= 3) {
+    if(input_map.size() >= 4 && *reinterpret_cast<std::uint32_t *>(input_map.data()) <= 3) {
         try {
-            auto map = load_resource_map(map_data.get(), size);
+            auto map = load_resource_map(input_map.data(), input_map.size());
             auto tag_count = map.size();
-            int skip = *reinterpret_cast<std::uint32_t *>(map_data.get()) != 3 ? 1 : 0;
+            int skip = *reinterpret_cast<std::uint32_t *>(input_map.data()) != 3 ? 1 : 0;
 
             // Open the output!
             f = std::fopen(output, "wb");
@@ -79,7 +74,7 @@ int main(int argc, const char **argv) {
     // If not, it's probably a cache file
     else {
         try {
-            auto map = Map::map_with_copy(map_data.get(), size);
+            auto map = Map::map_with_move(std::move(input_map));
 
             // Open output
             f = std::fopen(output, "wb");

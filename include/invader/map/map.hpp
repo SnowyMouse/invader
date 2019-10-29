@@ -38,11 +38,25 @@ namespace Invader {
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
          * @param sounds_data_size  length of sounds data
+         * @return                   map
          */
         static Map map_with_copy(const std::byte *data, std::size_t data_size,
                                  const std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
                                  const std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
                                  const std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
+
+        /**
+         * Create a Map by moving the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this way.
+         * @param  data         map data vector
+         * @param  bitmaps_data bitmap data vector
+         * @param  loc_data     loc data vector
+         * @param  sounds_data  sound data vector
+         * @return              map
+         */
+        static Map map_with_move(std::vector<std::byte> &&data,
+                                 std::vector<std::byte> &&bitmaps_data = std::vector<std::byte>(),
+                                 std::vector<std::byte> &&loc_data = std::vector<std::byte>(),
+                                 std::vector<std::byte> &&sounds_data = std::vector<std::byte>());
 
         /**
          * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
@@ -57,6 +71,7 @@ namespace Invader {
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
          * @param sounds_data_size  length of sounds data
+         * @return                  map
          */
         static Map map_with_pointer(std::byte *data, std::size_t data_size,
                                     std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
