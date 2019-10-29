@@ -40,10 +40,10 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_FAILURE);
-            case 'r':
+            case 'R':
                 dependency_options.reverse = true;
                 break;
-            case 'R':
+            case 'r':
                 dependency_options.recursive = true;
                 break;
             case 'P':

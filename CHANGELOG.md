@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.15.2] - 2019-10-29
+## Fixed
+- invader-compress: Fixed a bug where decompressing did not work
+- invader-dependency: Fixed a bug where reverse and recursive were switched
+
 ## [0.15.1] - 2019-10-29
 ## Changed
 - invader-compress: Now uses `-d` instead of `-D` to decompress

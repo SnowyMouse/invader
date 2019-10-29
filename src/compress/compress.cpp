@@ -28,7 +28,7 @@ int main(int argc, const char **argv) {
 
     auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, 'h', compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
         switch(opt) {
-            case 'D':
+            case 'd':
                 compress_options.decompress = true;
                 break;
             case 'l':
