@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.15.2] - 2019-10-29
+## Changed
+- The zstd library is now static linked (except for libarchive)
+
 ## Fixed
 - invader-compress: Fixed a bug where decompressing did not work
 - invader-dependency: Fixed a bug where reverse and recursive were switched
