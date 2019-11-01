@@ -94,7 +94,7 @@ This is used for recording Invader's changes. This changelog is based on
   needs more work but it's remarkably close
 
 ### Fixed
-- Fixed an issue where invader-dependency didn't include a null terminator,
+- invader-dependency: Fixed an issue where it didn't include a null terminator,
   causing some tags to fail to open
 - invader-archive: Fixed an issue where some stock HEK .gbxmodel tags tried
   (and failed) to be archived as .model tags
