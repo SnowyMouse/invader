@@ -3,21 +3,21 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.15.2] - 2019-10-29
-## Changed
+### Changed
 - The zstd library is now static linked (except for libarchive)
 
-## Fixed
+### Fixed
 - invader-compress: Fixed a bug where decompressing did not work
 - invader-dependency: Fixed a bug where reverse and recursive were switched
 
 ## [0.15.1] - 2019-10-29
-## Changed
+### Changed
 - invader-compress: Now uses `-d` instead of `-D` to decompress
 - invader-dependency: Now uses `-R` instead of `-r` for reverse dependencies
 - invader-dependency: Now uses `-r` instead of `-R` for recursive dependencies
 
 ## [0.15.0] - 2019-10-29
-## Added
+### Added
 - invader-compress - Compresses cache files using the [Zstandard] algorithm
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
@@ -25,7 +25,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-crc: Works with maps compressed with invader-compress
 - invader-indexer: Works with maps compressed with invader-compress
 
-## Changed
+### Changed
 - invader-build: Bitmaps and sound data are now shown separately next to their
   combined total in the diagnostic output
 - invader-build: The number of tags that could be cached/indexed is now shown
