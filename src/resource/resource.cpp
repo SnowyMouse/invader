@@ -19,12 +19,14 @@ int main(int argc, const char **argv) {
     using namespace Invader;
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("type", 'T', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("maps", 'm', 1);
-    options.emplace_back("retail", 'R', 0);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("type", 'T', 1, "Set the resource map. This option is required for creating maps. Can be: bitmaps, sounds, or loc.", "<type>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
+    options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
+
+    static constexpr char DESCRIPTION[] = "Create resource maps.";
+    static constexpr char USAGE[] = "<options>";
 
     struct ResourceOption {
         // Program path
@@ -45,7 +47,7 @@ int main(int argc, const char **argv) {
     } resource_options;
     resource_options.path = argv[0];
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, 'h', resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {
             case 'i':
                 show_version_info();
@@ -82,22 +84,6 @@ int main(int argc, const char **argv) {
                 }
                 resource_options.resource_map_set = true;
                 break;
-
-            default:
-                eprintf("Usage: %s <options>\n\n", resource_options.path);
-                eprintf("Create or modify a bitmap tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --maps,-m <path>           Set the maps directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory. Use multiple times to use\n");
-                eprintf("                               multiple directories in order of precedence.\n\n");
-                eprintf("Resource options:\n");
-                eprintf("    --type,-T <type>           Set the resource map. This option is required for\n");
-                eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n");
-                eprintf("    --retail,-R                Build a retail resource map (bitmaps/sounds only)\n\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

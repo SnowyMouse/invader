@@ -39,15 +39,17 @@ int main(int argc, char *argv[]) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("font-size", 'i', 1);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("fs-path", 'P', 0);
+    options.emplace_back("data", 'd', 1, "Set the data directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Set the tags directory.", "<dir>");
+    options.emplace_back("font-size", 'i', 1, "Set the font size in pixels.", "<px>");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+
+    static constexpr char DESCRIPTION[] = "Create font tags from TTF files.";
+    static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, 0, font_options, [](char opt, const auto &args, FontOptions &font_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, font_options, [](char opt, const auto &args, FontOptions &font_options) {
         switch(opt) {
             case 'd':
                 font_options.data = args[0];
@@ -68,20 +70,6 @@ int main(int argc, char *argv[]) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-
-            default:
-                eprintf("Usage: %s [options] <font-tag>\n\n", font_options.path);
-                eprintf("Create font tags from TTF files.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --fs-path,-P               Use a filesystem path for the TTF file.\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --data,-d <path>           Set the data directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
-                eprintf("Font options:\n");
-                eprintf("    --font-size,-s <px>        Set the font size in pixels.\n\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

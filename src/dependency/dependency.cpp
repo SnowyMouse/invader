@@ -14,12 +14,14 @@
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("reverse", 'R', 0);
-    options.emplace_back("recursive", 'r', 0);
-    options.emplace_back("fs-path", 'P', 0);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("reverse", 'R', 0, "Find all tags that depend on the tag, instead.");
+    options.emplace_back("recursive", 'r', 0, "Recursively get all depended tags.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+
+    static constexpr char DESCRIPTION[] = "Check dependencies for a tag.";
+    static constexpr char USAGE[] = "[options] <tag.class>";
 
     struct DependencyOption {
         const char *path;
@@ -32,7 +34,7 @@ int main(int argc, char * const *argv) {
 
     dependency_options.path = argv[0];
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, 'h', dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
                 dependency_options.tags.push_back(arguments[0]);
@@ -49,18 +51,6 @@ int main(int argc, char * const *argv) {
             case 'P':
                 dependency_options.use_filesystem_path = true;
                 break;
-            default:
-                eprintf("Usage: %s [options] <tag.class>\n\n", dependency_options.path);
-                eprintf("Check dependencies for a tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --recursive,-r               Recursively get all depended tags.\n");
-                eprintf("  --reverse,-R                 Find all tags that depend on the tag, instead.\n");
-                eprintf("  --fs-path,-P                 Use a filesystem path for the tag.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

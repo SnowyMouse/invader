@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace Invader {
     /**
@@ -21,14 +22,22 @@ namespace Invader {
 
         /** Number of arguments expected */
         int argument_count;
+
+        /** Description of the option */
+        std::optional<std::string> description;
+
+        /** Parameters of the option */
+        std::optional<std::string> parameters;
     public:
         /**
          * Initialize a command line option
-         * @param full_name      full name of the command line option
+         * @param full_name      long name of the command line option
          * @param char_name      char name of the command line option; this will be passed into the argument handler if this is correctly used
          * @param argument_count number of arguments expected for the command line option
+         * @param description    description of the command line option, if any
+         * @param parameters     parameters of the command line option, if any
          */
-        CommandLineOption(const char *full_name, const char char_name, int argument_count) : full_name(full_name), char_name(char_name), argument_count(argument_count) {}
+        CommandLineOption(const char *full_name, const char char_name, int argument_count, const char *description = nullptr, const char *parameters = nullptr) : full_name(full_name), char_name(char_name), argument_count(argument_count), description(description ? std::optional<std::string>(std::string(description)) : std::nullopt), parameters(parameters ? std::optional<std::string>(std::string(parameters)) : std::nullopt) {}
 
         /**
          * Get the full name of the command line option
@@ -59,13 +68,14 @@ namespace Invader {
          * @param argc            number of arguments
          * @param argv            pointer to the first argument
          * @param options         options to use
-         * @param error_char_name char_name to use for errors
+         * @param usage           program usage on help/error
+         * @param description     program description on help
          * @param user_data       user data passed into the arguments
          * @param handler         handler function to use
          * @return                a vector of all unhandled arguments
          */
         template<typename DataType>
-        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, char error_char_name, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
+        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, const char *usage, const char *description, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
             // Hold all unhandled arguments
             std::vector<const char *> unhandled_arguments;
 
@@ -73,7 +83,127 @@ namespace Invader {
             std::vector<const CommandLineOption *> currently_handled_options;
             std::vector<const char *> currently_handled_option_arguments_handled;
 
-            static const char INVALID_OPTION_ERROR[] = "-%s is not a valid option.\n";
+            auto error_fail = [&argv, &usage](const char *what) {
+                std::fprintf(stderr, "-%s is not a valid option.\n", what);
+                std::fprintf(stderr, "Usage: %s %s\n", argv[0], usage);
+                std::fprintf(stderr, "Use -h for help.\n");
+                std::exit(EXIT_FAILURE);
+            };
+
+            auto print_help = [&options, &argv, &usage, &description]() {
+                // Print the usage and description
+                std::printf("Usage: %s %s\n\n%s\n\nOptions:\n", argv[0], usage, description);
+
+                auto print_help_for_option = [](const CommandLineOption &option) {
+                    #define INV_COMMAND_LINE_ARGUMENT_SIZE 30
+                    #define INV_COMMAND_LINE_ARGUMENT_MAKE_STR2(w) #w
+                    #define INV_COMMAND_LINE_ARGUMENT_MAKE_STR(w) INV_COMMAND_LINE_ARGUMENT_MAKE_STR2(w)
+                    #define INV_COMMAND_LINE_ARGUMENT_SIZE_STR INV_COMMAND_LINE_ARGUMENT_MAKE_STR(INV_COMMAND_LINE_ARGUMENT_SIZE)
+
+                    // Print the left column (parameters and stuff)
+                    char left_column[INV_COMMAND_LINE_ARGUMENT_SIZE];
+                    std::size_t l = std::snprintf(left_column, sizeof(left_column), "  -%c --%s", option.char_name, option.full_name.data());
+                    if(l >= sizeof(left_column)) {
+                        std::fprintf(stderr, "Left column exceeded!\n");
+                        std::terminate();
+                    }
+                    if(option.parameters.has_value()) {
+                        l += std::snprintf(left_column + l, sizeof(left_column) - l, " %s", option.parameters.value().data());
+                        if(l >= sizeof(left_column)) {
+                            std::fprintf(stderr, "Left column exceeded!\n");
+                            std::terminate();
+                        }
+                    }
+                    std::printf("%-" INV_COMMAND_LINE_ARGUMENT_SIZE_STR "s", left_column);
+
+                    if(!option.description.has_value()) {
+                        std::printf("\n");
+                        return;
+                    }
+
+                    const char *description = option.description.value().data();
+
+                    // Print the right column (description)
+                    std::size_t r = 0;
+                    char right_column[80 - sizeof(left_column)] = {};
+                    const char *word_start = nullptr;
+                    bool first_line = true;
+
+                    // Print and then purge the right column buffer to make way for a new line
+                    auto purge_right_column = [&right_column, &r, &first_line, &word_start]() {
+                        if(r) {
+                            if(first_line) {
+                                first_line = false;
+                            }
+                            else {
+                                std::printf("%" INV_COMMAND_LINE_ARGUMENT_SIZE_STR "s", "");
+                            }
+                            std::printf("%s\n", right_column);
+                            std::fill(right_column, right_column + sizeof(right_column), 0);
+                            r = 0;
+                        }
+                    };
+
+                    // Go through each word
+                    for(const char *w = description;; w++) {
+                        if(*w == ' ' || *w == 0) {
+                            if(word_start) {
+                                std::size_t word_length = w - word_start;
+                                if(r + 1 + word_length >= sizeof(right_column)) {
+                                    purge_right_column();
+                                }
+                                if(word_length + 1 > sizeof(right_column)) {
+                                    std::fprintf(stderr, "Right column exceeded!\n");
+                                    std::terminate();
+                                }
+                                right_column[r++] = ' ';
+                                std::strncpy(right_column + r, word_start, word_length);
+                                r += word_length;
+                                word_start = nullptr;
+                            }
+                        }
+                        else if(!word_start) {
+                            word_start = w;
+                        }
+
+                        // If it's a null terminator, end the line and return
+                        if(*w == 0) {
+                            purge_right_column();
+                            return;
+                        }
+                    }
+
+                    #undef INV_COMMAND_LINE_ARGUMENT_SIZE
+                    #undef INV_COMMAND_LINE_ARGUMENT_MAKE_STR2
+                    #undef INV_COMMAND_LINE_ARGUMENT_MAKE_STR
+                    #undef INV_COMMAND_LINE_ARGUMENT_SIZE_STR
+                };
+
+                auto print_help_for_option_letter = [&options, &print_help_for_option](char option_letter) {
+                    // If option, show that
+                    for(auto &option : options) {
+                        if(option.char_name == option_letter) {
+                            print_help_for_option(option);
+                            return;
+                        }
+                    }
+                    // If help, show that
+                    if(option_letter == 'h') {
+                        auto help_option = CommandLineOption("help", 'h', 0, "Show this list of options.");
+                        print_help_for_option(help_option);
+                        return;
+                    }
+                };
+
+                for(char letter = 'a'; letter <= 'z'; letter++) {
+                    print_help_for_option_letter(letter);
+                    print_help_for_option_letter(std::toupper(letter));
+                }
+
+                std::printf("\n");
+
+                std::exit(EXIT_SUCCESS);
+            };
 
             for(int i = 1; i < argc; i++) {
                 // If we don't have any options being worked on, check if this is an option
@@ -84,8 +214,7 @@ namespace Invader {
                     if(argument_length >= 1 && argument[0] == '-') {
                         // It was just a hyphen
                         if(argument_length == 1) {
-                            std::fprintf(stderr, INVALID_OPTION_ERROR, "");
-                            handler(error_char_name, std::vector<const char *>(), user_data);
+                            error_fail("");
                         }
 
                         // It's a long option
@@ -104,8 +233,12 @@ namespace Invader {
 
                             // If we didn't get it, then darn
                             if(!got_it) {
-                                std::fprintf(stderr, INVALID_OPTION_ERROR, argument + 1);
-                                handler(error_char_name, std::vector<const char *>(), user_data);
+                                if(std::strcmp(argument, "--help") == 0) {
+                                    print_help();
+                                }
+                                else {
+                                    error_fail(argument + 1);
+                                }
                             }
                         }
 
@@ -124,9 +257,13 @@ namespace Invader {
 
                                 // If we didn't get it, then darn
                                 if(!got_it) {
-                                    char option_text[2] = { *o, 0 };
-                                    std::fprintf(stderr, INVALID_OPTION_ERROR, option_text);
-                                    handler(error_char_name, std::vector<const char *>(), user_data);
+                                    if(*o == 'h') {
+                                        print_help();
+                                    }
+                                    else {
+                                        char option_text[2] = { *o, 0 };
+                                        error_fail(option_text);
+                                    }
                                 }
                             }
 
@@ -136,7 +273,7 @@ namespace Invader {
                                 if(option->argument_count) {
                                     std::fprintf(stderr, "-%c (passed in \"%s\") takes %i argument%s.\n", option->char_name, argument, option->argument_count, option->argument_count == 1 ? "" : "s");
                                     std::fprintf(stderr, "Only the last option in an array of options can take arguments.\n");
-                                    handler(error_char_name, std::vector<const char *>(), user_data);
+                                    std::exit(EXIT_FAILURE);
                                 }
                             }
                         }
@@ -180,7 +317,7 @@ namespace Invader {
                 int expected_argument_count = arg->get_argument_count();
                 std::size_t remaining_argument_count = currently_handled_option_arguments_handled.size();
                 std::fprintf(stderr, "-%c takes %i argument%s, but only %zu %s given.\n", arg->get_char_name(), expected_argument_count, expected_argument_count == 1 ? "" : "s", remaining_argument_count, remaining_argument_count == 1 ? "was" : "were");
-                handler(error_char_name, std::vector<const char *>(), user_data);
+                std::exit(EXIT_FAILURE);
             }
 
             return unhandled_arguments;

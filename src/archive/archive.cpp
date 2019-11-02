@@ -24,15 +24,17 @@ int main(int argc, const char **argv) {
     } archive_options;
     archive_options.path = argv[0];
 
-    std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("single-tag", 's', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("output", 'o', 1);
-    options.emplace_back("fs-path", 'P', 0);
+    static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
+    static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, 'h', archive_options, [](char opt, const auto &arguments, auto &archive_options) {
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz.", "<file>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
@@ -49,19 +51,6 @@ int main(int argc, const char **argv) {
             case 'P':
                 archive_options.use_filesystem_path = true;
                 break;
-            default:
-                eprintf("Usage: %s [options] <scenario | -s tag.class>\n\n", archive_options.path);
-                eprintf("Generate .tar.xz archives of the tags required to build a cache file.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --output,-o <file>           Output to a specific file. Extension must be\n");
-                eprintf("                               .tar.xz.\n");
-                eprintf("  --single-tag,-s              Archive a tag tree instead of a cache file.\n");
-                eprintf("  --fs-path,-P                 Use a filesystem path for the tag.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

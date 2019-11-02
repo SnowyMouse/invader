@@ -93,12 +93,14 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::string &)
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("format", 'f', 1);
-    options.emplace_back("fs-path", 'P', 0);
+    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be utf-16, hmt, or latin-1. Default: utf-16");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
+
+    static constexpr char DESCRIPTION[] = "Generate string list tags.";
+    static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
         const char *path;
@@ -111,7 +113,7 @@ int main(int argc, char * const *argv) {
 
     string_options.path = argv[0];
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, 'h', string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
         switch(opt) {
             case 't':
                 string_options.tags = arguments[0];
@@ -139,17 +141,6 @@ int main(int argc, char * const *argv) {
                     string_options.output_extension = ".hud_message_text";
                 }
                 break;
-            default:
-                eprintf("Usage: %s [options] <tag>\n\n", arguments[0]);
-                eprintf("Generate string list tags.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --fs-path,-P                 Use a filesystem path for the text file.\n");
-                eprintf("  --format,-f <format>         Set string list format. Can be utf-16, hmt, or\n");
-                eprintf("                               or latin-1. Default: utf-16\n");
-                eprintf("  --data,-d <dir>              Use the specified data directory.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory.\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

@@ -20,13 +20,15 @@ int main(int argc, const char **argv) {
     compress_options.path = *argv;
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("output", 'o', 1);
-    options.emplace_back("compression-level", 'l', 1);
-    options.emplace_back("decompress", 'd', 0);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 22. Values > 19 use more memory. Default: 3", "<level>");
+    options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, 'h', compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
+    static constexpr char DESCRIPTION[] = "Compress cache files.";
+    static constexpr char USAGE[] = "[options] <map>";
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, USAGE, DESCRIPTION, compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
         switch(opt) {
             case 'd':
                 compress_options.decompress = true;
@@ -45,18 +47,6 @@ int main(int argc, const char **argv) {
                 show_version_info();
                 std::exit(EXIT_FAILURE);
                 break;
-            default:
-                eprintf("Usage: %s [options] <map>\n\n", compress_options.path);
-                eprintf("Compress cache files.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --help,-h                    Show a list of arguments.\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --output,-o <path>           Emit the resulting map at the given path. By\n");
-                eprintf("                               default, this is the map path (overwrite).\n");
-                eprintf("  --compression-level,-l <lvl> Use the compression level. Must be between 1 and\n");
-                eprintf("                               22. Values > 19 use more memory. Default: 3\n");
-                eprintf("  --decompress,-d              Decompress instead of compress.\n\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

@@ -93,26 +93,27 @@ int main(int argc, char *argv[]) {
     bitmap_options.path = argv[0];
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("ignore-tag", 'I', 0);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("dithering", 'D', 1);
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("format", 'F', 1);
-    options.emplace_back("type", 'T', 1);
-    options.emplace_back("mipmap-count", 'm', 1);
-    options.emplace_back("mipmap-scale", 's', 1);
-    options.emplace_back("detail-fade", 'f', 1);
-    options.emplace_back("budget", 'B', 1);
-    options.emplace_back("budget-count", 'C', 1);
-    options.emplace_back("bump-palettize", 'p', 1);
-    options.emplace_back("bump-palettise", 'p', 1);
-    options.emplace_back("bump-height", 'H', 1);
-    options.emplace_back("fs-path", 'P', 0);
+    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
+    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. Specify channels with letters (i.e. argb).", "<channels>");
+    options.emplace_back("data <path>", 'd', 1, "Set the data directory.", "<path>");
+    options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
+    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit" "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
+    options.emplace_back("mipmap-count", 'm', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
+    options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
+    options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
+    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
+    options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
+    options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. This will not work with stock Halo. Can be: off or on. Default (new tag): off", "<val>");
+    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.02", "<height>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+
+    static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
+    static constexpr char USAGE[] = "[options] <bitmap-tag>";
 
     // Go through each argument
-    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, 'h', bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
         switch(opt) {
             case 'd':
                 bitmap_options.data = arguments[0];
@@ -288,46 +289,6 @@ int main(int argc, char *argv[]) {
             case 'P':
                 bitmap_options.filesystem_path = true;
                 break;
-
-            default:
-                eprintf("Usage: %s [options] <bitmap-tag>\n\n", bitmap_options.path);
-                eprintf("Create or modify a bitmap tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --fs-path,-P               Use a filesystem path for the input bitmap.\n");
-                eprintf("    --data,-d <path>           Set the data directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
-                eprintf("Bitmap options:\n");
-                eprintf("    --type,-T <type>           Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
-                eprintf("                               interface, or sprite. Default (new tag): 2d\n");
-                eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap,\n");
-                eprintf("                               or detail. Default (new tag): default\n");
-                eprintf("    --dithering,-D <channels>  Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
-                eprintf("                               Specify channels with letters (i.e. argb).\n");
-                eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
-                eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
-                eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n\n");
-                eprintf("Mipmap options:\n");
-                eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
-                eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
-                eprintf("                               nearest. Default (new tag): linear\n\n");
-                eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
-                eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
-                eprintf("                               Default (new tag): 0.02\n");
-                eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
-                eprintf("                               not work with stock Halo. Can be: off or on.\n");
-                eprintf("                               Default (new tag): off\n\n");
-                eprintf("Detail map options (only applies to detail bitmaps):\n");
-                eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
-                eprintf("Sprite options (only applies to sprite bitmaps):\n");
-                eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
-                eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
-                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Can be 32, 64,\n");
-                eprintf("                               128, 256, or 512. Default (new tag): 32\n\n");
-
-                std::exit(EXIT_FAILURE);
         }
     });
 

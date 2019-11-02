@@ -50,20 +50,22 @@ int main(int argc, const char **argv) {
     build_options.path = argv[0];
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("no-external-tags", 'n', 0);
-    options.emplace_back("always-index-tags", 'a', 0);
-    options.emplace_back("quiet", 'q', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("game-engine", 'g', 1);
-    options.emplace_back("with-index", 'w', 1);
-    options.emplace_back("maps", 'm', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("output", 'o', 1);
-    options.emplace_back("forge-crc", 'c', 1);
-    options.emplace_back("fs-path", 'P', 0);
+    options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
+    options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
+    options.emplace_back("quiet", 'q', 0, "Only output error messages.");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. Valid engines are: custom (default), retail, demo, dark", "<id>");
+    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
+    options.emplace_back("maps", 'm', 1, "Use a specific maps directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
+    options.emplace_back("forge-crc", 'c', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, 'h', build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
+    static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
+    static constexpr char USAGE[] = "[options] <scenario>";
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
         switch(opt) {
             case 'n':
                 build_options.no_external_tags = true;
@@ -108,29 +110,6 @@ int main(int argc, const char **argv) {
                 break;
             case 'i':
                 show_version_info();
-                std::exit(EXIT_FAILURE);
-            default:
-                eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);
-                eprintf("Build cache files for Halo Combat Evolved on the PC.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
-                eprintf("  --fs-path,-P                 Use a filesystem path for the scenario tag.\n");
-                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
-                eprintf("                               custom (default), retail, demo, dark\n");
-                eprintf("  --no-external-tags,-n        Do not use external tags. This can speed up build\n");
-                eprintf("                               time at the cost of a much larger file size.\n");
-                eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
-                eprintf("                               up build time, but stock tags can't be modified.\n");
-                eprintf("  --forge-crc,-c <crc>         Forge the CRC32 value of a map. This is useful\n");
-                eprintf("                               for multiplayer.\n");
-                eprintf("  --output,-o <file>           Output to a specific file.\n");
-                eprintf("  --quiet,-q                   Only output error messages.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                eprintf("  --with-index,-w <file>       Use an index file for the tags, ensuring the\n");
-                eprintf("                               map's tags are ordered in the same way.\n\n");
                 std::exit(EXIT_FAILURE);
         }
     });
