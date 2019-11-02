@@ -116,13 +116,13 @@ build a map.
 
 **Usage:** `invader-archive [options] <scenario-tag | -s tag.class>`
 
-Option               | Description                                                
+Option               | Description
 -------------------- | -----------------------------------------------------------
-`--info,-i`          | Show credits, source info, and other info.                 
-`--help,-h`          | Show help.                                                 
-`--fs-path,-P`       | Use a filesystem path for the tag.                         
-`--output,-o <file>` | Output to a specific file. Extension must be .tar.xz.      
-`--single-tag,-s`    | Archive a tag tree instead of a cache file tree.           
+`--info,-i`          | Show credits, source info, and other info.
+`--help,-h`          | Show help.
+`--fs-path,-P`       | Use a filesystem path for the tag.
+`--output,-o <file>` | Output to a specific file. Extension must be .tar.xz.
+`--single-tag,-s`    | Archive a tag tree instead of a cache file tree.
 `--tags,-t <dir>`    | Tags directory. Use multiple times to add tags directories.
 
 ### invader-bitmap
@@ -132,25 +132,25 @@ supported.
 
 **Usage:** `invader-bitmap [options] <bitmap-data>`
 
-Option                      | Description                                                                                
+Option                      | Description
 --------------------------- | -------------------------------------------------------------------------------------------
-`--info,-i`                 | Show credits, source info, and other info.                                                 
-`--help,-h`                 | Show help.                                                                                 
-`--fs-path,-P`              | Use a filesystem path for the bitmap data path.                                            
-`--data,-d <dir>`           | Data directory.                                                                            
-`--tags,-t <dir>`           | Tags directory.                                                                            
-`--type,-T`                 | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`.         
-`--usage,-u <usage>`        | Set usage. Can be `default` (default) or `bumpmap`.                                        
-`--dithering,-D <channels>` | Apply dithering for dxt, 16-bit, and p8. Specify channels with letters (i.e. `argb`).      
-`--ignore-tag,-I`           | Ignore the tag data if the tag exists.                                                     
+`--info,-i`                 | Show credits, source info, and other info.
+`--help,-h`                 | Show help.
+`--fs-path,-P`              | Use a filesystem path for the bitmap data path.
+`--data,-d <dir>`           | Data directory.
+`--tags,-t <dir>`           | Tags directory.
+`--type,-T`                 | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`.
+`--usage,-u <usage>`        | Set usage. Can be `default` (default) or `bumpmap`.
+`--dithering,-D <channels>` | Apply dithering for dxt, 16-bit, and p8. Specify channels with letters (i.e. `argb`).
+`--ignore-tag,-I`           | Ignore the tag data if the tag exists.
 `--format,-F <format>`      | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`.
-`--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767.                                       
-`--mipmap-scale,-s <type>`  | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`.          
-`--detail-fade,-f <factor>` | Set fade-to-gray factor for mipmaps of detail maps. By default, this is 0.                 
-`--spacing,-S <px>`         | Set minimum spacing between sprites in pixels. By default, this is 4.                      
-`--bump-height,-H <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02.                            
-`--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting.                           
-`--budget,-B <length>`      | Set max length of sprite sheet. By default, this is 32.                                    
+`--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767.
+`--mipmap-scale,-s <type>`  | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`.
+`--detail-fade,-f <factor>` | Set fade-to-gray factor for mipmaps of detail maps. By default, this is 0.
+`--spacing,-S <px>`         | Set minimum spacing between sprites in pixels. By default, this is 4.
+`--bump-height,-H <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02.
+`--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting.
+`--budget,-B <length>`      | Set max length of sprite sheet. By default, this is 32.
 
 #### Uncompressed bitmap formats
 These formats are uncompressed and use explicit (not interpolated) RGB and/or
@@ -169,13 +169,13 @@ The exact storage format used will depend on the bitmap:
   If pixels have either 0% or 100% alpha, A1R5G5B5 is used. Otherwise, A4R4G4B4
   is used.
 
-Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes                
+Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes
 -------- | -------- | ------- | ------- | ----- | ----- | ----- | ---------------------
-`32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |                      
+`32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |
 `32-bit` | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | All pixels 100% alpha
 `16-bit` | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | All pixels 100% alpha
-`16-bit` | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                      
-`16-bit` | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                      
+`16-bit` | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |
+`16-bit` | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |
 
 #### Block-compressed bitmap formats
 These formats utilize block compression. Basically, each bitmap is separated
@@ -190,10 +190,10 @@ difference is in how alpha is handled. Therefore, if dxt3 or dxt5 is specified
 and a bitmap does not have any alpha, then dxt1 will automatically be used to
 keep the size as small as possible.
 
-Format | Bits/px | Alpha              | RGB                 | Notes                                 
+Format | Bits/px | Alpha              | RGB                 | Notes
 ------ | ------- | ------------------ | ------------------- | --------------------------------------
-`dxt1` | 4       |                    | 16-bit interpolated | All pixels 100% alpha                 
-`dxt3` | 8       | 4-bit explicit     | 16-bit interpolated | Better for shapes like HUDs           
+`dxt1` | 4       |                    | 16-bit interpolated | All pixels 100% alpha
+`dxt3` | 8       | 4-bit explicit     | 16-bit interpolated | Better for shapes like HUDs
 `dxt5` | 8       | 4-bit interpolated | 16-bit interpolated | Better for alpha gradients like clouds
 
 #### More formats
@@ -203,45 +203,45 @@ PC without a mod (e.g. [Chimera]). They all use explicit RGB and/or alpha.
 If you use monochrome with a monochrome bitmap used as input, then there will
 be no loss in quality.
 
-Format       | Storage  | Bits/px | Alpha   | RGB     | Notes                    
+Format       | Storage  | Bits/px | Alpha   | RGB     | Notes
 ------------ | -------- | ------- | ------- | ------- | -------------------------
-`monochrome` | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)        
+`monochrome` | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)
 `monochrome` | A8       | 8       | 8-bit   |         | All pixels 100% intensity
-`monochrome` | Y8       | 8       |         | 8-bit   | All pixels 100% alpha    
-palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only            
+`monochrome` | Y8       | 8       |         | 8-bit   | All pixels 100% alpha
+palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only
 
 ### invader-build
 This program builds cache files.
 
 **Usage:** `invader-build [options] <scenario-tag>`
 
-Option                    | Description                                                         
+Option                    | Description
 ------------------------- | --------------------------------------------------------------------
-`--info,-i`               | Show credits, source info, and other info.                          
-`--help,-h`               | Show help.                                                          
-`--fs-path,-P`            | Use a filesystem path for the scenario tag.                         
+`--info,-i`               | Show credits, source info, and other info.
+`--help,-h`               | Show help.
+`--fs-path,-P`            | Use a filesystem path for the scenario tag.
 `--game-engine,-g` <type> | Set target map type. Can be `ce` (default), `retail`, `demo`, `dark`
-`--maps,-m <dir>`         | Use a specific maps directory.                                      
-`--tags,-t <dir>`         | Tags directory. Use multiple times to add tags directories.         
-`--always-index-tags,-a`  | Always index tags with resource maps when possible.                 
-`--no-external-tags,-n`   | Do not external tags from resource maps.                            
-`--forge-crc,-c <crc>`    | Forge the CRC.                                                      
-`--output,-o <file>`      | Output to a specific file.                                          
-`--quiet,-q`              | Only output error messages.                                         
-`--with-index,-w <file>`  | Use an index file for the tags.     
+`--maps,-m <dir>`         | Use a specific maps directory.
+`--tags,-t <dir>`         | Tags directory. Use multiple times to add tags directories.
+`--always-index-tags,-a`  | Always index tags with resource maps when possible.
+`--no-external-tags,-n`   | Do not external tags from resource maps.
+`--forge-crc,-c <crc>`    | Forge the CRC.
+`--output,-o <file>`      | Output to a specific file.
+`--quiet,-q`              | Only output error messages.
+`--with-index,-w <file>`  | Use an index file for the tags.
 
 ### invader-compress
 This program compresses cache files.
 
 **Usage:** `invader-compress [options] <map-path>`
 
-Option                         | Description                                                         
+Option                         | Description
 ------------------------------ | --------------------------------------------------------------------
-`--info,-i`                    | Show credits, source info, and other info.                          
-`--help,-h`                    | Show help.                                                          
+`--info,-i`                    | Show credits, source info, and other info.
+`--help,-h`                    | Show help.
 `--output,-o <file>`           | Output to a specific file.
 `--compression-level,-l <lvl>` | Set compression level (1-22). Levels > 19 use more RAM. Default: 3
-`--decompress,-d`              | Decompress instead of compress.                             
+`--decompress,-d`              | Decompress instead of compress.
 
 ### invader-crc
 This program calculates the CRC32 of a map file. If the CRC value calculated
@@ -255,13 +255,13 @@ This program finds tags that directly depend on a given tag.
 
 **Usage:** `invader-dependency [options] <tag.class>`
 
-Option            | Description                                                
+Option            | Description
 ----------------- | -----------------------------------------------------------
-`--help,-h`       | Show help.                                                 
-`--info,-i`       | Show credits, source info, and other info.                 
-`--fs-path,-P`    | Use a filesystem path for the tag.                         
-`--recursive,-r`  | Recursively get all depended tags.                         
-`--reverse,-R`    | Find all tags that depend on the tag, instead.             
+`--help,-h`       | Show help.
+`--info,-i`       | Show credits, source info, and other info.
+`--fs-path,-P`    | Use a filesystem path for the tag.
+`--recursive,-r`  | Recursively get all depended tags.
+`--reverse,-R`    | Find all tags that depend on the tag, instead.
 `--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories.
 
 ### invader-font
@@ -269,14 +269,14 @@ This program generates font tags.
 
 **Usage:** `invader-font [options] <font-tag>`
 
-Option                | Description                               
+Option                | Description
 --------------------- | ------------------------------------------
-`--help,-h`           | Show help.                                
+`--help,-h`           | Show help.
 `--info,-i`           | Show credits, source info, and other info.
-`--fs-path,-P`        | Use a filesystem path for the font data.  
-`--data,-d <dir>`     | Data directory.                           
-`--maps,-m <dir>`     | Maps directory.                           
-`--font-size,-s <px>` | Use a font size in pixels.                
+`--fs-path,-P`        | Use a filesystem path for the font data.
+`--data,-d <dir>`     | Data directory.
+`--maps,-m <dir>`     | Maps directory.
+`--font-size,-s <px>` | Use a font size in pixels.
 
 ### invader-indexer
 This program builds index files for usage with `--with-index` with invader-build.
@@ -289,14 +289,14 @@ These files are not guaranteed to work with existing cache files.
 
 **Usage:** `invader-resource <options>`
 
-Option             | Description                                                       
+Option             | Description
 ------------------ | ------------------------------------------------------------------
-`--info,-i`        | Show credits, source info, and other info.                        
-`--help,-h`        | Show help.                                                        
-`--maps,-m <dir>`  | Use a specific maps directory.                                    
-`--tags,-t <dir>`  | Tags directory. Use multiple times to add tags directories.       
+`--info,-i`        | Show credits, source info, and other info.
+`--help,-h`        | Show help.
+`--maps,-m <dir>`  | Use a specific maps directory.
+`--tags,-t <dir>`  | Tags directory. Use multiple times to add tags directories.
 `--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`.
-`--retail,-R`      | Build a retail/demo resource map.                                 
+`--retail,-R`      | Build a retail/demo resource map.
 
 ## Frequently Asked Questions
 These are a selection of questions that have been asked over the course of
