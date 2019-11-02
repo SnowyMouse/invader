@@ -125,7 +125,7 @@ int main(int argc, const char **argv) {
 
     for(const std::string &tag : tags_list) {
         // First let's open it
-        TagClassInt tag_class_int;
+        TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
 
         // Convert backslashes if needed
@@ -392,7 +392,7 @@ int main(int argc, const char **argv) {
     header.resources = resource_names_arr.size() + resource_data.size();
     *reinterpret_cast<ResourceMapHeader *>(resource_data.data()) = header;
 
-    if(resource_data.size() >= 0x100000000) {
+    if(resource_data.size() >= 0xFFFFFFFF) {
         eprintf("Resource map exceeds 4 GiB.\n");
         return EXIT_FAILURE;
     }
