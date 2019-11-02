@@ -357,6 +357,7 @@ These are a selection of questions that have been asked over the course of
 Invader's development.
 
 - [What operating systems are supported?]
+- [Are 32-bit Windows Nightly Builds available?]
 - [Can invader-build create .yelo maps?]
 - [Can invader-build create Xbox maps?]
 - [The HEK says my bitmap tag is "too large" when opening.]
@@ -366,7 +367,16 @@ Invader's development.
 
 ### What operating systems are supported?
 Invader does not support any one operating system, but Invader is developed on
-Arch Linux, and Windows builds are available via [Nightly Builds].
+Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
+
+### Are 32-bit Windows Nightly Builds available?
+Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
+for 32-bit x86 Windows.
+
+The reason 32-bit builds are not provided is because 32-bit builds are slower
+and more limited than x86_64 due to architectural differences. People who are
+unsure may also download a 32-bit build even though a 64-build will work
+better. Nearly all desktop PCs made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for the Gearbox port of Halo on the
@@ -432,6 +442,7 @@ for multiplayer maps.
 [Frequently asked questions]: #frequently-asked-questions
 
 [What operating systems are supported?]: #what-operating-systems-are-supported
+[Are 32-bit Windows Nightly Builds available?]: #are-32-bit-windows-nightly-builds-available
 [Can invader-build create .yelo maps?]: #can-invader-build-create-yelo-maps
 [Can invader-build create Xbox maps?]: #can-invader-build-create-xbox-maps
 [The HEK says my bitmap tag is "too large" when opening.]: #the-hek-says-my-bitmap-tag-is-too-large-when-opening
