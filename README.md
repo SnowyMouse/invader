@@ -169,13 +169,13 @@ The exact storage format used will depend on the bitmap:
   If pixels have either 0% or 100% alpha, A1R5G5B5 is used. Otherwise, A4R4G4B4
   is used.
 
-Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes
--------- | -------- | ------- | ------- | ----- | ----- | ----- | ---------------------
-32-bit   | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |
-32-bit   | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | All pixels 100% alpha
-16-bit   | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | All pixels 100% alpha
-16-bit   | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |
-16-bit   | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |
+Format   | Storage  | Bits/px | Alpha | Red   | Green | Blue  | Notes
+-------- | -------- | ------- | ----- | ----- | ----- | ----- | ----------
+32-bit   | A8R8G8B8 | 32      | 8-bit | 8-bit | 8-bit | 8-bit |
+32-bit   | X8R8G8B8 | 32      |       | 8-bit | 8-bit | 8-bit | 100% alpha
+16-bit   | R5G6B5   | 16      |       | 5-bit | 6-bit | 5-bit | 100% alpha
+16-bit   | A1R5G5B5 | 16      | 1-bit | 5-bit | 5-bit | 5-bit |
+16-bit   | A4R4G4B4 | 16      | 4-bit | 4-bit | 4-bit | 4-bit |
 
 #### Block-compressed bitmap formats
 These formats utilize block compression. Basically, each bitmap is separated
@@ -190,11 +190,11 @@ difference is in how alpha is handled. Therefore, if dxt3 or dxt5 is specified
 and a bitmap does not have any alpha, then dxt1 will automatically be used to
 keep the size as small as possible.
 
-Format | Bits/px | Alpha              | RGB                 | Notes
------- | ------- | ------------------ | ------------------- | --------------------------------------
-DXT1   | 4       |                    | 16-bit interpolated | All pixels 100% alpha
-DXT3   | 8       | 4-bit explicit     | 16-bit interpolated | Better for shapes like HUDs
-DXT5   | 8       | 4-bit interpolated | 16-bit interpolated | Better for alpha gradients like clouds
+Format | Bits/px | Alpha              | Notes
+------ | ------- | ------------------ | --------------------------------------
+DXT1   | 4       |                    | 100% alpha
+DXT3   | 8       | 4-bit explicit     | Better for shapes like HUDs
+DXT5   | 8       | 4-bit interpolated | Better for alpha gradients like clouds
 
 #### More formats
 These formats were originally available on Xbox and do not work on stock Halo
@@ -204,11 +204,11 @@ If you use monochrome with a monochrome bitmap used as input, then there will
 be no loss in quality.
 
 Format       | Storage  | Bits/px | Alpha   | RGB     | Notes
------------- | -------- | ------- | ------- | ------- | -------------------------
+------------ | -------- | ------- | ------- | ------- | ---------------------
 monochrome   | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)
 monochrome   | A8       | 8       | 8-bit   |         | 100% intensity
 monochrome   | Y8       | 8       |         | 8-bit   | 100% alpha
-palettized   | P8       | 8       | Indexed | Indexed | Bumpmaps only
+palettized   | P8       | 8       | Indexed | Indexed | Bump compression only
 
 ### invader-build
 This program builds cache files.
