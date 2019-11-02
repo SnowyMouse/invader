@@ -114,43 +114,63 @@ work with, this project is split into different programs.
 This program generates a .tar.xz archive containing all of the tags used to
 build a map.
 
-**Usage:** `invader-archive [options] <scenario-tag | -s tag.class>`
+```
+Usage: invader-archive [options] <scenario | -s tag.class>
 
-Option               | Description
--------------------- | -----------------------------------------------------------
-`--info,-i`          | Show credits, source info, and other info.
-`--help,-h`          | Show help.
-`--fs-path,-P`       | Use a filesystem path for the tag.
-`--output,-o <file>` | Output to a specific file. Extension must be .tar.xz.
-`--single-tag,-s`    | Archive a tag tree instead of a cache file tree.
-`--tags,-t <dir>`    | Tags directory. Use multiple times to add tags directories.
+Generate .tar.xz archives of the tags required to build a cache file.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -o --output <file>           Output to a specific file. Extension must be
+                               .tar.xz.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -s --single-tag              Archive a tag tree instead of a cache file.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+```
 
 ### invader-bitmap
 This program generates bitmap tags from images. For source images, .tif, .tiff,
 .png, .tga, and .bmp extensions are
 supported.
 
-**Usage:** `invader-bitmap [options] <bitmap-data>`
+```
+Usage: invader-bitmap [options] <bitmap-tag>
 
-Option                      | Description
---------------------------- | -------------------------------------------------------------------------------------------
-`--info,-i`                 | Show credits, source info, and other info.
-`--help,-h`                 | Show help.
-`--fs-path,-P`              | Use a filesystem path for the bitmap data path.
-`--data,-d <dir>`           | Data directory.
-`--tags,-t <dir>`           | Tags directory.
-`--type,-T`                 | Set bitmap type. Can be `2d` (default), `3d`, `cubemap`, `interface`, or `sprite`.
-`--usage,-u <usage>`        | Set usage. Can be `default` (default) or `bumpmap`.
-`--dithering,-D <channels>` | Apply dithering for dxt, 16-bit, and p8. Specify channels with letters (i.e. `argb`).
-`--ignore-tag,-I`           | Ignore the tag data if the tag exists.
-`--format,-F <format>`      | Pixel format. Can be `32-bit` (default), `16-bit`, `monochrome`, `dxt1`, `dxt3`, or `dxt5`.
-`--mipmap-count,-m <count>` | Set maximum mipmap count. By default, this is 32767.
-`--mipmap-scale,-s <type>`  | Mipmap scaling. Can be `linear` (default), `nearest-alpha`, `nearest`, or `none`.
-`--detail-fade,-f <factor>` | Set fade-to-gray factor for mipmaps of detail maps. By default, this is 0.
-`--spacing,-S <px>`         | Set minimum spacing between sprites in pixels. By default, this is 4.
-`--bump-height,-H <height>` | Set apparent bump height from 0 to 1. By default, this is 0.02.
-`--budget-count,-C <count>` | Set max number of sprite sheets. 0 (default) disables budgeting.
-`--budget,-B <length>`      | Set max length of sprite sheet. By default, this is 32.
+Create or modify a bitmap tag.
+
+Options:
+  -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
+                               128, 256, or 512. Default (new tag): 32
+  -C --budget-count <count>    Set maximum number of sprite sheets. Setting
+                               this to 0 disables budgeting. Default (new tag):
+                               0
+  -d --data <path> <path>      Set the data directory.
+  -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
+                               Specify channels with letters (i.e. argb).
+  -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
+  -F --format                  Pixel format. Can be: 32-bit, 16-bit,
+                               monochrome, dxt5, dxt3, or dxt1. Default (new
+                               tag): 32-bit<type>
+  -h --help                    Show this list of options.
+  -H --bump-height <height>    Set the apparent bumpmap height from 0 to 1.
+                               Default (new tag): 0.02
+  -i --info                    Show license and credits.
+  -I --ignore-tag              Ignore the tag data if the tag exists.
+  -m --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
+  -p --bump-palettize <val>    Set the bumpmap palettization setting. This will
+                               not work with stock Halo. Can be: off or on.
+                               Default (new tag): off
+  -P --fs-path                 Use a filesystem path for the data.
+  -s --mipmap-scale <type>     Mipmap scale type. Can be: linear,
+                               nearest-alpha, nearest. Default (new tag):
+                               linear
+  -t --tags <path>             Set the data directory.
+  -T --type <type>             Set the type of bitmap. Can be: 2d, 3d, cubemap,
+                               interface, or sprite. Default (new tag): 2d
+```
 
 #### Uncompressed bitmap formats
 These formats are uncompressed and use explicit (not interpolated) RGB and/or
@@ -213,90 +233,124 @@ palettized   | P8       | 8       | Indexed | Indexed | Bump compression only
 ### invader-build
 This program builds cache files.
 
-**Usage:** `invader-build [options] <scenario-tag>`
+```
+Usage: invader-build [options] <scenario>
 
-Option                    | Description
-------------------------- | --------------------------------------------------------------------
-`--info,-i`               | Show credits, source info, and other info.
-`--help,-h`               | Show help.
-`--fs-path,-P`            | Use a filesystem path for the scenario tag.
-`--game-engine,-g` <type> | Set target map type. Can be `ce` (default), `retail`, `demo`, `dark`
-`--maps,-m <dir>`         | Use a specific maps directory.
-`--tags,-t <dir>`         | Tags directory. Use multiple times to add tags directories.
-`--always-index-tags,-a`  | Always index tags with resource maps when possible.
-`--no-external-tags,-n`   | Do not external tags from resource maps.
-`--forge-crc,-c <crc>`    | Forge the CRC.
-`--output,-o <file>`      | Output to a specific file.
-`--quiet,-q`              | Only output error messages.
-`--with-index,-w <file>`  | Use an index file for the tags.
+Build cache files for Halo Combat Evolved on the PC.
+
+Options:
+  -a --always-index-tags       Always index tags when possible. This can speed
+                               up build time, but stock tags can't be modified.
+  -c --forge-crc <crc>         Forge the CRC32 value of the map after building
+                               it.
+  -g --game-engine <id>        Specify the game engine. Valid engines are:
+                               custom (default), retail, demo, dark
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -m --maps <dir>              Use a specific maps directory.
+  -n --no-external-tags        Do not use external tags. This can speed up
+                               build time at a cost of a much larger file size.
+  -o --output <file>           Output to a specific file.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -q --quiet                   Only output error messages.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+  -w --with-index <file>       Use an index file for the tags, ensuring the
+                               map's tags are ordered in the same way.
+```
 
 ### invader-compress
 This program compresses cache files.
 
-**Usage:** `invader-compress [options] <map-path>`
+```
+Usage: invader-compress [options] <map>
 
-Option                         | Description
------------------------------- | --------------------------------------------------------------------
-`--info,-i`                    | Show credits, source info, and other info.
-`--help,-h`                    | Show help.
-`--output,-o <file>`           | Output to a specific file.
-`--compression-level,-l <lvl>` | Set compression level (1-22). Levels > 19 use more RAM. Default: 3
-`--decompress,-d`              | Decompress instead of compress.
+Compress cache files.
+
+Options:
+  -d --decompress              Decompress instead of compress.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -l --level <level>           Set the compression level. Must be between 1 and
+                               22. Values > 19 use more memory. Default: 3
+  -o --output <file>           Emit the resulting map at the given path. By
+                               default, this is the map path (overwrite).
+```
 
 ### invader-crc
 This program calculates the CRC32 of a map file. If the CRC value calculated
 differs from the value stored in the cache file header, then a warning will be
 printed to standard error.
 
-**Usage:** `invader-crc <map>`
+```
+Usage: invader-crc <map>
+```
 
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
 
-**Usage:** `invader-dependency [options] <tag.class>`
+```
+Usage: invader-dependency [options] <tag.class>
 
-Option            | Description
------------------ | -----------------------------------------------------------
-`--help,-h`       | Show help.
-`--info,-i`       | Show credits, source info, and other info.
-`--fs-path,-P`    | Use a filesystem path for the tag.
-`--recursive,-r`  | Recursively get all depended tags.
-`--reverse,-R`    | Find all tags that depend on the tag, instead.
-`--tags,-t <dir>` | Tags directory. Use multiple times to add tags directories.
+Check dependencies for a tag.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -r --recursive               Recursively get all depended tags.
+  -R --reverse                 Find all tags that depend on the tag, instead.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+```
 
 ### invader-font
 This program generates font tags.
 
-**Usage:** `invader-font [options] <font-tag>`
+```
+Usage: invader-font [options] <font-tag>
 
-Option                | Description
---------------------- | ------------------------------------------
-`--help,-h`           | Show help.
-`--info,-i`           | Show credits, source info, and other info.
-`--fs-path,-P`        | Use a filesystem path for the font data.
-`--data,-d <dir>`     | Data directory.
-`--maps,-m <dir>`     | Maps directory.
-`--font-size,-s <px>` | Use a font size in pixels.
+Create font tags from TTF files.
+
+Options:
+  -d --data <dir>              Set the data directory.
+  -h --help                    Show this list of options.
+  -i --font-size <px>          Set the font size in pixels.
+  -P --fs-path                 Use a filesystem path for the tag.
+  -t --tags <dir>              Set the tags directory.
+```
 
 ### invader-indexer
 This program builds index files for usage with `--with-index` with invader-build.
 
-**Usage:** `invader-indexer <input map> <output index>`
+```
+Usage: invader-indexer <input map> <output index>
+```
 
 ### invader-resource
 This program builds resource maps. Only maps with stock tags can be built.
 These files are not guaranteed to work with existing cache files.
 
-**Usage:** `invader-resource <options>`
+```
+Usage: invader-resource <options>
 
-Option             | Description
------------------- | ------------------------------------------------------------------
-`--info,-i`        | Show credits, source info, and other info.
-`--help,-h`        | Show help.
-`--maps,-m <dir>`  | Use a specific maps directory.
-`--tags,-t <dir>`  | Tags directory. Use multiple times to add tags directories.
-`--type,-T <type>` | Set resource map (required). Can be `bitmaps`, `sounds`, or `loc`.
-`--retail,-R`      | Build a retail/demo resource map.
+Create resource maps.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -m --maps <dir>              Set the maps directory.
+  -R --retail                  Build a retail resource map (bitmaps/sounds
+                               only)
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+  -T --type <type>             Set the resource map. This option is required
+                               for creating maps. Can be: bitmaps, sounds, or
+                               loc.
+```
 
 ## Frequently Asked Questions
 These are a selection of questions that have been asked over the course of

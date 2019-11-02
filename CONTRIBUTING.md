@@ -183,18 +183,18 @@ This applies to how markdown files are created and edited.
     - Do not use title case (e.g. write "Coding conventions" instead of "Coding
       Conventions")
 - Markdown file lines must be no more than 80 characters in length unless it
-  is part of a table or code
+  is part of code, or it is a URL on the bottom of the page.
 - Markdown table cells must be spaced so they can also be easily read in a text
   editor. For example:
-    ```markdown
-    Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes                
-    -------- | -------- | ------- | ------- | ----- | ----- | ----- | ---------------------
-    `32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |                      
-             | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | All pixels 100% alpha
-    `16-bit` | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | All pixels 100% alpha
-             | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                      
-             | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                      
-    ```
+  ```markdown
+  Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes                
+  -------- | -------- | ------- | ------- | ----- | ----- | ----- | ----------
+  `32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |                      
+           | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | 100% alpha
+  `16-bit` | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | 100% alpha
+           | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                      
+           | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                      
+  ```
 
 ### Coding conventions
 These conventions apply to code, specifically. Some of these are best-practices
