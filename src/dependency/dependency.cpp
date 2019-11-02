@@ -34,7 +34,7 @@ int main(int argc, char * const *argv) {
 
     dependency_options.path = argv[0];
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
                 dependency_options.tags.push_back(arguments[0]);
@@ -61,15 +61,7 @@ int main(int argc, char * const *argv) {
 
     // Require a tag
     std::vector<char> tag_path_to_find_data;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A scenario tag path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    else if(dependency_options.use_filesystem_path) {
+    if(dependency_options.use_filesystem_path) {
         auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags, true);
 
         if(tag_path_maybe.has_value()) {

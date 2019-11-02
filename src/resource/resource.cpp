@@ -47,7 +47,7 @@ int main(int argc, const char **argv) {
     } resource_options;
     resource_options.path = argv[0];
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {
             case 'i':
                 show_version_info();
@@ -87,13 +87,8 @@ int main(int argc, const char **argv) {
         }
     });
 
-    if(remaining_arguments.size() > 0) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[0]);
-        return EXIT_FAILURE;
-    }
-
     if(!resource_options.resource_map_set) {
-        eprintf("No resource map type was given. Use --help for more information.\n");
+        eprintf("No resource map type was given. Use -h for more information.\n");
         return EXIT_FAILURE;
     }
 

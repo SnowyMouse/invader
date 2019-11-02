@@ -113,7 +113,7 @@ int main(int argc, char * const *argv) {
 
     string_options.path = argv[0];
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
         switch(opt) {
             case 't':
                 string_options.tags = arguments[0];
@@ -148,15 +148,7 @@ int main(int argc, char * const *argv) {
 
     // Check if there's a string tag
     std::string string_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A string tag path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    else if(string_options.use_filesystem_path) {
+    if(string_options.use_filesystem_path) {
         std::vector<std::string> data(&string_options.data, &string_options.data + 1);
         auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
         if(string_tag_maybe.has_value()) {

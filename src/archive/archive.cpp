@@ -33,8 +33,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
-    
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
+
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
@@ -61,15 +61,7 @@ int main(int argc, const char **argv) {
 
     // Require a tag
     std::string base_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A %stag path is required. Use -h for help.\n", archive_options.single_tag ? "" : "scenario ");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    else if(archive_options.use_filesystem_path) {
+    if(archive_options.use_filesystem_path) {
         // See if the tag path is valid
         std::optional<std::string> base_tag_maybe;
         if(archive_options.single_tag) {

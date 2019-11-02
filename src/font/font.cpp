@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, font_options, [](char opt, const auto &args, FontOptions &font_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, FontOptions &font_options) {
         switch(opt) {
             case 'd':
                 font_options.data = args[0];
@@ -73,17 +73,8 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    // Make sure we have the bitmap tag path
     std::string font_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("Expected a font tag path. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s. Use -h for help.\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    else if(font_options.use_filesystem_path) {
+    if(font_options.use_filesystem_path) {
         std::vector<std::string> data(&font_options.data, &font_options.data + 1);
         auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, ".ttf");
         if(font_tag_maybe.has_value()) {

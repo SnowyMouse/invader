@@ -65,7 +65,7 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
         switch(opt) {
             case 'n':
                 build_options.no_external_tags = true;
@@ -126,16 +126,7 @@ int main(int argc, const char **argv) {
         build_options.tags.emplace_back("tags");
     }
 
-    // Check if there's a scenario tag
-    if(remaining_arguments.size() == 0) {
-        eprintf("A scenario tag path is required. Use -h for help.\n");
-        return RETURN_FAILED_NOTHING_TO_DO;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return RETURN_FAILED_UNHANDLED_ARGUMENT;
-    }
-    else if(build_options.use_filesystem_path) {
+    if(build_options.use_filesystem_path) {
         auto scenario_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], build_options.tags, ".scenario");
         if(scenario_maybe.has_value()) {
             scenario = scenario_maybe.value();

@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
     static constexpr char USAGE[] = "[options] <bitmap-tag>";
 
     // Go through each argument
-    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
         switch(opt) {
             case 'd':
                 bitmap_options.data = arguments[0];
@@ -291,16 +291,6 @@ int main(int argc, char *argv[]) {
                 break;
         }
     });
-
-    // Make sure we have the bitmap tag path
-    if(remaining_arguments.size() == 0) {
-        eprintf("Expected a bitmap tag path. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
 
     // See if we can figure out the bitmap tag using extensions
     std::string bitmap_tag = remaining_arguments[0];

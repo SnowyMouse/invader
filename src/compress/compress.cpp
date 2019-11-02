@@ -28,7 +28,7 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Compress cache files.";
     static constexpr char USAGE[] = "[options] <map>";
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, USAGE, DESCRIPTION, compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
         switch(opt) {
             case 'd':
                 compress_options.decompress = true;
@@ -49,11 +49,6 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-
-    if(remaining_arguments.size() == 0) {
-        eprintf("A map path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
 
     // Get the input (and maybe output?)
     const char *input = remaining_arguments[0];

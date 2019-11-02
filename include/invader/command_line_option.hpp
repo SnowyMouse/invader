@@ -65,17 +65,19 @@ namespace Invader {
 
         /**
          * Parse the arguments using the given options with the first argument as the path to the program. When enough arguments are found for the given option, the char_name and all options found will be passed to handler. If an error occurs, error_char_name with 0 arguments will be passed.
-         * @param argc            number of arguments
-         * @param argv            pointer to the first argument
-         * @param options         options to use
-         * @param usage           program usage on help/error
-         * @param description     program description on help
-         * @param user_data       user data passed into the arguments
-         * @param handler         handler function to use
-         * @return                a vector of all unhandled arguments
+         * @param argc          number of arguments
+         * @param argv          pointer to the first argument
+         * @param options       options to use
+         * @param usage         program usage on help/error
+         * @param description   program description on help
+         * @param min_unhandled number of unhandled arguments required
+         * @param max_unhandled number of unhandled arguments allowed
+         * @param user_data     user data passed into the arguments
+         * @param handler       handler function to use
+         * @return              a vector of all unhandled arguments
          */
         template<typename DataType>
-        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, const char *usage, const char *description, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
+        static std::vector<const char *> parse_arguments(int argc, const char * const *argv, const std::vector<CommandLineOption> &options, const char *usage, const char *description, std::size_t min_unhandled, std::size_t max_unhandled, DataType user_data, void (*handler)(char char_name, const std::vector<const char *> &arguments, DataType user_data)) {
             // Hold all unhandled arguments
             std::vector<const char *> unhandled_arguments;
 
@@ -317,6 +319,15 @@ namespace Invader {
                 int expected_argument_count = arg->get_argument_count();
                 std::size_t remaining_argument_count = currently_handled_option_arguments_handled.size();
                 std::fprintf(stderr, "-%c takes %i argument%s, but only %zu %s given.\n", arg->get_char_name(), expected_argument_count, expected_argument_count == 1 ? "" : "s", remaining_argument_count, remaining_argument_count == 1 ? "was" : "were");
+                std::fprintf(stderr, "Use -h for help.\n");
+                std::exit(EXIT_FAILURE);
+            }
+
+            // Minimum
+            std::size_t unhandled_count = unhandled_arguments.size();
+            if(unhandled_count < min_unhandled || unhandled_count > max_unhandled) {
+                std::fprintf(stderr, "Usage: %s %s\n", argv[0], usage);
+                std::fprintf(stderr, "Use -h for help.\n");
                 std::exit(EXIT_FAILURE);
             }
 
