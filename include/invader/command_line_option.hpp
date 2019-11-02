@@ -130,7 +130,7 @@ namespace Invader {
                     bool first_line = true;
 
                     // Print and then purge the right column buffer to make way for a new line
-                    auto purge_right_column = [&right_column, &r, &first_line, &word_start]() {
+                    auto purge_right_column = [&right_column, &r, &first_line]() {
                         if(r) {
                             if(first_line) {
                                 first_line = false;
