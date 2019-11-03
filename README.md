@@ -50,7 +50,8 @@ You can compile Invader using MSYS2 and MinGW. Make sure that you install all
 of the required dependencies through MSYS2 and not their respective Windows
 installers. See README.md for a list of the requirements. You can use the
 `pacman` command to install these dependencies. Also, make sure that when you
-compile Invader, you are using the 64-bit MSYS2 shell.
+compile Invader, you are using the 64-bit MSYS2 shell (or 32-bit if you need
+a 32-bit build).
 
 The rest of the instructions are the same as POSIX, except that when you go to
 use the `make` command, you specify that you want CMake to generate MSYS
@@ -352,7 +353,7 @@ Options:
                                loc.
 ```
 
-## Frequently Asked Questions
+## Frequently asked questions
 These are a selection of questions that have been asked over the course of
 Invader's development.
 
