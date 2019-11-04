@@ -13,6 +13,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-bitmap: Palettized flag is now properly set
+- invader-info: Fixed detecting stubbed tags as protected. However, this will
+  not apply to maps built before this change.
 
 ## [0.16.0] - 2019-11-04
 ### Added

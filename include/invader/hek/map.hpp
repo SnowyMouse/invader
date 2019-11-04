@@ -40,7 +40,9 @@ namespace Invader::HEK {
     enum CacheFileTagDataBaseMemoryAddress : std::uint32_t {
         CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
-        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000000
+        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000000,
+
+        CACHE_FILE_STUB_MEMORY_ADDRESS = 0xFFFFFFFF
     };
 
     enum CacheFileLimits : std::size_t {

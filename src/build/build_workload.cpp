@@ -1535,8 +1535,14 @@ namespace Invader {
             }
 
             // Write tag data
-            auto offset = this->add_tag_data_for_tag(tag_data, tag_array.data(), i);
-            tag_array[i].tag_data = static_cast<std::uint32_t>(this->tag_data_address + offset);
+            std::size_t offset = 0;
+            if(compiled_tag->p_stub) {
+                tag_array[i].tag_data = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS;
+            }
+            else {
+                offset = this->add_tag_data_for_tag(tag_data, tag_array.data(), i);
+                tag_array[i].tag_data = static_cast<std::uint32_t>(this->tag_data_address + offset);
+            }
 
             // Go through all BSPs if scenario tag
             if(compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO) {

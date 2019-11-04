@@ -27,8 +27,8 @@ namespace Invader {
             }
         }
 
-        // If the base struct pointer is 0, well... lol
-        else if(this->base_struct_pointer == 0) {
+        // If the base struct pointer is 0xFFFFFFFF, well... lol
+        else if(this->base_struct_pointer == CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
             return false;
         }
 
