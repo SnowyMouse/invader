@@ -22,7 +22,8 @@ int main(int argc, const char **argv) {
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
         DISPLAY_SCENARIO_PATH,
-        DISPLAY_TAG_COUNT
+        DISPLAY_TAG_COUNT,
+        DISPLAY_TAGS
     };
 
     // Options struct
@@ -32,7 +33,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -71,6 +72,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "protected") == 0) {
                     map_info_options.type = DISPLAY_PROTECTED;
                 }
+                else if(std::strcmp(args[0], "tags") == 0) {
+                    map_info_options.type = DISPLAY_TAGS;
+                }
                 else {
                     eprintf("Unknown type %s\n", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -96,13 +100,14 @@ int main(int argc, const char **argv) {
     auto data_length = map->get_data_length();
     bool compressed = map->is_compressed();
     auto compression_ratio = static_cast<float>(file_size) / data_length;
+    auto tag_count = map->get_tag_count();
 
     switch(map_info_options.type) {
         case DISPLAY_OVERVIEW: {
             oprintf("Scenario name:     %s\n", header.name.string);
             oprintf("Engine:            %s\n", engine_name(header.engine));
             oprintf("Map type:          %s\n", type_name(header.map_type));
-            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", map->get_tag_count(), static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
+            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
 
             // Get CRC
             auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
@@ -144,10 +149,16 @@ int main(int argc, const char **argv) {
             oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).path()).data());
             break;
         case DISPLAY_TAG_COUNT:
-            oprintf("%zu\n", map->get_tag_count());
+            oprintf("%zu\n", tag_count);
             break;
         case DISPLAY_PROTECTED:
             oprintf("%s\n", map->is_protected() ? "yes" : "no");
+            break;
+        case DISPLAY_TAGS:
+            for(std::size_t t = 0; t < tag_count; t++) {
+                auto &tag = map->get_tag(t);
+                oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.path()).data(), tag_class_to_extension(tag.tag_class_int()));
+            }
             break;
     }
 }
