@@ -1078,12 +1078,12 @@ namespace Invader {
                     auto &dobc = *reinterpret_cast<DetailObjectCollection<LittleEndian> *>(tag_ptr->data.data());
                     if(dobc.sprite_plate.tag_id.read().is_null()) {
                         eprintf("Sprite plate tag ID is null\n");
-                        throw;
+                        throw InvalidTagDataException();
                     }
                     auto &bitmap_tag = this->compiled_tags[dobc.sprite_plate.tag_id.read().index];
                     if(bitmap_tag->tag_class_int != TagClassInt::TAG_CLASS_BITMAP) {
                         eprintf("Sprite plate is not a bitmap\n");
-                        throw;
+                        throw InvalidTagDataException();
                     }
 
                     // Get bitmap data
@@ -1109,7 +1109,7 @@ namespace Invader {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
                     if(particle.bitmap.tag_id.read().is_null()) {
                         eprintf("Particle has no bitmap.\n");
-                        throw;
+                        throw InvalidTagDataException();
                     }
                     else {
                         particle.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[particle.bitmap.tag_id.read().index]);
@@ -1127,7 +1127,7 @@ namespace Invader {
                             auto &type = types[p];
                             if(type.sprite_bitmap.tag_id.read().is_null()) {
                                 eprintf("Weather particle system particle #%zu has no bitmap.\n", static_cast<std::size_t>(p));
-                                throw;
+                                throw InvalidTagDataException();
                             }
                             else {
                                 type.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[type.sprite_bitmap.tag_id.read().index]);

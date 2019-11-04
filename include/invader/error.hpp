@@ -116,5 +116,10 @@ namespace Invader {
      * This is thrown when decompression failed
      */
     DEFINE_EXCEPTION(DecompressionFailureException, "failed to decompress");
+
+    /**
+     * This is thrown when tag data is invalid
+     */
+    DEFINE_EXCEPTION(InvalidTagDataException, "tag data is invalid");
 }
 #endif
