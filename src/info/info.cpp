@@ -104,12 +104,6 @@ int main(int argc, const char **argv) {
             oprintf("Map type:          %s\n", type_name(header.map_type));
             oprintf("Tags:              %zu / %zu (%.02f MiB)\n", map->get_tag_count(), static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
 
-            // Compress and compression ratio
-            oprintf("Compressed:        %s", compressed ? "Yes" : "No\n");
-            if(compressed) {
-                oprintf(" (%.01f%%)\n", compression_ratio * 100.0F);
-            }
-
             // Get CRC
             auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
             auto dirty = crc != header.crc32;
@@ -118,8 +112,14 @@ int main(int argc, const char **argv) {
             // Is it protected?
             oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
 
+            // Compress and compression ratio
+            oprintf("Compressed:        %s", compressed ? "Yes" : "No\n");
+            if(compressed) {
+                oprintf(" (%.01f %%)\n", compression_ratio * 100.0F);
+            }
+
             // Uncompressed size
-            oprintf("Uncompressed size: %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(header.tag_data_size), BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
+            oprintf("Uncompressed size: %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(data_length), BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
             break;
         }
         case DISPLAY_COMPRESSED:
