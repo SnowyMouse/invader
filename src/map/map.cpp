@@ -101,6 +101,7 @@ namespace Invader {
             // If so, decompress it
             if(needs_decompressed) {
                 this->data_m = Compression::decompress_map_data(data, data_size);
+                this->compressed = true;
             }
         }
 
