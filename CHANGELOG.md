@@ -2,6 +2,20 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-info - Displays an overview of a map file, but also has options:
+  compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
+  tag-count
+
+### Changed
+- invader-build: Shows map type when building
+
+### Removed
+- invader-crc: Removed invader-crc in favor of invader-info. Use `-t crc32` or
+  `-t dirty` to indicate the map CRC32 and whether the map is dirty or not in a
+  scriptable fashion.
+
 ## [0.15.2] - 2019-10-29
 ### Changed
 - The zstd library is now static linked (except for libarchive)
