@@ -202,8 +202,6 @@ namespace Invader {
                     print_help_for_option_letter(std::toupper(letter));
                 }
 
-                std::printf("\n");
-
                 std::exit(EXIT_SUCCESS);
             };
 
