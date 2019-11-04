@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <vector>
-#include "invader/map/map.hpp"
 #include "../crc32.h"
-#include "invader/tag/hek/class/scenario.hpp"
-#include "invader/crc/hek/crc.hpp"
 #include "../crc_spoof.h"
+#include <invader/tag/hek/class/scenario.hpp>
+#include <invader/crc/hek/crc.hpp>
+#include <invader/map/map.hpp>
 
 namespace Invader {
     std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty, bool allow_compressed) {

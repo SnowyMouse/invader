@@ -3,8 +3,8 @@
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
 
-#include "invader/bitmap/bitmap_data_writer.hpp"
-#include "invader/printf.hpp"
+#include <invader/bitmap/bitmap_data_writer.hpp>
+#include <invader/printf.hpp>
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<HEK::BitmapData<HEK::BigEndian>> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {

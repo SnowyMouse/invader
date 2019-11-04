@@ -2,9 +2,9 @@
 
 #include <cstdio>
 #include <memory>
-#include "invader/printf.hpp"
-#include "invader/map/map.hpp"
-#include "invader/crc/hek/crc.hpp"
+#include <invader/printf.hpp>
+#include <invader/map/map.hpp>
+#include <invader/crc/hek/crc.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader;

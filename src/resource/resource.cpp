@@ -4,15 +4,15 @@
 #include <cstdlib>
 #include <cassert>
 #include <filesystem>
-#include "invader/tag/compiled_tag.hpp"
-#include "invader/version.hpp"
-#include "invader/tag/hek/class/bitmap.hpp"
-#include "invader/tag/hek/class/sound.hpp"
-#include "invader/resource/resource_map.hpp"
-#include "invader/resource/hek/resource_map.hpp"
-#include "invader/resource/list/resource_list.hpp"
-#include "invader/command_line_option.hpp"
-#include "invader/printf.hpp"
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/tag/hek/class/sound.hpp>
+#include <invader/resource/resource_map.hpp>
+#include <invader/resource/hek/resource_map.hpp>
+#include <invader/resource/list/resource_list.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/printf.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;

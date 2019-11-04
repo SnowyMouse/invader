@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "invader/compress/compression.hpp"
-#include "invader/map/map.hpp"
+#include <invader/compress/compression.hpp>
+#include <invader/map/map.hpp>
 #include "zstd/lib/zstd.h"
 
 namespace Invader::Compression {

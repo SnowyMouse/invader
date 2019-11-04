@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "invader/tag/hek/compile.hpp"
-#include "invader/tag/hek/class/gbxmodel.hpp"
-#include "invader/file/file.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/class/gbxmodel.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::HEK {
     struct TempMarker {

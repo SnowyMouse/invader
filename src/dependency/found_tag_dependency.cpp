@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "invader/dependency/found_tag_dependency.hpp"
-#include "invader/tag/compiled_tag.hpp"
-#include "invader/printf.hpp"
-#include "invader/file/file.hpp"
+#include <invader/dependency/found_tag_dependency.hpp>
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/printf.hpp>
+#include <invader/file/file.hpp>
 
 #include <filesystem>
 

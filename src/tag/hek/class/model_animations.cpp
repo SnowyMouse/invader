@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "invader/tag/hek/compile.hpp"
+#include <invader/tag/hek/compile.hpp>
 
-#include "invader/tag/hek/class/model_animations.hpp"
+#include <invader/tag/hek/class/model_animations.hpp>
 
 namespace Invader::HEK {
     struct DedupingAnimationData {

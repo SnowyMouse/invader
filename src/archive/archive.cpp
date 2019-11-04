@@ -5,14 +5,13 @@
 #include <filesystem>
 #include <archive.h>
 #include <archive_entry.h>
-#include "invader/version.hpp"
-#include "invader/printf.hpp"
-
-#include "invader/build/build_workload.hpp"
-#include "invader/map/map.hpp"
-#include "invader/dependency/found_tag_dependency.hpp"
-#include "invader/command_line_option.hpp"
-#include "invader/file/file.hpp"
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include <invader/build/build_workload.hpp>
+#include <invader/map/map.hpp>
+#include <invader/dependency/found_tag_dependency.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
     struct ArchiveOptions {

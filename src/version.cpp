@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "invader/version.hpp"
-#include "invader/hek/data_type.hpp"
-#include "invader/printf.hpp"
+#include <invader/version.hpp>
+#include <invader/hek/data_type.hpp>
+#include <invader/printf.hpp>
 
 #ifndef INVADER_VERSION_MAJOR
 #define INVADER_VERSION_MAJOR 0

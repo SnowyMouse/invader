@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cstring>
-#include "invader/tag/hek/header.hpp"
+#include <invader/tag/hek/header.hpp>
 
 namespace Invader::HEK {
     std::uint16_t TagFileHeader::version_for_tag(TagClassInt tag_class_int) {

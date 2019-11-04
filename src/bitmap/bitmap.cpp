@@ -4,14 +4,14 @@
 #include <filesystem>
 #include <optional>
 
-#include "invader/printf.hpp"
-#include "invader/version.hpp"
-#include "invader/tag/hek/class/bitmap.hpp"
-#include "invader/bitmap/image_loader.hpp"
-#include "invader/bitmap/color_plate_scanner.hpp"
-#include "invader/bitmap/bitmap_data_writer.hpp"
-#include "invader/command_line_option.hpp"
-#include "invader/file/file.hpp"
+#include <invader/printf.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/bitmap/image_loader.hpp>
+#include <invader/bitmap/color_plate_scanner.hpp>
+#include <invader/bitmap/bitmap_data_writer.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 enum SupportedFormatsInt {
     SUPPORTED_FORMATS_TIF = 0,

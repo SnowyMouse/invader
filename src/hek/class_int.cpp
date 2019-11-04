@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "invader/hek/class_int.hpp"
+#include <invader/hek/class_int.hpp>
 
 namespace Invader::HEK {
     /**
