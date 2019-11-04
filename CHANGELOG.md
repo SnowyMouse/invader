@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.16.0] - 2019-11-04
 ### Added
 - invader-info - Displays an overview of a map file, but also has options:
   compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
@@ -11,7 +11,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-build: Shows map type when building
 - invader-indexer: Changed index format to simply list tag paths with extension
-- invader-build: Uses new indexer, thus existing indexes will not work
+- invader-build: Use new indexer; Note previous index files no longer work
 
 ### Removed
 - invader-crc: Removed invader-crc in favor of invader-info. Use `-t crc32` or
