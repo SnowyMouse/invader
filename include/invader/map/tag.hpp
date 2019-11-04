@@ -37,6 +37,12 @@ namespace Invader {
         bool is_indexed() const noexcept;
 
         /**
+         * Get whether or not the tag data is available
+         * @return true if the tag data is available
+         */
+        bool data_is_available() const noexcept;
+
+        /**
          * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
          * @param  pointer Halo pointer where the data is
          * @param  minimum minimum number of bytes to guarantee to be valid

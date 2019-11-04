@@ -409,6 +409,44 @@ namespace Invader {
         return this->compressed;
     }
 
+    bool Map::is_protected() const noexcept {
+        using namespace HEK;
+
+        auto tag_count = this->get_tag_count();
+        for(std::size_t t = 0; t < tag_count; t++) {
+            auto &tag = this->get_tag(t);
+            auto tag_class = tag.tag_class_int();
+            auto &tag_path = tag.path();
+
+            // If the tag has no data, but it's not because it's indexed, keep going
+            if(!tag.data_is_available() && !tag.is_indexed()) {
+                continue;
+            }
+
+            // If the extension is invalid, return true
+            if(tag_class == TagClassInt::TAG_CLASS_NULL || tag_class == TagClassInt::TAG_CLASS_NONE || extension_to_tag_class(tag_class_to_extension(tag_class)) != tag_class) {
+                return true;
+            }
+
+            // Empty path? Probably protected
+            if(tag_path == "") {
+                return true;
+            }
+
+            // Go through each tag and see if we have any duplicates
+            for(std::size_t t2 = t + 1; t2 < tag_count; t2++) {
+                auto &tag2 = this->get_tag(t2);
+                if(tag_class != tag2.tag_class_int()) {
+                    continue;
+                }
+                if(tag2.path() == tag_path) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     Map::Map(Map &&move) {
         this->data_m = std::move(move.data_m);
         this->data = move.data;

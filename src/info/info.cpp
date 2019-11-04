@@ -19,6 +19,7 @@ int main(int argc, const char **argv) {
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
         DISPLAY_MAP_TYPE,
+        DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
         DISPLAY_SCENARIO_PATH,
         DISPLAY_TAG_COUNT
@@ -31,7 +32,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 't', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, map-type, scenario, scenario-path, tag-count");
+    options.emplace_back("type", 't', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -66,6 +67,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "map-type") == 0) {
                     map_info_options.type = DISPLAY_MAP_TYPE;
+                }
+                else if(std::strcmp(args[0], "protected") == 0) {
+                    map_info_options.type = DISPLAY_PROTECTED;
                 }
                 else {
                     eprintf("Unknown type %s\n", args[0]);
@@ -111,6 +115,9 @@ int main(int argc, const char **argv) {
             auto dirty = crc != header.crc32;
             oprintf("CRC32:             0x%08X%s\n", crc, dirty ? " (dirty)" : "");
 
+            // Is it protected?
+            oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
+
             // Uncompressed size
             oprintf("Uncompressed size: %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(header.tag_data_size), BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
             break;
@@ -138,6 +145,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_TAG_COUNT:
             oprintf("%zu\n", map->get_tag_count());
+            break;
+        case DISPLAY_PROTECTED:
+            oprintf("%s\n", map->is_protected() ? "yes" : "no");
             break;
     }
 }

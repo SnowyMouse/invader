@@ -333,7 +333,7 @@ Options:
   -h --help                    Show this list of options.
   -t --type                    Type of data to show. Can be overview (default),
                                compressed, crc32, dirty, engine, map-type,
-                               scenario, scenario-path, tag-count
+                               protected, scenario, scenario-path, tag-count
 ```
 
 ### invader-resource

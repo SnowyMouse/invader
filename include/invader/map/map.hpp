@@ -196,6 +196,12 @@ namespace Invader {
          */
         bool is_compressed() const noexcept;
 
+        /**
+         * Get whether the map is obviously protected
+         * @return true if the map is obviously protected
+         */
+        bool is_protected() const noexcept;
+
         Map(Map &&);
     private:
         /** Map data if managed */
