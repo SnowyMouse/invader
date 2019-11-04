@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info - Displays an overview of a map file, but also has options:
   compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
   tag-count, tags
+- invader-build: Added `-R` to rename scenarios when building
 
 ### Changed
 - Help menus have been rewritten for most programs
