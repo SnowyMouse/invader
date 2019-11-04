@@ -404,4 +404,8 @@ namespace Invader {
             bsp_tag.base_struct_pointer = bsp.bsp_address;
         }
     }
+
+    bool Map::is_compressed() const noexcept {
+        return this->compressed;
+    }
 }

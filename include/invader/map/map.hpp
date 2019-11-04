@@ -133,7 +133,7 @@ namespace Invader {
         const std::byte *resolve_tag_data_pointer(std::uint32_t offset, std::size_t minimum_size = 0) const;
 
         /**
-         * Get the data pointer
+         * Get a pointer to the uncompressed map data
          * @return data
          */
         std::byte *get_data() noexcept;
@@ -189,6 +189,12 @@ namespace Invader {
          * @return reference to the cache file header
          */
         const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
+
+        /**
+         * Get whether the map was originally compressed
+         * @return true if the map was compressed
+         */
+        bool is_compressed() const noexcept;
 
         Map(const Map &copy) = default;
     private:
@@ -249,6 +255,9 @@ namespace Invader {
 
         /** Header */
         HEK::CacheFileHeader header;
+
+        /** Map is compressed */
+        bool compressed = false;
 
 
         /** Load the map now */
