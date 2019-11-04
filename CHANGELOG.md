@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - Using `-h` or `--help` no longer outputs an extra newline
+- invader-build: Accepts forward slashes and backslashes in index files
 
 ### Fixed
 - invader-bitmap: Palettized flag is now properly set
@@ -24,7 +25,7 @@ This is used for recording Invader's changes. This changelog is based on
 - Help menus have been rewritten for most programs
 - invader-build: Shows map type when building
 - invader-indexer: Changed index format to simply list tag paths with extension
-- invader-build: Use new indexer; Note previous index files no longer work
+- invader-build: Use new indexer - *NOTE: Previous index files no longer work*
 
 ### Removed
 - invader-crc: Removed invader-crc in favor of invader-info. Use `-T crc32` or

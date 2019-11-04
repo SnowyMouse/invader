@@ -174,7 +174,9 @@ int main(int argc, const char **argv) {
                     return EXIT_FAILURE;
                 }
 
-                with_index.emplace_back(extension_to_tag_class(extension), tag.substr(0, extension - tag.data() - 1));
+                auto substr = tag.substr(0, extension - tag.data() - 1);
+                File::preferred_path_to_halo_path_chars(substr.data());
+                with_index.emplace_back(extension_to_tag_class(extension), substr);
             }
         }
 
