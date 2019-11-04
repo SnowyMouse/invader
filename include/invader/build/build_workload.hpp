@@ -36,13 +36,13 @@ namespace Invader {
             const std::vector<std::string> &tags_directories,
             HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET,
             std::string maps_directory = std::string(),
-            const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index = std::vector<std::tuple<Invader::HEK::TagClassInt, std::string>>(),
             bool no_external_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
-            std::optional<std::uint32_t> forge_crc = std::nullopt,
-            std::optional<std::uint32_t> tag_data_address = std::nullopt,
-            std::optional<std::string> rename_scenario = std::nullopt
+            const std::optional<std::vector<std::tuple<HEK::TagClassInt, std::string>>> &with_index = std::nullopt,
+            const std::optional<std::uint32_t> &forge_crc = std::nullopt,
+            const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
+            const std::optional<std::string> &rename_scenario = std::nullopt
         );
 
     private:

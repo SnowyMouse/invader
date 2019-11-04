@@ -198,10 +198,10 @@ int main(int argc, const char **argv) {
             build_options.tags,
             build_options.engine,
             build_options.maps,
-            with_index,
             build_options.no_external_tags,
             build_options.always_index_tags,
             !build_options.quiet,
+            with_index,
             forged_crc,
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))

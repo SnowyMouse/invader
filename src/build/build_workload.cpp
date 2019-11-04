@@ -38,13 +38,13 @@ namespace Invader {
         const std::vector<std::string> &tags_directories,
         HEK::CacheFileEngine engine_target,
         std::string maps_directory,
-        const std::vector<std::tuple<HEK::TagClassInt, std::string>> &with_index,
         bool no_external_tags,
         bool always_index_tags,
         bool verbose,
-        std::optional<std::uint32_t> forge_crc,
-        std::optional<std::uint32_t> tag_data_address,
-        std::optional<std::string> rename_scenario
+        const std::optional<std::vector<std::tuple<HEK::TagClassInt, std::string>>> &with_index,
+        const std::optional<std::uint32_t> &forge_crc,
+        const std::optional<std::uint32_t> &tag_data_address,
+        const std::optional<std::string> &rename_scenario
     ) {
         BuildWorkload workload;
 
@@ -78,9 +78,11 @@ namespace Invader {
         }
 
         // First set up indexed tags
-        workload.compiled_tags.reserve(with_index.size());
-        for(auto &tag : with_index) {
-            workload.compiled_tags.emplace_back(std::make_unique<CompiledTag>(std::get<1>(tag), std::get<0>(tag)));
+        if(with_index.has_value()) {
+            workload.compiled_tags.reserve((*with_index).size());
+            for(auto &tag : *with_index) {
+                workload.compiled_tags.emplace_back(std::make_unique<CompiledTag>(std::get<1>(tag), std::get<0>(tag)));
+            }
         }
 
         // Convert to paths
