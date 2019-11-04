@@ -11,6 +11,9 @@
 
 namespace Invader {
     class Map;
+    namespace HEK {
+        struct CacheFileTagDataTag;
+    }
 
     /**
      * Class for handling tags in compiled maps
@@ -41,6 +44,18 @@ namespace Invader {
          * @return true if the tag data is available
          */
         bool data_is_available() const noexcept;
+
+        /**
+         * Get the tag data index
+         * @return tag data index
+         */
+        HEK::CacheFileTagDataTag &get_tag_data_index() noexcept;
+
+        /**
+         * Get the tag data index
+         * @return tag data index
+         */
+        const HEK::CacheFileTagDataTag &get_tag_data_index() const noexcept;
 
         /**
          * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
@@ -150,6 +165,9 @@ namespace Invader {
 
         /** Tag data size */
         std::size_t tag_data_size = 0;
+
+        /** Tag data index offset */
+        std::size_t tag_data_index_offset = 0;
 
         /** Initialize the tag */
         Tag(Map &map);

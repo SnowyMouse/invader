@@ -6,10 +6,14 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-info: Added `-T compression-ratio`
 - invader-info: Added `-T build`
+- invader-info: Added `-T crc32-mismatched`
 
 ### Changed
 - Using `-h` or `--help` no longer outputs an extra newline
 - invader-build: Accepts forward slashes and backslashes in index files
+- invader-info: Dirty check is now separate from CRC32 but still checks CRC32
+- invader-info: Dirty check now checks if the map has been modified by Refinery
+- invader-info: Dirty check now fails (returns "Dirty") if the map is protected
 
 ### Fixed
 - invader-bitmap: Palettized flag is now properly set

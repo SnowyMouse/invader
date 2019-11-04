@@ -18,6 +18,7 @@ int main(int argc, const char **argv) {
         DISPLAY_COMPRESSED,
         DISPLAY_COMPRESSION_RATIO,
         DISPLAY_CRC32,
+        DISPLAY_CRC32_MISMATCHED,
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
         DISPLAY_MAP_TYPE,
@@ -35,7 +36,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -49,6 +50,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "crc32") == 0) {
                     map_info_options.type = DISPLAY_CRC32;
+                }
+                else if(std::strcmp(args[0], "crc32-mismatched") == 0) {
+                    map_info_options.type = DISPLAY_CRC32_MISMATCHED;
                 }
                 else if(std::strcmp(args[0], "dirty") == 0) {
                     map_info_options.type = DISPLAY_DIRTY;
@@ -110,6 +114,17 @@ int main(int argc, const char **argv) {
     auto compression_ratio = static_cast<float>(file_size) / data_length;
     auto tag_count = map->get_tag_count();
 
+    // Was the map opened in Refinery at some point? If so, it's dirty regardless of if the CRC is correct.
+    auto memed_by_refinery = [&tag_count, &map]() {
+        for(std::size_t i = 0; i < tag_count; i++) {
+            auto &tag = map->get_tag(i);
+            if(tag.tag_class_int() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data != 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     switch(map_info_options.type) {
         case DISPLAY_OVERVIEW: {
             oprintf("Scenario name:     %s\n", header.name.string);
@@ -120,8 +135,9 @@ int main(int argc, const char **argv) {
 
             // Get CRC
             auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
-            auto dirty = crc != header.crc32;
-            oprintf("CRC32:             0x%08X%s\n", crc, dirty ? " (dirty)" : "");
+            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected();
+            oprintf("CRC32:             0x%08X%s\n", crc, (crc != header.crc32) ? " (mismatched)" : "");
+            oprintf("Integrity:         %s\n", dirty ? "Dirty" : "Clean (probably)");
 
             // Is it protected?
             oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
@@ -143,7 +159,7 @@ int main(int argc, const char **argv) {
             oprintf("%08X\n", Invader::calculate_map_crc(map->get_data(), data_length));
             break;
         case DISPLAY_DIRTY:
-            oprintf("%s\n", Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 ? "yes" : "no");
+            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 || memed_by_refinery() || map->is_protected()) ? "yes" : "no");
             break;
         case DISPLAY_ENGINE:
             oprintf("%s\n", engine_name(header.engine));
@@ -174,6 +190,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_BUILD:
             oprintf("%s\n", header.build.string);
+            break;
+        case DISPLAY_CRC32_MISMATCHED:
+            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 ? "yes" : "no"));
             break;
     }
 }

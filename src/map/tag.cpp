@@ -78,5 +78,13 @@ namespace Invader {
         }
     }
 
+    HEK::CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {
+        return *reinterpret_cast<HEK::CacheFileTagDataTag *>(this->p_map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(HEK::CacheFileTagDataTag)));
+    }
+
+    const HEK::CacheFileTagDataTag &Tag::get_tag_data_index() const noexcept {
+        return const_cast<Tag *>(this)->get_tag_data_index();
+    }
+
     Tag::Tag(Map &map) : p_map(map) {}
 }
