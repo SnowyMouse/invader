@@ -195,8 +195,8 @@ namespace Invader {
 
         if(this->verbose) {
             oprintf("Scenario name:     %s\n", cache_file_header.name.string);
-            oprintf("Engine:            %s\n", engine_name(cache_file_header.engine));
-            oprintf("Map type:          %s\n", type_name(cache_file_header.map_type));
+            oprintf("Engine:            %s\n", engine_name(this->engine_target));
+            oprintf("Map type:          %s\n", type_name(this->cache_file_type));
 
             std::size_t total_tag_size = 0;
             for(auto &tag : this->compiled_tags) {
