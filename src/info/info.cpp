@@ -14,6 +14,7 @@ int main(int argc, const char **argv) {
     // Display data type
     enum DisplayType {
         DISPLAY_OVERVIEW,
+        DISPLAY_BUILD,
         DISPLAY_COMPRESSED,
         DISPLAY_COMPRESSION_RATIO,
         DISPLAY_CRC32,
@@ -34,7 +35,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, compression-ratio, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -79,6 +80,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "compression-ratio") == 0) {
                     map_info_options.type = DISPLAY_COMPRESSION_RATIO;
                 }
+                else if(std::strcmp(args[0], "build") == 0) {
+                    map_info_options.type = DISPLAY_BUILD;
+                }
                 else {
                     eprintf("Unknown type %s\n", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -109,6 +113,7 @@ int main(int argc, const char **argv) {
     switch(map_info_options.type) {
         case DISPLAY_OVERVIEW: {
             oprintf("Scenario name:     %s\n", header.name.string);
+            oprintf("Build:             %s\n", header.build.string);
             oprintf("Engine:            %s\n", engine_name(header.engine));
             oprintf("Map type:          %s\n", type_name(header.map_type));
             oprintf("Tags:              %zu / %zu (%.02f MiB)\n", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
@@ -166,6 +171,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_COMPRESSION_RATIO:
             oprintf("%.05f\n", compression_ratio);
+            break;
+        case DISPLAY_BUILD:
+            oprintf("%s\n", header.build.string);
             break;
     }
 }

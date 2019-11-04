@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-info: Added `-T compression-ratio`
+- invader-info: Added `-T build`
 
 ### Changed
 - Using `-h` or `--help` no longer outputs an extra newline

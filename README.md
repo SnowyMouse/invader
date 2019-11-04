@@ -333,9 +333,9 @@ Display map metadata.
 Options:
   -h --help                    Show this list of options.
   -T --type <type>             Set the type of data to show. Can be overview
-                               (default), compressed, compression-ratio, crc32,
-                               dirty, engine, protected, map-type, scenario,
-                               scenario-path, tag-count, tags
+                               (default), build, compressed, compression-ratio,
+                               crc32, dirty, engine, protected, map-type,
+                               scenario, scenario-path, tag-count, tags
 ```
 
 ### invader-resource
