@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.16.1] - 2019-11-04
 ### Added
 - invader-info: Added `-T compression-ratio`
 - invader-info: Added `-T build`
