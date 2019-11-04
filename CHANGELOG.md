@@ -10,6 +10,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - Using `-h` or `--help` no longer outputs an extra newline
 
+### Fixed
+- invader-bitmap: Palettized flag is now properly set
+
 ## [0.16.0] - 2019-11-04
 ### Added
 - invader-info - Displays an overview of a map file, but also has options:

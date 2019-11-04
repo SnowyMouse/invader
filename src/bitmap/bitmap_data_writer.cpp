@@ -34,7 +34,6 @@ namespace Invader {
                     bitmap.depth = 1;
                     break;
             }
-            bitmap.flags = BigEndian<BitmapDataFlags> {};
             bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
             std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
@@ -101,6 +100,9 @@ namespace Invader {
                 format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
                 compressed = false;
             }
+
+            // Set palettized
+            bool palettized = false;
 
             switch(format) {
                 case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
@@ -343,6 +345,7 @@ namespace Invader {
 
                     current_bitmap_pixels.clear();
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                    palettized = true;
                     break;
                 }
 
@@ -451,6 +454,7 @@ namespace Invader {
             BitmapDataFlags flags = {};
             flags.compressed = compressed;
             flags.power_of_two_dimensions = 1;
+            flags.palettized = palettized;
             bitmap.flags = flags;
 
             bitmap.registration_point.x = bitmap_color_plate.registration_point_x;
