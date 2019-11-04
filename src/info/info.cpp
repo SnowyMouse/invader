@@ -141,7 +141,7 @@ int main(int argc, const char **argv) {
             oprintf("%s\n", header.name.string);
             break;
         case DISPLAY_SCENARIO_PATH:
-            oprintf("%s\n", map->get_tag(map->get_scenario_tag_id()).path().data());
+            oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).path()).data());
             break;
         case DISPLAY_TAG_COUNT:
             oprintf("%zu\n", map->get_tag_count());
