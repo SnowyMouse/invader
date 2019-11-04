@@ -6,6 +6,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-info: Added `-T compression-ratio`
 
+### Changed
+- Using `-h` or `--help` no longer outputs an extra newline
+
 ## [0.16.0] - 2019-11-04
 ### Added
 - invader-info - Displays an overview of a map file, but also has options:
@@ -13,6 +16,7 @@ This is used for recording Invader's changes. This changelog is based on
   tag-count, tags
 
 ### Changed
+- Help menus have been rewritten for most programs
 - invader-build: Shows map type when building
 - invader-indexer: Changed index format to simply list tag paths with extension
 - invader-build: Use new indexer; Note previous index files no longer work
