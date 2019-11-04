@@ -32,7 +32,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 't', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count", "<type>");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -40,7 +40,7 @@ int main(int argc, const char **argv) {
     // Do it!
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<MapInfoOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, map_info_options, [](char opt, const auto &args, MapInfoOptions &map_info_options) {
         switch(opt) {
-            case 't':
+            case 'T':
                 if(std::strcmp(args[0], "overview") == 0) {
                     map_info_options.type = DISPLAY_OVERVIEW;
                 }
