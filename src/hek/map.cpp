@@ -20,6 +20,19 @@ namespace Invader::HEK {
         }
     }
 
+    const char *type_name(CacheFileType type) noexcept {
+        switch(type) {
+            case CacheFileType::CACHE_FILE_MULTIPLAYER:
+                return "Multiplayer";
+            case CacheFileType::CACHE_FILE_SINGLEPLAYER:
+                return "Singleplayer";
+            case CacheFileType::CACHE_FILE_USER_INTERFACE:
+                return "User interface";
+            default:
+                return "Unknown";
+        }
+    }
+
     #define PERFORM_COPY std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), static_cast<std::byte>(0)); \
                          this->head_literal = copy.head_literal; \
                          this->engine = copy.engine; \

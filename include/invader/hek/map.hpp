@@ -27,6 +27,8 @@ namespace Invader::HEK {
         CACHE_FILE_USER_INTERFACE
     };
 
+    const char *type_name(CacheFileType type) noexcept;
+
     enum CacheFileLiteral : std::uint32_t {
         CACHE_FILE_HEAD = 0x68656164,
         CACHE_FILE_FOOT = 0x666F6F74,
