@@ -196,7 +196,7 @@ namespace Invader {
          */
         bool is_compressed() const noexcept;
 
-        Map(const Map &copy) = default;
+        Map(Map &&);
     private:
         /** Map data if managed */
         std::vector<std::byte> data_m;

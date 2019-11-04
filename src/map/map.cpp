@@ -408,4 +408,37 @@ namespace Invader {
     bool Map::is_compressed() const noexcept {
         return this->compressed;
     }
+
+    Map::Map(Map &&move) {
+        this->data_m = std::move(move.data_m);
+        this->data = move.data;
+        this->data_length = move.data_length;
+        this->bitmap_data_m = std::move(move.bitmap_data_m);
+        this->bitmap_data = move.bitmap_data;
+        this->bitmap_data_length = move.bitmap_data_length;
+        this->loc_data_m = std::move(move.loc_data_m);
+        this->loc_data = move.loc_data;
+        this->loc_data_length = move.loc_data_length;
+        this->sound_data_m = std::move(move.sound_data_m);
+        this->sound_data = move.sound_data;
+        this->sound_data_length = move.sound_data_length;
+
+        if(this->data_m.size()) {
+            this->data = this->data_m.data();
+        }
+        if(this->loc_data_m.size()) {
+            this->loc_data = this->loc_data_m.data();
+        }
+        if(this->sound_data_m.size()) {
+            this->sound_data = this->sound_data_m.data();
+        }
+        if(this->bitmap_data_m.size()) {
+            this->bitmap_data = this->bitmap_data_m.data();
+        }
+
+        move.tags.clear();
+
+        this->load_map();
+        this->compressed = move.compressed;
+    }
 }
