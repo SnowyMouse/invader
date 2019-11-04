@@ -86,7 +86,7 @@ int main(int argc, const char **argv) {
             }
 
             try {
-                auto tag_count = map.tag_count();
+                auto tag_count = map.get_tag_count();
                 std::fprintf(f, "%zu\n", tag_count);
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &tag = map.get_tag(i);

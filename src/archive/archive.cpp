@@ -127,7 +127,7 @@ int main(int argc, const char **argv) {
             eprintf("Failed to parse the map file generated with scenario %s\n", base_tag.data());
             return EXIT_FAILURE;
         }
-        auto tag_count = parsed_map->tag_count();
+        auto tag_count = parsed_map->get_tag_count();
 
         // Go through each tag and see if we can find everything.
         archive_list.reserve(tag_count);

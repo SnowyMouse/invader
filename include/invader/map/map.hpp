@@ -148,7 +148,7 @@ namespace Invader {
          * Get the tag count
          * @return the tag count
          */
-        std::size_t tag_count() const noexcept;
+        std::size_t get_tag_count() const noexcept;
 
         /**
          * Get the tag at the specified index

@@ -177,12 +177,12 @@ namespace Invader {
         return const_cast<Map *>(this)->resolve_tag_data_pointer(pointer, minimum_size);
     }
 
-    std::size_t Map::tag_count() const noexcept {
+    std::size_t Map::get_tag_count() const noexcept {
         return this->tags.size();
     }
 
     Tag &Map::get_tag(std::size_t index) {
-        if(index >= this->tag_count()) {
+        if(index >= this->get_tag_count()) {
             throw OutOfBoundsException();
         }
         else {
