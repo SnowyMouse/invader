@@ -105,10 +105,10 @@ work with, this project is split into different programs.
 - [invader-archive]
 - [invader-bitmap]
 - [invader-build]
-- [invader-crc]
 - [invader-dependency]
 - [invader-font]
 - [invader-indexer]
+- [invader-info]
 - [invader-resource]
 
 ### invader-archive
@@ -279,15 +279,6 @@ Options:
                                default, this is the map path (overwrite).
 ```
 
-### invader-crc
-This program calculates the CRC32 of a map file. If the CRC value calculated
-differs from the value stored in the cache file header, then a warning will be
-printed to standard error.
-
-```
-Usage: invader-crc <map>
-```
-
 ### invader-dependency
 This program finds tags that directly depend on a given tag.
 
@@ -328,6 +319,21 @@ This program builds index files for usage with `--with-index` with invader-build
 
 ```
 Usage: invader-indexer <input map> <output index>
+```
+
+### invader-info
+This program displays metadata of a cache file.
+
+```
+Usage: ./invader-info [option] <map>
+
+Display map metadata.
+
+Options:
+  -h --help                    Show this list of options.
+  -t --type                    Type of data to show. Can be overview (default),
+                               compressed, crc32, dirty, engine, map-type,
+                               scenario, scenario-path, tag-count
 ```
 
 ### invader-resource
@@ -454,8 +460,8 @@ for multiplayer maps.
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
 [invader-build]: #invader-build
-[invader-crc]: #invader-crc
 [invader-dependency]: #invader-dependency
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer
+[invader-info]: #invader-info
 [invader-resource]: #invader-resource
