@@ -3,6 +3,23 @@
 #include <invader/hek/map.hpp>
 
 namespace Invader::HEK {
+    const char *engine_name(CacheFileEngine engine) noexcept {
+        switch(engine) {
+            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                return "Dark Circlet";
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                return "Halo Custom Edition";
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+                return "Halo: Combat Evolved (PC)";
+            case CacheFileEngine::CACHE_FILE_XBOX:
+                return "Halo: Combat Evolved (Xbox)";
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                return "Halo Demo / Trial";
+            default:
+                return "Unknown";
+        }
+    }
+
     #define PERFORM_COPY std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), static_cast<std::byte>(0)); \
                          this->head_literal = copy.head_literal; \
                          this->engine = copy.engine; \

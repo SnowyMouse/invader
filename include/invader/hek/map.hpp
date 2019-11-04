@@ -19,6 +19,8 @@ namespace Invader::HEK {
         CACHE_FILE_CUSTOM_EDITION_COMPRESSED = 0x861A0261
     };
 
+    const char *engine_name(CacheFileEngine engine) const noexcept;
+
     enum CacheFileType : TagEnum {
         CACHE_FILE_SINGLEPLAYER,
         CACHE_FILE_MULTIPLAYER,

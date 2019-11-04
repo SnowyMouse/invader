@@ -195,29 +195,7 @@ namespace Invader {
 
         if(this->verbose) {
             oprintf("Scenario name:     %s\n", cache_file_header.name.string);
-
-            const char *engine_name;
-            switch(this->engine_target) {
-                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    engine_name = "Dark Circlet";
-                    break;
-                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    engine_name = "Halo Custom Edition";
-                    break;
-                case CacheFileEngine::CACHE_FILE_RETAIL:
-                    engine_name = "Halo: Combat Evolved (PC)";
-                    break;
-                case CacheFileEngine::CACHE_FILE_XBOX:
-                    engine_name = "Halo: Combat Evolved (Xbox)";
-                    break;
-                case CacheFileEngine::CACHE_FILE_DEMO:
-                    engine_name = "Halo Demo / Trial";
-                    break;
-                default:
-                    engine_name = "Unknown";
-                    break;
-            }
-            oprintf("Engine:            %s\n", engine_name);
+            oprintf("Engine:            %s\n", engine_name(cache_file_header.engine));
 
             std::size_t total_tag_size = 0;
             for(auto &tag : this->compiled_tags) {
