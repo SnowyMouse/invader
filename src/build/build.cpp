@@ -154,22 +154,27 @@ int main(int argc, const char **argv) {
         std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
         if(build_options.index.size()) {
             std::fstream index_file(build_options.index, std::ios_base::in);
-            std::size_t tag_count;
+            std::string tag;
+            while(std::getline(index_file, tag)) {
+                // Check if empty
+                if(tag.size() == 0) {
+                    break;
+                }
 
-            // Get the tag count
-            index_file >> tag_count;
+                // Get the extension
+                const char *extension = nullptr;
+                for(char &c : tag) {
+                    if(c == '.') {
+                        extension = &c + 1;
+                    }
+                }
 
-            // Go through and do stuff
-            with_index.reserve(tag_count);
-            for(std::size_t i = 0; i < tag_count; i++) {
-                std::size_t tag_class;
-                std::string tag_path;
+                if(!extension) {
+                    eprintf("Invalid index given. \"%s\" is missing an extension.\n", tag.data());
+                    return EXIT_FAILURE;
+                }
 
-                index_file >> tag_class;
-                index_file.ignore();
-                std::getline(index_file, tag_path);
-
-                with_index.emplace_back(static_cast<HEK::TagClassInt>(tag_class), tag_path);
+                with_index.emplace_back(extension_to_tag_class(extension), tag.substr(0, extension - tag.data() - 1));
             }
         }
 

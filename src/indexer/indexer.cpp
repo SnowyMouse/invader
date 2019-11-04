@@ -48,7 +48,6 @@ int main(int argc, const char **argv) {
 
             // Open the output!
             std::FILE *f = std::fopen(output, "wb");
-            std::fprintf(f, "%zu\n", tag_count / (1 + skip));
 
             // Go through tags
             try {
@@ -87,13 +86,12 @@ int main(int argc, const char **argv) {
 
             try {
                 auto tag_count = map.get_tag_count();
-                std::fprintf(f, "%zu\n", tag_count);
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &tag = map.get_tag(i);
 
                     // Replace double slashes (or more) with one slash
                     std::string path = std::regex_replace(tag.path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-                    std::fprintf(f, "%u\t%s\n", tag.tag_class_int(), path.data());
+                    std::fprintf(f, "%s.%s\n", path.data(), tag_class_to_extension(tag.tag_class_int()));
                 }
             }
             catch(std::exception &) {

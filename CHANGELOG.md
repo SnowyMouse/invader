@@ -6,10 +6,12 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-info - Displays an overview of a map file, but also has options:
   compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
-  tag-count
+  tag-count, tags
 
 ### Changed
 - invader-build: Shows map type when building
+- invader-indexer: Changed index format to simply list tag paths with extension
+- invader-build: Uses new indexer, thus existing indexes will not work
 
 ### Removed
 - invader-crc: Removed invader-crc in favor of invader-info. Use `-t crc32` or
