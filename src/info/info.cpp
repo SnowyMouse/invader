@@ -15,6 +15,7 @@ int main(int argc, const char **argv) {
     enum DisplayType {
         DISPLAY_OVERVIEW,
         DISPLAY_COMPRESSED,
+        DISPLAY_COMPRESSION_RATIO,
         DISPLAY_CRC32,
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
@@ -33,7 +34,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), compressed, compression-ratio, crc32, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -74,6 +75,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "tags") == 0) {
                     map_info_options.type = DISPLAY_TAGS;
+                }
+                else if(std::strcmp(args[0], "compression-ratio") == 0) {
+                    map_info_options.type = DISPLAY_COMPRESSION_RATIO;
                 }
                 else {
                     eprintf("Unknown type %s\n", args[0]);
@@ -159,6 +163,9 @@ int main(int argc, const char **argv) {
                 auto &tag = map->get_tag(t);
                 oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.path()).data(), tag_class_to_extension(tag.tag_class_int()));
             }
+            break;
+        case DISPLAY_COMPRESSION_RATIO:
+            oprintf("%.05f\n", compression_ratio);
             break;
     }
 }

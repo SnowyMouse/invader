@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-info: Added `-T compression-ratio`
+
 ## [0.16.0] - 2019-11-04
 ### Added
 - invader-info - Displays an overview of a map file, but also has options:
@@ -14,8 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Use new indexer; Note previous index files no longer work
 
 ### Removed
-- invader-crc: Removed invader-crc in favor of invader-info. Use `-t crc32` or
-  `-t dirty` to indicate the map CRC32 and whether the map is dirty or not in a
+- invader-crc: Removed invader-crc in favor of invader-info. Use `-T crc32` or
+  `-T dirty` to indicate the map CRC32 and whether the map is dirty or not in a
   scriptable fashion.
 
 ## [0.15.2] - 2019-10-29
