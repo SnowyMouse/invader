@@ -254,6 +254,7 @@ Options:
   -o --output <file>           Output to a specific file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
+  -R --rename-scenario <name>  Rename the scenario.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -325,7 +326,7 @@ Usage: invader-indexer <input map> <output index>
 This program displays metadata of a cache file.
 
 ```
-Usage: ./invader-info [option] <map>
+Usage: invader-info [option] <map>
 
 Display map metadata.
 

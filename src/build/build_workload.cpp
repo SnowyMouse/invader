@@ -43,7 +43,8 @@ namespace Invader {
         bool always_index_tags,
         bool verbose,
         std::optional<std::uint32_t> forge_crc,
-        std::optional<std::uint32_t> tag_data_address
+        std::optional<std::uint32_t> tag_data_address,
+        std::optional<std::string> rename_scenario
     ) {
         BuildWorkload workload;
 
@@ -129,8 +130,8 @@ namespace Invader {
             }
         }
         workload.verbose = verbose;
-
         workload.scenario = scenario;
+        workload.rename_scenario = rename_scenario;
 
         // Replace forward slashes in scenario tag path with backslashes
         File::preferred_path_to_halo_path_chars(workload.scenario.data());
@@ -150,6 +151,21 @@ namespace Invader {
         if(this->tag_count > CACHE_FILE_MAX_TAG_COUNT) {
             eprintf("Tag count exceeds maximum of %zu.\n", CACHE_FILE_MAX_TAG_COUNT);
             throw MaximumTagDataSizeException();
+        }
+
+        // Change the scenario base name?
+        if(this->rename_scenario.has_value()) {
+            auto &tag = this->compiled_tags[this->scenario_index];
+            const char *stem_end = tag->path.data();
+            for(const char *i = stem_end; *i; i++) {
+                if(*i == '\\') {
+                    stem_end = i + 1;
+                }
+            }
+            std::string renamed_path = std::string(tag->path.data(), stem_end - tag->path.data()) + *this->rename_scenario;
+            tag->path = renamed_path;
+            this->scenario = renamed_path;
+            this->scenario_base_name = *this->rename_scenario;
         }
 
         // Remove anything we don't need

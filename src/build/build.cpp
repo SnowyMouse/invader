@@ -45,6 +45,7 @@ int main(int argc, const char **argv) {
         bool always_index_tags = false;
         const char *forged_crc = nullptr;
         bool use_filesystem_path = false;
+        const char *rename_scenario = nullptr;
     } build_options;
 
     build_options.path = argv[0];
@@ -61,6 +62,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("forge-crc", 'c', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    options.emplace_back("rename-scenario", 'R', 1, "Rename the scenario.", "<name>");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -111,6 +113,10 @@ int main(int argc, const char **argv) {
             case 'i':
                 show_version_info();
                 std::exit(EXIT_FAILURE);
+                break;
+            case 'R':
+                build_options.rename_scenario = arguments[0];
+                break;
         }
     });
 
@@ -186,9 +192,29 @@ int main(int argc, const char **argv) {
             forged_crc = forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_external_tags, build_options.always_index_tags, !build_options.quiet, forged_crc);
+        // Build!
+        auto map = Invader::BuildWorkload::compile_map(
+            scenario.data(),
+            build_options.tags,
+            build_options.engine,
+            build_options.maps,
+            with_index,
+            build_options.no_external_tags,
+            build_options.always_index_tags,
+            !build_options.quiet,
+            forged_crc,
+            std::nullopt,
+            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))
+        );
 
-        const char *map_name = File::base_name_chars(scenario.data());
+        // Set the map name
+        const char *map_name;
+        if(build_options.rename_scenario) {
+            map_name = build_options.rename_scenario;
+        }
+        else {
+            map_name = File::base_name_chars(scenario.data());
+        }
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;

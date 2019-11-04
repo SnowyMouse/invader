@@ -29,6 +29,7 @@ namespace Invader {
          * @param verbose           output non-error messages to console
          * @param forge_crc         forge the CRC32 of the map
          * @param tag_data_pointer  address the tag data will be loaded to
+         * @param rename_scenario   rename the scenario's base name (preserving the root path)
          */
         static std::vector<std::byte> compile_map(
             const char *scenario,
@@ -40,7 +41,8 @@ namespace Invader {
             bool always_index_tags = false,
             bool verbose = false,
             std::optional<std::uint32_t> forge_crc = std::nullopt,
-            std::optional<std::uint32_t> tag_data_address = std::nullopt
+            std::optional<std::uint32_t> tag_data_address = std::nullopt,
+            std::optional<std::string> rename_scenario = std::nullopt
         );
 
     private:
@@ -58,6 +60,11 @@ namespace Invader {
          * Index of the scenario tag to use
          */
         std::size_t scenario_index;
+
+        /**
+         * Rename the scenario base name to this
+         */
+        std::optional<std::string> rename_scenario;
 
         /**
          * Array of tag directories to use
