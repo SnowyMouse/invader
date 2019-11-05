@@ -495,7 +495,7 @@ for multiplayer maps.
 [Should I use invader-build or tool.exe?]: #should-i-use-invader-build-or-toolexe
 
 [Map protection]: http://forum.halomaps.org/index.cfm?page=topic&topicID=16885
-[Obfuscating software]: http://forum.halomaps.org/index.cfm?page=topic&topicID=51196
+[Obfuscating software]: http://forum.halomaps.org/index.cfm?page=topic&topicID=51196&start=112
 [Writing closed source software]: http://halo.isimaginary.com/
 [Keeping helpful information locked behind secret forums and groups]: http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948
 [it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
