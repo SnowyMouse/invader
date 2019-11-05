@@ -29,14 +29,19 @@ static_assert(sizeof(INVADER_FULL_VERSION_STRING) < sizeof(Invader::HEK::TagStri
 namespace Invader {
     void show_version_info() {
         oprintf(INVADER_FULL_VERSION_STRING "\n\n");
-        oprintf("This program is licensed under the GNU General Public License v3.0.\n\n");
+        oprintf("This program is licensed under the GNU General Public License v3.0.\n");
+        oprintf("\n");
         oprintf("Credits:\n");
-        oprintf("  Kavawuvi                       - Lead Developer\n");
-        oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n\n");
+        oprintf("  Kavawuvi                       - Lead Developer, Project owner\n");
+        oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n");
+        oprintf("\n");
         oprintf("Special thanks:\n");
+        oprintf("  MosesofEgypt                   - Lots of help with tag data and model geometry\n");
         oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
-        oprintf("  GoofballMichelle               - Discord server\n");
-        oprintf("  MosesofEgypt                   - Lots of help with tag data and model geometry\n\n");
+        oprintf("\n");
+        oprintf("Software used in this program:\n");
+        oprintf("  STB library                    - https://github.com/nothings/stb\n");
+        oprintf("\n");
         oprintf("Other links:\n");
         oprintf("  Invader source code            - https://github.com/Kavawuvi/Invader\n");
         oprintf("  Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/\n");
