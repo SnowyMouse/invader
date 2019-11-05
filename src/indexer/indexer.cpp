@@ -10,6 +10,7 @@
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
+#include <invader/command_line_option.hpp>
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -21,13 +22,22 @@ int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
 
-    if(argc < 3) {
-        eprintf("Usage: %s <input map> <output index>\n", argv[0]);
-        return RETURN_FAILED_NOTHING_TO_DO;
-    }
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
-    const char *output = argv[2];
-    const char *input = argv[1];
+    static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
+    static constexpr char USAGE[] = "[options] <input-map> <output-txt>";
+
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<std::nullptr_t>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, nullptr, [](char opt, const auto &, std::nullptr_t) {
+        switch(opt) {
+            case 'i':
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
+        }
+    });
+
+    const char *output = remaining_arguments[1];
+    const char *input = remaining_arguments[0];
 
     auto input_map_data = File::open_file(input);
 
