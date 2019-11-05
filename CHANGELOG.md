@@ -8,13 +8,10 @@ This is used for recording Invader's changes. This changelog is based on
   to other Invader programs
 
 ### Changed
-- To prevent people from confusing arguments of different programs, some of the
+- To prevent people from confusing arguments of different programs, two of the
   short argument letters were changed:
-    - invader-bitmap: Changed `-s` to `-e` to avoid confusion with `single-tag`
     - invader-bitmap: Changed `-m` to `-M` to avoid confusion with `maps`
     - invader-build: Changed `-R` to `-N` to avoid confusion with `retail`
-    - invader-dependency: Changed `-R` to `-V` to avoid confusion with `retail`
-    - invader-font: Changed `-s` to `-z` to avoid confusion with `single-tag`
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now
