@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- Added `--info` to invader-indexer to show information about Invader, similar
+  to other Invader programs
+
 ### Changed
 - To prevent people from confusing arguments of different programs, some of the
   short argument letters were changed:
