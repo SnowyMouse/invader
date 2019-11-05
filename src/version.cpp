@@ -40,6 +40,7 @@ namespace Invader {
         oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
         oprintf("\n");
         oprintf("Software used in this program:\n");
+        oprintf("  FreeType                       - https://www.freetype.org/\n");
         oprintf("  STB library                    - https://github.com/nothings/stb\n");
         oprintf("\n");
         oprintf("Other links:\n");
