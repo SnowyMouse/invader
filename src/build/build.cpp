@@ -64,7 +64,7 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
             case 'n':
                 build_options.no_external_tags = true;

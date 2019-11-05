@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, FontOptions &font_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, auto &font_options) {
         switch(opt) {
             case 'd':
                 font_options.data = args[0];

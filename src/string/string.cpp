@@ -110,7 +110,7 @@ int main(int argc, char * const *argv) {
         bool use_filesystem_path = false;
     } string_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
                 string_options.tags = arguments[0];

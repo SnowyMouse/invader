@@ -26,7 +26,7 @@ int main(int argc, const char **argv) {
     static constexpr char DESCRIPTION[] = "Compress cache files.";
     static constexpr char USAGE[] = "[options] <map>";
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, compress_options, [](char opt, const auto &arguments, CompressOptions &compress_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<CompressOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, compress_options, [](char opt, const auto &arguments, auto &compress_options) {
         switch(opt) {
             case 'd':
                 compress_options.decompress = true;

@@ -44,7 +44,7 @@ int main(int argc, const char **argv) {
     static constexpr char USAGE[] = "[option] <map>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<MapInfoOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, map_info_options, [](char opt, const auto &args, MapInfoOptions &map_info_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<MapInfoOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, map_info_options, [](char opt, const auto &args, auto &map_info_options) {
         switch(opt) {
             case 'T':
                 if(std::strcmp(args[0], "overview") == 0) {

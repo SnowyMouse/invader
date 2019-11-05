@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     static constexpr char USAGE[] = "[options] <bitmap-tag>";
 
     // Go through each argument
-    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, bitmap_options, [](char opt, const std::vector<const char *> &arguments, auto &bitmap_options) {
         switch(opt) {
             case 'd':
                 bitmap_options.data = arguments[0];
