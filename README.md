@@ -310,7 +310,7 @@ Create font tags from TTF files.
 Options:
   -d --data <dir>              Set the data directory.
   -h --help                    Show this list of options.
-  -i --font-size <px>          Set the font size in pixels.
+  -z --font-size <px>          Set the font size in pixels.
   -P --fs-path                 Use a filesystem path for the tag.
   -t --tags <dir>              Set the tags directory.
 ```

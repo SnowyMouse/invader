@@ -14,11 +14,14 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Dirty check is now separate from CRC32 but still checks CRC32
 - invader-info: Dirty check now checks if the map has been modified by Refinery
 - invader-info: Dirty check now fails (returns "Dirty") if the map is protected
+- invader-font: Changed `-s` to `-z`
 
 ### Fixed
 - invader-bitmap: Palettized flag is now properly set
 - invader-info: Fixed detecting stubbed tags as protected. However, this will
   not apply to maps built before this change.
+- invader-font: Fixed `-i` being used as both info and font size. It is now
+  `-z` as expected.
 
 ## [0.16.0] - 2019-11-04
 ### Added
