@@ -1,6 +1,6 @@
 #include <chrono>
 
-#include "zstd/lib/zstd.h"
+#include <zstd.h>
 #include <invader/command_line_option.hpp>
 #include <invader/printf.hpp>
 #include <invader/version.hpp>

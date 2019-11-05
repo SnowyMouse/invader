@@ -2,7 +2,7 @@
 
 #include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
-#include "zstd/lib/zstd.h"
+#include <zstd.h>
 
 namespace Invader::Compression {
     static void compress_header(const std::byte *header_input, std::byte *header_output, std::size_t decompressed_size) {

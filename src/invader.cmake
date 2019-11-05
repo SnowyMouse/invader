@@ -134,8 +134,5 @@ set_source_files_properties(src/version.cpp
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# Build zstd
-include(src/compress/zstd/zstd.cmake)
-
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette invader-zstd)
+target_link_libraries(invader invader-bitmap-p8-palette zstd)
