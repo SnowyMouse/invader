@@ -84,11 +84,15 @@ namespace Invader::HEK {
 
         /**
          * Check if the string overflows
-         * @return true if the string overflows
+         * @param  length optionally set the length to this
+         * @return        true if the string overflows
          */
-        bool overflows() const noexcept {
+        bool overflows(std::size_t *length = nullptr) const noexcept {
             for(const char &c : this->string) {
                 if(c == 0) {
+                    if(length) {
+                        *length = &c - this->string;
+                    }
                     return false;
                 }
             }
@@ -97,18 +101,22 @@ namespace Invader::HEK {
 
         TagString() = default;
         TagString(const TagString &copy) {
-            if(copy.overflows()) {
+            std::size_t length = 0;
+            if(copy.overflows(&length)) {
                 eprintf("string overflow detected\n");
                 throw OutOfBoundsException();
             }
-            std::copy(copy.string, copy.string + sizeof(copy.string), this->string);
+            std::copy(copy.string, copy.string + length, this->string);
+            std::fill(this->string + length, this->string + sizeof(this->string), 0x0);
         }
         TagString &operator=(const TagString &copy) {
-            if(copy.overflows()) {
+            std::size_t length = 0;
+            if(copy.overflows(&length)) {
                 eprintf("string overflow detected\n");
                 throw OutOfBoundsException();
             }
-            std::copy(copy.string, copy.string + sizeof(copy.string), this->string);
+            std::copy(copy.string, copy.string + length, this->string);
+            std::fill(this->string + length, this->string + sizeof(this->string), 0x0);
             return *this;
         }
     };

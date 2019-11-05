@@ -13,6 +13,8 @@ This is used for recording Invader's changes. This changelog is based on
   short argument letters were changed:
     - invader-bitmap: Changed `-m` to `-M` to avoid confusion with `maps`
     - invader-build: Changed `-R` to `-N` to avoid confusion with `retail`
+- invader-build: 32 byte tag strings are now zeroed out before copying
+- invader-compress: Names and build strings are zeroed out before copying
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now
