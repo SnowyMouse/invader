@@ -151,6 +151,9 @@ Options:
   -d --data <path> <path>      Set the data directory.
   -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
                                Specify channels with letters (i.e. argb).
+  -e --mipmap-scale <type>     Mipmap scale type. Can be: linear,
+                               nearest-alpha, nearest. Default (new tag):
+                               linear
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format                  Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
@@ -160,14 +163,11 @@ Options:
                                Default (new tag): 0.02
   -i --info                    Show license and credits.
   -I --ignore-tag              Ignore the tag data if the tag exists.
-  -m --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
+  -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
   -p --bump-palettize <val>    Set the bumpmap palettization setting. This will
                                not work with stock Halo. Can be: off or on.
                                Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
-  -s --mipmap-scale <type>     Mipmap scale type. Can be: linear,
-                               nearest-alpha, nearest. Default (new tag):
-                               linear
   -t --tags <path>             Set the data directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d, 3d, cubemap,
                                interface, or sprite. Default (new tag): 2d
@@ -251,10 +251,10 @@ Options:
   -m --maps <dir>              Use a specific maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
+  -N --rename-scenario <name>  Rename the scenario.
   -o --output <file>           Output to a specific file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
-  -R --rename-scenario <name>  Rename the scenario.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -293,10 +293,10 @@ Options:
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag.
   -r --recursive               Recursively get all depended tags.
-  -R --reverse                 Find all tags that depend on the tag, instead.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+  -V --reverse                 Find all tags that depend on the tag, instead.
 ```
 
 ### invader-font

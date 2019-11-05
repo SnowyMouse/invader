@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
     options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit" "<type>");
     options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
-    options.emplace_back("mipmap-count", 'm', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
-    options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
+    options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
+    options.emplace_back("mipmap-scale", 'e', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
     options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
-            case 's':
+            case 'e':
                 if(std::strcmp(arguments[0], "linear") == 0) {
                     bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR;
                 }
@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
                 bitmap_options.bump_height = static_cast<float>(std::strtof(arguments[0], nullptr));
                 break;
 
-            case 'm':
+            case 'M':
                 bitmap_options.max_mipmap_count = static_cast<std::uint32_t>(std::strtol(arguments[0], nullptr, 10));
                 break;
 

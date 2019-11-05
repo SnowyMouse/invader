@@ -16,7 +16,7 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("reverse", 'R', 0, "Find all tags that depend on the tag, instead.");
+    options.emplace_back("reverse", 'V', 0, "Find all tags that depend on the tag, instead.");
     options.emplace_back("recursive", 'r', 0, "Recursively get all depended tags.");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
 
@@ -39,7 +39,7 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_FAILURE);
-            case 'R':
+            case 'V':
                 dependency_options.reverse = true;
                 break;
             case 'r':

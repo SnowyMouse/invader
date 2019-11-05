@@ -59,7 +59,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("forge-crc", 'c', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
-    options.emplace_back("rename-scenario", 'R', 1, "Rename the scenario.", "<name>");
+    options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -111,7 +111,7 @@ int main(int argc, const char **argv) {
                 show_version_info();
                 std::exit(EXIT_FAILURE);
                 break;
-            case 'R':
+            case 'N':
                 build_options.rename_scenario = arguments[0];
                 break;
         }

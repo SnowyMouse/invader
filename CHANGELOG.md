@@ -2,6 +2,20 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- To prevent people from confusing arguments of different programs, some of the
+  short argument letters were changed:
+    - invader-bitmap: Changed `-s` to `-e` to avoid confusion with `single-tag`
+    - invader-bitmap: Changed `-m` to `-M` to avoid confusion with `maps`
+    - invader-build: Changed `-R` to `-N` to avoid confusion with `retail`
+    - invader-dependency: Changed `-R` to `-V` to avoid confusion with `retail`
+    - invader-font: Changed `-s` to `-z` to avoid confusion with `single-tag`
+
+### Fixed
+- invader-font: Fixed `-i` being used as both info and font size. It is now
+  `-z` as expected.
+
 ## [0.16.1] - 2019-11-04
 ### Added
 - invader-info: Added `-T compression-ratio`
@@ -14,14 +28,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Dirty check is now separate from CRC32 but still checks CRC32
 - invader-info: Dirty check now checks if the map has been modified by Refinery
 - invader-info: Dirty check now fails (returns "Dirty") if the map is protected
-- invader-font: Changed `-s` to `-z`
 
 ### Fixed
 - invader-bitmap: Palettized flag is now properly set
 - invader-info: Fixed detecting stubbed tags as protected. However, this will
   not apply to maps built before this change.
-- invader-font: Fixed `-i` being used as both info and font size. It is now
-  `-z` as expected.
 
 ## [0.16.0] - 2019-11-04
 ### Added
