@@ -367,7 +367,8 @@ These are a selection of questions that have been asked over the course of
 Invader's development.
 
 - [What operating systems are supported?]
-- [Are 32-bit Windows Nightly Builds available?]
+- [Why GPL and not MIT or BSD?]
+- [Are 32-bit Windows builds available?]
 - [Can invader-build create .yelo maps?]
 - [Can invader-build create Xbox maps?]
 - [The HEK says my bitmap tag is "too large" when opening.]
@@ -379,7 +380,32 @@ Invader's development.
 Invader does not support any one operating system, but Invader is developed on
 Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
 
-### Are 32-bit Windows Nightly Builds available?
+### Why GPL and not MIT or BSD?
+The Halo CE modding community has a habit of obfuscating knowledge that could
+be used to help other people. This is often done through these means:
+- [Map protection]
+- [Writing closed source software]
+- [Obfuscating software]
+- [Keeping helpful information locked behind secret forums and groups]
+
+Often times, people will say they will release the source code in the future,
+or they will at least consider releasing the source code. In nearly all cases
+of this, the source code was never released. In fact, many great
+accomplishments have been lost to time, as most of the people who made them are
+no longer there to support what they have made.
+
+As others are forced to rely on this software, then over time, people realize
+how broken, incomplete, or even incompatible the software is. For example, the
+Halo Editing Kit has numerous issues that prevent people from making the
+content they want to make, yet [it is still the only way to fully create maps].
+As a result, making closed source software does nothing but harm for any sort
+of community.
+
+In our opinion, having a requirement that people give back to the community
+any changes to Invader that they have released is not too much to ask for. That
+is why Invader is GPL.
+
+### Are 32-bit Windows builds available?
 Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
 for 32-bit x86 Windows.
 
@@ -452,13 +478,20 @@ for multiplayer maps.
 [Frequently asked questions]: #frequently-asked-questions
 
 [What operating systems are supported?]: #what-operating-systems-are-supported
-[Are 32-bit Windows Nightly Builds available?]: #are-32-bit-windows-nightly-builds-available
+[Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
+[Are 32-bit Windows builds available?]: #are-32-bit-windows-builds-available
 [Can invader-build create .yelo maps?]: #can-invader-build-create-yelo-maps
 [Can invader-build create Xbox maps?]: #can-invader-build-create-xbox-maps
 [The HEK says my bitmap tag is "too large" when opening.]: #the-hek-says-my-bitmap-tag-is-too-large-when-opening
 [How close to completion is Invader?]: #how-close-to-completion-is-invader
 [Should I use invader-bitmap or tool.exe?]: #should-i-use-invader-bitmap-or-toolexe
 [Should I use invader-build or tool.exe?]: #should-i-use-invader-build-or-toolexe
+
+[Map protection]: http://forum.halomaps.org/index.cfm?page=topic&topicID=16885
+[Obfuscating software]: http://forum.halomaps.org/index.cfm?page=topic&topicID=51196
+[Writing closed source software]: http://halo.isimaginary.com/
+[Keeping helpful information locked behind secret forums and groups]: http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948
+[it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
 
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
