@@ -29,13 +29,11 @@ struct RenderedCharacter {
 int main(int argc, char *argv[]) {
     // Options struct
     struct FontOptions {
-        const char *path;
         const char *data = "data/";
         const char *tags = "tags/";
         int pixel_size = 14;
         bool use_filesystem_path = false;
     } font_options;
-    font_options.path = argv[0];
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;

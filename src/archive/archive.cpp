@@ -15,13 +15,11 @@
 
 int main(int argc, const char **argv) {
     struct ArchiveOptions {
-        const char *path;
         bool single_tag = false;
         std::vector<std::string> tags;
         std::string output;
         bool use_filesystem_path = false;
     } archive_options;
-    archive_options.path = argv[0];
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
     static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";

@@ -32,7 +32,6 @@ int main(int argc, const char **argv) {
 
     // Parameters
     struct BuildOptions {
-        const char *path;
         std::string maps = "maps";
         std::vector<std::string> tags;
         std::string output;
@@ -47,8 +46,6 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
     } build_options;
-
-    build_options.path = argv[0];
 
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");

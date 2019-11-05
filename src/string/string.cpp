@@ -103,15 +103,12 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
-        const char *path;
         const char *data = "data";
         const char *tags = "tags";
         Format format = Format::STRING_LIST_FORMAT_UTF_16;
         const char *output_extension = ".unicode_string_list";
         bool use_filesystem_path = false;
     } string_options;
-
-    string_options.path = argv[0];
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
         switch(opt) {

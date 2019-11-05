@@ -29,9 +29,6 @@ int main(int argc, const char **argv) {
     static constexpr char USAGE[] = "<options>";
 
     struct ResourceOption {
-        // Program path
-        const char *path;
-
         // Tags directory
         std::vector<const char *> tags;
 
@@ -45,7 +42,6 @@ int main(int argc, const char **argv) {
 
         bool retail = false;
     } resource_options;
-    resource_options.path = argv[0];
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {

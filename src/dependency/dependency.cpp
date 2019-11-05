@@ -24,15 +24,12 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag.class>";
 
     struct DependencyOption {
-        const char *path;
         bool reverse = false;
         bool recursive = false;
         std::vector<std::string> tags;
         std::string output;
         bool use_filesystem_path = false;
     } dependency_options;
-
-    dependency_options.path = argv[0];
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {

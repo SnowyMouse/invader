@@ -12,12 +12,10 @@ int main(int argc, const char **argv) {
     using namespace Invader;
 
     struct CompressOptions {
-        const char *path;
         const char *output = nullptr;
         long compression_level = 3;
         bool decompress = false;
     } compress_options;
-    compress_options.path = *argv;
 
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");

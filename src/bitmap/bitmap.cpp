@@ -38,9 +38,6 @@ int main(int argc, char *argv[]) {
     using namespace Invader;
 
     struct BitmapOptions {
-        // Program path
-        const char *path;
-
         // Data directory
         const char *data = "data/";
 
@@ -90,7 +87,6 @@ int main(int argc, char *argv[]) {
         // Use a filesystem path?
         bool filesystem_path = false;
     } bitmap_options;
-    bitmap_options.path = argv[0];
 
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
