@@ -117,7 +117,7 @@ int main(int argc, char * const *argv) {
                 break;
             case 'i':
                 Invader::show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
             case 'd':
                 string_options.data = arguments[0];
                 break;

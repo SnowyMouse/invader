@@ -5,6 +5,7 @@
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
+#include <invader/version.hpp>
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
@@ -37,6 +38,7 @@ int main(int argc, const char **argv) {
     // Command line options
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
     static constexpr char USAGE[] = "[option] <map>";
@@ -92,6 +94,9 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
+            case 'i':
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
         }
     });
 

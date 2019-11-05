@@ -38,7 +38,7 @@ int main(int argc, char * const *argv) {
                 break;
             case 'i':
                 Invader::show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
             case 'V':
                 dependency_options.reverse = true;
                 break;

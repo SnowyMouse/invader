@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 
             case 'i':
                 show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
 
             case 'I':
                 bitmap_options.ignore_tag_data = true;

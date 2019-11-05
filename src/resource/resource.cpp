@@ -47,7 +47,7 @@ int main(int argc, const char **argv) {
         switch(opt) {
             case 'i':
                 show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
 
             case 't':
                 resource_options.tags.push_back(arguments[0]);

@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
             case 'i':
                 Invader::show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
                 break;
         }
     });

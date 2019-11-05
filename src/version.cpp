@@ -28,16 +28,18 @@ static_assert(sizeof(INVADER_FULL_VERSION_STRING) < sizeof(Invader::HEK::TagStri
 
 namespace Invader {
     void show_version_info() {
-        eprintf(INVADER_FULL_VERSION_STRING "\n\n");
-        eprintf("This program is licensed under the GNU General Public License v3.0.\n\n");
-        eprintf("Credits:\n");
-        eprintf("    Kavawuvi                       - Developer\n");
-        eprintf("    MosesofEgypt                   - Helped via Discord\n");
-        eprintf("    GoofballMichelle               - Helped via Discord\n");
-        eprintf("    Vaporeon                       - Testing\n\n");
-        eprintf("Other links:\n");
-        eprintf("    Invader source code            - https://github.com/Kavawuvi/Invader\n");
-        eprintf("    Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/\n");
+        oprintf(INVADER_FULL_VERSION_STRING "\n\n");
+        oprintf("This program is licensed under the GNU General Public License v3.0.\n\n");
+        oprintf("Credits:\n");
+        oprintf("  Kavawuvi                       - Lead Developer\n");
+        oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n\n");
+        oprintf("Special thanks:\n");
+        oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
+        oprintf("  GoofballMichelle               - Discord server\n");
+        oprintf("  MosesofEgypt                   - Lots of help with tag data and model geometry\n\n");
+        oprintf("Other links:\n");
+        oprintf("  Invader source code            - https://github.com/Kavawuvi/Invader\n");
+        oprintf("  Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/\n");
     }
 
     const char *full_version() {

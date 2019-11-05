@@ -43,7 +43,7 @@ int main(int argc, const char **argv) {
                 break;
             case 'i':
                 show_version_info();
-                std::exit(EXIT_FAILURE);
+                std::exit(EXIT_SUCCESS);
                 break;
         }
     });
