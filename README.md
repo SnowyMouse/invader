@@ -310,6 +310,7 @@ Create font tags from TTF files.
 Options:
   -d --data <dir>              Set the data directory.
   -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the tag.
   -t --tags <dir>              Set the tags directory.
   -z --font-size <px>          Set the font size in pixels.
@@ -319,7 +320,13 @@ Options:
 This program builds index files for usage with `--with-index` with invader-build.
 
 ```
-Usage: invader-indexer <input map> <output index>
+Usage: invader-indexer [options] <input-map> <output-txt>
+
+Create a file listing the tags of a map.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
 ```
 
 ### invader-info
