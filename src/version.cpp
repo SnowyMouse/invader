@@ -44,7 +44,7 @@ namespace Invader {
         oprintf("  STB library                    - https://github.com/nothings/stb\n");
         oprintf("\n");
         oprintf("Other links:\n");
-        oprintf("  Invader source code            - https://github.com/Kavawuvi/Invader\n");
+        oprintf("  Invader source code            - https://github.com/Kavawuvi/invader\n");
         oprintf("  Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/\n");
     }
 
