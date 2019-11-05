@@ -305,13 +305,13 @@ This program generates font tags.
 ```
 Usage: invader-font [options] <font-tag>
 
-Create font tags from TTF files.
+Create font tags from OTF/TTF files.
 
 Options:
   -d --data <dir>              Set the data directory.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -P --fs-path                 Use a filesystem path for the tag.
+  -P --fs-path                 Use a filesystem path for the font file.
   -s --font-size <px>          Set the font size in pixels.
   -t --tags <dir>              Set the tags directory.
 ```

@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - Added `--info` to invader-indexer to show information about Invader, similar
   to other Invader programs
+- invader-font: Added support for .otf files
 
 ### Changed
 - To prevent people from confusing arguments of different programs, two of the

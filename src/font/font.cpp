@@ -27,6 +27,19 @@ struct RenderedCharacter {
     std::int16_t hori_advance;
 };
 
+static const char *FONT_EXTENSION_STR[] = {
+    ".ttf",
+    ".otf"
+};
+
+enum FontExtension {
+    FONT_EXTENSION_TTF,
+    FONT_EXTENSION_OTF,
+
+    FONT_EXTENSION_COUNT
+};
+static_assert(FONT_EXTENSION_COUNT == sizeof(FONT_EXTENSION_STR) / sizeof(*FONT_EXTENSION_STR));
+
 int main(int argc, char *argv[]) {
     // Options struct
     struct FontOptions {
@@ -42,9 +55,9 @@ int main(int argc, char *argv[]) {
     options.emplace_back("tags", 't', 1, "Set the tags directory.", "<dir>");
     options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font file.");
 
-    static constexpr char DESCRIPTION[] = "Create font tags from TTF files.";
+    static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
     static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
@@ -77,16 +90,18 @@ int main(int argc, char *argv[]) {
         }
     });
 
+    // Do it!
     std::string font_tag;
+    FontExtension found_format = static_cast<FontExtension>(0);
     if(font_options.use_filesystem_path) {
         std::vector<std::string> data(&font_options.data, &font_options.data + 1);
-        auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, ".ttf");
-        if(font_tag_maybe.has_value()) {
-            font_tag = font_tag_maybe.value();
-        }
-        else {
-            eprintf("Failed to find a valid ttf %s in the data directory\n", remaining_arguments[0]);
-            return EXIT_FAILURE;
+        for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
+            auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, FONT_EXTENSION_STR[i]);
+            if(font_tag_maybe.has_value()) {
+                font_tag = font_tag_maybe.value();
+                found_format = i;
+                break;
+            }
         }
     }
     else {
@@ -109,7 +124,20 @@ int main(int argc, char *argv[]) {
     // TTf path
     std::filesystem::path data_path(font_options.data);
     auto ttf_path = data_path / font_tag;
-    auto final_ttf_path = ttf_path.string() + ".ttf";
+    std::string final_ttf_path;
+
+    // Check if .ttf or .otf exists
+    FontExtension ext;
+    for(ext = found_format; ext < FontExtension::FONT_EXTENSION_COUNT; ext = static_cast<FontExtension>(ext + 1)) {
+        final_ttf_path = ttf_path.string() + FONT_EXTENSION_STR[ext];
+        if(std::filesystem::exists(final_ttf_path)) {
+            break;
+        }
+    }
+    if(ext == FontExtension::FONT_EXTENSION_COUNT) {
+        eprintf("Failed to find a valid ttf or otf %s in the data directory.\n", remaining_arguments[0]);
+        return EXIT_FAILURE;
+    }
 
     // Load the TTF
     FT_Library library;
