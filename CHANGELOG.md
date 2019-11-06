@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
     - invader-build: Changed `-R` to `-N` to avoid confusion with `retail`
 - invader-build: 32 byte tag strings are now zeroed out before copying
 - invader-compress: Names and build strings are zeroed out before copying
+- invader-build: The number of stubbed tags is now shown in the tag count
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now

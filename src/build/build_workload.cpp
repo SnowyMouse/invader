@@ -217,12 +217,20 @@ namespace Invader {
             oprintf("Map type:          %s\n", type_name(this->cache_file_type));
 
             std::size_t total_tag_size = 0;
+            std::size_t stub_count = 0;
             for(auto &tag : this->compiled_tags) {
                 if(!tag->indexed) {
                     total_tag_size += tag->data_size;
                 }
+                if(tag->stub()) {
+                    stub_count++;
+                }
             }
-            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
+            oprintf("Tags:              %zu / %zu (%.02f MiB", compiled_tags.size(), CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(total_tag_size));
+            if(stub_count) {
+                oprintf(", %zu stubbed out", stub_count);
+            }
+            oprintf(")\n");
         }
 
         // Get the largest BSP tag as well as usage of the indexed tag space
