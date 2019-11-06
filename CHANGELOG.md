@@ -7,6 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - Added `--info` to invader-indexer to show information about Invader, similar
   to other Invader programs
 - invader-font: Added support for .otf files
+- invader-info: Added `-T stub-count`
 
 ### Changed
 - To prevent people from confusing arguments of different programs, two of the
@@ -15,7 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
     - invader-build: Changed `-R` to `-N` to avoid confusion with `retail`
 - invader-build: 32 byte tag strings are now zeroed out before copying
 - invader-compress: Names and build strings are zeroed out before copying
-- invader-build: The number of stubbed tags is now shown in the tag count
+- invader-build: The number of stubbed tags is now shown next to the tag count
+- invader-info: The number of stubbed tags is now shown next to the tag count
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now

@@ -27,6 +27,7 @@ int main(int argc, const char **argv) {
         DISPLAY_SCENARIO,
         DISPLAY_SCENARIO_PATH,
         DISPLAY_TAG_COUNT,
+        DISPLAY_STUB_COUNT,
         DISPLAY_TAGS
     };
 
@@ -37,7 +38,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, protected, map-type, scenario, scenario-path, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -89,6 +90,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "build") == 0) {
                     map_info_options.type = DISPLAY_BUILD;
                 }
+                else if(std::strcmp(args[0], "stub-count") == 0) {
+                    map_info_options.type = DISPLAY_STUB_COUNT;
+                }
                 else {
                     eprintf("Unknown type %s\n", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -130,13 +134,30 @@ int main(int argc, const char **argv) {
         return false;
     };
 
+    // Get stub count
+    auto stub_count = [&tag_count, &map]() {
+        std::size_t count = 0;
+        for(std::size_t i = 0; i < tag_count; i++) {
+            auto &tag = map->get_tag(i);
+            if(tag.tag_class_int() != HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
+                count++;
+            }
+        }
+        return count;
+    };
+
     switch(map_info_options.type) {
         case DISPLAY_OVERVIEW: {
             oprintf("Scenario name:     %s\n", header.name.string);
             oprintf("Build:             %s\n", header.build.string);
             oprintf("Engine:            %s\n", engine_name(header.engine));
             oprintf("Map type:          %s\n", type_name(header.map_type));
-            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
+            oprintf("Tags:              %zu / %zu (%.02f MiB", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
+            auto stubbed = stub_count();
+            if(stubbed) {
+                oprintf(", %zu stubbed out", stubbed);
+            }
+            oprintf(")\n");
 
             // Get CRC
             auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
@@ -198,6 +219,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_CRC32_MISMATCHED:
             oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 ? "yes" : "no"));
+            break;
+        case DISPLAY_STUB_COUNT:
+            oprintf("%zu\n", stub_count());
             break;
     }
 }
