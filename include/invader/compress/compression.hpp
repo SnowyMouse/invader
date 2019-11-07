@@ -10,7 +10,29 @@ namespace Invader::Compression {
      * Compress the map data
      * @param data              data pointer
      * @param data_size         size of the data
+     * @param output            data output
+     * @param output_size       output buffer size
      * @param compression_level compression level to use
+     * @return                  actual size of the output
+     */
+    std::size_t compress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size, int compression_level = 3);
+
+    /**
+     * Decompress the map data
+     * @param data              data pointer
+     * @param data_size         size of the data
+     * @param output            data output
+     * @param output_size       output buffer size
+     * @return                  actual size of the output
+     */
+    std::size_t decompress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size);
+
+    /**
+     * Compress the map data
+     * @param data              data pointer
+     * @param data_size         size of the data
+     * @param compression_level compression level to use
+     * @return                  vector of compressed data
      */
     std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level = 3);
 
@@ -18,6 +40,7 @@ namespace Invader::Compression {
      * Decompress the map data
      * @param data              data pointer
      * @param data_size         size of the data
+     * @return                  vector of decompressed data
      */
     std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size);
 }

@@ -98,27 +98,24 @@ namespace Invader::Compression {
 
     constexpr std::size_t HEADER_SIZE = sizeof(HEK::CacheFileHeader);
 
-    std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level) {
+    std::size_t compress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size, int compression_level) {
         // Load the data
         auto map = Map::map_with_pointer(const_cast<std::byte *>(data), data_size);
 
         // Allocate the data
-        std::vector<std::byte> new_data(ZSTD_compressBound(data_size - HEADER_SIZE) + HEADER_SIZE);
-        compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), new_data.data(), data_size);
+        compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
 
         // Immediately compress it
-        auto compressed_size = ZSTD_compress(new_data.data() + sizeof(HEK::CacheFileHeader), new_data.size(), data + sizeof(HEK::CacheFileHeader), data_size - sizeof(HEK::CacheFileHeader), compression_level);
+        auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
         if(ZSTD_isError(compressed_size)) {
             throw CompressionFailureException();
         }
 
-        // Shrink the buffer to the new size
-        new_data.resize(compressed_size + HEADER_SIZE);
-
-        return new_data;
+        // Done
+        return compressed_size + HEADER_SIZE;
     }
 
-    std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size) {
+    std::size_t decompress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size) {
         // Check the header
         const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         if(sizeof(*header) > data_size || !header->valid()) {
@@ -129,18 +126,42 @@ namespace Invader::Compression {
             throw InvalidMapException();
         }
 
-        // Allocate and decompress using data from the header
-        std::vector<std::byte> new_data(header->decompressed_file_size);
-        decompress_header(data, new_data.data());
+        decompress_header(data, output);
 
         // Immediately decompress
-        auto decompressed_size = ZSTD_decompress(new_data.data() + HEADER_SIZE, new_data.size() - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE);
+        auto decompressed_size = ZSTD_decompress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE);
         if(ZSTD_isError(decompressed_size) || (decompressed_size + HEADER_SIZE) != header->decompressed_file_size) {
             throw DecompressionFailureException();
         }
 
+        // Done
+        return decompressed_size + HEADER_SIZE;
+    }
+
+    std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level) {
+        // Allocate the data
+        std::vector<std::byte> new_data(ZSTD_compressBound(data_size - HEADER_SIZE) + HEADER_SIZE);
+
+        // Compress
+        auto compressed_size = compress_map_data(data, data_size, new_data.data(), new_data.size(), compression_level);
+
+        // Resize and return it
+        new_data.resize(compressed_size);
+
+        return new_data;
+    }
+
+    std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size) {
+        // Allocate and decompress using data from the header
+        const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        std::vector<std::byte> new_data(header->decompressed_file_size);
+        decompress_header(data, new_data.data());
+
+        // Compress
+        auto decompressed_size = decompress_map_data(data, data_size, new_data.data(), new_data.size());
+
         // Shrink the buffer to the new size
-        new_data.resize(decompressed_size + HEADER_SIZE);
+        new_data.resize(decompressed_size);
 
         return new_data;
     }
