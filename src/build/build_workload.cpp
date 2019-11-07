@@ -1401,7 +1401,7 @@ namespace Invader {
         }
 
         eprintf("Could not find %s.%s\n", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
-        throw FailedToOpenTagException();
+        throw FailedToOpenFileException();
     }
 
     void BuildWorkload::get_scenario_base_name() {

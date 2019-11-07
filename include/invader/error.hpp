@@ -63,9 +63,9 @@ namespace Invader {
     DEFINE_EXCEPTION(UnknownTagClassException, "unknown tag class");
 
     /**
-     * This is thrown when a tag cannot be compiled because it's not found or could not be opened
+     * This is thrown when a file cannot be compiled because it's not found or could not be opened
      */
-    DEFINE_EXCEPTION(FailedToOpenTagException, "failed to open a tag");
+    DEFINE_EXCEPTION(FailedToOpenFileException, "failed to open a file");
 
     /**
      * This is thrown when some other tag related error occurs.
