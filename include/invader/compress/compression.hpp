@@ -43,6 +43,13 @@ namespace Invader::Compression {
      * @return                  vector of decompressed data
      */
     std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size);
+
+    /**
+     * Decompress one file to another file, using significantly less memory but also significantly more disk I/O
+     * @param input  path to the compressed file
+     * @param output path to the decompressed file
+     */
+    void decompress_map_file(const char *input, const char *output);
 }
 
 #endif

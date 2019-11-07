@@ -3,6 +3,8 @@
 #include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
 #include <zstd.h>
+#include <cstdio>
+#include <filesystem>
 
 namespace Invader::Compression {
     static void compress_header(const std::byte *header_input, std::byte *header_output, std::size_t decompressed_size) {
@@ -164,5 +166,119 @@ namespace Invader::Compression {
         new_data.resize(decompressed_size);
 
         return new_data;
+    }
+
+    void decompress_map_file(const char *input, const char *output) {
+        // Open the input file
+        std::FILE *input_file = std::fopen(input, "rb");
+        if(!input_file) {
+            throw FailedToOpenFileException();
+        }
+
+        // Get the size
+        std::size_t total_size = std::filesystem::file_size(input);
+
+        // Read the input file header
+        HEK::CacheFileHeader header_input;
+        if(std::fread(&header_input, sizeof(header_input), 1, input_file) != 1) {
+            std::fclose(input_file);
+            throw DecompressionFailureException();
+        }
+
+        // Now, open the output file
+        std::FILE *output_file = std::fopen(output, "wb");
+        if(!output_file) {
+            std::fclose(input_file);
+            throw FailedToOpenFileException();
+        }
+
+        // Make the output header and write it
+        std::byte header_output[HEADER_SIZE];
+        try {
+            decompress_header(reinterpret_cast<std::byte *>(&header_input), header_output);
+        }
+        catch (std::exception &) {
+            std::fclose(input_file);
+            std::fclose(output_file);
+            throw;
+        }
+
+        // Write the header
+        if(std::fwrite(header_output, sizeof(header_output), 1, output_file) != 1) {
+            std::fclose(input_file);
+            std::fclose(output_file);
+            throw DecompressionFailureException();
+        }
+
+        // Allocate and init a stream
+        auto decompression_stream = ZSTD_createDStream();
+        const std::size_t init = ZSTD_initDStream(decompression_stream);
+
+        std::size_t total_read = HEADER_SIZE;
+        auto read_data = [&input_file, &output_file, &decompression_stream, &total_read](std::byte *where, std::size_t size) {
+            if(std::fread(where, size, 1, input_file) != 1) {
+                std::fclose(input_file);
+                std::fclose(output_file);
+                ZSTD_freeDStream(decompression_stream);
+                throw DecompressionFailureException();
+            }
+            total_read += size;
+        };
+
+        auto write_data = [&input_file, &output_file, &decompression_stream](const std::byte *where, std::size_t size) {
+            if(std::fwrite(where, size, 1, output_file) != 1) {
+                std::fclose(input_file);
+                std::fclose(output_file);
+                ZSTD_freeDStream(decompression_stream);
+                throw DecompressionFailureException();
+            }
+        };
+
+        while(total_read < total_size) {
+            // Make some input/output data thingy
+            std::vector<std::byte> input_data(init);
+            std::vector<std::byte> output_data(ZSTD_DStreamOutSize());
+
+            // Read the first bit
+            read_data(input_data.data(), input_data.size());
+
+            for(;;) {
+                ZSTD_inBuffer_s input_buffer = {};
+                ZSTD_outBuffer_s output_buffer = {};
+                input_buffer.src = input_data.data();
+                input_buffer.size = input_data.size();
+                output_buffer.dst = output_data.data();
+                output_buffer.size = output_data.size();
+
+                // Get the output
+                std::size_t q = ZSTD_decompressStream(decompression_stream, &output_buffer, &input_buffer);
+                if(ZSTD_isError(q)) {
+                    std::fclose(input_file);
+                    std::fclose(output_file);
+                    ZSTD_freeDStream(decompression_stream);
+                    throw DecompressionFailureException();
+                }
+
+                // Write it
+                if(output_buffer.pos) {
+                    write_data(reinterpret_cast<std::byte *>(output_buffer.dst), output_buffer.pos);
+                }
+
+                // If it's > 0, we need more data
+                if(q > 0) {
+                    input_data.clear();
+                    input_data.insert(input_data.end(), q, std::byte());
+                    read_data(input_data.data(), q);
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
+        // Close the stream and the files
+        fclose(input_file);
+        fclose(output_file);
+        ZSTD_freeDStream(decompression_stream);
     }
 }
