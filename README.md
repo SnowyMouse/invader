@@ -275,7 +275,7 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -l --level <level>           Set the compression level. Must be between 1 and
-                               22. Values > 19 use more memory. Default: 3
+                               19. Default: 3
   -o --output <file>           Emit the resulting map at the given path. By
                                default, this is the map path (overwrite).
 ```

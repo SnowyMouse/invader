@@ -20,7 +20,7 @@ int main(int argc, const char **argv) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
-    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 22. Values > 19 use more memory. Default: 3", "<level>");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 19. Default: 3", "<level>");
     options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
 
     static constexpr char DESCRIPTION[] = "Compress cache files.";
@@ -33,8 +33,8 @@ int main(int argc, const char **argv) {
                 break;
             case 'l':
                 compress_options.compression_level = std::strtol(arguments[0], nullptr, 10);
-                if(compress_options.compression_level < 1 || compress_options.compression_level > 22) {
-                    eprintf("Compression level must be between 1 and 22\n");
+                if(compress_options.compression_level < 1 || compress_options.compression_level > 19) {
+                    eprintf("Compression level must be between 1 and 19\n");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
