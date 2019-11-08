@@ -105,6 +105,7 @@ work with, this project is split into different programs.
 - [invader-archive]
 - [invader-bitmap]
 - [invader-build]
+- [invader-compress]
 - [invader-dependency]
 - [invader-font]
 - [invader-indexer]
@@ -503,6 +504,7 @@ for multiplayer maps.
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
 [invader-build]: #invader-build
+[invader-compress]: #invader-compress
 [invader-dependency]: #invader-dependency
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer
