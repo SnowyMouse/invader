@@ -65,7 +65,18 @@ int main(int argc, const char **argv) {
     #define TIME_ELAPSED_MS std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
 
     if(compress_options.decompress) {
-        auto decompressed_data = Compression::decompress_map_data(input_file_data.data(), input_file_data.size());
+        std::vector<std::byte> decompressed_data;
+        try {
+            decompressed_data = Compression::decompress_map_data(input_file_data.data(), input_file_data.size());
+        }
+        catch(Invader::MapNeedsCompressedException &) {
+            eprintf("Failed to decompress %s: map is already uncompressed\n", compress_options.output);
+            return EXIT_FAILURE;
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to decompress %s: %s\n", compress_options.output, e.what());
+            return EXIT_FAILURE;
+        }
         if(!File::save_file(compress_options.output, decompressed_data)) {
             eprintf("Failed to save %s\n", compress_options.output);
             return EXIT_FAILURE;
@@ -74,7 +85,18 @@ int main(int argc, const char **argv) {
         oprintf("Decompressed %s (%zu -> %zu, %zu ms)\n", input, input_file_data.size(), decompressed_data.size(), finished);
     }
     else {
-        auto compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
+        std::vector<std::byte> compressed_data;
+        try {
+            compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
+        }
+        catch(Invader::MapNeedsDecompressedException &) {
+            eprintf("Failed to decompress %s: map is already compressed\n", compress_options.output);
+            return EXIT_FAILURE;
+        }
+        catch(std::exception &e) {
+            eprintf("Failed to compress %s: %s\n", compress_options.output, e.what());
+            return EXIT_FAILURE;
+        }
         if(!File::save_file(compress_options.output, compressed_data)) {
             eprintf("Failed to save %s\n", compress_options.output);
             return EXIT_FAILURE;

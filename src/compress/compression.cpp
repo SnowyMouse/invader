@@ -53,9 +53,6 @@ namespace Invader::Compression {
     static void decompress_header(const std::byte *header_input, std::byte *header_output) {
         // Check to see if we can't even fit the header
         auto header_copy = *reinterpret_cast<const HEK::CacheFileHeader *>(header_input);
-        if(header_copy.decompressed_file_size < sizeof(header_copy) || !header_copy.valid()) {
-            throw InvalidMapException();
-        }
 
         // Figure out the new engine version
         auto new_engine_version = header_copy.engine.read();
@@ -80,7 +77,18 @@ namespace Invader::Compression {
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO;
                 break;
             default:
+                // Check if it's an uncompressed demo map?
+                if(static_cast<HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header_input)).engine.read() == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                    throw MapNeedsCompressedException();
+                }
+
+                // Give up
                 throw UnsupportedMapEngineException();
+        }
+
+        // Determine if the file size isn't set correctly
+        if(header_copy.decompressed_file_size < sizeof(header_copy) || !header_copy.valid()) {
+            throw InvalidMapException();
         }
 
         // Set the file size to 0 and the engine to the new thing

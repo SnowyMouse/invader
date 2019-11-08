@@ -20,6 +20,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: The number of stubbed tags is now shown next to the tag count
 - invader-compress: Levels higher than 19 are no longer allowed, as they take
   longer to decompress and require significantly more RAM
+- invader-compress: Now exits more gracefully on failure
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now
