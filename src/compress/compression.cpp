@@ -193,13 +193,6 @@ namespace Invader::Compression {
             throw DecompressionFailureException();
         }
 
-        // Now, open the output file
-        std::FILE *output_file = std::fopen(output, "wb");
-        if(!output_file) {
-            std::fclose(input_file);
-            throw FailedToOpenFileException();
-        }
-
         // Make the output header and write it
         std::byte header_output[HEADER_SIZE];
         try {
@@ -207,8 +200,14 @@ namespace Invader::Compression {
         }
         catch (std::exception &) {
             std::fclose(input_file);
-            std::fclose(output_file);
             throw;
+        }
+
+        // Now, open the output file
+        std::FILE *output_file = std::fopen(output, "wb");
+        if(!output_file) {
+            std::fclose(input_file);
+            throw FailedToOpenFileException();
         }
 
         // Write the header
@@ -285,8 +284,8 @@ namespace Invader::Compression {
         }
 
         // Close the stream and the files
-        fclose(input_file);
-        fclose(output_file);
+        std::fclose(input_file);
+        std::fclose(output_file);
         ZSTD_freeDStream(decompression_stream);
     }
 }
