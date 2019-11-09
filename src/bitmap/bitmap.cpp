@@ -294,17 +294,18 @@ int main(int argc, char *argv[]) {
 
     if(bitmap_options.filesystem_path) {
         std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
-        for(SupportedFormatsInt i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+        SupportedFormatsInt i;
+        for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
             auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
             if(bitmap_tag_maybe.has_value()) {
                 bitmap_tag = bitmap_tag_maybe.value();
                 found_format = i;
                 break;
             }
-            else {
-                eprintf("Failed to find a valid bitmap %s in the data directory.\n", remaining_arguments[0]);
-                return EXIT_FAILURE;
-            }
+        }
+        if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
+            eprintf("Failed to find a valid bitmap %s in the data directory.\n", remaining_arguments[0]);
+            return EXIT_FAILURE;
         }
     }
 
