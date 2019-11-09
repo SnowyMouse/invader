@@ -25,6 +25,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now
   `-z` as expected.
+- invader-bitmap: Fixed `-P` not working with non-.tif files
 
 ## [0.16.1] - 2019-11-04
 ### Added
