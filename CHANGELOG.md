@@ -21,6 +21,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-compress: Levels higher than 19 are no longer allowed, as they take
   longer to decompress and require significantly more RAM
 - invader-compress: Now exits more gracefully on failure
+- invader-bitmap: Changed the default bump height to 0.026
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now

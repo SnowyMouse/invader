@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. This will not work with stock Halo. Can be: off or on. Default (new tag): off", "<val>");
-    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.02", "<height>");
+    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
     DEFAULT_VALUE(bitmap_options.palettize,false);
-    DEFAULT_VALUE(bitmap_options.bump_height,0.02F);
+    DEFAULT_VALUE(bitmap_options.bump_height,0.026F);
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
     DEFAULT_VALUE(bitmap_options.dither_red,false);

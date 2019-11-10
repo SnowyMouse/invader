@@ -39,10 +39,10 @@ some of these dependencies may have their own dependencies.
 - Python 3.7 or newer
 
 ##### Optional dependencies
-- LibArchive (invader-archive)
-- LibTIFF (invader-bitmap)
-- zlib (invader-bitmap)
-- freetype (invader-font)
+- LibArchive ([invader-archive])
+- LibTIFF ([invader-bitmap])
+- zlib ([invader-bitmap])
+- freetype ([invader-font])
 - git (git commit hash in version - build only)
 
 #### Compiling (Windows)
@@ -158,7 +158,7 @@ Options:
                                tag): 32-bit<type>
   -h --help                    Show this list of options.
   -H --bump-height <height>    Set the apparent bumpmap height from 0 to 1.
-                               Default (new tag): 0.02
+                               Default (new tag): 0.026
   -i --info                    Show license and credits.
   -I --ignore-tag              Ignore the tag data if the tag exists.
   -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
