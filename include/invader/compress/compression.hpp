@@ -50,6 +50,14 @@ namespace Invader::Compression {
      * @param output path to the decompressed file
      */
     void decompress_map_file(const char *input, const char *output);
+
+    /**
+     * Decompress one file to a buffer, using significantly less memory but also significantly more disk I/O
+     * @param input       path to the compressed file
+     * @param output      buffer to output to
+     * @param output_size size of buffer
+     */
+    void decompress_map_file(const char *input, std::byte *output, std::size_t output_size);
 }
 
 #endif
