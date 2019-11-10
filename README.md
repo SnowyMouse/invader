@@ -37,6 +37,7 @@ some of these dependencies may have their own dependencies.
 - C99 compiler
 - CMake 3.10 or newer
 - Python 3.7 or newer
+- Zstandard 1.3 or newer
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
