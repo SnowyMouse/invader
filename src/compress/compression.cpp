@@ -293,29 +293,37 @@ namespace Invader::Compression {
          }
     };
 
-    void decompress_map_file(const char *input, const char *output) {
-        std::FILE *output_file = std::fopen(output, "wb");
-        if(!output_file) {
-            std::fclose(output_file);
+    std::size_t decompress_map_file(const char *input, const char *output) {
+        struct OutputWriter {
+            std::FILE *output_file;
+            std::size_t output_position = 0;
+        } output_writer = { std::fopen(output, "wb") };
+
+        if(!output_writer.output_file) {
+            std::fclose(output_writer.output_file);
             throw FailedToOpenFileException();
         }
 
         LowMemoryDecompression decomp;
         decomp.write_callback = [](const std::byte *decompressed_data, std::size_t size, void *user_data) -> bool {
-            return std::fwrite(decompressed_data, size, 1, reinterpret_cast<std::FILE *>(user_data));
+            auto &output_writer = *reinterpret_cast<OutputWriter *>(user_data);
+            output_writer.output_position += size;
+            return std::fwrite(decompressed_data, size, 1, reinterpret_cast<std::FILE *>(output_writer.output_file));
         };
 
         try {
-            decomp.decompress_map_file(input, output_file);
+            decomp.decompress_map_file(input, &output_writer);
         }
         catch (std::exception &e) {
-            std::fclose(output_file);
+            std::fclose(output_writer.output_file);
             throw;
         }
-        std::fclose(output_file);
+        std::fclose(output_writer.output_file);
+
+        return output_writer.output_position;
     }
 
-    void decompress_map_file(const char *input, std::byte *output, std::size_t output_size) {
+    std::size_t decompress_map_file(const char *input, std::byte *output, std::size_t output_size) {
         struct OutputWriter {
             std::byte *output;
             std::size_t output_size;
@@ -340,5 +348,7 @@ namespace Invader::Compression {
         catch (std::exception &e) {
             throw;
         }
+
+        return output_writer.output_position;
     }
 }
