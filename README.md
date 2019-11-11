@@ -377,6 +377,7 @@ Invader's development.
 
 - [What operating systems are supported?]
 - [Why GPL and not MIT or BSD?]
+- [Are there any GUI tools?]
 - [Are 32-bit Windows builds available?]
 - [Can invader-build create .yelo maps?]
 - [Can invader-build create Xbox maps?]
@@ -413,6 +414,31 @@ of community.
 In our opinion, having a requirement that people give back to the community
 any changes to Invader that they have released is not too much to ask for. That
 is why Invader is GPL.
+
+### Are there any GUI tools?
+Officially, none of these tools currently have graphical user interfaces. Some
+people have offered to make GUI versions of these tools, and it probably isn't
+difficult to make a GUI wrapper for these tools due to the nature of them.
+
+There are a few reasons why Invader officially has no command-line tools:
+- Command-line tools require significantly less time to write and test.
+- Command-line tools require fewer dependencies (e.g. no Qt or GTK).
+- Command-line tools work well with scripts and shell commands.
+- Command-line shells are very optimized at quick and precise execution,
+  providing features such as tab completion and command history.
+- Invader tools usually perform exactly one task: take a small amount of input
+  and turn it into an output. A GUI will likely make such a simple task slower.
+
+Basically, for most functions, a command-line interface is enough, while a GUI
+may add overhead to such a task (e.g. mouse usage, file navigation, etc.) while
+not getting any of the benefits of a command-line shell such as tab completion
+or command history.
+
+Even so, there are some functions where a graphical user interface is better.
+Tasks that require a large amount of user interaction such as direct editing of
+HEK tag files or scenario editing are tasks that are better suited to a GUI
+than the command line, as opposed to simple tasks such as building a cache file
+which requires a small amount of input to perform the entire task.
 
 ### Are 32-bit Windows builds available?
 Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
@@ -488,6 +514,7 @@ for multiplayer maps.
 
 [What operating systems are supported?]: #what-operating-systems-are-supported
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
+[Are there any GUI tools?]: #are-there-any-gui-tools
 [Are 32-bit Windows builds available?]: #are-32-bit-windows-builds-available
 [Can invader-build create .yelo maps?]: #can-invader-build-create-yelo-maps
 [Can invader-build create Xbox maps?]: #can-invader-build-create-xbox-maps
