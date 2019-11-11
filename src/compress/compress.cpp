@@ -13,7 +13,7 @@ int main(int argc, const char **argv) {
 
     struct CompressOptions {
         const char *output = nullptr;
-        long compression_level = 3;
+        long compression_level = 19;
         bool decompress = false;
     } compress_options;
 
