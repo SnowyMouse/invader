@@ -420,7 +420,7 @@ Officially, none of these tools currently have graphical user interfaces. Some
 people have offered to make GUI versions of these tools, and it probably isn't
 difficult to make a GUI wrapper for these tools due to the nature of them.
 
-There are a few reasons why Invader officially has no command-line tools:
+There are a few reasons why Invader officially has only command-line tools:
 - Command-line tools require significantly less time to write and test.
 - Command-line tools require fewer dependencies (e.g. no Qt or GTK).
 - Command-line tools work well with scripts and shell commands.
