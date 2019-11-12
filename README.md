@@ -244,7 +244,8 @@ Build cache files for Halo Combat Evolved on the PC.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
-  -c --forge-crc <crc>         Forge the CRC32 value of the map after building
+  -c --compress                Compress the cache file.
+  -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -g --game-engine <id>        Specify the game engine. Valid engines are:
                                custom (default), retail, demo, dark

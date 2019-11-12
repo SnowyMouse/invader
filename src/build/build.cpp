@@ -11,6 +11,7 @@ using clock_type = std::chrono::steady_clock;
 
 #include <invader/build/build_workload.hpp>
 #include <invader/map/map.hpp>
+#include <invader/compress/compression.hpp>
 #include <invader/tag/compiled_tag.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
@@ -45,6 +46,7 @@ int main(int argc, const char **argv) {
         const char *forged_crc = nullptr;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
+        bool compress = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -57,9 +59,10 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Use a specific maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
-    options.emplace_back("forge-crc", 'c', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
+    options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
+    options.emplace_back("compress", 'c', 0, "Compress the cache file.");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -101,8 +104,11 @@ int main(int argc, const char **argv) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
                 break;
-            case 'c':
+            case 'C':
                 build_options.forged_crc = arguments[0];
+                break;
+            case 'c':
+                build_options.compress = true;
                 break;
             case 'P':
                 build_options.use_filesystem_path = true;
@@ -210,6 +216,15 @@ int main(int argc, const char **argv) {
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))
         );
+
+        if(build_options.compress) {
+            std::size_t size_before = map.size();
+            oprintf("Compressing...");
+            oflush();
+            map = Compression::compress_map_data(map.data(), map.size());
+            std::size_t new_size = map.size();
+            oprintf("\rCompressed size:   %.02f MiB (%.02f %%)\n", new_size / 1024.0F / 1024.0F, 100.0F * new_size / size_before);
+        }
 
         // Set the map name
         const char *map_name;

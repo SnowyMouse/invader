@@ -9,6 +9,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-font: Added support for .otf files
 - invader-info: Added `-T stub-count`
 - Added slower but lower memory functions for decompression
+- invader-build: Added `--compress` which compresses the cache file using level
+  19 compression; this uses `-c` which `--forge-crc` now uses `-C`
 
 ### Changed
 - To prevent people from confusing arguments of different programs, two of the

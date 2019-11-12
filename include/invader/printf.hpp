@@ -9,12 +9,13 @@
 #include <cstdio>
 #define eprintf(...) std::fprintf(stderr, __VA_ARGS__)
 #define oprintf(...) std::fprintf(stdout, __VA_ARGS__)
-
+#define oflush() std::fflush(stdout)
 #else
 
 // Otherwise, we have eprintf and oprintf as an inline, variadic function that does nothing. This is so we don't get any unused variable warnings.
 static inline void eprintf(...) {}
 static inline void oprintf(...) {}
+static inline void oflush() {}
 #endif
 
 #endif

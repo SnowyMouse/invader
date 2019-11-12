@@ -384,12 +384,12 @@ namespace Invader {
 
         // Output the file size
         if(this->verbose) {
-            oprintf("File size:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
+            oprintf("Uncompressed size: %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(file.size()), BYTES_TO_MiB(CACHE_FILE_MAXIMUM_FILE_LENGTH), file.size() * 100.0F / CACHE_FILE_MAXIMUM_FILE_LENGTH);
         }
 
         // Check if we've exceeded the max file size.
         if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
-            eprintf("Maximum file size exceeds budget.\n");
+            eprintf("Uncompressed file size exceeds budget.\n");
             throw MaximumFileSizeException();
         }
 
