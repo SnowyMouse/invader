@@ -24,6 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-compress: Now exits more gracefully on failure
 - invader-bitmap: Changed the default bump height to 0.026
 - invader-compress: The default compression is now 19
+- invader-build: The ting sound tag is now determined by the globals tag
+  instead of its tag path when setting the gain based on engine version
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now

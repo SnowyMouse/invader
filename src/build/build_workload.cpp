@@ -18,6 +18,7 @@
 #include <invader/tag/hek/class/fog.hpp>
 #include <invader/tag/hek/class/font.hpp>
 #include <invader/tag/hek/class/gbxmodel.hpp>
+#include <invader/tag/hek/class/globals.hpp>
 #include <invader/tag/hek/class/particle.hpp>
 #include <invader/tag/hek/class/scenario.hpp>
 #include <invader/tag/hek/class/scenario_structure_bsp.hpp>
@@ -2369,16 +2370,32 @@ namespace Invader {
 
     void BuildWorkload::modify_ting_tag() {
         for(auto &tag : this->compiled_tags) {
-            if(tag->path == "sound\\sfx\\impulse\\ting\\ting" && tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_SOUND) {
-                auto &sound_header = *reinterpret_cast<HEK::Sound<HEK::LittleEndian> *>(tag->data.data());
-                switch(this->engine_target) {
-                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                        sound_header.random_gain_modifier = 0.2F;
-                        break;
-                    default:
-                        sound_header.random_gain_modifier = 1.0F;
-                        break;
+            if(tag->path == "globals\\globals" && tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_GLOBALS) {
+                auto &globals_header = *reinterpret_cast<HEK::Globals<HEK::LittleEndian> *>(tag->data.data());
+                auto multiplayer_info_count = globals_header.multiplayer_information.count.read();
+                auto *multiplayer_infos = reinterpret_cast<HEK::GlobalsMultiplayerInformation<HEK::LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&globals_header.multiplayer_information.pointer));
+                for(std::uint32_t m = 0; m < multiplayer_info_count; m++) {
+                    auto &multiplayer_info = multiplayer_infos[m];
+                    auto sound_count = multiplayer_info.sounds.count.read();
+                    if(sound_count > 43) {
+                        auto &sound = reinterpret_cast<HEK::GlobalsSound<HEK::LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&multiplayer_info.sounds.pointer))[43];
+                        auto sound_tag_id = sound.sound.tag_id.read();
+                        if(!sound_tag_id.is_null()) {
+                            auto &sound_tag = this->compiled_tags[sound_tag_id.index];
+                            if(sound_tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_SOUND) {
+                                auto &sound_header = *reinterpret_cast<HEK::Sound<HEK::LittleEndian> *>(sound_tag->data.data());
+                                switch(this->engine_target) {
+                                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                                        sound_header.random_gain_modifier = 0.2F;
+                                        break;
+                                    default:
+                                        sound_header.random_gain_modifier = 1.0F;
+                                        break;
+                                }
+                            }
+                        }
+                    }
                 }
                 return;
             }
