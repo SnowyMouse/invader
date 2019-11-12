@@ -437,6 +437,8 @@ namespace Invader {
                                 asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->asset_data.clear();
+                                total_removed_tag_data += tag->data.size() - sizeof(Sound<LittleEndian>);
+                                tag->data.resize(sizeof(Sound<LittleEndian>));
                                 count++;
                                 break;
                             }
@@ -490,6 +492,8 @@ namespace Invader {
                                 asset_data_removed += tag->asset_data.size();
                                 tag->indexed = true;
                                 tag->asset_data.clear();
+                                total_removed_tag_data += tag->data.size() - sizeof(Sound<LittleEndian>);
+                                tag->data.resize(sizeof(Sound<LittleEndian>));
                                 count++;
                                 break;
                             }
@@ -1603,6 +1607,12 @@ namespace Invader {
         compiled_tag->data_size = compiled_tag->data.size();
         auto offset = tag_data.size();
         tag_data.insert(tag_data.end(), compiled_tag->data.data(), compiled_tag->data.data() + compiled_tag->data.size());
+
+        // Stop if indexed
+        if(compiled_tag->indexed) {
+            return offset;
+        }
+
         auto *tag_data_data = tag_data.data() + offset;
         auto *tag_array_cast = reinterpret_cast<CacheFileTagDataTag *>(tag_array);
 

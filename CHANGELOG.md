@@ -29,6 +29,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-font: Fixed `-i` being used as both info and font size. It is now
   `-z` as expected.
 - invader-bitmap: Fixed `-P` not working with non-.tif files
+- invader-build: Fixed indexed sound tag data taking up more space than needed;
+  this should result in a small file size reduction for any Halo Custom Edition
+  maps that have indexed sounds
 
 ## [0.16.1] - 2019-11-04
 ### Added
