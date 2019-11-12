@@ -171,7 +171,7 @@ int main(int argc, const char **argv) {
             // Compress and compression ratio
             oprintf("Compressed:        %s", compressed ? "Yes" : "No\n");
             if(compressed) {
-                oprintf(" (%.01f %%)\n", compression_ratio * 100.0F);
+                oprintf(" (%.02f %%)\n", compression_ratio * 100.0F);
             }
 
             // Uncompressed size
