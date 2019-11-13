@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.17.0] - 2019-11-13
 ### Added
 - invader-indexer: Added `--info` to invader-indexer to show information about
   Invader, similar to other Invader programs
@@ -36,6 +36,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed indexed sound tag data taking up more space than needed;
   this should result in a small file size reduction for any Halo Custom Edition
   maps that have indexed sounds
+- Addressed some linking errors when building with MinGW
 
 ## [0.16.1] - 2019-11-04
 ### Added
