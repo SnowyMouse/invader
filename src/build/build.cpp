@@ -103,6 +103,10 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "dark") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
+                else {
+                    eprintf("Unknown engine type %s.\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
             case 'C':
                 build_options.forged_crc = arguments[0];

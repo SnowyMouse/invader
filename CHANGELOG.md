@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed `-g` not erroring if an invalid engine was given
+
 ## [0.17.0] - 2019-11-13
 ### Added
 - invader-indexer: Added `--info` to invader-indexer to show information about
