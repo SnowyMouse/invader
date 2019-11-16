@@ -1,0 +1,9 @@
+[
+    {
+        "name": "Scenery",
+        "fields": [],
+        "type": "struct",
+        "inherits": "BasicObject",
+        "size": 508
+    }
+]
