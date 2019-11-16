@@ -3,8 +3,15 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- All tag definitions have been converted to .json format .This will allow them
+  to be used for even more purposes than before.
+
 ### Fixed
 - invader-build: Fixed `-g` not erroring if an invalid engine was given
+- invader-build: Fixed sound looping tags' gain being set to 0
+- invader-build: Fixed some values in shader_transparent_plasma being set to 0
+- invader-build: Fixed biped A In, B In, C In, D In being set to 0
 
 ## [0.17.0] - 2019-11-13
 ### Added
