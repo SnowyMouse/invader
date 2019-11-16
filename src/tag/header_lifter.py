@@ -208,7 +208,7 @@ for i in range(1, len(sys.argv)):
                                     f["count"] = int(f["name"][array_index:][1:-1])
                                     f["name"] = f["name"][:array_index]
 
-                            new_name = f["name"].replace("_", " ").replace(" t ","'t ")
+                            new_name = f["name"].replace("_", " ").replace(" t ","'t ").replace("dont","don't").replace("wont","won't").replace("cant","can't")
                             if new_name == " ":
                                 new_name = f["name"][1:]
 

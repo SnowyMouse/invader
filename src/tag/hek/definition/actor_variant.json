@@ -447,7 +447,7 @@
                 "type": "uint16"
             },
             {
-                "name": "dont drop grenades chance",
+                "name": "don't drop grenades chance",
                 "type": "float"
             },
             {

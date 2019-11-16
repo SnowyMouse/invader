@@ -79,7 +79,7 @@
                 "type": "BipedFunctionIn"
             },
             {
-                "name": "dont use",
+                "name": "don't use",
                 "type": "dependency",
                 "classes": [
                     "damage_effect"
