@@ -68,7 +68,7 @@
             "cannot use ranged weapons",
             "prefer passenger seat"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ActorVariantChangeColors",

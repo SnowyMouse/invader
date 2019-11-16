@@ -10,7 +10,7 @@
             "first person flashlight",
             "don't fade active camouflage"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Light",

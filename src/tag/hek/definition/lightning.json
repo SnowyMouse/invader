@@ -5,7 +5,7 @@
         "fields": [
             "not connected to next marker"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "LightningMarker",

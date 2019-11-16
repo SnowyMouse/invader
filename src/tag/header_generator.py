@@ -105,7 +105,7 @@ with open(sys.argv[1], "w") as f:
             name_fixed = q.replace("'","").replace(" ", "_")
             if name_fixed[0].isnumeric():
                 name_fixed = "_{}".format(name_fixed)
-            f.write("        std::{}_t {} : 1;\n".format(b["width"], name_fixed))
+            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], name_fixed))
         f.write("    };\n")
 
     # Now the hard part

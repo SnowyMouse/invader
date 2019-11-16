@@ -68,7 +68,7 @@
             "can cause multiplayer headshots",
             "infection form pop"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "DamageEffectFlags",
@@ -76,7 +76,7 @@
         "fields": [
             "do not scale damage by distance"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "DamageEffect",

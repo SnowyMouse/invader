@@ -48,7 +48,7 @@
             "unused",
             "make effect work"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "EffectPartScalesValues",
@@ -61,7 +61,7 @@
             "angular velocity delta",
             "type specific scale"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "EffectParticleFlags",
@@ -73,7 +73,7 @@
             "interpolate tint as hsv",
             "across the long hue path"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "EffectParticleScalesValues",
@@ -92,7 +92,7 @@
             "particle radius delta",
             "tint"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "EffectFlags",
@@ -102,7 +102,7 @@
             "required for gameplay cannot optimize out",
             "use in dedicated servers"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "EffectLocation",

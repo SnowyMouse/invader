@@ -6,7 +6,7 @@
             "affects exteriors",
             "affects interiors"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "SkyFunction",

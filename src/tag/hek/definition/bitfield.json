@@ -5,7 +5,7 @@
         "fields": [
             "unused"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "IsUnfilteredFlag",
@@ -13,7 +13,7 @@
         "fields": [
             "unfiltered"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ColorInterpolationFlags",
@@ -22,6 +22,6 @@
             "blend in hsv",
             "more colors"
         ],
-        "width": "uint32"
+        "width": 32
     }
 ]

@@ -7,7 +7,7 @@
             "atmosphere dominant",
             "fog screen only"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "FogScreenFlags",
@@ -17,7 +17,7 @@
             "no model multipass",
             "no texture based falloff"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "Fog",

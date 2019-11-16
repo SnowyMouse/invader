@@ -360,7 +360,7 @@
             "run scenario script",
             "try to branch on failure"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ConditionalWidgetReferenceFlags",
@@ -368,7 +368,7 @@
         "fields": [
             "load if event handler function fails"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ChildWidgetReferenceFlags",
@@ -376,7 +376,7 @@
         "fields": [
             "use custom controller index"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UIWidgetDefinitionFlags",
@@ -399,7 +399,7 @@
             "don't push history",
             "force handle mouse"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UIWidgetDefinitionFlags1",
@@ -410,7 +410,7 @@
             "flashing",
             "don't do that weird focus test"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UIWidgetDefinitionFlags2",
@@ -421,7 +421,7 @@
             "list items only one tooltip",
             "list single preview no scroll"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GameDataInputReference",

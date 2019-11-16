@@ -35,7 +35,7 @@
             "trailing particles shrink over time",
             "trailing particles slow over time"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Glow",

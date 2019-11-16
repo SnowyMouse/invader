@@ -73,7 +73,7 @@
             "ignore normals",
             "transparent lit"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderPhysicsFlags",
@@ -81,7 +81,7 @@
         "fields": [
             "unused"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentExtraLayer",

@@ -44,7 +44,7 @@
             "hinge",
             "no movement"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ModelAnimationAnimationFlags",
@@ -54,7 +54,7 @@
             "world relative",
             "25hz pal"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ModelAnimationsFlags",
@@ -63,7 +63,7 @@
             "compress all animations",
             "force idle compression"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ModelAnimationRotation",

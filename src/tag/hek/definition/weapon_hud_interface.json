@@ -53,7 +53,7 @@
         "fields": [
             "divide number by clip size"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceCrosshairOverlayFlags",
@@ -67,7 +67,7 @@
             "one zoom level",
             "don't show when zoomed"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "WeaponHUDInterfaceOverlayType",
@@ -79,7 +79,7 @@
             "show on default",
             "show always"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceScreenEffectDefinitionMaskFlags",
@@ -87,7 +87,7 @@
         "fields": [
             "only when zoomed"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceScreenEffectDefinitionNightVisionFlags",
@@ -97,7 +97,7 @@
             "connect to flashlight",
             "masked"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceScreenEffectDefinitionDesaturationFlags",
@@ -108,7 +108,7 @@
             "additive",
             "masked"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceFlags",
@@ -116,7 +116,7 @@
         "fields": [
             "use parent hud flashing parameters"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "WeaponHUDInterfaceStaticElement",

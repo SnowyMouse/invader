@@ -49,7 +49,7 @@
             "random attached detonation time",
             "minimum unattached detonation time"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ProjectileMaterialResponseFlags",
@@ -57,7 +57,7 @@
         "fields": [
             "cannot be overpenetrated"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ProjectileMaterialResponsePotentialFlags",
@@ -65,7 +65,7 @@
         "fields": [
             "only against units"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ProjectileMaterialResponse",

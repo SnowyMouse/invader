@@ -15,7 +15,7 @@
             "along long hue path",
             "random rotation"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "WeatherParticleSystemParticleType",

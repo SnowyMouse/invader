@@ -8,7 +8,7 @@
             "u clamped",
             "v clamped"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentChicagoExtraFlags",
@@ -17,7 +17,7 @@
             "don't fade active camouflage",
             "numeric countdown timer"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ShaderTransparentChicagoMap",

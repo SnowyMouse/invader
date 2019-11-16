@@ -5,7 +5,7 @@
         "fields": [
             "tint edge density"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "GlobalsBreakableSurfaceParticleEffectFlags",
@@ -14,7 +14,7 @@
             "interpolate color in hsv",
             "more colors"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GlobalsSound",

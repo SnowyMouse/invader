@@ -19,7 +19,7 @@
             "position loops",
             "position not interpolated"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Device",

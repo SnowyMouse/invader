@@ -5,7 +5,7 @@
         "fields": [
             "cannot be chosen randomly"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GBXModelGeometryPartFlags",
@@ -14,7 +14,7 @@
             "stripped internal",
             "zoner"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GBXModelFlags",
@@ -24,7 +24,7 @@
             "parts have local nodes",
             "ignore skinning"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GBXModelMarkerInstance",

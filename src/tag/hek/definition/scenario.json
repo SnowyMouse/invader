@@ -300,7 +300,7 @@
             "additive",
             "always active"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioSpawnNotPlaced",
@@ -311,7 +311,7 @@
             "on normal",
             "on hard"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioUnitFlags",
@@ -319,7 +319,7 @@
         "fields": [
             "dead"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioVehicleMultiplayerSpawnFlags",
@@ -342,7 +342,7 @@
             "unused 6",
             "unused 7"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioItemFlags",
@@ -352,7 +352,7 @@
             "obsolete",
             "does accelerate"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioDeviceGroupFlags",
@@ -360,7 +360,7 @@
         "fields": [
             "can change only once"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioDeviceFlags",
@@ -372,7 +372,7 @@
             "position reversed",
             "not usable from any side"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioMachineFlags",
@@ -383,7 +383,7 @@
             "never appears locked",
             "opened by melee attack"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioControlFlags",
@@ -391,7 +391,7 @@
         "fields": [
             "usable from both sides"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioNetgameEquipmentFlags",
@@ -399,7 +399,7 @@
         "fields": [
             "levitate"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioStartingEquipmentFlags",
@@ -408,7 +408,7 @@
             "no grenades",
             "plasma grenades"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioActorStartingLocationFlags",
@@ -416,7 +416,7 @@
         "fields": [
             "required"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "ScenarioSquadFlags",
@@ -429,7 +429,7 @@
             "magic sight after timer",
             "automatic migration"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioSquadAttacking",
@@ -462,7 +462,7 @@
             "y",
             "z"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioPlatoonFlags",
@@ -472,7 +472,7 @@
             "say advancing when maneuver",
             "start in defending state"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioEncounterFlags",
@@ -486,7 +486,7 @@
             "3d firing positions",
             "manual bsp index specified"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioCommandListFlags",
@@ -499,7 +499,7 @@
             "disable falling damage",
             "manual bsp index"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioAIConversationParticipantFlags",
@@ -509,7 +509,7 @@
             "has alternate",
             "is alternate"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioAIConversationLineFlags",
@@ -522,7 +522,7 @@
             "wait until speaker nearby",
             "wait until everyone nearby"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioAIConversationFlags",
@@ -537,7 +537,7 @@
             "keep trying to play",
             "player must be looking"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioFlags",
@@ -546,7 +546,7 @@
             "cortana hack",
             "use demo ui"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioScriptNodeFlags",
@@ -557,7 +557,7 @@
             "is global",
             "is garbage collectable"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioSky",

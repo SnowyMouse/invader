@@ -34,7 +34,7 @@
             "random horizontal mirroring",
             "random vertical mirroring"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ParticleShaderFlags",
@@ -44,7 +44,7 @@
             "nonlinear tint",
             "don't overdraw fp weapon"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "Particle",

@@ -6,7 +6,7 @@
             "interpolate color in hsv",
             "more colors"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "LightVolumeFrame",

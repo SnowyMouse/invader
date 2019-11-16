@@ -6,7 +6,7 @@
             "coplanar",
             "fog plane"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ScenarioStructureBSPClusterPortalFlags",
@@ -14,7 +14,7 @@
         "fields": [
             "ai can simply not hear through all this amazing stuff darn it"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ScenarioStructureBSPCollisionMaterial",

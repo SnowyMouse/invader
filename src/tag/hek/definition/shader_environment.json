@@ -25,7 +25,7 @@
             "bump map is specular mask",
             "true atmospheric fog"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderEnvironmentDiffuseFlags",
@@ -34,7 +34,7 @@
             "rescale detail maps",
             "rescale bump map"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderEnvironmentSpecularFlags",
@@ -44,7 +44,7 @@
             "extra shiny",
             "lightmap is specular"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderEnvironmentReflectionFlags",
@@ -52,7 +52,7 @@
         "fields": [
             "dynamic mirror"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderEnvironment",

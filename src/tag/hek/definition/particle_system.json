@@ -54,7 +54,7 @@
             "don't draw in first person",
             "don't draw in third person"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ParticleSystemPhysicsConstant",

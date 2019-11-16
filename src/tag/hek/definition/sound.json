@@ -89,7 +89,7 @@
             "fit to adpcm blocksize",
             "split long sound into permutations"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "SoundPermutation",

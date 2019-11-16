@@ -25,7 +25,7 @@
             "true atmospheric fog",
             "disable two sided culling"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderModelMoreFlags",
@@ -33,7 +33,7 @@
         "fields": [
             "no random phase"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderModel",

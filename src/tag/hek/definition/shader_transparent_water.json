@@ -8,7 +8,7 @@
             "atmospheric fog",
             "draw before fog"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentWaterRipple",

@@ -38,7 +38,7 @@
             "radius scaled by occlusion factor",
             "occluded by solid objects"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "LensFlareReflectionMoreFlags",
@@ -47,7 +47,7 @@
             "interpolate colors in hsv",
             "more colors"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "LensFlareFlags",
@@ -55,7 +55,7 @@
         "fields": [
             "sun"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "LensFlareReflection",

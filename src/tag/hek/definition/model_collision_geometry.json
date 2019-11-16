@@ -5,7 +5,7 @@
         "fields": [
             "head"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ModelCollisionGeometryRegionFlags",
@@ -22,7 +22,7 @@
             "forces drop weapon",
             "causes head maimed scream"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ModelCollisionGeometryLeafFlags",
@@ -30,7 +30,7 @@
         "fields": [
             "contains double sided surfaces"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ModelCollisionGeometrySurfaceFlags",
@@ -41,7 +41,7 @@
             "climbable",
             "breakable"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "ModelCollisionGeometryFlags",
@@ -55,7 +55,7 @@
             "only damaged by explosives",
             "only damaged while occupied"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ModelCollisionGeometryMaterial",

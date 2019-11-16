@@ -75,7 +75,7 @@
             "ai driver can sidestep",
             "ai driver hovering"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Vehicle",

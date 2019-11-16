@@ -12,7 +12,7 @@
         "fields": [
             "use team color"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "UnitHUDInterfaceHUDSoundLatchedTo",
@@ -27,7 +27,7 @@
             "health minor damage",
             "health major damage"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UnitHUDInterfaceAuxiliaryPanelMeterMoreFlags",
@@ -36,7 +36,7 @@
             "show only when active",
             "flash once if activated while disabled"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UnitHUDInterfaceAuxiliaryOverlay",

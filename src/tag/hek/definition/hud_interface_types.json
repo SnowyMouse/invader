@@ -81,7 +81,7 @@
             "more colors for hsv interpolation",
             "invert interpolation"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "HUDInterfaceScalingFlags",
@@ -91,7 +91,7 @@
             "don't scale size",
             "use high res scale"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "HUDInterfaceFlashFlags",
@@ -99,7 +99,7 @@
         "fields": [
             "reverse default flashing colors"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "HUDInterfaceNumberFlags",
@@ -109,7 +109,7 @@
             "only show when zoomed",
             "draw a trailing m"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "HUDInterfaceOverlayFlashFlags",
@@ -117,7 +117,7 @@
         "fields": [
             "flashes when active"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "HUDInterfaceMessagingFlags",
@@ -127,7 +127,7 @@
             "override default color",
             "width offset is absolute icon width"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "HUDInterfaceMultitextureOverlayEffector",

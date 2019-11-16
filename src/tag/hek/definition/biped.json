@@ -25,7 +25,7 @@
             "random speed increase",
             "unit uses old ntsc player physics"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "BipedContactPoint",

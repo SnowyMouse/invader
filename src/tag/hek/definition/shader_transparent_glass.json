@@ -17,7 +17,7 @@
             "two sided",
             "bump map is specular mask"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentGlass",

@@ -79,7 +79,7 @@
             "wastes rounds when reloaded",
             "every round must be chambered"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "WeaponTriggerFlags",
@@ -100,7 +100,7 @@
             "projectiles have identical error",
             "projectile is client side only"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "WeaponFlags",
@@ -123,7 +123,7 @@
             "enables integrated night vision",
             "ais use weapon melee damage"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "WeaponMagazineObject",

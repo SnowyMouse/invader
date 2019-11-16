@@ -21,7 +21,7 @@
             "thrust",
             "antigrav"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "PhysicsMassPointFlags",
@@ -29,7 +29,7 @@
         "fields": [
             "metallic"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "PhysicsInertialMatrix",

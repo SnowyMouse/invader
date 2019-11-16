@@ -24,7 +24,7 @@
             "but not when open",
             "elevator"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "DeviceMachine",

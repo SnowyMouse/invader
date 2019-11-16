@@ -5,7 +5,7 @@
         "fields": [
             "dont rotate when pointing offscreen"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "HUDGlobalsButtonIcon",

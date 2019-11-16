@@ -22,7 +22,7 @@
             "width",
             "color"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ContrailFlags",
@@ -36,7 +36,7 @@
             "points always pinned to ground",
             "edge effect fades slowly"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ContrailScaleFlags",
@@ -53,7 +53,7 @@
             "texture animation u",
             "texture animation v"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ContrailPointState",

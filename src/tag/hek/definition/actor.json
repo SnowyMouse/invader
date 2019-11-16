@@ -86,7 +86,7 @@
             "crouch when in line of fire",
             "avoid friends line of fire"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "ActorMoreFlags",
@@ -100,7 +100,7 @@
             "panic in groups",
             "no corpse shooting"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Actor",

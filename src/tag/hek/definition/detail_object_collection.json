@@ -16,7 +16,7 @@
             "interpolate color in hsv",
             "more colors"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "DetailObjectCollectionObjectType",

@@ -68,7 +68,7 @@
             "integrated light cntrls weapon",
             "integrated light lasts forever"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UnitSeatFlags",
@@ -96,7 +96,7 @@
             "reserved 8",
             "allows melee"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "UnitPoweredSeat",

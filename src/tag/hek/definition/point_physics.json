@@ -10,7 +10,7 @@
             "uses damped wind",
             "no gravity"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "PointPhysics",

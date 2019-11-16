@@ -65,7 +65,7 @@ for i in range(1, len(sys.argv)):
                             print("Warning: Bad bitfield struct on line {}".format(l))
                             break
                         if "width" not in bitfield_field:
-                            bitfield_field["width"] = line_split[0][5:-2]
+                            bitfield_field["width"] = int(line_split[0][9:-2])
                         bitfield_field["fields"].append(line_split[1])
                     bitfields.append(bitfield_field)
 

@@ -8,7 +8,7 @@
             "show on default",
             "show always"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "GrenadeHUDInterfaceSoundLatchedTo",
@@ -18,7 +18,7 @@
             "no grenades left",
             "throw on no grenades"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "GrenadeHUDInterfaceOverlay",

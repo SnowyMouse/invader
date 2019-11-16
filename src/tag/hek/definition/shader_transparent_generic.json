@@ -118,7 +118,7 @@
             "u clamped",
             "v clamped"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentGenericStageFlags",
@@ -128,7 +128,7 @@
             "alpha mux",
             "a out controls color0 animation"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentGenericFlags",
@@ -143,7 +143,7 @@
             "scale first map with distance",
             "numeric"
         ],
-        "width": "uint8"
+        "width": 8
     },
     {
         "name": "ShaderTransparentGenericMap",

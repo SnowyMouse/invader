@@ -7,7 +7,7 @@
             "destroyed by explosions",
             "unaffected by gravity"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "Item",

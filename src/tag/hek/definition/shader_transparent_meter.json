@@ -9,7 +9,7 @@
             "tint mode 2",
             "unfiltered"
         ],
-        "width": "uint16"
+        "width": 16
     },
     {
         "name": "ShaderTransparentMeter",

@@ -7,7 +7,7 @@
             "fade out at stop",
             "fade in alternate"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "SoundLoopingDetailFlags",
@@ -16,7 +16,7 @@
             "don't play with alternate",
             "don't play without alternate"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "SoundLoopingFlags",
@@ -26,7 +26,7 @@
             "not a loop",
             "stops music"
         ],
-        "width": "uint32"
+        "width": 32
     },
     {
         "name": "SoundLoopingTrack",
