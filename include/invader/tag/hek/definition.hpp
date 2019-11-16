@@ -3103,7 +3103,7 @@ namespace Invader::HEK {
         ColorRGB<EndianType> color_lower_bound;
         ColorRGB<EndianType> color_upper_bound;
         ENDIAN_TEMPLATE(NewEndian) operator ObjectChangeColorsPermutation<NewEndian>() const noexcept {
-            ObjectChangeColorsPermutation<NewEndian> copy = {};
+            ObjectChangeColorsPermutation<NewEndian> copy;
             COPY_THIS(weight);
             COPY_THIS(color_lower_bound);
             COPY_THIS(color_upper_bound);
@@ -3119,7 +3119,7 @@ namespace Invader::HEK {
         ColorRGB<EndianType> color_upper_bound;
         TagReflexive<EndianType, ObjectChangeColorsPermutation> permutations;
         ENDIAN_TEMPLATE(NewEndian) operator ObjectChangeColors<NewEndian>() const noexcept {
-            ObjectChangeColors<NewEndian> copy = {};
+            ObjectChangeColors<NewEndian> copy;
             COPY_THIS(darken_by);
             COPY_THIS(scale_by);
             COPY_THIS(flags);
@@ -3768,7 +3768,7 @@ namespace Invader::HEK {
         TagString name;
         ColorARGB<EndianType> color;
         ENDIAN_TEMPLATE(NewEndian) operator ColorTableColor<NewEndian>() const noexcept {
-            ColorTableColor<NewEndian> copy = {};
+            ColorTableColor<NewEndian> copy;
             COPY_THIS(name);
             COPY_THIS(color);
             return copy;
@@ -3778,7 +3778,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ColorTable {
         TagReflexive<EndianType, ColorTableColor> colors;
         ENDIAN_TEMPLATE(NewEndian) operator ColorTable<NewEndian>() const noexcept {
-            ColorTable<NewEndian> copy = {};
+            ColorTable<NewEndian> copy;
             COPY_THIS(colors);
             return copy;
         }
@@ -4880,7 +4880,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct EffectLocation {
         TagString marker_name;
         ENDIAN_TEMPLATE(NewEndian) operator EffectLocation<NewEndian>() const noexcept {
-            EffectLocation<NewEndian> copy = {};
+            EffectLocation<NewEndian> copy;
             COPY_THIS(marker_name);
             return copy;
         }
@@ -5248,7 +5248,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct FontCharacterIndex {
         EndianType<Index> character_index;
         ENDIAN_TEMPLATE(NewEndian) operator FontCharacterIndex<NewEndian>() const noexcept {
-            FontCharacterIndex<NewEndian> copy = {};
+            FontCharacterIndex<NewEndian> copy;
             COPY_THIS(character_index);
             return copy;
         }
@@ -5257,7 +5257,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct FontCharacterTables {
         TagReflexive<EndianType, FontCharacterIndex> character_table;
         ENDIAN_TEMPLATE(NewEndian) operator FontCharacterTables<NewEndian>() const noexcept {
-            FontCharacterTables<NewEndian> copy = {};
+            FontCharacterTables<NewEndian> copy;
             COPY_THIS(character_table);
             return copy;
         }
@@ -5496,7 +5496,7 @@ namespace Invader::HEK {
         EndianType<float> node0_weight;
         EndianType<float> node1_weight;
         ENDIAN_TEMPLATE(NewEndian) operator GBXModelVertexUncompressed<NewEndian>() const noexcept {
-            GBXModelVertexUncompressed<NewEndian> copy = {};
+            GBXModelVertexUncompressed<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(normal);
             COPY_THIS(binormal);
@@ -5521,7 +5521,7 @@ namespace Invader::HEK {
         std::int8_t node1_index;
         EndianType<std::uint16_t> node0_weight;
         ENDIAN_TEMPLATE(NewEndian) operator GBXModelVertexCompressed<NewEndian>() const noexcept {
-            GBXModelVertexCompressed<NewEndian> copy = {};
+            GBXModelVertexCompressed<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(normal);
             COPY_THIS(binormal);
@@ -5540,7 +5540,7 @@ namespace Invader::HEK {
         EndianType<Index> vertex1_index;
         EndianType<Index> vertex2_index;
         ENDIAN_TEMPLATE(NewEndian) operator GBXModelTriangle<NewEndian>() const noexcept {
-            GBXModelTriangle<NewEndian> copy = {};
+            GBXModelTriangle<NewEndian> copy;
             COPY_THIS(vertex0_index);
             COPY_THIS(vertex1_index);
             COPY_THIS(vertex2_index);
@@ -5679,7 +5679,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsSound {
         TagDependency<EndianType> sound;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsSound<NewEndian>() const noexcept {
-            GlobalsSound<NewEndian> copy = {};
+            GlobalsSound<NewEndian> copy;
             COPY_THIS(sound);
             return copy;
         }
@@ -5688,7 +5688,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsCamera {
         TagDependency<EndianType> default_unit_camera_track;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsCamera<NewEndian>() const noexcept {
-            GlobalsCamera<NewEndian> copy = {};
+            GlobalsCamera<NewEndian> copy;
             COPY_THIS(default_unit_camera_track);
             return copy;
         }
@@ -5697,7 +5697,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsLookFunction {
         EndianType<float> scale;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsLookFunction<NewEndian>() const noexcept {
-            GlobalsLookFunction<NewEndian> copy = {};
+            GlobalsLookFunction<NewEndian> copy;
             COPY_THIS(scale);
             return copy;
         }
@@ -5971,7 +5971,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> equipment;
         TagDependency<EndianType> projectile;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsGrenade<NewEndian>() const noexcept {
-            GlobalsGrenade<NewEndian> copy = {};
+            GlobalsGrenade<NewEndian> copy;
             COPY_THIS(maximum_count);
             COPY_THIS(mp_spawn_default);
             COPY_THIS(throwing_effect);
@@ -6083,7 +6083,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsWeapon {
         TagDependency<EndianType> weapon;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsWeapon<NewEndian>() const noexcept {
-            GlobalsWeapon<NewEndian> copy = {};
+            GlobalsWeapon<NewEndian> copy;
             COPY_THIS(weapon);
             return copy;
         }
@@ -6092,7 +6092,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsCheatPowerup {
         TagDependency<EndianType> powerup;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsCheatPowerup<NewEndian>() const noexcept {
-            GlobalsCheatPowerup<NewEndian> copy = {};
+            GlobalsCheatPowerup<NewEndian> copy;
             COPY_THIS(powerup);
             return copy;
         }
@@ -6101,7 +6101,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsVehicle {
         TagDependency<EndianType> vehicle;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsVehicle<NewEndian>() const noexcept {
-            GlobalsVehicle<NewEndian> copy = {};
+            GlobalsVehicle<NewEndian> copy;
             COPY_THIS(vehicle);
             return copy;
         }
@@ -6110,7 +6110,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct GlobalsMultiplayerSound {
         TagDependency<EndianType> sound;
         ENDIAN_TEMPLATE(NewEndian) operator GlobalsMultiplayerSound<NewEndian>() const noexcept {
-            GlobalsMultiplayerSound<NewEndian> copy = {};
+            GlobalsMultiplayerSound<NewEndian> copy;
             COPY_THIS(sound);
             return copy;
         }
@@ -6762,7 +6762,7 @@ namespace Invader::HEK {
         HUDInterfaceMessagingFlags flags;
         EndianType<Index> text_index;
         ENDIAN_TEMPLATE(NewEndian) operator HUDGlobalsButtonIcon<NewEndian>() const noexcept {
-            HUDGlobalsButtonIcon<NewEndian> copy = {};
+            HUDGlobalsButtonIcon<NewEndian> copy;
             COPY_THIS(sequence_index);
             COPY_THIS(width_offset);
             COPY_THIS(offset_from_reference_corner);
@@ -6981,7 +6981,7 @@ namespace Invader::HEK {
         std::int8_t type;
         std::int8_t data;
         ENDIAN_TEMPLATE(NewEndian) operator HUDMessageTextElement<NewEndian>() const noexcept {
-            HUDMessageTextElement<NewEndian> copy = {};
+            HUDMessageTextElement<NewEndian> copy;
             COPY_THIS(type);
             COPY_THIS(data);
             return copy;
@@ -7048,7 +7048,7 @@ namespace Invader::HEK {
         TagDataOffset<EndianType> device_id;
         TagDataOffset<EndianType> profile;
         ENDIAN_TEMPLATE(NewEndian) operator InputDeviceDefaults<NewEndian>() const noexcept {
-            InputDeviceDefaults<NewEndian> copy = {};
+            InputDeviceDefaults<NewEndian> copy;
             COPY_THIS(device_type);
             COPY_THIS(unused);
             COPY_THIS(device_id);
@@ -7471,7 +7471,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationRotation {
         EndianType<std::int16_t> rotation[4];
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationRotation<NewEndian>() const noexcept {
-            ModelAnimationRotation<NewEndian> copy = {};
+            ModelAnimationRotation<NewEndian> copy;
             COPY_THIS_ARRAY(rotation);
             return copy;
         }
@@ -7480,7 +7480,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationTransform {
         Point3D<EndianType> transform;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationTransform<NewEndian>() const noexcept {
-            ModelAnimationTransform<NewEndian> copy = {};
+            ModelAnimationTransform<NewEndian> copy;
             COPY_THIS(transform);
             return copy;
         }
@@ -7489,7 +7489,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationScale {
         EndianType<Fraction> scale;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationScale<NewEndian>() const noexcept {
-            ModelAnimationScale<NewEndian> copy = {};
+            ModelAnimationScale<NewEndian> copy;
             COPY_THIS(scale);
             return copy;
         }
@@ -7499,7 +7499,7 @@ namespace Invader::HEK {
         EndianType<float> dx;
         EndianType<float> dy;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationFrameInfoDxDy<NewEndian>() const noexcept {
-            ModelAnimationFrameInfoDxDy<NewEndian> copy = {};
+            ModelAnimationFrameInfoDxDy<NewEndian> copy;
             COPY_THIS(dx);
             COPY_THIS(dy);
             return copy;
@@ -7511,7 +7511,7 @@ namespace Invader::HEK {
         EndianType<float> dy;
         EndianType<float> dyaw;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationFrameInfoDxDyDyaw<NewEndian>() const noexcept {
-            ModelAnimationFrameInfoDxDyDyaw<NewEndian> copy = {};
+            ModelAnimationFrameInfoDxDyDyaw<NewEndian> copy;
             COPY_THIS(dx);
             COPY_THIS(dy);
             COPY_THIS(dyaw);
@@ -7525,7 +7525,7 @@ namespace Invader::HEK {
         EndianType<float> dz;
         EndianType<float> dyaw;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationFrameInfoDxDyDzDyaw<NewEndian>() const noexcept {
-            ModelAnimationFrameInfoDxDyDzDyaw<NewEndian> copy = {};
+            ModelAnimationFrameInfoDxDyDzDyaw<NewEndian> copy;
             COPY_THIS(dx);
             COPY_THIS(dy);
             COPY_THIS(dz);
@@ -7552,7 +7552,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationUnitSeatAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationUnitSeatAnimation<NewEndian>() const noexcept {
-            ModelAnimationUnitSeatAnimation<NewEndian> copy = {};
+            ModelAnimationUnitSeatAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7562,7 +7562,7 @@ namespace Invader::HEK {
         TagString marker;
         TagString attach_to_marker;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationAnimationGraphUnitSeatikPoint<NewEndian>() const noexcept {
-            ModelAnimationAnimationGraphUnitSeatikPoint<NewEndian> copy = {};
+            ModelAnimationAnimationGraphUnitSeatikPoint<NewEndian> copy;
             COPY_THIS(marker);
             COPY_THIS(attach_to_marker);
             return copy;
@@ -7572,7 +7572,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationWeaponClassAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationAnimationWeaponClassAnimation<NewEndian>() const noexcept {
-            ModelAnimationAnimationWeaponClassAnimation<NewEndian> copy = {};
+            ModelAnimationAnimationWeaponClassAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7581,7 +7581,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationAnimationWeaponTypeAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationAnimationWeaponTypeAnimation<NewEndian>() const noexcept {
-            ModelAnimationAnimationWeaponTypeAnimation<NewEndian> copy = {};
+            ModelAnimationAnimationWeaponTypeAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7670,7 +7670,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationWeaponAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationWeaponAnimation<NewEndian>() const noexcept {
-            ModelAnimationWeaponAnimation<NewEndian> copy = {};
+            ModelAnimationWeaponAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7689,7 +7689,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationVehicleAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationVehicleAnimation<NewEndian>() const noexcept {
-            ModelAnimationVehicleAnimation<NewEndian> copy = {};
+            ModelAnimationVehicleAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7742,7 +7742,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationDeviceAnimation {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationDeviceAnimation<NewEndian>() const noexcept {
-            ModelAnimationDeviceAnimation<NewEndian> copy = {};
+            ModelAnimationDeviceAnimation<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7761,7 +7761,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationUnitDamageAnimations {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationUnitDamageAnimations<NewEndian>() const noexcept {
-            ModelAnimationUnitDamageAnimations<NewEndian> copy = {};
+            ModelAnimationUnitDamageAnimations<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7770,7 +7770,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationFirstPersonWeapon {
         EndianType<Index> animation;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationFirstPersonWeapon<NewEndian>() const noexcept {
-            ModelAnimationFirstPersonWeapon<NewEndian> copy = {};
+            ModelAnimationFirstPersonWeapon<NewEndian> copy;
             COPY_THIS(animation);
             return copy;
         }
@@ -7822,7 +7822,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationArrayNodeTransformFlagData {
         EndianType<std::int32_t> no_name;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationArrayNodeTransformFlagData<NewEndian>() const noexcept {
-            ModelAnimationArrayNodeTransformFlagData<NewEndian> copy = {};
+            ModelAnimationArrayNodeTransformFlagData<NewEndian> copy;
             COPY_THIS(no_name);
             return copy;
         }
@@ -7831,7 +7831,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationArrayNodeRotationFlagData {
         EndianType<std::int32_t> no_name;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationArrayNodeRotationFlagData<NewEndian>() const noexcept {
-            ModelAnimationArrayNodeRotationFlagData<NewEndian> copy = {};
+            ModelAnimationArrayNodeRotationFlagData<NewEndian> copy;
             COPY_THIS(no_name);
             return copy;
         }
@@ -7840,7 +7840,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelAnimationArrayNodeScaleFlagData {
         EndianType<std::int32_t> no_name;
         ENDIAN_TEMPLATE(NewEndian) operator ModelAnimationArrayNodeScaleFlagData<NewEndian>() const noexcept {
-            ModelAnimationArrayNodeScaleFlagData<NewEndian> copy = {};
+            ModelAnimationArrayNodeScaleFlagData<NewEndian> copy;
             COPY_THIS(no_name);
             return copy;
         }
@@ -7965,7 +7965,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryPermutation {
         TagString name;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryPermutation<NewEndian>() const noexcept {
-            ModelCollisionGeometryPermutation<NewEndian> copy = {};
+            ModelCollisionGeometryPermutation<NewEndian> copy;
             COPY_THIS(name);
             return copy;
         }
@@ -8018,7 +8018,7 @@ namespace Invader::HEK {
         EndianType<FlaggedInt<std::uint32_t>> back_child;
         EndianType<FlaggedInt<std::uint32_t>> front_child;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryBSP3DNode<NewEndian>() const noexcept {
-            ModelCollisionGeometryBSP3DNode<NewEndian> copy = {};
+            ModelCollisionGeometryBSP3DNode<NewEndian> copy;
             COPY_THIS(plane);
             COPY_THIS(back_child);
             COPY_THIS(front_child);
@@ -8029,7 +8029,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ModelCollisionGeometryPlane {
         Plane3D<EndianType> plane;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryPlane<NewEndian>() const noexcept {
-            ModelCollisionGeometryPlane<NewEndian> copy = {};
+            ModelCollisionGeometryPlane<NewEndian> copy;
             COPY_THIS(plane);
             return copy;
         }
@@ -8040,7 +8040,7 @@ namespace Invader::HEK {
         EndianType<std::uint16_t> bsp2d_reference_count;
         EndianType<std::int32_t> first_bsp2d_reference;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryLeaf<NewEndian>() const noexcept {
-            ModelCollisionGeometryLeaf<NewEndian> copy = {};
+            ModelCollisionGeometryLeaf<NewEndian> copy;
             COPY_THIS(flags);
             COPY_THIS(bsp2d_reference_count);
             COPY_THIS(first_bsp2d_reference);
@@ -8052,7 +8052,7 @@ namespace Invader::HEK {
         EndianType<FlaggedInt<std::uint32_t>> plane;
         EndianType<FlaggedInt<std::uint32_t>> bsp2d_node;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryBSP2DReference<NewEndian>() const noexcept {
-            ModelCollisionGeometryBSP2DReference<NewEndian> copy = {};
+            ModelCollisionGeometryBSP2DReference<NewEndian> copy;
             COPY_THIS(plane);
             COPY_THIS(bsp2d_node);
             return copy;
@@ -8064,7 +8064,7 @@ namespace Invader::HEK {
         EndianType<FlaggedInt<std::uint32_t>> left_child;
         EndianType<FlaggedInt<std::uint32_t>> right_child;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryBSP2DNode<NewEndian>() const noexcept {
-            ModelCollisionGeometryBSP2DNode<NewEndian> copy = {};
+            ModelCollisionGeometryBSP2DNode<NewEndian> copy;
             COPY_THIS(plane);
             COPY_THIS(left_child);
             COPY_THIS(right_child);
@@ -8079,7 +8079,7 @@ namespace Invader::HEK {
         std::int8_t breakable_surface;
         EndianType<Index> material;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometrySurface<NewEndian>() const noexcept {
-            ModelCollisionGeometrySurface<NewEndian> copy = {};
+            ModelCollisionGeometrySurface<NewEndian> copy;
             COPY_THIS(plane);
             COPY_THIS(first_edge);
             COPY_THIS(flags);
@@ -8097,7 +8097,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> left_surface;
         EndianType<std::int32_t> right_surface;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryEdge<NewEndian>() const noexcept {
-            ModelCollisionGeometryEdge<NewEndian> copy = {};
+            ModelCollisionGeometryEdge<NewEndian> copy;
             COPY_THIS(start_vertex);
             COPY_THIS(end_vertex);
             COPY_THIS(forward_edge);
@@ -8112,7 +8112,7 @@ namespace Invader::HEK {
         Point3D<EndianType> point;
         EndianType<std::int32_t> first_edge;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryVertex<NewEndian>() const noexcept {
-            ModelCollisionGeometryVertex<NewEndian> copy = {};
+            ModelCollisionGeometryVertex<NewEndian> copy;
             COPY_THIS(point);
             COPY_THIS(first_edge);
             return copy;
@@ -8129,7 +8129,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, ModelCollisionGeometryEdge> edges;
         TagReflexive<EndianType, ModelCollisionGeometryVertex> vertices;
         ENDIAN_TEMPLATE(NewEndian) operator ModelCollisionGeometryBSP<NewEndian>() const noexcept {
-            ModelCollisionGeometryBSP<NewEndian> copy = {};
+            ModelCollisionGeometryBSP<NewEndian> copy;
             COPY_THIS(bsp3d_nodes);
             COPY_THIS(planes);
             COPY_THIS(leaves);
@@ -8268,7 +8268,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct MultiplayerScenarioDescription {
         TagReflexive<EndianType, MultiplayerScenarioDescriptionScenarioDescription> multiplayer_scenarios;
         ENDIAN_TEMPLATE(NewEndian) operator MultiplayerScenarioDescription<NewEndian>() const noexcept {
-            MultiplayerScenarioDescription<NewEndian> copy = {};
+            MultiplayerScenarioDescription<NewEndian> copy;
             COPY_THIS(multiplayer_scenarios);
             return copy;
         }
@@ -8422,7 +8422,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ParticleSystemPhysicsConstant {
         EndianType<float> k;
         ENDIAN_TEMPLATE(NewEndian) operator ParticleSystemPhysicsConstant<NewEndian>() const noexcept {
-            ParticleSystemPhysicsConstant<NewEndian> copy = {};
+            ParticleSystemPhysicsConstant<NewEndian> copy;
             COPY_THIS(k);
             return copy;
         }
@@ -8607,7 +8607,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct PhysicsInertialMatrix {
         Matrix<EndianType> matrix;
         ENDIAN_TEMPLATE(NewEndian) operator PhysicsInertialMatrix<NewEndian>() const noexcept {
-            PhysicsInertialMatrix<NewEndian> copy = {};
+            PhysicsInertialMatrix<NewEndian> copy;
             COPY_THIS(matrix);
             return copy;
         }
@@ -8895,7 +8895,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioSky {
         TagDependency<EndianType> sky;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioSky<NewEndian>() const noexcept {
-            ScenarioSky<NewEndian> copy = {};
+            ScenarioSky<NewEndian> copy;
             COPY_THIS(sky);
             return copy;
         }
@@ -8904,7 +8904,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioChildScenario {
         TagDependency<EndianType> child_scenario;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioChildScenario<NewEndian>() const noexcept {
-            ScenarioChildScenario<NewEndian> copy = {};
+            ScenarioChildScenario<NewEndian> copy;
             COPY_THIS(child_scenario);
             return copy;
         }
@@ -8973,7 +8973,7 @@ namespace Invader::HEK {
         LittleEndian<ObjectType> object_type;
         LittleEndian<std::uint16_t> object_index;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioObjectName<NewEndian>() const noexcept {
-            ScenarioObjectName<NewEndian> copy = {};
+            ScenarioObjectName<NewEndian> copy;
             COPY_THIS(name);
             COPY_THIS(object_type);
             COPY_THIS(object_index);
@@ -8989,7 +8989,7 @@ namespace Invader::HEK {
         Point3D<EndianType> position;
         Euler3D<EndianType> rotation;
         ENDIAN_TEMPLATE(NewEndian) operator SpawnPrelude<NewEndian>() const noexcept {
-            SpawnPrelude<NewEndian> copy = {};
+            SpawnPrelude<NewEndian> copy;
             COPY_THIS(type);
             COPY_THIS(name);
             COPY_THIS(not_placed);
@@ -9486,7 +9486,7 @@ namespace Invader::HEK {
         EndianType<Index> destination;
         LittleEndian<std::uint16_t> unknown;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioBSPSwitchTriggerVolume<NewEndian>() const noexcept {
-            ScenarioBSPSwitchTriggerVolume<NewEndian> copy = {};
+            ScenarioBSPSwitchTriggerVolume<NewEndian> copy;
             COPY_THIS(trigger_volume);
             COPY_THIS(source);
             COPY_THIS(destination);
@@ -9501,7 +9501,7 @@ namespace Invader::HEK {
         std::int8_t pitch;
         Point3D<EndianType> position;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioDecal<NewEndian>() const noexcept {
-            ScenarioDecal<NewEndian> copy = {};
+            ScenarioDecal<NewEndian> copy;
             COPY_THIS(decal_type);
             COPY_THIS(yaw);
             COPY_THIS(pitch);
@@ -9513,7 +9513,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioDecalPalette {
         TagDependency<EndianType> reference;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioDecalPalette<NewEndian>() const noexcept {
-            ScenarioDecalPalette<NewEndian> copy = {};
+            ScenarioDecalPalette<NewEndian> copy;
             COPY_THIS(reference);
             return copy;
         }
@@ -9532,7 +9532,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioActorPalette {
         TagDependency<EndianType> reference;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioActorPalette<NewEndian>() const noexcept {
-            ScenarioActorPalette<NewEndian> copy = {};
+            ScenarioActorPalette<NewEndian> copy;
             COPY_THIS(reference);
             return copy;
         }
@@ -9572,7 +9572,7 @@ namespace Invader::HEK {
         EndianType<Index> actor_type;
         EndianType<Index> command_list;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioActorStartingLocation<NewEndian>() const noexcept {
-            ScenarioActorStartingLocation<NewEndian> copy = {};
+            ScenarioActorStartingLocation<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(facing);
             COPY_THIS(unknown);
@@ -9942,7 +9942,7 @@ namespace Invader::HEK {
         TagString name;
         TagDataOffset<EndianType> source;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioSourceFile<NewEndian>() const noexcept {
-            ScenarioSourceFile<NewEndian> copy = {};
+            ScenarioSourceFile<NewEndian> copy;
             COPY_THIS(name);
             COPY_THIS(source);
             return copy;
@@ -10042,7 +10042,7 @@ namespace Invader::HEK {
         EndianType<std::uint32_t> string_offset;
         EndianType<ScenarioScriptNodeValue> data;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioScriptNode<NewEndian>() const noexcept {
-            ScenarioScriptNode<NewEndian> copy = {};
+            ScenarioScriptNode<NewEndian> copy;
             COPY_THIS(salt);
             COPY_THIS(index_union);
             COPY_THIS(type);
@@ -10236,7 +10236,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPNode {
         LittleEndian<std::uint16_t> node_stuff[3];
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPNode<NewEndian>() const noexcept {
-            ScenarioStructureBSPNode<NewEndian> copy = {};
+            ScenarioStructureBSPNode<NewEndian> copy;
             COPY_THIS_ARRAY(node_stuff);
             return copy;
         }
@@ -10262,7 +10262,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> surface;
         EndianType<std::int32_t> node;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPSurfaceReference<NewEndian>() const noexcept {
-            ScenarioStructureBSPSurfaceReference<NewEndian> copy = {};
+            ScenarioStructureBSPSurfaceReference<NewEndian> copy;
             COPY_THIS(surface);
             COPY_THIS(node);
             return copy;
@@ -10272,7 +10272,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPArrayVertex {
         EndianType<std::int16_t> a;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPArrayVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPArrayVertex<NewEndian> copy = {};
+            ScenarioStructureBSPArrayVertex<NewEndian> copy;
             COPY_THIS(a);
             return copy;
         }
@@ -10281,7 +10281,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPSurface {
         ScenarioStructureBSPArrayVertex<EndianType> vertices[3];
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPSurface<NewEndian>() const noexcept {
-            ScenarioStructureBSPSurface<NewEndian> copy = {};
+            ScenarioStructureBSPSurface<NewEndian> copy;
             COPY_THIS_ARRAY(vertices);
             return copy;
         }
@@ -10307,7 +10307,7 @@ namespace Invader::HEK {
         Vector3D<EndianType> tangent;
         Point2D<EndianType> texture_coords;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMaterialUncompressedRenderedVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPMaterialUncompressedRenderedVertex<NewEndian> copy = {};
+            ScenarioStructureBSPMaterialUncompressedRenderedVertex<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(normal);
             COPY_THIS(binormal);
@@ -10321,7 +10321,7 @@ namespace Invader::HEK {
         Vector3D<EndianType> normal;
         Point2D<EndianType> texture_coords;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMaterialUncompressedLightmapVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPMaterialUncompressedLightmapVertex<NewEndian> copy = {};
+            ScenarioStructureBSPMaterialUncompressedLightmapVertex<NewEndian> copy;
             COPY_THIS(normal);
             COPY_THIS(texture_coords);
             return copy;
@@ -10396,7 +10396,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPLensFlare {
         TagDependency<EndianType> lens;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPLensFlare<NewEndian>() const noexcept {
-            ScenarioStructureBSPLensFlare<NewEndian> copy = {};
+            ScenarioStructureBSPLensFlare<NewEndian> copy;
             COPY_THIS(lens);
             return copy;
         }
@@ -10409,7 +10409,7 @@ namespace Invader::HEK {
         std::int8_t direction_k_component;
         std::int8_t lens_flare_index;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPLensFlareMarker<NewEndian>() const noexcept {
-            ScenarioStructureBSPLensFlareMarker<NewEndian> copy = {};
+            ScenarioStructureBSPLensFlareMarker<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(direction_i_component);
             COPY_THIS(direction_j_component);
@@ -10422,7 +10422,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPSubclusterSurfaceIndex {
         EndianType<std::int32_t> index;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPSubclusterSurfaceIndex<NewEndian>() const noexcept {
-            ScenarioStructureBSPSubclusterSurfaceIndex<NewEndian> copy = {};
+            ScenarioStructureBSPSubclusterSurfaceIndex<NewEndian> copy;
             COPY_THIS(index);
             return copy;
         }
@@ -10434,7 +10434,7 @@ namespace Invader::HEK {
         Bounds<EndianType<float>> world_bounds_z;
         TagReflexive<EndianType, ScenarioStructureBSPSubclusterSurfaceIndex> surface_indices;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPSubcluster<NewEndian>() const noexcept {
-            ScenarioStructureBSPSubcluster<NewEndian> copy = {};
+            ScenarioStructureBSPSubcluster<NewEndian> copy;
             COPY_THIS(world_bounds_x);
             COPY_THIS(world_bounds_y);
             COPY_THIS(world_bounds_z);
@@ -10446,7 +10446,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPClusterSurfaceIndex {
         EndianType<std::int32_t> index;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPClusterSurfaceIndex<NewEndian>() const noexcept {
-            ScenarioStructureBSPClusterSurfaceIndex<NewEndian> copy = {};
+            ScenarioStructureBSPClusterSurfaceIndex<NewEndian> copy;
             COPY_THIS(index);
             return copy;
         }
@@ -10455,7 +10455,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMirrorVertex {
         Point3D<EndianType> point;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMirrorVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPMirrorVertex<NewEndian> copy = {};
+            ScenarioStructureBSPMirrorVertex<NewEndian> copy;
             COPY_THIS(point);
             return copy;
         }
@@ -10478,7 +10478,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPClusterPortalIndex {
         EndianType<Index> portal;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPClusterPortalIndex<NewEndian>() const noexcept {
-            ScenarioStructureBSPClusterPortalIndex<NewEndian> copy = {};
+            ScenarioStructureBSPClusterPortalIndex<NewEndian> copy;
             COPY_THIS(portal);
             return copy;
         }
@@ -10525,7 +10525,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPClusterPortalVertex {
         Point3D<EndianType> point;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPClusterPortalVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPClusterPortalVertex<NewEndian> copy = {};
+            ScenarioStructureBSPClusterPortalVertex<NewEndian> copy;
             COPY_THIS(point);
             return copy;
         }
@@ -10570,7 +10570,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPFogPlaneVertex {
         Point3D<EndianType> point;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPFogPlaneVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPFogPlaneVertex<NewEndian> copy = {};
+            ScenarioStructureBSPFogPlaneVertex<NewEndian> copy;
             COPY_THIS(point);
             return copy;
         }
@@ -10582,7 +10582,7 @@ namespace Invader::HEK {
         Plane3D<EndianType> plane;
         TagReflexive<EndianType, ScenarioStructureBSPFogPlaneVertex> vertices;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPFogPlane<NewEndian>() const noexcept {
-            ScenarioStructureBSPFogPlane<NewEndian> copy = {};
+            ScenarioStructureBSPFogPlane<NewEndian> copy;
             COPY_THIS(front_region);
             COPY_THIS(material_type);
             COPY_THIS(plane);
@@ -10646,7 +10646,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPWeatherPolyhedronPlane {
         Plane3D<EndianType> plane;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPWeatherPolyhedronPlane<NewEndian>() const noexcept {
-            ScenarioStructureBSPWeatherPolyhedronPlane<NewEndian> copy = {};
+            ScenarioStructureBSPWeatherPolyhedronPlane<NewEndian> copy;
             COPY_THIS(plane);
             return copy;
         }
@@ -10669,7 +10669,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPPathfindingSurface {
         std::int8_t data;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPPathfindingSurface<NewEndian>() const noexcept {
-            ScenarioStructureBSPPathfindingSurface<NewEndian> copy = {};
+            ScenarioStructureBSPPathfindingSurface<NewEndian> copy;
             COPY_THIS(data);
             return copy;
         }
@@ -10678,7 +10678,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPPathfindingEdge {
         std::int8_t midpoint;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPPathfindingEdge<NewEndian>() const noexcept {
-            ScenarioStructureBSPPathfindingEdge<NewEndian> copy = {};
+            ScenarioStructureBSPPathfindingEdge<NewEndian> copy;
             COPY_THIS(midpoint);
             return copy;
         }
@@ -10716,7 +10716,7 @@ namespace Invader::HEK {
         Quaternion<EndianType> rotation;
         Point3D<EndianType> position;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMarker<NewEndian>() const noexcept {
-            ScenarioStructureBSPMarker<NewEndian> copy = {};
+            ScenarioStructureBSPMarker<NewEndian> copy;
             COPY_THIS(name);
             COPY_THIS(rotation);
             COPY_THIS(position);
@@ -10753,7 +10753,7 @@ namespace Invader::HEK {
         std::int8_t no_name_3;
         EndianType<std::int16_t> no_name_4;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPGlobalDetailObject<NewEndian>() const noexcept {
-            ScenarioStructureBSPGlobalDetailObject<NewEndian> copy = {};
+            ScenarioStructureBSPGlobalDetailObject<NewEndian> copy;
             COPY_THIS(no_name);
             COPY_THIS(no_name_1);
             COPY_THIS(no_name_2);
@@ -10766,7 +10766,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPGlobalDetailObjectCount {
         EndianType<std::int16_t> no_name;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPGlobalDetailObjectCount<NewEndian>() const noexcept {
-            ScenarioStructureBSPGlobalDetailObjectCount<NewEndian> copy = {};
+            ScenarioStructureBSPGlobalDetailObjectCount<NewEndian> copy;
             COPY_THIS(no_name);
             return copy;
         }
@@ -10778,7 +10778,7 @@ namespace Invader::HEK {
         EndianType<float> no_name_2;
         EndianType<float> no_name_3;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPGlobalZReferenceVector<NewEndian>() const noexcept {
-            ScenarioStructureBSPGlobalZReferenceVector<NewEndian> copy = {};
+            ScenarioStructureBSPGlobalZReferenceVector<NewEndian> copy;
             COPY_THIS(no_name);
             COPY_THIS(no_name_1);
             COPY_THIS(no_name_2);
@@ -10812,7 +10812,7 @@ namespace Invader::HEK {
         std::int8_t yaw;
         std::int8_t pitch;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPRuntimeDecal<NewEndian>() const noexcept {
-            ScenarioStructureBSPRuntimeDecal<NewEndian> copy = {};
+            ScenarioStructureBSPRuntimeDecal<NewEndian> copy;
             COPY_THIS(position);
             COPY_THIS(decal_type);
             COPY_THIS(yaw);
@@ -10824,7 +10824,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMapLeafFaceVertex {
         Point2D<EndianType> vertex;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMapLeafFaceVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPMapLeafFaceVertex<NewEndian> copy = {};
+            ScenarioStructureBSPMapLeafFaceVertex<NewEndian> copy;
             COPY_THIS(vertex);
             return copy;
         }
@@ -10834,7 +10834,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> node_index;
         TagReflexive<EndianType, ScenarioStructureBSPMapLeafFaceVertex> vertices;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMapLeafFace<NewEndian>() const noexcept {
-            ScenarioStructureBSPMapLeafFace<NewEndian> copy = {};
+            ScenarioStructureBSPMapLeafFace<NewEndian> copy;
             COPY_THIS(node_index);
             COPY_THIS(vertices);
             return copy;
@@ -10844,7 +10844,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMapLeafPortalIndex {
         EndianType<std::int32_t> portal_index;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPMapLeafPortalIndex<NewEndian>() const noexcept {
-            ScenarioStructureBSPMapLeafPortalIndex<NewEndian> copy = {};
+            ScenarioStructureBSPMapLeafPortalIndex<NewEndian> copy;
             COPY_THIS(portal_index);
             return copy;
         }
@@ -10854,7 +10854,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, ScenarioStructureBSPMapLeafFace> faces;
         TagReflexive<EndianType, ScenarioStructureBSPMapLeafPortalIndex> portal_indices;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPGlobalMapLeaf<NewEndian>() const noexcept {
-            ScenarioStructureBSPGlobalMapLeaf<NewEndian> copy = {};
+            ScenarioStructureBSPGlobalMapLeaf<NewEndian> copy;
             COPY_THIS(faces);
             COPY_THIS(portal_indices);
             return copy;
@@ -10864,7 +10864,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPLeafPortalVertex {
         Point3D<EndianType> point;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPLeafPortalVertex<NewEndian>() const noexcept {
-            ScenarioStructureBSPLeafPortalVertex<NewEndian> copy = {};
+            ScenarioStructureBSPLeafPortalVertex<NewEndian> copy;
             COPY_THIS(point);
             return copy;
         }
@@ -10876,7 +10876,7 @@ namespace Invader::HEK {
         EndianType<std::int32_t> front_leaf_index;
         TagReflexive<EndianType, ScenarioStructureBSPLeafPortalVertex> vertices;
         ENDIAN_TEMPLATE(NewEndian) operator ScenarioStructureBSPGlobalLeafPortal<NewEndian>() const noexcept {
-            ScenarioStructureBSPGlobalLeafPortal<NewEndian> copy = {};
+            ScenarioStructureBSPGlobalLeafPortal<NewEndian> copy;
             COPY_THIS(plane_index);
             COPY_THIS(back_leaf_index);
             COPY_THIS(front_leaf_index);
@@ -11175,7 +11175,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ShaderTransparentExtraLayer {
         TagDependency<EndianType> shader;
         ENDIAN_TEMPLATE(NewEndian) operator ShaderTransparentExtraLayer<NewEndian>() const noexcept {
-            ShaderTransparentExtraLayer<NewEndian> copy = {};
+            ShaderTransparentExtraLayer<NewEndian> copy;
             COPY_THIS(shader);
             return copy;
         }
@@ -12192,7 +12192,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct StringListString {
         TagDataOffset<EndianType> string;
         ENDIAN_TEMPLATE(NewEndian) operator StringListString<NewEndian>() const noexcept {
-            StringListString<NewEndian> copy = {};
+            StringListString<NewEndian> copy;
             COPY_THIS(string);
             return copy;
         }
@@ -12201,7 +12201,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct StringList {
         TagReflexive<EndianType, StringListString> strings;
         ENDIAN_TEMPLATE(NewEndian) operator StringList<NewEndian>() const noexcept {
-            StringList<NewEndian> copy = {};
+            StringList<NewEndian> copy;
             COPY_THIS(strings);
             return copy;
         }
@@ -12210,7 +12210,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct TagCollectionTag {
         TagDependency<EndianType> reference;
         ENDIAN_TEMPLATE(NewEndian) operator TagCollectionTag<NewEndian>() const noexcept {
-            TagCollectionTag<NewEndian> copy = {};
+            TagCollectionTag<NewEndian> copy;
             COPY_THIS(reference);
             return copy;
         }
@@ -12219,7 +12219,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct TagCollection {
         TagReflexive<EndianType, TagCollectionTag> tags;
         ENDIAN_TEMPLATE(NewEndian) operator TagCollection<NewEndian>() const noexcept {
-            TagCollection<NewEndian> copy = {};
+            TagCollection<NewEndian> copy;
             COPY_THIS(tags);
             return copy;
         }
@@ -12244,7 +12244,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> sound_effect;
         TagString script;
         ENDIAN_TEMPLATE(NewEndian) operator EventHandlerReference<NewEndian>() const noexcept {
-            EventHandlerReference<NewEndian> copy = {};
+            EventHandlerReference<NewEndian> copy;
             COPY_THIS(flags);
             COPY_THIS(event_type);
             COPY_THIS(function);
@@ -12259,7 +12259,7 @@ namespace Invader::HEK {
         TagString search_string;
         EndianType<UIReplaceFunction> replace_function;
         ENDIAN_TEMPLATE(NewEndian) operator SearchAndReplaceReference<NewEndian>() const noexcept {
-            SearchAndReplaceReference<NewEndian> copy = {};
+            SearchAndReplaceReference<NewEndian> copy;
             COPY_THIS(search_string);
             COPY_THIS(replace_function);
             return copy;
@@ -13003,7 +13003,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> active_background_bitmap;
         TagDependency<EndianType> sticky_background_bitmap;
         ENDIAN_TEMPLATE(NewEndian) operator VirtualKeyboardVirtualKey<NewEndian>() const noexcept {
-            VirtualKeyboardVirtualKey<NewEndian> copy = {};
+            VirtualKeyboardVirtualKey<NewEndian> copy;
             COPY_THIS(keyboard_key);
             COPY_THIS(lowercase_character);
             COPY_THIS(shift_character);
@@ -13026,7 +13026,7 @@ namespace Invader::HEK {
         TagDependency<EndianType> special_key_labels_string_list;
         TagReflexive<EndianType, VirtualKeyboardVirtualKey> virtual_keys;
         ENDIAN_TEMPLATE(NewEndian) operator VirtualKeyboard<NewEndian>() const noexcept {
-            VirtualKeyboard<NewEndian> copy = {};
+            VirtualKeyboard<NewEndian> copy;
             COPY_THIS(display_font);
             COPY_THIS(background_bitmap);
             COPY_THIS(special_key_labels_string_list);

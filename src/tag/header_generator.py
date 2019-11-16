@@ -129,7 +129,6 @@ with open(sys.argv[1], "w") as f:
                 type_to_write = "std::{}_t".format(type_to_write)
             elif type_to_write == "pad":
                 f.write("        PAD(0x{:X});\n".format(n["size"]))
-                padding_present = True
                 continue
 
             if "flagged" in n and n["flagged"]:
@@ -165,16 +164,18 @@ with open(sys.argv[1], "w") as f:
                 else:
                     f.write("        {} {};\n".format(format_to_use.format(type_to_write), name))
 
-        # And we can't forget the copy part
-        f.write("        ENDIAN_TEMPLATE(NewEndian) operator {}<NewEndian>() const noexcept {{\n".format(s["name"]))
-        f.write("            {}<NewEndian> copy{};\n".format(s["name"], " = {}" if padding_present else ""))
-
         # Make sure we have all of the structs we depend on, too
         depended_structs = []
         dependency = s
+        padding_present = False
 
         while dependency is not None:
             depended_structs.append(dependency)
+            if not padding_present:
+                for n in dependency["fields"]:
+                    if n["type"] == "pad":
+                        padding_present = True
+                        break
             if "inherits" in dependency:
                 dependency_name = dependency["inherits"]
                 dependency = None
@@ -184,6 +185,10 @@ with open(sys.argv[1], "w") as f:
                         break
             else:
                 break
+
+        # And we can't forget the copy part
+        f.write("        ENDIAN_TEMPLATE(NewEndian) operator {}<NewEndian>() const noexcept {{\n".format(s["name"]))
+        f.write("            {}<NewEndian> copy{};\n".format(s["name"], " = {}" if padding_present else ""))
 
         for ds in depended_structs:
             for n in ds["fields"]:
