@@ -12,19 +12,8 @@
 #define MAX_PATH_LENGTH 254
 
 #include <invader/printf.hpp>
-#include <invader/tag/hek/class/biped.hpp>
-#include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/tag/hek/class/detail_object_collection.hpp>
-#include <invader/tag/hek/class/fog.hpp>
-#include <invader/tag/hek/class/font.hpp>
-#include <invader/tag/hek/class/gbxmodel.hpp>
-#include <invader/tag/hek/class/globals.hpp>
-#include <invader/tag/hek/class/particle.hpp>
-#include <invader/tag/hek/class/scenario.hpp>
-#include <invader/tag/hek/class/scenario_structure_bsp.hpp>
-#include <invader/tag/hek/class/weather_particle_system.hpp>
-#include <invader/tag/hek/class/sound.hpp>
-#include <invader/tag/hek/class/string_list.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/hek/class/model_collision_geometry.hpp>
 #include <invader/version.hpp>
 #include <invader/error.hpp>
 #include <invader/hek/map.hpp>
@@ -752,7 +741,7 @@ namespace Invader {
             std::size_t bitmap_limit, sound_limit, loc_limit;
 
             // Singleplayer / UI limits - use the internal list
-            if(this->cache_file_type != CacheFileType::CACHE_FILE_MULTIPLAYER) {
+            if(this->cache_file_type != ScenarioType::CACHE_FILE_MULTIPLAYER) {
                 bitmap_limit = get_default_bitmap_resources_count();
                 sound_limit = get_default_sound_resources_count();
                 loc_limit = get_default_loc_resources_count();
@@ -785,13 +774,13 @@ namespace Invader {
 
         // Load the correct tag collection tag
         switch(this->cache_file_type) {
-            case CacheFileType::CACHE_FILE_SINGLEPLAYER:
+            case ScenarioType::CACHE_FILE_SINGLEPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
-            case CacheFileType::CACHE_FILE_MULTIPLAYER:
+            case ScenarioType::CACHE_FILE_MULTIPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
-            case CacheFileType::CACHE_FILE_USER_INTERFACE:
+            case ScenarioType::CACHE_FILE_USER_INTERFACE:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
         }
@@ -810,7 +799,7 @@ namespace Invader {
         for(auto &compiled_tag : this->compiled_tags) {
             if(compiled_tag->stub()) {
                 // Damage effects and object tags that are not in the correct location will break things
-                if(this->cache_file_type == CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
+                if(this->cache_file_type == ScenarioType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
                     eprintf("Warning: Network object %s.%s is missing.\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                     network_issue = true;
                 }
@@ -1033,7 +1022,7 @@ namespace Invader {
                 // BSP-related things (need to set water plane stuff for fog)
                 if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                     auto *bsp_data = tag_ptr->data.data();
-                    auto &bsp_header = *reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(bsp_data);
+                    auto &bsp_header = *reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(bsp_data);
                     std::size_t bsp_offset = tag_ptr->resolve_pointer(&bsp_header.pointer);
                     if(bsp_offset != INVALID_POINTER) {
                         auto &bsp = *reinterpret_cast<ScenarioStructureBSP<LittleEndian> *>(bsp_data + bsp_offset);
@@ -1179,7 +1168,7 @@ namespace Invader {
                             auto bsp_id = bsps[bsp].structure_bsp.tag_id.read().index;
                             if(bsp_id < this->compiled_tags.size()) {
                                 auto &bsp_tag = this->compiled_tags[bsp_id];
-                                auto *bsp_header = reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(bsp_tag->data.data());
+                                auto *bsp_header = reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(bsp_tag->data.data());
                                 std::size_t bsp_data_offset = bsp_tag->resolve_pointer(&bsp_header->pointer);
                                 if(bsp_data_offset == INVALID_POINTER) {
                                     continue;
@@ -2124,7 +2113,7 @@ namespace Invader {
                 // Get leaves for the BSP
                 auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
                 auto *sbsp_tag_data = sbsp_tag->data.data();
-                auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+                auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(sbsp_tag_data);
                 auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
 
                 // Make sure we have a collision BSP
@@ -2297,7 +2286,7 @@ namespace Invader {
         // Get current BSP data
         auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
         auto *sbsp_tag_data = sbsp_tag->data.data();
-        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(sbsp_tag_data);
         auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
 
         // Make sure we have a collision BSP
@@ -2319,7 +2308,7 @@ namespace Invader {
     bool BuildWorkload::intersect_in_bsp(const HEK::Point3D<HEK::LittleEndian> &point_a, const HEK::Point3D<HEK::LittleEndian> &point_b, std::uint32_t bsp, HEK::Point3D<HEK::LittleEndian> &intersection_point, std::uint32_t &surface_index, std::uint32_t &leaf_index) {
         auto &sbsp_tag = this->compiled_tags[this->get_bsp_tag_index(bsp)];
         auto *sbsp_tag_data = sbsp_tag->data.data();
-        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader *>(sbsp_tag_data);
+        auto &sbsp_tag_header = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(sbsp_tag_data);
         auto &sbsp = *reinterpret_cast<HEK::ScenarioStructureBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp_tag_header.pointer));
 
         auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));

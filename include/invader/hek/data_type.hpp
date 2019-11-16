@@ -734,6 +734,12 @@ namespace Invader::HEK {
         PREDICTED_RESOUCE_TYPE_SOUND
     };
 
+    enum ScenarioType : TagEnum {
+        CACHE_FILE_SINGLEPLAYER,
+        CACHE_FILE_MULTIPLAYER,
+        CACHE_FILE_USER_INTERFACE
+    };
+
     ENDIAN_TEMPLATE(EndianType) struct PredictedResource {
         EndianType<PredictedResourceType> type;
         EndianType<Index> resource_index;

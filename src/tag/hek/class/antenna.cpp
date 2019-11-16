@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <invader/tag/hek/compile.hpp>
-#include <invader/tag/hek/class/antenna.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_antenna_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

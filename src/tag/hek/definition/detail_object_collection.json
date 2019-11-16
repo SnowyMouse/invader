@@ -1,0 +1,135 @@
+[
+    {
+        "name": "DetailObjectCollectionType",
+        "options": [
+            "screen facing",
+            "viewer facing"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DetailObjectCollectionTypeFlags",
+        "type": "bitfield",
+        "fields": [
+            "unused a",
+            "unused b",
+            "interpolate color in hsv",
+            "more colors"
+        ],
+        "width": "uint8"
+    },
+    {
+        "name": "DetailObjectCollectionObjectType",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "sequence index",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "DetailObjectCollectionTypeFlags",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 1
+            },
+            {
+                "name": "sprite count",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "color override factor",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "near fade distance",
+                "type": "float"
+            },
+            {
+                "name": "far fade distance",
+                "type": "float"
+            },
+            {
+                "name": "size",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "minimum color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "maximum color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "ambient color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            }
+        ],
+        "type": "struct",
+        "size": 96
+    },
+    {
+        "name": "DetailObjectCollection",
+        "fields": [
+            {
+                "name": "collection type",
+                "type": "DetailObjectCollectionType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "global z offset",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 44
+            },
+            {
+                "name": "sprite plate",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "types",
+                "type": "reflexive",
+                "struct": "DetailObjectCollectionObjectType",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 48
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    }
+]

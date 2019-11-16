@@ -2,8 +2,9 @@
 
 #include <invader/tag/hek/compile.hpp>
 #include <invader/hek/constants.hpp>
-
+#include <invader/tag/hek/definition.hpp>
 #include <invader/tag/hek/class/weapon.hpp>
+#include "compile.hpp"
 
 namespace Invader::HEK {
     void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, WeaponJasonJones jason_jones) {

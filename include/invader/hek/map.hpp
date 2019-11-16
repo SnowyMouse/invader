@@ -21,12 +21,7 @@ namespace Invader::HEK {
 
     const char *engine_name(CacheFileEngine engine) noexcept;
 
-    enum CacheFileType : TagEnum {
-        CACHE_FILE_SINGLEPLAYER,
-        CACHE_FILE_MULTIPLAYER,
-        CACHE_FILE_USER_INTERFACE
-    };
-
+    using CacheFileType = ScenarioType;
     const char *type_name(CacheFileType type) noexcept;
 
     enum CacheFileLiteral : std::uint32_t {

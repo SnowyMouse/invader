@@ -1,0 +1,149 @@
+[
+    {
+        "name": "FramebufferBlendFunction",
+        "options": [
+            "alpha blend",
+            "multiply",
+            "double multiply",
+            "add",
+            "subtract",
+            "component min",
+            "component max",
+            "alpha multiply add"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FramebufferFadeMode",
+        "options": [
+            "none",
+            "fade when perpendicular",
+            "fade when parallel"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FunctionOut",
+        "options": [
+            "none",
+            "a out",
+            "b out",
+            "c out",
+            "d out"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WaveFunction",
+        "options": [
+            "one",
+            "zero",
+            "cosine",
+            "cosine variable period",
+            "diagonal wave",
+            "diagonal wave variable period",
+            "slide",
+            "slide variable period",
+            "noise",
+            "jitter",
+            "wander",
+            "spark"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "MaterialType",
+        "options": [
+            "none",
+            "dirt",
+            "sand",
+            "stone",
+            "snow",
+            "wood",
+            "metal hollow",
+            "metal thin",
+            "metal thick",
+            "rubber",
+            "glass",
+            "force field",
+            "grunt",
+            "hunter armor",
+            "hunter skin",
+            "elite",
+            "jackal",
+            "jackal energy shield",
+            "engineer skin",
+            "engineer force field",
+            "flood combat form",
+            "flood carrier form",
+            "cyborg armor",
+            "cyborg energy shield",
+            "human armor",
+            "human skin",
+            "sentinel",
+            "monitor",
+            "plastic",
+            "water",
+            "leaves",
+            "elite energy shield",
+            "ice",
+            "hunter shield"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FunctionType",
+        "options": [
+            "linear",
+            "early",
+            "very early",
+            "late",
+            "very late",
+            "cosine"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FunctionBoundsMode",
+        "options": [
+            "clip",
+            "clip and normalize",
+            "scale to fit"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FunctionScaleBy",
+        "options": [
+            "none",
+            "a in",
+            "b in",
+            "c in",
+            "d in",
+            "a out",
+            "b out",
+            "c out",
+            "d out"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "FunctionNameNullable",
+        "options": [
+            "none",
+            "a",
+            "b",
+            "c",
+            "d"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "GrenadeType",
+        "options": [
+            "human fragmentation",
+            "covenant plasma"
+        ],
+        "type": "enum"
+    }
+]

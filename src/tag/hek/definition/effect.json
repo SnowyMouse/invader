@@ -1,0 +1,408 @@
+[
+    {
+        "name": "EffectCreateIn1",
+        "options": [
+            "any environment",
+            "air only",
+            "water only",
+            "space only"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "EffectCreateIn2",
+        "options": [
+            "either mode",
+            "violent mode only",
+            "nonviolent mode only"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "EffectCreate",
+        "options": [
+            "independent of camera mode",
+            "only in first person",
+            "only in third person",
+            "in first person if possible"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "EffectDistributionFunction",
+        "options": [
+            "start",
+            "end",
+            "constant",
+            "buildup",
+            "falloff",
+            "buildup and falloff"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "EffectPartFlags",
+        "type": "bitfield",
+        "fields": [
+            "face down regardless of location decals",
+            "unused",
+            "make effect work"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "EffectPartScalesValues",
+        "type": "bitfield",
+        "fields": [
+            "velocity",
+            "velocity delta",
+            "velocity cone angle",
+            "angular velocity",
+            "angular velocity delta",
+            "type specific scale"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "EffectParticleFlags",
+        "type": "bitfield",
+        "fields": [
+            "stay attached to marker",
+            "random initial angle",
+            "tint from object color",
+            "interpolate tint as hsv",
+            "across the long hue path"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "EffectParticleScalesValues",
+        "type": "bitfield",
+        "fields": [
+            "velocity",
+            "velocity delta",
+            "velocity cone angle",
+            "angular velocity",
+            "angular velocity delta",
+            "count",
+            "count delta",
+            "distribution radius",
+            "distribution radius delta",
+            "particle radius",
+            "particle radius delta",
+            "tint"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "EffectFlags",
+        "type": "bitfield",
+        "fields": [
+            "deleted when attachment deactivates",
+            "required for gameplay cannot optimize out",
+            "use in dedicated servers"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "EffectLocation",
+        "fields": [
+            {
+                "name": "marker name",
+                "type": "TagString",
+                "endian": null
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "EffectPart",
+        "fields": [
+            {
+                "name": "create in 1",
+                "type": "EffectCreateIn1"
+            },
+            {
+                "name": "create in 2",
+                "type": "EffectCreateIn2"
+            },
+            {
+                "name": "location",
+                "type": "Index"
+            },
+            {
+                "name": "flags",
+                "type": "EffectPartFlags"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "type type",
+                "type": "uint32",
+                "endian": "little"
+            },
+            {
+                "name": "type",
+                "type": "dependency",
+                "classes": [
+                    "damage_effect",
+                    "object",
+                    "particle_system",
+                    "sound",
+                    "decal",
+                    "light"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "velocity bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "velocity cone angle",
+                "type": "Angle"
+            },
+            {
+                "name": "angular velocity bounds",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "radius modifier bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "a scales values",
+                "type": "EffectPartScalesValues"
+            },
+            {
+                "name": "b scales values",
+                "type": "EffectPartScalesValues"
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "EffectParticle",
+        "fields": [
+            {
+                "name": "create in 1",
+                "type": "EffectCreateIn1"
+            },
+            {
+                "name": "create in 2",
+                "type": "EffectCreateIn2"
+            },
+            {
+                "name": "create",
+                "type": "EffectCreate"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "location",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "relative direction",
+                "type": "Euler2D",
+                "compound": true
+            },
+            {
+                "name": "relative offset",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "relative direction vector",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "particle type",
+                "type": "dependency",
+                "classes": [
+                    "particle"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flags",
+                "type": "EffectParticleFlags"
+            },
+            {
+                "name": "distribution function",
+                "type": "EffectDistributionFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "count",
+                "bounds": true,
+                "type": "uint16"
+            },
+            {
+                "name": "distribution radius",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "velocity",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "velocity cone angle",
+                "type": "Angle"
+            },
+            {
+                "name": "angular velocity",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "radius",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "tint lower bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "tint upper bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "a scales values",
+                "type": "EffectParticleScalesValues"
+            },
+            {
+                "name": "b scales values",
+                "type": "EffectParticleScalesValues"
+            }
+        ],
+        "type": "struct",
+        "size": 232
+    },
+    {
+        "name": "EffectEvent",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "skip fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "delay bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "duration bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "parts",
+                "type": "reflexive",
+                "struct": "EffectPart",
+                "compound": true
+            },
+            {
+                "name": "particles",
+                "type": "reflexive",
+                "struct": "EffectParticle",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 68
+    },
+    {
+        "name": "Effect",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "EffectFlags"
+            },
+            {
+                "name": "loop start event",
+                "type": "Index"
+            },
+            {
+                "name": "loop stop event",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "locations",
+                "type": "reflexive",
+                "struct": "EffectLocation",
+                "compound": true
+            },
+            {
+                "name": "events",
+                "type": "reflexive",
+                "struct": "EffectEvent",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 64
+    }
+]

@@ -2,15 +2,14 @@
 
 #include <invader/hek/constants.hpp>
 #include <invader/tag/hek/compile.hpp>
-
-#include <invader/tag/hek/class/scenario.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_scenario_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         BEGIN_COMPILE(Scenario);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.don_t_use);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.won_t_use);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.can_t_use);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.dont_use);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.wont_use);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.cant_use);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.skies, sky);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.child_scenarios, child_scenario);
         ADD_REFLEXIVE(tag.predicted_resources);

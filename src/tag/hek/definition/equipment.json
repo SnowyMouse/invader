@@ -1,0 +1,47 @@
+[
+    {
+        "name": "EquipmentPowerupType",
+        "options": [
+            "none",
+            "double speed",
+            "over shield",
+            "active camouflage",
+            "full spectrum vision",
+            "health",
+            "grenade"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "Equipment",
+        "fields": [
+            {
+                "name": "powerup type",
+                "type": "EquipmentPowerupType"
+            },
+            {
+                "name": "grenade type",
+                "type": "GrenadeType"
+            },
+            {
+                "name": "powerup time",
+                "type": "float"
+            },
+            {
+                "name": "pickup sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 144
+            }
+        ],
+        "type": "struct",
+        "inherits": "Item",
+        "size": 944
+    }
+]

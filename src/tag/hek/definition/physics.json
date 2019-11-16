@@ -1,0 +1,279 @@
+[
+    {
+        "name": "PhysicsFrictionType",
+        "options": [
+            "point",
+            "forward",
+            "left",
+            "up"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "PhysicsPoweredMassPointFlags",
+        "type": "bitfield",
+        "fields": [
+            "ground friction",
+            "water friction",
+            "air friction",
+            "water lift",
+            "air lift",
+            "thrust",
+            "antigrav"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "PhysicsMassPointFlags",
+        "type": "bitfield",
+        "fields": [
+            "metallic"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "PhysicsInertialMatrix",
+        "fields": [
+            {
+                "name": "matrix",
+                "type": "Matrix",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 36
+    },
+    {
+        "name": "PhysicsPoweredMassPoint",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "PhysicsPoweredMassPointFlags"
+            },
+            {
+                "name": "antigrav strength",
+                "type": "float"
+            },
+            {
+                "name": "antigrav offset",
+                "type": "float"
+            },
+            {
+                "name": "antigrav height",
+                "type": "float"
+            },
+            {
+                "name": "antigrav damp fraction",
+                "type": "float"
+            },
+            {
+                "name": "antigrav normal k1",
+                "type": "float"
+            },
+            {
+                "name": "antigrav normal k0",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 68
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    },
+    {
+        "name": "PhysicsMassPoint",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "powered mass point",
+                "type": "int16"
+            },
+            {
+                "name": "model node",
+                "type": "int16"
+            },
+            {
+                "name": "flags",
+                "type": "PhysicsMassPointFlags"
+            },
+            {
+                "name": "relative mass",
+                "type": "float"
+            },
+            {
+                "name": "mass",
+                "type": "float"
+            },
+            {
+                "name": "relative density",
+                "type": "float"
+            },
+            {
+                "name": "density",
+                "type": "float"
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "forward",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "up",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "friction type",
+                "type": "PhysicsFrictionType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "friction parallel scale",
+                "type": "float"
+            },
+            {
+                "name": "friction perpendicular scale",
+                "type": "float"
+            },
+            {
+                "name": "radius",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    },
+    {
+        "name": "Physics",
+        "fields": [
+            {
+                "name": "radius",
+                "type": "float"
+            },
+            {
+                "name": "moment scale",
+                "type": "Fraction"
+            },
+            {
+                "name": "mass",
+                "type": "float"
+            },
+            {
+                "name": "center of mass",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "density",
+                "type": "float"
+            },
+            {
+                "name": "gravity scale",
+                "type": "float"
+            },
+            {
+                "name": "ground friction",
+                "type": "float"
+            },
+            {
+                "name": "ground depth",
+                "type": "float"
+            },
+            {
+                "name": "ground damp fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "ground normal k1",
+                "type": "float"
+            },
+            {
+                "name": "ground normal k0",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "water friction",
+                "type": "float"
+            },
+            {
+                "name": "water depth",
+                "type": "float"
+            },
+            {
+                "name": "water density",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "air friction",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "xx moment",
+                "type": "float"
+            },
+            {
+                "name": "yy moment",
+                "type": "float"
+            },
+            {
+                "name": "zz moment",
+                "type": "float"
+            },
+            {
+                "name": "inertial matrix and inverse",
+                "type": "reflexive",
+                "struct": "PhysicsInertialMatrix",
+                "compound": true
+            },
+            {
+                "name": "powered mass points",
+                "type": "reflexive",
+                "struct": "PhysicsPoweredMassPoint",
+                "compound": true
+            },
+            {
+                "name": "mass points",
+                "type": "reflexive",
+                "struct": "PhysicsMassPoint",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    }
+]

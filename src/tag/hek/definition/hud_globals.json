@@ -1,0 +1,531 @@
+[
+    {
+        "name": "HUDGlobalsWaypointArrowFlags",
+        "type": "bitfield",
+        "fields": [
+            "dont rotate when pointing offscreen"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "HUDGlobalsButtonIcon",
+        "fields": [
+            {
+                "name": "sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "width offset",
+                "type": "int16"
+            },
+            {
+                "name": "offset from reference corner",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "override icon color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "frame rate",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "HUDInterfaceMessagingFlags",
+                "endian": null
+            },
+            {
+                "name": "text index",
+                "type": "Index"
+            }
+        ],
+        "type": "struct",
+        "size": 16
+    },
+    {
+        "name": "HUDGlobalsWaypointArrow",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "opacity",
+                "type": "float"
+            },
+            {
+                "name": "translucency",
+                "type": "float"
+            },
+            {
+                "name": "on screen sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "off screen sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "occluded sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "flags",
+                "type": "HUDGlobalsWaypointArrowFlags"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "HUDGlobals",
+        "fields": [
+            {
+                "name": "anchor",
+                "type": "HUDInterfaceAnchor"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "width scale",
+                "type": "float"
+            },
+            {
+                "name": "height scale",
+                "type": "float"
+            },
+            {
+                "name": "scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "single player font",
+                "type": "dependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "multi player font",
+                "type": "dependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "up time",
+                "type": "float"
+            },
+            {
+                "name": "fade time",
+                "type": "float"
+            },
+            {
+                "name": "icon color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "text color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "text spacing",
+                "type": "float"
+            },
+            {
+                "name": "item message text",
+                "type": "dependency",
+                "classes": [
+                    "unicode_string_list"
+                ],
+                "compound": true
+            },
+            {
+                "name": "icon bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alternate icon text",
+                "type": "dependency",
+                "classes": [
+                    "unicode_string_list"
+                ],
+                "compound": true
+            },
+            {
+                "name": "button icons",
+                "type": "reflexive",
+                "struct": "HUDGlobalsButtonIcon",
+                "compound": true
+            },
+            {
+                "name": "hud help default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "hud help flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "hud help flash period",
+                "type": "float"
+            },
+            {
+                "name": "hud help flash delay",
+                "type": "float"
+            },
+            {
+                "name": "hud help number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "hud help flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "hud help flash length",
+                "type": "float"
+            },
+            {
+                "name": "hud help disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "hud messages",
+                "type": "dependency",
+                "classes": [
+                    "hud_message"
+                ],
+                "compound": true
+            },
+            {
+                "name": "objective default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "objective flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "objective flash period",
+                "type": "float"
+            },
+            {
+                "name": "objective flash delay",
+                "type": "float"
+            },
+            {
+                "name": "objective number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "objective flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "objective flash length",
+                "type": "float"
+            },
+            {
+                "name": "objective disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "objective uptime ticks",
+                "type": "uint16"
+            },
+            {
+                "name": "objective fade ticks",
+                "type": "uint16"
+            },
+            {
+                "name": "top offset",
+                "type": "float"
+            },
+            {
+                "name": "bottom offset",
+                "type": "float"
+            },
+            {
+                "name": "left offset",
+                "type": "float"
+            },
+            {
+                "name": "right offset",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "arrow bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "waypoint arrows",
+                "type": "reflexive",
+                "struct": "HUDGlobalsWaypointArrow",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 80
+            },
+            {
+                "name": "hud scale in multiplayer",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 256
+            },
+            {
+                "name": "default weapon hud",
+                "type": "dependency",
+                "classes": [
+                    "weapon_hud_interface"
+                ],
+                "compound": true
+            },
+            {
+                "name": "motion sensor range",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor velocity sensitivity",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor scale",
+                "type": "float"
+            },
+            {
+                "name": "default chapter title bounds",
+                "type": "Rectangle2D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 44
+            },
+            {
+                "name": "hud damage top offset",
+                "type": "int16"
+            },
+            {
+                "name": "hud damage bottom offset",
+                "type": "int16"
+            },
+            {
+                "name": "hud damage left offset",
+                "type": "int16"
+            },
+            {
+                "name": "hud damage right offset",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "hud damage indicator bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hud damage sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "hud damage multiplayer sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "hud damage color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "not much time left default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "not much time left flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "not much time left flash period",
+                "type": "float"
+            },
+            {
+                "name": "not much time left flash delay",
+                "type": "float"
+            },
+            {
+                "name": "not much time left number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "not much time left flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "not much time left flash length",
+                "type": "float"
+            },
+            {
+                "name": "not much time left disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "time out flash default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "time out flash flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "time out flash flash period",
+                "type": "float"
+            },
+            {
+                "name": "time out flash flash delay",
+                "type": "float"
+            },
+            {
+                "name": "time out flash number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "time out flash flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "time out flash flash length",
+                "type": "float"
+            },
+            {
+                "name": "time out flash disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "carnage report bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "loading begin text",
+                "type": "Index"
+            },
+            {
+                "name": "loading end text",
+                "type": "Index"
+            },
+            {
+                "name": "checkpoint begin text",
+                "type": "Index"
+            },
+            {
+                "name": "checkpoint end text",
+                "type": "Index"
+            },
+            {
+                "name": "checkpoint sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 96
+            }
+        ],
+        "type": "struct",
+        "size": 1104
+    }
+]

@@ -6,7 +6,8 @@
 
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
-#include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/hek/header.hpp>
 #include <invader/bitmap/image_loader.hpp>
 #include <invader/bitmap/color_plate_scanner.hpp>
 #include <invader/bitmap/bitmap_data_writer.hpp>

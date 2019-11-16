@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Garbage",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 168
+            }
+        ],
+        "type": "struct",
+        "inherits": "Item",
+        "size": 944
+    }
+]

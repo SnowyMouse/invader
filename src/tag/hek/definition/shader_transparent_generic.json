@@ -1,0 +1,474 @@
+[
+    {
+        "name": "ShaderTransparentGenericStageInputColor",
+        "options": [
+            "zero",
+            "one",
+            "one half",
+            "negative one",
+            "negative one half",
+            "map color 0",
+            "map color 1",
+            "map color 2",
+            "map color 3",
+            "vertex color 0 diffuse light",
+            "vertex color 1 fade perpendicular",
+            "scratch color 0",
+            "scratch color 1",
+            "constant color 0",
+            "constant color 1",
+            "map alpha 0",
+            "map alpha 1",
+            "map alpha 2",
+            "map alpha 3",
+            "vertex alpha 0 fade none",
+            "vertex alpha 1 fade perpendicular",
+            "scratch alpha 0",
+            "scratch alpha 1",
+            "constant alpha 0",
+            "constant alpha 1"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericStageInputAlpha",
+        "options": [
+            "zero",
+            "one",
+            "one half",
+            "negative one",
+            "negative one half",
+            "map alpha 0",
+            "map alpha 1",
+            "map alpha 2",
+            "map alpha 3",
+            "vertex alpha 0 fade none",
+            "vertex alpha 1 fade perpendicular",
+            "scratch alpha 0",
+            "scratch alpha 1",
+            "constant alpha 0",
+            "constant alpha 1",
+            "map blue 0",
+            "map blue 1",
+            "map blue 2",
+            "map blue 3",
+            "vertex blue 0 blue light",
+            "vertex blue 1 fade parallel",
+            "scratch blue 0",
+            "scratch blue 1",
+            "constant blue 0",
+            "constant blue 1"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericStageInputMappingColor",
+        "options": [
+            "clamp x",
+            "1 clamp x",
+            "2",
+            "1 2",
+            "clamp x 1 2",
+            "1 2 clamp x",
+            "x",
+            "x 1"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericStageOutputFunction",
+        "options": [
+            "multiply",
+            "dot product"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericStageOutputMapping",
+        "options": [
+            "color identity",
+            "color scale by 1 2",
+            "color scale by 2",
+            "color scale by 4",
+            "color bias by 1 2",
+            "color expand normal"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericStageOutput",
+        "options": [
+            "alpha discard",
+            "alpha scratch alpha 0 final alpha",
+            "alpha scratch alpha 1",
+            "alpha vertex alpha 0 fog",
+            "alpha vertex alpha 1",
+            "alpha map alpha 0",
+            "alpha map alpha 1",
+            "alpha map alpha 2",
+            "alpha map alpha 3"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGenericMapFlag",
+        "type": "bitfield",
+        "fields": [
+            "unfiltered",
+            "u clamped",
+            "v clamped"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderTransparentGenericStageFlags",
+        "type": "bitfield",
+        "fields": [
+            "color mux",
+            "alpha mux",
+            "a out controls color0 animation"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderTransparentGenericFlags",
+        "type": "bitfield",
+        "fields": [
+            "alpha tested",
+            "decal",
+            "two sided",
+            "first map is in screenspace",
+            "draw before water",
+            "ignore effect",
+            "scale first map with distance",
+            "numeric"
+        ],
+        "width": "uint8"
+    },
+    {
+        "name": "ShaderTransparentGenericMap",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ShaderTransparentGenericMapFlag"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "map u scale",
+                "type": "float"
+            },
+            {
+                "name": "map v scale",
+                "type": "float"
+            },
+            {
+                "name": "map u offset",
+                "type": "float"
+            },
+            {
+                "name": "map v offset",
+                "type": "float"
+            },
+            {
+                "name": "map rotation",
+                "type": "float"
+            },
+            {
+                "name": "mapmap bias",
+                "type": "Fraction"
+            },
+            {
+                "name": "map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 100
+    },
+    {
+        "name": "ShaderTransparentGenericStage",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ShaderTransparentGenericStageFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "color0 source",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "name": "color0 animation function",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "color0 animation period",
+                "type": "float"
+            },
+            {
+                "name": "color0 animation lower bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color0 animation upper bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color1",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "input a",
+                "type": "ShaderTransparentGenericStageInputColor"
+            },
+            {
+                "name": "input a mapping",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input b",
+                "type": "ShaderTransparentGenericStageInputColor"
+            },
+            {
+                "name": "input b mapping",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input c",
+                "type": "ShaderTransparentGenericStageInputColor"
+            },
+            {
+                "name": "input c mapping",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input d",
+                "type": "ShaderTransparentGenericStageInputColor"
+            },
+            {
+                "name": "input d mapping",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "output ab",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output ab function",
+                "type": "ShaderTransparentGenericStageOutputFunction"
+            },
+            {
+                "name": "output bc",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output cd function",
+                "type": "ShaderTransparentGenericStageOutputFunction"
+            },
+            {
+                "name": "output ab cd mux sum",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output mapping color",
+                "type": "ShaderTransparentGenericStageOutputMapping"
+            },
+            {
+                "name": "input a alpha",
+                "type": "ShaderTransparentGenericStageInputAlpha"
+            },
+            {
+                "name": "input a mapping alpha",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input b alpha",
+                "type": "ShaderTransparentGenericStageInputAlpha"
+            },
+            {
+                "name": "input b mapping alpha",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input c alpha",
+                "type": "ShaderTransparentGenericStageInputAlpha"
+            },
+            {
+                "name": "input c mapping alpha",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "input d alpha",
+                "type": "ShaderTransparentGenericStageInputAlpha"
+            },
+            {
+                "name": "input d mapping alpha",
+                "type": "ShaderTransparentGenericStageInputMappingColor"
+            },
+            {
+                "name": "output ab alpha",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output cd alpha",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output ab cd mux sum alpha",
+                "type": "ShaderTransparentGenericStageOutput"
+            },
+            {
+                "name": "output mapping alpha",
+                "type": "ShaderTransparentGenericStageOutputMapping"
+            }
+        ],
+        "type": "struct",
+        "size": 112
+    },
+    {
+        "name": "ShaderTransparentGeneric",
+        "fields": [
+            {
+                "name": "numeric counter limit",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "shader transparent generic flags",
+                "type": "ShaderTransparentGenericFlags",
+                "endian": null
+            },
+            {
+                "name": "first map type",
+                "type": "ShaderFirstMapType"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "framebuffer fade source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "lens flare spacing",
+                "type": "float"
+            },
+            {
+                "name": "lens flare",
+                "type": "dependency",
+                "classes": [
+                    "lens_flare"
+                ],
+                "compound": true
+            },
+            {
+                "name": "extra layers",
+                "type": "reflexive",
+                "struct": "ShaderTransparentExtraLayer",
+                "compound": true
+            },
+            {
+                "name": "maps",
+                "type": "reflexive",
+                "struct": "ShaderTransparentGenericMap",
+                "compound": true
+            },
+            {
+                "name": "stages",
+                "type": "reflexive",
+                "struct": "ShaderTransparentGenericStage",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 108
+    }
+]

@@ -1,0 +1,436 @@
+[
+    {
+        "name": "ShaderEnvironmentType",
+        "options": [
+            "normal",
+            "blended",
+            "blended base specular"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderEnvironmentReflectionType",
+        "options": [
+            "bumped cube map",
+            "flat cube map",
+            "bumped radiosity"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderEnvironmentFlags",
+        "type": "bitfield",
+        "fields": [
+            "alpha tested",
+            "bump map is specular mask",
+            "true atmospheric fog"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderEnvironmentDiffuseFlags",
+        "type": "bitfield",
+        "fields": [
+            "rescale detail maps",
+            "rescale bump map"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderEnvironmentSpecularFlags",
+        "type": "bitfield",
+        "fields": [
+            "overbright",
+            "extra shiny",
+            "lightmap is specular"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderEnvironmentReflectionFlags",
+        "type": "bitfield",
+        "fields": [
+            "dynamic mirror"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "ShaderEnvironment",
+        "fields": [
+            {
+                "name": "shader environment flags",
+                "type": "ShaderEnvironmentFlags"
+            },
+            {
+                "name": "shader environment type",
+                "type": "ShaderEnvironmentType"
+            },
+            {
+                "name": "lens flare spacing",
+                "type": "float"
+            },
+            {
+                "name": "lens flare",
+                "type": "dependency",
+                "classes": [
+                    "lens_flare"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 44
+            },
+            {
+                "name": "diffuse flags",
+                "type": "ShaderEnvironmentDiffuseFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "base map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "detail map function",
+                "type": "ShaderDetailFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "primary detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "primary detail map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "secondary detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "secondary detail map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "micro detail map function",
+                "type": "ShaderDetailFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "micro detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "micro detail map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "material color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "bump map scale",
+                "type": "float"
+            },
+            {
+                "name": "bump map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "bump map scale xy",
+                "type": "Point2D",
+                "endian": "little",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "self illumination flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "primary on color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "primary off color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "primary animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "primary animation period",
+                "type": "float"
+            },
+            {
+                "name": "primary animation phase",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "secondary on color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "secondary off color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "secondary animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "secondary animation period",
+                "type": "float"
+            },
+            {
+                "name": "secondary animation phase",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "plasma on color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "plasma off color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "plasma animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "plasma animation period",
+                "type": "float"
+            },
+            {
+                "name": "plasma animation phase",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "map scale",
+                "type": "float"
+            },
+            {
+                "name": "map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "specular flags",
+                "type": "ShaderEnvironmentSpecularFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "brightness",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "perpendicular color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "parallel color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "reflection flags",
+                "type": "ShaderEnvironmentReflectionFlags"
+            },
+            {
+                "name": "reflection type",
+                "type": "ShaderEnvironmentReflectionType"
+            },
+            {
+                "name": "lightmap brightness scale",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "perpendicular brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "parallel brightness",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "reflection cube map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 836
+    }
+]

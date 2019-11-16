@@ -1,0 +1,30 @@
+[
+    {
+        "name": "TagCollectionTag",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "reference",
+                "type": "dependency",
+                "compound": true,
+                "classes": [
+                    "item"
+                ]
+            }
+        ],
+        "size": 16
+    },
+    {
+        "name": "TagCollection",
+        "fields": [
+            {
+                "name": "tags",
+                "type": "reflexive",
+                "struct": "TagCollectionTag",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    }
+]

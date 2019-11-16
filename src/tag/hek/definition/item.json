@@ -1,0 +1,109 @@
+[
+    {
+        "name": "ItemFlags",
+        "type": "bitfield",
+        "fields": [
+            "always maintains z up",
+            "destroyed by explosions",
+            "unaffected by gravity"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "Item",
+        "fields": [
+            {
+                "name": "item flags",
+                "type": "ItemFlags"
+            },
+            {
+                "name": "message index",
+                "type": "Index"
+            },
+            {
+                "name": "sort order",
+                "type": "int16"
+            },
+            {
+                "name": "scale",
+                "type": "float"
+            },
+            {
+                "name": "hud message value scale",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "item a in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "item b in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "item c in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "item d in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "type": "pad",
+                "size": 164
+            },
+            {
+                "name": "material effects",
+                "type": "dependency",
+                "classes": [
+                    "material_effects"
+                ],
+                "compound": true
+            },
+            {
+                "name": "collision sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 120
+            },
+            {
+                "name": "detonation delay",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "detonating effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "detonation effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 776
+    }
+]

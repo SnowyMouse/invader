@@ -1,0 +1,183 @@
+[
+    {
+        "name": "DeviceIn",
+        "options": [
+            "none",
+            "power",
+            "change in power",
+            "position",
+            "change in position",
+            "locked",
+            "delay"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DeviceFlags",
+        "type": "bitfield",
+        "fields": [
+            "position loops",
+            "position not interpolated"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "Device",
+        "fields": [
+            {
+                "name": "device flags",
+                "type": "DeviceFlags"
+            },
+            {
+                "name": "power transition time",
+                "type": "float"
+            },
+            {
+                "name": "power acceleration time",
+                "type": "float"
+            },
+            {
+                "name": "position transition time",
+                "type": "float"
+            },
+            {
+                "name": "position acceleration time",
+                "type": "float"
+            },
+            {
+                "name": "depowered position transition time",
+                "type": "float"
+            },
+            {
+                "name": "depowered position acceleration time",
+                "type": "float"
+            },
+            {
+                "name": "device a in",
+                "type": "DeviceIn"
+            },
+            {
+                "name": "device b in",
+                "type": "DeviceIn"
+            },
+            {
+                "name": "device c in",
+                "type": "DeviceIn"
+            },
+            {
+                "name": "device d in",
+                "type": "DeviceIn"
+            },
+            {
+                "name": "open",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "close",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "opened",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "closed",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "depowered",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "repowered",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "delay time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "delay effect",
+                "type": "dependency",
+                "classes": [
+                    ".sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "automatic activation radius",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 84
+            },
+            {
+                "name": "inverse power acceleration time",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "inverse power transition time",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "inverse position acceleration time",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "inverse position transition time",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 656
+    }
+]

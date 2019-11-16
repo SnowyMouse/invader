@@ -1,0 +1,867 @@
+[
+    {
+        "name": "WeaponSecondaryTriggerMode",
+        "options": [
+            "normal",
+            "slaved to primary",
+            "inhibits primary",
+            "loads alterate ammunition",
+            "loads multiple primary ammunition"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponFunctionIn",
+        "options": [
+            "none",
+            "heat",
+            "primary ammunition",
+            "secondary ammunition",
+            "primary rate of fire",
+            "secondary rate of fire",
+            "ready",
+            "primary ejection port",
+            "secondary ejection port",
+            "overheated",
+            "primary charged",
+            "secondary charged",
+            "illumination",
+            "age",
+            "integrated light",
+            "primary firing",
+            "secondary firing",
+            "primary firing on",
+            "secondary firing on"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponMovementPenalized",
+        "options": [
+            "always",
+            "when zoomed",
+            "when zoomed or reloading"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponType",
+        "options": [
+            "undefined",
+            "shotgun",
+            "needler",
+            "plasma pistol",
+            "plasma rifle"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponOverchargedAction",
+        "options": [
+            "none",
+            "explode",
+            "discharge"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponDistributionFunction",
+        "options": [
+            "point",
+            "horizontal fan"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "WeaponMagazineFlags",
+        "type": "bitfield",
+        "fields": [
+            "wastes rounds when reloaded",
+            "every round must be chambered"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "WeaponTriggerFlags",
+        "type": "bitfield",
+        "fields": [
+            "tracks fired projectile",
+            "random firing effects",
+            "can fire with partial ammo",
+            "does not repeat automatically",
+            "locks in on off state",
+            "projectiles use weapon origin",
+            "sticks when dropped",
+            "ejects during chamber",
+            "discharging spews",
+            "analog rate of fire",
+            "use error when unzoomed",
+            "projectile vector cannot be adjusted",
+            "projectiles have identical error",
+            "projectile is client side only"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "WeaponFlags",
+        "type": "bitfield",
+        "fields": [
+            "vertical heat display",
+            "mutually exclusive triggers",
+            "attacks automatically on bump",
+            "must be readied",
+            "doesn't count toward maximum",
+            "aim assists only when zoomed",
+            "prevents grenade throwing",
+            "must be picked up",
+            "holds triggers when dropped",
+            "prevents melee attack",
+            "detonates when dropped",
+            "cannot fire at maximum age",
+            "secondary trigger overrides grenades",
+            "obsolete does not depower active camo in multilplayer",
+            "enables integrated night vision",
+            "ais use weapon melee damage"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "WeaponMagazineObject",
+        "fields": [
+            {
+                "name": "rounds",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 10
+            },
+            {
+                "name": "equipment",
+                "type": "dependency",
+                "classes": [
+                    "equipment"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 28
+    },
+    {
+        "name": "WeaponMagazine",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "WeaponMagazineFlags"
+            },
+            {
+                "name": "rounds recharged",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds total initial",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds total maximum",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds loaded maximum",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "reload time",
+                "type": "float"
+            },
+            {
+                "name": "rounds reloaded",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "chamber time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "reloading effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "chambering effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "magazine objects",
+                "type": "reflexive",
+                "struct": "WeaponMagazineObject",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 112
+    },
+    {
+        "name": "WeaponTriggerFiringEffect",
+        "fields": [
+            {
+                "name": "shot count lower bound",
+                "type": "uint16"
+            },
+            {
+                "name": "shot count upper bound",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "firing effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "misfire effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "empty effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "firing damage",
+                "type": "dependency",
+                "classes": [
+                    "damage"
+                ],
+                "compound": true
+            },
+            {
+                "name": "misfire damage",
+                "type": "dependency",
+                "classes": [
+                    "damage"
+                ],
+                "compound": true
+            },
+            {
+                "name": "empty damage",
+                "type": "dependency",
+                "classes": [
+                    "damage"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 132
+    },
+    {
+        "name": "WeaponTrigger",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "WeaponTriggerFlags"
+            },
+            {
+                "name": "rounds per second",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "acceleration time",
+                "type": "float"
+            },
+            {
+                "name": "deceleration time",
+                "type": "float"
+            },
+            {
+                "name": "blurred rate of fire",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "magazine",
+                "type": "Index"
+            },
+            {
+                "name": "rounds per shot",
+                "type": "uint16"
+            },
+            {
+                "name": "minimum rounds loaded",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds between tracers",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 6
+            },
+            {
+                "name": "firing noise",
+                "type": "ObjectNoise"
+            },
+            {
+                "name": "error",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "error acceleration time",
+                "type": "float"
+            },
+            {
+                "name": "error deceleration time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "charging time",
+                "type": "float"
+            },
+            {
+                "name": "charged time",
+                "type": "float"
+            },
+            {
+                "name": "overcharged action",
+                "type": "WeaponDistributionFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "charged illumination",
+                "type": "float"
+            },
+            {
+                "name": "spew time",
+                "type": "float"
+            },
+            {
+                "name": "charging effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "distribution function",
+                "type": "WeaponDistributionFunction"
+            },
+            {
+                "name": "projectiles per shot",
+                "type": "uint16"
+            },
+            {
+                "name": "distribution angle",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "minimum error",
+                "type": "Angle"
+            },
+            {
+                "name": "error angle",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "first person offset",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "projectile",
+                "type": "dependency",
+                "classes": [
+                    "object"
+                ],
+                "compound": true
+            },
+            {
+                "name": "ejection port recovery time",
+                "type": "float"
+            },
+            {
+                "name": "illumination recovery time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "heat generated per round",
+                "type": "Fraction"
+            },
+            {
+                "name": "age generated per round",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "overload time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "ejection port recovery rate",
+                "type": "float"
+            },
+            {
+                "name": "illumination recovery rate",
+                "type": "float"
+            },
+            {
+                "name": "firing acceleration rate",
+                "type": "float"
+            },
+            {
+                "name": "firing deceleration rate",
+                "type": "float"
+            },
+            {
+                "name": "error acceleration rate",
+                "type": "float"
+            },
+            {
+                "name": "error deceleration rate",
+                "type": "float"
+            },
+            {
+                "name": "firing effects",
+                "type": "reflexive",
+                "struct": "WeaponTriggerFiringEffect",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 276
+    },
+    {
+        "name": "Weapon",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "WeaponFlags"
+            },
+            {
+                "name": "label",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "secondary trigger mode",
+                "type": "WeaponSecondaryTriggerMode"
+            },
+            {
+                "name": "maximum alternate shots loaded",
+                "type": "uint16"
+            },
+            {
+                "name": "weapon a in",
+                "type": "WeaponFunctionIn"
+            },
+            {
+                "name": "weapon b in",
+                "type": "WeaponFunctionIn"
+            },
+            {
+                "name": "weapon c in",
+                "type": "WeaponFunctionIn"
+            },
+            {
+                "name": "weapon d in",
+                "type": "WeaponFunctionIn"
+            },
+            {
+                "name": "ready time",
+                "type": "float"
+            },
+            {
+                "name": "ready effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "heat recovery threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "overheated threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "heat detonation threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "heat detonation fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "heat loss per second",
+                "type": "Fraction"
+            },
+            {
+                "name": "heat illumination",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "overheated",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "detonation",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player melee damage",
+                "type": "dependency",
+                "classes": [
+                    "damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player melee response",
+                "type": "dependency",
+                "classes": [
+                    "damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "actor firing parameters",
+                "type": "dependency",
+                "classes": [
+                    "actor_variant"
+                ],
+                "compound": true
+            },
+            {
+                "name": "near reticle range",
+                "type": "float"
+            },
+            {
+                "name": "far reticle range",
+                "type": "float"
+            },
+            {
+                "name": "intersection reticle range",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "magnification levels",
+                "type": "uint16"
+            },
+            {
+                "name": "magnification range",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "autoaim angle",
+                "type": "Angle"
+            },
+            {
+                "name": "autoaim range",
+                "type": "float"
+            },
+            {
+                "name": "magnetism angle",
+                "type": "Angle"
+            },
+            {
+                "name": "magnetism range",
+                "type": "float"
+            },
+            {
+                "name": "deviation angle",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "movement penalized",
+                "type": "WeaponMovementPenalized"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "forward movement penalty",
+                "type": "Fraction"
+            },
+            {
+                "name": "sideways movement penalty",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "minimum target range",
+                "type": "float"
+            },
+            {
+                "name": "looking time modifier",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "light power on time",
+                "type": "float"
+            },
+            {
+                "name": "light power off time",
+                "type": "float"
+            },
+            {
+                "name": "light power on effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "light power off effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "age heat recovery penalty",
+                "type": "float"
+            },
+            {
+                "name": "age rate of fire penalty",
+                "type": "float"
+            },
+            {
+                "name": "age misfire start",
+                "type": "Fraction"
+            },
+            {
+                "name": "age misfire chance",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "first person model",
+                "type": "dependency",
+                "classes": [
+                    "gbxmodel"
+                ],
+                "compound": true
+            },
+            {
+                "name": "first person animations",
+                "type": "dependency",
+                "classes": [
+                    "model_animations"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "hud interface",
+                "type": "dependency",
+                "classes": [
+                    "weapon_hud_interface"
+                ],
+                "compound": true
+            },
+            {
+                "name": "pickup sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "zoom in sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "zoom out sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "active camo ding",
+                "type": "float"
+            },
+            {
+                "name": "active camo regrowth rate",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "weapon type",
+                "type": "WeaponType"
+            },
+            {
+                "name": "more predicted resources",
+                "type": "reflexive",
+                "struct": "PredictedResource",
+                "compound": true
+            },
+            {
+                "name": "magazines",
+                "type": "reflexive",
+                "struct": "WeaponMagazine",
+                "compound": true
+            },
+            {
+                "name": "triggers",
+                "type": "reflexive",
+                "struct": "WeaponTrigger",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Item",
+        "size": 1288
+    }
+]

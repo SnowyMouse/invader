@@ -1,0 +1,317 @@
+[
+    {
+        "name": "ParticleOrientation",
+        "options": [
+            "screen facing",
+            "parallel to direction",
+            "perpendicular to direction"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ParticleAnchor",
+        "options": [
+            "with primary",
+            "with screen space",
+            "zsprite"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ParticleFlags",
+        "type": "bitfield",
+        "fields": [
+            "can animate backwards",
+            "animation stops at rest",
+            "animation starts on random frame",
+            "animate once per frame",
+            "dies at rest",
+            "dies on contact with structure",
+            "tint from diffuse texture",
+            "dies on contact with water",
+            "dies on contact with air",
+            "self illuminated",
+            "random horizontal mirroring",
+            "random vertical mirroring"
+        ],
+        "width": "uint32"
+    },
+    {
+        "name": "ParticleShaderFlags",
+        "type": "bitfield",
+        "fields": [
+            "sort bias",
+            "nonlinear tint",
+            "don't overdraw fp weapon"
+        ],
+        "width": "uint16"
+    },
+    {
+        "name": "Particle",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ParticleFlags"
+            },
+            {
+                "name": "bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "physics",
+                "type": "dependency",
+                "classes": [
+                    "point_physics"
+                ],
+                "compound": true
+            },
+            {
+                "name": "sir marty exchanged his children for thine",
+                "type": "dependency",
+                "classes": [
+                    "material_effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "lifespan",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "fade in time",
+                "type": "float"
+            },
+            {
+                "name": "fade out time",
+                "type": "float"
+            },
+            {
+                "name": "collision effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death effect",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "minimum size",
+                "type": "float"
+            },
+            {
+                "name": "unknown float a",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "unknown float b",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "radius animation",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "animation rate",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "contact deterioration",
+                "type": "float"
+            },
+            {
+                "name": "fade start size",
+                "type": "float"
+            },
+            {
+                "name": "fade end size",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "first sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "initial sequence count",
+                "type": "uint16"
+            },
+            {
+                "name": "looping sequence count",
+                "type": "uint16"
+            },
+            {
+                "name": "final sequence count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "unknown",
+                "type": "float"
+            },
+            {
+                "name": "orientation",
+                "type": "ParticleOrientation"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "one",
+                "type": "uint32",
+                "endian": "little"
+            },
+            {
+                "name": "shader flags",
+                "type": "ParticleShaderFlags"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "map flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "bitmap1",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "anchor",
+                "type": "ParticleAnchor"
+            },
+            {
+                "name": "map flags1",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "zsprite radius scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            }
+        ],
+        "type": "struct",
+        "size": 356
+    }
+]

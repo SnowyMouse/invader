@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/hek/map.hpp>
-#include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/tag/hek/class/gbxmodel.hpp>
-#include <invader/tag/hek/class/scenario.hpp>
-#include <invader/tag/hek/class/sound.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
