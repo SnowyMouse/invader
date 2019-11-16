@@ -8,7 +8,7 @@
                 "type": "dependency",
                 "compound": true,
                 "classes": [
-                    "item"
+                    "*"
                 ]
             }
         ],
