@@ -51,7 +51,8 @@ def add_struct(name):
             break
 
     if not struct_to_add:
-        print("Warning: Unknown struct {}".format(name))
+        if name != "PredictedResource":
+            print("Warning: Unknown struct {}".format(name), file=sys.stderr)
         return
 
     if "inherits" in struct_to_add:
