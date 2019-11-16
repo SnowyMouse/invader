@@ -273,7 +273,8 @@
             },
             {
                 "name": "unknown",
-                "type": "float"
+                "type": "float",
+                "endian": "little"
             },
             {
                 "type": "pad",
