@@ -85,7 +85,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.breakable_surfaces);
         ADD_REFLEXIVE_START(tag.fog_planes) {
-            DEFAULT_VALUE(reflexive.material_type, MaterialType::MATERIAL_TYPE_NONE);
+            DEFAULT_VALUE(reflexive.material_type, static_cast<MaterialType>(NULL_INDEX));
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.fog_regions);
