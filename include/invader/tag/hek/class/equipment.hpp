@@ -16,14 +16,9 @@ namespace Invader::HEK {
         EQUIPMENT_POWERUP_TYPE_GRENADE
     };
 
-    enum EquipmentGrenadeType : TagEnum {
-        EQUIPMENT_GRENADE_TYPE_HUMAN_FRAGMENTATION,
-        EQUIPMENT_GRENADE_TYPE_COVENANT_PLASMA
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct Equipment : Item<EndianType> {
         EndianType<EquipmentPowerupType> powerup_type;
-        EndianType<EquipmentGrenadeType> grenade_type;
+        EndianType<GrenadeType> grenade_type;
         EndianType<float> powerup_time;
         TagDependency<EndianType> pickup_sound; // sound
 

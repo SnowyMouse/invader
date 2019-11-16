@@ -30,23 +30,10 @@ namespace Invader::HEK {
         UNIT_DEFAULT_TEAM_UNUSED_9
     };
 
-    enum UnitConstantSoundVolume : TagEnum {
-        UNIT_CONSTANT_SOUND_VOLUME_SILENT,
-        UNIT_CONSTANT_SOUND_VOLUME_MEDIUM,
-        UNIT_CONSTANT_SOUND_VOLUME_LOUD,
-        UNIT_CONSTANT_SOUND_VOLUME_SHOUT,
-        UNIT_CONSTANT_SOUND_VOLUME_QUIET
-    };
-
     enum UnitMotionSensorBlipSize : TagEnum {
         UNIT_MOTION_SENSOR_BLIP_SIZE_MEDIUM,
         UNIT_MOTION_SENSOR_BLIP_SIZE_SMALL,
         UNIT_MOTION_SENSOR_BLIP_SIZE_LARGE
-    };
-
-    enum UnitGrenadeType : TagEnum {
-        UNIT_GRENADE_TYPE_HUMAN_FRAGMENTATION,
-        UNIT_GRENADE_TYPE_COVENANT_PLASMA
     };
 
     ENDIAN_TEMPLATE(EndianType) struct UnitPoweredSeat {
@@ -184,7 +171,7 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct Unit : Object<EndianType> {
         EndianType<UnitFlags> unit_flags;
         EndianType<UnitDefaultTeam> default_team;
-        EndianType<UnitConstantSoundVolume> constant_sound_volume;
+        EndianType<ObjectNoise> constant_sound_volume;
         EndianType<float> rider_damage_fraction;
         TagDependency<EndianType> integrated_light_toggle; // effect
         EndianType<UnitFunctionIn> unit_a_in;
@@ -231,7 +218,7 @@ namespace Invader::HEK {
         TagReflexive<EndianType, UnitUnitHudInterface> new_hud_interfaces;
         TagReflexive<EndianType, UnitDialogueVariant> dialogue_variants;
         EndianType<float> grenade_velocity;
-        EndianType<UnitGrenadeType> grenade_type;
+        EndianType<GrenadeType> grenade_type;
         EndianType<std::uint16_t> grenade_count;
         EndianType<std::int16_t> unknown_shorts[2];
         TagReflexive<EndianType, UnitPoweredSeat> powered_seats;

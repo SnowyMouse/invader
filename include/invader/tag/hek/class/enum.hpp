@@ -117,6 +117,11 @@ namespace Invader::HEK {
         FUNCTION_NAME_NULLABLE_C,
         FUNCTION_NAME_NULLABLE_D
     };
+
+    enum GrenadeType : TagEnum {
+        GRENADE_TYPE_HUMAN_FRAGMENTATION,
+        GRENADE_TYPE_COVENANT_PLASMA
+    };
 }
 
 #endif
