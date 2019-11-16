@@ -13,10 +13,6 @@ namespace Invader::HEK {
         std::uint16_t show_always : 1;
     };
 
-    struct GrenadeHUDInterfaceOverlayFlags {
-        std::uint32_t flashes_when_active : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct GrenadeHUDInterfaceOverlay {
         Point2DInt<EndianType> anchor_offset;
         EndianType<float> width_scale;
@@ -36,7 +32,7 @@ namespace Invader::HEK {
         EndianType<float> frame_rate;
         EndianType<Index> sequence_index;
         EndianType<GrenadeHUDInterfaceOverlayType> type;
-        EndianType<GrenadeHUDInterfaceOverlayFlags> flags;
+        EndianType<HUDInterfaceOverlayFlashFlags> flags;
         PAD(0x10);
         PAD(0x28);
 
@@ -84,12 +80,6 @@ namespace Invader::HEK {
         }
     };
     static_assert(sizeof(GrenadeHUDInterfaceSound<BigEndian>) == 0x38);
-
-    struct GrenadeHUDInterfaceFlags {
-        std::uint8_t use_text_from_string_list_instead : 1;
-        std::uint8_t override_default_color : 1;
-        std::uint8_t width_offset_is_absolute_icon_width : 1;
-    };
 
     ENDIAN_TEMPLATE(EndianType) struct GrenadeHUDInterface {
         EndianType<HUDInterfaceAnchor> anchor;
@@ -166,7 +156,7 @@ namespace Invader::HEK {
         Point2DInt<EndianType> messaging_information_offset_from_reference_corner;
         EndianType<ColorARGBInt> messaging_information_override_icon_color;
         std::int8_t messaging_information_frame_rate;
-        GrenadeHUDInterfaceFlags messaging_information_flags;
+        HUDInterfaceMessagingFlags messaging_information_flags;
         EndianType<Index> messaging_information_text_index;
         PAD(0x30);
 

@@ -6,19 +6,13 @@
 #include "hud_interface_types.hpp"
 
 namespace Invader::HEK {
-    struct HUDGlobalButtonIconFlags {
-        std::uint8_t use_text_from_string_list_instead : 1;
-        std::uint8_t override_default_color : 1;
-        std::uint8_t width_offset_is_absolute_icon_width : 1;
-    };
-
     ENDIAN_TEMPLATE(EndianType) struct HUDGlobalsButtonIcon {
         EndianType<Index> sequence_index;
         EndianType<std::int16_t> width_offset;
         Point2DInt<EndianType> offset_from_reference_corner;
         EndianType<ColorARGBInt> override_icon_color;
         std::int8_t frame_rate;
-        EndianType<HUDGlobalButtonIconFlags> flags;
+        HUDInterfaceMessagingFlags flags;
         EndianType<Index> text_index;
 
         ENDIAN_TEMPLATE(NewType) operator HUDGlobalsButtonIcon<NewType>() const noexcept {
