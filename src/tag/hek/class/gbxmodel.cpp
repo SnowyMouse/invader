@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-
-#include "gbxmodel.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/class/gbxmodel.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::HEK {
     struct TempMarker {
@@ -127,7 +127,7 @@ namespace Invader::HEK {
 
                 auto instance_count = temp_marker.instances.size();
                 auto instance_offset = compiled.data.size();
-                marker_struct.instances.count = static_cast<std::int32_t>(instance_count);
+                marker_struct.instances.count = static_cast<std::uint32_t>(instance_count);
 
                 add_pointer(compiled, reinterpret_cast<std::uintptr_t>(marker_struct.instances.pointer.value) - reinterpret_cast<std::uintptr_t>(compiled.data.data()), instance_offset);
                 compiled.data.insert(compiled.data.end(), instance_count * sizeof(GBXModelMarkerInstance<LittleEndian>), std::byte());
@@ -184,8 +184,7 @@ namespace Invader::HEK {
         // Make sure we don't have any stragglers
         for(std::size_t n = 0; n < nodes_count; n++) {
             if(!node_done[n]) {
-                eprintf("orphaned model node %zu\n", n);
-                throw OutOfBoundsException();
+                eprintf("Warning: Orphaned node #%zu in %s.%s\n", n, File::halo_path_to_preferred_path(compiled.path.data()).data(), tag_class_to_extension(compiled.tag_class_int));
             }
         }
 
@@ -248,7 +247,7 @@ namespace Invader::HEK {
                 for(std::size_t v = 0; v < vertex_count; v++) {
                     vertices_little[v] = vertices_big[v];
 
-                    if(vertices_little[v].node1_index == -1) {
+                    if(vertices_little[v].node1_index == NULL_INDEX) {
                         vertices_little[v].node1_index = 0;
                     }
                 }
@@ -269,13 +268,13 @@ namespace Invader::HEK {
                 std::size_t additional_triangles_to_subtract = 0;
                 if(triangle_count > 0) {
                     auto &last_triangle = triangles_big[triangle_count - 1];
-                    if(last_triangle.vertex0_index == -1) {
+                    if(last_triangle.vertex0_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 3;
                     }
-                    else if(last_triangle.vertex1_index == -1) {
+                    else if(last_triangle.vertex1_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 2;
                     }
-                    else if(last_triangle.vertex2_index == -1) {
+                    else if(last_triangle.vertex2_index == NULL_INDEX) {
                         additional_triangles_to_subtract += 1;
                     }
                 }

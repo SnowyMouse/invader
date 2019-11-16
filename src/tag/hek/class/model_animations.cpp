@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
+#include <invader/tag/hek/compile.hpp>
 
-#include "model_animations.hpp"
+#include <invader/tag/hek/class/model_animations.hpp>
 
 namespace Invader::HEK {
     struct DedupingAnimationData {
@@ -222,7 +222,7 @@ namespace Invader::HEK {
             if(compressed) {
                 INCREMENT_DATA_PTR(compressed_data_offset);
                 ADD_POINTER_FROM_INT32(reflexive.frame_data.pointer, compiled.data.size());
-                reflexive.frame_data.size = static_cast<std::int32_t>(reflexive.frame_data.size - compressed_data_offset);
+                reflexive.frame_data.size = static_cast<std::uint32_t>(reflexive.frame_data.size - compressed_data_offset);
                 std::size_t frame_size = reflexive.frame_data.size;
                 compiled.data.insert(compiled.data.end(), data, data + frame_size);
                 INCREMENT_DATA_PTR(frame_size);
@@ -288,7 +288,7 @@ namespace Invader::HEK {
             // Go through each animation. Make sure the weights are all correct.
             while(true) {
                 // Set the main animation index
-                animation->main_animation_index = static_cast<std::int32_t>(i);
+                animation->main_animation_index = static_cast<std::uint32_t>(i);
 
                 // Set weight to a default value
                 animation->relative_weight = 1.0F;

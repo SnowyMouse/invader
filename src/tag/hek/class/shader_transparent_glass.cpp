@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "shader_transparent_glass.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/class/shader_transparent_glass.hpp>
 
 namespace Invader::HEK {
     void compile_shader_transparent_glass_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

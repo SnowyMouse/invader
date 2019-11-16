@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "scenario_structure_bsp.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/class/scenario_structure_bsp.hpp>
 
 namespace Invader::HEK {
     void compile_scenario_structure_bsp_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -84,7 +84,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.breakable_surfaces);
         ADD_REFLEXIVE_START(tag.fog_planes) {
-            DEFAULT_VALUE(reflexive.material_type, -1);
+            DEFAULT_VALUE(reflexive.material_type, MaterialType::MATERIAL_TYPE_NONE);
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.fog_regions);

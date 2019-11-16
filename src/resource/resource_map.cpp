@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "resource_map.hpp"
-
-#include "hek/resource_map.hpp"
+#include <invader/resource/resource_map.hpp>
+#include <invader/resource/hek/resource_map.hpp>
 
 namespace Invader {
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size) {
         using namespace HEK;
         if(size < sizeof(ResourceMapHeader)) {
-            throw;
+            throw OutOfBoundsException();
         }
         const auto &header = *reinterpret_cast<const ResourceMapHeader *>(data);
         std::size_t resource_count = header.resource_count;
         std::size_t resource_offset = header.resources;
         std::size_t path_offset = header.paths;
         if(resource_offset > size || resource_offset + sizeof(ResourceMapResource) * resource_count > size) {
-            throw;
+            throw OutOfBoundsException();
         }
         const auto *resources = reinterpret_cast<const ResourceMapResource *>(data + resource_offset);
 
@@ -28,24 +27,30 @@ namespace Invader {
 
             const auto *resource_data = data + resource_data_offset;
             if(resource_data_offset >= size || resource_data_offset + resource_data_size > size) {
-                throw;
+                throw OutOfBoundsException();
             }
 
             std::size_t resource_path_length = 0;
             if(resource_path_offset >= size) {
-                throw;
+                throw OutOfBoundsException();
             }
             const auto *resource_path = reinterpret_cast<const char *>(data + resource_path_offset);
             for(;;resource_path_length++) {
                 if(resource_path_length >= size) {
-                    throw;
+                    throw OutOfBoundsException();
                 }
                 else if(resource_path[resource_path_length] == 0) {
                     break;
                 }
             }
 
-            returned_resources.push_back(Resource { resource_path, std::vector<std::byte>(resource_data, resource_data + resource_data_size) });
+            Resource resource;
+            resource.path = resource_path;
+            resource.data = std::vector<std::byte>(resource_data, resource_data + resource_data_size);
+            resource.path_offset = resource_path_offset;
+            resource.data_offset = resource_data_offset;
+
+            returned_resources.push_back(resource);
         }
 
         return returned_resources;

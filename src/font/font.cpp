@@ -8,10 +8,12 @@
 #include <cstdint>
 #include <filesystem>
 #include <vector>
-#include "../tag/hek/class/font.hpp"
-#include "../tag/hek/header.hpp"
-#include "../eprintf.hpp"
-#include "../command_line_option.hpp"
+#include <invader/tag/hek/class/font.hpp>
+#include <invader/tag/hek/header.hpp>
+#include <invader/printf.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
+#include <invader/version.hpp>
 #include FT_FREETYPE_H
 
 struct RenderedCharacter {
@@ -25,26 +27,41 @@ struct RenderedCharacter {
     std::int16_t hori_advance;
 };
 
+static const char *FONT_EXTENSION_STR[] = {
+    ".ttf",
+    ".otf"
+};
+
+enum FontExtension {
+    FONT_EXTENSION_TTF,
+    FONT_EXTENSION_OTF,
+
+    FONT_EXTENSION_COUNT
+};
+static_assert(FONT_EXTENSION_COUNT == sizeof(FONT_EXTENSION_STR) / sizeof(*FONT_EXTENSION_STR));
+
 int main(int argc, char *argv[]) {
     // Options struct
     struct FontOptions {
-        const char *path;
         const char *data = "data/";
         const char *tags = "tags/";
         int pixel_size = 14;
+        bool use_filesystem_path = false;
     } font_options;
-    font_options.path = argv[0];
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("font-size", 'i', 1);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
+    options.emplace_back("data", 'd', 1, "Set the data directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Set the tags directory.", "<dir>");
+    options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font file.");
+
+    static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
+    static constexpr char USAGE[] = "[options] <font-tag>";
 
     // Do it!
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, 0, font_options, [](char opt, const auto &args, FontOptions &font_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<FontOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, font_options, [](char opt, const auto &args, auto &font_options) {
         switch(opt) {
             case 'd':
                 font_options.data = args[0];
@@ -52,6 +69,10 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 font_options.tags = args[0];
+                break;
+
+            case 'P':
+                font_options.use_filesystem_path = true;
                 break;
 
             case 's':
@@ -62,36 +83,35 @@ int main(int argc, char *argv[]) {
                 }
                 break;
 
-            default:
-                eprintf("Usage: %s [options] <font-tag>\n\n", font_options.path);
-                eprintf("Create font tags.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --data,-d <path>           Set the data directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
-                eprintf("Font options:\n");
-                eprintf("    --font-size,-s <px>        Set the font size in pixels.\n\n");
-                std::exit(EXIT_FAILURE);
+            case 'i':
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
+                break;
         }
     });
 
-    // Make sure we have the bitmap tag path
-    if(remaining_arguments.size() == 0) {
-        eprintf("Expected a font tag path. Use -h for help.\n");
-        return EXIT_FAILURE;
+    // Do it!
+    std::string font_tag;
+    FontExtension found_format = static_cast<FontExtension>(0);
+    if(font_options.use_filesystem_path) {
+        std::vector<std::string> data(&font_options.data, &font_options.data + 1);
+        for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
+            auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, FONT_EXTENSION_STR[i]);
+            if(font_tag_maybe.has_value()) {
+                font_tag = font_tag_maybe.value();
+                found_format = i;
+                break;
+            }
+        }
     }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s. Use -h for help.\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
+    else {
+        font_tag = remaining_arguments[0];
     }
-    const char *font_tag = remaining_arguments[0];
 
     // Ensure it's lowercase
-    for(const char *c = font_tag; *c; c++) {
+    for(const char *c = font_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag);
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag.data());
             return EXIT_FAILURE;
         }
     }
@@ -104,7 +124,20 @@ int main(int argc, char *argv[]) {
     // TTf path
     std::filesystem::path data_path(font_options.data);
     auto ttf_path = data_path / font_tag;
-    auto final_ttf_path = ttf_path.string() + ".ttf";
+    std::string final_ttf_path;
+
+    // Check if .ttf or .otf exists
+    FontExtension ext;
+    for(ext = found_format; ext < FontExtension::FONT_EXTENSION_COUNT; ext = static_cast<FontExtension>(ext + 1)) {
+        final_ttf_path = ttf_path.string() + FONT_EXTENSION_STR[ext];
+        if(std::filesystem::exists(final_ttf_path)) {
+            break;
+        }
+    }
+    if(ext == FontExtension::FONT_EXTENSION_COUNT) {
+        eprintf("Failed to find a valid ttf or otf %s in the data directory.\n", remaining_arguments[0]);
+        return EXIT_FAILURE;
+    }
 
     // Load the TTF
     FT_Library library;

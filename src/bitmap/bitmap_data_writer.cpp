@@ -3,8 +3,8 @@
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
 
-#include "bitmap_data_writer.hpp"
-#include "../eprintf.hpp"
+#include <invader/bitmap/bitmap_data_writer.hpp>
+#include <invader/printf.hpp>
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<HEK::BitmapData<HEK::BigEndian>> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
@@ -34,7 +34,6 @@ namespace Invader {
                     bitmap.depth = 1;
                     break;
             }
-            bitmap.flags = BigEndian<BitmapDataFlags> {};
             bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
             std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
@@ -102,6 +101,9 @@ namespace Invader {
                 compressed = false;
             }
 
+            // Set palettized
+            bool palettized = false;
+
             switch(format) {
                 case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
                     bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
@@ -148,7 +150,7 @@ namespace Invader {
 
                 default:
                     eprintf("Unsupported bitmap format.\n");
-                    std::exit(EXIT_FAILURE);
+                    throw InvalidBitmapFormatException();
             }
 
             // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering
@@ -343,6 +345,7 @@ namespace Invader {
 
                     current_bitmap_pixels.clear();
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                    palettized = true;
                     break;
                 }
 
@@ -451,6 +454,7 @@ namespace Invader {
             BitmapDataFlags flags = {};
             flags.compressed = compressed;
             flags.power_of_two_dimensions = 1;
+            flags.palettized = palettized;
             bitmap.flags = flags;
 
             bitmap.registration_point.x = bitmap_color_plate.registration_point_x;
@@ -458,7 +462,7 @@ namespace Invader {
 
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-            std::printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
+            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
         }
     }
 }

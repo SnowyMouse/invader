@@ -3,11 +3,12 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-#include "../eprintf.hpp"
-#include "../version.hpp"
-#include "../tag/hek/header.hpp"
-#include "../tag/hek/class/string_list.hpp"
-#include "../command_line_option.hpp"
+#include <invader/printf.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/header.hpp>
+#include <invader/tag/hek/class/string_list.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 enum Format {
     STRING_LIST_FORMAT_UTF_16,
@@ -92,32 +93,36 @@ static std::vector<std::byte> generate_hud_message_text_tag(const std::string &)
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("format", 'f', 1);
+    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be utf-16, hmt, or latin-1. Default: utf-16");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
+
+    static constexpr char DESCRIPTION[] = "Generate string list tags.";
+    static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
-        const char *path;
         const char *data = "data";
         const char *tags = "tags";
         Format format = Format::STRING_LIST_FORMAT_UTF_16;
         const char *output_extension = ".unicode_string_list";
+        bool use_filesystem_path = false;
     } string_options;
 
-    string_options.path = argv[0];
-
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, 'h', string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
                 string_options.tags = arguments[0];
                 break;
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
             case 'd':
                 string_options.data = arguments[0];
+                break;
+            case 'P':
+                string_options.use_filesystem_path = true;
                 break;
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
@@ -133,37 +138,32 @@ int main(int argc, char * const *argv) {
                     string_options.output_extension = ".hud_message_text";
                 }
                 break;
-            default:
-                eprintf("Usage: %s [options] <tag>\n\n", arguments[0]);
-                eprintf("Generate string list tags.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --format,-f <format>         Set string list format. Can be utf-16, hmt, or\n");
-                eprintf("                               or latin-1. Default: utf-16\n");
-                eprintf("  --data,-d <dir>              Use the specified data directory.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory.\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 
+    const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
+
     // Check if there's a string tag
-    const char *string_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A string tag path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
+    std::string string_tag;
+    if(string_options.use_filesystem_path) {
+        std::vector<std::string> data(&string_options.data, &string_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+        if(string_tag_maybe.has_value()) {
+            string_tag = string_tag_maybe.value();
+        }
+        else {
+            eprintf("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
     else {
         string_tag = remaining_arguments[0];
     }
 
     // Ensure it's lowercase
-    for(const char *c = string_tag; *c; c++) {
+    for(const char *c = string_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag);
+            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.data());
             return EXIT_FAILURE;
         }
     }
@@ -171,7 +171,7 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tags_path(string_options.tags);
     std::filesystem::path data_path(string_options.data);
 
-    auto input_path = (data_path / string_tag).string() + (string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+    auto input_path = (data_path / string_tag).string() + valid_extension;
     auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
 
     // Open a file

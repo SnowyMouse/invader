@@ -4,12 +4,17 @@
 add_library(invader STATIC
     src/hek/class_int.cpp
     src/hek/data_type.cpp
+    src/hek/map.cpp
     src/resource/resource_map.cpp
     src/dependency/found_tag_dependency.cpp
     src/map/map.cpp
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
+    src/bitmap/color_plate_scanner.cpp
+    src/bitmap/image_loader.cpp
+    src/bitmap/bitmap_data_writer.cpp
+    src/compress/compression.cpp
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
@@ -88,9 +93,22 @@ add_library(invader STATIC
     src/crc/crc_spoof.c
     src/crc/hek/crc.cpp
 
-    src/error.cpp
+    src/version.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+)
+
+# P8 palette library (separate for slightly faster building)
+add_library(invader-bitmap-p8-palette STATIC
+    "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+)
+
+# Include version script
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette" "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette"
 )
 
 # Include version script
@@ -108,5 +126,13 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices"
 )
 
+# Here's to set up constants for version.cpp
+set_source_files_properties(src/version.cpp
+    PROPERTIES COMPILE_DEFINITIONS "INVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} INVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} INVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} INVADER_FORK=\"${PROJECT_NAME}\""
+)
+
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# Add libraries
+target_link_libraries(invader invader-bitmap-p8-palette zstd)

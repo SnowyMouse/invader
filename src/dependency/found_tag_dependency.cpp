@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "found_tag_dependency.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "../eprintf.hpp"
+#include <invader/dependency/found_tag_dependency.hpp>
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/printf.hpp>
+#include <invader/file/file.hpp>
 
 #include <filesystem>
 
@@ -13,16 +14,7 @@ namespace Invader {
 
         if(!reverse) {
             auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, auto recursion) -> void {
-                std::string tag_path_to_find = tag_path_to_find_2;
-
-                // Forwardslashafy it
-                #ifndef _WIN32
-                for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-                    if(tag_path_to_find[i] == '\\') {
-                        tag_path_to_find[i] = '/';
-                    }
-                }
-                #endif
+                std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
                 bool found = false;
@@ -54,37 +46,36 @@ namespace Invader {
                                 continue;
                             }
 
-                            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.tag_class_int);
-                            #ifndef _WIN32
-                            for(char &c : path_copy) {
-                                if(c == '\\') {
-                                    c = '/';
-                                }
+                            // Fix .model dependencies so they're .gbxmodel (this is only an issue with HEK stock tags)
+                            auto class_to_use = dependency.tag_class_int;
+                            if(class_to_use == HEK::TagClassInt::TAG_CLASS_MODEL) {
+                                class_to_use = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
                             }
-                            #endif
+
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.path, dependency.tag_class_int, false, complete_tag_path.string());
+                                    found_tags.emplace_back(dependency.path, class_to_use, false, complete_tag_path.string());
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.path, dependency.tag_class_int, true, "");
+                                found_tags.emplace_back(dependency.path, class_to_use, true, "");
                             }
                             else if(recursive) {
-                                recursion(dependency.path.data(), dependency.tag_class_int, recursion);
+                                recursion(dependency.path.data(), class_to_use, recursion);
                             }
                         }
                         found = true;
                         break;
                     }
                     catch (std::exception &e) {
-                        eprintf("Failed to compile tag %s. %s\n", tag_path.string().data(), e.what());
+                        eprintf("Failed to compile tag %s: %s\n", tag_path.string().data(), e.what());
                         success = false;
                         return;
                     }
@@ -101,14 +92,7 @@ namespace Invader {
         }
         else {
             // Turn all forward slashes into backslashes if not on Windows
-            std::string tag_path_to_find = tag_path_to_find_2;
-            #ifndef _WIN32
-            for(std::size_t i = 0; tag_path_to_find[i] != 0; i++) {
-                if(tag_path_to_find[i] == '/') {
-                    tag_path_to_find[i] = '\\';
-                }
-            }
-            #endif
+            std::string tag_path_to_find = File::preferred_path_to_halo_path(tag_path_to_find_2);
 
             // Iterate
             for(auto &tags_directory : tags) {
@@ -172,7 +156,7 @@ namespace Invader {
                                 }
                             }
                             catch (std::exception &e) {
-                                eprintf("Failed to compile tag %s. %s\n", file.path().string().data(), e.what());
+                                eprintf("Warning: Failed to compile tag %s: %s\n", file.path().string().data(), e.what());
                             }
                         }
                     }

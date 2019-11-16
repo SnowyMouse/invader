@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "tag.hpp"
-#include "map.hpp"
+#include <invader/map/tag.hpp>
+#include <invader/map/map.hpp>
 
 namespace Invader {
     const std::string &Tag::path() const noexcept {
@@ -10,6 +10,32 @@ namespace Invader {
 
     bool Tag::is_indexed() const noexcept {
         return this->indexed;
+    }
+
+    bool Tag::data_is_available() const noexcept {
+        using namespace HEK;
+
+        // If it's indexed, check if the corresponding data is available
+        if(this->is_indexed()) {
+            switch(this->p_tag_class_int) {
+                case TagClassInt::TAG_CLASS_BITMAP:
+                    return this->p_map.bitmap_data != nullptr;
+                case TagClassInt::TAG_CLASS_SOUND:
+                    return this->p_map.sound_data != nullptr;
+                default:
+                    return this->p_map.loc_data != nullptr;
+            }
+        }
+
+        // If the base struct pointer is 0xFFFFFFFF, well... lol
+        else if(this->base_struct_pointer == CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
+            return false;
+        }
+
+        // Return true otherwise
+        else {
+            return true;
+        }
     }
 
     HEK::TagClassInt Tag::tag_class_int() const noexcept {
@@ -50,6 +76,14 @@ namespace Invader {
         else {
             return this->p_map.resolve_tag_data_pointer(pointer, minimum);
         }
+    }
+
+    HEK::CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {
+        return *reinterpret_cast<HEK::CacheFileTagDataTag *>(this->p_map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(HEK::CacheFileTagDataTag)));
+    }
+
+    const HEK::CacheFileTagDataTag &Tag::get_tag_data_index() const noexcept {
+        return const_cast<Tag *>(this)->get_tag_data_index();
     }
 
     Tag::Tag(Map &map) : p_map(map) {}

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cmath>
-#include "../compile.hpp"
-#include "antenna.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/class/antenna.hpp>
 
 namespace Invader::HEK {
     void compile_antenna_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

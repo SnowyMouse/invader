@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "../../../hek/constants.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/hek/constants.hpp>
 
-#include "projectile.hpp"
+#include <invader/tag/hek/class/projectile.hpp>
 
 namespace Invader::HEK {
     void compile_projectile_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

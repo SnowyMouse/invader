@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.10)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.13.0
-    DESCRIPTION "Modding toolkit for Halo Custom Edition"
+    VERSION 0.17.0
+    DESCRIPTION "Modding toolkit for Halo Combat Evolved on the PC"
     LANGUAGES C CXX
 )
 
@@ -16,18 +16,8 @@ set(CMAKE_CXX_STANDARD 17)
 # Use C99
 set(CMAKE_C_STANDARD 99)
 
-# Find some packages
-find_package(TIFF)
-find_package(ZLIB)
-find_package(Python3)
-find_package(Git)
-find_package(LibArchive)
-find_package(Freetype)
-
-# If we don't have Python, bail
-if(${Python3_FOUND} STREQUAL FALSE)
-    message(FATAL_ERROR "Python 3 is required to build Invader.")
-endif()
+# Add our dependencies
+include(dependencies.cmake)
 
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
@@ -52,18 +42,20 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -march=native")
 endif()
 
-# Here's to set up constants for version.hpp
-add_definitions(-DINVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DINVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DINVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} "-DINVADER_FORK=\"${PROJECT_NAME}\"")
+# If it's MinGW, this may be required to prevent linking errors
+if(MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fstack-protector")
+endif()
 
 # Turn on console messages
-option(NO_OUTPUT "don't show any console messages" OFF)
+option(NO_OUTPUT "don't show most console messages including most errors" OFF)
 if(NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
 endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(src/invader.cmake)
 include(src/build/build.cmake)
-include(src/crc/crc.cmake)
 include(src/indexer/indexer.cmake)
 include(src/bitmap/bitmap.cmake)
 include(src/resource/resource.cmake)
@@ -71,3 +63,5 @@ include(src/archive/archive.cmake)
 include(src/dependency/dependency.cmake)
 include(src/font/font.cmake)
 include(src/string/string.cmake)
+include(src/compress/compress.cmake)
+include(src/info/info.cmake)
