@@ -120,7 +120,7 @@ with open(sys.argv[1], "w") as f:
         f.write("    ENDIAN_TEMPLATE(EndianType) struct {} {}{{\n".format(s["name"], ": {}<EndianType> ".format(s["inherits"]) if "inherits" in s else ""))
         for n in s["fields"]:
             type_to_write = n["type"]
-            
+
             if type_to_write == "reflexive":
                 type_to_write = "TagReflexive"
             elif type_to_write == "dependency":
@@ -131,7 +131,7 @@ with open(sys.argv[1], "w") as f:
                 f.write("        PAD(0x{:X});\n".format(n["size"]))
                 padding_present = True
                 continue
-            
+
             if "flagged" in n and n["flagged"]:
                 type_to_write = "FlaggedInt<{}>".format(type_to_write)
 
@@ -168,11 +168,29 @@ with open(sys.argv[1], "w") as f:
         # And we can't forget the copy part
         f.write("        ENDIAN_TEMPLATE(NewEndian) operator {}<NewEndian>() const noexcept {{\n".format(s["name"]))
         f.write("            {}<NewEndian> copy{};\n".format(s["name"], " = {}" if padding_present else ""))
-        for n in s["fields"]:
-            if n["type"] == "pad":
-                continue
+
+        # Make sure we have all of the structs we depend on, too
+        depended_structs = []
+        dependency = s
+
+        while dependency is not None:
+            depended_structs.append(dependency)
+            if "inherits" in dependency:
+                dependency_name = dependency["inherits"]
+                dependency = None
+                for ds in all_structs_arranged:
+                    if ds["name"] == dependency_name:
+                        dependency = ds
+                        break
             else:
-                f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", make_name_fun(n["name"])))
+                break
+
+        for ds in depended_structs:
+            for n in ds["fields"]:
+                if n["type"] == "pad":
+                    continue
+                else:
+                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", make_name_fun(n["name"])))
         f.write("            return copy;\n")
         f.write("        }\n")
 
