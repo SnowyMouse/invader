@@ -12,6 +12,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed sound looping tags' gain being set to 0
 - invader-build: Fixed some values in shader_transparent_plasma being set to 0
 - invader-build: Fixed biped A In, B In, C In, D In being set to 0
+- invader-build: Fixed some objects' flags being set to 0
+- invader-build: Fixed an undefined behavior issue with firing positions
 
 ## [0.17.0] - 2019-11-13
 ### Added
