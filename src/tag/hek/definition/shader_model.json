@@ -1,0 +1,292 @@
+[
+    {
+        "name": "ShaderModelDetailMask",
+        "options": [
+            "none",
+            "reflection mask inverse",
+            "reflection mask",
+            "self illumination mask inverse",
+            "self illumination mask",
+            "change color mask inverse",
+            "change color mask",
+            "multipurpose map alpha inverse",
+            "multipurpose map alpha"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderModelFlags",
+        "type": "bitfield",
+        "fields": [
+            "detail after reflection",
+            "two sided",
+            "not alpha tested",
+            "alpha blended decal",
+            "true atmospheric fog",
+            "disable two sided culling"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ShaderModelMoreFlags",
+        "type": "bitfield",
+        "fields": [
+            "no random phase"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ShaderModel",
+        "fields": [
+            {
+                "name": "shader model flags",
+                "type": "ShaderModelFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "translucency",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "change color source",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "shader model more flags",
+                "type": "ShaderModelMoreFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "color source",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "name": "animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "animation period",
+                "type": "float"
+            },
+            {
+                "name": "animation color lower bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "animation color upper bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "map u scale",
+                "type": "float"
+            },
+            {
+                "name": "map v scale",
+                "type": "float"
+            },
+            {
+                "name": "base map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "multipurpose map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "detail function",
+                "type": "ShaderDetailFunction"
+            },
+            {
+                "name": "detail mask",
+                "type": "ShaderModelDetailMask"
+            },
+            {
+                "name": "detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "detail map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "detail map v scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "reflection falloff distance",
+                "type": "float"
+            },
+            {
+                "name": "reflection cutoff distance",
+                "type": "float"
+            },
+            {
+                "name": "perpendicular brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "perpendicular tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "parallel brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "parallel tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "reflection cube map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "unknown",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 440
+    }
+]

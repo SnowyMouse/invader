@@ -6,12 +6,16 @@
 #include <invader/tag/compiled_tag.hpp>
 #include <invader/error.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/class/globals.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/tag/hek/class/damage_effect.hpp>
-#include <invader/tag/hek/class/object.hpp>
 #include <invader/tag/hek/class/weapon.hpp>
 
 namespace Invader::HEK {
+    void compile_globals_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, ScenarioType type);
+    void compile_damage_effect_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, DamageEffectJasonJones jason_jones);
+    void compile_object_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, ObjectType type);
+    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, WeaponJasonJones jason_jones);
+
     /**
      * Compile the tag
      * @param compiled  CompiledTag reference

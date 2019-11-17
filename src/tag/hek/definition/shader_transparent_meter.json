@@ -1,0 +1,111 @@
+[
+    {
+        "name": "ShaderTransparentMeterFlags",
+        "type": "bitfield",
+        "fields": [
+            "decal",
+            "two sided",
+            "flash color is negative",
+            "tint mode 2",
+            "unfiltered"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ShaderTransparentMeter",
+        "fields": [
+            {
+                "name": "meter flags",
+                "type": "ShaderTransparentMeterFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "gradient min color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "gradient max color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "background color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "flash color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "meter tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "meter transparency",
+                "type": "Fraction"
+            },
+            {
+                "name": "background transparency",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "meter brightness source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "flash brightness source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "value source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "gradient source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "flash extension source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 260
+    }
+]

@@ -3,7 +3,7 @@
 #include <vector>
 #include "../crc32.h"
 #include "../crc_spoof.h"
-#include <invader/tag/hek/class/scenario.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/map/map.hpp>
 

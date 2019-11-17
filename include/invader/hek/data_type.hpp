@@ -734,6 +734,12 @@ namespace Invader::HEK {
         PREDICTED_RESOUCE_TYPE_SOUND
     };
 
+    enum ScenarioType : TagEnum {
+        CACHE_FILE_SINGLEPLAYER,
+        CACHE_FILE_MULTIPLAYER,
+        CACHE_FILE_USER_INTERFACE
+    };
+
     ENDIAN_TEMPLATE(EndianType) struct PredictedResource {
         EndianType<PredictedResourceType> type;
         EndianType<Index> resource_index;
@@ -767,83 +773,60 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(TagDataOffset<BigEndian>) == 0x14);
 
-    enum MaterialType : TagEnum {
-        MATERIAL_TYPE_NONE = NULL_INDEX,
-        MATERIAL_TYPE_DIRT = 0x00,
-        MATERIAL_TYPE_SAND,
-        MATERIAL_TYPE_STONE,
-        MATERIAL_TYPE_SNOW,
-        MATERIAL_TYPE_WOOD,
-        MATERIAL_TYPE_METAL_HOLLOW,
-        MATERIAL_TYPE_METAL_THIN,
-        MATERIAL_TYPE_METAL_THICK,
-        MATERIAL_TYPE_RUBBER,
-        MATERIAL_TYPE_GLASS,
-        MATERIAL_TYPE_FORCE_FIELD,
-        MATERIAL_TYPE_GRUNT,
-        MATERIAL_TYPE_HUNTER_ARMOR,
-        MATERIAL_TYPE_HUNTER_SKIN,
-        MATERIAL_TYPE_ELITE,
-        MATERIAL_TYPE_JACKAL,
-        MATERIAL_TYPE_JACKAL_ENERGY_SHIELD,
-        MATERIAL_TYPE_ENGINEER_SKIN,
-        MATERIAL_TYPE_ENGINEER_FORCE_FIELD,
-        MATERIAL_TYPE_FLOOD_COMBAT_FORM,
-        MATERIAL_TYPE_FLOOD_CARRIER_FORM,
-        MATERIAL_TYPE_CYBORG_ARMOR,
-        MATERIAL_TYPE_CYBORG_ENERGY_SHIELD,
-        MATERIAL_TYPE_HUMAN_ARMOR,
-        MATERIAL_TYPE_HUMAN_SKIN,
-        MATERIAL_TYPE_SENTINEL,
-        MATERIAL_TYPE_MONITOR,
-        MATERIAL_TYPE_PLASTIC,
-        MATERIAL_TYPE_WATER,
-        MATERIAL_TYPE_LEAVES,
-        MATERIAL_TYPE_ELITE_ENERGY_SHIELD,
-        MATERIAL_TYPE_ICE,
-        MATERIAL_TYPE_HUNTER_SHIELD
-    };
+    /**
+     * Node value; can hold a variety of different value types
+     */
+    union ScenarioScriptNodeValue {
+        std::uint8_t bool_int;
+        std::uint16_t short_int;
+        std::uint32_t long_int;
+        float real;
+        TagID tag_id;
 
-    enum FunctionType : TagEnum {
-        FUNCTION_LINEAR,
-        FUNCTION_EARLY,
-        FUNCTION_VERY_EARLY,
-        FUNCTION_LATE,
-        FUNCTION_VERY_LATE,
-        FUNCTION_COSINE
-    };
+        ScenarioScriptNodeValue() = default;
+        ScenarioScriptNodeValue(const ScenarioScriptNodeValue &copy) = default;
 
-    enum FunctionType2 : TagEnum {
-        FUNCTION_TYPE_ONE,
-        FUNCTION_TYPE_ZERO,
-        FUNCTION_TYPE_COSINE,
-        FUNCTION_TYPE_COSINE_VARIABLE_PERIOD,
-        FUNCTION_TYPE_DIAGONAL_WAVE,
-        FUNCTION_TYPE_DIAGONAL_WAVE_VARIABLE_PERIOD,
-        FUNCTION_TYPE_SLIDE,
-        FUNCTION_TYPE_SLIDE_VARIABLE_PERIOD,
-        FUNCTION_TYPE_NOISE,
-        FUNCTION_TYPE_JITTER,
-        FUNCTION_TYPE_WANDER,
-        FUNCTION_TYPE_SPARK
-    };
+        ScenarioScriptNodeValue(std::uint8_t v) {
+            this->bool_int = v;
+        }
 
-    enum FunctionBoundsMode : TagEnum {
-        FUNCTION_BOUNDS_MODE_CLIP,
-        FUNCTION_BOUNDS_MODE_CLIP_AND_NORMALIZE,
-        FUNCTION_BOUNDS_MODE_SCALE_TO_FIT
-    };
+        ScenarioScriptNodeValue(std::uint16_t v) {
+            this->short_int = v;
+        }
 
-    enum FunctionScaleBy : TagEnum {
-        FUNCTION_SCALE_PERIOD_BY_NONE,
-        FUNCTION_SCALE_PERIOD_BY_A_IN,
-        FUNCTION_SCALE_PERIOD_BY_B_IN,
-        FUNCTION_SCALE_PERIOD_BY_C_IN,
-        FUNCTION_SCALE_PERIOD_BY_D_IN,
-        FUNCTION_SCALE_PERIOD_BY_A_OUT,
-        FUNCTION_SCALE_PERIOD_BY_B_OUT,
-        FUNCTION_SCALE_PERIOD_BY_C_OUT,
-        FUNCTION_SCALE_PERIOD_BY_D_OUT
+        ScenarioScriptNodeValue(std::uint32_t v) {
+            this->long_int = v;
+        }
+
+        ScenarioScriptNodeValue(float v) {
+            this->real = v;
+        }
+
+        ScenarioScriptNodeValue(TagID v) {
+            this->tag_id = v;
+        }
+
+        void operator=(std::uint8_t v) {
+            this->long_int = 0xFFFFFFFF;
+            this->bool_int = v;
+        }
+
+        void operator=(std::uint16_t v) {
+            this->long_int = 0xFFFFFFFF;
+            this->short_int = v;
+        }
+
+        void operator=(std::uint32_t v) {
+            this->long_int = v;
+        }
+
+        void operator=(float v) {
+            this->real = v;
+        }
+
+        void operator=(TagID v) {
+            this->tag_id = v;
+        }
     };
 
     Vector3D<NativeEndian> euler2d_to_vector(const Euler2D<NativeEndian> &rotation) noexcept;

@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/compile.hpp>
-#include <invader/tag/hek/class/scenario_structure_bsp.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include "compile.hpp"
 
 namespace Invader::HEK {
     void compile_scenario_structure_bsp_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         // Allocate data for the header
-        compiled.data.insert(compiled.data.end(), sizeof(ScenarioStructureBSPCompiledHeader), std::byte());
+        compiled.data.insert(compiled.data.end(), sizeof(ScenarioStructureBSPCompiledHeader<LittleEndian>), std::byte());
 
         // Initialize the header
-        ScenarioStructureBSPCompiledHeader header = {};
+        ScenarioStructureBSPCompiledHeader<LittleEndian> header = {};
         header.signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
 
-        compiled.pointers.emplace_back(CompiledTagPointer { 0x0, sizeof(ScenarioStructureBSPCompiledHeader) });
+        compiled.pointers.emplace_back(CompiledTagPointer { 0x0, sizeof(ScenarioStructureBSPCompiledHeader<LittleEndian>) });
 
         BEGIN_COMPILE(ScenarioStructureBSP)
 
@@ -84,7 +85,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.breakable_surfaces);
         ADD_REFLEXIVE_START(tag.fog_planes) {
-            DEFAULT_VALUE(reflexive.material_type, MaterialType::MATERIAL_TYPE_NONE);
+            DEFAULT_VALUE(reflexive.material_type, static_cast<MaterialType>(NULL_INDEX));
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.fog_regions);
@@ -132,7 +133,7 @@ namespace Invader::HEK {
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
 
-        *reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(compiled.data.data()) = header;
+        *reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(compiled.data.data()) = header;
 
         FINISH_COMPILE
     }

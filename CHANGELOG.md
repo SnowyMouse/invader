@@ -3,8 +3,17 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- All tag definitions have been converted to .json format .This will allow them
+  to be used for even more purposes than before.
+
 ### Fixed
 - invader-build: Fixed `-g` not erroring if an invalid engine was given
+- invader-build: Fixed sound looping tags' gain being set to 0
+- invader-build: Fixed some values in shader_transparent_plasma being set to 0
+- invader-build: Fixed biped A In, B In, C In, D In being set to 0
+- invader-build: Fixed some objects' flags being set to 0
+- invader-build: Fixed an undefined behavior issue with firing positions
 
 ## [0.17.0] - 2019-11-13
 ### Added
@@ -32,6 +41,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-compress: The default compression is now 19
 - invader-build: The ting sound tag is now determined by the globals tag
   instead of its tag path when setting the gain based on engine version
+- zstd's source code is no longer included in the repository
 
 ### Fixed
 - invader-font: Fixed `-i` being used as both info and font size. It is now

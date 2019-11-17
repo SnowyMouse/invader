@@ -6,8 +6,7 @@
 #include <filesystem>
 #include <invader/tag/compiled_tag.hpp>
 #include <invader/version.hpp>
-#include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/tag/hek/class/sound.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/resource/list/resource_list.hpp>

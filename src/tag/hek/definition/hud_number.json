@@ -1,0 +1,55 @@
+[
+    {
+        "name": "HUDNumber",
+        "fields": [
+            {
+                "name": "digits bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "bitmap digit width",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "screen digit width",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "x offset",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "y offset",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "decimal point width",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "colon width",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 76
+            }
+        ],
+        "type": "struct",
+        "size": 100
+    }
+]

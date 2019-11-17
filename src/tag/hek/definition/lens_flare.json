@@ -1,0 +1,263 @@
+[
+    {
+        "name": "LensFlareRadiusScaledBy",
+        "options": [
+            "none",
+            "rotation",
+            "rotation and strafing",
+            "distance from center"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "LensFlareOcclusionOffsetDirection",
+        "options": [
+            "toward viewer",
+            "marker forward",
+            "none"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "LensFlareRotationFunction",
+        "options": [
+            "none",
+            "rotation a",
+            "rotation b",
+            "rotation translation",
+            "translation"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "LensFlareReflectionFlags",
+        "type": "bitfield",
+        "fields": [
+            "align rotation with screen center",
+            "radius not scaled by distance",
+            "radius scaled by occlusion factor",
+            "occluded by solid objects"
+        ],
+        "width": 16
+    },
+    {
+        "name": "LensFlareReflectionMoreFlags",
+        "type": "bitfield",
+        "fields": [
+            "interpolate colors in hsv",
+            "more colors"
+        ],
+        "width": 16
+    },
+    {
+        "name": "LensFlareFlags",
+        "type": "bitfield",
+        "fields": [
+            "sun"
+        ],
+        "width": 16
+    },
+    {
+        "name": "LensFlareReflection",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "LensFlareReflectionFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "bitmap index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "position",
+                "type": "float"
+            },
+            {
+                "name": "rotation offset",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "radius",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "radius scaled by",
+                "type": "LensFlareRadiusScaledBy"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "brightness",
+                "bounds": true,
+                "type": "Fraction"
+            },
+            {
+                "name": "brightness scaled by",
+                "type": "LensFlareRadiusScaledBy"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "tint color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color lower bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "more flags",
+                "type": "LensFlareReflectionMoreFlags"
+            },
+            {
+                "name": "animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "animation period",
+                "type": "float"
+            },
+            {
+                "name": "animation phase",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    },
+    {
+        "name": "LensFlare",
+        "fields": [
+            {
+                "name": "falloff angle",
+                "type": "Angle"
+            },
+            {
+                "name": "cutoff angle",
+                "type": "Angle"
+            },
+            {
+                "name": "cos falloff angle",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "cos cutoff angle",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "occlusion radius",
+                "type": "float"
+            },
+            {
+                "name": "occlusion offset direction",
+                "type": "LensFlareOcclusionOffsetDirection"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "near fade distance",
+                "type": "float"
+            },
+            {
+                "name": "far fade distance",
+                "type": "float"
+            },
+            {
+                "name": "bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flags",
+                "type": "LensFlareFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 76
+            },
+            {
+                "name": "rotation function",
+                "type": "LensFlareRotationFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "rotation function scale",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "horizontal scale",
+                "type": "float"
+            },
+            {
+                "name": "vertical scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "reflections",
+                "type": "reflexive",
+                "struct": "LensFlareReflection",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "size": 240
+    }
+]

@@ -1,0 +1,488 @@
+[
+    {
+        "name": "ObjectNoise",
+        "options": [
+            "silent",
+            "medium",
+            "loud",
+            "shout",
+            "quiet"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ObjectFunctionIn",
+        "options": [
+            "none",
+            "body vitality",
+            "shield vitality",
+            "recent body damage",
+            "recent shield damage",
+            "random constant",
+            "umbrella shield vitality",
+            "shield stun",
+            "recent umbrella shield vitality",
+            "umbrella shield stun",
+            "region",
+            "region 1",
+            "region 2",
+            "region 3",
+            "region 4",
+            "region 5",
+            "region 6",
+            "region 7",
+            "alive",
+            "compass"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ObjectType",
+        "options": [
+            "biped",
+            "vehicle",
+            "weapon",
+            "equipment",
+            "garbage",
+            "projectile",
+            "scenery",
+            "device machine",
+            "device control",
+            "device light fixture",
+            "placeholder",
+            "sound scenery"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ObjectFunctionFlags",
+        "type": "bitfield",
+        "fields": [
+            "invert",
+            "additive",
+            "always active"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ObjectFlags",
+        "type": "bitfield",
+        "fields": [
+            "does not cast shadow",
+            "transparent self occlusion",
+            "brighter than it should be",
+            "not a pathfinding obstacle",
+            "cast shadow by default"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ObjectAttachment",
+        "fields": [
+            {
+                "name": "type",
+                "type": "dependency",
+                "classes": [
+                    "light",
+                    "light_volume",
+                    "contrail",
+                    "particle_system",
+                    "effect",
+                    "sound_looping"
+                ],
+                "compound": true
+            },
+            {
+                "name": "marker",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "primary scale",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "secondary scale",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "change color",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "size": 72
+    },
+    {
+        "name": "ObjectWidget",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "reference",
+                "type": "dependency",
+                "compound": true,
+                "classes": [
+                    "antenna",
+                    "glow",
+                    "light_volume",
+                    "lightning"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "size": 32
+    },
+    {
+        "name": "ObjectFunction",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ObjectFunctionFlags"
+            },
+            {
+                "name": "period",
+                "type": "float"
+            },
+            {
+                "name": "scale period by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "scale function by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "wobble function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "wobble period",
+                "type": "float"
+            },
+            {
+                "name": "wobble magnitude",
+                "type": "float"
+            },
+            {
+                "name": "square wave threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "step count",
+                "type": "uint16"
+            },
+            {
+                "name": "map to",
+                "type": "FunctionType"
+            },
+            {
+                "name": "sawtooth count",
+                "type": "uint16"
+            },
+            {
+                "name": "add",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "scale result by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "bounds mode",
+                "type": "FunctionBoundsMode"
+            },
+            {
+                "name": "bounds",
+                "bounds": true,
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "turn off with",
+                "type": "int16"
+            },
+            {
+                "name": "scale by",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 252
+            },
+            {
+                "name": "inverse bounds",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "unknown float 2",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "inverse step",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "inverse period",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "name": "usage",
+                "type": "TagString",
+                "endian": null
+            }
+        ],
+        "type": "struct",
+        "size": 360
+    },
+    {
+        "name": "ObjectChangeColorsPermutation",
+        "fields": [
+            {
+                "name": "weight",
+                "type": "float"
+            },
+            {
+                "name": "color lower bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorRGB",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 28
+    },
+    {
+        "name": "ObjectChangeColors",
+        "fields": [
+            {
+                "name": "darken by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "scale by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "flags",
+                "type": "ColorInterpolationFlags"
+            },
+            {
+                "name": "color lower bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "permutations",
+                "type": "reflexive",
+                "struct": "ObjectChangeColorsPermutation",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 44
+    },
+    {
+        "name": "Object",
+        "fields": [
+            {
+                "name": "object type",
+                "type": "ObjectType",
+                "endian": "little"
+            },
+            {
+                "name": "flags",
+                "type": "ObjectFlags"
+            },
+            {
+                "name": "bounding radius",
+                "type": "float"
+            },
+            {
+                "name": "bounding offset",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "origin offset",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "acceleration scale",
+                "type": "float"
+            },
+            {
+                "name": "has change colors",
+                "type": "uint32",
+                "endian": "little"
+            },
+            {
+                "name": "model",
+                "type": "dependency",
+                "classes": [
+                    "gbxmodel"
+                ],
+                "compound": true
+            },
+            {
+                "name": "animation graph",
+                "type": "dependency",
+                "classes": [
+                    "animation"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "collision model",
+                "type": "dependency",
+                "classes": [
+                    "model_collision_geometry"
+                ],
+                "compound": true
+            },
+            {
+                "name": "physics",
+                "type": "dependency",
+                "classes": [
+                    "physics"
+                ],
+                "compound": true
+            },
+            {
+                "name": "modifier shader",
+                "type": "dependency",
+                "classes": [
+                    "shader"
+                ],
+                "compound": true
+            },
+            {
+                "name": "creation effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 84
+            },
+            {
+                "name": "render bounding radius",
+                "type": "float"
+            },
+            {
+                "name": "a in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "b in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "c in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "name": "d in",
+                "type": "ObjectFunctionIn"
+            },
+            {
+                "type": "pad",
+                "size": 44
+            },
+            {
+                "name": "hud text message index",
+                "type": "Index"
+            },
+            {
+                "name": "forced shader permutation index",
+                "type": "Index"
+            },
+            {
+                "name": "attachments",
+                "type": "reflexive",
+                "struct": "ObjectAttachment",
+                "compound": true
+            },
+            {
+                "name": "widgets",
+                "type": "reflexive",
+                "struct": "ObjectWidget",
+                "compound": true
+            },
+            {
+                "name": "functions",
+                "type": "reflexive",
+                "struct": "ObjectFunction",
+                "compound": true
+            },
+            {
+                "name": "change colors",
+                "type": "reflexive",
+                "struct": "ObjectChangeColors",
+                "compound": true
+            },
+            {
+                "name": "predicted resources",
+                "type": "reflexive",
+                "struct": "PredictedResource",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 380
+    },
+    {
+        "name": "BasicObject",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 128
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 508
+    }
+]

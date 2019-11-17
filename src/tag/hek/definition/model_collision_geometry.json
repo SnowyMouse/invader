@@ -1,0 +1,703 @@
+[
+    {
+        "name": "ModelCollisionGeometryMaterialFlags",
+        "type": "bitfield",
+        "fields": [
+            "head"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelCollisionGeometryRegionFlags",
+        "type": "bitfield",
+        "fields": [
+            "lives until object dies",
+            "forces object to die",
+            "dies when object dies",
+            "dies when object is damaged",
+            "disappears when shield is off",
+            "inhibits melee attack",
+            "inhibits weapon attack",
+            "inhibits walking",
+            "forces drop weapon",
+            "causes head maimed scream"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelCollisionGeometryLeafFlags",
+        "type": "bitfield",
+        "fields": [
+            "contains double sided surfaces"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ModelCollisionGeometrySurfaceFlags",
+        "type": "bitfield",
+        "fields": [
+            "two sided",
+            "invisible",
+            "climbable",
+            "breakable"
+        ],
+        "width": 8
+    },
+    {
+        "name": "ModelCollisionGeometryFlags",
+        "type": "bitfield",
+        "fields": [
+            "takes shield damage for children",
+            "takes body damage for children",
+            "always shields friendly damage",
+            "passes area damage to children",
+            "parent never takes body damage for us",
+            "only damaged by explosives",
+            "only damaged while occupied"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelCollisionGeometryMaterial",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ModelCollisionGeometryMaterialFlags"
+            },
+            {
+                "name": "material type",
+                "type": "MaterialType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "shield leak percentage",
+                "type": "Fraction"
+            },
+            {
+                "name": "shield damage multiplier",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "body damage multiplier",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 72
+    },
+    {
+        "name": "ModelCollisionGeometryPermutation",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ModelCollisionGeometryRegion",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ModelCollisionGeometryRegionFlags"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "damage threshold",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "destroyed effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "permutations",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryPermutation",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 84
+    },
+    {
+        "name": "ModelCollisionGeometryModifier",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 52
+            }
+        ],
+        "type": "struct",
+        "size": 52
+    },
+    {
+        "name": "ModelCollisionGeometrySphere",
+        "fields": [
+            {
+                "name": "node",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "center",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "radius",
+                "type": "float"
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ModelCollisionGeometryBSP3DNode",
+        "fields": [
+            {
+                "name": "plane",
+                "type": "int32"
+            },
+            {
+                "name": "back child",
+                "flagged": true,
+                "type": "uint32"
+            },
+            {
+                "name": "front child",
+                "flagged": true,
+                "type": "uint32"
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    },
+    {
+        "name": "ModelCollisionGeometryPlane",
+        "fields": [
+            {
+                "name": "plane",
+                "type": "Plane3D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 16
+    },
+    {
+        "name": "ModelCollisionGeometryLeaf",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ModelCollisionGeometryLeafFlags"
+            },
+            {
+                "name": "bsp2d reference count",
+                "type": "uint16"
+            },
+            {
+                "name": "first bsp2d reference",
+                "type": "int32"
+            }
+        ],
+        "type": "struct",
+        "size": 8
+    },
+    {
+        "name": "ModelCollisionGeometryBSP2DReference",
+        "fields": [
+            {
+                "name": "plane",
+                "flagged": true,
+                "type": "uint32"
+            },
+            {
+                "name": "bsp2d node",
+                "flagged": true,
+                "type": "uint32"
+            }
+        ],
+        "type": "struct",
+        "size": 8
+    },
+    {
+        "name": "ModelCollisionGeometryBSP2DNode",
+        "fields": [
+            {
+                "name": "plane",
+                "type": "Plane2D",
+                "compound": true
+            },
+            {
+                "name": "left child",
+                "flagged": true,
+                "type": "uint32"
+            },
+            {
+                "name": "right child",
+                "flagged": true,
+                "type": "uint32"
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "ModelCollisionGeometrySurface",
+        "fields": [
+            {
+                "name": "plane",
+                "flagged": true,
+                "type": "uint32"
+            },
+            {
+                "name": "first edge",
+                "type": "int32"
+            },
+            {
+                "name": "flags",
+                "type": "ModelCollisionGeometrySurfaceFlags",
+                "endian": null
+            },
+            {
+                "name": "breakable surface",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "material",
+                "type": "Index"
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    },
+    {
+        "name": "ModelCollisionGeometryEdge",
+        "fields": [
+            {
+                "name": "start vertex",
+                "type": "int32"
+            },
+            {
+                "name": "end vertex",
+                "type": "int32"
+            },
+            {
+                "name": "forward edge",
+                "type": "int32"
+            },
+            {
+                "name": "reverse edge",
+                "type": "int32"
+            },
+            {
+                "name": "left surface",
+                "type": "int32"
+            },
+            {
+                "name": "right surface",
+                "type": "int32"
+            }
+        ],
+        "type": "struct",
+        "size": 24
+    },
+    {
+        "name": "ModelCollisionGeometryVertex",
+        "fields": [
+            {
+                "name": "point",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "first edge",
+                "type": "int32"
+            }
+        ],
+        "type": "struct",
+        "size": 16
+    },
+    {
+        "name": "ModelCollisionGeometryBSP",
+        "fields": [
+            {
+                "name": "bsp3d nodes",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryBSP3DNode",
+                "compound": true
+            },
+            {
+                "name": "planes",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryPlane",
+                "compound": true
+            },
+            {
+                "name": "leaves",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryLeaf",
+                "compound": true
+            },
+            {
+                "name": "bsp2d references",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryBSP2DReference",
+                "compound": true
+            },
+            {
+                "name": "bsp2d nodes",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryBSP2DNode",
+                "compound": true
+            },
+            {
+                "name": "surfaces",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometrySurface",
+                "compound": true
+            },
+            {
+                "name": "edges",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryEdge",
+                "compound": true
+            },
+            {
+                "name": "vertices",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryVertex",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 96
+    },
+    {
+        "name": "ModelCollisionGeometryNode",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "region",
+                "type": "Index"
+            },
+            {
+                "name": "parent node",
+                "type": "Index"
+            },
+            {
+                "name": "next sibling node",
+                "type": "Index"
+            },
+            {
+                "name": "first child node",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "bsps",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryBSP",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 64
+    },
+    {
+        "name": "ModelCollisionGeometry",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ModelCollisionGeometryFlags"
+            },
+            {
+                "name": "indirect damage material",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "maximum body vitality",
+                "type": "float"
+            },
+            {
+                "name": "body system shock",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "friendly damage resistance",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "localized damage effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "area damage effect threshold",
+                "type": "float"
+            },
+            {
+                "name": "area damage effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "body damaged threshold",
+                "type": "float"
+            },
+            {
+                "name": "body damaged effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "body depleted effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "body destroyed threshold",
+                "type": "float"
+            },
+            {
+                "name": "body destroyed effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "maximum shield vitality",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "shield material type",
+                "type": "MaterialType"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "shield failure function",
+                "type": "FunctionType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "shield failure threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "failing shield leak fraction",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "minimum stun damage",
+                "type": "float"
+            },
+            {
+                "name": "stun time",
+                "type": "float"
+            },
+            {
+                "name": "recharge time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 96
+            },
+            {
+                "name": "shield damaged threshold",
+                "type": "float"
+            },
+            {
+                "name": "shield damaged effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shield depleted effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shield recharging effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "shield recharge rate",
+                "type": "float",
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 112
+            },
+            {
+                "name": "materials",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryMaterial",
+                "compound": true
+            },
+            {
+                "name": "regions",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryRegion",
+                "compound": true
+            },
+            {
+                "name": "modifiers",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryModifier",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "x",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "y",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "z",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "pathfinding spheres",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometrySphere",
+                "compound": true
+            },
+            {
+                "name": "nodes",
+                "type": "reflexive",
+                "struct": "ModelCollisionGeometryNode",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 664
+    }
+]

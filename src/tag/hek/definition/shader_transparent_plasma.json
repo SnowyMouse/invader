@@ -1,0 +1,154 @@
+[
+    {
+        "name": "ShaderTransparentPlasma",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "intensity source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "intensity exponent",
+                "type": "float"
+            },
+            {
+                "name": "offset source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "offset amount",
+                "type": "float"
+            },
+            {
+                "name": "offset exponent",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "perpendicular brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "perpendicular tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "parallel brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "parallel tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "tint color source",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "primary animation period",
+                "type": "float"
+            },
+            {
+                "name": "primary animation direction",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "primary noise map scale",
+                "type": "float"
+            },
+            {
+                "name": "primary noise map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "secondary animation period",
+                "type": "float"
+            },
+            {
+                "name": "secondary animation direction",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "secondary noise map scale",
+                "type": "float"
+            },
+            {
+                "name": "secondary noise map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 332
+    }
+]

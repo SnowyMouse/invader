@@ -1,0 +1,14 @@
+[
+    {
+        "name": "DeviceLightFixture",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 64
+            }
+        ],
+        "type": "struct",
+        "inherits": "Device",
+        "size": 720
+    }
+]

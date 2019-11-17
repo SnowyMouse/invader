@@ -1,0 +1,63 @@
+[
+    {
+        "name": "MaterialEffectsMaterialEffectMaterial",
+        "fields": [
+            {
+                "name": "effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "size": 48
+    },
+    {
+        "name": "MaterialEffectsMaterialEffect",
+        "fields": [
+            {
+                "name": "materials",
+                "type": "reflexive",
+                "struct": "MaterialEffectsMaterialEffectMaterial",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "size": 28
+    },
+    {
+        "name": "MaterialEffects",
+        "fields": [
+            {
+                "name": "effects",
+                "type": "reflexive",
+                "struct": "MaterialEffectsMaterialEffect",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 128
+            }
+        ],
+        "type": "struct",
+        "size": 140
+    }
+]

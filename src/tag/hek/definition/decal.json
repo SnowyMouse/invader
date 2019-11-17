@@ -1,0 +1,172 @@
+[
+    {
+        "name": "DecalType",
+        "options": [
+            "scratch",
+            "splatter",
+            "burn",
+            "painted sign"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DecalLayer",
+        "options": [
+            "primary",
+            "secondary",
+            "light",
+            "alpha tested",
+            "water"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DecalFlags",
+        "type": "bitfield",
+        "fields": [
+            "geometry inherited by next decal in chain",
+            "interpolate color in hsv",
+            "more colors",
+            "no random rotation",
+            "water effect",
+            "sapien snap to axis",
+            "sapien incremental counter",
+            "animation loop",
+            "preserve aspect"
+        ],
+        "width": 16
+    },
+    {
+        "name": "Decal",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "DecalFlags"
+            },
+            {
+                "name": "type",
+                "type": "DecalType"
+            },
+            {
+                "name": "layer",
+                "type": "DecalLayer"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "next decal in chain",
+                "type": "dependency",
+                "classes": [
+                    "decal"
+                ],
+                "compound": true
+            },
+            {
+                "name": "radius",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "intensity",
+                "bounds": true,
+                "type": "Fraction"
+            },
+            {
+                "name": "color lower bounds",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bounds",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "animation loop frame",
+                "type": "uint16"
+            },
+            {
+                "name": "animation speed",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "name": "lifetime",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "decay time",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "maximum sprite extent",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 268
+    }
+]

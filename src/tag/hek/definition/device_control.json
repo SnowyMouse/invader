@@ -1,0 +1,71 @@
+[
+    {
+        "name": "DeviceType",
+        "options": [
+            "toggle switch",
+            "on button",
+            "off button",
+            "call button"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DeviceTriggersWhen",
+        "options": [
+            "triggers when touched by player",
+            "triggers when destroyed"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "DeviceControl",
+        "fields": [
+            {
+                "name": "type",
+                "type": "DeviceType"
+            },
+            {
+                "name": "triggers when",
+                "type": "DeviceTriggersWhen"
+            },
+            {
+                "name": "call value",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 80
+            },
+            {
+                "name": "on",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "off",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "deny",
+                "type": "dependency",
+                "classes": [
+                    "sound",
+                    "effect"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Device",
+        "size": 792
+    }
+]

@@ -2,8 +2,7 @@
 
 #include <invader/tag/hek/compile.hpp>
 #include <invader/hek/constants.hpp>
-
-#include <invader/tag/hek/class/sound.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_sound_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

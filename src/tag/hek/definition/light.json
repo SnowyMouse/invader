@@ -1,0 +1,198 @@
+[
+    {
+        "name": "LightFlags",
+        "type": "bitfield",
+        "fields": [
+            "dynamic",
+            "no specular",
+            "don't light own object",
+            "supersize in first person",
+            "first person flashlight",
+            "don't fade active camouflage"
+        ],
+        "width": 32
+    },
+    {
+        "name": "Light",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "LightFlags"
+            },
+            {
+                "name": "radius",
+                "type": "float"
+            },
+            {
+                "name": "radius modifer",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "falloff angle",
+                "type": "Angle"
+            },
+            {
+                "name": "cutoff angle",
+                "type": "Angle"
+            },
+            {
+                "name": "lens flare only radius",
+                "type": "float"
+            },
+            {
+                "name": "cos falloff angle",
+                "type": "float"
+            },
+            {
+                "name": "cos cutoff angle",
+                "type": "float"
+            },
+            {
+                "name": "unknown two",
+                "type": "float"
+            },
+            {
+                "name": "sin cutoff angle",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "interpolation flags",
+                "type": "ColorInterpolationFlags"
+            },
+            {
+                "name": "color lower bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "primary cube map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "texture animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "texture animation period",
+                "type": "float"
+            },
+            {
+                "name": "secondary cube map",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "yaw function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "yaw period",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "roll function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "roll period",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "pitch function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "pitch period",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "lens flare",
+                "type": "dependency",
+                "classes": [
+                    "lens_flare"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "intensity",
+                "type": "float"
+            },
+            {
+                "name": "color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "duration",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "falloff function",
+                "type": "FunctionType"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 92
+            }
+        ],
+        "type": "struct",
+        "size": 352
+    }
+]

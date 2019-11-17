@@ -1,0 +1,36 @@
+[
+    {
+        "name": "InputDeviceDefaultsDeviceType",
+        "options": [
+            "mouse and keyboard",
+            "joysticks gamepads etc",
+            "full profile definition"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "InputDeviceDefaults",
+        "fields": [
+            {
+                "name": "device type",
+                "type": "InputDeviceDefaultsDeviceType"
+            },
+            {
+                "name": "unused",
+                "type": "int16"
+            },
+            {
+                "name": "device id",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "profile",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 44
+    }
+]

@@ -2,8 +2,8 @@
 
 #include <invader/hek/constants.hpp>
 #include <invader/tag/hek/compile.hpp>
-
-#include <invader/tag/hek/class/model_collision_geometry.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include "compile.hpp"
 
 namespace Invader::HEK {
     void compile_model_collision_geometry_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -187,7 +187,10 @@ namespace Invader::HEK {
                     // Calculate a point that's almost on the plane
                     auto &plane = planes[node.plane.read()].plane;
                     Point3D<LittleEndian> intersection_front;
-                    intersect_plane_with_points(plane, point_a, point_b, &intersection_front);
+                    bool p = intersect_plane_with_points(plane, point_a, point_b, &intersection_front);
+                    if(!p) {
+                        return false;
+                    }
 
                     Point3D<LittleEndian> point_a_intersection;
                     Point3D<LittleEndian> point_b_intersection;

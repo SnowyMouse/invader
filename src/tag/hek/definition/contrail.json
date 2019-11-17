@@ -1,0 +1,316 @@
+[
+    {
+        "name": "ContrailRenderType",
+        "options": [
+            "vertical orientation",
+            "horizontal orientation",
+            "media mapped",
+            "ground mapped",
+            "viewer facing",
+            "double marker linked"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ContrailPointStateScaleFlags",
+        "type": "bitfield",
+        "fields": [
+            "duration",
+            "duration delta",
+            "transition duration",
+            "transition duration delta",
+            "width",
+            "color"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ContrailFlags",
+        "type": "bitfield",
+        "fields": [
+            "first point unfaded",
+            "last point unfaded",
+            "points start pinned to media",
+            "points start pinned to ground",
+            "points always pinned to media",
+            "points always pinned to ground",
+            "edge effect fades slowly"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ContrailScaleFlags",
+        "type": "bitfield",
+        "fields": [
+            "point generation rate",
+            "point velocity",
+            "point velocity delta",
+            "point velocity cone angle",
+            "inherited velocity fraction",
+            "sequence animation rate",
+            "texture scale u",
+            "texture scale v",
+            "texture animation u",
+            "texture animation v"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ContrailPointState",
+        "fields": [
+            {
+                "name": "duration",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "transition duration",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "physics",
+                "type": "dependency",
+                "classes": [
+                    "point_physics"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "width",
+                "type": "float"
+            },
+            {
+                "name": "color lower bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "scale flags",
+                "type": "ContrailPointStateScaleFlags"
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "Contrail",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ContrailFlags"
+            },
+            {
+                "name": "scale flags",
+                "type": "ContrailScaleFlags"
+            },
+            {
+                "name": "point generation rate",
+                "type": "float"
+            },
+            {
+                "name": "point velocity",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "point velocity cone angle",
+                "type": "Angle"
+            },
+            {
+                "name": "inherited velocity fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "render type",
+                "type": "ContrailRenderType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "texture repeats u",
+                "type": "float"
+            },
+            {
+                "name": "texture repeats v",
+                "type": "float"
+            },
+            {
+                "name": "texture animation u",
+                "type": "float"
+            },
+            {
+                "name": "texture animation v",
+                "type": "float"
+            },
+            {
+                "name": "animation rate",
+                "type": "float"
+            },
+            {
+                "name": "bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "first sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "sequence count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 64
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "unknown int",
+                "type": "uint32"
+            },
+            {
+                "name": "shader flags",
+                "type": "ParticleShaderFlags"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "map flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "secondary bitmap",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "anchor",
+                "type": "ParticleAnchor"
+            },
+            {
+                "name": "secondary map flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "zsprite radius scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "point states",
+                "type": "reflexive",
+                "struct": "ContrailPointState",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 324
+    }
+]

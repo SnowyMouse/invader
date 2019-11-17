@@ -1,0 +1,210 @@
+[
+    {
+        "name": "SoundLoopingTrackFlags",
+        "type": "bitfield",
+        "fields": [
+            "fade in at start",
+            "fade out at stop",
+            "fade in alternate"
+        ],
+        "width": 32
+    },
+    {
+        "name": "SoundLoopingDetailFlags",
+        "type": "bitfield",
+        "fields": [
+            "don't play with alternate",
+            "don't play without alternate"
+        ],
+        "width": 32
+    },
+    {
+        "name": "SoundLoopingFlags",
+        "type": "bitfield",
+        "fields": [
+            "deafening to ais",
+            "not a loop",
+            "stops music"
+        ],
+        "width": 32
+    },
+    {
+        "name": "SoundLoopingTrack",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "SoundLoopingTrackFlags"
+            },
+            {
+                "name": "gain",
+                "type": "Fraction"
+            },
+            {
+                "name": "fade in duration",
+                "type": "float"
+            },
+            {
+                "name": "fade out duration",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "start",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "loop",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "end",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "alternate loop",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alternate end",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 160
+    },
+    {
+        "name": "SoundLoopingDetail",
+        "fields": [
+            {
+                "name": "sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "random period bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "gain",
+                "type": "Fraction"
+            },
+            {
+                "name": "flags",
+                "type": "SoundLoopingDetailFlags"
+            },
+            {
+                "type": "pad",
+                "size": 48
+            },
+            {
+                "name": "yaw bounds",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "pitch bounds",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "distance bounds",
+                "bounds": true,
+                "type": "float"
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "SoundLooping",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "SoundLoopingFlags"
+            },
+            {
+                "name": "zero detail sound period",
+                "type": "float"
+            },
+            {
+                "name": "zero detail unknown floats",
+                "type": "float",
+                "count": 2
+            },
+            {
+                "name": "one detail sound period",
+                "type": "float"
+            },
+            {
+                "name": "one detail unknown floats",
+                "type": "float",
+                "count": 2
+            },
+            {
+                "name": "unknown int",
+                "type": "int32"
+            },
+            {
+                "name": "unknown float",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "continuous damage effect",
+                "type": "dependency",
+                "classes": [
+                    "continuous_damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "tracks",
+                "type": "reflexive",
+                "struct": "SoundLoopingTrack",
+                "compound": true
+            },
+            {
+                "name": "detail sounds",
+                "type": "reflexive",
+                "struct": "SoundLoopingDetail",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 84
+    }
+]

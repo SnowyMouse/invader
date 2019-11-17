@@ -6,7 +6,7 @@
 #include <invader/printf.hpp>
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
-#include <invader/tag/hek/class/string_list.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
 

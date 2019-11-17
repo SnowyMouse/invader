@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/compile.hpp>
-#include <invader/tag/hek/class/gbxmodel.hpp>
+#include <invader/tag/hek/definition.hpp>
 #include <invader/file/file.hpp>
 
 namespace Invader::HEK {
@@ -328,7 +328,12 @@ namespace Invader::HEK {
                 }
 
                 exodux_handler = !exodux_handler;
-                reflexive.bullshit = exodux_value;
+
+                // Do an endian swap of the exodux rainbow table checksum hash
+                reflexive.bullshit = (exodux_value & 0xFF000000) >> 24 |
+                                     (exodux_value & 0xFF0000) >> 8 |
+                                     (exodux_value & 0xFF00) << 8 |
+                                     (exodux_value & 0xFF) << 24;
 
                 reflexive.triangles.count = 0;
 

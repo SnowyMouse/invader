@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/compile.hpp>
-
-#include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_bitmap_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -101,35 +100,35 @@ namespace Invader::HEK {
             // Now, set the size based on number of pixels
             switch(reflexive.format.read()) {
                 // 8-bit
-                case BITMAP_FORMAT_A8:
-                case BITMAP_FORMAT_Y8:
-                case BITMAP_FORMAT_P8_BUMP:
-                case BITMAP_FORMAT_AY8:
+                case BITMAP_DATA_FORMAT_A8:
+                case BITMAP_DATA_FORMAT_Y8:
+                case BITMAP_DATA_FORMAT_P8_BUMP:
+                case BITMAP_DATA_FORMAT_AY8:
                     reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count);
                     break;
 
                 // 8-bit DXT (4x4 blocks)
-                case BITMAP_FORMAT_DXT3:
-                case BITMAP_FORMAT_DXT5:
+                case BITMAP_DATA_FORMAT_DXT3:
+                case BITMAP_DATA_FORMAT_DXT5:
                     reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt);
                     break;
 
                 // 16-bit
-                case BITMAP_FORMAT_A8Y8:
-                case BITMAP_FORMAT_R5G6B5:
-                case BITMAP_FORMAT_A1R5G5B5:
-                case BITMAP_FORMAT_A4R4G4B4:
+                case BITMAP_DATA_FORMAT_A8Y8:
+                case BITMAP_DATA_FORMAT_R5G6B5:
+                case BITMAP_DATA_FORMAT_A1R5G5B5:
+                case BITMAP_DATA_FORMAT_A4R4G4B4:
                     reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 2);
                     break;
 
                 // 32-bit
-                case BITMAP_FORMAT_X8R8G8B8:
-                case BITMAP_FORMAT_A8R8G8B8:
+                case BITMAP_DATA_FORMAT_X8R8G8B8:
+                case BITMAP_DATA_FORMAT_A8R8G8B8:
                     reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 4);
                     break;
 
                 // 4-bit DXT (4x4 blocks)
-                case BITMAP_FORMAT_DXT1:
+                case BITMAP_DATA_FORMAT_DXT1:
                     reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
                     break;
 

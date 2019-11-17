@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/compile.hpp>
-#include <invader/tag/hek/class/shader_model.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include "compile.hpp"
 
 namespace Invader::HEK {
     void compile_shader_model_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -16,7 +17,7 @@ namespace Invader::HEK {
         DEFAULT_VALUE(tag.map_v_scale, tag.map_u_scale);
         DEFAULT_VALUE(tag.detail_map_scale, 1.0f);
         DEFAULT_VALUE(tag.detail_map_v_scale, 1.0f);
-        DEFAULT_VALUE(tag.unknown, 1.0f);
+        tag.unknown = 1.0f;
         tag.shader_type = SHADER_TYPE_SHADER_MODEL;
         FINISH_COMPILE
     }

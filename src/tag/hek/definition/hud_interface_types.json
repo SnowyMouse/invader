@@ -1,0 +1,338 @@
+[
+    {
+        "name": "HUDInterfaceDestinationType",
+        "options": [
+            "tint 0 1",
+            "horizontal offset",
+            "vertical offset",
+            "fade 0 1"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceDestination",
+        "options": [
+            "geometry offset",
+            "primary map",
+            "secondary map",
+            "tertiary map"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceSource",
+        "options": [
+            "player pitch",
+            "player pitch tangent",
+            "player yaw",
+            "weapon ammo total",
+            "weapon ammo loaded",
+            "weapon heat",
+            "explicit uses low bound",
+            "weapon zoom level"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceMultitextureOverlayAnchor",
+        "options": [
+            "texture",
+            "screen"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceZeroToOneBlendFunction",
+        "options": [
+            "add",
+            "subtract",
+            "multiply",
+            "multiply2x",
+            "dot"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceWrapMode",
+        "options": [
+            "clamp",
+            "wrap"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceAnchor",
+        "options": [
+            "top left",
+            "top right",
+            "bottom left",
+            "bottom right",
+            "center"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "HUDInterfaceMeterFlags",
+        "type": "bitfield",
+        "fields": [
+            "use min max for state changes",
+            "interpolate between min max flash colors as state changes",
+            "interpolate color along hsv space",
+            "more colors for hsv interpolation",
+            "invert interpolation"
+        ],
+        "width": 8
+    },
+    {
+        "name": "HUDInterfaceScalingFlags",
+        "type": "bitfield",
+        "fields": [
+            "don't scale offset",
+            "don't scale size",
+            "use high res scale"
+        ],
+        "width": 16
+    },
+    {
+        "name": "HUDInterfaceFlashFlags",
+        "type": "bitfield",
+        "fields": [
+            "reverse default flashing colors"
+        ],
+        "width": 16
+    },
+    {
+        "name": "HUDInterfaceNumberFlags",
+        "type": "bitfield",
+        "fields": [
+            "show leading zeros",
+            "only show when zoomed",
+            "draw a trailing m"
+        ],
+        "width": 8
+    },
+    {
+        "name": "HUDInterfaceOverlayFlashFlags",
+        "type": "bitfield",
+        "fields": [
+            "flashes when active"
+        ],
+        "width": 32
+    },
+    {
+        "name": "HUDInterfaceMessagingFlags",
+        "type": "bitfield",
+        "fields": [
+            "use text from string list instead",
+            "override default color",
+            "width offset is absolute icon width"
+        ],
+        "width": 8
+    },
+    {
+        "name": "HUDInterfaceMultitextureOverlayEffector",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 64
+            },
+            {
+                "name": "destination type",
+                "type": "HUDInterfaceDestinationType"
+            },
+            {
+                "name": "destination",
+                "type": "HUDInterfaceDestination"
+            },
+            {
+                "name": "source",
+                "type": "HUDInterfaceSource"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "in bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "out bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 64
+            },
+            {
+                "name": "tint color lower bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "tint color upper bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "periodic function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "function period",
+                "type": "float"
+            },
+            {
+                "name": "function phase",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "size": 220
+    },
+    {
+        "name": "HUDInterfaceMultitextureOverlay",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "type",
+                "type": "int16"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "primary anchor",
+                "type": "HUDInterfaceAnchor"
+            },
+            {
+                "name": "secondary anchor",
+                "type": "HUDInterfaceMultitextureOverlayAnchor"
+            },
+            {
+                "name": "tertiary anchor",
+                "type": "HUDInterfaceMultitextureOverlayAnchor"
+            },
+            {
+                "name": "zero to one blend function",
+                "type": "HUDInterfaceZeroToOneBlendFunction"
+            },
+            {
+                "name": "one to two blend function",
+                "type": "HUDInterfaceZeroToOneBlendFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "primary scale",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "secondary scale",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "tertiary scale",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "primary offset",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "secondary offset",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "tertiary offset",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "primary",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "secondary",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "tertiary",
+                "type": "dependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "primary wrap mode",
+                "type": "HUDInterfaceWrapMode"
+            },
+            {
+                "name": "secondary wrap mode",
+                "type": "HUDInterfaceWrapMode"
+            },
+            {
+                "name": "tertiary wrap mode",
+                "type": "HUDInterfaceWrapMode"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 184
+            },
+            {
+                "name": "effectors",
+                "type": "reflexive",
+                "struct": "HUDInterfaceMultitextureOverlayEffector",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 128
+            }
+        ],
+        "type": "struct",
+        "size": 480
+    }
+]

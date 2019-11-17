@@ -1,0 +1,27 @@
+[
+    {
+        "name": "IsUnusedFlag",
+        "type": "bitfield",
+        "fields": [
+            "unused"
+        ],
+        "width": 32
+    },
+    {
+        "name": "IsUnfilteredFlag",
+        "type": "bitfield",
+        "fields": [
+            "unfiltered"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ColorInterpolationFlags",
+        "type": "bitfield",
+        "fields": [
+            "blend in hsv",
+            "more colors"
+        ],
+        "width": 32
+    }
+]

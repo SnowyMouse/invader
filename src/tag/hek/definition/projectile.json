@@ -1,0 +1,336 @@
+[
+    {
+        "name": "ProjectileResponse",
+        "options": [
+            "disappear",
+            "detonate",
+            "reflect",
+            "overpenetrate",
+            "attach"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ProjectileScaleEffectsBy",
+        "options": [
+            "damage",
+            "angle"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ProjectileDetonationTimerStarts",
+        "options": [
+            "immediately",
+            "after first bounce",
+            "when at rest"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ProjectileFunctionIn",
+        "options": [
+            "none",
+            "range remaining",
+            "time remaining",
+            "tracer"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ProjectileFlags",
+        "type": "bitfield",
+        "fields": [
+            "oriented along velocity",
+            "ai must use ballistic aiming",
+            "detonation max time if attached",
+            "has super combining explosion",
+            "combine initial velocity with parent velocity",
+            "random attached detonation time",
+            "minimum unattached detonation time"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ProjectileMaterialResponseFlags",
+        "type": "bitfield",
+        "fields": [
+            "cannot be overpenetrated"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ProjectileMaterialResponsePotentialFlags",
+        "type": "bitfield",
+        "fields": [
+            "only against units"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ProjectileMaterialResponse",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ProjectileMaterialResponseFlags"
+            },
+            {
+                "name": "default response",
+                "type": "ProjectileResponse"
+            },
+            {
+                "name": "default effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "potential response",
+                "type": "ProjectileResponse"
+            },
+            {
+                "name": "potential flags",
+                "type": "ProjectileMaterialResponsePotentialFlags"
+            },
+            {
+                "name": "potential skip fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "potential between",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "potential and",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "potential effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "scale effects by",
+                "type": "ProjectileScaleEffectsBy"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "angular noise",
+                "type": "Angle"
+            },
+            {
+                "name": "velocity noise",
+                "type": "float"
+            },
+            {
+                "name": "detonation effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "initial friction",
+                "type": "float"
+            },
+            {
+                "name": "maximum distance",
+                "type": "float"
+            },
+            {
+                "name": "parallel friction",
+                "type": "float"
+            },
+            {
+                "name": "perpendicular friction",
+                "type": "float"
+            }
+        ],
+        "type": "struct",
+        "size": 160
+    },
+    {
+        "name": "Projectile",
+        "fields": [
+            {
+                "name": "projectile flags",
+                "type": "ProjectileFlags"
+            },
+            {
+                "name": "detonation timer starts",
+                "type": "ProjectileDetonationTimerStarts"
+            },
+            {
+                "name": "impact noise",
+                "type": "ObjectNoise"
+            },
+            {
+                "name": "projectile a in",
+                "type": "ProjectileFunctionIn"
+            },
+            {
+                "name": "projectile b in",
+                "type": "ProjectileFunctionIn"
+            },
+            {
+                "name": "projectile c in",
+                "type": "ProjectileFunctionIn"
+            },
+            {
+                "name": "projectile d in",
+                "type": "ProjectileFunctionIn"
+            },
+            {
+                "name": "super detonation",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "ai perception radius",
+                "type": "float"
+            },
+            {
+                "name": "collision radius",
+                "type": "float"
+            },
+            {
+                "name": "arming time",
+                "type": "float"
+            },
+            {
+                "name": "danger radius",
+                "type": "float"
+            },
+            {
+                "name": "effect",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "timer",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "minimum velocity",
+                "type": "float"
+            },
+            {
+                "name": "maximum range",
+                "type": "float"
+            },
+            {
+                "name": "air gravity scale",
+                "type": "float"
+            },
+            {
+                "name": "air damage range",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "water gravity scale",
+                "type": "float"
+            },
+            {
+                "name": "water damage range",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "initial velocity",
+                "type": "float"
+            },
+            {
+                "name": "final velocity",
+                "type": "float"
+            },
+            {
+                "name": "guided angular velocity",
+                "type": "Angle"
+            },
+            {
+                "name": "detonation noise",
+                "type": "ObjectNoise"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "detonation started",
+                "type": "dependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flyby sound",
+                "type": "dependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "attached detonation damage",
+                "type": "dependency",
+                "classes": [
+                    "damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "impact damage",
+                "type": "dependency",
+                "classes": [
+                    "damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "projectile material response",
+                "type": "reflexive",
+                "struct": "ProjectileMaterialResponse",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 588
+    }
+]
