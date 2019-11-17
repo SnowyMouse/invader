@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.18.0] - 2019-11-17
 ### Changed
 - All tag definitions have been converted to .json format .This will allow them
   to be used for even more purposes than before.
