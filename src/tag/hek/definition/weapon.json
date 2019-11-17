@@ -519,7 +519,7 @@
         "name": "Weapon",
         "fields": [
             {
-                "name": "flags",
+                "name": "weapon flags",
                 "type": "WeaponFlags"
             },
             {

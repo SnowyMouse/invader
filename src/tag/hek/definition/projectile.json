@@ -176,7 +176,7 @@
         "name": "Projectile",
         "fields": [
             {
-                "name": "flags",
+                "name": "projectile flags",
                 "type": "ProjectileFlags"
             },
             {
