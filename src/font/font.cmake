@@ -20,4 +20,6 @@ if(${INVADER_FONT})
     )
 
     target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES})
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-font)
 endif()

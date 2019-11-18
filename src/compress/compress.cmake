@@ -9,4 +9,6 @@ if(${INVADER_COMPRESS})
         src/compress/compress.cpp
     )
     target_link_libraries(invader-compress invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-compress)
 endif()

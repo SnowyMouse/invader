@@ -9,4 +9,6 @@ if(${INVADER_INFO})
         src/info/info.cpp
     )
     target_link_libraries(invader-info invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-info)
 endif()

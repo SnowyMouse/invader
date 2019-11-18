@@ -9,4 +9,6 @@ if(${INVADER_RESOURCE})
         src/resource/resource.cpp
     )
     target_link_libraries(invader-resource invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-resource)
 endif()

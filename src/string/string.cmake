@@ -9,4 +9,6 @@ if(${INVADER_STRING})
         src/string/string.cpp
     )
     target_link_libraries(invader-string invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-string)
 endif()

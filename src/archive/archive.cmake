@@ -16,4 +16,6 @@ if(${INVADER_ARCHIVE})
     )
     target_include_directories(invader-archive PUBLIC ${LibArchive_INCLUDE_DIRS})
     target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES})
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-archive)
 endif()

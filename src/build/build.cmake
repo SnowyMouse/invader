@@ -9,4 +9,6 @@ if(${INVADER_BUILD})
         src/build/build.cpp
     )
     target_link_libraries(invader-build invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-build)
 endif()

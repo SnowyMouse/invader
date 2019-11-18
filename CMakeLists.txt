@@ -19,6 +19,9 @@ set(CMAKE_C_STANDARD 99)
 # Add our dependencies
 include(dependencies.cmake)
 
+# Start here
+set(TARGETS_LIST invader)
+
 # If we have Git, try to see if we are in a git repo
 if(${GIT_FOUND})
     execute_process(
@@ -65,3 +68,16 @@ include(src/font/font.cmake)
 include(src/string/string.cmake)
 include(src/compress/compress.cmake)
 include(src/info/info.cmake)
+
+# Install stuff
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/invader
+    DESTINATION include
+)
+
+# Install programs
+install(
+    TARGETS ${TARGETS_LIST}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+)

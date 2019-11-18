@@ -24,4 +24,6 @@ if(${INVADER_BITMAP})
     )
 
     target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES})
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-bitmap)
 endif()

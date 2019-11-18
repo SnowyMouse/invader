@@ -9,4 +9,6 @@ if(${INVADER_INDEXER})
         src/indexer/indexer.cpp
     )
     target_link_libraries(invader-indexer invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-indexer)
 endif()

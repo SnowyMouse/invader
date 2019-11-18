@@ -9,4 +9,6 @@ if(${INVADER_DEPENDENCY})
         src/dependency/dependency.cpp
     )
     target_link_libraries(invader-dependency invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-dependency)
 endif()
