@@ -146,7 +146,7 @@
             },
             {
                 "name": "type",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect",
                     "object",
@@ -244,7 +244,7 @@
             },
             {
                 "name": "particle type",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "particle"
                 ],
@@ -356,13 +356,13 @@
             },
             {
                 "name": "parts",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "EffectPart",
                 "compound": true
             },
             {
                 "name": "particles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "EffectParticle",
                 "compound": true
             }
@@ -391,13 +391,13 @@
             },
             {
                 "name": "locations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "EffectLocation",
                 "compound": true
             },
             {
                 "name": "events",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "EffectEvent",
                 "compound": true
             }

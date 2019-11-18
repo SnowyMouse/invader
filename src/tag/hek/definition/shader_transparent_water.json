@@ -75,7 +75,7 @@
             },
             {
                 "name": "base map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -109,7 +109,7 @@
             },
             {
                 "name": "reflection map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -133,7 +133,7 @@
             },
             {
                 "name": "ripple maps",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -161,7 +161,7 @@
             },
             {
                 "name": "ripples",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ShaderTransparentWaterRipple",
                 "compound": true
             },

@@ -197,7 +197,7 @@
             },
             {
                 "name": "permutations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SoundPermutation",
                 "compound": true
             }
@@ -303,7 +303,7 @@
             },
             {
                 "name": "promotion sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -337,7 +337,7 @@
             },
             {
                 "name": "pitch ranges",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SoundPitchRange",
                 "compound": true
             }

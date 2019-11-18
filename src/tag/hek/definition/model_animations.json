@@ -248,7 +248,7 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationWeaponTypeAnimation",
                 "compound": true
             }
@@ -312,19 +312,19 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationWeaponClassAnimation",
                 "compound": true
             },
             {
                 "name": "ik point",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphUnitSeatikPoint",
                 "compound": true
             },
             {
                 "name": "weapon types",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphWeaponType",
                 "compound": true
             }
@@ -378,19 +378,19 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationWeaponClassAnimation",
                 "compound": true
             },
             {
                 "name": "ik points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphUnitSeatikPoint",
                 "compound": true
             },
             {
                 "name": "weapons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphWeapon",
                 "compound": true
             }
@@ -418,7 +418,7 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationWeaponAnimation",
                 "compound": true
             }
@@ -505,13 +505,13 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationVehicleAnimation",
                 "compound": true
             },
             {
                 "name": "suspension animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationSuspensionAnimation",
                 "compound": true
             }
@@ -539,7 +539,7 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationDeviceAnimation",
                 "compound": true
             }
@@ -578,7 +578,7 @@
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationFirstPersonWeapon",
                 "compound": true
             }
@@ -592,7 +592,7 @@
         "fields": [
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "sound"
@@ -789,49 +789,49 @@
         "fields": [
             {
                 "name": "objects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphObjectOverlay",
                 "compound": true
             },
             {
                 "name": "units",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphUnitSeat",
                 "compound": true
             },
             {
                 "name": "weapons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphWeaponAnimations",
                 "compound": true
             },
             {
                 "name": "vehicles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphVehicleAnimations",
                 "compound": true
             },
             {
                 "name": "devices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationDeviceAnimations",
                 "compound": true
             },
             {
                 "name": "unit damage",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationUnitDamageAnimations",
                 "compound": true
             },
             {
                 "name": "first person weapons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphFirstPersonWeaponAnimations",
                 "compound": true
             },
             {
                 "name": "sound references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphSoundReference",
                 "compound": true
             },
@@ -849,13 +849,13 @@
             },
             {
                 "name": "nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimationGraphNode",
                 "compound": true
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelAnimationAnimation",
                 "compound": true
             }

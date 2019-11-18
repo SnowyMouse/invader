@@ -117,7 +117,7 @@
         "fields": [
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "sound_looping"
@@ -182,7 +182,7 @@
             },
             {
                 "name": "background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -234,7 +234,7 @@
             },
             {
                 "name": "background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -269,7 +269,7 @@
             },
             {
                 "name": "total grenades background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -321,7 +321,7 @@
             },
             {
                 "name": "total grenades background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -423,7 +423,7 @@
             },
             {
                 "name": "total grenades overlay bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -431,13 +431,13 @@
             },
             {
                 "name": "total grenades overlays",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceOverlay",
                 "compound": true
             },
             {
                 "name": "total grenades warning sounds",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GrenadeHUDInterfaceSound",
                 "compound": true
             },

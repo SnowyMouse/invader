@@ -183,7 +183,7 @@
             },
             {
                 "name": "sprites",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
                 "compound": true
             }
@@ -346,13 +346,13 @@
             },
             {
                 "name": "bitmap group sequence",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
                 "compound": true
             },
             {
                 "name": "bitmap data",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "BitmapData",
                 "compound": true
             }

@@ -86,7 +86,7 @@
             },
             {
                 "name": "unselected background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -94,7 +94,7 @@
             },
             {
                 "name": "selected background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -102,7 +102,7 @@
             },
             {
                 "name": "active background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -110,7 +110,7 @@
             },
             {
                 "name": "sticky background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -125,7 +125,7 @@
         "fields": [
             {
                 "name": "display font",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -133,7 +133,7 @@
             },
             {
                 "name": "background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -141,7 +141,7 @@
             },
             {
                 "name": "special key labels string list",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unicode_string"
                 ],
@@ -149,7 +149,7 @@
             },
             {
                 "name": "virtual keys",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "VirtualKeyboardVirtualKey",
                 "compound": true
             }

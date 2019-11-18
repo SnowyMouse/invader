@@ -107,7 +107,7 @@
             },
             {
                 "name": "primary noise map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -136,7 +136,7 @@
             },
             {
                 "name": "secondary noise map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

@@ -350,7 +350,7 @@
             },
             {
                 "name": "do not use",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon"
                 ],
@@ -362,7 +362,7 @@
             },
             {
                 "name": "do not use 1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "projectile"
                 ],
@@ -662,7 +662,7 @@
             },
             {
                 "name": "do not use 2",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor"
                 ],

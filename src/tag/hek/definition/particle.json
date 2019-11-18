@@ -55,7 +55,7 @@
             },
             {
                 "name": "bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -63,7 +63,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -71,7 +71,7 @@
             },
             {
                 "name": "sir marty exchanged his children for thine",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "material_effect"
                 ],
@@ -96,7 +96,7 @@
             },
             {
                 "name": "collision effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -105,7 +105,7 @@
             },
             {
                 "name": "death effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -219,7 +219,7 @@
             },
             {
                 "name": "bitmap1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

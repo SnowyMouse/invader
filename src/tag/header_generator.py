@@ -72,7 +72,7 @@ def add_struct(name):
         dependencies.append(struct_to_add["inherits"])
 
     for f in s["fields"]:
-        if f["type"] == "reflexive":
+        if f["type"] == "TagReflexive":
             if f["struct"] not in dependencies:
                 dependencies.append(f["struct"])
 
@@ -126,11 +126,7 @@ with open(sys.argv[1], "w") as f:
         for n in s["fields"]:
             type_to_write = n["type"]
 
-            if type_to_write == "reflexive":
-                type_to_write = "TagReflexive"
-            elif type_to_write == "dependency":
-                type_to_write = "TagDependency"
-            elif type_to_write.startswith("int") or type_to_write.startswith("uint"):
+            if type_to_write.startswith("int") or type_to_write.startswith("uint"):
                 type_to_write = "std::{}_t".format(type_to_write)
             elif type_to_write == "pad":
                 f.write("        PAD(0x{:X});\n".format(n["size"]))
@@ -212,10 +208,17 @@ with open(sys.argv[1], "w") as f:
 
 with open(sys.argv[2], "w") as f:
     f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
-    header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
+    header_name = "INVADER__TAG__PARSER__PARSER_HPP"
     f.write("#ifndef {}\n".format(header_name))
     f.write("#define {}\n\n".format(header_name))
+    f.write("#include \"../hek/definition.hpp\"\n")
     f.write("namespace Invader::Parser {\n")
+    for s in all_structs_arranged:
+        f.write("    struct {} {{\n".format(s["name"]))
+        for t in s["fields"]:
+            if t["type"] == "pad":
+                continue
+        f.write("    };\n")
     f.write("}\n")
     f.write("#endif\n")
     pass

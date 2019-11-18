@@ -459,7 +459,7 @@
             },
             {
                 "name": "widget tag",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
                 ],
@@ -467,7 +467,7 @@
             },
             {
                 "name": "sound effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             },
@@ -501,7 +501,7 @@
         "fields": [
             {
                 "name": "widget tag",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
                 ],
@@ -533,7 +533,7 @@
         "fields": [
             {
                 "name": "widget tag",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
                 ],
@@ -603,7 +603,7 @@
             },
             {
                 "name": "background bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -611,19 +611,19 @@
             },
             {
                 "name": "game data inputs",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GameDataInputReference",
                 "compound": true
             },
             {
                 "name": "event handlers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "EventHandlerReference",
                 "compound": true
             },
             {
                 "name": "search and replace functions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SearchAndReplaceReference",
                 "compound": true
             },
@@ -633,13 +633,13 @@
             },
             {
                 "name": "text label unicode strings list",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             },
             {
                 "name": "text font",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -688,7 +688,7 @@
             },
             {
                 "name": "list header bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -696,7 +696,7 @@
             },
             {
                 "name": "list footer bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -718,7 +718,7 @@
             },
             {
                 "name": "extended description widget",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "ui_widget_definition"
                 ],
@@ -734,7 +734,7 @@
             },
             {
                 "name": "conditional widgets",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ConditionalWidgetReference",
                 "compound": true
             },
@@ -748,7 +748,7 @@
             },
             {
                 "name": "child widgets",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ChildWidgetReference",
                 "compound": true
             }

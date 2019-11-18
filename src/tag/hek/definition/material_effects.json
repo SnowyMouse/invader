@@ -4,7 +4,7 @@
         "fields": [
             {
                 "name": "effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -12,7 +12,7 @@
             },
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -31,7 +31,7 @@
         "fields": [
             {
                 "name": "materials",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffectMaterial",
                 "compound": true
             },
@@ -48,7 +48,7 @@
         "fields": [
             {
                 "name": "effects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "MaterialEffectsMaterialEffect",
                 "compound": true
             },

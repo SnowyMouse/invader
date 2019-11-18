@@ -28,7 +28,7 @@
             },
             {
                 "name": "map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

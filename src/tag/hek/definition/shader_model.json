@@ -114,7 +114,7 @@
             },
             {
                 "name": "base map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -126,7 +126,7 @@
             },
             {
                 "name": "multipurpose map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -150,7 +150,7 @@
             },
             {
                 "name": "detail map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -261,7 +261,7 @@
             },
             {
                 "name": "reflection cube map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

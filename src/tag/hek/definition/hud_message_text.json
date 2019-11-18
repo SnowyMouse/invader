@@ -59,13 +59,13 @@
             },
             {
                 "name": "message elements",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDMessageTextElement",
                 "compound": true
             },
             {
                 "name": "messages",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDMessageTextMessage",
                 "compound": true
             },

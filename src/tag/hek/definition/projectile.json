@@ -80,7 +80,7 @@
             },
             {
                 "name": "default effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -114,7 +114,7 @@
             },
             {
                 "name": "potential effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -142,7 +142,7 @@
             },
             {
                 "name": "detonation effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -205,7 +205,7 @@
             },
             {
                 "name": "super detonation",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -229,7 +229,7 @@
             },
             {
                 "name": "effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -288,7 +288,7 @@
             },
             {
                 "name": "detonation started",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -296,7 +296,7 @@
             },
             {
                 "name": "flyby sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -304,7 +304,7 @@
             },
             {
                 "name": "attached detonation damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -312,7 +312,7 @@
             },
             {
                 "name": "impact damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -324,7 +324,7 @@
             },
             {
                 "name": "projectile material response",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ProjectileMaterialResponse",
                 "compound": true
             }

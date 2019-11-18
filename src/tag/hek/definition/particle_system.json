@@ -132,7 +132,7 @@
             },
             {
                 "name": "physics constants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
                 "compound": true
             }
@@ -160,7 +160,7 @@
             },
             {
                 "name": "bitmaps",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -209,7 +209,7 @@
             },
             {
                 "name": "point physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -250,7 +250,7 @@
             },
             {
                 "name": "secondary map bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -343,7 +343,7 @@
             },
             {
                 "name": "physics constants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
                 "compound": true
             }
@@ -401,19 +401,19 @@
             },
             {
                 "name": "physics constants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
                 "compound": true
             },
             {
                 "name": "states",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemTypeStates",
                 "compound": true
             },
             {
                 "name": "particle states",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemTypeParticleState",
                 "compound": true
             }
@@ -434,7 +434,7 @@
             },
             {
                 "name": "point physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -454,13 +454,13 @@
             },
             {
                 "name": "physics constants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
                 "compound": true
             },
             {
                 "name": "particle types",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ParticleSystemType",
                 "compound": true
             }

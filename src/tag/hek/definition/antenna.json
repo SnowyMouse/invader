@@ -61,7 +61,7 @@
             },
             {
                 "name": "bitmaps",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -69,7 +69,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -101,7 +101,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "AntennaVertex",
                 "compound": true
             }

@@ -249,7 +249,7 @@
             },
             {
                 "name": "texture",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

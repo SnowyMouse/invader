@@ -16,7 +16,7 @@
             },
             {
                 "name": "idle noncombat",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -24,7 +24,7 @@
             },
             {
                 "name": "idle combat",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -32,7 +32,7 @@
             },
             {
                 "name": "idle flee",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -52,7 +52,7 @@
             },
             {
                 "name": "pain body minor",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -60,7 +60,7 @@
             },
             {
                 "name": "pain body major",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -68,7 +68,7 @@
             },
             {
                 "name": "pain shield",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -76,7 +76,7 @@
             },
             {
                 "name": "pain falling",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -84,7 +84,7 @@
             },
             {
                 "name": "scream fear",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -92,7 +92,7 @@
             },
             {
                 "name": "scream pain",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -100,7 +100,7 @@
             },
             {
                 "name": "maimed limb",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -108,7 +108,7 @@
             },
             {
                 "name": "maimed head",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -116,7 +116,7 @@
             },
             {
                 "name": "death quiet",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -124,7 +124,7 @@
             },
             {
                 "name": "death violent",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -132,7 +132,7 @@
             },
             {
                 "name": "death falling",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -140,7 +140,7 @@
             },
             {
                 "name": "death agonizing",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -148,7 +148,7 @@
             },
             {
                 "name": "death instant",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -156,7 +156,7 @@
             },
             {
                 "name": "death flying",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -168,7 +168,7 @@
             },
             {
                 "name": "damaged friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -176,7 +176,7 @@
             },
             {
                 "name": "damaged friend player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -184,7 +184,7 @@
             },
             {
                 "name": "damaged enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -192,7 +192,7 @@
             },
             {
                 "name": "damaged enemy cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -216,7 +216,7 @@
             },
             {
                 "name": "hurt friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -224,7 +224,7 @@
             },
             {
                 "name": "hurt friend re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -232,7 +232,7 @@
             },
             {
                 "name": "hurt friend player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -240,7 +240,7 @@
             },
             {
                 "name": "hurt enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -248,7 +248,7 @@
             },
             {
                 "name": "hurt enemy re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -256,7 +256,7 @@
             },
             {
                 "name": "hurt enemy cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -264,7 +264,7 @@
             },
             {
                 "name": "hurt enemy bullet",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -272,7 +272,7 @@
             },
             {
                 "name": "hurt enemy needler",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -280,7 +280,7 @@
             },
             {
                 "name": "hurt enemy plasma",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -288,7 +288,7 @@
             },
             {
                 "name": "hurt enemy sniper",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -296,7 +296,7 @@
             },
             {
                 "name": "hurt enemy grenade",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -304,7 +304,7 @@
             },
             {
                 "name": "hurt enemy explosion",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -312,7 +312,7 @@
             },
             {
                 "name": "hurt enemy melee",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -320,7 +320,7 @@
             },
             {
                 "name": "hurt enemy flame",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -328,7 +328,7 @@
             },
             {
                 "name": "hurt enemy shotgun",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -336,7 +336,7 @@
             },
             {
                 "name": "hurt enemy vehicle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -344,7 +344,7 @@
             },
             {
                 "name": "hurt enemy mountedweapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -364,7 +364,7 @@
             },
             {
                 "name": "killed friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -372,7 +372,7 @@
             },
             {
                 "name": "killed friend cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -380,7 +380,7 @@
             },
             {
                 "name": "killed friend player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -388,7 +388,7 @@
             },
             {
                 "name": "killed friend player cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -396,7 +396,7 @@
             },
             {
                 "name": "killed enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -404,7 +404,7 @@
             },
             {
                 "name": "killed enemy cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -412,7 +412,7 @@
             },
             {
                 "name": "killed enemy player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -420,7 +420,7 @@
             },
             {
                 "name": "killed enemy player cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -428,7 +428,7 @@
             },
             {
                 "name": "killed enemy covenant",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -436,7 +436,7 @@
             },
             {
                 "name": "killed enemy covenant cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -444,7 +444,7 @@
             },
             {
                 "name": "killed enemy floodcombat",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -452,7 +452,7 @@
             },
             {
                 "name": "killed enemy floodcombat cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -460,7 +460,7 @@
             },
             {
                 "name": "killed enemy floodcarrier",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -468,7 +468,7 @@
             },
             {
                 "name": "killed enemy floodcarrier cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -476,7 +476,7 @@
             },
             {
                 "name": "killed enemy sentinel",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -484,7 +484,7 @@
             },
             {
                 "name": "killed enemy sentinel cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -492,7 +492,7 @@
             },
             {
                 "name": "killed enemy bullet",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -500,7 +500,7 @@
             },
             {
                 "name": "killed enemy needler",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -508,7 +508,7 @@
             },
             {
                 "name": "killed enemy plasma",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -516,7 +516,7 @@
             },
             {
                 "name": "killed enemy sniper",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -524,7 +524,7 @@
             },
             {
                 "name": "killed enemy grenade",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -532,7 +532,7 @@
             },
             {
                 "name": "killed enemy explosion",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -540,7 +540,7 @@
             },
             {
                 "name": "killed enemy melee",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -548,7 +548,7 @@
             },
             {
                 "name": "killed enemy flame",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -556,7 +556,7 @@
             },
             {
                 "name": "killed enemy shotgun",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -564,7 +564,7 @@
             },
             {
                 "name": "killed enemy vehicle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -572,7 +572,7 @@
             },
             {
                 "name": "killed enemy mountedweapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -580,7 +580,7 @@
             },
             {
                 "name": "killing spree",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -600,7 +600,7 @@
             },
             {
                 "name": "player kill cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -608,7 +608,7 @@
             },
             {
                 "name": "player kill bullet cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -616,7 +616,7 @@
             },
             {
                 "name": "player kill needler cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -624,7 +624,7 @@
             },
             {
                 "name": "player kill plasma cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -632,7 +632,7 @@
             },
             {
                 "name": "player kill sniper cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -640,7 +640,7 @@
             },
             {
                 "name": "anyone kill grenade cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -648,7 +648,7 @@
             },
             {
                 "name": "player kill explosion cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -656,7 +656,7 @@
             },
             {
                 "name": "player kill melee cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -664,7 +664,7 @@
             },
             {
                 "name": "player kill flame cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -672,7 +672,7 @@
             },
             {
                 "name": "player kill shotgun cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -680,7 +680,7 @@
             },
             {
                 "name": "player kill vehicle cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -688,7 +688,7 @@
             },
             {
                 "name": "player kill mountedweapon cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -696,7 +696,7 @@
             },
             {
                 "name": "player killling spree cm",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -716,7 +716,7 @@
             },
             {
                 "name": "friend died",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -724,7 +724,7 @@
             },
             {
                 "name": "friend player died",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -732,7 +732,7 @@
             },
             {
                 "name": "friend killed by friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -740,7 +740,7 @@
             },
             {
                 "name": "friend killed by friendly player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -748,7 +748,7 @@
             },
             {
                 "name": "friend killed by enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -756,7 +756,7 @@
             },
             {
                 "name": "friend killed by enemy player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -764,7 +764,7 @@
             },
             {
                 "name": "friend killed by covenant",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -772,7 +772,7 @@
             },
             {
                 "name": "friend killed by flood",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -780,7 +780,7 @@
             },
             {
                 "name": "friend killed by sentinel",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -788,7 +788,7 @@
             },
             {
                 "name": "friend betrayed",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -804,7 +804,7 @@
             },
             {
                 "name": "new combat alone",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -812,7 +812,7 @@
             },
             {
                 "name": "new enemy recent combat",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -820,7 +820,7 @@
             },
             {
                 "name": "old enemy sighted",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -828,7 +828,7 @@
             },
             {
                 "name": "unexpected enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -836,7 +836,7 @@
             },
             {
                 "name": "dead friend found",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -844,7 +844,7 @@
             },
             {
                 "name": "alliance broken",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -852,7 +852,7 @@
             },
             {
                 "name": "alliance reformed",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -860,7 +860,7 @@
             },
             {
                 "name": "grenade throwing",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -868,7 +868,7 @@
             },
             {
                 "name": "grenade sighted",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -876,7 +876,7 @@
             },
             {
                 "name": "grenade startle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -884,7 +884,7 @@
             },
             {
                 "name": "grenade danger enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -892,7 +892,7 @@
             },
             {
                 "name": "grenade danger self",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -900,7 +900,7 @@
             },
             {
                 "name": "grenade danger friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -916,7 +916,7 @@
             },
             {
                 "name": "new combat group re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -924,7 +924,7 @@
             },
             {
                 "name": "new combat nearby re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -932,7 +932,7 @@
             },
             {
                 "name": "alert friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -940,7 +940,7 @@
             },
             {
                 "name": "alert friend re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -948,7 +948,7 @@
             },
             {
                 "name": "alert lost contact",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -956,7 +956,7 @@
             },
             {
                 "name": "alert lost contact re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -964,7 +964,7 @@
             },
             {
                 "name": "blocked",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -972,7 +972,7 @@
             },
             {
                 "name": "blocked re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -980,7 +980,7 @@
             },
             {
                 "name": "search start",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -988,7 +988,7 @@
             },
             {
                 "name": "search query",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -996,7 +996,7 @@
             },
             {
                 "name": "search query re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1004,7 +1004,7 @@
             },
             {
                 "name": "search report",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1012,7 +1012,7 @@
             },
             {
                 "name": "search abandon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1020,7 +1020,7 @@
             },
             {
                 "name": "search group abandon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1028,7 +1028,7 @@
             },
             {
                 "name": "group uncover",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1036,7 +1036,7 @@
             },
             {
                 "name": "group uncover re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1044,7 +1044,7 @@
             },
             {
                 "name": "advance",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1052,7 +1052,7 @@
             },
             {
                 "name": "advance re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1060,7 +1060,7 @@
             },
             {
                 "name": "retreat",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1068,7 +1068,7 @@
             },
             {
                 "name": "retreat re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1076,7 +1076,7 @@
             },
             {
                 "name": "cover",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1100,7 +1100,7 @@
             },
             {
                 "name": "sighted friend player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1108,7 +1108,7 @@
             },
             {
                 "name": "shooting",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1116,7 +1116,7 @@
             },
             {
                 "name": "shooting vehicle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1124,7 +1124,7 @@
             },
             {
                 "name": "shooting berserk",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1132,7 +1132,7 @@
             },
             {
                 "name": "shooting group",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1140,7 +1140,7 @@
             },
             {
                 "name": "shooting traitor",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1148,7 +1148,7 @@
             },
             {
                 "name": "taunt",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1156,7 +1156,7 @@
             },
             {
                 "name": "taunt re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1164,7 +1164,7 @@
             },
             {
                 "name": "flee",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1172,7 +1172,7 @@
             },
             {
                 "name": "flee re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1180,7 +1180,7 @@
             },
             {
                 "name": "flee leader died",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1188,7 +1188,7 @@
             },
             {
                 "name": "attempted flee",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1196,7 +1196,7 @@
             },
             {
                 "name": "attempted flee re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1204,7 +1204,7 @@
             },
             {
                 "name": "lost contact",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1212,7 +1212,7 @@
             },
             {
                 "name": "hiding finished",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1220,7 +1220,7 @@
             },
             {
                 "name": "vehicle entry",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1228,7 +1228,7 @@
             },
             {
                 "name": "vehicle exit",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1236,7 +1236,7 @@
             },
             {
                 "name": "vehicle woohoo",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1244,7 +1244,7 @@
             },
             {
                 "name": "vehicle scared",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1252,7 +1252,7 @@
             },
             {
                 "name": "vehicle collision",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1260,7 +1260,7 @@
             },
             {
                 "name": "partially sighted",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1268,7 +1268,7 @@
             },
             {
                 "name": "nothing there",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1276,7 +1276,7 @@
             },
             {
                 "name": "pleading",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1308,7 +1308,7 @@
             },
             {
                 "name": "surprise",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1316,7 +1316,7 @@
             },
             {
                 "name": "berserk",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1324,7 +1324,7 @@
             },
             {
                 "name": "melee attack",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1332,7 +1332,7 @@
             },
             {
                 "name": "dive",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1340,7 +1340,7 @@
             },
             {
                 "name": "uncover exclamation",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1348,7 +1348,7 @@
             },
             {
                 "name": "leap attack",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1356,7 +1356,7 @@
             },
             {
                 "name": "resurrection",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1380,7 +1380,7 @@
             },
             {
                 "name": "celebration",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1388,7 +1388,7 @@
             },
             {
                 "name": "check body enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1396,7 +1396,7 @@
             },
             {
                 "name": "check body friend",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1404,7 +1404,7 @@
             },
             {
                 "name": "shooting dead enemy",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1412,7 +1412,7 @@
             },
             {
                 "name": "shooting dead enemy player",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1436,7 +1436,7 @@
             },
             {
                 "name": "alone",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1444,7 +1444,7 @@
             },
             {
                 "name": "unscathed",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1452,7 +1452,7 @@
             },
             {
                 "name": "seriously wounded",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1460,7 +1460,7 @@
             },
             {
                 "name": "seriously wounded re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1468,7 +1468,7 @@
             },
             {
                 "name": "massacre",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1476,7 +1476,7 @@
             },
             {
                 "name": "massacre re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1484,7 +1484,7 @@
             },
             {
                 "name": "rout",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1492,7 +1492,7 @@
             },
             {
                 "name": "rout re",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],

@@ -100,7 +100,7 @@
             },
             {
                 "name": "actor definition",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor"
                 ],
@@ -108,7 +108,7 @@
             },
             {
                 "name": "unit",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unit"
                 ],
@@ -116,7 +116,7 @@
             },
             {
                 "name": "major variant",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor_variant"
                 ],
@@ -150,7 +150,7 @@
             },
             {
                 "name": "weapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon"
                 ],
@@ -435,7 +435,7 @@
             },
             {
                 "name": "equipment",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "equipment"
                 ],
@@ -498,7 +498,7 @@
             },
             {
                 "name": "change colors",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ActorVariantChangeColors",
                 "compound": true
             }

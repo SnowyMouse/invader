@@ -81,7 +81,7 @@
         "fields": [
             {
                 "name": "type",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "light",
                     "light_volume",
@@ -127,7 +127,7 @@
         "fields": [
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "antenna",
@@ -308,7 +308,7 @@
             },
             {
                 "name": "permutations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ObjectChangeColorsPermutation",
                 "compound": true
             }
@@ -353,7 +353,7 @@
             },
             {
                 "name": "model",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "gbxmodel"
                 ],
@@ -361,7 +361,7 @@
             },
             {
                 "name": "animation graph",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "animation"
                 ],
@@ -373,7 +373,7 @@
             },
             {
                 "name": "collision model",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "model_collision_geometry"
                 ],
@@ -381,7 +381,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "physics"
                 ],
@@ -389,7 +389,7 @@
             },
             {
                 "name": "modifier shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -397,7 +397,7 @@
             },
             {
                 "name": "creation effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -441,31 +441,31 @@
             },
             {
                 "name": "attachments",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ObjectAttachment",
                 "compound": true
             },
             {
                 "name": "widgets",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ObjectWidget",
                 "compound": true
             },
             {
                 "name": "functions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ObjectFunction",
                 "compound": true
             },
             {
                 "name": "change colors",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ObjectChangeColors",
                 "compound": true
             },
             {
                 "name": "predicted resources",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "compound": true
             }

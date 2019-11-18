@@ -80,7 +80,7 @@
             },
             {
                 "name": "don't use",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -168,7 +168,7 @@
             },
             {
                 "name": "footsteps",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "footsteps"
                 ],
@@ -300,7 +300,7 @@
             },
             {
                 "name": "contact point",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "BipedContactPoint",
                 "compound": true
             }

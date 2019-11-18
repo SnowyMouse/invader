@@ -200,7 +200,7 @@
             },
             {
                 "name": "bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -248,7 +248,7 @@
             },
             {
                 "name": "reflections",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "LensFlareReflection",
                 "compound": true
             },
