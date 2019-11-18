@@ -74,6 +74,7 @@ include(src/extract/extract.cmake)
 install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/invader
     DESTINATION include
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
 
 # Install programs
