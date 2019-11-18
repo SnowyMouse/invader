@@ -445,6 +445,15 @@ namespace Invader {
         return false;
     }
 
+    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagClassInt tag_class_int) const noexcept {
+        for(auto &tag : tags) {
+            if(tag.tag_class_int() == tag_class_int && tag.path() == tag_path) {
+                return &tag - tags.data();
+            }
+        }
+        return std::nullopt;
+    }
+
     Map::Map(Map &&move) {
         this->data_m = std::move(move.data_m);
         this->data = move.data;
