@@ -4,14 +4,6 @@
 #include <invader/map/map.hpp>
 
 namespace Invader {
-    const std::string &Tag::path() const noexcept {
-        return this->p_path;
-    }
-
-    bool Tag::is_indexed() const noexcept {
-        return this->indexed;
-    }
-
     bool Tag::data_is_available() const noexcept {
         using namespace HEK;
 
@@ -36,10 +28,6 @@ namespace Invader {
         else {
             return true;
         }
-    }
-
-    TagClassInt Tag::tag_class_int() const noexcept {
-        return this->p_tag_class_int;
     }
 
     std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {

@@ -25,19 +25,25 @@ namespace Invader {
          * Get the path of the tag
          * @return path of the tag
          */
-        const std::string &path() const noexcept;
+        const std::string &path() const noexcept {
+            return this->p_path;
+        }
 
         /**
          * Get the class of the tag
          * @return class of the tag
          */
-        TagClassInt tag_class_int() const noexcept;
+        TagClassInt tag_class_int() const noexcept {
+            return this->p_tag_class_int;
+        }
 
         /**
          * Get whether this is an indexed tag that is not in the map
          * @return true if this is an indexed tag that is not in the map
          */
-        bool is_indexed() const noexcept;
+        bool is_indexed() const noexcept {
+            return this->indexed;
+        }
 
         /**
          * Get whether or not the tag data is available
