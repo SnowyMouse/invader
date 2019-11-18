@@ -122,29 +122,6 @@
         "size": 6
     },
     {
-        "name": "ScenarioStructureBSPArrayVertexBuffer",
-        "fields": [
-            {
-                "type": "pad",
-                "size": 4
-            },
-            {
-                "name": "count",
-                "type": "int32"
-            },
-            {
-                "name": "offset",
-                "type": "int32"
-            },
-            {
-                "type": "pad",
-                "size": 8
-            }
-        ],
-        "type": "struct",
-        "size": 20
-    },
-    {
         "name": "ScenarioStructureBSPMaterialUncompressedRenderedVertex",
         "fields": [
             {
@@ -291,14 +268,36 @@
                 "size": 2
             },
             {
-                "name": "rendered vertices",
-                "type": "ScenarioStructureBSPArrayVertexBuffer",
-                "compound": true
+                "type": "pad",
+                "size": 4
             },
             {
-                "name": "lightmap vertices",
-                "type": "ScenarioStructureBSPArrayVertexBuffer",
-                "compound": true
+                "name": "rendered vertices count",
+                "type": "uint32"
+            },
+            {
+                "name": "rendered vertices offset",
+                "type": "uint32"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "lightmap vertices count",
+                "type": "uint32"
+            },
+            {
+                "name": "lightmap vertices offset",
+                "type": "uint32"
+            },
+            {
+                "type": "pad",
+                "size": 8
             },
             {
                 "name": "uncompressed vertices",

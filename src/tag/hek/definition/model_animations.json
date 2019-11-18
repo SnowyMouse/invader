@@ -651,39 +651,6 @@
         "size": 64
     },
     {
-        "name": "ModelAnimationArrayNodeTransformFlagData",
-        "fields": [
-            {
-                "name": "no name",
-                "type": "int32"
-            }
-        ],
-        "type": "struct",
-        "size": 4
-    },
-    {
-        "name": "ModelAnimationArrayNodeRotationFlagData",
-        "fields": [
-            {
-                "name": "no name",
-                "type": "int32"
-            }
-        ],
-        "type": "struct",
-        "size": 4
-    },
-    {
-        "name": "ModelAnimationArrayNodeScaleFlagData",
-        "fields": [
-            {
-                "name": "no name",
-                "type": "int32"
-            }
-        ],
-        "type": "struct",
-        "size": 4
-    },
-    {
         "name": "ModelAnimationAnimation",
         "fields": [
             {
@@ -774,8 +741,7 @@
             },
             {
                 "name": "node transform flag data",
-                "type": "ModelAnimationArrayNodeTransformFlagData",
-                "compound": true,
+                "type": "uint32",
                 "count": 2
             },
             {
@@ -784,8 +750,7 @@
             },
             {
                 "name": "node rotation flag data",
-                "type": "ModelAnimationArrayNodeRotationFlagData",
-                "compound": true,
+                "type": "uint32",
                 "count": 2
             },
             {
@@ -794,8 +759,7 @@
             },
             {
                 "name": "node scale flag data",
-                "type": "ModelAnimationArrayNodeScaleFlagData",
-                "compound": true,
+                "type": "uint32",
                 "count": 2
             },
             {

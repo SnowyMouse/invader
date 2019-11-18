@@ -31,8 +31,8 @@ namespace Invader::HEK {
                 std::size_t uncompressed_vertices_size = reflexive.uncompressed_vertices.size;
                 ASSERT_SIZE(uncompressed_vertices_size);
 
-                std::size_t rendered_vertex_count = reflexive.rendered_vertices.count;
-                std::size_t lightmap_vertex_count = reflexive.lightmap_vertices.count;
+                std::size_t rendered_vertex_count = reflexive.rendered_vertices_count;
+                std::size_t lightmap_vertex_count = reflexive.lightmap_vertices_count;
 
                 std::size_t total_uncompressed_vertex_size = rendered_vertex_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex<LittleEndian>) + lightmap_vertex_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex<LittleEndian>);
                 ASSERT_SIZE(total_uncompressed_vertex_size);

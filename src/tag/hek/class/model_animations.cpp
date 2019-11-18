@@ -126,12 +126,12 @@ namespace Invader::HEK {
             std::size_t rotation_count = 0;
             std::size_t scale_count = 0;
             std::size_t transform_count = 0;
-            std::uint32_t rotation_flag_0 = reflexive.node_rotation_flag_data[0].no_name;
-            std::uint32_t rotation_flag_1 = reflexive.node_rotation_flag_data[1].no_name;
-            std::uint32_t scale_flag_0 = reflexive.node_scale_flag_data[0].no_name;
-            std::uint32_t scale_flag_1 = reflexive.node_scale_flag_data[1].no_name;
-            std::uint32_t transform_flag_0 = reflexive.node_transform_flag_data[0].no_name;
-            std::uint32_t transform_flag_1 = reflexive.node_transform_flag_data[1].no_name;
+            std::uint32_t rotation_flag_0 = reflexive.node_rotation_flag_data[0];
+            std::uint32_t rotation_flag_1 = reflexive.node_rotation_flag_data[1];
+            std::uint32_t scale_flag_0 = reflexive.node_scale_flag_data[0];
+            std::uint32_t scale_flag_1 = reflexive.node_scale_flag_data[1];
+            std::uint32_t transform_flag_0 = reflexive.node_transform_flag_data[0];
+            std::uint32_t transform_flag_1 = reflexive.node_transform_flag_data[1];
             bool rotate[64];
             bool scale[64];
             bool transform[64];
