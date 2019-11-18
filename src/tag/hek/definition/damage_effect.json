@@ -216,7 +216,7 @@
             },
             {
                 "name": "temporary camera impulse rotation",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "temporary camera impulse pushback",
@@ -236,7 +236,7 @@
             },
             {
                 "name": "permanent camera impulse angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "type": "pad",
@@ -264,7 +264,7 @@
             },
             {
                 "name": "camera shaking random rotation",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "type": "pad",
