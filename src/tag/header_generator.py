@@ -108,7 +108,7 @@ with open(sys.argv[1], "w") as f:
             prefix += i.upper()
 
         for n in range(0,len(e["options"])):
-            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper().replace("'","").replace(" ","_"), "," if n + 1 < len(e["options"]) else ""))
+            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper(), "," if n + 1 < len(e["options"]) else ""))
 
         f.write("    };\n")
 
@@ -211,13 +211,44 @@ with open(sys.argv[2], "w") as f:
     header_name = "INVADER__TAG__PARSER__PARSER_HPP"
     f.write("#ifndef {}\n".format(header_name))
     f.write("#define {}\n\n".format(header_name))
-    f.write("#include \"../hek/definition.hpp\"\n")
+    f.write("#include <string>\n")
+    f.write("#include \"../hek/definition.hpp\"\n\n")
     f.write("namespace Invader::Parser {\n")
-    for s in all_structs_arranged:
-        f.write("    struct {} {{\n".format(s["name"]))
-        for t in s["fields"]:
-            if t["type"] == "pad":
+    f.write("    struct Dependency {\n")
+    f.write("        TagClassInt tag_class_int;\n")
+    f.write("        std::string path;\n")
+    f.write("    };\n")
+    for s in all_structs:
+        f.write("    class {} {{\n".format(s["name"]))
+        def add_structs_from_struct(struct):
+            if "inherits" in struct:
+                for t in all_structs:
+                    if t["name"] == struct["inherits"]:
+                        add_structs_from_struct(t)
+                        break
+            for t in struct["fields"]:
+                if t["type"] == "pad":
+                    continue
+                type_to_write = t["type"]
+                if type_to_write.startswith("int") or type_to_write.startswith("uint"):
+                    type_to_write = "std::{}_t".format(type_to_write)
+                elif type_to_write == "float":
+                    type_to_write = "float"
+                elif type_to_write == "TagDependency":
+                    type_to_write = "Dependency"
+                elif type_to_write == "TagReflexive":
+                    type_to_write = "std::vector<HEK::{}>".format(t["struct"])
+                elif type_to_write == "TagDataOffset":
+                    type_to_write = "std::vector<std::byte>"
+                else:
+                    type_to_write = "HEK::{}".format(type_to_write)
+                if "compound" in t and t["compound"]:
+                    type_to_write = "{}<NativeEndian>".format(type_to_write)
+                if "bounds" in t and t["bounds"]:
+                    type_to_write = "Bounds<{}>".format(type_to_write)
+                f.write("        {} {};\n".format(type_to_write, t["name"]))
                 continue
+        add_structs_from_struct(s)
         f.write("    };\n")
     f.write("}\n")
     f.write("#endif\n")
