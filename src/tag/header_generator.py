@@ -220,6 +220,7 @@ with open(sys.argv[2], "w") as f:
     f.write("    };\n")
     for s in all_structs:
         f.write("    class {} {{\n".format(s["name"]))
+        all_used_structs = []
         def add_structs_from_struct(struct):
             if "inherits" in struct:
                 for t in all_structs:
@@ -230,23 +231,30 @@ with open(sys.argv[2], "w") as f:
                 if t["type"] == "pad":
                     continue
                 type_to_write = t["type"]
+                non_type = False
                 if type_to_write.startswith("int") or type_to_write.startswith("uint"):
                     type_to_write = "std::{}_t".format(type_to_write)
+                    non_type = True
                 elif type_to_write == "float":
                     type_to_write = "float"
+                    non_type = True
                 elif type_to_write == "TagDependency":
                     type_to_write = "Dependency"
+                    non_type = True
                 elif type_to_write == "TagReflexive":
                     type_to_write = "std::vector<HEK::{}>".format(t["struct"])
+                    non_type = True
                 elif type_to_write == "TagDataOffset":
                     type_to_write = "std::vector<std::byte>"
+                    non_type = True
                 else:
                     type_to_write = "HEK::{}".format(type_to_write)
-                if "compound" in t and t["compound"]:
-                    type_to_write = "{}<NativeEndian>".format(type_to_write)
+                if "compound" in t and t["compound"] and not non_type:
+                    type_to_write = "{}<HEK::NativeEndian>".format(type_to_write)
                 if "bounds" in t and t["bounds"]:
-                    type_to_write = "Bounds<{}>".format(type_to_write)
+                    type_to_write = "HEK::Bounds<{}>".format(type_to_write)
                 f.write("        {} {};\n".format(type_to_write, t["name"]))
+                all_used_structs.append(t)
                 continue
         add_structs_from_struct(s)
         f.write("    };\n")
