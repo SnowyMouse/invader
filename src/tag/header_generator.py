@@ -5,7 +5,7 @@ import json
 import os
 
 if len(sys.argv) < 3:
-    print("Usage: {} <output.hpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+    print("Usage: {} <definition.hpp> <parser.hpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,7 +13,13 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-for i in range(2, len(sys.argv)):
+for i in range(3, len(sys.argv)):
+    def make_name_fun(name, ignore_numbers):
+        name = name.replace(" ", "_").replace("'", "")
+        if not ignore_numbers and name[0].isnumeric():
+            name = "_{}".format(name)
+        return name
+
     objects = None
     with open(sys.argv[i], "r") as f:
         objects = json.loads(f.read())
@@ -23,10 +29,17 @@ for i in range(2, len(sys.argv)):
     # Get all enums, bitfields, and structs
     for s in objects:
         if s["type"] == "enum":
+            for o in range(len(s["options"])):
+                s["options"][o] = make_name_fun(s["options"][o], True)
             all_enums.append(s)
         elif s["type"] == "bitfield":
+            for f in range(len(s["fields"])):
+                s["fields"][f] = make_name_fun(s["fields"][f], False)
             all_bitfields.append(s)
         elif s["type"] == "struct":
+            for f in s["fields"]:
+                if f["type"] != "pad":
+                    f["name"] = make_name_fun(f["name"], False)
             all_structs.append(s)
         else:
             print("Unknown object type {}".format(s["type"]), file=sys.stderr)
@@ -76,7 +89,7 @@ def to_hex(number):
 
 with open(sys.argv[1], "w") as f:
     f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
-    header_name = "INVADER__TAG__HEK__CLASS__{}_HPP".format(name.upper())
+    header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
     f.write("#ifndef {}\n".format(header_name))
     f.write("#define {}\n\n".format(header_name))
     f.write("#include \"../../hek/data_type.hpp\"\n\n")
@@ -102,20 +115,11 @@ with open(sys.argv[1], "w") as f:
     for b in all_bitfields:
         f.write("    struct {} {{\n".format(b["name"]))
         for q in b["fields"]:
-            name_fixed = q.replace("'","").replace(" ", "_")
-            if name_fixed[0].isnumeric():
-                name_fixed = "_{}".format(name_fixed)
-            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], name_fixed))
+            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
         f.write("    };\n")
 
     # Now the hard part
     padding_present = False
-
-    def make_name_fun(name):
-        name = name.replace(" ", "_").replace("'", "")
-        if name[0].isnumeric():
-            name = "_{}".format(name)
-        return name
 
     for s in all_structs_arranged:
         f.write("    ENDIAN_TEMPLATE(EndianType) struct {} {}{{\n".format(s["name"], ": {}<EndianType> ".format(s["inherits"]) if "inherits" in s else ""))
@@ -135,7 +139,7 @@ with open(sys.argv[1], "w") as f:
             if "flagged" in n and n["flagged"]:
                 type_to_write = "FlaggedInt<{}>".format(type_to_write)
 
-            name = make_name_fun(n["name"])
+            name = n["name"]
             if "count" in n:
                 name = "{}[{}]".format(name, n["count"])
 
@@ -196,7 +200,7 @@ with open(sys.argv[1], "w") as f:
                 if n["type"] == "pad":
                     continue
                 else:
-                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", make_name_fun(n["name"])))
+                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", n["name"]))
         f.write("            return copy;\n")
         f.write("        }\n")
 
@@ -205,3 +209,13 @@ with open(sys.argv[1], "w") as f:
 
     f.write("}\n\n")
     f.write("#endif\n")
+
+with open(sys.argv[2], "w") as f:
+    f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+    header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
+    f.write("#ifndef {}\n".format(header_name))
+    f.write("#define {}\n\n".format(header_name))
+    f.write("namespace Invader::Parser {\n")
+    f.write("}\n")
+    f.write("#endif\n")
+    pass
