@@ -158,7 +158,7 @@ int main(int argc, const char **argv) {
         auto start = clock_type::now();
 
         // Get the index
-        std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
+        std::vector<std::tuple<TagClassInt, std::string>> with_index;
         if(build_options.index.size()) {
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;

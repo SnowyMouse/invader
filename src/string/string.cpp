@@ -16,7 +16,7 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+template <typename T, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
     using namespace Invader::HEK;
 
     // Make the file header
@@ -219,10 +219,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(string_options.format) {
         case STRING_LIST_FORMAT_UTF_16:
-            final_data = generate_string_list_tag<char16_t, Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
-            final_data = generate_string_list_tag<char, Invader::HEK::TagClassInt::TAG_CLASS_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
             final_data = generate_hud_message_text_tag(text);

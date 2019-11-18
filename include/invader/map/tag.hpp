@@ -31,7 +31,7 @@ namespace Invader {
          * Get the class of the tag
          * @return class of the tag
          */
-        HEK::TagClassInt tag_class_int() const noexcept;
+        TagClassInt tag_class_int() const noexcept;
 
         /**
          * Get whether this is an indexed tag that is not in the map
@@ -152,7 +152,7 @@ namespace Invader {
         std::string p_path;
 
         /** Class of tag */
-        HEK::TagClassInt p_tag_class_int;
+        TagClassInt p_tag_class_int;
 
         /** This is indexed and not in the map? */
         bool indexed = false;

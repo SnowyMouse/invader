@@ -293,9 +293,9 @@ namespace Invader {
         return this->resolve_pointer(static_cast<std::size_t>(reinterpret_cast<std::byte *>(offset) - this->data.data()));
     }
 
-    CompiledTag::CompiledTag(const std::string &path, HEK::TagClassInt class_int) : path(path), tag_class_int(class_int), p_stub(true) {}
+    CompiledTag::CompiledTag(const std::string &path, TagClassInt class_int) : path(path), tag_class_int(class_int), p_stub(true) {}
 
-    CompiledTag::CompiledTag(const std::string &path, HEK::TagClassInt class_int, const std::byte *data, std::size_t size, CacheFileType type) : CompiledTag(path, data, size, type) {
+    CompiledTag::CompiledTag(const std::string &path, TagClassInt class_int, const std::byte *data, std::size_t size, CacheFileType type) : CompiledTag(path, data, size, type) {
         if(this->tag_class_int != class_int) {
             throw UnexpectedTagClassException();
         }

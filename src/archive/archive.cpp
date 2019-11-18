@@ -166,7 +166,7 @@ int main(int argc, const char **argv) {
             eprintf("No extension for %s. Archive could not be made.\n", tag_path_to_find);
             return EXIT_FAILURE;
         }
-        Invader::HEK::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
+        Invader::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {

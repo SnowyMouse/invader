@@ -32,7 +32,7 @@ namespace Invader {
         /**
          * Type of class
          */
-        HEK::TagClassInt tag_class_int;
+        TagClassInt tag_class_int;
 
         /**
          * This is just a tag ID
@@ -71,7 +71,7 @@ namespace Invader {
         /**
          * The class of the tag
          */
-        HEK::TagClassInt tag_class_int;
+        TagClassInt tag_class_int;
 
         /**
          * Raw tag data
@@ -120,7 +120,7 @@ namespace Invader {
          * @param path      path of the tag
          * @param class_int class of the tag
          */
-        CompiledTag(const std::string &path, HEK::TagClassInt class_int);
+        CompiledTag(const std::string &path, TagClassInt class_int);
 
         /**
          * Compile a tag with the given data array
@@ -141,7 +141,7 @@ namespace Invader {
          * @param type      type of cache file being built
          * @throws          an exception if tag data is invalid or if the data does not match the given class
          */
-        CompiledTag(const std::string &path, HEK::TagClassInt class_int, const std::byte *data, std::size_t size, HEK::CacheFileType type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER);
+        CompiledTag(const std::string &path, TagClassInt class_int, const std::byte *data, std::size_t size, HEK::CacheFileType type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER);
     private:
         /**
          * The tag is a stub tag, taking the place of a real tag.

@@ -127,7 +127,7 @@ int main(int argc, const char **argv) {
     auto memed_by_refinery = [&tag_count, &map]() {
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
-            if(tag.tag_class_int() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data != 0) {
+            if(tag.tag_class_int() == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data != 0) {
                 return true;
             }
         }
@@ -139,7 +139,7 @@ int main(int argc, const char **argv) {
         std::size_t count = 0;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
-            if(tag.tag_class_int() != HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
+            if(tag.tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
                 count++;
             }
         }

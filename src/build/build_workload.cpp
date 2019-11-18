@@ -31,7 +31,7 @@ namespace Invader {
         bool no_external_tags,
         bool always_index_tags,
         bool verbose,
-        const std::optional<std::vector<std::tuple<HEK::TagClassInt, std::string>>> &with_index,
+        const std::optional<std::vector<std::tuple<TagClassInt, std::string>>> &with_index,
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario
@@ -815,7 +815,7 @@ namespace Invader {
         }
     }
 
-    std::size_t BuildWorkload::compile_tag_recursively(const char *path, HEK::TagClassInt tag_class_int) {
+    std::size_t BuildWorkload::compile_tag_recursively(const char *path, TagClassInt tag_class_int) {
         using namespace HEK;
 
         bool adding = true;
@@ -841,7 +841,7 @@ namespace Invader {
         }
 
         // If the tag has no class and we aren't adding anything, exit
-        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE && !adding) {
+        if(tag_class_int == TagClassInt::TAG_CLASS_NONE && !adding) {
             return index;
         }
 
@@ -888,21 +888,21 @@ namespace Invader {
                 #define MAKE_ATTEMPT(class_int) if(file == nullptr) { file = attempt_to_open_tag(class_int); if(file) tag_class_int = class_int; }
 
                 std::string tag_path = (tag_dir / tag_base_path).string();
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_BIPED);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_CONTROL);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_DEVICE_MACHINE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_EQUIPMENT);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_GARBAGE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_ITEM);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_OBJECT);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_PLACEHOLDER);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_PROJECTILE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_SCENERY);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_SOUND_SCENERY);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_VEHICLE);
-                MAKE_ATTEMPT(HEK::TagClassInt::TAG_CLASS_WEAPON);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_BIPED);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_DEVICE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_DEVICE_CONTROL);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_DEVICE_MACHINE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_EQUIPMENT);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_GARBAGE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_ITEM);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_OBJECT);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_PLACEHOLDER);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_PROJECTILE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_SCENERY);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_SOUND_SCENERY);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_VEHICLE);
+                MAKE_ATTEMPT(TagClassInt::TAG_CLASS_WEAPON);
 
                 // If we successfully open it, try again
                 if(file) {
@@ -1020,7 +1020,7 @@ namespace Invader {
                 }
 
                 // BSP-related things (need to set water plane stuff for fog)
-                if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                     auto *bsp_data = tag_ptr->data.data();
                     auto &bsp_header = *reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(bsp_data);
                     std::size_t bsp_offset = tag_ptr->resolve_pointer(&bsp_header.pointer);
@@ -1075,7 +1075,7 @@ namespace Invader {
                 }
 
                 // Detail-object collection things
-                else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION) {
+                else if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION) {
                     // Make sure we're referencing the right things
                     auto &dobc = *reinterpret_cast<DetailObjectCollection<LittleEndian> *>(tag_ptr->data.data());
                     if(dobc.sprite_plate.tag_id.read().is_null()) {
@@ -1107,7 +1107,7 @@ namespace Invader {
                 }
 
                 // Particle-related things
-                else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_PARTICLE) {
+                else if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_PARTICLE) {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
                     if(particle.bitmap.tag_id.read().is_null()) {
                         eprintf("Particle has no bitmap.\n");
@@ -1119,7 +1119,7 @@ namespace Invader {
                 }
 
                 // Weather-related things
-                else if(tag_ptr->tag_class_int == HEK::TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM) {
+                else if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM) {
                     auto &weather_particle_system = *reinterpret_cast<WeatherParticleSystem<LittleEndian> *>(tag_ptr->data.data());
                     std::uint32_t particle_count = weather_particle_system.particle_types.count;
                     if(particle_count > 0) {
@@ -2359,7 +2359,7 @@ namespace Invader {
 
     void BuildWorkload::modify_ting_tag() {
         for(auto &tag : this->compiled_tags) {
-            if(tag->path == "globals\\globals" && tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_GLOBALS) {
+            if(tag->path == "globals\\globals" && tag->tag_class_int == TagClassInt::TAG_CLASS_GLOBALS) {
                 auto &globals_header = *reinterpret_cast<HEK::Globals<HEK::LittleEndian> *>(tag->data.data());
                 auto multiplayer_info_count = globals_header.multiplayer_information.count.read();
                 auto *multiplayer_infos = reinterpret_cast<HEK::GlobalsMultiplayerInformation<HEK::LittleEndian> *>(tag->data.data() + tag->resolve_pointer(&globals_header.multiplayer_information.pointer));
@@ -2371,7 +2371,7 @@ namespace Invader {
                         auto sound_tag_id = sound.sound.tag_id.read();
                         if(!sound_tag_id.is_null()) {
                             auto &sound_tag = this->compiled_tags[sound_tag_id.index];
-                            if(sound_tag->tag_class_int == HEK::TagClassInt::TAG_CLASS_SOUND) {
+                            if(sound_tag->tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
                                 auto &sound_header = *reinterpret_cast<HEK::Sound<HEK::LittleEndian> *>(sound_tag->data.data());
                                 switch(this->engine_target) {
                                     case HEK::CacheFileEngine::CACHE_FILE_DEMO:

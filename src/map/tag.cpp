@@ -38,7 +38,7 @@ namespace Invader {
         }
     }
 
-    HEK::TagClassInt Tag::tag_class_int() const noexcept {
+    TagClassInt Tag::tag_class_int() const noexcept {
         return this->p_tag_class_int;
     }
 
