@@ -9,13 +9,13 @@ namespace Invader {
 
         // If it's indexed, check if the corresponding data is available
         if(this->is_indexed()) {
-            switch(this->p_tag_class_int) {
+            switch(this->tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP:
-                    return this->p_map.bitmap_data != nullptr;
+                    return this->map.bitmap_data != nullptr;
                 case TagClassInt::TAG_CLASS_SOUND:
-                    return this->p_map.sound_data != nullptr;
+                    return this->map.sound_data != nullptr;
                 default:
-                    return this->p_map.loc_data != nullptr;
+                    return this->map.loc_data != nullptr;
             }
         }
 
@@ -33,7 +33,7 @@ namespace Invader {
     std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
         using namespace HEK;
 
-        if(this->indexed || this->p_tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+        if(this->indexed || this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
             auto edge = this->base_struct_offset + this->base_struct_offset;
             auto offset = pointer - this->base_struct_pointer;
 
@@ -43,7 +43,7 @@ namespace Invader {
 
             Map::DataMapType type;
             if(this->indexed) {
-                switch(this->p_tag_class_int) {
+                switch(this->tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         type = Map::DataMapType::DATA_MAP_BITMAP;
                         break;
@@ -59,20 +59,20 @@ namespace Invader {
                 type = Map::DataMapType::DATA_MAP_CACHE;
             }
 
-            return this->p_map.get_data_at_offset(pointer - this->base_struct_pointer, minimum, type);
+            return this->map.get_data_at_offset(pointer - this->base_struct_pointer, minimum, type);
         }
         else {
-            return this->p_map.resolve_tag_data_pointer(pointer, minimum);
+            return this->map.resolve_tag_data_pointer(pointer, minimum);
         }
     }
 
     HEK::CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {
-        return *reinterpret_cast<HEK::CacheFileTagDataTag *>(this->p_map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(HEK::CacheFileTagDataTag)));
+        return *reinterpret_cast<HEK::CacheFileTagDataTag *>(this->map.get_tag_data_at_offset(this->tag_data_index_offset, sizeof(HEK::CacheFileTagDataTag)));
     }
 
     const HEK::CacheFileTagDataTag &Tag::get_tag_data_index() const noexcept {
         return const_cast<Tag *>(this)->get_tag_data_index();
     }
 
-    Tag::Tag(Map &map) : p_map(map) {}
+    Tag::Tag(Map &map) : map(map) {}
 }

@@ -25,16 +25,16 @@ namespace Invader {
          * Get the path of the tag
          * @return path of the tag
          */
-        const std::string &path() const noexcept {
-            return this->p_path;
+        const std::string &get_path() const noexcept {
+            return this->path;
         }
 
         /**
          * Get the class of the tag
          * @return class of the tag
          */
-        TagClassInt tag_class_int() const noexcept {
-            return this->p_tag_class_int;
+        TagClassInt get_tag_class_int() const noexcept {
+            return this->tag_class_int;
         }
 
         /**
@@ -152,13 +152,13 @@ namespace Invader {
 
     private:
         /** Map reference */
-        Map &p_map;
+        Map &map;
 
         /** Path of tag */
-        std::string p_path;
+        std::string path;
 
         /** Class of tag */
-        TagClassInt p_tag_class_int;
+        TagClassInt tag_class_int;
 
         /** This is indexed and not in the map? */
         bool indexed = false;

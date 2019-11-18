@@ -127,7 +127,7 @@ int main(int argc, const char **argv) {
     auto memed_by_refinery = [&tag_count, &map]() {
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
-            if(tag.tag_class_int() == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data != 0) {
+            if(tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data != 0) {
                 return true;
             }
         }
@@ -139,7 +139,7 @@ int main(int argc, const char **argv) {
         std::size_t count = 0;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
-            if(tag.tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
+            if(tag.get_tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && tag.get_tag_data_index().tag_data == HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS) {
                 count++;
             }
         }
@@ -197,7 +197,7 @@ int main(int argc, const char **argv) {
             oprintf("%s\n", header.name.string);
             break;
         case DISPLAY_SCENARIO_PATH:
-            oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).path()).data());
+            oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).get_path()).data());
             break;
         case DISPLAY_TAG_COUNT:
             oprintf("%zu\n", tag_count);
@@ -208,7 +208,7 @@ int main(int argc, const char **argv) {
         case DISPLAY_TAGS:
             for(std::size_t t = 0; t < tag_count; t++) {
                 auto &tag = map->get_tag(t);
-                oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.path()).data(), tag_class_to_extension(tag.tag_class_int()));
+                oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).data(), tag_class_to_extension(tag.get_tag_class_int()));
             }
             break;
         case DISPLAY_COMPRESSION_RATIO:
