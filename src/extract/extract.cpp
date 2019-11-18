@@ -102,6 +102,9 @@ int main(int argc, const char **argv) {
                 return EXIT_FAILURE;
             }
 
+            // Replace forward slashes with backslashes
+            File::preferred_path_to_halo_path_chars(tag.data());
+
             // Get the index
             auto index = map->find_tag(tag.data(), tag_class_int);
             if(!index.has_value()) {
