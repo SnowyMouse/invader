@@ -22,4 +22,12 @@ if(${INVADER_FONT})
     target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES})
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-font)
+
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set_source_files_properties(src/font/font.cpp
+            PROPERTIES COMPILE_FLAGS -Wno-old-style-cast
+        )
+    endif()
+
 endif()
