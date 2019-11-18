@@ -218,8 +218,8 @@ with open(sys.argv[2], "w") as f:
     f.write("        TagClassInt tag_class_int;\n")
     f.write("        std::string path;\n")
     f.write("    };\n")
-    for s in all_structs:
-        f.write("    class {} {{\n".format(s["name"]))
+    for s in all_structs_arranged:
+        f.write("    struct {} {{\n".format(s["name"]))
         all_used_structs = []
         def add_structs_from_struct(struct):
             if "inherits" in struct:
@@ -242,7 +242,9 @@ with open(sys.argv[2], "w") as f:
                     type_to_write = "Dependency"
                     non_type = True
                 elif type_to_write == "TagReflexive":
-                    type_to_write = "std::vector<HEK::{}>".format(t["struct"])
+                    if t["struct"] == "PredictedResource":
+                        continue
+                    type_to_write = "std::vector<{}>".format(t["struct"])
                     non_type = True
                 elif type_to_write == "TagDataOffset":
                     type_to_write = "std::vector<std::byte>"
@@ -253,10 +255,40 @@ with open(sys.argv[2], "w") as f:
                     type_to_write = "{}<HEK::NativeEndian>".format(type_to_write)
                 if "bounds" in t and t["bounds"]:
                     type_to_write = "HEK::Bounds<{}>".format(type_to_write)
-                f.write("        {} {};\n".format(type_to_write, t["name"]))
+                f.write("        {} {}{};\n".format(type_to_write, t["name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"])))
                 all_used_structs.append(t)
                 continue
         add_structs_from_struct(s)
+        f.write("\n        std::vector<std::byte> generate_hek_tag_data() {\n")
+        f.write("            std::vector<std::byte> converted_data(sizeof(HEK::{}<HEK::BigEndian>));\n".format(s["name"]))
+        f.write("            HEK::{}<HEK::BigEndian> b = {{}};\n".format(s["name"]))
+        for struct in all_used_structs:
+            name = struct["name"]
+            if struct["type"] == "TagDependency":
+                f.write("            b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                f.write("            b.{}.path_size = this->{}.path.size();\n".format(name, name))
+                f.write("            converted_data.insert(converted_data.end(), reinterpret_cast<std::byte *>(this->{}.path.data()), reinterpret_cast<std::byte *>(this->{}.path.data()) + this->{}.path.size() + 1);\n".format(name, name, name))
+            elif struct["type"] == "TagReflexive":
+                f.write("            b.{}.count = this->{}.size();\n".format(name, name))
+                f.write("            for(auto &s : this->{}) {{\n".format(name))
+                f.write("                auto converted_struct = s.generate_hek_tag_data();\n")
+                f.write("                converted_data.insert(converted_data.end(), converted_struct.begin(), converted_struct.end());\n")
+                f.write("            }\n")
+            elif struct["type"] == "TagDataOffset":
+                f.write("            b.{}.size = this->{}.size();\n".format(name, name))
+                f.write("            converted_data.insert(converted_data.end(), this->{}.data(), this->{}.data() + this->{}.size());\n".format(name, name, name))
+            elif "bounds" in struct and struct["bounds"]:
+                f.write("            b.{}.from = this->{}.from;\n".format(name, name))
+                f.write("            b.{}.to = this->{}.to;\n".format(name, name))
+            elif "flagged" in struct and struct["flagged"]:
+                f.write("            *reinterpret_cast<std::{}_t *>(b.{}.value) = this->{};\n".format(struct["type"], name, name))
+            elif "count" in struct and struct["count"] > 1:
+                f.write("            std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
+            else:
+                f.write("            b.{} = this->{};\n".format(name, name))
+        f.write("            *reinterpret_cast<decltype(b) *>(converted_data.data()) = b;\n")
+        f.write("            return converted_data;\n")
+        f.write("        }\n")
         f.write("    };\n")
     f.write("}\n")
     f.write("#endif\n")
