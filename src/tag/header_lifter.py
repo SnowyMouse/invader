@@ -82,7 +82,7 @@ for i in range(1, len(sys.argv)):
                     # Get the dependency going
                     f = {}
                     f["name"] = s[1][:-1 if padded_struct else -2]
-                    f["type"] = "dependency"
+                    f["type"] = "TagDependency"
                     f["compound"] = True
                     f["classes"] = [s[i].replace(",", "") for i in range(first_type, len(s))]
                     struct_field["fields"] = [f]
@@ -139,7 +139,7 @@ for i in range(1, len(sys.argv)):
                             f = {}
                             if s.startswith("TagReflexive"):
                                 f["name"] = s_split[2][:-1]
-                                f["type"] = "reflexive"
+                                f["type"] = "TagReflexive"
                                 f["struct"] = s_split[1][:-1]
                                 f["compound"] = True
 
@@ -172,7 +172,7 @@ for i in range(1, len(sys.argv)):
                                     type_read = type_r[:-len("<LittleEndian>")] if is_little else type_r[:-len("<EndianType>")]
 
                                     if type_read == "TagDependency":
-                                        f["type"] = "dependency"
+                                        f["type"] = "TagDependency"
                                         f["classes"] = []
                                         f["compound"] = True
                                         if len(s_split) > 3:

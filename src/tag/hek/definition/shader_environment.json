@@ -71,7 +71,7 @@
             },
             {
                 "name": "lens flare",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "lens_flare"
                 ],
@@ -95,7 +95,7 @@
             },
             {
                 "name": "base map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -119,7 +119,7 @@
             },
             {
                 "name": "primary detail map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -131,7 +131,7 @@
             },
             {
                 "name": "secondary detail map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -155,7 +155,7 @@
             },
             {
                 "name": "micro detail map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -176,7 +176,7 @@
             },
             {
                 "name": "bump map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -336,7 +336,7 @@
             },
             {
                 "name": "map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -418,7 +418,7 @@
             },
             {
                 "name": "reflection cube map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

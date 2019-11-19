@@ -112,7 +112,7 @@
             },
             {
                 "name": "sprite plate",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -120,7 +120,7 @@
             },
             {
                 "name": "types",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "DetailObjectCollectionObjectType",
                 "compound": true
             },

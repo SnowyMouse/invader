@@ -52,7 +52,7 @@
         "fields": [
             {
                 "name": "lens flare",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "lens_flare"
                 ],
@@ -106,7 +106,7 @@
         "fields": [
             {
                 "name": "model",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "model"
                 ],
@@ -114,7 +114,7 @@
             },
             {
                 "name": "animation graph",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "model_animations"
                 ],
@@ -186,7 +186,7 @@
             },
             {
                 "name": "indoor fog screen",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "fog"
                 ],
@@ -198,19 +198,19 @@
             },
             {
                 "name": "shader functions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SkyFunction",
                 "compound": true
             },
             {
                 "name": "animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SkyAnimation",
                 "compound": true
             },
             {
                 "name": "lights",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "SkyLight",
                 "compound": true
             }

@@ -256,19 +256,19 @@
             },
             {
                 "name": "inertial matrix and inverse",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PhysicsInertialMatrix",
                 "compound": true
             },
             {
                 "name": "powered mass points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PhysicsPoweredMassPoint",
                 "compound": true
             },
             {
                 "name": "mass points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PhysicsMassPoint",
                 "compound": true
             }

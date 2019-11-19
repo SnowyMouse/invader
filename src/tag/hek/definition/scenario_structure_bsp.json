@@ -21,7 +21,7 @@
         "fields": [
             {
                 "name": "shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -175,7 +175,7 @@
         "fields": [
             {
                 "name": "shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -330,7 +330,7 @@
             },
             {
                 "name": "materials",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMaterial",
                 "compound": true
             }
@@ -344,7 +344,7 @@
         "fields": [
             {
                 "name": "lens",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "lens_flare"
@@ -416,7 +416,7 @@
             },
             {
                 "name": "surface indices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSubclusterSurfaceIndex",
                 "compound": true
             }
@@ -461,7 +461,7 @@
             },
             {
                 "name": "shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -469,7 +469,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirrorVertex",
                 "compound": true
             }
@@ -531,13 +531,13 @@
             },
             {
                 "name": "predicted resources",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "compound": true
             },
             {
                 "name": "subclusters",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSubcluster",
                 "compound": true
             },
@@ -551,19 +551,19 @@
             },
             {
                 "name": "surface indices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterSurfaceIndex",
                 "compound": true
             },
             {
                 "name": "mirrors",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMirror",
                 "compound": true
             },
             {
                 "name": "portals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalIndex",
                 "compound": true
             }
@@ -617,7 +617,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortalVertex",
                 "compound": true
             }
@@ -680,7 +680,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlaneVertex",
                 "compound": true
             }
@@ -717,7 +717,7 @@
             },
             {
                 "name": "fog",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "fog"
                 ],
@@ -750,7 +750,7 @@
             },
             {
                 "name": "particle system",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weather_system"
                 ],
@@ -771,7 +771,7 @@
             },
             {
                 "name": "wind",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "wind"
                 ],
@@ -833,7 +833,7 @@
             },
             {
                 "name": "planes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedronPlane",
                 "compound": true
             }
@@ -875,7 +875,7 @@
             },
             {
                 "name": "background sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound_looping"
                 ],
@@ -908,7 +908,7 @@
             },
             {
                 "name": "sound environment",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound_environment"
                 ],
@@ -1053,25 +1053,25 @@
         "fields": [
             {
                 "name": "cells",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCell",
                 "compound": true
             },
             {
                 "name": "instances",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObject",
                 "compound": true
             },
             {
                 "name": "counts",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalDetailObjectCount",
                 "compound": true
             },
             {
                 "name": "z reference vectors",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalZReferenceVector",
                 "compound": true
             },
@@ -1139,7 +1139,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFaceVertex",
                 "compound": true
             }
@@ -1163,13 +1163,13 @@
         "fields": [
             {
                 "name": "faces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafFace",
                 "compound": true
             },
             {
                 "name": "portal indices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMapLeafPortalIndex",
                 "compound": true
             }
@@ -1206,7 +1206,7 @@
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLeafPortalVertex",
                 "compound": true
             }
@@ -1219,7 +1219,7 @@
         "fields": [
             {
                 "name": "lightmaps",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -1291,19 +1291,19 @@
             },
             {
                 "name": "collision materials",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCollisionMaterial",
                 "compound": true
             },
             {
                 "name": "collision bsp",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
                 "compound": true
             },
             {
                 "name": "nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPNode",
                 "compound": true
             },
@@ -1324,25 +1324,25 @@
             },
             {
                 "name": "leaves",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLeaf",
                 "compound": true
             },
             {
                 "name": "leaf surfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurfaceReference",
                 "compound": true
             },
             {
                 "name": "surfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSurface",
                 "compound": true
             },
             {
                 "name": "lightmaps 1",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLightmap",
                 "compound": true
             },
@@ -1352,19 +1352,19 @@
             },
             {
                 "name": "lens flares",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlare",
                 "compound": true
             },
             {
                 "name": "lens flare markers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLensFlareMarker",
                 "compound": true
             },
             {
                 "name": "clusters",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPCluster",
                 "compound": true
             },
@@ -1375,7 +1375,7 @@
             },
             {
                 "name": "cluster portals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPClusterPortal",
                 "compound": true
             },
@@ -1385,25 +1385,25 @@
             },
             {
                 "name": "breakable surfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBreakableSurface",
                 "compound": true
             },
             {
                 "name": "fog planes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPlane",
                 "compound": true
             },
             {
                 "name": "fog regions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogRegion",
                 "compound": true
             },
             {
                 "name": "fog palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
                 "compound": true
             },
@@ -1413,13 +1413,13 @@
             },
             {
                 "name": "weather palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPalette",
                 "compound": true
             },
             {
                 "name": "weather polyhedra",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPolyhedron",
                 "compound": true
             },
@@ -1429,25 +1429,25 @@
             },
             {
                 "name": "pathfinding surfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingSurface",
                 "compound": true
             },
             {
                 "name": "pathfinding edges",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPPathfindingEdge",
                 "compound": true
             },
             {
                 "name": "background sound palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBackgroundSoundPalette",
                 "compound": true
             },
             {
                 "name": "sound environment palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSoundEnvironmentPalette",
                 "compound": true
             },
@@ -1462,19 +1462,19 @@
             },
             {
                 "name": "markers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPMarker",
                 "compound": true
             },
             {
                 "name": "detail objects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPDetailObjectData",
                 "compound": true
             },
             {
                 "name": "runtime decals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPRuntimeDecal",
                 "compound": true
             },
@@ -1488,13 +1488,13 @@
             },
             {
                 "name": "leaf map leaves",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalMapLeaf",
                 "compound": true
             },
             {
                 "name": "leaf map portals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPGlobalLeafPortal",
                 "compound": true
             }

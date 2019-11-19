@@ -4,8 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 3:
-    print("Usage: {} <output.hpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 4:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser.cpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,7 +13,13 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-for i in range(2, len(sys.argv)):
+for i in range(4, len(sys.argv)):
+    def make_name_fun(name, ignore_numbers):
+        name = name.replace(" ", "_").replace("'", "")
+        if not ignore_numbers and name[0].isnumeric():
+            name = "_{}".format(name)
+        return name
+
     objects = None
     with open(sys.argv[i], "r") as f:
         objects = json.loads(f.read())
@@ -23,10 +29,17 @@ for i in range(2, len(sys.argv)):
     # Get all enums, bitfields, and structs
     for s in objects:
         if s["type"] == "enum":
+            for o in range(len(s["options"])):
+                s["options"][o] = make_name_fun(s["options"][o], True)
             all_enums.append(s)
         elif s["type"] == "bitfield":
+            for f in range(len(s["fields"])):
+                s["fields"][f] = make_name_fun(s["fields"][f], False)
             all_bitfields.append(s)
         elif s["type"] == "struct":
+            for f in s["fields"]:
+                if f["type"] != "pad":
+                    f["name"] = make_name_fun(f["name"], False)
             all_structs.append(s)
         else:
             print("Unknown object type {}".format(s["type"]), file=sys.stderr)
@@ -59,7 +72,7 @@ def add_struct(name):
         dependencies.append(struct_to_add["inherits"])
 
     for f in s["fields"]:
-        if f["type"] == "reflexive":
+        if f["type"] == "TagReflexive":
             if f["struct"] not in dependencies:
                 dependencies.append(f["struct"])
 
@@ -76,7 +89,7 @@ def to_hex(number):
 
 with open(sys.argv[1], "w") as f:
     f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
-    header_name = "INVADER__TAG__HEK__CLASS__{}_HPP".format(name.upper())
+    header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
     f.write("#ifndef {}\n".format(header_name))
     f.write("#define {}\n\n".format(header_name))
     f.write("#include \"../../hek/data_type.hpp\"\n\n")
@@ -95,38 +108,25 @@ with open(sys.argv[1], "w") as f:
             prefix += i.upper()
 
         for n in range(0,len(e["options"])):
-            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper().replace("'","").replace(" ","_"), "," if n + 1 < len(e["options"]) else ""))
+            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper(), "," if n + 1 < len(e["options"]) else ""))
 
         f.write("    };\n")
 
     for b in all_bitfields:
         f.write("    struct {} {{\n".format(b["name"]))
         for q in b["fields"]:
-            name_fixed = q.replace("'","").replace(" ", "_")
-            if name_fixed[0].isnumeric():
-                name_fixed = "_{}".format(name_fixed)
-            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], name_fixed))
+            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
         f.write("    };\n")
 
     # Now the hard part
     padding_present = False
-
-    def make_name_fun(name):
-        name = name.replace(" ", "_").replace("'", "")
-        if name[0].isnumeric():
-            name = "_{}".format(name)
-        return name
 
     for s in all_structs_arranged:
         f.write("    ENDIAN_TEMPLATE(EndianType) struct {} {}{{\n".format(s["name"], ": {}<EndianType> ".format(s["inherits"]) if "inherits" in s else ""))
         for n in s["fields"]:
             type_to_write = n["type"]
 
-            if type_to_write == "reflexive":
-                type_to_write = "TagReflexive"
-            elif type_to_write == "dependency":
-                type_to_write = "TagDependency"
-            elif type_to_write.startswith("int") or type_to_write.startswith("uint"):
+            if type_to_write.startswith("int") or type_to_write.startswith("uint"):
                 type_to_write = "std::{}_t".format(type_to_write)
             elif type_to_write == "pad":
                 f.write("        PAD(0x{:X});\n".format(n["size"]))
@@ -135,7 +135,7 @@ with open(sys.argv[1], "w") as f:
             if "flagged" in n and n["flagged"]:
                 type_to_write = "FlaggedInt<{}>".format(type_to_write)
 
-            name = make_name_fun(n["name"])
+            name = n["name"]
             if "count" in n:
                 name = "{}[{}]".format(name, n["count"])
 
@@ -196,7 +196,7 @@ with open(sys.argv[1], "w") as f:
                 if n["type"] == "pad":
                     continue
                 else:
-                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", make_name_fun(n["name"])))
+                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", n["name"]))
         f.write("            return copy;\n")
         f.write("        }\n")
 
@@ -205,3 +205,219 @@ with open(sys.argv[1], "w") as f:
 
     f.write("}\n\n")
     f.write("#endif\n")
+
+hpp = open(sys.argv[2], "w")
+cpp = open(sys.argv[3], "w")
+hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+cpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+header_name = "INVADER__TAG__PARSER__PARSER_HPP"
+hpp.write("#ifndef {}\n".format(header_name))
+hpp.write("#define {}\n\n".format(header_name))
+hpp.write("#include <string>\n")
+hpp.write("#include \"../hek/definition.hpp\"\n\n")
+hpp.write("namespace Invader::Parser {\n")
+hpp.write("    struct Dependency {\n")
+hpp.write("        TagClassInt tag_class_int;\n")
+hpp.write("        std::string path;\n")
+hpp.write("    };\n")
+
+cpp.write("#include <invader/tag/parser/parser.hpp>\n")
+cpp.write("namespace Invader::Parser {\n")
+
+for s in all_structs_arranged:
+    struct_name = s["name"]
+
+    hpp.write("    struct {} {{\n".format(struct_name))
+    hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
+    all_used_structs = []
+    def add_structs_from_struct(struct):
+        if "inherits" in struct:
+            for t in all_structs:
+                if t["name"] == struct["inherits"]:
+                    add_structs_from_struct(t)
+                    break
+        for t in struct["fields"]:
+            if t["type"] == "pad":
+                continue
+            type_to_write = t["type"]
+            non_type = False
+            if type_to_write.startswith("int") or type_to_write.startswith("uint"):
+                type_to_write = "std::{}_t".format(type_to_write)
+                non_type = True
+            elif type_to_write == "float":
+                type_to_write = "float"
+                non_type = True
+            elif type_to_write == "TagDependency":
+                type_to_write = "Dependency"
+                non_type = True
+            elif type_to_write == "TagReflexive":
+                if t["struct"] == "PredictedResource":
+                    continue
+                type_to_write = "std::vector<{}>".format(t["struct"])
+                non_type = True
+            elif type_to_write == "TagDataOffset":
+                type_to_write = "std::vector<std::byte>"
+                non_type = True
+            else:
+                type_to_write = "HEK::{}".format(type_to_write)
+            if "flagged" in t and t["flagged"]:
+                type_to_write = "HEK::FlaggedInt<{}>".format(type_to_write)
+            if "compound" in t and t["compound"] and not non_type:
+                type_to_write = "{}<HEK::NativeEndian>".format(type_to_write)
+            if "bounds" in t and t["bounds"]:
+                type_to_write = "HEK::Bounds<{}>".format(type_to_write)
+            hpp.write("        {} {}{};\n".format(type_to_write, t["name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"])))
+            all_used_structs.append(t)
+            continue
+    add_structs_from_struct(s)
+
+    # generate_hek_tag_data()
+    hpp.write("\n        /**\n")
+    hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
+    hpp.write("         * @return cache file data\n")
+    hpp.write("         */\n")
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data();\n")
+
+    cpp.write("    std::vector<std::byte> {}::generate_hek_tag_data() {{\n".format(struct_name))
+    if len(all_used_structs) > 0:
+        cpp.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
+        cpp.write("        struct_big b = {};\n")
+        for struct in all_used_structs:
+            name = struct["name"]
+            if struct["type"] == "TagDependency":
+                cpp.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
+                cpp.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                cpp.write("        b.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
+                cpp.write("        if({}_size > 0) {{\n".format(name))
+                cpp.write("            b.{}.path_size = static_cast<std::uint32_t>({}_size);\n".format(name, name))
+                cpp.write("            converted_data.insert(converted_data.end(), reinterpret_cast<std::byte *>(this->{}.path.data()), reinterpret_cast<std::byte *>(this->{}.path.data()) + {}_size + 1);\n".format(name, name, name))
+                cpp.write("        }\n")
+            elif struct["type"] == "TagReflexive":
+                cpp.write("        auto ref_{}_size = this->{}.size();\n".format(name, name))
+                cpp.write("        if(ref_{}_size > 0) {{\n".format(name))
+                cpp.write("            b.{}.count = static_cast<std::uint32_t>(ref_{}_size);\n".format(name, name))
+                cpp.write("            constexpr std::size_t STRUCT_SIZE = sizeof({}::struct_big);\n".format(struct["struct"]))
+                cpp.write("            auto total_size = STRUCT_SIZE * ref_{}_size;\n".format(name))
+                cpp.write("            const std::size_t FIRST_STRUCT_OFFSET = converted_data.size();\n")
+                cpp.write("            converted_data.insert(converted_data.end(), total_size, std::byte());\n")
+                cpp.write("            for(std::size_t i = 0; i < ref_{}_size; i++) {{\n".format(name))
+                cpp.write("                const auto converted_struct = this->{}[i].generate_hek_tag_data();\n".format(name))
+                cpp.write("                const auto *struct_data = converted_struct.data();\n")
+                cpp.write("                std::copy(struct_data, struct_data + STRUCT_SIZE, converted_data.data() + FIRST_STRUCT_OFFSET + STRUCT_SIZE * i);\n")
+                cpp.write("                converted_data.insert(converted_data.end(), struct_data + STRUCT_SIZE, struct_data + converted_struct.size());\n")
+                cpp.write("            }\n")
+                cpp.write("        }\n")
+            elif struct["type"] == "TagDataOffset":
+                cpp.write("        b.{}.size = static_cast<std::uint32_t>(this->{}.size());\n".format(name, name))
+                cpp.write("        converted_data.insert(converted_data.end(), this->{}.begin(), this->{}.end());\n".format(name, name, name))
+            elif "bounds" in struct and struct["bounds"]:
+                cpp.write("        b.{}.from = this->{}.from;\n".format(name, name))
+                cpp.write("        b.{}.to = this->{}.to;\n".format(name, name))
+            elif "count" in struct and struct["count"] > 1:
+                cpp.write("        std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
+            else:
+                cpp.write("        b.{} = this->{};\n".format(name, name))
+        cpp.write("        *reinterpret_cast<struct_big *>(converted_data.data()) = b;\n")
+        cpp.write("        return converted_data;\n")
+    else:
+        cpp.write("        return std::vector<std::byte>(sizeof(struct_big));\n")
+    cpp.write("    }\n")
+
+    # parse_hek_tag_data()
+    hpp.write("\n        /**\n")
+    hpp.write("         * Parse the HEK tag data.\n")
+    hpp.write("         * @param data      Data to read from for structs, tag references, and reflexives; if data_this is nullptr, this must point to the struct\n")
+    hpp.write("         * @param data_size Size of the buffer\n")
+    hpp.write("         * @param data_read This will be set to the amount of data read. If data_this is null, then the initial struct will also be added\n")
+    hpp.write("         * @param data_this Pointer to the struct; if this is null, then data will be used instead\n")
+    hpp.write("         * @return parsed tag data\n")
+    hpp.write("         */\n")
+    hpp.write("        static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this = nullptr);\n".format(struct_name))
+    cpp.write("    {} {}::parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this) {{\n".format(struct_name, struct_name))
+    cpp.write("        {} r;\n".format(struct_name))
+    cpp.write("        data_read = 0;\n")
+    cpp.write("        if(data_this == nullptr) {\n")
+    cpp.write("            if(sizeof(struct_big) > data_size) {\n")
+    cpp.write("                eprintf(\"failed to read {} base struct: %zu bytes needed > %zu bytes available\\n\", sizeof(struct_big), data_size);\n".format(struct_name))
+    cpp.write("                throw OutOfBoundsException();\n")
+    cpp.write("            }\n")
+    cpp.write("            data_this = data;\n")
+    cpp.write("            data_size -= sizeof(struct_big);\n")
+    cpp.write("            data_read += sizeof(struct_big);\n")
+    cpp.write("            data += sizeof(struct_big);\n")
+    cpp.write("        }\n")
+    if len(all_used_structs) > 0:
+        cpp.write("        const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
+        for struct in all_used_structs:
+            name = struct["name"]
+            if struct["type"] == "TagDependency":
+                cpp.write("        std::size_t h_{}_expected_length = h.{}.path_size;\n".format(name,name))
+                cpp.write("        r.{}.tag_class_int = h.{}.tag_class_int;\n".format(name, name))
+                cpp.write("        if(h_{}_expected_length > 0) {{\n".format(name))
+                cpp.write("            if(h_{}_expected_length + 1 > data_size) {{\n".format(name))
+                cpp.write("                eprintf(\"failed to read dependency {}.{}: %zu bytes needed > %zu bytes available\\n\", h_{}_expected_length, data_size);\n".format(struct_name, name, name))
+                cpp.write("                throw OutOfBoundsException();\n")
+                cpp.write("            }\n")
+                cpp.write("            const char *h_{}_char = reinterpret_cast<const char *>(data);\n".format(name))
+                cpp.write("            for(std::size_t i = 0; i < h_{}_expected_length; i++) {{\n".format(name))
+                cpp.write("                if(h_{}_char[i] == 0) {{\n".format(name))
+                cpp.write("                    eprintf(\"failed to read dependency {}.{}: size is smaller than expected (%zu expected > %zu actual)\\n\", h_{}_expected_length, i);\n".format(struct_name, name, name))
+                cpp.write("                    throw InvalidTagDataException();\n")
+                cpp.write("                }\n")
+                cpp.write("            }\n")
+                cpp.write("            if(static_cast<char>(data[h_{}_expected_length]) != 0) {{\n".format(name))
+                cpp.write("                eprintf(\"failed to read dependency {}.{}: missing null terminator\\n\");\n".format(struct_name, name))
+                cpp.write("                throw InvalidTagDataException();\n")
+                cpp.write("            }\n")
+                cpp.write("            r.{}.path = std::string(reinterpret_cast<const char *>(data));\n".format(name))
+                cpp.write("            data_size -= h_{}_expected_length + 1;\n".format(name))
+                cpp.write("            data_read += h_{}_expected_length + 1;\n".format(name))
+                cpp.write("            data += h_{}_expected_length + 1;\n".format(name))
+                cpp.write("        }\n")
+            elif struct["type"] == "TagReflexive":
+                cpp.write("        std::size_t h_{}_count = h.{}.count;\n".format(name,name))
+                cpp.write("        if(h_{}_count > 0) {{\n".format(name))
+                cpp.write("            const auto *array = reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data);\n".format(struct["struct"]))
+                cpp.write("            std::size_t total_size = sizeof(*array) * h_{}_count;\n".format(name))
+                cpp.write("            if(total_size > data_size) {\n")
+                cpp.write("                eprintf(\"failed to read reflexive {}.{}: %zu bytes needed > %zu bytes available\\n\", total_size, data_size);".format(struct_name, name))
+                cpp.write("                throw OutOfBoundsException();\n")
+                cpp.write("            }\n")
+                cpp.write("            data_size -= total_size;\n")
+                cpp.write("            data_read += total_size;\n")
+                cpp.write("            data += total_size;\n")
+                cpp.write("            r.{}.reserve(h_{}_count);\n".format(name, name))
+                cpp.write("            for(std::size_t ref = 0; ref < h_{}_count; ref++) {{\n".format(name))
+                cpp.write("                std::size_t ref_data_read = 0;\n")
+                cpp.write("                r.{}.emplace_back({}::parse_hek_tag_data(data, data_size, ref_data_read, reinterpret_cast<const std::byte *>(array + ref)));\n".format(name, struct["struct"]))
+                cpp.write("                data += ref_data_read;\n")
+                cpp.write("                data_read += ref_data_read;\n")
+                cpp.write("                data_size -= ref_data_read;\n")
+                cpp.write("            }\n")
+                cpp.write("        }\n")
+            elif struct["type"] == "TagDataOffset":
+                cpp.write("        std::size_t h_{}_size = h.{}.size;\n".format(name, name))
+                cpp.write("        if(h_{}_size > data_size) {{\n".format(name))
+                cpp.write("            eprintf(\"failed to read tag data block {}.{}: %zu bytes needed > %zu bytes available\\n\", h_{}_size, data_size);\n".format(struct_name, name, name))
+                cpp.write("            throw OutOfBoundsException();\n")
+                cpp.write("        }\n")
+                cpp.write("        r.{} = std::vector<std::byte>(data, data + h_{}_size);\n".format(name, name))
+                cpp.write("        data_size -= h_{}_size;\n".format(name))
+                cpp.write("        data_read += h_{}_size;\n".format(name))
+                cpp.write("        data += h_{}_size;\n".format(name))
+            elif "bounds" in struct and struct["bounds"]:
+                cpp.write("        r.{}.from = h.{}.from;\n".format(name, name))
+                cpp.write("        r.{}.to = h.{}.to;\n".format(name, name))
+            elif "count" in struct and struct["count"] > 1:
+                cpp.write("        std::copy(h.{}, h.{} + {}, r.{});\n".format(name, name, struct["count"], name))
+            else:
+                cpp.write("        r.{} = h.{};\n".format(name, name))
+    cpp.write("        return r;\n")
+    cpp.write("    }\n")
+
+    hpp.write("    };\n")
+hpp.write("}\n")
+hpp.write("#endif\n")
+cpp.write("}\n")
+cpp.close()
+hpp.close()

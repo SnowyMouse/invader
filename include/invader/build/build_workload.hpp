@@ -39,7 +39,7 @@ namespace Invader {
             bool no_external_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
-            const std::optional<std::vector<std::tuple<HEK::TagClassInt, std::string>>> &with_index = std::nullopt,
+            const std::optional<std::vector<std::tuple<TagClassInt, std::string>>> &with_index = std::nullopt,
             const std::optional<std::uint32_t> &forge_crc = std::nullopt,
             const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
             const std::optional<std::string> &rename_scenario = std::nullopt
@@ -147,7 +147,7 @@ namespace Invader {
          * @param  tag_class_int class of tag
          * @return               tag index of compiled tag
          */
-        std::size_t compile_tag_recursively(const char *path, HEK::TagClassInt tag_class_int);
+        std::size_t compile_tag_recursively(const char *path, TagClassInt tag_class_int);
 
         /**
          * Build a cache file

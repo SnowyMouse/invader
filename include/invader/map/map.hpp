@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstddef>
 #include <memory>
+#include <optional>
 
 #include "../resource/resource_map.hpp"
 #include "../hek/map.hpp"
@@ -165,6 +166,14 @@ namespace Invader {
          * @throws      OutOfBoundsException if index is invalid
          */
         const Tag &get_tag(std::size_t index) const;
+
+        /**
+         * Find the tag with the given path and class
+         * @param tag_path      tag path to find
+         * @param tag_class_int tag class to find
+         * @return              the index of the first tag found or std::nullopt if not found
+         */
+        std::optional<std::size_t> find_tag(const char *tag_path, TagClassInt tag_class_int) const noexcept;
 
         /**
          * Get the scenario tag ID

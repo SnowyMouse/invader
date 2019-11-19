@@ -16,7 +16,7 @@
         "fields": [
             {
                 "name": "strings",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "StringListString",
                 "compound": true
             }

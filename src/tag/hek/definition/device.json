@@ -70,7 +70,7 @@
             },
             {
                 "name": "open",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -79,7 +79,7 @@
             },
             {
                 "name": "close",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -88,7 +88,7 @@
             },
             {
                 "name": "opened",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -97,7 +97,7 @@
             },
             {
                 "name": "closed",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -106,7 +106,7 @@
             },
             {
                 "name": "depowered",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -115,7 +115,7 @@
             },
             {
                 "name": "repowered",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"
@@ -132,7 +132,7 @@
             },
             {
                 "name": "delay effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     ".sound",
                     "effect"

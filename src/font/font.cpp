@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Invader::HEK::TagFileHeader header(Invader::HEK::TagClassInt::TAG_CLASS_FONT);
+    Invader::HEK::TagFileHeader header(Invader::TagClassInt::TAG_CLASS_FONT);
     Invader::HEK::Font<Invader::HEK::BigEndian> font = {};
     std::vector<Invader::HEK::FontCharacter<Invader::HEK::BigEndian>> tag_characters;
     std::vector<std::byte> pixels;

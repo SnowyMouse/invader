@@ -38,7 +38,7 @@
             },
             {
                 "name": "on",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -47,7 +47,7 @@
             },
             {
                 "name": "off",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -56,7 +56,7 @@
             },
             {
                 "name": "deny",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"

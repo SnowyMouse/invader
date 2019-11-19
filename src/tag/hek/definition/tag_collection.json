@@ -5,7 +5,7 @@
         "fields": [
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "*"
@@ -19,7 +19,7 @@
         "fields": [
             {
                 "name": "tags",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "TagCollectionTag",
                 "compound": true
             }

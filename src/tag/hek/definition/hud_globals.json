@@ -143,7 +143,7 @@
             },
             {
                 "name": "single player font",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -151,7 +151,7 @@
             },
             {
                 "name": "multi player font",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -181,7 +181,7 @@
             },
             {
                 "name": "item message text",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
                 ],
@@ -189,7 +189,7 @@
             },
             {
                 "name": "icon bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -197,7 +197,7 @@
             },
             {
                 "name": "alternate icon text",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unicode_string_list"
                 ],
@@ -205,7 +205,7 @@
             },
             {
                 "name": "button icons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDGlobalsButtonIcon",
                 "compound": true
             },
@@ -247,7 +247,7 @@
             },
             {
                 "name": "hud messages",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "hud_message"
                 ],
@@ -315,7 +315,7 @@
             },
             {
                 "name": "arrow bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -323,7 +323,7 @@
             },
             {
                 "name": "waypoint arrows",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDGlobalsWaypointArrow",
                 "compound": true
             },
@@ -341,7 +341,7 @@
             },
             {
                 "name": "default weapon hud",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon_hud_interface"
                 ],
@@ -390,7 +390,7 @@
             },
             {
                 "name": "hud damage indicator bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -490,7 +490,7 @@
             },
             {
                 "name": "carnage report bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -514,7 +514,7 @@
             },
             {
                 "name": "checkpoint sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],

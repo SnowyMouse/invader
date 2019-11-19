@@ -182,7 +182,7 @@
             },
             {
                 "name": "map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -442,7 +442,7 @@
             },
             {
                 "name": "lens flare",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "lens_flare"
                 ],
@@ -450,19 +450,19 @@
             },
             {
                 "name": "extra layers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
                 "compound": true
             },
             {
                 "name": "maps",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericMap",
                 "compound": true
             },
             {
                 "name": "stages",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericStage",
                 "compound": true
             }

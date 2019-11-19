@@ -139,7 +139,7 @@
             },
             {
                 "name": "destroyed effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -147,7 +147,7 @@
             },
             {
                 "name": "permutations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPermutation",
                 "compound": true
             }
@@ -367,49 +367,49 @@
         "fields": [
             {
                 "name": "bsp3d nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP3DNode",
                 "compound": true
             },
             {
                 "name": "planes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPlane",
                 "compound": true
             },
             {
                 "name": "leaves",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryLeaf",
                 "compound": true
             },
             {
                 "name": "bsp2d references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DReference",
                 "compound": true
             },
             {
                 "name": "bsp2d nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP2DNode",
                 "compound": true
             },
             {
                 "name": "surfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySurface",
                 "compound": true
             },
             {
                 "name": "edges",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryEdge",
                 "compound": true
             },
             {
                 "name": "vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryVertex",
                 "compound": true
             }
@@ -447,7 +447,7 @@
             },
             {
                 "name": "bsps",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryBSP",
                 "compound": true
             }
@@ -500,7 +500,7 @@
             },
             {
                 "name": "localized damage effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -512,7 +512,7 @@
             },
             {
                 "name": "area damage effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -524,7 +524,7 @@
             },
             {
                 "name": "body damaged effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -532,7 +532,7 @@
             },
             {
                 "name": "body depleted effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -544,7 +544,7 @@
             },
             {
                 "name": "body destroyed effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -612,7 +612,7 @@
             },
             {
                 "name": "shield damaged effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -620,7 +620,7 @@
             },
             {
                 "name": "shield depleted effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -628,7 +628,7 @@
             },
             {
                 "name": "shield recharging effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -649,19 +649,19 @@
             },
             {
                 "name": "materials",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryMaterial",
                 "compound": true
             },
             {
                 "name": "regions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryRegion",
                 "compound": true
             },
             {
                 "name": "modifiers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryModifier",
                 "compound": true
             },
@@ -686,13 +686,13 @@
             },
             {
                 "name": "pathfinding spheres",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
                 "compound": true
             },
             {
                 "name": "nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryNode",
                 "compound": true
             }

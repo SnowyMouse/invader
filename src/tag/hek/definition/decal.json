@@ -57,7 +57,7 @@
             },
             {
                 "name": "next decal in chain",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "decal"
                 ],
@@ -143,7 +143,7 @@
             },
             {
                 "name": "map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

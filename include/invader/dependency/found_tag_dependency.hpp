@@ -10,13 +10,13 @@
 namespace Invader {
     struct FoundTagDependency {
         std::string path;
-        Invader::HEK::TagClassInt class_int;
+        Invader::TagClassInt class_int;
         bool broken;
         std::string file_path;
 
-        static std::vector<FoundTagDependency> find_dependencies(const char *tag_path_to_find, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success);
+        static std::vector<FoundTagDependency> find_dependencies(const char *tag_path_to_find, Invader::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success);
 
-        FoundTagDependency(std::string path, Invader::HEK::TagClassInt class_int, bool broken, std::string file_path) : path(path), class_int(class_int), broken(broken), file_path(file_path) {}
+        FoundTagDependency(std::string path, Invader::TagClassInt class_int, bool broken, std::string file_path) : path(path), class_int(class_int), broken(broken), file_path(file_path) {}
     };
 }
 

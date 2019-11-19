@@ -123,7 +123,7 @@
             },
             {
                 "name": "map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -161,7 +161,7 @@
             },
             {
                 "name": "background sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound_looping"
                 ],
@@ -169,7 +169,7 @@
             },
             {
                 "name": "sound environment",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound_environment"
                 ],

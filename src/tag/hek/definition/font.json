@@ -15,7 +15,7 @@
         "fields": [
             {
                 "name": "character table",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "FontCharacterIndex",
                 "compound": true
             }
@@ -95,13 +95,13 @@
             },
             {
                 "name": "character tables",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "FontCharacterTables",
                 "compound": true
             },
             {
                 "name": "bold",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -109,7 +109,7 @@
             },
             {
                 "name": "italic",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -117,7 +117,7 @@
             },
             {
                 "name": "condense",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -125,7 +125,7 @@
             },
             {
                 "name": "underline",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -133,7 +133,7 @@
             },
             {
                 "name": "characters",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "FontCharacter",
                 "compound": true
             },

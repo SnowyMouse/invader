@@ -62,7 +62,7 @@
             },
             {
                 "name": "material effects",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "material_effects"
                 ],
@@ -70,7 +70,7 @@
             },
             {
                 "name": "collision sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -87,7 +87,7 @@
             },
             {
                 "name": "detonating effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -95,7 +95,7 @@
             },
             {
                 "name": "detonation effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],

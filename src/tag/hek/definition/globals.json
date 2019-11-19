@@ -22,7 +22,7 @@
         "fields": [
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "sound"
@@ -37,7 +37,7 @@
         "fields": [
             {
                 "name": "default_unit_camera_track",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "camera_track"
@@ -118,7 +118,7 @@
             },
             {
                 "name": "look function",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsLookFunction",
                 "compound": true
             }
@@ -602,7 +602,7 @@
             },
             {
                 "name": "throwing effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -610,7 +610,7 @@
             },
             {
                 "name": "hud interface",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "grenade_hud_interface"
                 ],
@@ -618,7 +618,7 @@
             },
             {
                 "name": "equipment",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "equipment"
                 ],
@@ -626,7 +626,7 @@
             },
             {
                 "name": "projectile",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "projectile"
                 ],
@@ -641,7 +641,7 @@
         "fields": [
             {
                 "name": "distance attenuation",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -649,7 +649,7 @@
             },
             {
                 "name": "vector normalization",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -657,7 +657,7 @@
             },
             {
                 "name": "atmospheric fog density",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -665,7 +665,7 @@
             },
             {
                 "name": "planar fog density",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -673,7 +673,7 @@
             },
             {
                 "name": "linear corner fade",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -681,7 +681,7 @@
             },
             {
                 "name": "active camouflage distortion",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -689,7 +689,7 @@
             },
             {
                 "name": "glow",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -701,7 +701,7 @@
             },
             {
                 "name": "default 2d",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -709,7 +709,7 @@
             },
             {
                 "name": "default 3d",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -717,7 +717,7 @@
             },
             {
                 "name": "default cube map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -725,7 +725,7 @@
             },
             {
                 "name": "test 0",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -733,7 +733,7 @@
             },
             {
                 "name": "test 1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -741,7 +741,7 @@
             },
             {
                 "name": "test 2",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -749,7 +749,7 @@
             },
             {
                 "name": "test 3",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -757,7 +757,7 @@
             },
             {
                 "name": "video scanline map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -765,7 +765,7 @@
             },
             {
                 "name": "video noise map",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -811,7 +811,7 @@
             },
             {
                 "name": "distance attenuation 2d",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -826,7 +826,7 @@
         "fields": [
             {
                 "name": "font system",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -834,7 +834,7 @@
             },
             {
                 "name": "font terminal",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "font"
                 ],
@@ -842,7 +842,7 @@
             },
             {
                 "name": "screen color table",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "color_table"
                 ],
@@ -850,7 +850,7 @@
             },
             {
                 "name": "hud color table",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "color_table"
                 ],
@@ -858,7 +858,7 @@
             },
             {
                 "name": "editor color table",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "color_table"
                 ],
@@ -866,7 +866,7 @@
             },
             {
                 "name": "dialog color table",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "color_table"
                 ],
@@ -874,7 +874,7 @@
             },
             {
                 "name": "hud globals",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "hud_globals"
                 ],
@@ -882,7 +882,7 @@
             },
             {
                 "name": "motion sensor sweep bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -890,7 +890,7 @@
             },
             {
                 "name": "motion sensor sweep bitmap mask",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -898,7 +898,7 @@
             },
             {
                 "name": "multiplayer hud bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -906,7 +906,7 @@
             },
             {
                 "name": "localization",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "string_list"
                 ],
@@ -914,7 +914,7 @@
             },
             {
                 "name": "hud digits definition",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "hud_numbers"
                 ],
@@ -922,7 +922,7 @@
             },
             {
                 "name": "motion sensor blip bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -930,7 +930,7 @@
             },
             {
                 "name": "interface goo map1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -938,7 +938,7 @@
             },
             {
                 "name": "interface goo map2",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -946,7 +946,7 @@
             },
             {
                 "name": "interface goo map3",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -966,7 +966,7 @@
         "fields": [
             {
                 "name": "weapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "item"
@@ -981,7 +981,7 @@
         "fields": [
             {
                 "name": "powerup",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "equipment"
@@ -996,7 +996,7 @@
         "fields": [
             {
                 "name": "vehicle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "unit"
@@ -1011,7 +1011,7 @@
         "fields": [
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "sound"
@@ -1025,7 +1025,7 @@
         "fields": [
             {
                 "name": "flag",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item"
                 ],
@@ -1033,7 +1033,7 @@
             },
             {
                 "name": "unit",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unit"
                 ],
@@ -1041,13 +1041,13 @@
             },
             {
                 "name": "vehicles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsVehicle",
                 "compound": true
             },
             {
                 "name": "hill shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -1055,7 +1055,7 @@
             },
             {
                 "name": "flag shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -1063,7 +1063,7 @@
             },
             {
                 "name": "ball",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item"
                 ],
@@ -1071,7 +1071,7 @@
             },
             {
                 "name": "sounds",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsMultiplayerSound",
                 "compound": true
             },
@@ -1088,7 +1088,7 @@
         "fields": [
             {
                 "name": "unit",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unit"
                 ],
@@ -1198,7 +1198,7 @@
             },
             {
                 "name": "coop respawn effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -1217,13 +1217,13 @@
         "fields": [
             {
                 "name": "first person hands",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             },
             {
                 "name": "base bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -1231,7 +1231,7 @@
             },
             {
                 "name": "shield meter",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             },
@@ -1242,7 +1242,7 @@
             },
             {
                 "name": "body meter",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             },
@@ -1253,7 +1253,7 @@
             },
             {
                 "name": "night vision off on effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -1261,7 +1261,7 @@
             },
             {
                 "name": "night vision on off effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -1289,7 +1289,7 @@
             },
             {
                 "name": "falling damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1305,7 +1305,7 @@
             },
             {
                 "name": "distance damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1313,7 +1313,7 @@
             },
             {
                 "name": "vehicle environment collision damage effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1321,7 +1321,7 @@
             },
             {
                 "name": "vehicle killed unit damage effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1329,7 +1329,7 @@
             },
             {
                 "name": "vehicle collision damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1337,7 +1337,7 @@
             },
             {
                 "name": "flaming death damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -1367,7 +1367,7 @@
         "fields": [
             {
                 "name": "particle type",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "particle"
                 ],
@@ -1479,7 +1479,7 @@
             },
             {
                 "name": "effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -1487,7 +1487,7 @@
             },
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1499,7 +1499,7 @@
             },
             {
                 "name": "particle effects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsBreakableSurfaceParticleEffect",
                 "compound": true
             },
@@ -1509,7 +1509,7 @@
             },
             {
                 "name": "melee hit sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -1569,91 +1569,91 @@
             },
             {
                 "name": "sounds",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsSound",
                 "compound": true
             },
             {
                 "name": "camera",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsCamera",
                 "compound": true
             },
             {
                 "name": "player control",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsPlayerControl",
                 "compound": true
             },
             {
                 "name": "difficulty",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsDifficulty",
                 "compound": true
             },
             {
                 "name": "grenades",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsGrenade",
                 "compound": true
             },
             {
                 "name": "rasterizer data",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsRasterizerData",
                 "compound": true
             },
             {
                 "name": "interface bitmaps",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsInterfaceBitmaps",
                 "compound": true
             },
             {
                 "name": "weapon list",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsWeapon",
                 "compound": true
             },
             {
                 "name": "cheat powerups",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsCheatPowerup",
                 "compound": true
             },
             {
                 "name": "multiplayer information",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsMultiplayerInformation",
                 "compound": true
             },
             {
                 "name": "player information",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsPlayerInformation",
                 "compound": true
             },
             {
                 "name": "first person interface",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsFirstPersonInterface",
                 "compound": true
             },
             {
                 "name": "falling damage",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsFallingDamage",
                 "compound": true
             },
             {
                 "name": "materials",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsMaterial",
                 "compound": true
             },
             {
                 "name": "playlist members",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GlobalsPlaylistMember",
                 "compound": true
             }

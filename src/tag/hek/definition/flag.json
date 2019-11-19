@@ -83,7 +83,7 @@
             },
             {
                 "name": "red flag shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -91,7 +91,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -107,7 +107,7 @@
             },
             {
                 "name": "blue flag shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -115,7 +115,7 @@
             },
             {
                 "name": "attachment points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "FlagAttachmentPoint",
                 "compound": true
             }

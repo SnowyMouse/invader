@@ -84,7 +84,7 @@
             },
             {
                 "name": "instances",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelMarkerInstance",
                 "compound": true
             }
@@ -237,7 +237,7 @@
             },
             {
                 "name": "markers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelRegionPermutationMarker",
                 "compound": true
             }
@@ -259,7 +259,7 @@
             },
             {
                 "name": "permutations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelRegionPermutation",
                 "compound": true
             }
@@ -424,19 +424,19 @@
             },
             {
                 "name": "uncompressed vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelVertexUncompressed",
                 "compound": true
             },
             {
                 "name": "compressed vertices",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelVertexCompressed",
                 "compound": true
             },
             {
                 "name": "triangles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelTriangle",
                 "compound": true
             },
@@ -517,7 +517,7 @@
             },
             {
                 "name": "parts",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelGeometryPart",
                 "compound": true
             }
@@ -530,7 +530,7 @@
         "fields": [
             {
                 "name": "shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "shader"
                 ],
@@ -625,31 +625,31 @@
             },
             {
                 "name": "markers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelMarker",
                 "compound": true
             },
             {
                 "name": "nodes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelNode",
                 "compound": true
             },
             {
                 "name": "regions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelRegion",
                 "compound": true
             },
             {
                 "name": "geometries",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelGeometry",
                 "compound": true
             },
             {
                 "name": "shaders",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "GBXModelShaderReference",
                 "compound": true
             }

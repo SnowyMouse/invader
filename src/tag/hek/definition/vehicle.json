@@ -235,7 +235,7 @@
             },
             {
                 "name": "suspension sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -243,7 +243,7 @@
             },
             {
                 "name": "crash sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -251,7 +251,7 @@
             },
             {
                 "name": "material effects",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "material_effects"
                 ],
@@ -259,7 +259,7 @@
             },
             {
                 "name": "effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],

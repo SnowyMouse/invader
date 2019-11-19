@@ -8,12 +8,12 @@
 #include <filesystem>
 
 namespace Invader {
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
         if(!reverse) {
-            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::HEK::TagClassInt tag_int_to_find, auto recursion) -> void {
+            auto find_dependencies_in_tag = [&tags, &found_tags, &recursive, &success](const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, auto recursion) -> void {
                 std::string tag_path_to_find = File::halo_path_to_preferred_path(tag_path_to_find_2);
 
                 // See if we can open the tag
@@ -48,8 +48,8 @@ namespace Invader {
 
                             // Fix .model dependencies so they're .gbxmodel (this is only an issue with HEK stock tags)
                             auto class_to_use = dependency.tag_class_int;
-                            if(class_to_use == HEK::TagClassInt::TAG_CLASS_MODEL) {
-                                class_to_use = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
+                            if(class_to_use == TagClassInt::TAG_CLASS_MODEL) {
+                                class_to_use = TagClassInt::TAG_CLASS_GBXMODEL;
                             }
 
                             std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
@@ -108,14 +108,14 @@ namespace Invader {
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_NULL ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_BITMAP ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_CAMERA_TRACK ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_PHYSICS ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST ||
-                                class_int == Invader::HEK::TagClassInt::TAG_CLASS_WIND) {
+                                class_int == Invader::TagClassInt::TAG_CLASS_NULL ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_BITMAP ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_CAMERA_TRACK ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_PHYSICS ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST ||
+                                class_int == Invader::TagClassInt::TAG_CLASS_WIND) {
                                 continue;
                             }
 

@@ -68,7 +68,7 @@
             },
             {
                 "name": "interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -120,7 +120,7 @@
             },
             {
                 "name": "multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -149,7 +149,7 @@
         "fields": [
             {
                 "name": "sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "sound_looping"
@@ -214,7 +214,7 @@
             },
             {
                 "name": "background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -266,7 +266,7 @@
             },
             {
                 "name": "background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -301,7 +301,7 @@
             },
             {
                 "name": "meter meter bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -428,7 +428,7 @@
             },
             {
                 "name": "hud background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -480,7 +480,7 @@
             },
             {
                 "name": "hud background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -515,7 +515,7 @@
             },
             {
                 "name": "shield panel background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -567,7 +567,7 @@
             },
             {
                 "name": "shield panel background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -602,7 +602,7 @@
             },
             {
                 "name": "shield panel meter meter bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -714,7 +714,7 @@
             },
             {
                 "name": "health panel background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -766,7 +766,7 @@
             },
             {
                 "name": "health panel background multitex overlay",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -801,7 +801,7 @@
             },
             {
                 "name": "health panel meter meter bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -909,7 +909,7 @@
             },
             {
                 "name": "motion sensor background interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -961,7 +961,7 @@
             },
             {
                 "name": "motion sensor background multitex overlays",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -996,7 +996,7 @@
             },
             {
                 "name": "motion sensor foreground interface bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -1048,7 +1048,7 @@
             },
             {
                 "name": "motion sensor foreground multitex overlays",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlay",
                 "compound": true
             },
@@ -1099,7 +1099,7 @@
             },
             {
                 "name": "overlays",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitHUDInterfaceAuxiliaryOverlay",
                 "compound": true
             },
@@ -1109,13 +1109,13 @@
             },
             {
                 "name": "sounds",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitHUDInterfaceHUDSound",
                 "compound": true
             },
             {
                 "name": "meters",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitHUDInterfaceAuxiliaryPanel",
                 "compound": true
             },

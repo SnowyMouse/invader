@@ -4,7 +4,7 @@
         "fields": [
             {
                 "name": "digits bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],

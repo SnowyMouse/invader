@@ -26,7 +26,7 @@ namespace Invader {
 
             // Add our dependency if we aren't skipping
             if(skip_data) {
-                dependency.tag_class_int = HEK::TagClassInt::TAG_CLASS_NONE;
+                dependency.tag_class_int = TagClassInt::TAG_CLASS_NONE;
                 dependency.tag_id = HEK::TagID::null_tag_id();
             }
             else {

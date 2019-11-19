@@ -285,7 +285,7 @@ namespace Invader {
         for(std::size_t i = 0; i < tag_count; i++) {
             this->tags.push_back(Tag(*this));
             auto &tag = this->tags[i];
-            tag.p_tag_class_int = tags[i].primary_class;
+            tag.tag_class_int = tags[i].primary_class;
             tag.tag_data_index_offset = reinterpret_cast<const std::byte *>(tags + i) - this->tag_data;
 
             try {
@@ -302,12 +302,12 @@ namespace Invader {
 
                 // If it was null terminated, use it. Otherwise, don't.
                 if(zeroed) {
-                    tag.p_path = path;
+                    tag.path = path;
                 }
             }
             catch (Invader::OutOfBoundsException &) {}
 
-            if(tag.p_tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+            if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                 continue;
             }
             else if(tags[i].indexed) {
@@ -315,7 +315,7 @@ namespace Invader {
 
                 // Find where it's located
                 DataMapType type;
-                switch(tag.p_tag_class_int) {
+                switch(tag.tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         type = DataMapType::DATA_MAP_BITMAP;
                         tag.base_struct_pointer = 0;
@@ -352,7 +352,7 @@ namespace Invader {
                     auto *paths = reinterpret_cast<const char *>(this->get_data_at_offset(header.paths, 0, type));
                     for(std::uint32_t i = 1; i < count; i+=2) {
                         auto *path = paths + indices[i].path_offset;
-                        if(tag.p_path == path) {
+                        if(tag.path == path) {
                             resource_index = i;
                             break;
                         }
@@ -413,8 +413,8 @@ namespace Invader {
         auto tag_count = this->get_tag_count();
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag = this->get_tag(t);
-            auto tag_class = tag.tag_class_int();
-            auto &tag_path = tag.path();
+            auto tag_class = tag.get_tag_class_int();
+            auto &tag_path = tag.get_path();
 
             // If the tag has no data, but it's not because it's indexed, keep going
             if(!tag.data_is_available() && !tag.is_indexed()) {
@@ -434,15 +434,24 @@ namespace Invader {
             // Go through each tag and see if we have any duplicates
             for(std::size_t t2 = t + 1; t2 < tag_count; t2++) {
                 auto &tag2 = this->get_tag(t2);
-                if(tag_class != tag2.tag_class_int()) {
+                if(tag_class != tag2.get_tag_class_int()) {
                     continue;
                 }
-                if(tag2.path() == tag_path) {
+                if(tag2.get_path() == tag_path) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    std::optional<std::size_t> Map::find_tag(const char *tag_path, TagClassInt tag_class_int) const noexcept {
+        for(auto &tag : tags) {
+            if(tag.get_tag_class_int() == tag_class_int && tag.get_path() == tag_path) {
+                return &tag - tags.data();
+            }
+        }
+        return std::nullopt;
     }
 
     Map::Map(Map &&move) {

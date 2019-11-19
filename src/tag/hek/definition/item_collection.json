@@ -12,7 +12,7 @@
             },
             {
                 "name": "item",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item"
                 ],
@@ -31,7 +31,7 @@
         "fields": [
             {
                 "name": "permutations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ItemCollectionPermutation",
                 "compound": true
             },

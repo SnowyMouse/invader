@@ -25,19 +25,25 @@ namespace Invader {
          * Get the path of the tag
          * @return path of the tag
          */
-        const std::string &path() const noexcept;
+        const std::string &get_path() const noexcept {
+            return this->path;
+        }
 
         /**
          * Get the class of the tag
          * @return class of the tag
          */
-        HEK::TagClassInt tag_class_int() const noexcept;
+        TagClassInt get_tag_class_int() const noexcept {
+            return this->tag_class_int;
+        }
 
         /**
          * Get whether this is an indexed tag that is not in the map
          * @return true if this is an indexed tag that is not in the map
          */
-        bool is_indexed() const noexcept;
+        bool is_indexed() const noexcept {
+            return this->indexed;
+        }
 
         /**
          * Get whether or not the tag data is available
@@ -146,13 +152,13 @@ namespace Invader {
 
     private:
         /** Map reference */
-        Map &p_map;
+        Map &map;
 
         /** Path of tag */
-        std::string p_path;
+        std::string path;
 
         /** Class of tag */
-        HEK::TagClassInt p_tag_class_int;
+        TagClassInt tag_class_int;
 
         /** This is indexed and not in the map? */
         bool indexed = false;

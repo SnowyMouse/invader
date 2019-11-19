@@ -138,7 +138,7 @@
             },
             {
                 "name": "equipment",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "equipment"
                 ],
@@ -201,7 +201,7 @@
             },
             {
                 "name": "reloading effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -210,7 +210,7 @@
             },
             {
                 "name": "chambering effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -223,7 +223,7 @@
             },
             {
                 "name": "magazine objects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "WeaponMagazineObject",
                 "compound": true
             }
@@ -248,7 +248,7 @@
             },
             {
                 "name": "firing effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -257,7 +257,7 @@
             },
             {
                 "name": "misfire effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -266,7 +266,7 @@
             },
             {
                 "name": "empty effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -275,7 +275,7 @@
             },
             {
                 "name": "firing damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage"
                 ],
@@ -283,7 +283,7 @@
             },
             {
                 "name": "misfire damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage"
                 ],
@@ -291,7 +291,7 @@
             },
             {
                 "name": "empty damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage"
                 ],
@@ -396,7 +396,7 @@
             },
             {
                 "name": "charging effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -439,7 +439,7 @@
             },
             {
                 "name": "projectile",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "object"
                 ],
@@ -507,7 +507,7 @@
             },
             {
                 "name": "firing effects",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "WeaponTriggerFiringEffect",
                 "compound": true
             }
@@ -557,7 +557,7 @@
             },
             {
                 "name": "ready effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -594,7 +594,7 @@
             },
             {
                 "name": "overheated",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -603,7 +603,7 @@
             },
             {
                 "name": "detonation",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -612,7 +612,7 @@
             },
             {
                 "name": "player melee damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -620,7 +620,7 @@
             },
             {
                 "name": "player melee response",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -632,7 +632,7 @@
             },
             {
                 "name": "actor firing parameters",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor_variant"
                 ],
@@ -729,7 +729,7 @@
             },
             {
                 "name": "light power on effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -738,7 +738,7 @@
             },
             {
                 "name": "light power off effect",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
@@ -767,7 +767,7 @@
             },
             {
                 "name": "first person model",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "gbxmodel"
                 ],
@@ -775,7 +775,7 @@
             },
             {
                 "name": "first person animations",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "model_animations"
                 ],
@@ -787,7 +787,7 @@
             },
             {
                 "name": "hud interface",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon_hud_interface"
                 ],
@@ -795,7 +795,7 @@
             },
             {
                 "name": "pickup sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -803,7 +803,7 @@
             },
             {
                 "name": "zoom in sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -811,7 +811,7 @@
             },
             {
                 "name": "zoom out sound",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -843,19 +843,19 @@
             },
             {
                 "name": "more predicted resources",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "compound": true
             },
             {
                 "name": "magazines",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "WeaponMagazine",
                 "compound": true
             },
             {
                 "name": "triggers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "WeaponTrigger",
                 "compound": true
             }

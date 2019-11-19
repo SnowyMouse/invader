@@ -565,7 +565,7 @@
         "fields": [
             {
                 "name": "sky",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "sky"
@@ -580,7 +580,7 @@
         "fields": [
             {
                 "name": "child_scenario",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "scenario"
@@ -792,7 +792,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "scenery"
@@ -851,7 +851,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "biped"
@@ -923,7 +923,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "vehicle"
@@ -962,7 +962,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "equipment"
@@ -1025,7 +1025,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "weapon"
@@ -1100,7 +1100,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "device_machine"
@@ -1159,7 +1159,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "device_control"
@@ -1223,7 +1223,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "device_light_fixture"
@@ -1254,7 +1254,7 @@
         "fields": [
             {
                 "name": "name",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "sound_scenery"
@@ -1285,7 +1285,7 @@
             },
             {
                 "name": "primary weapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon"
                 ],
@@ -1301,7 +1301,7 @@
             },
             {
                 "name": "secondary weapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "weapon"
                 ],
@@ -1489,7 +1489,7 @@
             },
             {
                 "name": "weapon group",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1549,7 +1549,7 @@
             },
             {
                 "name": "item collection",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1592,7 +1592,7 @@
             },
             {
                 "name": "item collection 1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1600,7 +1600,7 @@
             },
             {
                 "name": "item collection 2",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1608,7 +1608,7 @@
             },
             {
                 "name": "item collection 3",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1616,7 +1616,7 @@
             },
             {
                 "name": "item collection 4",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1624,7 +1624,7 @@
             },
             {
                 "name": "item collection 5",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1632,7 +1632,7 @@
             },
             {
                 "name": "item collection 6",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "item_collection"
                 ],
@@ -1702,7 +1702,7 @@
         "fields": [
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "decal"
@@ -1717,7 +1717,7 @@
         "fields": [
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "detail_object_collection"
@@ -1736,7 +1736,7 @@
         "fields": [
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "actor_variant"
@@ -1967,13 +1967,13 @@
             },
             {
                 "name": "move positions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioMovePosition",
                 "compound": true
             },
             {
                 "name": "starting locations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioActorStartingLocation",
                 "compound": true
             },
@@ -2120,25 +2120,25 @@
             },
             {
                 "name": "squads",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSquad",
                 "compound": true
             },
             {
                 "name": "platoons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioPlatoon",
                 "compound": true
             },
             {
                 "name": "firing positions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioFiringPosition",
                 "compound": true
             },
             {
                 "name": "player starting locations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
                 "compound": true
             }
@@ -2243,13 +2243,13 @@
             },
             {
                 "name": "commands",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCommand",
                 "compound": true
             },
             {
                 "name": "points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCommandPoint",
                 "compound": true
             },
@@ -2271,7 +2271,7 @@
             },
             {
                 "name": "animation graph",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "model_animations"
                 ],
@@ -2402,7 +2402,7 @@
             },
             {
                 "name": "variant 1",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2410,7 +2410,7 @@
             },
             {
                 "name": "variant 2",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2418,7 +2418,7 @@
             },
             {
                 "name": "variant 3",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2426,7 +2426,7 @@
             },
             {
                 "name": "variant 4",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2434,7 +2434,7 @@
             },
             {
                 "name": "variant 5",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2442,7 +2442,7 @@
             },
             {
                 "name": "variant 6",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sound"
                 ],
@@ -2482,13 +2482,13 @@
             },
             {
                 "name": "participants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIConversationParticipant",
                 "compound": true
             },
             {
                 "name": "lines",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIConversationLine",
                 "compound": true
             },
@@ -2569,7 +2569,7 @@
             },
             {
                 "name": "reference",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [],
                 "compound": true
             }
@@ -2755,7 +2755,7 @@
             },
             {
                 "name": "structure bsp",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "scenario_structure_bsp"
                 ],
@@ -2858,7 +2858,7 @@
         "fields": [
             {
                 "name": "don't use",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "scenario_structure_bsp"
                 ],
@@ -2866,7 +2866,7 @@
             },
             {
                 "name": "won't use",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "scenario_structure_bsp"
                 ],
@@ -2874,7 +2874,7 @@
             },
             {
                 "name": "can't use",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "sky"
                 ],
@@ -2882,7 +2882,7 @@
             },
             {
                 "name": "skies",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSky",
                 "compound": true
             },
@@ -2896,7 +2896,7 @@
             },
             {
                 "name": "child scenarios",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
                 "compound": true
             },
@@ -2914,13 +2914,13 @@
             },
             {
                 "name": "predicted resources",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "compound": true
             },
             {
                 "name": "functions",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioFunction",
                 "compound": true
             },
@@ -2931,7 +2931,7 @@
             },
             {
                 "name": "comments",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioEditorComment",
                 "compound": true
             },
@@ -2941,121 +2941,121 @@
             },
             {
                 "name": "object names",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioObjectName",
                 "compound": true
             },
             {
                 "name": "scenery",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioScenery",
                 "compound": true
             },
             {
                 "name": "scenery palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSceneryPalette",
                 "compound": true
             },
             {
                 "name": "bipeds",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioBiped",
                 "compound": true
             },
             {
                 "name": "biped palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioBipedPalette",
                 "compound": true
             },
             {
                 "name": "vehicles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioVehicle",
                 "compound": true
             },
             {
                 "name": "vehicle palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
                 "compound": true
             },
             {
                 "name": "equipment",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
                 "compound": true
             },
             {
                 "name": "equipment palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioEquipmentPalette",
                 "compound": true
             },
             {
                 "name": "weapons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioWeapon",
                 "compound": true
             },
             {
                 "name": "weapon palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioWeaponPalette",
                 "compound": true
             },
             {
                 "name": "device groups",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioDeviceGroup",
                 "compound": true
             },
             {
                 "name": "machines",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioMachine",
                 "compound": true
             },
             {
                 "name": "machine palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioMachinePalette",
                 "compound": true
             },
             {
                 "name": "controls",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioControl",
                 "compound": true
             },
             {
                 "name": "control palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioControlPalette",
                 "compound": true
             },
             {
                 "name": "light fixtures",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioLightFixture",
                 "compound": true
             },
             {
                 "name": "light fixture palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioLightFixturePalette",
                 "compound": true
             },
             {
                 "name": "sound scenery",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSoundScenery",
                 "compound": true
             },
             {
                 "name": "sound scenery palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSoundSceneryPalette",
                 "compound": true
             },
@@ -3065,67 +3065,67 @@
             },
             {
                 "name": "player starting profile",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingProfile",
                 "compound": true
             },
             {
                 "name": "player starting locations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
                 "compound": true
             },
             {
                 "name": "trigger volumes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioTriggerVolume",
                 "compound": true
             },
             {
                 "name": "recorded animations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioRecordedAnimation",
                 "compound": true
             },
             {
                 "name": "netgame flags",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioNetgameFlags",
                 "compound": true
             },
             {
                 "name": "netgame equipment",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioNetgameEquipment",
                 "compound": true
             },
             {
                 "name": "starting equipment",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioStartingEquipment",
                 "compound": true
             },
             {
                 "name": "bsp switch trigger volumes",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioBSPSwitchTriggerVolume",
                 "compound": true
             },
             {
                 "name": "decals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioDecal",
                 "compound": true
             },
             {
                 "name": "decal palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioDecalPalette",
                 "compound": true
             },
             {
                 "name": "detail object collection palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioDetailObjectCollectionPalette",
                 "compound": true
             },
@@ -3135,43 +3135,43 @@
             },
             {
                 "name": "actor palette",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioActorPalette",
                 "compound": true
             },
             {
                 "name": "encounters",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioEncounter",
                 "compound": true
             },
             {
                 "name": "command lists",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCommandList",
                 "compound": true
             },
             {
                 "name": "ai animation references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIAnimationReference",
                 "compound": true
             },
             {
                 "name": "ai script references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIScriptReference",
                 "compound": true
             },
             {
                 "name": "ai recording references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIRecordingReference",
                 "compound": true
             },
             {
                 "name": "ai conversations",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioAIConversation",
                 "compound": true
             },
@@ -3187,25 +3187,25 @@
             },
             {
                 "name": "scripts",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioScript",
                 "compound": true
             },
             {
                 "name": "globals",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioGlobal",
                 "compound": true
             },
             {
                 "name": "references",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioReference",
                 "compound": true
             },
             {
                 "name": "source files",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioSourceFile",
                 "compound": true
             },
@@ -3215,19 +3215,19 @@
             },
             {
                 "name": "cutscene flags",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCutsceneFlag",
                 "compound": true
             },
             {
                 "name": "cutscene camera points",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCutsceneCameraPoint",
                 "compound": true
             },
             {
                 "name": "cutscene titles",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioCutsceneTitle",
                 "compound": true
             },
@@ -3237,7 +3237,7 @@
             },
             {
                 "name": "custom object names",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unicode_string"
                 ],
@@ -3245,7 +3245,7 @@
             },
             {
                 "name": "ingame help text",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unicode_string"
                 ],
@@ -3253,7 +3253,7 @@
             },
             {
                 "name": "hud messages",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "hud_messages"
                 ],
@@ -3261,7 +3261,7 @@
             },
             {
                 "name": "structure bsps",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ScenarioBSP",
                 "compound": true
             }

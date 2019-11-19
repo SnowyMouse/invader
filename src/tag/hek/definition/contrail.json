@@ -70,7 +70,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -160,7 +160,7 @@
             },
             {
                 "name": "bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -212,7 +212,7 @@
             },
             {
                 "name": "secondary bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -305,7 +305,7 @@
             },
             {
                 "name": "point states",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "ContrailPointState",
                 "compound": true
             }

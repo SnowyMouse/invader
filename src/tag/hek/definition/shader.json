@@ -89,7 +89,7 @@
         "fields": [
             {
                 "name": "shader",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "shader"

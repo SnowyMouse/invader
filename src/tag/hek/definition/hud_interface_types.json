@@ -279,7 +279,7 @@
             },
             {
                 "name": "primary",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -287,7 +287,7 @@
             },
             {
                 "name": "secondary",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -295,7 +295,7 @@
             },
             {
                 "name": "tertiary",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -323,7 +323,7 @@
             },
             {
                 "name": "effectors",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "HUDInterfaceMultitextureOverlayEffector",
                 "compound": true
             },

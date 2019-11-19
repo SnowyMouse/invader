@@ -209,7 +209,7 @@ namespace Invader::HEK {
         // Iterate through the nodes to get references
         for(std::uint16_t c = 0; c < table.size.read(); c++) {
             // Check if we know the class
-            HEK::TagClassInt tag_class = HEK::TAG_CLASS_NONE;
+            TagClassInt tag_class = HEK::TAG_CLASS_NONE;
             auto &node = nodes[c];
 
             // Check the class type
@@ -294,7 +294,7 @@ namespace Invader::HEK {
                 auto tag_class_int = reflexive.reference.tag_class_int.read();
                 for(auto dependency = script_dependencies.begin(); dependency != script_dependencies.end(); dependency++) {
                     if(dependency->path == path) {
-                        if(dependency->tag_class_int == tag_class_int || (dependency->tag_class_int == HEK::TagClassInt::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag_class_int))) {
+                        if(dependency->tag_class_int == tag_class_int || (dependency->tag_class_int == TagClassInt::TAG_CLASS_OBJECT && IS_OBJECT_TAG(tag_class_int))) {
                             script_dependencies.erase(dependency);
                             break;
                         }

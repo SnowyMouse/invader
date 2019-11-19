@@ -127,7 +127,7 @@
         "fields": [
             {
                 "name": "track",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "camera_track"
@@ -146,7 +146,7 @@
         "fields": [
             {
                 "name": "hud",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "unit_hud_interface"
@@ -218,13 +218,13 @@
             },
             {
                 "name": "camera tracks",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitCameraTrack",
                 "compound": true
             },
             {
                 "name": "unit hud interface",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitUnitHudInterface",
                 "compound": true
             },
@@ -250,7 +250,7 @@
             },
             {
                 "name": "built in gunner",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor_variant"
                 ],
@@ -270,7 +270,7 @@
         "fields": [
             {
                 "name": "weapon",
-                "type": "dependency",
+                "type": "TagDependency",
                 "compound": true,
                 "classes": [
                     "weapon"
@@ -300,7 +300,7 @@
             },
             {
                 "name": "dialogue",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "unit_dialogue"
                 ],
@@ -331,7 +331,7 @@
             },
             {
                 "name": "integrated light toggle",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
@@ -382,7 +382,7 @@
             },
             {
                 "name": "camera tracks",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitCameraTrack",
                 "compound": true
             },
@@ -449,7 +449,7 @@
             },
             {
                 "name": "spawned actor",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "actor_variant"
                 ],
@@ -498,7 +498,7 @@
             },
             {
                 "name": "melee damage",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "damage_effect"
                 ],
@@ -518,13 +518,13 @@
             },
             {
                 "name": "new hud interfaces",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitUnitHudInterface",
                 "compound": true
             },
             {
                 "name": "dialogue variants",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitDialogueVariant",
                 "compound": true
             },
@@ -547,19 +547,19 @@
             },
             {
                 "name": "powered seats",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitPoweredSeat",
                 "compound": true
             },
             {
                 "name": "weapons",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitWeapon",
                 "compound": true
             },
             {
                 "name": "seats",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "UnitSeat",
                 "compound": true
             }

@@ -2,6 +2,9 @@
 
 # Invader library
 add_library(invader STATIC
+    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
+
     src/hek/class_int.cpp
     src/hek/data_type.cpp
     src/hek/map.cpp
@@ -94,11 +97,13 @@ add_library(invader STATIC
     src/crc/hek/crc.cpp
 
     src/version.cpp
-
-    "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
 )
+
+# Generate headers separately (this is to guarantee build order)
+add_custom_target(invader-header-gen
+    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+)
+add_dependencies(invader invader-header-gen)
 
 # P8 palette library (separate for slightly faster building)
 add_library(invader-bitmap-p8-palette STATIC
@@ -107,8 +112,8 @@ add_library(invader-bitmap-p8-palette STATIC
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )

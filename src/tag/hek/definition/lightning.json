@@ -167,7 +167,7 @@
             },
             {
                 "name": "bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -179,13 +179,13 @@
             },
             {
                 "name": "markers",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "LightningMarker",
                 "compound": true
             },
             {
                 "name": "shader",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "LightningShader",
                 "compound": true
             },

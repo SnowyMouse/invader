@@ -131,7 +131,7 @@ int main(int argc, const char **argv) {
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
             auto &tag = parsed_map->get_tag(i);
-            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.path()) + "." + tag_class_to_extension(tag.tag_class_int()));
+            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_class_to_extension(tag.get_tag_class_int()));
 
             // Check each tag directory if it exists. If so, archive it
             bool exists = false;
@@ -166,7 +166,7 @@ int main(int argc, const char **argv) {
             eprintf("No extension for %s. Archive could not be made.\n", tag_path_to_find);
             return EXIT_FAILURE;
         }
-        Invader::HEK::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
+        Invader::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {

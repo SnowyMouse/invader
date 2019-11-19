@@ -72,7 +72,7 @@
             },
             {
                 "name": "physics",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "point_physics"
                 ],
@@ -138,7 +138,7 @@
             },
             {
                 "name": "sprite bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -183,7 +183,7 @@
             },
             {
                 "name": "bitmap",
-                "type": "dependency",
+                "type": "TagDependency",
                 "classes": [
                     "bitmap"
                 ],
@@ -291,7 +291,7 @@
             },
             {
                 "name": "particle types",
-                "type": "reflexive",
+                "type": "TagReflexive",
                 "struct": "WeatherParticleSystemParticleType",
                 "compound": true
             }
