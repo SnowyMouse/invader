@@ -285,10 +285,13 @@ for s in all_structs_arranged:
         for struct in all_used_structs:
             name = struct["name"]
             if struct["type"] == "TagDependency":
+                cpp.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
                 cpp.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
-                cpp.write("        b.{}.path_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name, name))
                 cpp.write("        b.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
-                cpp.write("        converted_data.insert(converted_data.end(), reinterpret_cast<std::byte *>(this->{}.path.data()), reinterpret_cast<std::byte *>(this->{}.path.data()) + this->{}.path.size() + 1);\n".format(name, name, name))
+                cpp.write("        if({}_size > 0) {{\n".format(name))
+                cpp.write("            b.{}.path_size = static_cast<std::uint32_t>({}_size);\n".format(name, name))
+                cpp.write("            converted_data.insert(converted_data.end(), reinterpret_cast<std::byte *>(this->{}.path.data()), reinterpret_cast<std::byte *>(this->{}.path.data()) + {}_size + 1);\n".format(name, name, name))
+                cpp.write("        }\n")
             elif struct["type"] == "TagReflexive":
                 cpp.write("        auto ref_{}_size = this->{}.size();\n".format(name, name))
                 cpp.write("        if(ref_{}_size > 0) {{\n".format(name))
@@ -306,7 +309,7 @@ for s in all_structs_arranged:
                 cpp.write("        }\n")
             elif struct["type"] == "TagDataOffset":
                 cpp.write("        b.{}.size = static_cast<std::uint32_t>(this->{}.size());\n".format(name, name))
-                cpp.write("        converted_data.insert(converted_data.end(), this->{}.data(), this->{}.data() + this->{}.size());\n".format(name, name, name))
+                cpp.write("        converted_data.insert(converted_data.end(), this->{}.begin(), this->{}.end());\n".format(name, name, name))
             elif "bounds" in struct and struct["bounds"]:
                 cpp.write("        b.{}.from = this->{}.from;\n".format(name, name))
                 cpp.write("        b.{}.to = this->{}.to;\n".format(name, name))
