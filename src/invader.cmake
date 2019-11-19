@@ -2,6 +2,9 @@
 
 # Invader library
 add_library(invader STATIC
+    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
+
     src/hek/class_int.cpp
     src/hek/data_type.cpp
     src/hek/map.cpp
@@ -94,9 +97,6 @@ add_library(invader STATIC
     src/crc/hek/crc.cpp
 
     src/version.cpp
-
-    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
 )
 
 # Generate headers separately (this is to guarantee build order)
