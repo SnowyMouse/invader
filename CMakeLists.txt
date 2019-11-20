@@ -68,7 +68,7 @@ include(src/font/font.cmake)
 include(src/string/string.cmake)
 include(src/compress/compress.cmake)
 include(src/info/info.cmake)
-# include(src/extract/extract.cmake)
+include(src/extract/extract.cmake)
 
 # Install stuff
 install(

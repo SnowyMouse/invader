@@ -91,6 +91,7 @@ add_library(invader STATIC
     src/tag/hek/class/wind.cpp
     src/tag/hek/class/virtual_keyboard.cpp
     src/tag/compiled_tag.cpp
+    src/extract/extraction.cpp
 
     src/crc/crc32.c
     src/crc/crc_spoof.c

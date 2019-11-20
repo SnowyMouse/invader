@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <optional>
+#include <filesystem>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
+#include <invader/extract/extraction.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -16,6 +18,7 @@ int main(int argc, const char **argv) {
         std::string maps_directory = "maps";
         std::vector<std::vector<char>> tags_to_extract;
         bool recursive = false;
+        bool overwrite = false;
     } extract_options;
 
     // Command line options
@@ -24,6 +27,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Set the tags directory", "<dir>");
     options.emplace_back("tag", 'T', 1, "Extract a specific tag. Use multiple times to specify multiple tags.", "<tag.class>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
+    options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
@@ -43,6 +47,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'r':
                 extract_options.recursive = true;
+                break;
+            case 'O':
+                extract_options.overwrite = true;
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -66,13 +73,42 @@ int main(int argc, const char **argv) {
     auto tag_count = map->get_tag_count();
     std::vector<bool> extracted_tags(tag_count);
 
+    // Also here's the tags directory
+    std::filesystem::path tags(extract_options.tags_directory);
+
     // Extract a tag
-    auto extract_tag = [&extracted_tags](std::size_t tag_index) -> void {
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options](std::size_t tag_index) -> void {
         if(extracted_tags[tag_index]) {
             return;
         }
 
-        // TODO: RECURSIVELY EXTRACT TAGS HERE
+        // Get the tag path
+        const auto &tag = map->get_tag(tag_index);
+        const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
+        auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
+        if(extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
+            return;
+        }
+
+        // Get the tag data
+        std::vector<std::byte> new_tag;
+        try {
+            new_tag = Invader::Extraction::extract_tag(tag);
+        }
+        catch (std::exception &e) {
+            eprintf("Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
+            return;
+        }
+
+        // Create directories along the way
+        std::filesystem::create_directories(tag_path_to_write_to.parent_path());
+
+        // Save it
+        auto tag_path_str = tag_path_to_write_to.string();
+        if(!Invader::File::save_file(tag_path_str.data(), new_tag)) {
+            eprintf("Failed to save extracted tag to %s\n", tag_path_str.data());
+            std::exit(1);
+        }
 
         extracted_tags[tag_index] = true;
     };
