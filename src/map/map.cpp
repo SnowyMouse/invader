@@ -106,33 +106,8 @@ namespace Invader {
     }
 
     std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {
-        std::size_t max_length;
-        std::byte *data_ptr;
-        switch(map_type) {
-            case DATA_MAP_CACHE:
-                max_length = this->data_length;
-                data_ptr = this->data;
-                break;
-
-            case DATA_MAP_BITMAP:
-                max_length = this->bitmap_data_length;
-                data_ptr = this->bitmap_data;
-                break;
-
-            case DATA_MAP_SOUND:
-                max_length = this->sound_data_length;
-                data_ptr = this->sound_data;
-                break;
-
-            case DATA_MAP_LOC:
-                max_length = this->loc_data_length;
-                data_ptr = this->loc_data;
-                break;
-
-            default:
-                throw OutOfBoundsException();
-        }
-
+        std::size_t max_length = this->get_data_length(map_type);
+        std::byte *data_ptr = this->get_data(map_type);
         if(offset >= max_length || offset + minimum_size > max_length) {
             throw OutOfBoundsException();
         }
@@ -141,12 +116,36 @@ namespace Invader {
         }
     }
 
-    std::byte *Map::get_data() noexcept {
-        return this->data;
+    std::byte *Map::get_data(DataMapType map_type) noexcept {
+        switch(map_type) {
+            case DATA_MAP_CACHE:
+                return this->data;
+            case DATA_MAP_BITMAP:
+                return this->bitmap_data;
+            case DATA_MAP_SOUND:
+                return this->sound_data;
+            case DATA_MAP_LOC:
+                return this->loc_data;
+        }
+        std::terminate();
     }
 
-    std::size_t Map::get_data_length() const noexcept {
-        return this->data_length;
+    const std::byte *Map::get_data(DataMapType map_type) const noexcept {
+        return const_cast<Map *>(this)->get_data(map_type);
+    }
+
+    std::size_t Map::get_data_length(DataMapType map_type) const noexcept {
+        switch(map_type) {
+            case DATA_MAP_CACHE:
+                return this->data_length;
+            case DATA_MAP_BITMAP:
+                return this->bitmap_data_length;
+            case DATA_MAP_SOUND:
+                return this->sound_data_length;
+            case DATA_MAP_LOC:
+                return this->loc_data_length;
+        }
+        std::terminate();
     }
 
     const std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) const {
