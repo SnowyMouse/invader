@@ -335,6 +335,12 @@ for s in all_structs_arranged:
     cpp.write("    }\n")
 
     # parse_cache_file_data()
+    hpp.write("\n        /**\n")
+    hpp.write("         * Parse the cache file tag data.\n")
+    hpp.write("         * @param tag     Tag to read data from\n")
+    hpp.write("         * @param pointer Pointer to read from; if none is given, then the start of the tag will be used\n")
+    hpp.write("         * @return parsed tag data\n")
+    hpp.write("         */\n")
     hpp.write("        static {} parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer = std::nullopt);\n".format(struct_name))
     if len(all_used_structs) > 0 or post_parse_cache_file_data:
         cpp.write("    {} {}::parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {{\n".format(struct_name, struct_name))
