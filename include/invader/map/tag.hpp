@@ -22,6 +22,22 @@ namespace Invader {
     friend class Map;
     public:
         /**
+         * Get the map
+         * @return the map
+         */
+        Map &get_map() noexcept {
+            return this->map;
+        }
+
+        /**
+         * Get the map
+         * @return the map
+         */
+        const Map &get_map() const noexcept {
+            return const_cast<Tag *>(this)->get_map();
+        }
+
+        /**
          * Get the path of the tag
          * @return path of the tag
          */
