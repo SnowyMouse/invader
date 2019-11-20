@@ -140,7 +140,9 @@
             {
                 "name": "samples",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "file_offset": true,
+                "external_file_offset": "sounds.map"
             },
             {
                 "name": "mouth data",

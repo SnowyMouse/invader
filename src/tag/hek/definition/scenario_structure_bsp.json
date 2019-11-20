@@ -307,7 +307,8 @@
             {
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             }
         ],
         "type": "struct",

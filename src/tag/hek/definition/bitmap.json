@@ -313,12 +313,14 @@
             {
                 "name": "compressed color plate data",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "processed pixel data",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "blur filter size",

@@ -426,19 +426,22 @@
                 "name": "uncompressed vertices",
                 "type": "TagReflexive",
                 "struct": "GBXModelVertexUncompressed",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "compressed vertices",
                 "type": "TagReflexive",
                 "struct": "GBXModelVertexCompressed",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "triangles",
                 "type": "TagReflexive",
                 "struct": "GBXModelTriangle",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "do not crash the game",
