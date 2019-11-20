@@ -331,6 +331,7 @@
         ],
         "type": "struct",
         "inherits": "Object",
+        "post_parse_cache_file_data": true,
         "size": 588
     }
 ]

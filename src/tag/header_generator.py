@@ -501,7 +501,7 @@ for s in all_structs_arranged:
     if private_functions:
         hpp.write("    private:\n")
         if post_parse_cache_file_data:
-            hpp.write("    void post_parse_cache_file_data(const Tag &tag, HEK::Pointer pointer);\n")
+            hpp.write("    void post_parse_cache_file_data(const Tag &tag, std::optional<HEK::Pointer> pointer);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")

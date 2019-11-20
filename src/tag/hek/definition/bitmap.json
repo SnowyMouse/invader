@@ -360,6 +360,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 108
     }
 ]
