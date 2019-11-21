@@ -19,6 +19,11 @@ namespace Invader::Parser {
         throw std::exception();
     }
 
+    void Invader::Parser::Scenario::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+        eprintf("unimplemented\n");
+        throw std::exception();
+    }
+
     void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         for(auto &marker : this->markers) {
             for(auto &instance : marker.instances) {
