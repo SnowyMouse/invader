@@ -20,6 +20,9 @@ namespace Invader::HEK {
         compiled.asset_data.insert(compiled.asset_data.begin(), processed_data, processed_data + tag.processed_pixel_data.size);
         INCREMENT_DATA_PTR(tag.processed_pixel_data.size);
 
+        // Zero out processed data, too
+        tag.processed_pixel_data = {};
+
         // Get all of the data. We'll need to comb over it in a bit.
         std::vector<BitmapGroupSequence<LittleEndian>> sequence_data;
         std::vector<BitmapGroupSprite<LittleEndian>> sprite_data;
