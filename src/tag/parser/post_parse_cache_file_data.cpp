@@ -123,8 +123,9 @@ namespace Invader::Parser {
         }
 
         // Get model indices
-        std::size_t index_count = part.triangle_count.read();
-        std::size_t triangle_count = index_count / 3 + 1;
+        std::size_t index_count = part.triangle_count.read() + 2;
+
+        std::size_t triangle_count = (index_count) / 3;
         std::size_t triangle_modulo = index_count % 3;
         const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.triangle_offset.read() + header.vertex_size.read(), sizeof(std::uint16_t) * index_count));
 
@@ -140,8 +141,8 @@ namespace Invader::Parser {
             auto &straggler_triangle = this->triangles.emplace_back();
             auto *triangle_indices = indices + triangle_count * 3;
             straggler_triangle.vertex0_index = triangle_indices[0];
-            straggler_triangle.vertex1_index = triangle_indices[1];
-            straggler_triangle.vertex2_index = triangle_indices[2];
+            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1] : NULL_INDEX;
+            straggler_triangle.vertex2_index = NULL_INDEX;
         }
     }
 }
