@@ -212,6 +212,9 @@ namespace Invader {
         /** Tag data index offset */
         std::size_t tag_data_index_offset = 0;
 
+        /** Tag index in the cache file */
+        std::size_t tag_index = 0;
+
         /** Initialize the tag */
         Tag(Map &map);
     };

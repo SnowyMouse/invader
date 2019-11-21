@@ -286,6 +286,7 @@ namespace Invader {
             auto &tag = this->tags[i];
             tag.tag_class_int = tags[i].primary_class;
             tag.tag_data_index_offset = reinterpret_cast<const std::byte *>(tags + i) - this->tag_data;
+            tag.tag_index = i;
 
             try {
                 auto *path = reinterpret_cast<const char *>(this->resolve_tag_data_pointer(tags[i].tag_path));
