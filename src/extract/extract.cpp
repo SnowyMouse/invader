@@ -19,6 +19,8 @@ int main(int argc, const char **argv) {
         std::vector<std::vector<char>> tags_to_extract;
         bool recursive = false;
         bool overwrite = false;
+        bool continue_extracting = false;
+        bool no_external_tags = false;
     } extract_options;
 
     // Command line options
@@ -29,6 +31,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("continue", 'c', 0, "Don't stop on error when possible.");
+    options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data.");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
@@ -51,54 +55,49 @@ int main(int argc, const char **argv) {
             case 'O':
                 extract_options.overwrite = true;
                 break;
+            case 'c':
+                extract_options.continue_extracting = true;
+                break;
+            case 'n':
+                extract_options.no_external_tags = true;
+                break;
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
         }
     });
 
+    std::filesystem::path maps_directory(extract_options.maps_directory);
+    std::vector<std::byte> loc, bitmaps, sounds;
+
+    // Load asset data
+    if(!extract_options.no_external_tags) {
+        auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
+            auto potential_map_path = (maps_directory / map).string();
+            auto potential_map = Invader::File::open_file(potential_map_path.data());
+            if(potential_map.has_value()) {
+                return *potential_map;
+            }
+            else {
+                return std::vector<std::byte>();
+            }
+        };
+
+        loc = open_map_possibly("loc.map");
+        bitmaps = open_map_possibly("bitmaps.map");
+        sounds = open_map_possibly("sounds.map");
+    }
+
     std::unique_ptr<Map> map;
     std::size_t file_size = 0;
     try {
         auto file = File::open_file(remaining_arguments[0]).value();
         file_size = file.size();
-        map = std::make_unique<Map>(Map::map_with_move(std::move(file)));
+        map = std::make_unique<Map>(Map::map_with_move(std::move(file), std::move(bitmaps), std::move(loc), std::move(sounds)));
     }
     catch (std::exception &e) {
         eprintf("Failed to parse %s: %s\n", remaining_arguments[0], e.what());
         return EXIT_FAILURE;
-    }
-
-    auto engine = map->get_cache_file_header().engine.read();
-    std::filesystem::path maps_directory(extract_options.maps_directory);
-    std::vector<std::byte> loc, bitmaps, sounds;
-
-    auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
-        auto potential_map_path = (maps_directory / map).string();
-        auto potential_map = Invader::File::open_file(potential_map_path.data());
-        if(potential_map.has_value()) {
-            return *potential_map;
-        }
-        else {
-            eprintf("Warning: Failed to open %s\n", potential_map_path.data());
-            return std::vector<std::byte>();
-        }
-    };
-
-    switch(engine) {
-        case Invader::HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-            break;
-        case Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            loc = open_map_possibly("loc.map");
-            // Fallthrough
-        case Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-        case Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO:
-            bitmaps = open_map_possibly("bitmaps.map");
-            sounds = open_map_possibly("sounds.map");
-            break;
-        default:
-            eprintf("Cannot extract from file type %s (0x%08X)\n", Invader::HEK::engine_name(engine), engine);
-            return EXIT_FAILURE;
     }
 
     // Already extracted tags (so we don't need to re-extract them)
@@ -116,6 +115,12 @@ int main(int argc, const char **argv) {
 
         // Get the tag path
         const auto &tag = map->get_tag(tag_index);
+
+        // See if we can extract this
+        if(!tag.data_is_available()) {
+            return;
+        }
+
         const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
         if(extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
@@ -129,6 +134,9 @@ int main(int argc, const char **argv) {
         }
         catch (std::exception &e) {
             eprintf("Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
+            if(!extract_options.continue_extracting) {
+                std::exit(1);
+            }
             return;
         }
 
