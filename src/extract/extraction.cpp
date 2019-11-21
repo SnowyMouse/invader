@@ -105,7 +105,6 @@ namespace Invader::Extraction {
                 std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1));
                 auto sbsp_header_data = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
                 auto sbsp_header_pointer = sbsp_header_data.pointer.read();
-                eprintf("%08X\n", sbsp_header_pointer);
                 auto tag_data = Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer).generate_hek_tag_data();
                 data.insert(data.end(), tag_data.begin(), tag_data.end());
                 return data;
