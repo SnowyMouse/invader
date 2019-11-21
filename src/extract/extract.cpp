@@ -69,6 +69,38 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
+    auto engine = map->get_cache_file_header().engine.read();
+    std::filesystem::path maps_directory(extract_options.maps_directory);
+    std::vector<std::byte> loc, bitmaps, sounds;
+
+    auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
+        auto potential_map_path = (maps_directory / map).string();
+        auto potential_map = Invader::File::open_file(potential_map_path.data());
+        if(potential_map.has_value()) {
+            return *potential_map;
+        }
+        else {
+            eprintf("Warning: Failed to open %s\n", potential_map_path.data());
+            return std::vector<std::byte>();
+        }
+    };
+
+    switch(engine) {
+        case Invader::HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+            break;
+        case Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            loc = open_map_possibly("loc.map");
+            // Fallthrough
+        case Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+        case Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO:
+            bitmaps = open_map_possibly("bitmaps.map");
+            sounds = open_map_possibly("sounds.map");
+            break;
+        default:
+            eprintf("Cannot extract from file type %s (0x%08X)\n", Invader::HEK::engine_name(engine), engine);
+            return EXIT_FAILURE;
+    }
+
     // Already extracted tags (so we don't need to re-extract them)
     auto tag_count = map->get_tag_count();
     std::vector<bool> extracted_tags(tag_count);
