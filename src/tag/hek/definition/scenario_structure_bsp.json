@@ -312,6 +312,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 256
     },
     {
@@ -1501,6 +1502,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 648
     },
     {
@@ -1520,7 +1522,6 @@
             }
         ],
         "type": "struct",
-        "post_parse_cache_file_data": true,
         "size": 24
     }
 ]
