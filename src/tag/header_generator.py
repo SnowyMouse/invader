@@ -227,7 +227,9 @@ hpp.write("    };\n")
 cpp.write("#include <invader/tag/parser/parser.hpp>\n")
 cpp.write("#include <invader/map/map.hpp>\n")
 cpp.write("#include <invader/map/tag.hpp>\n")
+cpp.write("#include <invader/tag/hek/header.hpp>\n")
 cpp.write("#include <invader/printf.hpp>\n")
+cpp.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
 cpp.write("namespace Invader::Parser {\n")
 
 for s in all_structs_arranged:
@@ -283,13 +285,20 @@ for s in all_structs_arranged:
     # generate_hek_tag_data()
     hpp.write("\n        /**\n")
     hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
+    hpp.write("         * @param  generate_header_class generate a cache file header with the class, too\n")
     hpp.write("         * @return cache file data\n")
     hpp.write("         */\n")
-    hpp.write("        std::vector<std::byte> generate_hek_tag_data();\n")
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt);\n")
 
-    cpp.write("    std::vector<std::byte> {}::generate_hek_tag_data() {{\n".format(struct_name))
+    cpp.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class) {{\n".format(struct_name))
+    cpp.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
+    cpp.write("        std::size_t tag_header_offset = 0;\n")
+    cpp.write("        if(generate_header_class.has_value()) {\n")
+    cpp.write("            HEK::TagFileHeader header(*generate_header_class);\n")
+    cpp.write("            tag_header_offset = sizeof(header);\n")
+    cpp.write("            converted_data.insert(converted_data.begin(), reinterpret_cast<std::byte *>(&header), reinterpret_cast<std::byte *>(&header + 1));\n")
+    cpp.write("        }\n")
     if len(all_used_structs) > 0:
-        cpp.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
         cpp.write("        struct_big b = {};\n")
         for struct in all_used_structs:
             name = struct["name"]
@@ -326,10 +335,11 @@ for s in all_structs_arranged:
                 cpp.write("        std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
             else:
                 cpp.write("        b.{} = this->{};\n".format(name, name))
-        cpp.write("        *reinterpret_cast<struct_big *>(converted_data.data()) = b;\n")
-        cpp.write("        return converted_data;\n")
-    else:
-        cpp.write("        return std::vector<std::byte>(sizeof(struct_big));\n")
+        cpp.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")
+    cpp.write("        if(generate_header_class.has_value()) {\n")
+    cpp.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(0, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")
+    cpp.write("        }\n")
+    cpp.write("        return converted_data;\n")
     cpp.write("    }\n")
 
     # parse_cache_file_data()

@@ -13,11 +13,7 @@ namespace Invader::Extraction {
         auto tag_class_int = tag.get_tag_class_int();
 
         #define EXTRACT_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
-            HEK::TagFileHeader tag_data_header(tag_class_int); \
-            std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1)); \
-            auto tag_data = Parser::class_struct::parse_cache_file_data(tag).generate_hek_tag_data(); \
-            data.insert(data.end(), tag_data.begin(), tag_data.end()); \
-            return data; \
+            return Parser::class_struct::parse_cache_file_data(tag).generate_hek_tag_data(TagClassInt::class_int); \
         }
 
         switch(tag_class_int) {
@@ -105,9 +101,7 @@ namespace Invader::Extraction {
                 std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1));
                 auto sbsp_header_data = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
                 auto sbsp_header_pointer = sbsp_header_data.pointer.read();
-                auto tag_data = Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer).generate_hek_tag_data();
-                data.insert(data.end(), tag_data.begin(), tag_data.end());
-                return data;
+                return Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer).generate_hek_tag_data(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
             }
 
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:

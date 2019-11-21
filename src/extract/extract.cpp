@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <filesystem>
+#include <chrono>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
@@ -202,8 +203,11 @@ int main(int argc, const char **argv) {
 
     // Extract each tag?
     else {
+        auto start = std::chrono::steady_clock::now();
         for(std::size_t t = 0; t < tag_count; t++) {
             extract_tag(t);
         }
+        auto end = std::chrono::steady_clock::now();
+        oprintf("Finished in %zu ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     }
 }
