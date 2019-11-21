@@ -25,8 +25,33 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::Scenario::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        eprintf("unimplemented\n");
-        throw std::exception();
+        auto *script_data = this->script_syntax_data.data();
+        auto script_data_size = this->script_syntax_data.size();
+
+        // If we don't have a script node table, give up
+        if(script_data_size < sizeof(ScenarioScriptNodeTable::struct_little)) {
+            eprintf("scenario tag has an invalid scenario script node table\n");
+            throw InvalidTagDataException();
+        }
+
+        // Copy the table header
+        ScenarioScriptNodeTable::struct_big table = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(script_data);
+        *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(script_data) = table;
+
+        // Make sure it's not bullshit
+        auto *script_nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(script_data + sizeof(table));
+        auto table_size = table.maximum_count.read();
+        std::size_t expected_size = (reinterpret_cast<std::byte *>(script_nodes + table_size) - script_data);
+        if(expected_size != script_data_size) {
+            eprintf("scenario tag has an invalid scenario script node table (%zu vs %zu)\n", expected_size, script_data_size);
+            throw InvalidTagDataException();
+        }
+
+        // Copy the rest of the table
+        for(std::size_t i = 0; i < table_size; i++) {
+            ScenarioScriptNode::struct_big big = script_nodes[i];
+            *reinterpret_cast<ScenarioScriptNode::struct_big *>(script_nodes + i) = big;
+        }
     }
 
     void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
