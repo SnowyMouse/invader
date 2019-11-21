@@ -89,10 +89,8 @@ int main(int argc, const char **argv) {
     }
 
     std::unique_ptr<Map> map;
-    std::size_t file_size = 0;
     try {
         auto file = File::open_file(remaining_arguments[0]).value();
-        file_size = file.size();
         map = std::make_unique<Map>(Map::map_with_move(std::move(file), std::move(bitmaps), std::move(loc), std::move(sounds)));
     }
     catch (std::exception &e) {
@@ -117,11 +115,17 @@ int main(int argc, const char **argv) {
         const auto &tag = map->get_tag(tag_index);
 
         // See if we can extract this
+        const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         if(!tag.data_is_available()) {
+            if(extract_options.tags_to_extract.size()) {
+                eprintf("Unable to extract %s.%s due to missing data\n", tag.get_path().data(), tag_extension);
+                if(!extract_options.continue_extracting) {
+                    std::exit(1);
+                }
+            }
             return;
         }
 
-        const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
             return;
