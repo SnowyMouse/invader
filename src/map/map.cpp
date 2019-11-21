@@ -313,20 +313,25 @@ namespace Invader {
             else if(tags[i].indexed) {
                 tag.indexed = true;
 
+                // Indexed sound tags still use tag data (until you use reflexives)
+                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                    tag.base_struct_pointer = tags[i].tag_data;
+                }
+                else {
+                    tag.base_struct_pointer = 0;
+                }
+
                 // Find where it's located
                 DataMapType type;
                 switch(tag.tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         type = DataMapType::DATA_MAP_BITMAP;
-                        tag.base_struct_pointer = 0;
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         type = DataMapType::DATA_MAP_SOUND;
-                        tag.base_struct_pointer = ~static_cast<HEK::Pointer>(sizeof(HEK::Sound<LittleEndian>));
                         break;
                     default:
                         type = DataMapType::DATA_MAP_LOC;
-                        tag.base_struct_pointer = 0;
                         break;
                 }
 
@@ -370,7 +375,12 @@ namespace Invader {
                 // Set it all
                 auto &index = indices[resource_index];
                 tag.tag_data_size = index.size;
-                tag.base_struct_offset = index.data_offset;
+                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                    tag.base_struct_offset = index.data_offset + sizeof(HEK::Sound<HEK::LittleEndian>);
+                }
+                else {
+                    tag.base_struct_offset = index.data_offset;
+                }
             }
             else {
                 tag.base_struct_pointer = tags[i].tag_data;

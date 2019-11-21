@@ -2,6 +2,7 @@
 
 #include <invader/map/tag.hpp>
 #include <invader/map/map.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader {
     bool Tag::data_is_available() const noexcept {
@@ -32,6 +33,16 @@ namespace Invader {
 
     std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
         using namespace HEK;
+
+        // Indexed sound tags can use data in both the sound tag in the cache file and the sound tag in sounds.map
+        if(this->tag_class_int == TagClassInt::TAG_CLASS_SOUND && this->indexed) {
+            if(pointer > this->get_map().base_memory_address) {
+                return this->map.resolve_tag_data_pointer(pointer, minimum);
+            }
+            else {
+                return this->map.get_data_at_offset(pointer + this->base_struct_offset, minimum, Map::DataMapType::DATA_MAP_SOUND);
+            }
+        }
 
         if(this->indexed || this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
             auto edge = this->base_struct_offset + this->tag_data_size;

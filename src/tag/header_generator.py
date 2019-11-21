@@ -215,10 +215,8 @@ hpp.write("#ifndef {}\n".format(header_name))
 hpp.write("#define {}\n\n".format(header_name))
 hpp.write("#include <string>\n")
 hpp.write("#include <optional>\n")
+hpp.write("#include \"../../map/map.hpp\"\n")
 hpp.write("#include \"../hek/definition.hpp\"\n\n")
-hpp.write("namespace Invader {\n")
-hpp.write("    class Tag;\n")
-hpp.write("}\n")
 hpp.write("namespace Invader::Parser {\n")
 hpp.write("    struct Dependency {\n")
 hpp.write("        TagClassInt tag_class_int;\n")
@@ -380,19 +378,35 @@ for s in all_structs_arranged:
                 cpp.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
                 cpp.write("                }\n")
                 cpp.write("                catch (std::exception &) {\n")
-                cpp.write("                    eprintf(\"failed to parse reference #%zu for {}.{} in %s.%s\\n\", i, tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp.write("                    eprintf(\"failed to parse {}.{} #%zu in %s.%s\\n\", i, tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
                 cpp.write("                    throw;\n")
                 cpp.write("                }\n")
                 cpp.write("            }\n")
                 cpp.write("        }\n")
             elif struct["type"] == "TagDataOffset":
-                if "file_offset" in struct:
-                    continue
                 cpp.write("        std::size_t l_{}_data_size = l.{}.size;\n".format(name, name))
                 cpp.write("        if(l_{}_data_size > 0) {{\n".format(name))
                 cpp.write("            const std::byte *data;\n")
                 cpp.write("            try {\n")
-                cpp.write("                data = tag.data(l.{}.pointer, l_{}_data_size);\n".format(name, name))
+                if "file_offset" in struct:
+                    if "external_file_offset" in struct:
+                        where_to = "DATA_MAP_CACHE"
+                        if struct["external_file_offset"] == "sounds.map":
+                            where_to = "DATA_MAP_SOUND"
+                        elif struct["external_file_offset"] == "bitmaps.map":
+                            where_to = "DATA_MAP_BITMAP"
+                        elif struct["external_file_offset"] == "loc.map":
+                            where_to = "DATA_MAP_LOC"
+                        else:
+                            print("Unknown external_file_offset: {}".format(struct["external_file_offset"]), file=sys.stderr)
+                            sys.exit(1)
+                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, l.{}.external ? Map::DataMapType::{} : Map::DataMapType::DATA_MAP_CACHE);\n".format(name, name, name, where_to))
+                        pass
+                    else:
+                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size);\n".format(name, name))
+                    pass
+                else:
+                    cpp.write("                data = tag.data(l.{}.pointer, l_{}_data_size);\n".format(name, name))
                 cpp.write("            }\n")
                 cpp.write("            catch (std::exception &) {\n")
                 cpp.write("                eprintf(\"failed to read tag data for {}.{} in %s.%s\\n\", tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
