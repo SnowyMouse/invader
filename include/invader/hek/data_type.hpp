@@ -844,6 +844,12 @@ namespace Invader::HEK {
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Quaternion<NativeEndian> &rotation) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Matrix<NativeEndian> &rotation) noexcept;
 
+    ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexCompressed;
+    ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexUncompressed;
+
+    GBXModelVertexCompressed<NativeEndian> compress_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept;
+    GBXModelVertexUncompressed<NativeEndian> decompress_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept;
+
     bool intersect_plane_with_points(const Plane3D<NativeEndian> &plane, const Point3D<NativeEndian> &point_a, const Point3D<NativeEndian> &point_b, Point3D<NativeEndian> *intersection = nullptr, float epsilon = 0.0001);
 
     inline float dot3(const Vector3D<NativeEndian> &vector_a, const Vector3D<NativeEndian> &vector_b) {

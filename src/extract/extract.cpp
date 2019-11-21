@@ -123,7 +123,7 @@ int main(int argc, const char **argv) {
 
         const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
-        if(extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
+        if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
             return;
         }
 

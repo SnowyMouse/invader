@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <invader/map/map.hpp>
+#include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
@@ -87,5 +89,29 @@ namespace Invader::Parser {
     void Invader::Parser::ScenarioStructureBSPMaterial::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         eprintf("unimplemented\n");
         throw std::exception();
+    }
+
+    void Invader::Parser::GBXModelGeometryPart::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+        const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
+        const auto &map = tag.get_map();
+        const auto &header = *reinterpret_cast<const HEK::CacheFileTagDataHeaderPC *>(&map.get_tag_data_header());
+
+        // Get model vertices
+        std::size_t vertex_count = part.vertex_count.read();
+        const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
+
+        for(std::size_t v = 0; v < vertex_count; v++) {
+            HEK::GBXModelVertexUncompressed<HEK::BigEndian> vertex_uncompressed = vertices[v];
+            HEK::GBXModelVertexCompressed<HEK::BigEndian> vertex_compressed = HEK::compress_vertex(vertex_uncompressed);
+
+            std::size_t data_read;
+            this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read));
+            this->compressed_vertices.emplace_back(GBXModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read));
+        }
+
+        if(true) {
+            eprintf("TODO: Indices\n");
+            throw std::exception();
+        }
     }
 }
