@@ -18,8 +18,34 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::GBXModel::post_parse_cache_file_data(Invader::Tag const &tag, std::optional<HEK::Pointer> pointer) {
-        eprintf("unimplemented\n");
-        throw std::exception();
+        for(auto &marker : this->markers) {
+            for(auto &instance : marker.instances) {
+                // Figure out the region
+                std::size_t region_index = instance.region_index;
+                std::size_t region_count = this->regions.size();
+                if(region_index >= region_count) {
+                    eprintf("invalid region index %zu / %zu\n", region_index, region_count);
+                    throw OutOfBoundsException();
+                }
+
+                // Next, figure out the region permutation
+                auto &region = this->regions[region_index];
+                std::size_t permutation_count = region.permutations.size();
+                std::size_t permutation_index = instance.permutation_index;
+                if(permutation_index >= permutation_count) {
+                    eprintf("invalid permutation index %zu / %zu for region #%zu\n", permutation_index, permutation_count, region_index);
+                    throw OutOfBoundsException();
+                }
+
+                // Lastly
+                auto &new_marker = region.permutations[permutation_index].markers.emplace_back();
+                new_marker.name = marker.name;
+                new_marker.node_index = instance.node_index;
+                new_marker.rotation = instance.rotation;
+                new_marker.translation = instance.translation;
+            }
+        }
+        this->markers.clear();
     }
 
     void Invader::Parser::GlobalsFallingDamage::post_parse_cache_file_data(Invader::Tag const &, std::optional<HEK::Pointer>) {
