@@ -109,9 +109,26 @@ namespace Invader::Parser {
             this->compressed_vertices.emplace_back(GBXModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read));
         }
 
-        if(true) {
-            eprintf("TODO: Indices\n");
-            throw std::exception();
+        // Get model indices
+        std::size_t index_count = part.triangle_count.read();
+        std::size_t triangle_count = index_count / 3 + 1;
+        std::size_t triangle_modulo = index_count % 3;
+        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.triangle_offset.read() + header.vertex_size.read(), sizeof(std::uint16_t) * index_count));
+
+        for(std::size_t t = 0; t < triangle_count; t++) {
+            auto &triangle = this->triangles.emplace_back();
+            auto *triangle_indices = indices + t * 3;
+            triangle.vertex0_index = triangle_indices[0];
+            triangle.vertex1_index = triangle_indices[1];
+            triangle.vertex2_index = triangle_indices[2];
+        }
+
+        if(triangle_modulo) {
+            auto &straggler_triangle = this->triangles.emplace_back();
+            auto *triangle_indices = indices + triangle_count * 3;
+            straggler_triangle.vertex0_index = triangle_indices[0];
+            straggler_triangle.vertex1_index = triangle_indices[1];
+            straggler_triangle.vertex2_index = triangle_indices[2];
         }
     }
 }
