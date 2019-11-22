@@ -149,7 +149,7 @@ set_source_files_properties(src/version.cpp
 )
 
 # Include that
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd)
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES})

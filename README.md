@@ -33,15 +33,15 @@ section lists the dependencies required to fully utilize Invader. Note that
 some of these dependencies may have their own dependencies.
 
 ##### Required dependencies
-- C++17 compiler
+- C++17 compiler with support for `filesystem`
 - C99 compiler
-- CMake 3.10 or newer
+- CMake 3.12 or newer
 - Python 3.7 or newer
 - Zstandard 1.3 or newer
+- LibTIFF 3.6 or newer
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
-- LibTIFF ([invader-bitmap])
 - zlib ([invader-bitmap])
 - freetype ([invader-font])
 - git (git commit hash in version - build only)
