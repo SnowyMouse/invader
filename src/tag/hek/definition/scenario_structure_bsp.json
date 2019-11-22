@@ -302,7 +302,8 @@
             {
                 "name": "uncompressed vertices",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "manual_extraction": true
             },
             {
                 "name": "compressed vertices",

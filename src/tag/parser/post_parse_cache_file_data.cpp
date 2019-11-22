@@ -111,8 +111,28 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::ScenarioStructureBSPMaterial::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        eprintf("unimplemented\n");
-        throw std::exception();
+        // Do nothing if there is nothing to do
+        if(this->rendered_vertices_count == 0) {
+            this->lightmap_vertices_count = 0;
+            return;
+        }
+
+        // Extract vertices
+        auto &bsp_material = tag.get_struct_at_pointer<HEK::ScenarioStructureBSPMaterial>(*pointer);
+        std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+        const auto *uncompressed_bsp_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(tag.data(bsp_material.uncompressed_vertices.pointer, this->rendered_vertices_offset + uncompressed_vertices_size) + this->rendered_vertices_offset);
+        std::copy(uncompressed_bsp_vertices, uncompressed_bsp_vertices + this->rendered_vertices_count, reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_big *>(this->uncompressed_vertices.insert(this->uncompressed_vertices.begin(), uncompressed_vertices_size, std::byte()).base()));
+
+        // Lightmap vertices
+        if(this->lightmap_vertices_count == this->rendered_vertices_count) {
+            auto *uncompressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(tag.data(bsp_material.uncompressed_vertices.pointer, this->lightmap_vertices_offset + this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little)));
+            this->lightmap_vertices_offset = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+            std::copy(uncompressed_bsp_lightmap_vertices, uncompressed_bsp_lightmap_vertices + this->rendered_vertices_count, reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_big *>(this->uncompressed_vertices.insert(this->uncompressed_vertices.begin(), uncompressed_vertices_size, std::byte()).base()));
+        }
+        else {
+            this->lightmap_vertices_count = 0;
+            this->lightmap_vertices_offset = 0;
+        }
     }
 
     void Invader::Parser::GBXModelGeometryPart::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
