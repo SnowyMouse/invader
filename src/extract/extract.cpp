@@ -2,13 +2,40 @@
 
 #include <optional>
 #include <filesystem>
-#include <regex>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
 #include <invader/extract/extraction.hpp>
+
+bool string_matches(const char *string, const char *pattern) {
+    for(const char *p = pattern;; p++) {
+        if(*p == *string && *p == 0) {
+            return true;
+        }
+        else if(*p == '?' || *p == *string) {
+            string++;
+            continue;
+        }
+        else if(*p == '*') {
+            p++;
+            if(*p == 0) {
+                return true;
+            }
+            for(const char *s = string; *s; s++) {
+                if(string_matches(s, p)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            return false;
+        }
+    }
+    return true;
+}
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -17,8 +44,8 @@ int main(int argc, const char **argv) {
     struct ExtractOptions {
         std::string tags_directory = "tags";
         std::string maps_directory = "maps";
-        std::vector<std::vector<char>> tags_to_extract;
-        std::vector<std::regex> regex_search;
+        std::vector<std::string> tags_to_extract;
+        std::vector<std::string> search_queries;
         bool search_all_tags = true;
         bool recursive = false;
         bool overwrite = false;
@@ -30,13 +57,13 @@ int main(int argc, const char **argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("maps", 'm', 1, "Set the maps directory", "<dir>");
     options.emplace_back("tags", 't', 1, "Set the tags directory", "<dir>");
-    options.emplace_back("tag", 'T', 1, "Extract a specific tag. Use multiple times to specify multiple tags.", "<tag.class>");
+    options.emplace_back("tag", 'T', 1, "Extract a specific tag. Use multiple times to specify multiple tags", "<tag.class>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("continue", 'c', 0, "Don't stop on error when possible.");
-    options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data.");
-    options.emplace_back("regex-tag", 'R', 1, "Add all tags with the given expression", "<expr>");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
+    options.emplace_back("continue", 'c', 0, "Don't stop on error when possible");
+    options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data");
+    options.emplace_back("search-tag", 's', 1, "Search for a tag (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
@@ -51,7 +78,7 @@ int main(int argc, const char **argv) {
                 extract_options.tags_directory = args[0];
                 break;
             case 'T':
-                extract_options.tags_to_extract.emplace_back(args[0], args[0] + std::strlen(args[0]) + 1);
+                extract_options.tags_to_extract.emplace_back(args[0]);
                 extract_options.search_all_tags = false;
                 break;
             case 'r':
@@ -66,8 +93,8 @@ int main(int argc, const char **argv) {
             case 'n':
                 extract_options.no_external_tags = true;
                 break;
-            case 'R':
-                extract_options.regex_search.emplace_back(args[0]);
+            case 's':
+                extract_options.search_queries.emplace_back(args[0]);
                 extract_options.search_all_tags = false;
                 break;
             case 'i':
@@ -220,7 +247,7 @@ int main(int argc, const char **argv) {
         }
 
         // Regex search
-        if(extract_options.regex_search.size() != 0) {
+        if(extract_options.search_queries.size() != 0) {
             std::size_t tag_count = map->get_tag_count();
             for(std::size_t t = 0; t < tag_count; t++) {
                 // See if we already added
@@ -238,9 +265,9 @@ int main(int argc, const char **argv) {
                 const auto &tag = map->get_tag(t);
                 auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
 
-                for(auto &regex : extract_options.regex_search) {
-                    if(std::regex_search(full_tag_path, regex)) {
-                        all_tags_to_extract.push_back(t);
+                for(auto &query : extract_options.search_queries) {
+                    if(string_matches(full_tag_path.data(), query.data())) {
+                        all_tags_to_extract.emplace_back(t);
                         break;
                     }
                 }
@@ -248,7 +275,7 @@ int main(int argc, const char **argv) {
         }
 
         if(all_tags_to_extract.size() == 0) {
-            eprintf("No tags were found with the given search parameters.\n");
+            eprintf("No tags were found with the given search parameter(s).\n");
             return EXIT_FAILURE;
         }
 
