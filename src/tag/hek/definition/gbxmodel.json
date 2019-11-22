@@ -631,7 +631,8 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "GBXModelMarker",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "name": "nodes",

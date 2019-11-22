@@ -301,6 +301,8 @@ for s in all_structs_arranged:
     if len(all_used_structs) > 0:
         cpp.write("        struct_big b = {};\n")
         for struct in all_used_structs:
+            if "cache_only" in struct and struct["cache_only"]:
+                continue
             name = struct["name"]
             if struct["type"] == "TagDependency":
                 cpp.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))

@@ -77,7 +77,6 @@ namespace Invader::Parser {
                 new_marker.translation = instance.translation;
             }
         }
-        this->markers.clear();
     }
 
     void Invader::Parser::GlobalsFallingDamage::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
