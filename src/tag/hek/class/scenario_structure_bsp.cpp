@@ -17,14 +17,14 @@ namespace Invader::HEK {
 
         BEGIN_COMPILE(ScenarioStructureBSP)
 
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps_bitmap);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.collision_materials, shader);
         ADD_MODEL_COLLISION_BSP(tag.collision_bsp); // Add collision BSP (same as the model_collision_geometry collsion BSP)
         ADD_REFLEXIVE(tag.nodes);
         ADD_REFLEXIVE(tag.leaves);
         ADD_REFLEXIVE(tag.leaf_surfaces);
         ADD_REFLEXIVE(tag.surfaces);
-        ADD_REFLEXIVE_START(tag.lightmaps_1) {
+        ADD_REFLEXIVE_START(tag.lightmaps) {
             ADD_REFLEXIVE_START(reflexive.materials) {
                 ADD_DEPENDENCY_ADJUST_SIZES(reflexive.shader);
 

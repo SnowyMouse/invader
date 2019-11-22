@@ -251,8 +251,8 @@ namespace Invader::HEK {
         k = decompress_float<10>(v >> 22);
     }
 
-    GBXModelVertexCompressed<NativeEndian> compress_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept {
-        GBXModelVertexCompressed<NativeEndian> r = {};
+    GBXModelVertexCompressed<NativeEndian> compress_model_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept {
+        GBXModelVertexCompressed<NativeEndian> r;
         r.position = vertex.position;
         r.node0_index = vertex.node0_index * 3;
         r.node0_weight = static_cast<std::int16_t>(compress_float<16>(vertex.node0_weight));
@@ -265,8 +265,8 @@ namespace Invader::HEK {
         return r;
     }
 
-    GBXModelVertexUncompressed<NativeEndian> decompress_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept {
-        GBXModelVertexUncompressed<NativeEndian> r = {};
+    GBXModelVertexUncompressed<NativeEndian> decompress_model_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept {
+        GBXModelVertexUncompressed<NativeEndian> r;
         r.position = vertex.position;
         r.node0_index = vertex.node0_index / 3;
         r.node0_weight = decompress_float<16>(vertex.node0_weight);
@@ -274,6 +274,7 @@ namespace Invader::HEK {
         r.node1_weight = 0;
         r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_u);
         r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_v);
+
         float normal_i, normal_j, normal_k;
 
         decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
@@ -292,4 +293,65 @@ namespace Invader::HEK {
         r.tangent.i = normal_k;
         return r;
     }
+
+    ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.binormal = compress_vector(vertex.binormal.i, vertex.binormal.j, vertex.binormal.k);
+        r.tangent = compress_vector(vertex.tangent.i, vertex.tangent.j, vertex.tangent.k);
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> decompress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+
+        decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
+        r.binormal.i = normal_i;
+        r.binormal.j = normal_j;
+        r.binormal.k = normal_k;
+
+        decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
+        r.tangent.i = normal_i;
+        r.tangent.j = normal_j;
+        r.tangent.k = normal_k;
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> compress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> r;
+
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.texture_coordinate_x = compress_float<16>(vertex.texture_coords.x);
+        r.texture_coordinate_y = compress_float<16>(vertex.texture_coords.y);
+
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> decompress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> r;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+
+        r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_x);
+        r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_y);
+
+        return r;
+    }
+
 }

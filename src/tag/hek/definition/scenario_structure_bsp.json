@@ -154,6 +154,35 @@
         "size": 56
     },
     {
+        "name": "ScenarioStructureBSPMaterialCompressedRenderedVertex",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "normal",
+                "type": "uint32"
+            },
+            {
+                "name": "binormal",
+                "type": "uint32"
+            },
+            {
+                "name": "tangent",
+                "type": "uint32"
+            },
+            {
+                "name": "texture coords",
+                "type": "Point2D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
         "name": "ScenarioStructureBSPMaterialUncompressedLightmapVertex",
         "fields": [
             {
@@ -169,6 +198,25 @@
         ],
         "type": "struct",
         "size": 20
+    },
+    {
+        "name": "ScenarioStructureBSPMaterialCompressedLightmapVertex",
+        "fields": [
+            {
+                "name": "normal",
+                "type": "uint32"
+            },
+            {
+                "name": "texture coordinate x",
+                "type": "int16"
+            },
+            {
+                "name": "texture coordinate y",
+                "type": "int16"
+            }
+        ],
+        "type": "struct",
+        "size": 8
     },
     {
         "name": "ScenarioStructureBSPMaterial",
@@ -309,7 +357,8 @@
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "manual_extraction": true
             }
         ],
         "type": "struct",
@@ -1221,7 +1270,7 @@
         "name": "ScenarioStructureBSP",
         "fields": [
             {
-                "name": "lightmaps",
+                "name": "lightmaps bitmap",
                 "type": "TagDependency",
                 "classes": [
                     "bitmap"
@@ -1344,7 +1393,7 @@
                 "compound": true
             },
             {
-                "name": "lightmaps 1",
+                "name": "lightmaps",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPLightmap",
                 "compound": true
