@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # Invader library
-add_library(invader STATIC
+set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
 
@@ -93,6 +93,7 @@ add_library(invader STATIC
     src/tag/compiled_tag.cpp
     src/extract/extraction.cpp
     src/tag/parser/post_parse_cache_file_data.cpp
+    src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
     src/crc/crc_spoof.c
@@ -100,6 +101,20 @@ add_library(invader STATIC
 
     src/version.cpp
 )
+
+if(NOT DEFINED ${INVADER_STATIC_BUILD})
+    set(INVADER_STATIC_BUILD false CACHE BOOL "Create a static build of libinvader.a (NOTE: Does not remove external dependencies)")
+endif()
+
+if(${INVADER_STATIC_BUILD})
+    add_library(invader STATIC
+        ${INVADER_SOURCE_FILES}
+    )
+else()
+    add_library(invader SHARED
+        ${INVADER_SOURCE_FILES}
+    )
+endif()
 
 # Generate headers separately (this is to guarantee build order)
 add_custom_target(invader-header-gen
@@ -114,7 +129,7 @@ add_library(invader-bitmap-p8-palette STATIC
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp" 
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
@@ -147,6 +162,9 @@ add_custom_command(
 set_source_files_properties(src/version.cpp
     PROPERTIES COMPILE_DEFINITIONS "INVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} INVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} INVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} INVADER_FORK=\"${PROJECT_NAME}\""
 )
+
+# Remove warnings from this
+set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
