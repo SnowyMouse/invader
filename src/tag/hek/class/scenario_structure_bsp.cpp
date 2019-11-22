@@ -82,6 +82,12 @@ namespace Invader::HEK {
         ASSERT_SIZE(cluster_data_size);
         compiled.data.insert(compiled.data.end(), data, data + cluster_data_size);
         INCREMENT_DATA_PTR(cluster_data_size);
+
+        tag.cluster_data.external = 0;
+        tag.cluster_data.file_offset = 0;
+        tag.sound_pas_data.external = 0;
+        tag.sound_pas_data.file_offset = 0;
+        
         PAD_32_BIT
 
         ADD_REFLEXIVE_START(tag.cluster_portals) {
@@ -136,11 +142,6 @@ namespace Invader::HEK {
         ADD_REFLEXIVE_START(tag.leaf_map_portals) {
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
-
-        tag.cluster_data.external = 0;
-        tag.cluster_data.file_offset = 0;
-        tag.sound_pas_data.external = 0;
-        tag.sound_pas_data.file_offset = 0;
 
         *reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(compiled.data.data()) = header;
 
