@@ -129,6 +129,7 @@ int main(int argc, const char **argv) {
             if(!extract_options.search_all_tags) {
                 eprintf("Unable to extract %s.%s due to missing data\n", tag.get_path().data(), tag_extension);
                 if(!extract_options.continue_extracting) {
+                    eprintf("Use -c to override this.\n");
                     std::exit(1);
                 }
             }
@@ -148,6 +149,7 @@ int main(int argc, const char **argv) {
         catch (std::exception &e) {
             eprintf("Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
             if(!extract_options.continue_extracting) {
+                eprintf("Use -c to override this.\n");
                 std::exit(1);
             }
             return false;
