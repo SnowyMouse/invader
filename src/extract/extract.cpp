@@ -63,7 +63,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
     options.emplace_back("continue", 'c', 0, "Don't stop on error when possible");
     options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data");
-    options.emplace_back("search-tag", 's', 1, "Search for a tag (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
+    options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
