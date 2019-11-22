@@ -121,17 +121,9 @@ namespace Invader::Parser {
         auto &bsp_material = tag.get_struct_at_pointer<HEK::ScenarioStructureBSPMaterial>(*pointer);
         std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
         const auto *uncompressed_bsp_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(
-            tag.data(bsp_material.uncompressed_vertices.pointer, this->rendered_vertices_offset + uncompressed_vertices_size)
+            tag.data(bsp_material.uncompressed_vertices.pointer, uncompressed_vertices_size)
         );
-
-        // Allocate and insert
-        std::copy(
-            uncompressed_bsp_vertices,
-            uncompressed_bsp_vertices + this->rendered_vertices_count,
-            reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(
-                this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), uncompressed_vertices_size, std::byte()).base()
-            )
-        );
+        this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices + this->rendered_vertices_count));
 
         // Compress the vertices too
         auto *new_compressed_bsp_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little *>(
@@ -148,13 +140,7 @@ namespace Invader::Parser {
         // Add lightmap vertices
         if(this->lightmap_vertices_count == this->rendered_vertices_count) {
             auto *uncompressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(tag.data(bsp_material.uncompressed_vertices.pointer, uncompressed_vertices_size + this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little)) + uncompressed_vertices_size);
-            std::copy(
-                uncompressed_bsp_lightmap_vertices,
-                uncompressed_bsp_lightmap_vertices + this->rendered_vertices_count,
-                reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(
-                    this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), uncompressed_vertices_size, std::byte()).base()
-                )
-            );
+            this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices + this->lightmap_vertices_count));
 
             // Compress them as well
             auto *new_compressed_bsp_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little *>(
