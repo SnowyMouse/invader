@@ -19,11 +19,6 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Font::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        eprintf("unimplemented\n");
-        throw std::exception();
-    }
-
     void Invader::Parser::Scenario::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         auto *script_data = this->script_syntax_data.data();
         auto script_data_size = this->script_syntax_data.size();
