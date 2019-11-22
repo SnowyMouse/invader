@@ -49,7 +49,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+    void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
         for(auto &marker : this->markers) {
             for(auto &instance : marker.instances) {
                 // Figure out the region
