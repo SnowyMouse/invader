@@ -1478,7 +1478,8 @@
                 "name": "runtime decals",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPRuntimeDecal",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -1502,7 +1503,6 @@
             }
         ],
         "type": "struct",
-        "post_parse_cache_file_data": true,
         "size": 648
     },
     {

@@ -110,11 +110,6 @@ namespace Invader::Parser {
         this->up_time *= TICK_RATE;
     }
 
-    void Invader::Parser::ScenarioStructureBSP::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        eprintf("unimplemented\n");
-        throw std::exception();
-    }
-
     void Invader::Parser::ScenarioStructureBSPMaterial::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         eprintf("unimplemented\n");
         throw std::exception();
