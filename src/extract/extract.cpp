@@ -2,7 +2,7 @@
 
 #include <optional>
 #include <filesystem>
-#include <chrono>
+#include <regex>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/command_line_option.hpp>
@@ -18,6 +18,8 @@ int main(int argc, const char **argv) {
         std::string tags_directory = "tags";
         std::string maps_directory = "maps";
         std::vector<std::vector<char>> tags_to_extract;
+        std::vector<std::regex> regex_search;
+        bool search_all_tags = true;
         bool recursive = false;
         bool overwrite = false;
         bool continue_extracting = false;
@@ -34,6 +36,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("continue", 'c', 0, "Don't stop on error when possible.");
     options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data.");
+    options.emplace_back("regex-tag", 'R', 1, "Add all tags with the given expression", "<expr>");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
@@ -49,6 +52,7 @@ int main(int argc, const char **argv) {
                 break;
             case 'T':
                 extract_options.tags_to_extract.emplace_back(args[0], args[0] + std::strlen(args[0]) + 1);
+                extract_options.search_all_tags = false;
                 break;
             case 'r':
                 extract_options.recursive = true;
@@ -61,6 +65,10 @@ int main(int argc, const char **argv) {
                 break;
             case 'n':
                 extract_options.no_external_tags = true;
+                break;
+            case 'R':
+                extract_options.regex_search.emplace_back(args[0]);
+                extract_options.search_all_tags = false;
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -107,9 +115,9 @@ int main(int argc, const char **argv) {
     std::filesystem::path tags(extract_options.tags_directory);
 
     // Extract a tag
-    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options](std::size_t tag_index) -> void {
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options](std::size_t tag_index) -> bool {
         if(extracted_tags[tag_index]) {
-            return;
+            return false;
         }
 
         // Get the tag path
@@ -118,18 +126,18 @@ int main(int argc, const char **argv) {
         // See if we can extract this
         const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         if(!tag.data_is_available()) {
-            if(extract_options.tags_to_extract.size()) {
+            if(!extract_options.search_all_tags) {
                 eprintf("Unable to extract %s.%s due to missing data\n", tag.get_path().data(), tag_extension);
                 if(!extract_options.continue_extracting) {
                     std::exit(1);
                 }
             }
-            return;
+            return false;
         }
 
         auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
-            return;
+            return false;
         }
 
         // Get the tag data
@@ -142,7 +150,7 @@ int main(int argc, const char **argv) {
             if(!extract_options.continue_extracting) {
                 std::exit(1);
             }
-            return;
+            return false;
         }
 
         // Create directories along the way
@@ -156,58 +164,100 @@ int main(int argc, const char **argv) {
         }
 
         extracted_tags[tag_index] = true;
+        return true;
     };
 
-    // Extract individual tags?
-    if(extract_options.tags_to_extract.size() != 0) {
-        std::vector<std::size_t> all_tags_to_extract;
-        for(auto &tag : extract_options.tags_to_extract) {
-            // Find the dot
-            char *dot = nullptr;
-            for(char &c : tag) {
-                if(c == '.') {
-                    dot = &c;
-                }
-            }
-            if(dot == nullptr) {
-                eprintf("Tag is missing an extension: %s\n", tag.data());
-                return EXIT_FAILURE;
-            }
-            *dot = 0;
-
-            // Get the extension
-            const char *extension = dot + 1;
-            auto tag_class_int = HEK::extension_to_tag_class(extension);
-            if(tag_class_int == TagClassInt::TAG_CLASS_NULL) {
-                eprintf("Invalid tag class: %s\n", extension);
-                return EXIT_FAILURE;
-            }
-
-            // Replace forward slashes with backslashes
-            File::preferred_path_to_halo_path_chars(tag.data());
-
-            // Get the index
-            auto index = map->find_tag(tag.data(), tag_class_int);
-            if(!index.has_value()) {
-                eprintf("Tag not in cache file: %s.%s\n", tag.data(), extension);
-                return EXIT_FAILURE;
-            }
-
-            all_tags_to_extract.push_back(*index);
-        }
-
-        for(auto &tag : all_tags_to_extract) {
-            extract_tag(tag);
-        }
-    }
-
     // Extract each tag?
-    else {
+    if(extract_options.search_all_tags) {
         auto start = std::chrono::steady_clock::now();
         for(std::size_t t = 0; t < tag_count; t++) {
             extract_tag(t);
         }
         auto end = std::chrono::steady_clock::now();
         oprintf("Finished in %zu ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    }
+
+    else {
+        std::vector<std::size_t> all_tags_to_extract;
+
+        if(extract_options.tags_to_extract.size() != 0) {
+            for(auto &tag : extract_options.tags_to_extract) {
+                // Find the dot
+                char *dot = nullptr;
+                for(char &c : tag) {
+                    if(c == '.') {
+                        dot = &c;
+                    }
+                }
+                if(dot == nullptr) {
+                    eprintf("Tag is missing an extension: %s\n", tag.data());
+                    return EXIT_FAILURE;
+                }
+                *dot = 0;
+
+                // Get the extension
+                const char *extension = dot + 1;
+                auto tag_class_int = HEK::extension_to_tag_class(extension);
+                if(tag_class_int == TagClassInt::TAG_CLASS_NULL) {
+                    eprintf("Invalid tag class: %s\n", extension);
+                    return EXIT_FAILURE;
+                }
+
+                // Replace forward slashes with backslashes
+                File::preferred_path_to_halo_path_chars(tag.data());
+
+                // Get the index
+                auto index = map->find_tag(tag.data(), tag_class_int);
+                if(!index.has_value()) {
+                    eprintf("Tag not in cache file: %s.%s\n", tag.data(), extension);
+                    return EXIT_FAILURE;
+                }
+
+                all_tags_to_extract.push_back(*index);
+            }
+        }
+
+        // Regex search
+        if(extract_options.regex_search.size() != 0) {
+            std::size_t tag_count = map->get_tag_count();
+            for(std::size_t t = 0; t < tag_count; t++) {
+                // See if we already added
+                bool already_added = false;
+                for(auto &tag : all_tags_to_extract) {
+                    if(tag == t) {
+                        already_added = true;
+                        break;
+                    }
+                }
+                if(already_added) {
+                    continue;
+                }
+
+                const auto &tag = map->get_tag(t);
+                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
+
+                for(auto &regex : extract_options.regex_search) {
+                    if(std::regex_search(full_tag_path, regex)) {
+                        all_tags_to_extract.push_back(t);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(all_tags_to_extract.size() == 0) {
+            eprintf("No tags were found with the given search parameters.\n");
+            return EXIT_FAILURE;
+        }
+
+        for(auto &tag : all_tags_to_extract) {
+            const auto &tag_map = map->get_tag(tag);
+            if(extract_tag(tag)) {
+                oprintf("Extracted %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            }
+            else {
+                oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            }
+        }
     }
 }
