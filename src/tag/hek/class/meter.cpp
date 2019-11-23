@@ -9,6 +9,12 @@ namespace Invader::HEK {
         // These don't work in Halo anyway
         //ADD_DEPENDENCY_ADJUST_SIZES(tag.stencil_bitmaps);
         //ADD_DEPENDENCY_ADJUST_SIZES(tag.source_bitmap);
+        if(tag.stencil_bitmaps.path_size.read() > 0) {
+            INCREMENT_DATA_PTR(tag.stencil_bitmaps.path_size.read() + 1);
+        }
+        if(tag.source_bitmap.path_size.read() > 0) {
+            INCREMENT_DATA_PTR(tag.source_bitmap.path_size.read() + 1);
+        }
         tag.stencil_bitmaps.tag_id = TagID::null_tag_id();
         tag.source_bitmap.tag_id = TagID::null_tag_id();
         ADD_POINTER_FROM_INT32(tag.encoded_stencil.pointer, compiled.data.size());
