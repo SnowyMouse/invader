@@ -178,8 +178,8 @@ namespace Invader::Parser {
         const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
 
         for(std::size_t v = 0; v < vertex_count; v++) {
-            HEK::GBXModelVertexUncompressed<HEK::BigEndian> vertex_uncompressed = vertices[v];
-            HEK::GBXModelVertexCompressed<HEK::BigEndian> vertex_compressed = HEK::compress_model_vertex(vertex_uncompressed);
+            GBXModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
+            GBXModelVertexCompressed::struct_big vertex_compressed = HEK::compress_model_vertex(vertex_uncompressed);
 
             std::size_t data_read;
             this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read));
@@ -223,13 +223,184 @@ namespace Invader::Parser {
         this->rotation_function_scale = DEGREES_TO_RADIANS(this->rotation_function_scale);
     }
 
-    void Invader::Parser::ModelAnimationAnimation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        eprintf("unimplemented");
-        throw std::exception();
+    template <typename A, typename B> static void swap_endian_array(A *to, const B *from, std::size_t count) {
+        for(std::size_t i = 0; i < count; i++) {
+            to[i] = from[i];
+        }
     }
 
-    void Invader::Parser::ModelAnimations::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        eprintf("unimplemented");
-        throw std::exception();
+    void Invader::Parser::ModelAnimationAnimation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        std::vector<std::byte> frame_data = this->frame_data;
+        std::vector<std::byte> frame_info = this->frame_info;
+        std::vector<std::byte> default_data = this->default_data;
+
+        // Frame info
+        std::size_t required_frame_info_size;
+        switch(this->frame_info_type) {
+            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_NONE:
+                required_frame_info_size = 0;
+                break;
+            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
+                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDy::struct_little);
+                break;
+            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
+                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDyaw::struct_little);
+                break;
+            case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
+                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDzDyaw::struct_little);
+                break;
+            default:
+                throw InvalidTagDataException();
+        }
+        if(required_frame_info_size * this->frame_count != frame_info.size()) {
+            throw OutOfBoundsException();
+        }
+
+        // Convert endianness
+        if(frame_info.size() > 0) {
+            switch(this->frame_info_type) {
+                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
+                    swap_endian_array(
+                        reinterpret_cast<ModelAnimationFrameInfoDxDy::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationFrameInfoDxDy::struct_little *>(frame_info.data()),
+                        this->frame_count
+                    );
+                    break;
+                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
+                    swap_endian_array(
+                        reinterpret_cast<ModelAnimationFrameInfoDxDyDyaw::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationFrameInfoDxDyDyaw::struct_little *>(frame_info.data()),
+                        this->frame_count
+                    );
+                    break;
+                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
+                    swap_endian_array(
+                        reinterpret_cast<ModelAnimationFrameInfoDxDyDzDyaw::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationFrameInfoDxDyDzDyaw::struct_little *>(frame_info.data()),
+                        this->frame_count
+                    );
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Now do nodes
+        if(this->node_count > 64) {
+            throw OutOfBoundsException();
+        }
+
+        // Count this stuff
+        std::size_t rotation_count = 0;
+        std::size_t scale_count = 0;
+        std::size_t transform_count = 0;
+        std::uint32_t rotation_flag_0 = this->node_rotation_flag_data[0];
+        std::uint32_t rotation_flag_1 = this->node_rotation_flag_data[1];
+        std::uint32_t scale_flag_0 = this->node_scale_flag_data[0];
+        std::uint32_t scale_flag_1 = this->node_scale_flag_data[1];
+        std::uint32_t transform_flag_0 = this->node_transform_flag_data[0];
+        std::uint32_t transform_flag_1 = this->node_transform_flag_data[1];
+        bool rotate[64];
+        bool scale[64];
+        bool transform[64];
+        for(std::size_t i = 0; i < node_count; i++) {
+            bool has_rotation = false;
+            bool has_scale = false;
+            bool has_transform = false;
+
+            if(i > 31) {
+                has_rotation = (rotation_flag_1 >> (i - 32)) & 1;
+                has_scale = (scale_flag_1 >> (i - 32)) & 1;
+                has_transform = (transform_flag_1 >> (i - 32)) & 1;
+            }
+            else {
+                has_rotation = (rotation_flag_0 >> i) & 1;
+                has_scale = (scale_flag_0 >> i) & 1;
+                has_transform = (transform_flag_0 >> i) & 1;
+            }
+
+            rotation_count += has_rotation;
+            scale_count += has_scale;
+            transform_count += has_transform;
+
+            rotate[i] = has_rotation;
+            scale[i] = has_scale;
+            transform[i] = has_transform;
+        }
+
+        // Make sure frame and default size is correct
+        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationRotation::struct_big) + scale_count * sizeof(ModelAnimationScale::struct_big) + transform_count * sizeof(ModelAnimationTransform::struct_big);
+        std::size_t max_frame_size = node_count * (sizeof(ModelAnimationRotation::struct_big) + sizeof(ModelAnimationScale::struct_big) + sizeof(ModelAnimationTransform::struct_big));
+
+        if(frame_size != total_frame_size) {
+            throw InvalidTagDataException();
+        }
+        if(default_data.size() != (max_frame_size - total_frame_size)) {
+            throw InvalidTagDataException();
+        }
+
+        // Do default data
+        if(default_data.size() > 0) {
+            auto *default_data_big = this->default_data.data();
+            auto *default_data_little = default_data.data();
+
+            for(std::size_t node = 0; node < this->node_count; node++) {
+                if(!rotate[node]) {
+                    auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_big *>(default_data_big);
+                    const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_little *>(default_data_little);
+                    rotation_big = rotation_little;
+                    default_data_big += sizeof(rotation_big);
+                    default_data_little += sizeof(rotation_big);
+                }
+                if(!transform[node]) {
+                    auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_big *>(default_data_big);
+                    const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_little *>(default_data_little);
+                    transform_big = transform_little;
+                    default_data_big += sizeof(transform_big);
+                    default_data_little += sizeof(transform_big);
+                }
+                if(!scale[node]) {
+                    auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_big *>(default_data_big);
+                    const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_little *>(default_data_little);
+                    scale_big = scale_little;
+                    default_data_big += sizeof(scale_big);
+                    default_data_little += sizeof(scale_big);
+                }
+            }
+        }
+
+        // Get whether or not it's compressed
+        bool compressed = flags.compressed_data;
+
+        // Convert frame data
+        if(!compressed && frame_data.size() > 0) {
+            auto *frame_data_big = this->frame_data.data();
+            auto *frame_data_little = frame_data.data();
+            for(std::size_t frame = 0; frame < frame_count; frame++) {
+                for(std::size_t node = 0; node < this->node_count; node++) {
+                    if(rotate[node]) {
+                        auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_little *>(frame_data_big);
+                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_big *>(frame_data_little);
+                        rotation_big = rotation_little;
+                        frame_data_big += sizeof(rotation_big);
+                        frame_data_little += sizeof(rotation_big);
+                    }
+                    if(transform[node]) {
+                        auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_little *>(frame_data_big);
+                        const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_big *>(frame_data_little);
+                        transform_big = transform_little;
+                        frame_data_big += sizeof(transform_big);
+                        frame_data_little += sizeof(transform_big);
+                    }
+                    if(scale[node]) {
+                        auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_little *>(frame_data_big);
+                        const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_big *>(frame_data_little);
+                        scale_big = scale_little;
+                        frame_data_big += sizeof(scale_big);
+                        frame_data_little += sizeof(scale_big);
+                    }
+                }
+            }
+        }
     }
 }
