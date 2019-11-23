@@ -361,7 +361,7 @@ for s in all_structs_arranged:
         cpp.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
         for struct in all_used_structs:
             name = struct["name"]
-            if ("non_cached" in struct and struct["non_cached"]) or ("manual_extraction" in struct and struct["manual_extraction"]):
+            if ("non_cached" in struct and struct["non_cached"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
                 continue
             if struct["type"] == "TagDependency":
                 cpp.write("        r.{}.tag_class_int = l.{}.tag_class_int.read();\n".format(name, name))

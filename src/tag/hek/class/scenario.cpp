@@ -11,7 +11,9 @@ namespace Invader::HEK {
         ADD_DEPENDENCY_ADJUST_SIZES(tag.wont_use);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.cant_use);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.skies, sky);
+        skip_data = true;
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.child_scenarios, child_scenario);
+        skip_data = false;
         ADD_REFLEXIVE(tag.predicted_resources);
         ADD_REFLEXIVE(tag.functions);
         std::size_t editor_scenario_data_size = tag.editor_scenario_data.size;

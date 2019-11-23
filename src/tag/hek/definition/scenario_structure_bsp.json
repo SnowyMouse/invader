@@ -351,14 +351,14 @@
                 "name": "uncompressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
-                "manual_extraction": true
+                "ignore_cached": true
             },
             {
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
                 "non_cached": true,
-                "manual_extraction": true
+                "ignore_cached": true
             }
         ],
         "type": "struct",

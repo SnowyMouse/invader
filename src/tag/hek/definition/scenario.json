@@ -2899,7 +2899,8 @@
                 "name": "child scenarios",
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
-                "compound": true
+                "compound": true,
+                "ignore_cached": true
             },
             {
                 "name": "local north",
