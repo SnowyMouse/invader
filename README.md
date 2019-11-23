@@ -108,6 +108,7 @@ work with, this project is split into different programs.
 - [invader-build]
 - [invader-compress]
 - [invader-dependency]
+- [invader-extract]
 - [invader-font]
 - [invader-indexer]
 - [invader-info]
@@ -300,6 +301,27 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+```
+
+### invader-extract
+This program extracts tags from cache files.
+
+```
+Usage: invader-extract [options] <map>
+
+Extract data from cache files.
+
+Options:
+  -c --continue                Don't stop on error when possible
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info
+  -m --maps <dir>              Set the maps directory
+  -n --no-external-tags        Do not extract tags with external data
+  -O --overwrite               Overwrite tags if they already exist
+  -r --recursive               Extract tag dependencies
+  -s --search <expr>           Search for tags (* and ? are wildcards); use
+                               multiple times for multiple queries
+  -t --tags <dir>              Set the tags directory
 ```
 
 ### invader-font
@@ -535,6 +557,7 @@ for multiplayer maps.
 [invader-build]: #invader-build
 [invader-compress]: #invader-compress
 [invader-dependency]: #invader-dependency
+[invader-extract]: #invader-extract
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer
 [invader-info]: #invader-info

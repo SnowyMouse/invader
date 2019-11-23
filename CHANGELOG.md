@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-extract - Extracts tags from cache files
+- Added a new tag parser that programs can use
 
 ### Fixed
 - invader-build: Fixed light tag durations not being properly multiplied by 30
