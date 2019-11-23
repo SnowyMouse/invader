@@ -108,6 +108,7 @@ namespace Invader {
     std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {
         std::size_t max_length = this->get_data_length(map_type);
         std::byte *data_ptr = this->get_data(map_type);
+
         if(offset >= max_length || offset + minimum_size > max_length) {
             throw OutOfBoundsException();
         }

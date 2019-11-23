@@ -412,7 +412,7 @@ for s in all_structs_arranged:
                         else:
                             print("Unknown external_file_offset: {}".format(struct["external_file_offset"]), file=sys.stderr)
                             sys.exit(1)
-                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, l.{}.external ? Map::DataMapType::{} : Map::DataMapType::DATA_MAP_CACHE);\n".format(name, name, name, where_to))
+                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, (l.{}.external & 1) ? Map::DataMapType::{} : Map::DataMapType::DATA_MAP_CACHE);\n".format(name, name, name, where_to))
                         pass
                     else:
                         cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size);\n".format(name, name))

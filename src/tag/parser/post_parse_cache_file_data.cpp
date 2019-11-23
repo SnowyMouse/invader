@@ -219,6 +219,18 @@ namespace Invader::Parser {
         }
     }
 
+    void Invader::Parser::SoundPermutation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        if(this->compression == HEK::SoundCompression::SOUND_COMPRESSION_NONE) {
+            auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
+            auto *end = start + this->samples.size() / sizeof(*start);
+
+            while(start < end) {
+                *reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(start) = *start;
+                start++;
+            }
+        }
+    }
+
     void Invader::Parser::LensFlare::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
         this->rotation_function_scale = DEGREES_TO_RADIANS(this->rotation_function_scale);
     }
