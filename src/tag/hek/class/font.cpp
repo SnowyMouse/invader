@@ -66,6 +66,8 @@ namespace Invader::HEK {
         std::size_t pixels_size = tag.pixels.size;
         compiled.data.insert(compiled.data.end(), data, data + pixels_size);
         INCREMENT_DATA_PTR(pixels_size);
+        tag.pixels.external = 0;
+        tag.pixels.file_offset = 0;
 
         PAD_32_BIT
 
