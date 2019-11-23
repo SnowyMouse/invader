@@ -77,6 +77,16 @@ namespace Invader::Parser {
                 new_marker.translation = instance.translation;
             }
         }
+
+        float super_low = this->super_low_detail_cutoff;
+        float low = this->low_detail_cutoff;
+        float high = this->high_detail_cutoff;
+        float super_high = this->super_high_detail_cutoff;
+
+        this->super_low_detail_cutoff = super_high;
+        this->low_detail_cutoff = high;
+        this->high_detail_cutoff = low;
+        this->super_high_detail_cutoff = super_low;
     }
 
     void Invader::Parser::GlobalsFallingDamage::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
