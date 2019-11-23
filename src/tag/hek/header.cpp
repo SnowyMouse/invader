@@ -64,6 +64,8 @@ namespace Invader::HEK {
                 return 2;
             case TAG_CLASS_SHADER_TRANSPARENT_WATER:
                 return 2;
+            case TAG_CLASS_CAMERA_TRACK:
+                return 2;
             case TAG_CLASS_UNIT:
                 return 2;
             case TAG_CLASS_VIRTUAL_KEYBOARD:

@@ -1,0 +1,27 @@
+[
+    {
+        "name": "UnicodeStringListString",
+        "fields": [
+            {
+                "name": "string",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "UnicodeStringList",
+        "fields": [
+            {
+                "name": "strings",
+                "type": "TagReflexive",
+                "struct": "UnicodeStringListString",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    }
+]

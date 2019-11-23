@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # Invader library
-add_library(invader STATIC
+set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser.cpp"
 
@@ -91,6 +91,9 @@ add_library(invader STATIC
     src/tag/hek/class/wind.cpp
     src/tag/hek/class/virtual_keyboard.cpp
     src/tag/compiled_tag.cpp
+    src/extract/extraction.cpp
+    src/tag/parser/post_parse_cache_file_data.cpp
+    src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
     src/crc/crc_spoof.c
@@ -98,6 +101,20 @@ add_library(invader STATIC
 
     src/version.cpp
 )
+
+if(NOT DEFINED ${INVADER_STATIC_BUILD})
+    set(INVADER_STATIC_BUILD false CACHE BOOL "Create a static build of libinvader.a (NOTE: Does not remove external dependencies)")
+endif()
+
+if(${INVADER_STATIC_BUILD})
+    add_library(invader STATIC
+        ${INVADER_SOURCE_FILES}
+    )
+else()
+    add_library(invader SHARED
+        ${INVADER_SOURCE_FILES}
+    )
+endif()
 
 # Generate headers separately (this is to guarantee build order)
 add_custom_target(invader-header-gen
@@ -146,8 +163,11 @@ set_source_files_properties(src/version.cpp
     PROPERTIES COMPILE_DEFINITIONS "INVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} INVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} INVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} INVADER_FORK=\"${PROJECT_NAME}\""
 )
 
+# Remove warnings from this
+set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
+
 # Include that
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd)
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES})

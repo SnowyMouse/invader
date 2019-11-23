@@ -61,6 +61,30 @@ namespace Invader::HEK {
                 reflexive.sound = -1;
             }
 
+            if(reflexive.default_data.size == 0) {
+                reflexive.default_data = {};
+            }
+            else {
+                reflexive.default_data.file_offset = 0;
+                reflexive.default_data.external = 0;
+            }
+
+            if(reflexive.frame_data.size == 0) {
+                reflexive.frame_data = {};
+            }
+            else {
+                reflexive.frame_data.file_offset = 0;
+                reflexive.frame_data.external = 0;
+            }
+
+            if(reflexive.frame_info.size == 0) {
+                reflexive.frame_info = {};
+            }
+            else {
+                reflexive.frame_info.file_offset = 0;
+                reflexive.frame_info.external = 0;
+            }
+
             std::size_t required_frame_info_size;
             switch(frame_type) {
                 case AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_NONE:

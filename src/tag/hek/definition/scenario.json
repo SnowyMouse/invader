@@ -2732,6 +2732,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 96
     },
     {
@@ -2898,7 +2899,8 @@
                 "name": "child scenarios",
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
-                "compound": true
+                "compound": true,
+                "ignore_cached": true
             },
             {
                 "name": "local north",
@@ -3267,6 +3269,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 1456
     }
 ]

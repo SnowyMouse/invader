@@ -17,14 +17,14 @@ namespace Invader::HEK {
 
         BEGIN_COMPILE(ScenarioStructureBSP)
 
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps_bitmap);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.collision_materials, shader);
         ADD_MODEL_COLLISION_BSP(tag.collision_bsp); // Add collision BSP (same as the model_collision_geometry collsion BSP)
         ADD_REFLEXIVE(tag.nodes);
         ADD_REFLEXIVE(tag.leaves);
         ADD_REFLEXIVE(tag.leaf_surfaces);
         ADD_REFLEXIVE(tag.surfaces);
-        ADD_REFLEXIVE_START(tag.lightmaps_1) {
+        ADD_REFLEXIVE_START(tag.lightmaps) {
             ADD_REFLEXIVE_START(reflexive.materials) {
                 ADD_DEPENDENCY_ADJUST_SIZES(reflexive.shader);
 
@@ -54,6 +54,10 @@ namespace Invader::HEK {
 
                 INCREMENT_DATA_PTR(uncompressed_vertices_size);
                 INCREMENT_DATA_PTR(reflexive.compressed_vertices.size);
+
+                reflexive.uncompressed_vertices.external = 0;
+                reflexive.uncompressed_vertices.file_offset = 0;
+                reflexive.compressed_vertices = {};
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.lens_flares, lens);
@@ -78,6 +82,12 @@ namespace Invader::HEK {
         ASSERT_SIZE(cluster_data_size);
         compiled.data.insert(compiled.data.end(), data, data + cluster_data_size);
         INCREMENT_DATA_PTR(cluster_data_size);
+
+        tag.cluster_data.external = 0;
+        tag.cluster_data.file_offset = 0;
+        tag.sound_pas_data.external = 0;
+        tag.sound_pas_data.file_offset = 0;
+        
         PAD_32_BIT
 
         ADD_REFLEXIVE_START(tag.cluster_portals) {

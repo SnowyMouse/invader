@@ -2,6 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-extract - Extracts tags from cache files
+
+### Fixed
+- invader-build: Fixed light tag durations not being properly multiplied by 30
+- invader-build: Fixed some sound tags not working as intended
+- invader-build: Fixed lens flare rotation scale not being converted properly
+
 ## [0.18.0] - 2019-11-17
 ### Changed
 - All tag definitions have been converted to .json format .This will allow them
@@ -373,7 +382,8 @@ image as one bitmap
 - invader-build: CRC32 is now calculated in the header when building
 
 ### Removed
-- invader-crc: CRC32 can no longer be forged using this tool; use invader-build instead
+- invader-crc: CRC32 can no longer be forged using this tool; use invader-build
+  instead
 
 ## [0.4.3] - 2019-08-23
 ### Changed

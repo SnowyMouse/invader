@@ -118,7 +118,8 @@
             {
                 "name": "samples pointer",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -140,7 +141,9 @@
             {
                 "name": "samples",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "file_offset": true,
+                "external_file_offset": "sounds.map"
             },
             {
                 "name": "mouth data",
@@ -188,12 +191,14 @@
             {
                 "name": "unknown ffffffff 0",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "unknown ffffffff 1",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "permutations",
@@ -328,12 +333,14 @@
             {
                 "name": "unknown ffffffff 0",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "unknown ffffffff 1",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "pitch ranges",
@@ -343,6 +350,7 @@
             }
         ],
         "type": "struct",
+        "post_parse_cache_file_data": true,
         "size": 164
     }
 ]

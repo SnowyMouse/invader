@@ -98,6 +98,27 @@ namespace Invader {
         const std::byte *get_data_at_offset(std::size_t offset, std::size_t minimum_size = 0, DataMapType map_type = DATA_MAP_CACHE) const;
 
         /**
+         * Get a pointer to the uncompressed map data
+         * @param map_type map to get data from
+         * @return         data
+         */
+        std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE) noexcept;
+
+        /**
+         * Get a pointer to the uncompressed map data
+         * @param map_type map to get data from
+         * @return         data
+         */
+        const std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE) const noexcept;
+
+        /**
+         * Get the data length in bytes
+         * @param map_type map to get data from
+         * @return         data length in bytes
+         */
+        std::size_t get_data_length(DataMapType map_type = DATA_MAP_CACHE) const noexcept;
+
+        /**
          * Get the tag data at the specified offset
          * @param  offset       offset
          * @param  minimum_size minimum number of bytes to guarantee
@@ -132,18 +153,6 @@ namespace Invader {
          * @throws              OutOfBoundsException if data is out of bounds
          */
         const std::byte *resolve_tag_data_pointer(std::uint32_t offset, std::size_t minimum_size = 0) const;
-
-        /**
-         * Get a pointer to the uncompressed map data
-         * @return data
-         */
-        std::byte *get_data() noexcept;
-
-        /**
-         * Get the data length in bytes
-         * @return data length in bytes
-         */
-        std::size_t get_data_length() const noexcept;
 
         /**
          * Get the tag count

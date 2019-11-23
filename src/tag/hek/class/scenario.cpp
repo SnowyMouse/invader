@@ -11,7 +11,9 @@ namespace Invader::HEK {
         ADD_DEPENDENCY_ADJUST_SIZES(tag.wont_use);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.cant_use);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.skies, sky);
+        skip_data = true;
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.child_scenarios, child_scenario);
+        skip_data = false;
         ADD_REFLEXIVE(tag.predicted_resources);
         ADD_REFLEXIVE(tag.functions);
         std::size_t editor_scenario_data_size = tag.editor_scenario_data.size;
@@ -20,9 +22,13 @@ namespace Invader::HEK {
         compiled.data.insert(compiled.data.end(), data, data + editor_scenario_data_size);
         PAD_32_BIT
         INCREMENT_DATA_PTR(editor_scenario_data_size);
+        tag.editor_scenario_data.file_offset = 0;
+        tag.editor_scenario_data.external = 0;
 
         ADD_REFLEXIVE_START(tag.comments) {
             std::size_t comment_size = reflexive.comment.size;
+            reflexive.comment.file_offset = 0;
+            reflexive.comment.external = 0;
             ASSERT_SIZE(comment_size);
             ADD_POINTER_FROM_INT32(reflexive.comment.pointer, compiled.data.size());
             compiled.data.insert(compiled.data.end(), data, data + comment_size);
@@ -75,6 +81,8 @@ namespace Invader::HEK {
 
         ADD_REFLEXIVE_START(tag.recorded_animations) {
             std::size_t animation_size = reflexive.recorded_animation_event_stream.size;
+            reflexive.recorded_animation_event_stream.file_offset = 0;
+            reflexive.recorded_animation_event_stream.external = 0;
             ASSERT_SIZE(animation_size);
             ADD_POINTER_FROM_INT32(reflexive.recorded_animation_event_stream.pointer, compiled.data.size());
             compiled.data.insert(compiled.data.end(), data, data + animation_size);
@@ -185,6 +193,8 @@ namespace Invader::HEK {
         compiled.data.insert(compiled.data.end(), tag.script_syntax_data.size, std::byte());
         auto &table = *reinterpret_cast<ScenarioScriptNodeTable<LittleEndian> *>(compiled.data.data() + compiled.data.size() - tag.script_syntax_data.size);
         table = *reinterpret_cast<const ScenarioScriptNodeTable<BigEndian> *>(data);
+        tag.script_syntax_data.file_offset = 0;
+        tag.script_syntax_data.external = 0;
 
         auto node_count = static_cast<std::size_t>(table.maximum_count);
 
@@ -201,6 +211,8 @@ namespace Invader::HEK {
         // Increment this
         INCREMENT_DATA_PTR(tag.script_syntax_data.size);
         ASSERT_SIZE(tag.script_string_data.size)
+        tag.script_string_data.file_offset = 0;
+        tag.script_string_data.external = 0;
 
         // Hold a list of references here
         std::vector<CompiledTagDependency> script_dependencies;
@@ -277,6 +289,9 @@ namespace Invader::HEK {
             table.element_size = 0x7F4F;
             table.maximum_count = 0x764F;
         }
+        else {
+            table.first_element_ptr = 0;
+        }
 
         ADD_POINTER_FROM_INT32(tag.script_string_data.pointer, compiled.data.size());
         compiled.data.insert(compiled.data.end(), data, data + tag.script_string_data.size);
@@ -327,6 +342,10 @@ namespace Invader::HEK {
         skip_data = true;
         ADD_REFLEXIVE_START(tag.source_files) {
             INCREMENT_DATA_PTR(reflexive.source.size);
+            reflexive.source.file_offset = 0;
+            reflexive.source.external = 0;
+            reflexive.source.file_offset = 0;
+            reflexive.source.external = 0;
         } ADD_REFLEXIVE_END
         skip_data = false;
 

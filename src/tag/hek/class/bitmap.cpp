@@ -10,10 +10,18 @@ namespace Invader::HEK {
         ASSERT_SIZE(tag.compressed_color_plate_data.size);
         INCREMENT_DATA_PTR(tag.compressed_color_plate_data.size);
 
+        // Zero out color plate data
+        tag.color_plate_width = 0;
+        tag.color_plate_height = 0;
+        tag.compressed_color_plate_data = {};
+
         auto *processed_data = data;
         ASSERT_SIZE(tag.processed_pixel_data.size);
         compiled.asset_data.insert(compiled.asset_data.begin(), processed_data, processed_data + tag.processed_pixel_data.size);
         INCREMENT_DATA_PTR(tag.processed_pixel_data.size);
+
+        // Zero out processed data, too
+        tag.processed_pixel_data = {};
 
         // Get all of the data. We'll need to comb over it in a bit.
         std::vector<BitmapGroupSequence<LittleEndian>> sequence_data;

@@ -232,6 +232,8 @@ namespace Invader::HEK {
                 ASSERT_SIZE(vertex_size);
                 reflexive.uncompressed_vertices.count = 0;
 
+                DEFAULT_VALUE(reflexive.centroid_primary_weight, 1.0F);
+
                 // Set vertex count and offsets
                 reflexive.vertex_offset = static_cast<std::uint32_t>(compiled.asset_data.size());
                 reflexive.vertex_count = static_cast<std::uint32_t>(vertex_count);

@@ -11,12 +11,13 @@ namespace Invader::HEK {
         ADD_DEPENDENCY_ADJUST_SIZES(tag.bitmap);
         DEFAULT_VALUE(tag.vertical_scale, 1.0f);
         DEFAULT_VALUE(tag.horizontal_scale, 1.0f);
-        DEFAULT_VALUE(tag.rotation_function_scale, 360.0f);
         ADD_REFLEXIVE_START(tag.reflections) {
             DEFAULT_VALUE(reflexive.animation_period, 1.0f);
         } ADD_REFLEXIVE_END
         tag.cos_falloff_angle = std::cos(tag.falloff_angle);
         tag.cos_cutoff_angle = std::cos(tag.cutoff_angle);
+        tag.rotation_function_scale = RADIANS_TO_DEGREES(tag.rotation_function_scale);
+        DEFAULT_VALUE(tag.rotation_function_scale, 360.0f);
         FINISH_COMPILE
     }
 }

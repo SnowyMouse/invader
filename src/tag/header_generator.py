@@ -214,21 +214,32 @@ header_name = "INVADER__TAG__PARSER__PARSER_HPP"
 hpp.write("#ifndef {}\n".format(header_name))
 hpp.write("#define {}\n\n".format(header_name))
 hpp.write("#include <string>\n")
+hpp.write("#include <optional>\n")
+hpp.write("#include \"../../map/map.hpp\"\n")
 hpp.write("#include \"../hek/definition.hpp\"\n\n")
 hpp.write("namespace Invader::Parser {\n")
 hpp.write("    struct Dependency {\n")
 hpp.write("        TagClassInt tag_class_int;\n")
 hpp.write("        std::string path;\n")
+hpp.write("        HEK::TagID tag_id = HEK::TagID::null_tag_id();\n")
 hpp.write("    };\n")
 
 cpp.write("#include <invader/tag/parser/parser.hpp>\n")
+cpp.write("#include <invader/map/map.hpp>\n")
+cpp.write("#include <invader/map/tag.hpp>\n")
+cpp.write("#include <invader/tag/hek/header.hpp>\n")
+cpp.write("#include <invader/printf.hpp>\n")
+cpp.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
 cpp.write("namespace Invader::Parser {\n")
 
 for s in all_structs_arranged:
     struct_name = s["name"]
+    post_parse_cache_file_data = "post_parse_cache_file_data" in s and s["post_parse_cache_file_data"]
+    private_functions = post_parse_cache_file_data
 
     hpp.write("    struct {} {{\n".format(struct_name))
     hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
+    hpp.write("        using struct_little = HEK::{}<HEK::LittleEndian>;\n".format(struct_name))
     all_used_structs = []
     def add_structs_from_struct(struct):
         if "inherits" in struct:
@@ -274,15 +285,24 @@ for s in all_structs_arranged:
     # generate_hek_tag_data()
     hpp.write("\n        /**\n")
     hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
+    hpp.write("         * @param  generate_header_class generate a cache file header with the class, too\n")
     hpp.write("         * @return cache file data\n")
     hpp.write("         */\n")
-    hpp.write("        std::vector<std::byte> generate_hek_tag_data();\n")
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt);\n")
 
-    cpp.write("    std::vector<std::byte> {}::generate_hek_tag_data() {{\n".format(struct_name))
+    cpp.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class) {{\n".format(struct_name))
+    cpp.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
+    cpp.write("        std::size_t tag_header_offset = 0;\n")
+    cpp.write("        if(generate_header_class.has_value()) {\n")
+    cpp.write("            HEK::TagFileHeader header(*generate_header_class);\n")
+    cpp.write("            tag_header_offset = sizeof(header);\n")
+    cpp.write("            converted_data.insert(converted_data.begin(), reinterpret_cast<std::byte *>(&header), reinterpret_cast<std::byte *>(&header + 1));\n")
+    cpp.write("        }\n")
     if len(all_used_structs) > 0:
-        cpp.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
         cpp.write("        struct_big b = {};\n")
         for struct in all_used_structs:
+            if "cache_only" in struct and struct["cache_only"]:
+                continue
             name = struct["name"]
             if struct["type"] == "TagDependency":
                 cpp.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
@@ -317,10 +337,105 @@ for s in all_structs_arranged:
                 cpp.write("        std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
             else:
                 cpp.write("        b.{} = this->{};\n".format(name, name))
-        cpp.write("        *reinterpret_cast<struct_big *>(converted_data.data()) = b;\n")
-        cpp.write("        return converted_data;\n")
+        cpp.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")
+    cpp.write("        if(generate_header_class.has_value()) {\n")
+    cpp.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(0, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")
+    cpp.write("        }\n")
+    cpp.write("        return converted_data;\n")
+    cpp.write("    }\n")
+
+    # parse_cache_file_data()
+    hpp.write("\n        /**\n")
+    hpp.write("         * Parse the cache file tag data.\n")
+    hpp.write("         * @param tag     Tag to read data from\n")
+    hpp.write("         * @param pointer Pointer to read from; if none is given, then the start of the tag will be used\n")
+    hpp.write("         * @return parsed tag data\n")
+    hpp.write("         */\n")
+    hpp.write("        static {} parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer = std::nullopt);\n".format(struct_name))
+    if len(all_used_structs) > 0 or post_parse_cache_file_data:
+        cpp.write("    {} {}::parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {{\n".format(struct_name, struct_name))
     else:
-        cpp.write("        return std::vector<std::byte>(sizeof(struct_big));\n")
+        cpp.write("    {} {}::parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {{\n".format(struct_name, struct_name))
+    cpp.write("        {} r = {{}};\n".format(struct_name))
+    if len(all_used_structs) > 0:
+        cpp.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
+        for struct in all_used_structs:
+            name = struct["name"]
+            if ("non_cached" in struct and struct["non_cached"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
+                continue
+            if struct["type"] == "TagDependency":
+                cpp.write("        r.{}.tag_class_int = l.{}.tag_class_int.read();\n".format(name, name))
+                cpp.write("        r.{}.tag_id = l.{}.tag_id.read();\n".format(name, name))
+                cpp.write("        if(!r.{}.tag_id.is_null()) {{\n".format(name))
+                cpp.write("            try {\n")
+                cpp.write("                auto &referenced_tag = tag.get_map().get_tag(r.{}.tag_id.index);\n".format(name))
+                cpp.write("                if(referenced_tag.get_tag_class_int() != r.{}.tag_class_int) {{\n".format(name))
+                cpp.write("                    eprintf(\"corrupt tag reference (class in reference does not match class in referenced tag)\\n\");\n")
+                cpp.write("                    throw InvalidTagDataException();\n")
+                cpp.write("                }\n")
+                cpp.write("                r.{}.path = referenced_tag.get_path();\n".format(name))
+                cpp.write("            }\n")
+                cpp.write("            catch (std::exception &) {\n")
+                cpp.write("                eprintf(\"invalid reference for {}.{} in %s.%s\\n\", tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp.write("                throw;\n")
+                cpp.write("            }\n")
+                cpp.write("        }\n")
+            elif struct["type"] == "TagReflexive":
+                cpp.write("        std::size_t l_{}_count = l.{}.count.read();\n".format(name, name))
+                cpp.write("        r.{}.reserve(l_{}_count);\n".format(name, name))
+                cpp.write("        if(l_{}_count > 0) {{\n".format(name))
+                cpp.write("            auto l_{}_ptr = l.{}.pointer;\n".format(name, name))
+                cpp.write("            for(std::size_t i = 0; i < l_{}_count; i++) {{\n".format(name))
+                cpp.write("                try {\n")
+                cpp.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
+                cpp.write("                }\n")
+                cpp.write("                catch (std::exception &) {\n")
+                cpp.write("                    eprintf(\"failed to parse {}.{} #%zu in %s.%s\\n\", i, tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp.write("                    throw;\n")
+                cpp.write("                }\n")
+                cpp.write("            }\n")
+                cpp.write("        }\n")
+            elif struct["type"] == "TagDataOffset":
+                cpp.write("        std::size_t l_{}_data_size = l.{}.size;\n".format(name, name))
+                cpp.write("        if(l_{}_data_size > 0) {{\n".format(name))
+                cpp.write("            const std::byte *data;\n")
+                cpp.write("            try {\n")
+                if "file_offset" in struct:
+                    if "external_file_offset" in struct:
+                        where_to = "DATA_MAP_CACHE"
+                        if struct["external_file_offset"] == "sounds.map":
+                            where_to = "DATA_MAP_SOUND"
+                        elif struct["external_file_offset"] == "bitmaps.map":
+                            where_to = "DATA_MAP_BITMAP"
+                        elif struct["external_file_offset"] == "loc.map":
+                            where_to = "DATA_MAP_LOC"
+                        else:
+                            print("Unknown external_file_offset: {}".format(struct["external_file_offset"]), file=sys.stderr)
+                            sys.exit(1)
+                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, l.{}.external ? Map::DataMapType::{} : Map::DataMapType::DATA_MAP_CACHE);\n".format(name, name, name, where_to))
+                        pass
+                    else:
+                        cpp.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size);\n".format(name, name))
+                    pass
+                else:
+                    cpp.write("                data = tag.data(l.{}.pointer, l_{}_data_size);\n".format(name, name))
+                cpp.write("            }\n")
+                cpp.write("            catch (std::exception &) {\n")
+                cpp.write("                eprintf(\"failed to read tag data for {}.{} in %s.%s\\n\", tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp.write("                throw;\n")
+                cpp.write("            }\n")
+                cpp.write("            r.{}.insert(r.{}.begin(), data, data + l_{}_data_size);\n".format(name, name, name))
+                cpp.write("        }\n")
+            elif "bounds" in struct and struct["bounds"]:
+                cpp.write("        r.{}.from = l.{}.from;\n".format(name, name))
+                cpp.write("        r.{}.to = l.{}.to;\n".format(name, name))
+            elif "count" in struct and struct["count"] > 1:
+                cpp.write("        std::copy(l.{}, l.{} + {}, r.{});\n".format(name, name, struct["count"], name))
+            else:
+                cpp.write("        r.{} = l.{};\n".format(name, name))
+    if post_parse_cache_file_data:
+        cpp.write("        r.post_parse_cache_file_data(tag, pointer);\n")
+    cpp.write("        return r;\n")
     cpp.write("    }\n")
 
     # parse_hek_tag_data()
@@ -334,7 +449,7 @@ for s in all_structs_arranged:
     hpp.write("         */\n")
     hpp.write("        static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this = nullptr);\n".format(struct_name))
     cpp.write("    {} {}::parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this) {{\n".format(struct_name, struct_name))
-    cpp.write("        {} r;\n".format(struct_name))
+    cpp.write("        {} r = {{}};\n".format(struct_name))
     cpp.write("        data_read = 0;\n")
     cpp.write("        if(data_this == nullptr) {\n")
     cpp.write("            if(sizeof(struct_big) > data_size) {\n")
@@ -380,7 +495,7 @@ for s in all_structs_arranged:
                 cpp.write("            const auto *array = reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data);\n".format(struct["struct"]))
                 cpp.write("            std::size_t total_size = sizeof(*array) * h_{}_count;\n".format(name))
                 cpp.write("            if(total_size > data_size) {\n")
-                cpp.write("                eprintf(\"failed to read reflexive {}.{}: %zu bytes needed > %zu bytes available\\n\", total_size, data_size);".format(struct_name, name))
+                cpp.write("                eprintf(\"failed to read reflexive {}.{}: %zu bytes needed > %zu bytes available\\n\", total_size, data_size);\n".format(struct_name, name))
                 cpp.write("                throw OutOfBoundsException();\n")
                 cpp.write("            }\n")
                 cpp.write("            data_size -= total_size;\n")
@@ -414,6 +529,34 @@ for s in all_structs_arranged:
                 cpp.write("        r.{} = h.{};\n".format(name, name))
     cpp.write("        return r;\n")
     cpp.write("    }\n")
+
+    # parse_hek_tag_file()
+    hpp.write("\n        /**\n")
+    hpp.write("         * Parse the HEK tag file.\n")
+    hpp.write("         * @param data      Tag file data to read from\n")
+    hpp.write("         * @param data_size Size of the tag file\n")
+    hpp.write("         * @return parsed tag data\n")
+    hpp.write("         */\n")
+    hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size);\n".format(struct_name))
+    cpp.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size) {{\n".format(struct_name, struct_name))
+    cpp.write("        if(data_size < sizeof(HEK::TagFileHeader)) {\n")
+    cpp.write("            eprintf(\"data is too small to have a header\\n\");")
+    cpp.write("            throw OutOfBoundsException();\n")
+    cpp.write("        }\n")
+    cpp.write("        std::size_t data_read = 0;\n")
+    cpp.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
+    cpp.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read);\n")
+    cpp.write("        if(data_read != expected_data_read) {\n")
+    cpp.write("            eprintf(\"invalid tag file; tag data was left over\\n\");")
+    cpp.write("            throw InvalidTagDataException();\n")
+    cpp.write("        }\n")
+    cpp.write("        return r;\n")
+    cpp.write("    }\n")
+
+    if private_functions:
+        hpp.write("    private:\n")
+        if post_parse_cache_file_data:
+            hpp.write("    void post_parse_cache_file_data(const Tag &tag, std::optional<HEK::Pointer> pointer);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")

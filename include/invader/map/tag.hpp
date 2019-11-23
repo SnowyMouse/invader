@@ -22,6 +22,22 @@ namespace Invader {
     friend class Map;
     public:
         /**
+         * Get the map
+         * @return the map
+         */
+        Map &get_map() noexcept {
+            return this->map;
+        }
+
+        /**
+         * Get the map
+         * @return the map
+         */
+        const Map &get_map() const noexcept {
+            return const_cast<Tag *>(this)->get_map();
+        }
+
+        /**
          * Get the path of the tag
          * @return path of the tag
          */
@@ -105,6 +121,27 @@ namespace Invader {
         }
 
         /**
+         * Get a reference to the struct at the given offset.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
+         * @return a reference to the base struct
+         * @throws throw if out of bounds
+         */
+        template <template<template<typename> typename> typename StructType>
+        const StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) const {
+            return const_cast<Tag *>(this)->get_struct_at_pointer<StructType>(pointer, minimum);
+        }
+
+        /**
+         * Get a reference to the base struct, throwing an exception if out of bounds.
+         * @return a reference to the base struct
+         */
+        template <template<template<typename> typename> typename StructType>
+        const StructType<HEK::LittleEndian> &get_base_struct() const {
+            return const_cast<Tag *>(this)->get_base_struct<StructType>();
+        }
+
+        /**
          * Resolve the reflexive.
          * @param  reflexive the reflexive
          * @return pointer to the first object or nullptr if the reflexive has 0 items
@@ -123,7 +160,7 @@ namespace Invader {
          * @return pointer to the first object or nullptr if the reflexive has 0 items
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> *resolve_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive) const {
+        const StructType<HEK::LittleEndian> *resolve_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive) const {
             return const_cast<Tag *>(this)->resolve_reflexive(reflexive);
         }
 
@@ -141,12 +178,12 @@ namespace Invader {
         }
 
         /**
-         * Resolve the reflexive at the given offset and return a const referenced to the desired struct
+         * Resolve the reflexive at the given offset and return a const reference to the desired struct
          * @param reflexive the reflexive
          * @param index     the index
          */
         template <template<template<typename> typename> typename StructType>
-        StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) const {
+        const StructType<HEK::LittleEndian> &get_struct_from_reflexive(const HEK::TagReflexive<HEK::LittleEndian, StructType> &reflexive, std::size_t index) const {
             return const_cast<Tag *>(this)->get_struct_from_reflexive(reflexive, index);
         }
 
@@ -174,6 +211,9 @@ namespace Invader {
 
         /** Tag data index offset */
         std::size_t tag_data_index_offset = 0;
+
+        /** Tag index in the cache file */
+        std::size_t tag_index = 0;
 
         /** Initialize the tag */
         Tag(Map &map);

@@ -22,7 +22,7 @@ namespace Invader::HEK {
         BigEndian<TagClassInt> tag_class_int;
 
         /** CRC32? Unread? */
-        BigEndian<std::uint32_t> unknown;
+        BigEndian<std::uint32_t> crc32;
 
         /** Equals 0x40. Unread? */
         BigEndian<std::uint32_t> header_size;

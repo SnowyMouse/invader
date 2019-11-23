@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <invader/hek/data_type.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     Vector3D<NativeEndian> euler2d_to_vector(const Euler2D<NativeEndian> &rotation) noexcept {
@@ -203,4 +204,154 @@ namespace Invader::HEK {
         *intersection = *back_point + vector * (back_distance + epsilon);
         return true;
     }
+
+    template<unsigned int bits> constexpr std::int32_t compress_float(float f) {
+        // Clamp to -1 to +1
+        if(f > 1.0F) {
+            f = 1.0F;
+        }
+        else if(f < -1.0F) {
+            f = -1.0F;
+        }
+
+        // Compressing a float basically means taking a -1 to 1 (inclusive) value and turning it into a signed integer.
+        // So, if a float is 1.0 and we need to compress it to a 16-bit integer, the result is 32767.
+        // If a float is -1.0 and we need to compress it to a 16-bit integer, the result is -1 (or 65535). 0 is always 0.
+        if(f >= 0.0F) {
+            constexpr int32_t MAX_VALUE = (1 << (bits - 1)) - 1;
+            return static_cast<std::int32_t>(f * MAX_VALUE + 0.5F);
+        }
+        else {
+            constexpr int32_t MAX_VALUE = (1 << (bits - 1));
+            return static_cast<std::int32_t>((f + 2.0F) * MAX_VALUE + 0.5F);
+        }
+    }
+
+    template<unsigned int bits> constexpr float decompress_float(std::int32_t f) {
+        constexpr std::uint32_t MAX_VALUE = (1 << bits) - 1;
+        constexpr std::uint32_t MAX_UNSIGNED = MAX_VALUE >> 1;
+        constexpr std::int32_t MAX_SIGNED = MAX_UNSIGNED + 1;
+
+        std::uint32_t f_unsigned = static_cast<std::uint32_t>(f) & MAX_VALUE;
+        if(f_unsigned > MAX_UNSIGNED) {
+            return static_cast<float>(f_unsigned) / MAX_SIGNED - 2.0F;
+        }
+        else {
+            return static_cast<float>(f_unsigned) / MAX_UNSIGNED;
+        }
+    }
+
+    std::uint32_t compress_vector(float i, float j, float k) {
+        return (compress_float<11>(i)) | (compress_float<11>(j) << 11) | (compress_float<10>(k) << 22);
+    }
+
+    void decompress_vector(std::uint32_t v, float &i, float &j, float &k) {
+        i = decompress_float<11>(v);
+        j = decompress_float<11>(v >> 11);
+        k = decompress_float<10>(v >> 22);
+    }
+
+    GBXModelVertexCompressed<NativeEndian> compress_model_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept {
+        GBXModelVertexCompressed<NativeEndian> r;
+        r.position = vertex.position;
+        r.node0_index = vertex.node0_index * 3;
+        r.node0_weight = static_cast<std::int16_t>(compress_float<16>(vertex.node0_weight));
+        r.node1_index = vertex.node1_index * 3;
+        r.texture_coordinate_u = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.x));
+        r.texture_coordinate_v = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.y));
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.binormal = compress_vector(vertex.binormal.i, vertex.binormal.j, vertex.binormal.k);
+        r.tangent = compress_vector(vertex.tangent.i, vertex.tangent.j, vertex.tangent.k);
+        return r;
+    }
+
+    GBXModelVertexUncompressed<NativeEndian> decompress_model_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept {
+        GBXModelVertexUncompressed<NativeEndian> r;
+        r.position = vertex.position;
+        r.node0_index = vertex.node0_index / 3;
+        r.node0_weight = decompress_float<16>(vertex.node0_weight);
+        r.node1_index = vertex.node1_index / 3;
+        r.node1_weight = 0;
+        r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_u);
+        r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_v);
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.i = normal_j;
+        r.normal.i = normal_k;
+
+        decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
+        r.binormal.i = normal_i;
+        r.binormal.i = normal_j;
+        r.binormal.i = normal_k;
+
+        decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
+        r.tangent.i = normal_i;
+        r.tangent.i = normal_j;
+        r.tangent.i = normal_k;
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.binormal = compress_vector(vertex.binormal.i, vertex.binormal.j, vertex.binormal.k);
+        r.tangent = compress_vector(vertex.tangent.i, vertex.tangent.j, vertex.tangent.k);
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> decompress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> r;
+        r.position = vertex.position;
+        r.texture_coords = vertex.texture_coords;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+
+        decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
+        r.binormal.i = normal_i;
+        r.binormal.j = normal_j;
+        r.binormal.k = normal_k;
+
+        decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
+        r.tangent.i = normal_i;
+        r.tangent.j = normal_j;
+        r.tangent.k = normal_k;
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> compress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> r;
+
+        r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
+        r.texture_coordinate_x = compress_float<16>(vertex.texture_coords.x);
+        r.texture_coordinate_y = compress_float<16>(vertex.texture_coords.y);
+
+        return r;
+    }
+
+    ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> decompress_sbsp_lightmap_vertex(const ScenarioStructureBSPMaterialCompressedLightmapVertex<NativeEndian> &vertex) noexcept {
+        ScenarioStructureBSPMaterialUncompressedLightmapVertex<NativeEndian> r;
+
+        float normal_i, normal_j, normal_k;
+
+        decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
+        r.normal.i = normal_i;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
+
+        r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_x);
+        r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_y);
+
+        return r;
+    }
+
 }

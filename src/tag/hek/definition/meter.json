@@ -31,7 +31,8 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "source bitmap",
@@ -39,7 +40,8 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "name": "stencil sequence index",
