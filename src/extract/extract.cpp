@@ -57,7 +57,6 @@ int main(int argc, const char **argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("maps", 'm', 1, "Set the maps directory", "<dir>");
     options.emplace_back("tags", 't', 1, "Set the tags directory", "<dir>");
-    options.emplace_back("tag", 'T', 1, "Extract a specific tag. Use multiple times to specify multiple tags", "<tag.class>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
@@ -76,10 +75,6 @@ int main(int argc, const char **argv) {
                 break;
             case 't':
                 extract_options.tags_directory = args[0];
-                break;
-            case 'T':
-                extract_options.tags_to_extract.emplace_back(args[0]);
-                extract_options.search_all_tags = false;
                 break;
             case 'r':
                 extract_options.recursive = true;
