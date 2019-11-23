@@ -2,10 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.19.0] - 2019-11-23
 ### Added
 - invader-extract - Extracts tags from cache files
 - Added a new tag parser that programs can use
+
+### Changed
+- libTIFF and CMake 3.12 are now required to compile Invader
 
 ### Fixed
 - invader-build: Fixed light tag durations not being properly multiplied by 30
