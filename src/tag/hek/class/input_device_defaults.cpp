@@ -9,7 +9,11 @@ namespace Invader::HEK {
         ADD_POINTER_FROM_INT32(tag.device_id.pointer, compiled.data.size());
         compiled.data.insert(compiled.data.end(), data, data + tag.device_id.size);
         INCREMENT_DATA_PTR(tag.device_id.size);
+        tag.device_id.external = 0;
+        tag.device_id.file_offset = 0;
         ADD_POINTER_FROM_INT32(tag.profile.pointer, compiled.data.size());
+        tag.profile.external = 0;
+        tag.profile.file_offset = 0;
         compiled.data.insert(compiled.data.end(), data, data + tag.profile.size);
         INCREMENT_DATA_PTR(tag.profile.size);
         FINISH_COMPILE
