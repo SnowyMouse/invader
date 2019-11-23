@@ -210,4 +210,14 @@ namespace Invader::Parser {
             this->encoding = tag_data.encoding;
         }
     }
+
+    void Invader::Parser::ModelAnimationAnimation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        eprintf("unimplemented");
+        throw std::exception();
+    }
+
+    void Invader::Parser::ModelAnimations::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        eprintf("unimplemented");
+        throw std::exception();
+    }
 }
