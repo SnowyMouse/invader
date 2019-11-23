@@ -89,12 +89,6 @@ namespace Invader::Parser {
         this->super_high_detail_cutoff = super_low;
     }
 
-    void Invader::Parser::GlobalsFallingDamage::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        this->maximum_falling_distance = static_cast<float>((this->maximum_falling_distance * this->maximum_falling_distance) / GRAVITY / 2.0f);
-        this->harmful_falling_velocity.from = static_cast<float>((this->harmful_falling_velocity.from * this->harmful_falling_velocity.from) / GRAVITY / 2.0f);
-        this->harmful_falling_velocity.to = static_cast<float>((this->harmful_falling_velocity.to * this->harmful_falling_velocity.to) / GRAVITY / 2.0f);
-    }
-
     void Invader::Parser::Glow::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
         this->attachment_0 = static_cast<HEK::FunctionOut>(this->attachment_0 + 1);
         this->attachment_1 = static_cast<HEK::FunctionOut>(this->attachment_1 + 1);
