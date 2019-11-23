@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-extract: Extracting all tags now prints all tags that were extracted
+- invader-extract: Extracting searched tags now prints the time it took
+
 ## [0.19.0] - 2019-11-23
 ### Added
 - invader-extract - Extracts tags from cache files

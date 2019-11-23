@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("maps", 'm', 1, "Set the maps directory", "<dir>");
     options.emplace_back("tags", 't', 1, "Set the tags directory", "<dir>");
-    options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
+    //options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
     options.emplace_back("continue", 'c', 0, "Don't stop on error when possible");
@@ -98,6 +98,7 @@ int main(int argc, const char **argv) {
         }
     });
 
+    auto start = std::chrono::steady_clock::now();
     std::filesystem::path maps_directory(extract_options.maps_directory);
     std::vector<std::byte> loc, bitmaps, sounds;
 
@@ -191,18 +192,16 @@ int main(int argc, const char **argv) {
         return true;
     };
 
+    std::vector<std::size_t> all_tags_to_extract;
+
     // Extract each tag?
     if(extract_options.search_all_tags) {
-        auto start = std::chrono::steady_clock::now();
         for(std::size_t t = 0; t < tag_count; t++) {
-            extract_tag(t);
+            all_tags_to_extract.push_back(t);
         }
-        auto end = std::chrono::steady_clock::now();
-        oprintf("Finished in %zu ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     }
 
     else {
-        std::vector<std::size_t> all_tags_to_extract;
 
         if(extract_options.tags_to_extract.size() != 0) {
             for(auto &tag : extract_options.tags_to_extract) {
@@ -273,15 +272,18 @@ int main(int argc, const char **argv) {
             eprintf("No tags were found with the given search parameter(s).\n");
             return EXIT_FAILURE;
         }
+    }
 
-        for(auto &tag : all_tags_to_extract) {
-            const auto &tag_map = map->get_tag(tag);
-            if(extract_tag(tag)) {
-                oprintf("Extracted %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
-            }
-            else {
-                oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
-            }
+    for(auto &tag : all_tags_to_extract) {
+        const auto &tag_map = map->get_tag(tag);
+        if(extract_tag(tag)) {
+            oprintf("Extracted %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+        }
+        else {
+            oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
         }
     }
+
+    auto end = std::chrono::steady_clock::now();
+    oprintf("Extracted in %zu ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 }
