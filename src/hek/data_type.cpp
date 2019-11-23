@@ -219,11 +219,11 @@ namespace Invader::HEK {
         // If a float is -1.0 and we need to compress it to a 16-bit integer, the result is -1 (or 65535). 0 is always 0.
         if(f >= 0.0F) {
             constexpr int32_t MAX_VALUE = (1 << (bits - 1)) - 1;
-            return f * MAX_VALUE;
+            return static_cast<std::int32_t>(f * MAX_VALUE + 0.5F);
         }
         else {
             constexpr int32_t MAX_VALUE = (1 << (bits - 1));
-            return static_cast<std::int32_t>((f + 2.0F) * MAX_VALUE);
+            return static_cast<std::int32_t>((f + 2.0F) * MAX_VALUE + 0.5F);
         }
     }
 
