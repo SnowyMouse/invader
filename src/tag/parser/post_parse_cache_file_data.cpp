@@ -114,6 +114,10 @@ namespace Invader::Parser {
         this->up_time *= TICK_RATE;
     }
 
+    void Invader::Parser::Light::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        this->duration /= TICK_RATE;
+    }
+
     void Invader::Parser::ScenarioStructureBSPMaterial::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         // Do nothing if there is nothing to do
         if(this->rendered_vertices_count == 0) {
