@@ -2,6 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- Added invader-extract
+
+### Fixed
+- invader-build: Fixed light tag durations not being properly multiplied by 30
+- invader-build: Fixed some sound tags not working as intended
+
 ## [0.18.0] - 2019-11-17
 ### Changed
 - All tag definitions have been converted to .json format .This will allow them
