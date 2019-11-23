@@ -219,6 +219,10 @@ namespace Invader::Parser {
         }
     }
 
+    void Invader::Parser::LensFlare::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+        this->rotation_function_scale = DEGREES_TO_RADIANS(this->rotation_function_scale);
+    }
+
     void Invader::Parser::ModelAnimationAnimation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
         eprintf("unimplemented");
         throw std::exception();

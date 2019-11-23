@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed light tag durations not being properly multiplied by 30
 - invader-build: Fixed some sound tags not working as intended
+- invader-build: Fixed lens flare rotation scale not being converted properly
 
 ## [0.18.0] - 2019-11-17
 ### Changed

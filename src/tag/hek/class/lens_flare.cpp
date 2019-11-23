@@ -17,6 +17,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
         tag.cos_falloff_angle = std::cos(tag.falloff_angle);
         tag.cos_cutoff_angle = std::cos(tag.cutoff_angle);
+        tag.rotation_function_scale = RADIANS_TO_DEGREES(tag.rotation_function_scale);
         FINISH_COMPILE
     }
 }
