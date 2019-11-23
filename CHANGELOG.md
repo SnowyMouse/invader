@@ -381,7 +381,8 @@ image as one bitmap
 - invader-build: CRC32 is now calculated in the header when building
 
 ### Removed
-- invader-crc: CRC32 can no longer be forged using this tool; use invader-build instead
+- invader-crc: CRC32 can no longer be forged using this tool; use invader-build
+  instead
 
 ## [0.4.3] - 2019-08-23
 ### Changed
