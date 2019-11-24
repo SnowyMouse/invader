@@ -172,7 +172,7 @@ int main(int argc, const char **argv) {
 
         // Get the path
         auto &path = tag.get_path();
-        if(header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS) {
+        if(extract_options.search_all_tags && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS) {
             oprintf("Skipping the non-multiplayer map's globals tag\n");
             return false;
         }
