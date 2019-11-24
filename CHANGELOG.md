@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-extract: Added recursive extraction
+
+### Removed
+- invader-extract: Removed -c, making it always on
+
 ## [0.19.1] - 2019-11-23
 ### Changed
 - invader-extract: Extracting all tags now prints all tags that were extracted

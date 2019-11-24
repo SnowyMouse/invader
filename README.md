@@ -312,7 +312,6 @@ Usage: invader-extract [options] <map>
 Extract data from cache files.
 
 Options:
-  -c --continue                Don't stop on error when possible
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info
   -m --maps <dir>              Set the maps directory
