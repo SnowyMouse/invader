@@ -49,7 +49,6 @@ int main(int argc, const char **argv) {
         bool search_all_tags = true;
         bool recursive = false;
         bool overwrite = false;
-        bool continue_extracting = false;
         bool no_external_tags = false;
     } extract_options;
 
@@ -81,9 +80,6 @@ int main(int argc, const char **argv) {
                 break;
             case 'O':
                 extract_options.overwrite = true;
-                break;
-            case 'c':
-                extract_options.continue_extracting = true;
                 break;
             case 'n':
                 extract_options.no_external_tags = true;
@@ -149,17 +145,18 @@ int main(int argc, const char **argv) {
         // See if we can extract this
         const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
         if(!tag.data_is_available()) {
-            if(!extract_options.search_all_tags) {
-                eprintf("Unable to extract %s.%s due to missing data\n", tag.get_path().data(), tag_extension);
-                if(!extract_options.continue_extracting) {
-                    eprintf("Use -c to override this.\n");
-                    std::exit(1);
-                }
-            }
             return false;
         }
 
-        auto tag_path_to_write_to = tags / (Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + tag_extension);
+        // Make sure the path doesn't have periods in it
+        auto sanitized_path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+        for(auto &c : sanitized_path) {
+            if(c == '.') {
+                eprintf("Error: Cannot extract %s.%s due to the tag having a period in the name\n", sanitized_path.data(), tag_extension);
+                return false;
+            }
+        }
+        auto tag_path_to_write_to = tags / (sanitized_path + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
             return false;
         }
@@ -170,11 +167,7 @@ int main(int argc, const char **argv) {
             new_tag = Invader::Extraction::extract_tag(tag);
         }
         catch (std::exception &e) {
-            eprintf("Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
-            if(!extract_options.continue_extracting) {
-                eprintf("Use -c to override this.\n");
-                std::exit(1);
-            }
+            eprintf("Error: Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
             return false;
         }
 
@@ -199,7 +192,6 @@ int main(int argc, const char **argv) {
     }
 
     else {
-
         if(extract_options.tags_to_extract.size() != 0) {
             for(auto &tag : extract_options.tags_to_extract) {
                 // Find the dot
