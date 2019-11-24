@@ -136,12 +136,12 @@ int main(int argc, const char **argv) {
 
     // Also here's the tags directory
     std::filesystem::path tags(extract_options.tags_directory);
+    std::vector<std::size_t> all_tags_to_extract;
 
     // Extract a tag
-    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options](std::size_t tag_index) -> bool {
-        if(extracted_tags[tag_index]) {
-            return false;
-        }
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract](std::size_t tag_index) -> bool {
+        // Do it
+        extracted_tags[tag_index] = true;
 
         // Get the tag path
         const auto &tag = map->get_tag(tag_index);
@@ -184,15 +184,12 @@ int main(int argc, const char **argv) {
         // Save it
         auto tag_path_str = tag_path_to_write_to.string();
         if(!Invader::File::save_file(tag_path_str.data(), new_tag)) {
-            eprintf("Failed to save extracted tag to %s\n", tag_path_str.data());
-            std::exit(1);
+            eprintf("Error: Failed to save %s\n", tag_path_str.data());
+            return false;
         }
 
-        extracted_tags[tag_index] = true;
         return true;
     };
-
-    std::vector<std::size_t> all_tags_to_extract;
 
     // Extract each tag?
     if(extract_options.search_all_tags) {
@@ -274,10 +271,20 @@ int main(int argc, const char **argv) {
         }
     }
 
-    for(auto &tag : all_tags_to_extract) {
+    // Extract tags
+    std::size_t total = 0;
+    std::size_t extracted = 0;
+    while(all_tags_to_extract.size() > 0) {
+        std::size_t tag = all_tags_to_extract[0];
+        all_tags_to_extract.erase(all_tags_to_extract.begin());
+        if(extracted_tags[tag]) {
+            continue;
+        }
+        total++;
         const auto &tag_map = map->get_tag(tag);
         if(extract_tag(tag)) {
             oprintf("Extracted %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            extracted++;
         }
         else {
             oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
@@ -285,5 +292,5 @@ int main(int argc, const char **argv) {
     }
 
     auto end = std::chrono::steady_clock::now();
-    oprintf("Extracted in %zu ms\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    oprintf("Extracted %zu / %zu tags in %zu ms\n", extracted, total, std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 }

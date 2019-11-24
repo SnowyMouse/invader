@@ -10,6 +10,7 @@ namespace Invader::Extraction {
     /**
      * Extract the tag into an HEK tag file
      * @param tag tag to extract
+     * @return    tag data extracted
      */
     std::vector<std::byte> extract_tag(const Tag &tag);
 }
