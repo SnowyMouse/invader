@@ -9,6 +9,7 @@
 #include <invader/version.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/tag/compiled_tag.hpp>
+#include <invader/tag/parser/parser.hpp>
 
 bool string_matches(const char *string, const char *pattern) {
     for(const char *p = pattern;; p++) {
@@ -155,7 +156,7 @@ int main(int argc, const char **argv) {
     std::vector<std::size_t> all_tags_to_extract;
 
     // Extract a tag
-    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract](std::size_t tag_index) -> bool {
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header](std::size_t tag_index) -> bool {
         // Do it
         extracted_tags[tag_index] = true;
 
@@ -168,8 +169,11 @@ int main(int argc, const char **argv) {
             return false;
         }
 
+        // Get the path
+        auto &path = tag.get_path();
+
         // Make sure the path doesn't have periods in it
-        auto sanitized_path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+        auto sanitized_path = Invader::File::halo_path_to_preferred_path(path);
         for(auto &c : sanitized_path) {
             if(c == '.') {
                 eprintf("Error: Cannot extract %s.%s due to the tag having a period in the name\n", sanitized_path.data(), tag_extension);
@@ -200,6 +204,43 @@ int main(int argc, const char **argv) {
         catch (std::exception &e) {
             eprintf("Error: Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
             return false;
+        }
+
+        // Jason Jones the tag
+        if(header.map_type == Invader::HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+            switch(tag.get_tag_class_int()) { // DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER, WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER, WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER
+                case Invader::TagClassInt::TAG_CLASS_WEAPON: {
+                    if(path == "weapons\\pistol\\pistol") {
+                        auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                        if(parsed.triggers.size() == 1) {
+                            auto &first_trigger = parsed.triggers[0];
+                            first_trigger.minimum_error = DEGREES_TO_RADIANS(0.0F);
+                            first_trigger.error_angle.from = DEGREES_TO_RADIANS(0.2F);
+                            first_trigger.error_angle.to = DEGREES_TO_RADIANS(2.0F);
+                        }
+                        new_tag = parsed.generate_hek_tag_data(TagClassInt::TAG_CLASS_WEAPON);
+                    }
+                    else if(path == "weapons\\plasma rifle\\plasma rifle") {
+                        auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                        if(parsed.triggers.size() == 1) {
+                            auto &first_trigger = parsed.triggers[0];
+                            first_trigger.error_angle.from = DEGREES_TO_RADIANS(0.5F);
+                            first_trigger.error_angle.to = DEGREES_TO_RADIANS(5.0F);
+                        }
+                        new_tag = parsed.generate_hek_tag_data(TagClassInt::TAG_CLASS_WEAPON);
+                    }
+                    break;
+                }
+                case Invader::TagClassInt::TAG_CLASS_DAMAGE_EFFECT:
+                    if(path == "weapons\\pistol\\bullet") {
+                        auto parsed = Invader::Parser::DamageEffect::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                        parsed.elite_energy_shield = 1.0F;
+                        new_tag = parsed.generate_hek_tag_data(TagClassInt::TAG_CLASS_DAMAGE_EFFECT);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         // Create directories along the way

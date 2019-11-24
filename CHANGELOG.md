@@ -8,6 +8,15 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-extract: There is no longer any default maps folder
+- invader-extract: Some tags are now reset back to what they are originally if
+  extracting from a single player map:
+    - `weapons\pistol\pistol.bullet`
+        - Elite energy shield damage modifier set to 1.0
+    - `weapons\pistol\pistol.weapon`
+        - Error angle set to 0.2° - 2.0° in the first trigger
+        - Minimum error set to 0.0° in the first trigger
+    - `weapons\plasma rifle\plasma rifle.weapon`
+        - Error angle set to 0.5° - 5.0° in the first trigger
 
 ### Deprecated
 - invader-extract: Hidden values are no longer extracted by default. A compiler
