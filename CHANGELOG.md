@@ -19,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
         - Error angle set to 0.5° - 5.0° in the first trigger
 - invader-extract: Globals tags in non-multiplayer maps are no longer extracted
   unless you use `-s`, and this is due to those tags having data stripped out
+- invader-extract: Tags with with `..` and `.` directories will no longer be
+  extracted as these are potentially dangerous
 
 ### Deprecated
 - invader-extract: Hidden values are no longer extracted by default. A compiler

@@ -10,6 +10,7 @@
 #include <invader/extract/extraction.hpp>
 #include <invader/tag/compiled_tag.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <regex>
 
 bool string_matches(const char *string, const char *pattern) {
     for(const char *p = pattern;; p++) {
@@ -155,8 +156,10 @@ int main(int argc, const char **argv) {
     std::filesystem::path tags(extract_options.tags_directory);
     std::vector<std::size_t> all_tags_to_extract;
 
-    // Extract a tag
     auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header](std::size_t tag_index) -> bool {
+        // Used for bad paths
+        static const std::regex BAD_PATH_DIRECTORY("(^|.*(\\\\|\\/))\\.{1,2}(\\\\|\\/).*");
+
         // Do it
         extracted_tags[tag_index] = true;
 
@@ -170,22 +173,21 @@ int main(int argc, const char **argv) {
             return false;
         }
 
-        // Get the path
-        auto &path = tag.get_path();
+        // Get the path and make sure it doesn't have double dot slashes
+        auto path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+        if(std::regex_match(path, BAD_PATH_DIRECTORY)) {
+            eprintf("Error: %s.%s contains an unsafe path\n", path.data(), tag_extension);
+            return false;
+        }
+
+        // Skip globals
         if(extract_options.search_all_tags && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS) {
             oprintf("Skipping the non-multiplayer map's globals tag\n");
             return false;
         }
 
-        // Make sure the path doesn't have periods in it
-        auto sanitized_path = Invader::File::halo_path_to_preferred_path(path);
-        for(auto &c : sanitized_path) {
-            if(c == '.') {
-                eprintf("Error: Cannot extract %s.%s due to the tag having a period in the name\n", sanitized_path.data(), tag_extension);
-                return false;
-            }
-        }
-        auto tag_path_to_write_to = tags / (sanitized_path + "." + tag_extension);
+        // Figure out the path we're writing to
+        auto tag_path_to_write_to = tags / (path + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
             return false;
         }
