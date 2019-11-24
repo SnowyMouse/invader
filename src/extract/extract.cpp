@@ -269,67 +269,27 @@ int main(int argc, const char **argv) {
     }
 
     else {
-        if(extract_options.tags_to_extract.size() != 0) {
-            for(auto &tag : extract_options.tags_to_extract) {
-                // Find the dot
-                char *dot = nullptr;
-                for(char &c : tag) {
-                    if(c == '.') {
-                        dot = &c;
-                    }
+        std::size_t tag_count = map->get_tag_count();
+        for(std::size_t t = 0; t < tag_count; t++) {
+            // See if we already added
+            bool already_added = false;
+            for(auto &tag : all_tags_to_extract) {
+                if(tag == t) {
+                    already_added = true;
+                    break;
                 }
-                if(dot == nullptr) {
-                    eprintf("Tag is missing an extension: %s\n", tag.data());
-                    return EXIT_FAILURE;
-                }
-                *dot = 0;
-
-                // Get the extension
-                const char *extension = dot + 1;
-                auto tag_class_int = HEK::extension_to_tag_class(extension);
-                if(tag_class_int == TagClassInt::TAG_CLASS_NULL) {
-                    eprintf("Invalid tag class: %s\n", extension);
-                    return EXIT_FAILURE;
-                }
-
-                // Replace forward slashes with backslashes
-                File::preferred_path_to_halo_path_chars(tag.data());
-
-                // Get the index
-                auto index = map->find_tag(tag.data(), tag_class_int);
-                if(!index.has_value()) {
-                    eprintf("Tag not in cache file: %s.%s\n", tag.data(), extension);
-                    return EXIT_FAILURE;
-                }
-
-                all_tags_to_extract.push_back(*index);
             }
-        }
+            if(already_added) {
+                continue;
+            }
 
-        // Regex search
-        if(extract_options.search_queries.size() != 0) {
-            std::size_t tag_count = map->get_tag_count();
-            for(std::size_t t = 0; t < tag_count; t++) {
-                // See if we already added
-                bool already_added = false;
-                for(auto &tag : all_tags_to_extract) {
-                    if(tag == t) {
-                        already_added = true;
-                        break;
-                    }
-                }
-                if(already_added) {
-                    continue;
-                }
+            const auto &tag = map->get_tag(t);
+            auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
 
-                const auto &tag = map->get_tag(t);
-                auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
-
-                for(auto &query : extract_options.search_queries) {
-                    if(string_matches(full_tag_path.data(), query.data())) {
-                        all_tags_to_extract.emplace_back(t);
-                        break;
-                    }
+            for(auto &query : extract_options.search_queries) {
+                if(string_matches(full_tag_path.data(), query.data())) {
+                    all_tags_to_extract.emplace_back(t);
+                    break;
                 }
             }
         }
