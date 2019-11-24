@@ -17,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
         - Minimum error set to 0.0° in the first trigger
     - `weapons\plasma rifle\plasma rifle.weapon`
         - Error angle set to 0.5° - 5.0° in the first trigger
+- invader-extract: Globals tags are no longer extracted
 
 ### Deprecated
 - invader-extract: Hidden values are no longer extracted by default. A compiler

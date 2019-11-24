@@ -164,13 +164,18 @@ int main(int argc, const char **argv) {
         const auto &tag = map->get_tag(tag_index);
 
         // See if we can extract this
-        const char *tag_extension = Invader::HEK::tag_class_to_extension(tag.get_tag_class_int());
+        auto tag_class_int = tag.get_tag_class_int();
+        const char *tag_extension = Invader::HEK::tag_class_to_extension(tag_class_int);
         if(!tag.data_is_available()) {
             return false;
         }
 
         // Get the path
         auto &path = tag.get_path();
+        if(header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS) {
+            oprintf("Skipping the non-multiplayer map's globals tag\n");
+            return false;
+        }
 
         // Make sure the path doesn't have periods in it
         auto sanitized_path = Invader::File::halo_path_to_preferred_path(path);
@@ -208,11 +213,11 @@ int main(int argc, const char **argv) {
 
         // Jason Jones the tag
         if(header.map_type == Invader::HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
-            switch(tag.get_tag_class_int()) { // DAMAGE_EFFECT_JASON_JONES_PISTOL_SINGLEPLAYER, WEAPON_JASON_JONES_PISTOL_SINGLEPLAYER, WEAPON_JASON_JONES_PLASMA_RIFLE_SINGLEPLAYER
+            switch(tag_class_int) {
                 case Invader::TagClassInt::TAG_CLASS_WEAPON: {
                     if(path == "weapons\\pistol\\pistol") {
                         auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
-                        if(parsed.triggers.size() == 1) {
+                        if(parsed.triggers.size() >= 1) {
                             auto &first_trigger = parsed.triggers[0];
                             first_trigger.minimum_error = DEGREES_TO_RADIANS(0.0F);
                             first_trigger.error_angle.from = DEGREES_TO_RADIANS(0.2F);
@@ -222,7 +227,7 @@ int main(int argc, const char **argv) {
                     }
                     else if(path == "weapons\\plasma rifle\\plasma rifle") {
                         auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
-                        if(parsed.triggers.size() == 1) {
+                        if(parsed.triggers.size() >= 1) {
                             auto &first_trigger = parsed.triggers[0];
                             first_trigger.error_angle.from = DEGREES_TO_RADIANS(0.5F);
                             first_trigger.error_angle.to = DEGREES_TO_RADIANS(5.0F);
