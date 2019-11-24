@@ -8,6 +8,7 @@
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
 #include <invader/extract/extraction.hpp>
+#include <invader/tag/compiled_tag.hpp>
 
 bool string_matches(const char *string, const char *pattern) {
     for(const char *p = pattern;; p++) {
@@ -56,10 +57,9 @@ int main(int argc, const char **argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("maps", 'm', 1, "Set the maps directory", "<dir>");
     options.emplace_back("tags", 't', 1, "Set the tags directory", "<dir>");
-    //options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
+    options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
-    options.emplace_back("continue", 'c', 0, "Don't stop on error when possible");
     options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data");
     options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
 
@@ -165,6 +165,17 @@ int main(int argc, const char **argv) {
         std::vector<std::byte> new_tag;
         try {
             new_tag = Invader::Extraction::extract_tag(tag);
+
+            // If we're recursive, we want to also
+            if(extract_options.recursive) {
+                auto dependencies = Invader::CompiledTag(tag.get_path(), new_tag.data(), new_tag.size()).dependencies;
+                for(auto &d : dependencies) {
+                    auto tag_index = map->find_tag(d.path.data(), d.tag_class_int);
+                    if(tag_index.has_value() && extracted_tags[*tag_index] == false) {
+                        all_tags_to_extract.push_back(*tag_index);
+                    }
+                }
+            }
         }
         catch (std::exception &e) {
             eprintf("Error: Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
