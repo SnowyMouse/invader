@@ -4,8 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 4:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser.cpp> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 5:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,7 +13,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-for i in range(4, len(sys.argv)):
+extract_hidden = True if sys.argv[4].lower() == "on" else False
+
+for i in range(5, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "")
         if not ignore_numbers and name[0].isnumeric():
@@ -301,7 +303,7 @@ for s in all_structs_arranged:
     if len(all_used_structs) > 0:
         cpp.write("        struct_big b = {};\n")
         for struct in all_used_structs:
-            if "cache_only" in struct and struct["cache_only"]:
+            if ("cache_only" in struct and struct["cache_only"]) or ("endian" in struct and struct["endian"] == "little" and not extract_hidden):
                 continue
             name = struct["name"]
             if struct["type"] == "TagDependency":

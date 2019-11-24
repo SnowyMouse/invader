@@ -51,8 +51,8 @@ if(MINGW)
 endif()
 
 # Turn on console messages
-option(NO_OUTPUT "don't show most console messages including most errors" OFF)
-if(NO_OUTPUT)
+option(INVADER_NO_OUTPUT "don't show most console messages including most errors" OFF)
+if(INVADER_NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
 endif()
 

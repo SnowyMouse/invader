@@ -727,14 +727,12 @@
             {
                 "name": "main animation index",
                 "type": "uint16",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "relative weight",
                 "type": "float",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "frame info",

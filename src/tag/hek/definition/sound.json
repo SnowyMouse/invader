@@ -118,8 +118,7 @@
             {
                 "name": "samples pointer",
                 "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "type": "pad",
@@ -192,14 +191,12 @@
             {
                 "name": "unknown ffffffff 0",
                 "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "unknown ffffffff 1",
                 "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "permutations",
@@ -334,14 +331,12 @@
             {
                 "name": "unknown ffffffff 0",
                 "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "unknown ffffffff 1",
                 "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "pitch ranges",

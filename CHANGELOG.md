@@ -6,6 +6,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-extract: Added recursive extraction
 
+### Deprecated
+- invader-extract: Hidden values are no longer extracted by default. A compiler
+  flag was added to do this, but it will be removed at a later version.
+
 ### Removed
 - invader-extract: Removed -c, making it always on
 

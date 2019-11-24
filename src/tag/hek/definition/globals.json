@@ -1350,15 +1350,13 @@
             {
                 "name": "maximum falling velocity",
                 "type": "float",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             },
             {
                 "name": "harmful falling velocity",
                 "bounds": true,
                 "type": "float",
-                "endian": "little",
-                "cache_only": true
+                "endian": "little"
             }
         ],
         "type": "struct",
