@@ -44,13 +44,12 @@ int main(int argc, const char **argv) {
     // Options struct
     struct ExtractOptions {
         std::string tags_directory = "tags";
-        std::string maps_directory = "maps";
+        std::optional<std::string> maps_directory;
         std::vector<std::string> tags_to_extract;
         std::vector<std::string> search_queries;
         bool search_all_tags = true;
         bool recursive = false;
         bool overwrite = false;
-        bool no_external_tags = false;
     } extract_options;
 
     // Command line options
@@ -60,7 +59,6 @@ int main(int argc, const char **argv) {
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
-    options.emplace_back("no-external-tags", 'n', 0, "Do not extract tags with external data");
     options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
@@ -81,9 +79,6 @@ int main(int argc, const char **argv) {
             case 'O':
                 extract_options.overwrite = true;
                 break;
-            case 'n':
-                extract_options.no_external_tags = true;
-                break;
             case 's':
                 extract_options.search_queries.emplace_back(args[0]);
                 extract_options.search_all_tags = false;
@@ -95,11 +90,11 @@ int main(int argc, const char **argv) {
     });
 
     auto start = std::chrono::steady_clock::now();
-    std::filesystem::path maps_directory(extract_options.maps_directory);
     std::vector<std::byte> loc, bitmaps, sounds;
 
     // Load asset data
-    if(!extract_options.no_external_tags) {
+    if(extract_options.maps_directory.has_value()) {
+        std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
             auto potential_map_path = (maps_directory / map).string();
             auto potential_map = Invader::File::open_file(potential_map_path.data());
@@ -116,6 +111,7 @@ int main(int argc, const char **argv) {
         sounds = open_map_possibly("sounds.map");
     }
 
+    // Load map
     std::unique_ptr<Map> map;
     try {
         auto file = File::open_file(remaining_arguments[0]).value();
@@ -124,6 +120,30 @@ int main(int argc, const char **argv) {
     catch (std::exception &e) {
         eprintf("Failed to parse %s: %s\n", remaining_arguments[0], e.what());
         return EXIT_FAILURE;
+    }
+
+    // Warn if needed
+    auto &header = map->get_cache_file_header();
+    if(extract_options.maps_directory.has_value()) {
+        using namespace Invader::HEK;
+        switch(header.engine) {
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                if(loc.size() == 0) {
+                    eprintf("Failed to find a loc.map\n");
+                }
+                // fallthrough
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                if(bitmaps.size() == 0) {
+                    eprintf("Failed to find a bitmaps.map\n");
+                }
+                if(sounds.size() == 0) {
+                    eprintf("Failed to find a sounds.map\n");
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     // Already extracted tags (so we don't need to re-extract them)

@@ -117,7 +117,10 @@ namespace Invader {
         }
     }
 
-    std::byte *Map::get_data(DataMapType map_type) noexcept {
+    std::byte *Map::get_data(DataMapType map_type) {
+        if(map_type != DATA_MAP_CACHE && this->get_data_length(map_type) == 0) {
+            throw ResourceMapRequiredException();
+        }
         switch(map_type) {
             case DATA_MAP_CACHE:
                 return this->data;
@@ -131,7 +134,7 @@ namespace Invader {
         std::terminate();
     }
 
-    const std::byte *Map::get_data(DataMapType map_type) const noexcept {
+    const std::byte *Map::get_data(DataMapType map_type) const {
         return const_cast<Map *>(this)->get_data(map_type);
     }
 

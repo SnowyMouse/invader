@@ -6,12 +6,17 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-extract: Added recursive extraction
 
+### Changed
+- invader-extract: There is no longer any default maps folder
+
 ### Deprecated
 - invader-extract: Hidden values are no longer extracted by default. A compiler
   flag was added to do this, but it will be removed at a later version.
 
 ### Removed
-- invader-extract: Removed -c, making it always on
+- invader-extract: Removed -c (--continue), making it always on
+- invader-extract: Removed -n (--no-external-tags), making it effectively on if
+  you don't specify a maps folder
 
 ## [0.19.1] - 2019-11-23
 ### Changed

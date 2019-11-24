@@ -102,14 +102,14 @@ namespace Invader {
          * @param map_type map to get data from
          * @return         data
          */
-        std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE) noexcept;
+        std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE);
 
         /**
          * Get a pointer to the uncompressed map data
          * @param map_type map to get data from
          * @return         data
          */
-        const std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE) const noexcept;
+        const std::byte *get_data(DataMapType map_type = DATA_MAP_CACHE) const;
 
         /**
          * Get the data length in bytes
