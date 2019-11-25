@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Changed
+- invader-build: Strips default data from compressed animations now
+
+### Fixed
+- invader-extract: Fixed an error when extracting compressed animations
+
 ## [0.19.2] - 2019-11-24
 ### Added
 - invader-extract: Added recursive extraction
