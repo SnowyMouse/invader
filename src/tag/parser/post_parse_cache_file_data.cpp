@@ -388,8 +388,8 @@ namespace Invader::Parser {
         }
         // Zero out default data if there is none
         else {
-            default_data.clear();
-            default_data.resize(expected_default_data_size, std::byte());
+            this->default_data.clear();
+            this->default_data.resize(expected_default_data_size, std::byte());
         }
 
         // Get whether or not it's compressed
