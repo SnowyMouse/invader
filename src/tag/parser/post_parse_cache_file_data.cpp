@@ -349,14 +349,14 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
-        if(default_data.size() != expected_default_data_size) {
-            eprintf("default data size (%zu) != expected_default_data_size (%zu)\n", static_cast<std::size_t>(frame_size), expected_default_data_size);
-            throw InvalidTagDataException();
-        }
-
         // Do default data
+        std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
         if(default_data.size() > 0) {
+            if(default_data.size() != expected_default_data_size) {
+                eprintf("default data size (%zu) != expected_default_data_size (%zu)\n", static_cast<std::size_t>(frame_size), expected_default_data_size);
+                throw InvalidTagDataException();
+            }
+
             auto *default_data_big = this->default_data.data();
             auto *default_data_little = default_data.data();
 
@@ -383,6 +383,10 @@ namespace Invader::Parser {
                     default_data_little += sizeof(scale_big);
                 }
             }
+        }
+        // Zero out default data if there is none
+        else {
+            default_data.resize(expected_default_data_size);
         }
 
         // Get whether or not it's compressed
