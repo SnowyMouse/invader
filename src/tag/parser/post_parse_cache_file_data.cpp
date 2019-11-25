@@ -262,6 +262,7 @@ namespace Invader::Parser {
                 required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDzDyaw::struct_little);
                 break;
             default:
+                eprintf("unknown frame info type\n");
                 throw InvalidTagDataException();
         }
         if(required_frame_info_size * this->frame_count != frame_info.size()) {
@@ -343,11 +344,14 @@ namespace Invader::Parser {
         // Make sure frame and default size is correct
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationRotation::struct_big) + scale_count * sizeof(ModelAnimationScale::struct_big) + transform_count * sizeof(ModelAnimationTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationRotation::struct_big) + sizeof(ModelAnimationScale::struct_big) + sizeof(ModelAnimationTransform::struct_big));
-
         if(frame_size != total_frame_size) {
+            eprintf("frame size (%zu) != total frame size (%zu)\n", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
         }
-        if(default_data.size() != (max_frame_size - total_frame_size)) {
+
+        std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
+        if(default_data.size() != expected_default_data_size) {
+            eprintf("default data size (%zu) != expected_default_data_size (%zu)\n", static_cast<std::size_t>(frame_size), expected_default_data_size);
             throw InvalidTagDataException();
         }
 
