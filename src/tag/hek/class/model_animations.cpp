@@ -203,7 +203,7 @@ namespace Invader::HEK {
 
             // Let's do default_data. Basically just add what isn't in frame_data, and only for one frame
             const auto *default_data_big = data;
-            if(reflexive.default_data.size > 0) {
+            if(reflexive.default_data.size > 0 && reflexive.flags.read().compressed_data == 0) {
                 std::size_t default_data_size = reflexive.default_data.size;
                 std::vector<std::byte> default_data(default_data_size);
                 auto *default_data_little = default_data.data();
