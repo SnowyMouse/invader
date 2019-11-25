@@ -316,6 +316,7 @@ namespace Invader::Parser {
         bool rotate[64];
         bool scale[64];
         bool transform[64];
+        std::size_t frame_data_size_expected = 0;
         for(std::size_t i = 0; i < node_count; i++) {
             bool has_rotation = false;
             bool has_scale = false;
@@ -330,6 +331,16 @@ namespace Invader::Parser {
                 has_rotation = (rotation_flag_0 >> i) & 1;
                 has_scale = (scale_flag_0 >> i) & 1;
                 has_transform = (transform_flag_0 >> i) & 1;
+            }
+
+            if(has_rotation) {
+                frame_data_size_expected += sizeof(ModelAnimationRotation::struct_little) * frame_count;
+            }
+            if(has_transform) {
+                frame_data_size_expected += sizeof(ModelAnimationTransform::struct_little) * frame_count;
+            }
+            if(has_scale) {
+                frame_data_size_expected += sizeof(ModelAnimationScale::struct_little) * frame_count;
             }
 
             rotation_count += has_rotation;
@@ -395,32 +406,42 @@ namespace Invader::Parser {
         // Get whether or not it's compressed
         bool compressed = flags.compressed_data;
 
-        // Convert frame data
-        if(!compressed && frame_data.size() > 0) {
-            auto *frame_data_big = this->frame_data.data();
-            auto *frame_data_little = frame_data.data();
-            for(std::size_t frame = 0; frame < frame_count; frame++) {
-                for(std::size_t node = 0; node < this->node_count; node++) {
-                    if(rotate[node]) {
-                        auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_little *>(frame_data_big);
-                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_big *>(frame_data_little);
-                        rotation_big = rotation_little;
-                        frame_data_big += sizeof(rotation_big);
-                        frame_data_little += sizeof(rotation_big);
-                    }
-                    if(transform[node]) {
-                        auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_little *>(frame_data_big);
-                        const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_big *>(frame_data_little);
-                        transform_big = transform_little;
-                        frame_data_big += sizeof(transform_big);
-                        frame_data_little += sizeof(transform_big);
-                    }
-                    if(scale[node]) {
-                        auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_little *>(frame_data_big);
-                        const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_big *>(frame_data_little);
-                        scale_big = scale_little;
-                        frame_data_big += sizeof(scale_big);
-                        frame_data_little += sizeof(scale_big);
+        if(compressed) {
+            this->offset_to_compressed_data = static_cast<std::uint32_t>(frame_data_size_expected);
+            this->frame_data.insert(this->frame_data.begin(), frame_data_size_expected, std::byte());
+        }
+        else {
+            if(frame_data.size() != frame_data_size_expected) {
+                eprintf("frame_data.size() (%zu) != frame_data_size_expected (%zu)\n", frame_data.size(), frame_data_size_expected);
+                throw InvalidTagDataException();
+            }
+
+            if(frame_data_size_expected) {
+                auto *frame_data_big = this->frame_data.data();
+                auto *frame_data_little = frame_data.data();
+                for(std::size_t frame = 0; frame < frame_count; frame++) {
+                    for(std::size_t node = 0; node < this->node_count; node++) {
+                        if(rotate[node]) {
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_little *>(frame_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_big *>(frame_data_little);
+                            rotation_big = rotation_little;
+                            frame_data_big += sizeof(rotation_big);
+                            frame_data_little += sizeof(rotation_big);
+                        }
+                        if(transform[node]) {
+                            auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_little *>(frame_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_big *>(frame_data_little);
+                            transform_big = transform_little;
+                            frame_data_big += sizeof(transform_big);
+                            frame_data_little += sizeof(transform_big);
+                        }
+                        if(scale[node]) {
+                            auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_little *>(frame_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_big *>(frame_data_little);
+                            scale_big = scale_little;
+                            frame_data_big += sizeof(scale_big);
+                            frame_data_little += sizeof(scale_big);
+                        }
                     }
                 }
             }
