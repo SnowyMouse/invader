@@ -351,7 +351,7 @@ namespace Invader::Parser {
 
         // Do default data
         std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
-        if(default_data.size() > 0) {
+        if(!this->flags.compressed_data) {
             if(default_data.size() != expected_default_data_size) {
                 eprintf("default data size (%zu) != expected_default_data_size (%zu)\n", static_cast<std::size_t>(frame_size), expected_default_data_size);
                 throw InvalidTagDataException();
@@ -386,7 +386,8 @@ namespace Invader::Parser {
         }
         // Zero out default data if there is none
         else {
-            default_data.resize(expected_default_data_size);
+            default_data.clear();
+            default_data.resize(expected_default_data_size, std::byte());
         }
 
         // Get whether or not it's compressed
