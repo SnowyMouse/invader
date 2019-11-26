@@ -82,10 +82,12 @@ namespace Invader::HEK {
         std::memset(this, 0, sizeof(*this));
 
         // Set values
+        #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->tag_class_int = tag_class_int;
         this->blam = BLAM;
         this->header_size = sizeof(*this);
         this->something_255 = 255;
         this->version = TagFileHeader::version_for_tag(tag_class_int);
+        #endif
     }
 }

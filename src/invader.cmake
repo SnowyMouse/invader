@@ -166,6 +166,13 @@ set_source_files_properties(src/version.cpp
     PROPERTIES COMPILE_DEFINITIONS "INVADER_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} INVADER_VERSION_MINOR=${PROJECT_VERSION_MINOR} INVADER_VERSION_PATCH=${PROJECT_VERSION_PATCH} INVADER_FORK=\"${PROJECT_NAME}\""
 )
 
+# Set a constant if we're extracting hidden values
+if(${INVADER_EXTRACT_HIDDEN_VALUES})
+    set_source_files_properties(src/tag/hek/header.cpp
+        PROPERTIES COMPILE_DEFINITIONS "INVADER_EXTRACT_HIDDEN_VALUES"
+    )
+endif()
+
 # Remove warnings from this
 set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 

@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- Enabling hidden value extraction now produces unusable tag files to
+  discourage users from using them in cache files
+
 ## [0.20.1] - 2019-11-26
 ### Changed
 - invader-bitmap: Now fails if the tags directory isn't valid
