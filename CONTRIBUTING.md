@@ -326,3 +326,4 @@ These apply to C++ code.
 [closed]: https://github.com/Kavawuvi/Invader/issues?q=is%3Aissue+is%3Aclosed
 [git master branch]: https://github.com/Kavawuvi/Invader/tree/master
 [fixed-width integer types]: https://en.cppreference.com/w/cpp/types/integer
+[scope conventions]: #scope-conventions
