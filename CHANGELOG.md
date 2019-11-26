@@ -155,9 +155,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [0.16.0] - 2019-11-04
 ### Added
-- New tool: invader-info - Displays an overview of a map file, but also has
-  options: compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
-  tag-count, tags
+- New tool: invader-info - Displays an overview of a map file but can also show
+  a specific value (`-T`): compressed, crc32, dirty, engine, map-type,
+  scenario, scenario-path, tag-count, tags
 - invader-build: Added `-R` to rename scenarios when building
 
 ### Changed
