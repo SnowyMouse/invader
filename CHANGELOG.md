@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - Enabling hidden value extraction now produces unusable tag files to
   discourage users from using them in cache files
+- parser.cpp was split up into multiple files to improve compilation time when
+  making using multiple jobs
 
 ## [0.20.1] - 2019-11-26
 ### Changed
