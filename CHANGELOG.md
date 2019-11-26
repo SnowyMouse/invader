@@ -11,7 +11,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Strips default data from compressed animations now
-- invader-extract: References are cleared
+- invader-extract: References are cleared from scenario tags
 
 ### Fixed
 - invader-extract: Fixed an error when extracting compressed animations
