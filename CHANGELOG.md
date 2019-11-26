@@ -74,7 +74,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [0.19.0] - 2019-11-23
 ### Added
-- invader-extract - Extracts tags from cache files
+- New tool: invader-extract - Extracts tags from cache files
 - Added a new tag parser that programs can use
 
 ### Changed
@@ -155,8 +155,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [0.16.0] - 2019-11-04
 ### Added
-- invader-info - Displays an overview of a map file, but also has options:
-  compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
+- New tool: invader-info - Displays an overview of a map file, but also has
+  options: compressed, crc32, dirty, engine, map-type, scenario, scenario-path,
   tag-count, tags
 - invader-build: Added `-R` to rename scenarios when building
 
@@ -187,7 +187,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [0.15.0] - 2019-10-29
 ### Added
-- invader-compress - Compresses cache files using the [Zstandard] algorithm
+- New tool: invader-compress - Compresses cache files using the [Zstandard]
+  algorithm
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
 - invader-build: Copying TagString data now checks for string overflow
@@ -501,16 +502,17 @@ image as one bitmap
 
 ## [0.2.0] - 2019-08-21
 ### Added
-- invader-archive - Archives all tags needed to build a map
-- invader-bitmap - Creates bitmap tags (only supports 2D textures without color
-  plate data but also has custom mipmap support)
-- invader-build - Builds cache files
-- invader-crc - Displays and spoofs CRC32 checksums of cache files; this is
-  useful for using modified multiplayer maps
-- invader-dependency - Outputs a list of tags that depend on a given tag
-- invader-indexer - Outputs the list of tags in a cache file to a text file to
-  be used with Invader
-- invader-resource - Builds resource map files
+- New tool: invader-archive - Archives all tags needed to build a map
+- New tool: invader-bitmap - Creates bitmap tags (only supports 2D textures
+  without color plate data but also has custom mipmap support)
+- New tool: invader-build - Builds cache files
+- New tool: invader-crc - Displays and spoofs CRC32 checksums of cache files;
+  this is useful for using modified multiplayer maps
+- New tool: invader-dependency - Outputs a list of tags that depend on a given
+  tag
+- New tool: invader-indexer - Outputs the list of tags in a cache file to a
+  text file to be used with Invader
+- New tool: invader-resource - Builds resource map files
 
 [Mozzarilla]: https://github.com/MosesofEgypt/mozzarilla
 [Zstandard]: https://github.com/Facebook/zstd
