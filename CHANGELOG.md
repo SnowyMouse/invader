@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-extract: Fixed an error when extracting compressed animations
+- invader-extract: Fixed sound tags' song length values not being preserved
 
 ## [0.19.2] - 2019-11-24
 ### Added

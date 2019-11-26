@@ -130,7 +130,7 @@
                 "type": "TagID"
             },
             {
-                "name": "sample count",
+                "name": "sound length",
                 "type": "uint32",
                 "endian": "little"
             },
