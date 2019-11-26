@@ -102,7 +102,8 @@ a bug and your issue will be closed.
 Issues and pull requests must remain in the scope of Invader. Here are some
 things to keep in mind:
 
-- Invader targets the base Halo Combat Evolved game as released on PC.
+- Invader targets the base Halo Combat Evolved game as released on PC by
+  Gearbox.
 - Invader is cross-platform and does not target any single operating system.
 - Invader does not (usually) care about the limitations of the original Halo
   Editing Kit.
