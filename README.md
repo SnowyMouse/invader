@@ -315,7 +315,7 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info
   -m --maps <dir>              Set the maps directory
-  -n --no-external-tags        Do not extract tags with external data
+  -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards); use
