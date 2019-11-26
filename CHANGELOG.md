@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.20.0] - 2019-11-26
 ### Added
 - invader-extract: Added `--non-mp-globals` / `-n` which is required to extract
   globals tags from non-multiplayer maps, as there is little value in building
@@ -11,12 +11,16 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Strips default data from compressed animations now
-- invader-extract: References are cleared from scenario tags
 
 ### Fixed
+- invader-extract: References are cleared from scenario tags
 - invader-extract: Fixed an error when extracting compressed animations
 - invader-extract: Fixed sound tags' song length values not being preserved
-- invader-extract: Fixed cutscene text fade taking 900x longer than expected
+- invader-extract: Fixed cutscene text fade taking 900x as long as expected
+- invader-extract: Fixed multiplayer scenario descriptions not being openable
+- invader-extract: Fixed some BSP trigger volumes not triggering properly
+- invader-extract: Fixed the Vorbis sample count not being copied correctly
+- invader-extract: Fixed some animation issues
 
 ## [0.19.2] - 2019-11-24
 ### Added
