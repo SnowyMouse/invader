@@ -16,6 +16,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-extract: Fixed an error when extracting compressed animations
 - invader-extract: Fixed sound tags' song length values not being preserved
+- invader-extract: Fixed cutscene text fade taking 900x longer than expected
 
 ## [0.19.2] - 2019-11-24
 ### Added

@@ -71,7 +71,8 @@
             {
                 "name": "make it work",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "shader flags",
@@ -100,7 +101,8 @@
             {
                 "name": "some more stuff that should be set for some reason",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",

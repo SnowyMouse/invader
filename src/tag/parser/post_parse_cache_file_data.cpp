@@ -109,9 +109,9 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::ScenarioCutsceneTitle::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        this->fade_in_time *= TICK_RATE;
-        this->fade_out_time *= TICK_RATE;
-        this->up_time *= TICK_RATE;
+        this->fade_in_time /= TICK_RATE;
+        this->fade_out_time /= TICK_RATE;
+        this->up_time /= TICK_RATE;
     }
 
     void Invader::Parser::Light::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
