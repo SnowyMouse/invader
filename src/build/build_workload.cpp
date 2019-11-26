@@ -1027,6 +1027,24 @@ namespace Invader {
                     if(bsp_offset != INVALID_POINTER) {
                         auto &bsp = *reinterpret_cast<ScenarioStructureBSP<LittleEndian> *>(bsp_data + bsp_offset);
 
+                        std::size_t collision_material_offset = tag_ptr->resolve_pointer(&bsp.collision_materials.pointer);
+                        if(collision_material_offset != INVALID_POINTER) {
+                            std::size_t collision_material_count = bsp.collision_materials.count;
+                            auto *collision_materials = reinterpret_cast<ScenarioStructureBSPCollisionMaterial<LittleEndian> *>(bsp_data + collision_material_offset);
+                            for(std::size_t c = 0; c < collision_material_count; c++) {
+                                auto &material = collision_materials[c];
+                                auto shader = material.shader.tag_id.read();
+                                if(shader.is_null()) {
+                                    material.material = static_cast<MaterialType>(NULL_INDEX);
+                                }
+                                else {
+                                    auto &material_tag = this->compiled_tags[shader.index];
+                                    auto &base_shader = *reinterpret_cast<Shader<LittleEndian> *>(material_tag->data.data());
+                                    material.material = base_shader.material_type;
+                                }
+                            }
+                        }
+
                         std::size_t fog_palette_offset = tag_ptr->resolve_pointer(&bsp.fog_palette.pointer);
                         std::size_t fog_region_offset = tag_ptr->resolve_pointer(&bsp.fog_regions.pointer);
                         std::size_t fog_plane_offset = tag_ptr->resolve_pointer(&bsp.fog_planes.pointer);

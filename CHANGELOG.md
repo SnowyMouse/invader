@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.20.1]
 ### Changed
 - invader-bitmap: Now fails if the tags directory isn't valid
 - invader-extract: Now fails if the tags directory isn't valid
@@ -11,6 +11,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Fixed setting mouth data and subtitle data to 0 size
+- invader-build: Fixed incorrect footstep sounds being used if not using an
+  MEK-extracted BSP tag
 
 ## [0.20.0] - 2019-11-26
 ### Added
