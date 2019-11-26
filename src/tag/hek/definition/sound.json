@@ -116,7 +116,7 @@
                 "type": "Index"
             },
             {
-                "name": "sample count",
+                "name": "samples pointer",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
@@ -130,7 +130,7 @@
                 "type": "TagID"
             },
             {
-                "name": "sound length",
+                "name": "sample count",
                 "type": "uint32",
                 "endian": "little"
             },
