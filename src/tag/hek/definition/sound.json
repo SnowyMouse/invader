@@ -1,11 +1,11 @@
 [
     {
-        "name": "SoundCompression",
+        "name": "SoundFormat",
         "options": [
-            "none",
-            "xbox adpcm",
-            "ima adpcm",
-            "ogg"
+            "16-bit PCM",
+            "Xbox ADPCM",
+            "IMA ADPCM",
+            "Ogg Vorbis"
         ],
         "type": "enum"
     },
@@ -69,8 +69,8 @@
     {
         "name": "SoundSampleRate",
         "options": [
-            "22khz",
-            "44khz"
+            "22050 Hz",
+            "44100 Hz"
         ],
         "type": "enum"
     },
@@ -109,7 +109,7 @@
             },
             {
                 "name": "compression",
-                "type": "SoundCompression"
+                "type": "SoundFormat"
             },
             {
                 "name": "next permutation index",
@@ -127,15 +127,18 @@
             },
             {
                 "name": "tag id 0",
+                "comment": "Set to the sound tag's tag ID",
                 "type": "TagID"
             },
             {
-                "name": "sample count",
+                "name": "vorbis sample count",
                 "type": "uint32",
+                "comment": "Vorbis only; sample rate (44100 Hz or 22050 Hz) x song length (seconds) x channel count (1 if mono; 2 if stereo)",
                 "endian": "little"
             },
             {
                 "name": "tag id 1",
+                "comment": "Set to the sound tag's tag ID",
                 "type": "TagID"
             },
             {
@@ -305,7 +308,7 @@
             },
             {
                 "name": "compression",
-                "type": "SoundCompression"
+                "type": "SoundFormat"
             },
             {
                 "name": "promotion sound",

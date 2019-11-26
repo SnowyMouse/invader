@@ -50,8 +50,8 @@
             "compressed with color key transparency",
             "compressed with explicit alpha",
             "compressed with interpolated alpha",
-            "16 bit color",
-            "32 bit color",
+            "16-bit color",
+            "32-bit color",
             "monochrome"
         ],
         "type": "enum"

@@ -220,7 +220,7 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::SoundPermutation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        if(this->compression == HEK::SoundCompression::SOUND_COMPRESSION_NONE) {
+        if(this->compression == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *end = start + this->samples.size() / sizeof(*start);
 
