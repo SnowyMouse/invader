@@ -150,12 +150,14 @@
             {
                 "name": "inverse power acceleration time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse power transition time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -164,12 +166,14 @@
             {
                 "name": "inverse position acceleration time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse position transition time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",

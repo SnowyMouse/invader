@@ -194,17 +194,20 @@
             {
                 "name": "inverse combat perception time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse guard perception time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse non combat perception time",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -340,13 +343,15 @@
                 "name": "cosine maximum aiming deviation",
                 "type": "Vector2D",
                 "endian": "little",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "name": "cosine maximum looking deviation",
                 "type": "Vector2D",
                 "endian": "little",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "name": "do not use",

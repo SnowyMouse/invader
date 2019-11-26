@@ -60,7 +60,8 @@
             {
                 "name": "door open time ticks",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",

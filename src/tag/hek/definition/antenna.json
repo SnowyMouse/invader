@@ -45,7 +45,8 @@
                 "name": "offset",
                 "type": "Point3D",
                 "endian": "little",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             }
         ],
         "type": "struct",

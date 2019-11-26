@@ -718,12 +718,14 @@
             {
                 "name": "object type",
                 "type": "ObjectType",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "object index",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",
@@ -2060,7 +2062,8 @@
             {
                 "name": "cluster index",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -2069,7 +2072,8 @@
             {
                 "name": "surface index",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",
@@ -2094,7 +2098,8 @@
             {
                 "name": "one",
                 "type": "int16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "search behavior",
@@ -2116,7 +2121,8 @@
             {
                 "name": "precomputed bsp index",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "squads",
@@ -2600,7 +2606,8 @@
             {
                 "name": "unknown",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "name",
@@ -2631,7 +2638,8 @@
             {
                 "name": "unknown",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "name",
@@ -2670,7 +2678,8 @@
             {
                 "name": "unknown",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "name",

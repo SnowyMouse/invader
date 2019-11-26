@@ -34,7 +34,8 @@
             {
                 "name": "material",
                 "type": "MaterialType",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",
@@ -47,7 +48,8 @@
                 "name": "node stuff",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3
+                "count": 3,
+                "cache_only": true
             }
         ],
         "type": "struct",
@@ -60,7 +62,8 @@
                 "name": "vertices",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3
+                "count": 3,
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -570,12 +573,14 @@
             {
                 "name": "first decal index",
                 "type": "Index",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "decal count",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -723,7 +728,8 @@
             {
                 "name": "material type",
                 "type": "MaterialType",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "plane",

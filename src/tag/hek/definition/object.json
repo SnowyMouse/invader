@@ -234,22 +234,26 @@
             {
                 "name": "inverse bounds",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "unknown float 2",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse step",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse period",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "usage",
@@ -349,7 +353,8 @@
             {
                 "name": "has change colors",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "model",

@@ -140,9 +140,8 @@
                 "size": 12
             },
             {
-                "name": "type type",
-                "type": "uint32",
-                "endian": "little"
+                "name": "type class",
+                "type": "uint32"
             },
             {
                 "name": "type",

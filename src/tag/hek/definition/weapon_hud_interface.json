@@ -938,7 +938,8 @@
             {
                 "name": "crosshair types",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",

@@ -22,17 +22,20 @@
             {
                 "name": "unknown constant",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "water gravity scale",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "air gravity scale",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",

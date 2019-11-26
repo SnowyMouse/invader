@@ -257,37 +257,44 @@
             {
                 "name": "cosine stationary turning threshold",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "crouch camera velocity",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "cosine maximum slope angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "negative sine downhill falloff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "negative sine downhill cutoff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "sine uphill falloff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "sine uphill cutoff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -296,7 +303,8 @@
             {
                 "name": "head model node index",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "contact point",

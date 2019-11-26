@@ -641,7 +641,8 @@
             {
                 "name": "shield recharge rate",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",

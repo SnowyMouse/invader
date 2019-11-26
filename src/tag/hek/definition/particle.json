@@ -119,12 +119,14 @@
             {
                 "name": "unknown float a",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "unknown float b",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "radius animation",
@@ -195,7 +197,8 @@
             {
                 "name": "one",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "shader flags",

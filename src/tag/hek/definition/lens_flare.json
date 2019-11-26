@@ -171,12 +171,14 @@
             {
                 "name": "cos falloff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "cos cutoff angle",
                 "type": "float",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "occlusion radius",

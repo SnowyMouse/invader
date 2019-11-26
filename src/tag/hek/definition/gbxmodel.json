@@ -201,7 +201,8 @@
             {
                 "name": "permutation number",
                 "type": "uint16",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -474,7 +475,8 @@
             {
                 "name": "bullshit",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "vertex offset",

@@ -186,7 +186,8 @@
                 "name": "bump map scale xy",
                 "type": "Point2D",
                 "endian": "little",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "type": "pad",

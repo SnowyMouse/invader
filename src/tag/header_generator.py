@@ -303,7 +303,7 @@ for s in all_structs_arranged:
     if len(all_used_structs) > 0:
         cpp.write("        struct_big b = {};\n")
         for struct in all_used_structs:
-            if ("cache_only" in struct and struct["cache_only"]) or ("endian" in struct and struct["endian"] == "little" and not extract_hidden):
+            if ("cache_only" in struct and struct["cache_only"] and not extract_hidden):
                 continue
             name = struct["name"]
             if struct["type"] == "TagDependency":

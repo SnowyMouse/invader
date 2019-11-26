@@ -159,7 +159,8 @@
             {
                 "name": "not broken",
                 "type": "uint32",
-                "endian": "little"
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "shader flags",
