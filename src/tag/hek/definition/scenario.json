@@ -3210,7 +3210,8 @@
                 "name": "source files",
                 "type": "TagReflexive",
                 "struct": "ScenarioSourceFile",
-                "compound": true
+                "compound": true,
+                "non_cached": true
             },
             {
                 "type": "pad",
