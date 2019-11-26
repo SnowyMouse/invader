@@ -5,6 +5,7 @@
 
 #include "../../hek/pad.hpp"
 #include "../../hek/class_int.hpp"
+#include "../../hek/data_type.hpp"
 #include "../../hek/endian.hpp"
 
 namespace Invader::HEK {
@@ -16,7 +17,11 @@ namespace Invader::HEK {
             BLAM = 0x626C616D
         };
 
-        PAD(0x24);
+        /** In some of the older point physics tags, this is some sort of tag ID; it's unused */
+        BigEndian<TagID> tag_id_unused;
+
+        /** In some of the older point physics tags, this is set to the tag name; it's unused */
+        TagString tag_name_unused;
 
         /** Tag class of this tag */
         BigEndian<TagClassInt> tag_class_int;
