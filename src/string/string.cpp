@@ -169,6 +169,16 @@ int main(int argc, char * const *argv) {
     }
 
     std::filesystem::path tags_path(string_options.tags);
+    if(!std::filesystem::is_directory(tags_path)) {
+        if(std::strcmp(string_options.tags, "tags") == 0) {
+            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
+            eprintf("Use -t to define a tags directory.\n");
+        }
+        else {
+            eprintf("Directory %s was not found or is not a directory\n", string_options.tags);
+        }
+        return EXIT_FAILURE;
+    }
     std::filesystem::path data_path(string_options.data);
 
     auto input_path = (data_path / string_tag).string() + valid_extension;

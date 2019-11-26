@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-bitmap: Now fails if the tags directory isn't valid
+- invader-extract: Now fails if the tags directory isn't valid
+- invader-font: Now fails if the tags directory isn't valid
+- invader-string: Now fails if the tags directory isn't valid
+
 ## [0.20.0] - 2019-11-26
 ### Added
 - invader-extract: Added `--non-mp-globals` / `-n` which is required to extract

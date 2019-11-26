@@ -118,6 +118,16 @@ int main(int argc, char *argv[]) {
 
     // Font tag path
     std::filesystem::path tags_path(font_options.tags);
+    if(!std::filesystem::is_directory(tags_path)) {
+        if(std::strcmp(font_options.tags, "tags") == 0) {
+            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
+            eprintf("Use -t to define a tags directory.\n");
+        }
+        else {
+            eprintf("Directory %s was not found or is not a directory\n", font_options.tags);
+        }
+        return EXIT_FAILURE;
+    }
     auto tag_path = tags_path / font_tag;
     auto final_tag_path = tag_path.string() + ".font";
 

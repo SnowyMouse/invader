@@ -320,8 +320,19 @@ int main(int argc, char *argv[]) {
 
     std::filesystem::path data_path = bitmap_options.data;
 
-    // Get the path
+    // Check if the tags directory exists
     std::filesystem::path tags_path(bitmap_options.tags);
+    if(!std::filesystem::is_directory(tags_path)) {
+        if(std::strcmp(bitmap_options.tags, "tags") == 0) {
+            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
+            eprintf("Use -t to define a tags directory.\n");
+        }
+        else {
+            eprintf("Directory %s was not found or is not a directory\n", bitmap_options.tags);
+        }
+        return EXIT_FAILURE;
+    }
+
     auto tag_path = tags_path / bitmap_tag;
     auto final_path = tag_path.string() + ".bitmap";
 

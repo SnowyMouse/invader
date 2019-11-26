@@ -96,6 +96,19 @@ int main(int argc, const char **argv) {
         }
     });
 
+    // Check if the tags directory exists
+    std::filesystem::path tags(extract_options.tags_directory);
+    if(!std::filesystem::is_directory(tags)) {
+        if(extract_options.tags_directory == "tags") {
+            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
+            eprintf("Use -t to define a tags directory.\n");
+        }
+        else {
+            eprintf("Directory %s was not found or is not a directory\n", extract_options.tags_directory.data());
+        }
+        return EXIT_FAILURE;
+    }
+
     auto start = std::chrono::steady_clock::now();
     std::vector<std::byte> loc, bitmaps, sounds;
 
@@ -158,7 +171,6 @@ int main(int argc, const char **argv) {
     std::vector<bool> extracted_tags(tag_count);
 
     // Also here's the tags directory
-    std::filesystem::path tags(extract_options.tags_directory);
     std::vector<std::size_t> all_tags_to_extract;
 
     auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header](std::size_t tag_index) -> bool {
