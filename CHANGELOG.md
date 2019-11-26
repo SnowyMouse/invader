@@ -3,6 +3,12 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-extract: Added `--non-mp-globals` / `-n` which is required to extract
+  globals tags from non-multiplayer maps, as there is little value in building
+  cache files with these tags, and you will need to add the missing multiplayer
+  information block, yourself
+
 ### Changed
 - invader-build: Strips default data from compressed animations now
 

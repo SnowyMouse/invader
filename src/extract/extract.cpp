@@ -52,6 +52,7 @@ int main(int argc, const char **argv) {
         bool search_all_tags = true;
         bool recursive = false;
         bool overwrite = false;
+        bool non_mp_globals = false;
     } extract_options;
 
     // Command line options
@@ -62,6 +63,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
     options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
+    options.emplace_back("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
@@ -80,6 +82,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'O':
                 extract_options.overwrite = true;
+                break;
+            case 'n':
+                extract_options.non_mp_globals = true;
                 break;
             case 's':
                 extract_options.search_queries.emplace_back(args[0]);
@@ -181,7 +186,7 @@ int main(int argc, const char **argv) {
         }
 
         // Skip globals
-        if(extract_options.search_all_tags && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS) {
+        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
             oprintf("Skipping the non-multiplayer map's globals tag\n");
             return false;
         }
