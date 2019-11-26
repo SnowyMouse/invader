@@ -43,8 +43,8 @@ namespace Invader::HEK {
             reflexive.playback_rate = 1.0f / reflexive.natural_pitch;
 
             // I don't know what this is. Sorry.
-            reflexive.unknown_ffffffff_0 = 0;
-            reflexive.unknown_ffffffff_1 = 0;
+            reflexive.unknown_ffffffff_0 = 0xFFFFFFFF;
+            reflexive.unknown_ffffffff_1 = 0xFFFFFFFF;
 
             ADD_REFLEXIVE_START(reflexive.permutations) {
                 reflexive.samples.pointer = static_cast<std::uint32_t>(compiled.data.size());
@@ -79,7 +79,6 @@ namespace Invader::HEK {
                     INCREMENT_DATA_PTR(mouth_data_size)
                 }
                 reflexive.mouth_data.file_offset = 0;
-                reflexive.mouth_data.size = 0;
                 reflexive.mouth_data.external = 0;
 
                 std::size_t subtitle_data_size = reflexive.subtitle_data.size;
@@ -90,7 +89,6 @@ namespace Invader::HEK {
                     INCREMENT_DATA_PTR(subtitle_data_size)
                 }
                 reflexive.subtitle_data.file_offset = 0;
-                reflexive.subtitle_data.size = 0;
                 reflexive.subtitle_data.external = 0;
 
                 DEFAULT_VALUE(reflexive.gain, 1.0f);

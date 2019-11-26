@@ -9,6 +9,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-font: Now fails if the tags directory isn't valid
 - invader-string: Now fails if the tags directory isn't valid
 
+### Fixed
+- invader-build: Fixed setting mouth data and subtitle data to 0 size
+
 ## [0.20.0] - 2019-11-26
 ### Added
 - invader-extract: Added `--non-mp-globals` / `-n` which is required to extract
