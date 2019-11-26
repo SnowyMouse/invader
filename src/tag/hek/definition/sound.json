@@ -116,7 +116,7 @@
                 "type": "Index"
             },
             {
-                "name": "samples pointer",
+                "name": "sample count",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
