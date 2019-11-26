@@ -79,7 +79,7 @@ namespace Invader::HEK {
 
     TagFileHeader::TagFileHeader(TagClassInt tag_class_int) {
         // Clear everything
-        std::memset(this, 0, sizeof(*this));
+        std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), std::byte());
 
         // Set values
         #ifndef INVADER_EXTRACT_HIDDEN_VALUES
