@@ -11,6 +11,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Strips default data from compressed animations now
+- invader-extract: References are cleared
 
 ### Fixed
 - invader-extract: Fixed an error when extracting compressed animations
