@@ -40,8 +40,6 @@ namespace Invader::HEK {
                 return 4;
             case TAG_CLASS_MODEL_COLLISION_GEOMETRY:
                 return 10;
-            case TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION:
-                return 2;
             case TAG_CLASS_PARTICLE:
                 return 2;
             case TAG_CLASS_PARTICLE_SYSTEM:
