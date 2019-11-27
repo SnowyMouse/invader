@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.20.2] - 2019-11-27
 ### Changed
 - Enabling hidden value extraction now produces unusable tag files to
   discourage users from using them in cache files
