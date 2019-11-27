@@ -9,7 +9,7 @@ using clock_type = std::chrono::steady_clock;
 #include <cstring>
 #include <filesystem>
 
-#include <invader/build/build_workload.hpp>
+#include <invader/build2/build_workload.hpp>
 #include <invader/map/map.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/tag/compiled_tag.hpp>
@@ -188,7 +188,7 @@ int main(int argc, const char **argv) {
                 for(char &c : substr) {
                     c = std::tolower(c);
                 }
-                
+
                 with_index.emplace_back(extension_to_tag_class(extension), substr);
             }
         }
@@ -213,7 +213,7 @@ int main(int argc, const char **argv) {
         }
 
         // Build!
-        auto map = Invader::BuildWorkload::compile_map(
+        auto map = Invader::BuildWorkload2::compile_map(
             scenario.data(),
             build_options.tags,
             build_options.engine,
