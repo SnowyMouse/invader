@@ -47,9 +47,6 @@ namespace Invader::Parser {
             ScenarioScriptNode::struct_big big = script_nodes[i];
             *reinterpret_cast<ScenarioScriptNode::struct_big *>(script_nodes + i) = big;
         }
-
-        // Clear BSP trigger volumes
-        this->bsp_switch_trigger_volumes.clear();
     }
 
     void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {

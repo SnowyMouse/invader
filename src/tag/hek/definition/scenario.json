@@ -3120,7 +3120,8 @@
                 "name": "bsp switch trigger volumes",
                 "type": "TagReflexive",
                 "struct": "ScenarioBSPSwitchTriggerVolume",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "name": "decals",
