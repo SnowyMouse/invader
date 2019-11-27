@@ -183,6 +183,12 @@ int main(int argc, const char **argv) {
 
                 auto substr = tag.substr(0, extension - tag.data() - 1);
                 File::preferred_path_to_halo_path_chars(substr.data());
+
+                // Lowercase everything
+                for(char &c : substr) {
+                    c = std::tolower(c);
+                }
+                
                 with_index.emplace_back(extension_to_tag_class(extension), substr);
             }
         }
