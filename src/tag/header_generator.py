@@ -4,8 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 8:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 9:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,9 +13,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[6].lower() == "on" else False
+extract_hidden = True if sys.argv[7].lower() == "on" else False
 
-for i in range(7, len(sys.argv)):
+for i in range(8, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -212,11 +212,13 @@ hpp = open(sys.argv[2], "w")
 cpp_save_hek_data = open(sys.argv[3], "w")
 cpp_read_cache_file_data = open(sys.argv[4], "w")
 cpp_read_hek_data = open(sys.argv[5], "w")
+cpp_cache_format_data = open(sys.argv[6], "w")
 
 def write_for_all_cpps(what):
     cpp_save_hek_data.write(what)
     cpp_read_cache_file_data.write(what)
     cpp_read_hek_data.write(what)
+    cpp_cache_format_data.write(what)
 
 hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
 write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -244,8 +246,9 @@ write_for_all_cpps("namespace Invader::Parser {\n")
 
 for s in all_structs_arranged:
     struct_name = s["name"]
-    post_parse_cache_file_data = "post_parse_cache_file_data" in s and s["post_parse_cache_file_data"]
-    private_functions = post_parse_cache_file_data
+    post_cache_deformat = "post_cache_deformat" in s and s["post_cache_deformat"]
+    post_cache_parse = "post_cache_parse" in s and s["post_cache_parse"]
+    private_functions = post_cache_deformat
 
     hpp.write("    struct {} {{\n".format(struct_name))
     hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
@@ -292,6 +295,39 @@ for s in all_structs_arranged:
             continue
     add_structs_from_struct(s)
 
+    hpp.write("\n        /**\n")
+    hpp.write("         * Get whether or not the data is formatted for cache files.\n")
+    hpp.write("         * @return true if data is formatted for cache files\n")
+    hpp.write("         */\n")
+    hpp.write("        bool is_cache_formatted() const noexcept;\n")
+    cpp_cache_format_data.write("    bool {}::is_cache_formatted() const noexcept {{\n".format(struct_name))
+    cpp_cache_format_data.write("        return this->cache_formatted;\n")
+    cpp_cache_format_data.write("    }\n")
+
+    hpp.write("\n        /**\n")
+    hpp.write("         * Format the tag to be used in HEK tags.\n")
+    hpp.write("         * @param tag     original cache file tag\n")
+    hpp.write("         * @param pointer original pointer\n")
+    hpp.write("         */\n")
+    hpp.write("        void cache_deformat();\n")
+    cpp_cache_format_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
+    cpp_cache_format_data.write("        if(this->cache_formatted) {\n")
+    for struct in all_used_structs:
+        if struct["type"] == "TagReflexive":
+            cpp_cache_format_data.write("            for(auto &i : {}) {{\n".format(struct["name"]))
+            cpp_cache_format_data.write("                i.cache_deformat();\n")
+            cpp_cache_format_data.write("            }\n")
+    cpp_cache_format_data.write("            this->cache_formatted = false;\n")
+    if post_cache_deformat:
+        cpp_cache_format_data.write("            this->post_cache_deformat();\n")
+    cpp_cache_format_data.write("        }\n")
+    cpp_cache_format_data.write("    }\n")
+
+    hpp.write("\n        /**\n")
+    hpp.write("         * Format the tag to be used in cache files.\n")
+    hpp.write("         */\n")
+    hpp.write("        void cache_format();\n")
+
     # generate_hek_tag_data()
     hpp.write("\n        /**\n")
     hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
@@ -301,6 +337,7 @@ for s in all_structs_arranged:
     hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt);\n")
 
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class) {{\n".format(struct_name))
+    cpp_save_hek_data.write("        this->cache_deformat();\n")
     cpp_save_hek_data.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
     cpp_save_hek_data.write("        std::size_t tag_header_offset = 0;\n")
     cpp_save_hek_data.write("        if(generate_header_class.has_value()) {\n")
@@ -362,11 +399,12 @@ for s in all_structs_arranged:
     hpp.write("         * @return parsed tag data\n")
     hpp.write("         */\n")
     hpp.write("        static {} parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer = std::nullopt);\n".format(struct_name))
-    if len(all_used_structs) > 0 or post_parse_cache_file_data:
+    if len(all_used_structs) > 0 or post_cache_parse:
         cpp_read_cache_file_data.write("    {} {}::parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {{\n".format(struct_name, struct_name))
     else:
         cpp_read_cache_file_data.write("    {} {}::parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {{\n".format(struct_name, struct_name))
     cpp_read_cache_file_data.write("        {} r = {{}};\n".format(struct_name))
+    cpp_read_cache_file_data.write("        r.cache_formatted = true;\n")
     if len(all_used_structs) > 0:
         cpp_read_cache_file_data.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
         for struct in all_used_structs:
@@ -443,8 +481,8 @@ for s in all_structs_arranged:
                 cpp_read_cache_file_data.write("        std::copy(l.{}, l.{} + {}, r.{});\n".format(name, name, struct["count"], name))
             else:
                 cpp_read_cache_file_data.write("        r.{} = l.{};\n".format(name, name))
-    if post_parse_cache_file_data:
-        cpp_read_cache_file_data.write("        r.post_parse_cache_file_data(tag, pointer);\n")
+    if post_cache_parse:
+        cpp_read_cache_file_data.write("        r.post_cache_parse(tag, pointer);\n")
     cpp_read_cache_file_data.write("        return r;\n")
     cpp_read_cache_file_data.write("    }\n")
 
@@ -563,10 +601,14 @@ for s in all_structs_arranged:
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 
-    if private_functions:
-        hpp.write("    private:\n")
-        if post_parse_cache_file_data:
-            hpp.write("    void post_parse_cache_file_data(const Tag &tag, std::optional<HEK::Pointer> pointer);\n")
+    hpp.write("    private:\n")
+    hpp.write("    bool cache_formatted = false;\n")
+
+    if post_cache_deformat:
+        hpp.write("    void post_cache_deformat();\n")
+
+    if post_cache_parse:
+        hpp.write("    void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")
@@ -576,3 +618,4 @@ hpp.close()
 cpp_save_hek_data.close()
 cpp_read_cache_file_data.close()
 cpp_read_hek_data.close()
+cpp_cache_format_data.close()

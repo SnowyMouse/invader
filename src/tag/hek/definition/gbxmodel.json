@@ -507,7 +507,7 @@
             }
         ],
         "type": "struct",
-        "post_parse_cache_file_data": true,
+        "post_cache_parse": true,
         "size": 132
     },
     {
@@ -662,7 +662,7 @@
             }
         ],
         "type": "struct",
-        "post_parse_cache_file_data": true,
+        "post_cache_deformat": true,
         "size": 232
     }
 ]

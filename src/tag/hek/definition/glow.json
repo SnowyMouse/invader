@@ -256,7 +256,7 @@
                 "compound": true
             }
         ],
-        "post_parse_cache_file_data": true,
+        "post_cache_deformat": true,
         "type": "struct",
         "size": 340
     }

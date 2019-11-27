@@ -5,11 +5,11 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void Invader::Parser::ActorVariant::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::ActorVariant::post_cache_deformat() {
         this->grenade_velocity *= TICK_RATE;
     }
 
-    void Invader::Parser::Bitmap::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         for(auto &bitmap_data : this->bitmap_data) {
             const std::byte *bitmap_data_ptr;
             bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixels_offset, bitmap_data.pixels_count, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
@@ -19,7 +19,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Scenario::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Scenario::post_cache_deformat() {
         auto *script_data = this->script_syntax_data.data();
         auto script_data_size = this->script_syntax_data.size();
 
@@ -49,7 +49,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::GBXModel::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::GBXModel::post_cache_deformat() {
         for(auto &marker : this->markers) {
             for(auto &instance : marker.instances) {
                 // Figure out the region
@@ -89,7 +89,7 @@ namespace Invader::Parser {
         this->super_high_detail_cutoff = super_low;
     }
 
-    void Invader::Parser::Glow::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Glow::post_cache_deformat() {
         this->attachment_0 = static_cast<HEK::FunctionOut>(this->attachment_0 + 1);
         this->attachment_1 = static_cast<HEK::FunctionOut>(this->attachment_1 + 1);
         this->attachment_2 = static_cast<HEK::FunctionOut>(this->attachment_2 + 1);
@@ -98,27 +98,27 @@ namespace Invader::Parser {
         this->attachment_5 = static_cast<HEK::FunctionOut>(this->attachment_5 + 1);
     }
 
-    void Invader::Parser::PointPhysics::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::PointPhysics::post_cache_deformat() {
         this->air_friction /= 10000.0f;
         this->water_friction /= 10000.0f;
     }
 
-    void Invader::Parser::Projectile::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Projectile::post_cache_deformat() {
         this->initial_velocity *= TICK_RATE;
         this->final_velocity *= TICK_RATE;
     }
 
-    void Invader::Parser::ScenarioCutsceneTitle::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::ScenarioCutsceneTitle::post_cache_deformat() {
         this->fade_in_time /= TICK_RATE;
         this->fade_out_time /= TICK_RATE;
         this->up_time /= TICK_RATE;
     }
 
-    void Invader::Parser::Light::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Light::post_cache_deformat() {
         this->duration /= TICK_RATE;
     }
 
-    void Invader::Parser::ScenarioStructureBSPMaterial::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+    void Invader::Parser::ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         // Do nothing if there is nothing to do
         if(this->rendered_vertices_count == 0) {
             this->lightmap_vertices_count = 0;
@@ -168,7 +168,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::GBXModelGeometryPart::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+    void Invader::Parser::GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
         const auto &map = tag.get_map();
         const auto &header = *reinterpret_cast<const HEK::CacheFileTagDataHeaderPC *>(&map.get_tag_data_header());
@@ -210,7 +210,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Sound::post_parse_cache_file_data(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Invader::Parser::Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE);
         if(tag.is_indexed()) {
             auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(0, 0)) - 1);
@@ -219,7 +219,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::SoundPermutation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::SoundPermutation::post_cache_deformat() {
         if(this->compression == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *end = start + this->samples.size() / sizeof(*start);
@@ -231,7 +231,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::LensFlare::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::LensFlare::post_cache_deformat() {
         this->rotation_function_scale = DEGREES_TO_RADIANS(this->rotation_function_scale);
     }
 
@@ -241,7 +241,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::ModelAnimationAnimation::post_parse_cache_file_data(const Invader::Tag &, std::optional<HEK::Pointer>) {
+    void Invader::Parser::ModelAnimationAnimation::post_cache_deformat() {
         std::vector<std::byte> frame_data = this->frame_data;
         std::vector<std::byte> frame_info = this->frame_info;
         std::vector<std::byte> default_data = this->default_data;
