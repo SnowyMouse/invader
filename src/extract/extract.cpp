@@ -190,8 +190,15 @@ int main(int argc, const char **argv) {
             return false;
         }
 
-        // Get the path and make sure it doesn't have double dot slashes
+        // Get the path
         auto path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+
+        // Lowercase everything
+        for(char &c : path) {
+            c = std::tolower(c);
+        }
+
+        // Make sure we don't have any dot slashes (i.e. ../ or ./) to prevent a potential directory traversal attack
         if(std::regex_match(path, BAD_PATH_DIRECTORY)) {
             eprintf("Error: %s.%s contains an unsafe path\n", path.data(), tag_extension);
             return false;

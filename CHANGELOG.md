@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
   making using multiple jobs
 - invader-extract: BSP trigger volumes are now deleted on extraction since they
   are generated on map build
+- invader-extract: Dependency and tag paths are made lowercase
 
 ### Fixed
 - invader-extract: Fixed unknown tags outputting as 0 byte files

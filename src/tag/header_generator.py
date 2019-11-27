@@ -427,6 +427,9 @@ for s in all_structs_arranged:
                 cpp_read_cache_file_data.write("                eprintf(\"invalid reference for {}.{} in %s.%s\\n\", tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                throw;\n")
                 cpp_read_cache_file_data.write("            }\n")
+                cpp_read_cache_file_data.write("            for(char &c : r.{}.path) {{\n".format(name))
+                cpp_read_cache_file_data.write("                c = std::tolower(c);\n")
+                cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("        }\n")
             elif struct["type"] == "TagReflexive":
                 cpp_read_cache_file_data.write("        std::size_t l_{}_count = l.{}.count.read();\n".format(name, name))
