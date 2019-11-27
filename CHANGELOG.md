@@ -9,6 +9,9 @@ This is used for recording Invader's changes. This changelog is based on
 - parser.cpp was split up into multiple files to improve compilation time when
   making using multiple jobs
 
+### Fixed
+- invader-extract: Fixed unknown tags outputting as 0 byte files
+
 ## [0.20.1] - 2019-11-26
 ### Changed
 - invader-bitmap: Now fails if the tags directory isn't valid

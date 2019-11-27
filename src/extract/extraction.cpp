@@ -113,6 +113,6 @@ namespace Invader::Extraction {
                 break;
         }
 
-        return std::vector<std::byte>();
+        throw InvalidTagDataException();
     }
 }
