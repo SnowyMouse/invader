@@ -46,7 +46,7 @@ namespace Invader {
         /** Denotes an individual tag dependency */
         struct BuildWorkloadDependency {
             /** Index of the depended tag */
-            std::optional<std::size_t> tag_index;
+            std::size_t tag_index;
 
             /** Offset of the depended tag */
             std::size_t offset;
@@ -59,7 +59,7 @@ namespace Invader {
         /** Denotes a pointer to another struct */
         struct BuildWorkloadStructPointer {
             /** Index of the depended struct */
-            std::optional<std::size_t> struct_index;
+            std::size_t struct_index;
 
             /** Offset of the pointer */
             std::size_t offset;

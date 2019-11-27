@@ -4,8 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 9:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 10:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,9 +13,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[7].lower() == "on" else False
+extract_hidden = True if sys.argv[8].lower() == "on" else False
 
-for i in range(8, len(sys.argv)):
+for i in range(9, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -213,12 +213,14 @@ cpp_save_hek_data = open(sys.argv[3], "w")
 cpp_read_cache_file_data = open(sys.argv[4], "w")
 cpp_read_hek_data = open(sys.argv[5], "w")
 cpp_cache_format_data = open(sys.argv[6], "w")
+cpp_cache_deformat_data = open(sys.argv[7], "w")
 
 def write_for_all_cpps(what):
     cpp_save_hek_data.write(what)
     cpp_read_cache_file_data.write(what)
     cpp_read_hek_data.write(what)
     cpp_cache_format_data.write(what)
+    cpp_cache_deformat_data.write(what)
 
 hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
 write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -229,6 +231,9 @@ hpp.write("#include <string>\n")
 hpp.write("#include <optional>\n")
 hpp.write("#include \"../../map/map.hpp\"\n")
 hpp.write("#include \"../hek/definition.hpp\"\n\n")
+hpp.write("namespace Invader {\n")
+hpp.write("    class BuildWorkload2;\n")
+hpp.write("}\n")
 hpp.write("namespace Invader::Parser {\n")
 hpp.write("    struct Dependency {\n")
 hpp.write("        TagClassInt tag_class_int;\n")
@@ -241,6 +246,7 @@ write_for_all_cpps("#include <invader/map/map.hpp>\n")
 write_for_all_cpps("#include <invader/map/tag.hpp>\n")
 write_for_all_cpps("#include <invader/tag/hek/header.hpp>\n")
 write_for_all_cpps("#include <invader/printf.hpp>\n")
+cpp_cache_format_data.write("#include <invader/build2/build_workload.hpp>\n")
 cpp_save_hek_data.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
 write_for_all_cpps("namespace Invader::Parser {\n")
 
@@ -300,33 +306,86 @@ for s in all_structs_arranged:
     hpp.write("         * @return true if data is formatted for cache files\n")
     hpp.write("         */\n")
     hpp.write("        bool is_cache_formatted() const noexcept;\n")
-    cpp_cache_format_data.write("    bool {}::is_cache_formatted() const noexcept {{\n".format(struct_name))
-    cpp_cache_format_data.write("        return this->cache_formatted;\n")
-    cpp_cache_format_data.write("    }\n")
+    cpp_cache_deformat_data.write("    bool {}::is_cache_formatted() const noexcept {{\n".format(struct_name))
+    cpp_cache_deformat_data.write("        return this->cache_formatted;\n")
+    cpp_cache_deformat_data.write("    }\n")
 
     hpp.write("\n        /**\n")
     hpp.write("         * Format the tag to be used in HEK tags.\n")
-    hpp.write("         * @param tag     original cache file tag\n")
-    hpp.write("         * @param pointer original pointer\n")
     hpp.write("         */\n")
     hpp.write("        void cache_deformat();\n")
-    cpp_cache_format_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
-    cpp_cache_format_data.write("        if(this->cache_formatted) {\n")
+    cpp_cache_deformat_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
+    cpp_cache_deformat_data.write("        if(this->cache_formatted) {\n")
     for struct in all_used_structs:
         if struct["type"] == "TagReflexive":
-            cpp_cache_format_data.write("            for(auto &i : {}) {{\n".format(struct["name"]))
-            cpp_cache_format_data.write("                i.cache_deformat();\n")
-            cpp_cache_format_data.write("            }\n")
-    cpp_cache_format_data.write("            this->cache_formatted = false;\n")
+            cpp_cache_deformat_data.write("            for(auto &i : {}) {{\n".format(struct["name"]))
+            cpp_cache_deformat_data.write("                i.cache_deformat();\n")
+            cpp_cache_deformat_data.write("            }\n")
+    cpp_cache_deformat_data.write("            this->cache_formatted = false;\n")
     if post_cache_deformat:
-        cpp_cache_format_data.write("            this->post_cache_deformat();\n")
-    cpp_cache_format_data.write("        }\n")
-    cpp_cache_format_data.write("    }\n")
+        cpp_cache_deformat_data.write("            this->post_cache_deformat();\n")
+    cpp_cache_deformat_data.write("        }\n")
+    cpp_cache_deformat_data.write("    }\n")
 
+    # compile()
     hpp.write("\n        /**\n")
-    hpp.write("         * Format the tag to be used in cache files.\n")
+    hpp.write("         * Compile the tag to be used in cache files.\n")
+    hpp.write("         * @param workload     workload struct to use\n")
+    hpp.write("         * @param struct_index struct index to use in the workload\n")
+    hpp.write("         * @param offset       struct offset\n")
     hpp.write("         */\n")
-    hpp.write("        void cache_format();\n")
+    hpp.write("        void compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset = 0);\n")
+    cpp_cache_format_data.write("    void {}::compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset) {{\n".format(struct_name))
+    cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
+    cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset);\n")
+    cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
+    for struct in all_used_structs:
+        name = struct["name"]
+        if struct["type"] == "TagDependency":
+            cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
+            cpp_cache_format_data.write("        r.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+            cpp_cache_format_data.write("        if(this->{}.path.size() > 0) {{\n".format(name))
+            cpp_cache_format_data.write("            std::size_t index = static_cast<std::uint16_t>(workload.compile_tag_recursively(this->{}.path.data(), this->{}.tag_class_int));\n".format(name, name))
+            cpp_cache_format_data.write("            this->{}.tag_id.index = static_cast<std::uint16_t>(index);\n".format(name))
+            cpp_cache_format_data.write("            auto &d = workload.structs[struct_index].dependencies.emplace_back();\n")
+            cpp_cache_format_data.write("            d.offset = reinterpret_cast<std::byte *>(&r.{}) - start;\n".format(name))
+            cpp_cache_format_data.write("            d.tag_index = index;\n".format(name))
+            cpp_cache_format_data.write("        }\n")
+            cpp_cache_format_data.write("        else {\n")
+            cpp_cache_format_data.write("            r.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
+            cpp_cache_format_data.write("        }\n")
+        elif struct["type"] == "TagReflexive":
+            cpp_cache_format_data.write("        std::size_t t_{}_count = this->{}.size();\n".format(name, name))
+            cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
+            cpp_cache_format_data.write("            r.{}.count = static_cast<std::uint32_t>(t_{}_count);\n".format(name, name))
+            cpp_cache_format_data.write("            auto &n = workload.structs.emplace_back();\n")
+            cpp_cache_format_data.write("            static constexpr std::size_t STRUCT_SIZE = sizeof({}::struct_little);\n".format(struct["struct"]))
+            cpp_cache_format_data.write("            n.data.resize(t_{}_count * STRUCT_SIZE);\n".format(name))
+            cpp_cache_format_data.write("            auto &p = workload.structs[struct_index].pointers.emplace_back();\n")
+            cpp_cache_format_data.write("            p.struct_index = &n - workload.structs.data();\n")
+            cpp_cache_format_data.write("            p.offset = reinterpret_cast<std::byte *>(&r.{}.pointer) - start;\n".format(name))
+            cpp_cache_format_data.write("            for(std::size_t i = 0; i < t_{}_count; i++) {{\n".format(name))
+            cpp_cache_format_data.write("                this->{}[i].compile(workload, p.struct_index, i * STRUCT_SIZE);\n".format(name))
+            cpp_cache_format_data.write("            }\n")
+            cpp_cache_format_data.write("        }\n")
+        elif struct["type"] == "TagDataOffset":
+            cpp_cache_format_data.write("        std::size_t t_{}_size = this->{}.size();\n".format(name, name))
+            cpp_cache_format_data.write("        if(t_{}_size > 0) {{\n".format(name))
+            cpp_cache_format_data.write("            auto &n = workload.structs.emplace_back();\n")
+            cpp_cache_format_data.write("            n.data.insert(n.data.begin(), this->{}.begin(), this->{}.end());\n".format(name, name))
+            cpp_cache_format_data.write("            auto &p = workload.structs[struct_index].pointers.emplace_back();\n")
+            cpp_cache_format_data.write("            p.struct_index = &n - workload.structs.data();\n")
+            cpp_cache_format_data.write("            p.offset = reinterpret_cast<std::byte *>(&r.{}.pointer) - start;\n".format(name))
+            cpp_cache_format_data.write("            r.{}.size = t_{}_size;\n".format(name, name))
+            cpp_cache_format_data.write("        }\n")
+        elif "bounds" in struct and struct["bounds"]:
+            cpp_cache_format_data.write("        r.{}.from = this->{}.from;\n".format(name, name))
+            cpp_cache_format_data.write("        r.{}.to = this->{}.to;\n".format(name, name))
+        elif "count" in struct and struct["count"] > 1:
+            cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
+        else:
+            cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
+    cpp_cache_format_data.write("    }\n")
 
     # generate_hek_tag_data()
     hpp.write("\n        /**\n")
@@ -335,7 +394,6 @@ for s in all_structs_arranged:
     hpp.write("         * @return cache file data\n")
     hpp.write("         */\n")
     hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt);\n")
-
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
     cpp_save_hek_data.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
@@ -622,3 +680,4 @@ cpp_save_hek_data.close()
 cpp_read_cache_file_data.close()
 cpp_read_hek_data.close()
 cpp_cache_format_data.close()
+cpp_cache_deformat_data.close()
