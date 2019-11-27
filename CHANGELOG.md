@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
   discourage users from using them in cache files
 - parser.cpp was split up into multiple files to improve compilation time when
   making using multiple jobs
+- invader-extract: BSP trigger volumes are now deleted on extraction since they
+  are generated on map build
 
 ### Fixed
 - invader-extract: Fixed unknown tags outputting as 0 byte files
