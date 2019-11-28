@@ -261,7 +261,8 @@
             }
         ],
         "type": "struct",
-        "size": 48
+        "size": 48,
+        "unsafe_to_dedupe": true
     },
     {
         "name": "Bitmap",

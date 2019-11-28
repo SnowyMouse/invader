@@ -88,8 +88,11 @@ namespace Invader {
             /** This struct cannot be deduped */
             bool unsafe_to_dedupe = false;
 
+            /** BSP index */
+            std::size_t bsp = 0;
+
             bool operator==(const BuildWorkloadStruct &other) const noexcept {
-                return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && this->data == other.data && this->dependencies == other.dependencies && this->pointers == other.pointers;
+                return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && this->bsp == other.bsp && this->dependencies == other.dependencies && this->pointers == other.pointers && this->data == other.data;
             }
         };
 
@@ -126,6 +129,9 @@ namespace Invader {
         /** Tags being worked with */
         std::vector<BuildWorkloadTag> tags;
 
+        /** BSP struct */
+        std::optional<std::size_t> bsp_struct;
+
         /**
          * Add the tag
          * @param tag_path      path of the tag
@@ -136,8 +142,9 @@ namespace Invader {
 
         /**
          * Dedupe all of the structs!
+         * @return number of bytes saved
          */
-        void dedupe_structs();
+        std::size_t dedupe_structs();
 
     private:
         BuildWorkload2() = default;

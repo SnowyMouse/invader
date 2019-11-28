@@ -508,6 +508,7 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
+        "unsafe_to_dedupe": true,
         "size": 132
     },
     {

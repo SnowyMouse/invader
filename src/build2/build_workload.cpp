@@ -84,16 +84,22 @@ namespace Invader {
         }
 
         // Find it
-        auto new_path = Invader::File::file_path_to_tag_path(tag_path, *this->tags_directories, true);
+        char formatted_path[256];
+        if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
+            tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
+        }
+        std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+        Invader::File::halo_path_to_preferred_path_chars(formatted_path);
+        auto new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
         if(!new_path.has_value()) {
-            eprintf("failed to find %s.%s\n", tag_path, tag_class_to_extension(tag_class_int));
+            eprintf("failed to find %s\n", formatted_path);
             throw InvalidTagPathException();
         }
 
         // Open it
         auto tag_file = Invader::File::open_file((*new_path).data());
         if(!tag_file.has_value()) {
-            eprintf("failed to open %s.%s\n", tag_path, tag_class_to_extension(tag_class_int));
+            eprintf("failed to open %s\n", formatted_path);
             throw FailedToOpenFileException();
         }
         auto &tag_file_data = *tag_file;
@@ -101,6 +107,7 @@ namespace Invader {
         #define COMPILE_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
             auto tag_data = Parser::class_struct::parse_hek_tag_file(tag_file_data.data(), tag_file_data.size()); \
             auto &new_struct = this->structs.emplace_back(); \
+            this->tags[return_value].base_struct = &new_struct - this->structs.data(); \
             new_struct.data.resize(sizeof(Parser::class_struct::struct_little), std::byte()); \
             tag_data.compile(*this, &new_struct - this->structs.data()); \
             break; \
@@ -186,13 +193,20 @@ namespace Invader {
                 COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
                 COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
                 COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
-                COMPILE_TAG_CLASS(ScenarioStructureBSP, TAG_CLASS_SCENARIO_STRUCTURE_BSP)
+                case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
+                    auto tag_data = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_file_data.data(), tag_file_data.size());
+                    auto &new_struct = this->structs.emplace_back();
+                    this->tags[return_value].base_struct = &new_struct - this->structs.data();
+                    new_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
+                    tag_data.compile(*this, &new_struct - this->structs.data());
+                    break;
+                }
                 default:
                     throw UnknownTagClassException();
             }
         }
         catch(std::exception &e) {
-            eprintf("failed to compile %s.%s\n", tag_path, tag_class_to_extension(tag_class_int));
+            eprintf("failed to compile %s\n", formatted_path);
             throw;
         }
 
