@@ -232,7 +232,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch (std::exception &e) {
-            eprintf_error("Error: Failed to extract %s.%s: %s", tag.get_path().data(), tag_extension, e.what());
+            eprintf_error("Error: Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).data(), tag_extension, e.what());
             return false;
         }
 

@@ -9,8 +9,9 @@
 
 // If NO_OUTPUT is not enabled, then we have eprintf and oprintf as a macro for, basically, printf
 #include <cstdio>
+#define ON_COLOR_TERM (std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)
 #define eprintf(...) std::fprintf(stderr, __VA_ARGS__)
-#define eprintf_error(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
+#define eprintf_error(...) if(ON_COLOR_TERM) {\
     std::fprintf(stderr, "\x1B[1;38;5;1m"); \
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\x1B[m\n"); \
@@ -19,7 +20,7 @@ else {\
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\n"); \
 }
-#define eprintf_warn(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
+#define eprintf_warn(...) if(ON_COLOR_TERM) {\
     std::fprintf(stderr, "\x1B[1;38;5;3m"); \
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\x1B[m\n"); \
@@ -29,7 +30,7 @@ else {\
     std::fprintf(stderr, "\n"); \
 }
 #define oprintf(...) std::fprintf(stdout, __VA_ARGS__)
-#define oprintf_success(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
+#define oprintf_success(...) if(ON_COLOR_TERM) {\
     std::fprintf(stdout, "\x1B[38;5;2m"); \
     std::fprintf(stdout, __VA_ARGS__); \
     std::fprintf(stdout, "\x1B[m\n"); \
