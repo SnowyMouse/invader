@@ -127,7 +127,7 @@ int main(int argc, const char **argv) {
         }
     });
 
-    if(ON_COLOR_TERM) {
+    if(build_options.forged_crc && ON_COLOR_TERM) {
         if(std::strcmp(build_options.forged_crc, "56617021") == 0) {
             std::fprintf(stdout, "\x1B[38;5;51m");
         }
