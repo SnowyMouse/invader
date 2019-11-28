@@ -337,7 +337,7 @@ int main(int argc, const char **argv) {
         total++;
         const auto &tag_map = map->get_tag(tag);
         if(extract_tag(tag)) {
-            oprintf("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            eprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
             extracted++;
         }
         else {
