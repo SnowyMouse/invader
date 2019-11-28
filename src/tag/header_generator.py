@@ -403,8 +403,8 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         else:
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
-        if post_compile:
-            cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
+    if post_compile:
+        cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
     cpp_cache_format_data.write("    }\n")
 
     # generate_hek_tag_data()
