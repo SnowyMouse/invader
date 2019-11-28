@@ -47,6 +47,7 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
+        std::size_t dedupe_tag_space = 0;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -63,6 +64,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
+    options.emplace_back("dedupe", 'd', 1, "Attempt to dedupe the requested amount.", "<KiB>");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -123,6 +125,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'N':
                 build_options.rename_scenario = arguments[0];
+                break;
+            case 'd':
+                build_options.dedupe_tag_space = static_cast<std::size_t>(std::atoll(arguments[0])) * 1024;
                 break;
         }
     });
@@ -224,7 +229,8 @@ int main(int argc, const char **argv) {
             with_index,
             forged_crc,
             std::nullopt,
-            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))
+            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
+            build_options.dedupe_tag_space
         );
 
         if(build_options.compress) {

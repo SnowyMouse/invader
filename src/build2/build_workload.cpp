@@ -18,11 +18,13 @@ namespace Invader {
         const std::optional<std::vector<std::tuple<TagClassInt, std::string>>> &with_index,
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
-        const std::optional<std::string> &rename_scenario
+        const std::optional<std::string> &rename_scenario,
+        std::size_t dedupe_tag_space
     ) {
         BuildWorkload2 workload;
         workload.scenario = scenario;
         workload.tags_directories = &tags_directories;
+        workload.dedupe_tag_space = dedupe_tag_space;
 
         // Set the tag data address
         if(tag_data_address.has_value()) {
@@ -51,9 +53,11 @@ namespace Invader {
         this->add_tags();
 
         // Dedupe structs
-        this->dedupe_structs();
+        if(this->dedupe_tag_space) {
+            this->dedupe_structs();
+        }
 
-        return std::vector<std::byte>();
+        std::terminate();
     }
 
     std::size_t BuildWorkload2::compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int) {
@@ -225,9 +229,11 @@ namespace Invader {
         this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
     }
 
-    void BuildWorkload2::dedupe_structs() {
+    std::size_t BuildWorkload2::dedupe_structs() {
         bool found_something = true;
-        while(true) {
+        std::size_t total_savings = 0;
+
+        while(found_something && total_savings < this->dedupe_tag_space) {
             found_something = false;
             for(std::size_t i = 0; i < this->structs.size() && !found_something; i++) {
                 for(std::size_t j = i + 1; j < this->structs.size(); j++) {
@@ -245,12 +251,29 @@ namespace Invader {
                             }
                         }
 
+                        // Also go through every tag, too
+                        for(auto &tag : this->tags) {
+                            if(tag.base_struct > j) {
+                                (*tag.base_struct)--;
+                            }
+                            else if(tag.base_struct == j) {
+                                tag.base_struct = i;
+                            }
+                        }
+
+                        total_savings += this->structs[j].data.size();
                         this->structs.erase(this->structs.begin() + j);
                         found_something = true;
-                        break;
+                        j--;
+
+                        if(total_savings >= this->dedupe_tag_space) {
+                            return total_savings;
+                        }
                     }
                 }
             }
         }
+
+        return total_savings;
     }
 }
