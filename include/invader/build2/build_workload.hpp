@@ -135,6 +135,9 @@ namespace Invader {
         /** BSP struct */
         std::optional<std::size_t> bsp_struct;
 
+        /** Cache file type */
+        std::optional<HEK::CacheFileType> cache_file_type;
+
         /**
          * Add the tag
          * @param tag_path      path of the tag
@@ -184,7 +187,6 @@ namespace Invader {
 
         const char *scenario;
         std::size_t scenario_index;
-        HEK::CacheFileType cache_file_type;
         std::uint32_t tag_data_address;
         std::vector<std::byte> build_cache_file();
         const std::vector<std::string> *tags_directories;

@@ -225,13 +225,12 @@ namespace Invader {
 
     void BuildWorkload2::add_tags() {
         this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
-        this->cache_file_type = reinterpret_cast<Scenario<LittleEndian> *>(this->structs[*this->tags[this->scenario_index].base_struct].data.data())->type;
 
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
 
         // Load the correct tag collection tag
-        switch(this->cache_file_type) {
+        switch(*this->cache_file_type) {
             case ScenarioType::CACHE_FILE_SINGLEPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
