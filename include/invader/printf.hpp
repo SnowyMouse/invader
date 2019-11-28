@@ -11,7 +11,7 @@
 #include <cstdio>
 #define eprintf(...) std::fprintf(stderr, __VA_ARGS__)
 #define eprintf_error(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
-    std::fprintf(stderr, "\x1B[1;38;5;196m"); \
+    std::fprintf(stderr, "\x1B[1;38;5;1m"); \
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\x1B[m\n"); \
 } \
@@ -20,7 +20,7 @@ else {\
     std::fprintf(stderr, "\n"); \
 }
 #define eprintf_warn(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
-    std::fprintf(stderr, "\x1B[1;38;5;226m"); \
+    std::fprintf(stderr, "\x1B[1;38;5;3m"); \
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\x1B[m\n"); \
 } \
@@ -29,6 +29,15 @@ else {\
     std::fprintf(stderr, "\n"); \
 }
 #define oprintf(...) std::fprintf(stdout, __VA_ARGS__)
+#define oprintf_success(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
+    std::fprintf(stdout, "\x1B[38;5;2m"); \
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\x1B[m\n"); \
+} \
+else {\
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\n"); \
+}
 #define oflush() std::fflush(stdout)
 
 #else
