@@ -203,15 +203,15 @@ int main(int argc, const char **argv) {
             return false;
         }
 
-        // Skip globals
-        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
-            eprintf_warn("Skipping the non-multiplayer map's globals tag\n");
-            return false;
-        }
-
         // Figure out the path we're writing to
         auto tag_path_to_write_to = tags / (path + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
+            return false;
+        }
+
+        // Skip globals
+        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
+            eprintf_warn("Skipping the non-multiplayer map's globals tag\n");
             return false;
         }
 
