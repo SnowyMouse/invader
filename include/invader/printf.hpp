@@ -20,7 +20,7 @@ else {\
     std::fprintf(stderr, "\n"); \
 }
 #define eprintf_warn(...) if(std::strcmp(std::getenv("TERM"), "xterm-256color") == 0) {\
-    std::fprintf(stderr, "\x1B[38;5;226m"); \
+    std::fprintf(stderr, "\x1B[1;38;5;226m"); \
     std::fprintf(stderr, __VA_ARGS__); \
     std::fprintf(stderr, "\x1B[m\n"); \
 } \
