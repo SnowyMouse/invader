@@ -189,7 +189,7 @@ namespace Invader {
                 COMPILE_TAG_CLASS(ShaderTransparentGeneric, TAG_CLASS_SHADER_TRANSPARENT_GENERIC)
                 COMPILE_TAG_CLASS(TagCollection, TAG_CLASS_UI_WIDGET_COLLECTION)
                 COMPILE_TAG_CLASS(ShaderTransparentPlasma, TAG_CLASS_SHADER_TRANSPARENT_PLASMA)
-                COMPILE_TAG_CLASS(Scenery, TAG_CLASS_SOUND_SCENERY)
+                COMPILE_TAG_CLASS(SoundScenery, TAG_CLASS_SOUND_SCENERY)
                 COMPILE_TAG_CLASS(StringList, TAG_CLASS_STRING_LIST)
                 COMPILE_TAG_CLASS(ShaderTransparentWater, TAG_CLASS_SHADER_TRANSPARENT_WATER)
                 COMPILE_TAG_CLASS(TagCollection, TAG_CLASS_TAG_COLLECTION)

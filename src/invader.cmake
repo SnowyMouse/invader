@@ -99,6 +99,7 @@ set(INVADER_SOURCE_FILES
     src/extract/extraction.cpp
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/bitmap.cpp
+    src/tag/parser/compile/object.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
