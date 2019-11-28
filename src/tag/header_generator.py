@@ -345,8 +345,9 @@ for s in all_structs_arranged:
     cpp_cache_format_data.write("        workload.structs[struct_index].unsafe_to_dedupe = {};\n".format("false" if ("unsafe_to_dedupe" in s and s["unsafe_to_dedupe"]) else "true"))
     if pre_compile:
         cpp_cache_format_data.write("        if(!this->cache_formatted) {\n")
-        cpp_cache_format_data.write("           this->pre_compile(workload, tag_index, struct_index, offset);\n")
+        cpp_cache_format_data.write("            this->pre_compile(workload, tag_index, struct_index, offset);\n")
         cpp_cache_format_data.write("        }\n")
+        cpp_cache_format_data.write("        this->cache_formatted = true;\n")
     cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset + tag_index * 0);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
     for struct in all_used_structs:
