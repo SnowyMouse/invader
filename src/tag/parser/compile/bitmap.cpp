@@ -24,6 +24,39 @@ namespace Invader::Parser {
             auto format = data.format;
             bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5);
 
+            std::size_t start = data.pixels_offset;
+            std::size_t size = 0;
+            std::size_t width = data.width;
+            std::size_t height = data.height;
+            std::size_t depth = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE ? data.depth : 1;
+            std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+            std::size_t bits_per_pixel;
+
+            switch(data.format) {
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+                    bits_per_pixel = 32;
+                    break;
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+                    bits_per_pixel = 16;
+                    break;
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                    bits_per_pixel = 8;
+                    break;
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                    bits_per_pixel = 4;
+                    break;
+                default:
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data %zu has an invalid format", data_index);
+                    throw InvalidTagDataException();
+            }
+
             // Make sure these are equal
             if(compressed != should_be_compressed) {
                 const char *format_name = HEK::bitmap_data_format_name(format);
@@ -35,16 +68,9 @@ namespace Invader::Parser {
                 }
             }
 
-            std::size_t start = data.pixels_offset;
-            std::size_t size = 0;
-            std::size_t width = data.width;
-            std::size_t height = data.height;
-            std::size_t depth = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE ? data.depth : 1;
-            std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
-
             // Do it
             for(std::size_t i = 0; i <= data.mipmap_count; i++) {
-                size += width * height * depth * multiplier;
+                size += width * height * depth * multiplier * bits_per_pixel;
 
                 // Divide by 2, resetting back to 1 when needed
                 width /= 2;
