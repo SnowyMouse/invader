@@ -333,20 +333,21 @@ for s in all_structs_arranged:
     hpp.write("\n        /**\n")
     hpp.write("         * Compile the tag to be used in cache files.\n")
     hpp.write("         * @param workload     workload struct to use\n")
+    hpp.write("         * @param tag_index    tag index to use in the workload\n")
     hpp.write("         * @param struct_index struct index to use in the workload\n")
     hpp.write("         * @param bsp          BSP index to use\n")
     hpp.write("         * @param offset       struct offset\n")
     hpp.write("         */\n")
-    hpp.write("        void compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t bsp = 0, std::size_t offset = 0);\n")
-    cpp_cache_format_data.write("    void {}::compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t bsp, std::size_t offset) {{\n".format(struct_name))
+    hpp.write("        void compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t bsp = 0, std::size_t offset = 0);\n")
+    cpp_cache_format_data.write("    void {}::compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t bsp, std::size_t offset) {{\n".format(struct_name))
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].unsafe_to_dedupe = {};\n".format("false" if ("unsafe_to_dedupe" in s and s["unsafe_to_dedupe"]) else "true"))
     if pre_compile:
         cpp_cache_format_data.write("        if(!this->cache_formatted) {\n")
-        cpp_cache_format_data.write("           this->pre_compile(workload, struct_index, offset);\n")
+        cpp_cache_format_data.write("           this->pre_compile(workload, tag_index, struct_index, offset);\n")
         cpp_cache_format_data.write("        }\n")
-    cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset);\n")
+    cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset + tag_index * 0);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
     for struct in all_used_structs:
         if ("non_cached" in struct and struct["non_cached"]):
@@ -376,7 +377,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("            p.struct_index = &n - workload.structs.data();\n")
             cpp_cache_format_data.write("            p.offset = reinterpret_cast<std::byte *>(&r.{}.pointer) - start;\n".format(name))
             cpp_cache_format_data.write("            for(std::size_t i = 0; i < t_{}_count; i++) {{\n".format(name))
-            cpp_cache_format_data.write("                this->{}[i].compile(workload, p.struct_index, bsp, i * STRUCT_SIZE);\n".format(name))
+            cpp_cache_format_data.write("                this->{}[i].compile(workload, tag_index, p.struct_index, bsp, i * STRUCT_SIZE);\n".format(name))
             cpp_cache_format_data.write("            }\n")
             cpp_cache_format_data.write("        }\n")
         elif struct["type"] == "TagDataOffset":
@@ -402,7 +403,7 @@ for s in all_structs_arranged:
         else:
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         if post_compile:
-            cpp_cache_format_data.write("        this->post_compile(workload, struct_index, offset);\n".format(name, name))
+            cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
     cpp_cache_format_data.write("    }\n")
 
     # generate_hek_tag_data()
@@ -690,10 +691,10 @@ for s in all_structs_arranged:
         hpp.write("    void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
 
     if pre_compile:
-        hpp.write("    void pre_compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("    void pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     if post_compile:
-        hpp.write("    void post_compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("    void post_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")

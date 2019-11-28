@@ -109,7 +109,7 @@ namespace Invader {
             auto &new_struct = this->structs.emplace_back(); \
             this->tags[return_value].base_struct = &new_struct - this->structs.data(); \
             new_struct.data.resize(sizeof(Parser::class_struct::struct_little), std::byte()); \
-            tag_data.compile(*this, &new_struct - this->structs.data()); \
+            tag_data.compile(*this, return_value, &new_struct - this->structs.data()); \
             break; \
         }
 
@@ -198,7 +198,7 @@ namespace Invader {
                     auto &new_struct = this->structs.emplace_back();
                     this->tags[return_value].base_struct = &new_struct - this->structs.data();
                     new_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
-                    tag_data.compile(*this, &new_struct - this->structs.data());
+                    tag_data.compile(*this, return_value, &new_struct - this->structs.data());
                     break;
                 }
                 default:
