@@ -103,6 +103,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/item_collection.cpp
     src/tag/parser/compile/shader.cpp
     src/tag/parser/compile/sound.cpp
+    src/tag/parser/compile/physics.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
