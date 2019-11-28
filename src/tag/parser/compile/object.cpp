@@ -4,7 +4,6 @@
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build2/build_workload.hpp>
-#include <invader/tag/hek/class/bitmap.hpp>
 
 namespace Invader::Parser {
     template <typename T> void compile_object(T &tag) {
