@@ -136,17 +136,23 @@
             },
             {
                 "name": "scale",
-                "type": "float"
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "rotation",
                 "type": "Matrix",
-                "compound": true
+                "compound": true,
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "translation",
                 "type": "Point3D",
-                "compound": true
+                "compound": true,
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",
