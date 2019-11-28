@@ -32,4 +32,7 @@ namespace Invader::Parser {
     void ShaderTransparentPlasma::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA;
     }
+    void ShaderTransparentGeneric::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+        this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC;
+    }
 }
