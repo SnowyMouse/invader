@@ -287,7 +287,7 @@ namespace Invader::HEK {
                 auto node_index = reference.bsp2d_node.read();
 
                 // Make sure the plane is valid
-                auto plane = reference.plane.read().int_value();
+                auto plane = reference.plane.read();
                 if(plane >= this->plane_count) {
                     eprintf_error("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
                     throw OutOfBoundsException();

@@ -199,7 +199,7 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "back child",
@@ -240,7 +240,7 @@
             },
             {
                 "name": "first bsp2d reference",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
@@ -251,7 +251,6 @@
         "fields": [
             {
                 "name": "plane",
-                "flagged": true,
                 "type": "uint32"
             },
             {
@@ -295,7 +294,7 @@
             },
             {
                 "name": "first edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "flags",
@@ -415,6 +414,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 96
     },
     {
@@ -699,6 +699,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 664
     }
 ]
