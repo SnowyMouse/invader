@@ -53,8 +53,11 @@ namespace Invader {
             /** Offset of the depended tag */
             std::size_t offset;
 
+            /** It's just the tag ID */
+            bool tag_id_only = false;
+
             bool operator==(const BuildWorkloadDependency &other) const noexcept {
-                return this->tag_index == other.tag_index && this->offset == other.offset;
+                return this->tag_index == other.tag_index && this->offset == other.offset && this->tag_id_only == other.tag_id_only;
             }
         };
 
