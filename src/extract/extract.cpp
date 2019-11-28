@@ -211,7 +211,7 @@ int main(int argc, const char **argv) {
 
         // Skip globals
         if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
-            eprintf_warn("Skipping the non-multiplayer map's globals tag\n");
+            eprintf_warn("Skipping the non-multiplayer map's globals tag");
             return false;
         }
 
