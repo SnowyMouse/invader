@@ -30,15 +30,6 @@ else {\
     std::fprintf(stderr, "\n"); \
 }
 #define oprintf(...) std::fprintf(stdout, __VA_ARGS__)
-#define oprintf_success(...) if(ON_COLOR_TERM) {\
-    std::fprintf(stdout, "\x1B[38;5;2m"); \
-    std::fprintf(stdout, __VA_ARGS__); \
-    std::fprintf(stdout, "\x1B[m\n"); \
-} \
-else {\
-    std::fprintf(stdout, __VA_ARGS__); \
-    std::fprintf(stdout, "\n"); \
-}
 #define oflush() std::fflush(stdout)
 
 #else

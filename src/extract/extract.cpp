@@ -205,7 +205,7 @@ int main(int argc, const char **argv) {
 
         // Skip globals
         if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
-            oprintf("Skipping the non-multiplayer map's globals tag\n");
+            eprintf_warn("Skipping the non-multiplayer map's globals tag\n");
             return false;
         }
 
@@ -337,7 +337,7 @@ int main(int argc, const char **argv) {
         total++;
         const auto &tag_map = map->get_tag(tag);
         if(extract_tag(tag)) {
-            oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            oprintf("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
             extracted++;
         }
         else {
