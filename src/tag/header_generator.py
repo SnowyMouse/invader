@@ -396,7 +396,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
         elif struct["type"] == "enum":
             cpp_cache_format_data.write("        if(static_cast<std::uint16_t>(r.{}) >= {}) {{\n".format(name, len(struct["options"])))
-            cpp_cache_format_data.write("            eprintf(\"{} exceeds maximum value of {}\");\n".format(name, len(struct["options"])))
+            cpp_cache_format_data.write("            eprintf_error(\"{} exceeds maximum value of {}\");\n".format(name, len(struct["options"])))
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         else:
