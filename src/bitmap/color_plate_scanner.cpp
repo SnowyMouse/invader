@@ -206,7 +206,7 @@ namespace Invader {
                         scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
                     }
                     else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-                        eprintf("Error: Sprites must have blue borders or a valid color plate.\n");
+                        eprintf_error("Error: Sprites must have blue borders or a valid color plate.\n");
                         throw InvalidInputBitmapException();
                     }
                     else {
@@ -458,7 +458,7 @@ namespace Invader {
         std::uint32_t face_height = height / 3;
 
         if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
-            eprintf("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
+            eprintf_error("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
             throw InvalidInputBitmapException();
         }
 
@@ -864,7 +864,7 @@ namespace Invader {
             const std::uint32_t FACES = sequence.bitmap_count;
 
             if(FACES == 0) {
-                eprintf("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
+                eprintf_error("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
                 throw InvalidInputBitmapException();
             }
 
@@ -884,17 +884,17 @@ namespace Invader {
 
             if(generated_bitmap.type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
                 if(FACES != 6) {
-                    eprintf("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
+                    eprintf_error("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
                     throw InvalidInputBitmapException();
                 }
                 if(BITMAP_WIDTH != BITMAP_HEIGHT) {
-                    eprintf("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
+                    eprintf_error("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
                     throw InvalidInputBitmapException();
                 }
             }
             else if(generated_bitmap.type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
                 if(!FACES || !is_power_of_two(FACES)) {
-                    eprintf("Error: 3D texture depth must be a power of two. Got %u\n", FACES);
+                    eprintf_error("Error: 3D texture depth must be a power of two. Got %u\n", FACES);
                     throw InvalidInputBitmapException();
                 }
             }
@@ -928,13 +928,13 @@ namespace Invader {
 
                 // Ensure it's the same dimensions
                 if(bitmap.height != BITMAP_HEIGHT || bitmap.width != BITMAP_WIDTH) {
-                    eprintf("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
+                    eprintf_error("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
                     throw InvalidInputBitmapException();
                 }
 
                 // Also ensure it has the same # of mipmaps. I don't know how it wouldn't, but you never know
                 if(bitmap.mipmaps.size() != MIPMAP_COUNT) {
-                    eprintf("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
+                    eprintf_error("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
                     throw InvalidInputBitmapException();
                 }
 
@@ -1387,7 +1387,7 @@ namespace Invader {
         // First see if we can even fit things into this
         auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
         if(!fit_sprites.has_value()) {
-            eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
+            eprintf_error("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
             throw InvalidInputBitmapException();
         }
         parameters.sprite_spacing = half_spacing;
@@ -1417,7 +1417,7 @@ namespace Invader {
                 auto &sprite_sequence = sprites_fit[sequence_index];
 
                 if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
-                    eprintf("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
+                    eprintf_error("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
                     throw InvalidInputBitmapException();
                 }
 

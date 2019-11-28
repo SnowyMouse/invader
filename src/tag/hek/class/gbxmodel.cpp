@@ -184,7 +184,7 @@ namespace Invader::HEK {
         // Make sure we don't have any stragglers
         for(std::size_t n = 0; n < nodes_count; n++) {
             if(!node_done[n]) {
-                eprintf("Warning: Orphaned node #%zu in %s.%s\n", n, File::halo_path_to_preferred_path(compiled.path.data()).data(), tag_class_to_extension(compiled.tag_class_int));
+                eprintf_warn("Warning: Orphaned node #%zu in %s.%s", n, File::halo_path_to_preferred_path(compiled.path.data()).data(), tag_class_to_extension(compiled.tag_class_int));
             }
         }
 
@@ -215,7 +215,7 @@ namespace Invader::HEK {
                         reflexive.permutation_number = static_cast<std::uint16_t>(std::strtol(last_hyphen, nullptr, 10));
                     }
                     else {
-                        eprintf("model permutation which contains a hyphen in its name is not null terminated\n");
+                        eprintf_error("model permutation which contains a hyphen in its name is not null terminated");
                         throw OutOfBoundsException();
                     }
                 }

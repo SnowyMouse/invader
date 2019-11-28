@@ -27,7 +27,7 @@ namespace Invader::Parser {
 
         // If we don't have a script node table, give up
         if(script_data_size < sizeof(ScenarioScriptNodeTable::struct_little)) {
-            eprintf("scenario tag has an invalid scenario script node table\n");
+            eprintf_error("scenario tag has an invalid scenario script node table");
             throw InvalidTagDataException();
         }
 
@@ -40,7 +40,7 @@ namespace Invader::Parser {
         auto table_size = table.maximum_count.read();
         std::size_t expected_size = (reinterpret_cast<std::byte *>(script_nodes + table_size) - script_data);
         if(expected_size != script_data_size) {
-            eprintf("scenario tag has an invalid scenario script node table (%zu vs %zu)\n", expected_size, script_data_size);
+            eprintf_error("scenario tag has an invalid scenario script node table (%zu vs %zu)", expected_size, script_data_size);
             throw InvalidTagDataException();
         }
 
@@ -58,7 +58,7 @@ namespace Invader::Parser {
                 std::size_t region_index = instance.region_index;
                 std::size_t region_count = this->regions.size();
                 if(region_index >= region_count) {
-                    eprintf("invalid region index %zu / %zu\n", region_index, region_count);
+                    eprintf_error("invalid region index %zu / %zu", region_index, region_count);
                     throw OutOfBoundsException();
                 }
 
@@ -67,7 +67,7 @@ namespace Invader::Parser {
                 std::size_t permutation_count = region.permutations.size();
                 std::size_t permutation_index = instance.permutation_index;
                 if(permutation_index >= permutation_count) {
-                    eprintf("invalid permutation index %zu / %zu for region #%zu\n", permutation_index, permutation_count, region_index);
+                    eprintf_error("invalid permutation index %zu / %zu for region #%zu", permutation_index, permutation_count, region_index);
                     throw OutOfBoundsException();
                 }
 
@@ -165,7 +165,7 @@ namespace Invader::Parser {
             }
         }
         else if(this->lightmap_vertices_count != 0) {
-            eprintf("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)\n", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
+            eprintf_error("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
             throw InvalidTagDataException();
         }
     }
@@ -264,7 +264,7 @@ namespace Invader::Parser {
                 required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDzDyaw::struct_little);
                 break;
             default:
-                eprintf("unknown frame info type\n");
+                eprintf_error("unknown frame info type");
                 throw InvalidTagDataException();
         }
         if(required_frame_info_size * this->frame_count != frame_info.size()) {
@@ -358,7 +358,7 @@ namespace Invader::Parser {
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationRotation::struct_big) + scale_count * sizeof(ModelAnimationScale::struct_big) + transform_count * sizeof(ModelAnimationTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationRotation::struct_big) + sizeof(ModelAnimationScale::struct_big) + sizeof(ModelAnimationTransform::struct_big));
         if(frame_size != total_frame_size) {
-            eprintf("frame size (%zu) != total frame size (%zu)\n", static_cast<std::size_t>(frame_size), total_frame_size);
+            eprintf_error("frame size (%zu) != total frame size (%zu)", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
         }
 
@@ -366,7 +366,7 @@ namespace Invader::Parser {
         std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
         if(!this->flags.compressed_data) {
             if(default_data.size() != expected_default_data_size) {
-                eprintf("default data size (%zu) != expected_default_data_size (%zu)\n", static_cast<std::size_t>(frame_size), expected_default_data_size);
+                eprintf_error("default data size (%zu) != expected_default_data_size (%zu)", static_cast<std::size_t>(frame_size), expected_default_data_size);
                 throw InvalidTagDataException();
             }
 
@@ -414,7 +414,7 @@ namespace Invader::Parser {
         }
         else {
             if(frame_data.size() != frame_data_size_expected) {
-                eprintf("frame_data.size() (%zu) != frame_data_size_expected (%zu)\n", frame_data.size(), frame_data_size_expected);
+                eprintf_error("frame_data.size() (%zu) != frame_data_size_expected (%zu)", frame_data.size(), frame_data_size_expected);
                 throw InvalidTagDataException();
             }
 

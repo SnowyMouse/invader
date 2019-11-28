@@ -150,7 +150,7 @@ namespace Invader {
                     break;
 
                 default:
-                    eprintf("Unsupported bitmap format.\n");
+                    eprintf_error("Unsupported bitmap format.");
                     throw InvalidBitmapFormatException();
             }
 

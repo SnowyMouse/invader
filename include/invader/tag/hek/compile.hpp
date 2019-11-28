@@ -17,7 +17,7 @@ namespace Invader {
      * @param  compare_size size to check
      */
     #define ASSERT_SIZE(compare_size) if(size < static_cast<std::size_t>(compare_size)) { \
-        eprintf("ASSERT_SIZE failed: %zu < " # compare_size " (%zu)\n", static_cast<std::size_t>(size), static_cast<std::size_t>(compare_size)); \
+        eprintf_error("ASSERT_SIZE failed: %zu < " # compare_size " (%zu)", static_cast<std::size_t>(size), static_cast<std::size_t>(compare_size)); \
         throw OutOfBoundsException(); \
     }
 
@@ -94,14 +94,14 @@ namespace Invader {
                             } \
                         }\
                         catch(std::exception &) {\
-                            eprintf("error adding reflexive #%zu for %s\n", i, struct_name); \
+                            eprintf_error("error adding reflexive #%zu for %s", i, struct_name); \
                             throw; \
                         }\
                     }\
                 }\
             }\
             catch(std::exception &) { \
-                eprintf("error adding reflexive for %s\n", struct_name); \
+                eprintf_error("error adding reflexive for %s", struct_name); \
                 throw; \
             }\
         }
@@ -136,7 +136,7 @@ namespace Invader {
     #define FINISH_COMPILE \
         FINISH_COMPILE_COPY \
         if(size != 0) { \
-            eprintf("unexpected extra %zu bytes\n", size); \
+            eprintf_error("unexpected extra %zu bytes", size); \
             throw ExtraTagDataException();\
         }
 
@@ -167,7 +167,7 @@ namespace Invader {
             INCREMENT_DATA_PTR(amt); \
         } \
         catch(std::exception &) { \
-            eprintf("error adding dependency " # dependency "\n"); \
+            eprintf_error("error adding dependency " # dependency ""); \
             throw; \
         } \
     }

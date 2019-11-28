@@ -100,11 +100,10 @@ int main(int argc, const char **argv) {
     std::filesystem::path tags(extract_options.tags_directory);
     if(!std::filesystem::is_directory(tags)) {
         if(extract_options.tags_directory == "tags") {
-            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
-            eprintf("Use -t to define a tags directory.\n");
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf("Directory %s was not found or is not a directory\n", extract_options.tags_directory.data());
+            eprintf_error("Directory %s was not found or is not a directory", extract_options.tags_directory.data());
         }
         return EXIT_FAILURE;
     }
@@ -138,7 +137,7 @@ int main(int argc, const char **argv) {
         map = std::make_unique<Map>(Map::map_with_move(std::move(file), std::move(bitmaps), std::move(loc), std::move(sounds)));
     }
     catch (std::exception &e) {
-        eprintf("Failed to parse %s: %s\n", remaining_arguments[0], e.what());
+        eprintf_error("Failed to parse %s: %s", remaining_arguments[0], e.what());
         return EXIT_FAILURE;
     }
 
@@ -149,16 +148,16 @@ int main(int argc, const char **argv) {
         switch(header.engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 if(loc.size() == 0) {
-                    eprintf("Failed to find a loc.map\n");
+                    eprintf_error("Failed to find a loc.map");
                 }
                 // fallthrough
             case CacheFileEngine::CACHE_FILE_RETAIL:
             case CacheFileEngine::CACHE_FILE_DEMO:
                 if(bitmaps.size() == 0) {
-                    eprintf("Failed to find a bitmaps.map\n");
+                    eprintf_error("Failed to find a bitmaps.map");
                 }
                 if(sounds.size() == 0) {
-                    eprintf("Failed to find a sounds.map\n");
+                    eprintf_error("Failed to find a sounds.map");
                 }
                 break;
             default:
@@ -200,19 +199,19 @@ int main(int argc, const char **argv) {
 
         // Make sure we don't have any dot slashes (i.e. ../ or ./) to prevent a potential directory traversal attack
         if(std::regex_match(path, BAD_PATH_DIRECTORY)) {
-            eprintf("Error: %s.%s contains an unsafe path\n", path.data(), tag_extension);
-            return false;
-        }
-
-        // Skip globals
-        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
-            oprintf("Skipping the non-multiplayer map's globals tag\n");
+            eprintf_error("Error: %s.%s contains an unsafe path", path.data(), tag_extension);
             return false;
         }
 
         // Figure out the path we're writing to
         auto tag_path_to_write_to = tags / (path + "." + tag_extension);
         if(!extract_options.overwrite && std::filesystem::exists(tag_path_to_write_to)) {
+            return false;
+        }
+
+        // Skip globals
+        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
+            eprintf_warn("Skipping the non-multiplayer map's globals tag");
             return false;
         }
 
@@ -233,7 +232,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch (std::exception &e) {
-            eprintf("Error: Failed to extract %s.%s: %s\n", tag.get_path().data(), tag_extension, e.what());
+            eprintf_error("Error: Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).data(), tag_extension, e.what());
             return false;
         }
 
@@ -280,7 +279,7 @@ int main(int argc, const char **argv) {
         // Save it
         auto tag_path_str = tag_path_to_write_to.string();
         if(!Invader::File::save_file(tag_path_str.data(), new_tag)) {
-            eprintf("Error: Failed to save %s\n", tag_path_str.data());
+            eprintf_error("Error: Failed to save %s", tag_path_str.data());
             return false;
         }
 
@@ -321,7 +320,7 @@ int main(int argc, const char **argv) {
         }
 
         if(all_tags_to_extract.size() == 0) {
-            eprintf("No tags were found with the given search parameter(s).\n");
+            eprintf_error("No tags were found with the given search parameter(s).");
             return EXIT_FAILURE;
         }
     }
@@ -338,7 +337,7 @@ int main(int argc, const char **argv) {
         total++;
         const auto &tag_map = map->get_tag(tag);
         if(extract_tag(tag)) {
-            oprintf("Extracted %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            eprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
             extracted++;
         }
         else {

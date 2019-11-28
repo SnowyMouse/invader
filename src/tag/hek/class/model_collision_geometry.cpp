@@ -35,7 +35,7 @@ namespace Invader::HEK {
 
     static inline bool point_in_front_of_plane(const Point3D<LittleEndian> &point, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count, std::uint32_t plane_index) {
         if(plane_index >= plane_count) {
-            eprintf("Invalid plane index %u / %u in BSP.\n", plane_index, plane_count);
+            eprintf_error("Invalid plane index %u / %u in BSP.\n", plane_index, plane_count);
             throw OutOfBoundsException();
         }
         return point.distance_from_plane(planes[plane_index].plane) >= 0;
@@ -49,7 +49,7 @@ namespace Invader::HEK {
         while(!node_index.flag_value() && !node_index.is_null()) {
             // Make sure it's a valid index
             if(node_index >= bsp3d_node_count) {
-                eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
+                eprintf_error("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
                 throw OutOfBoundsException();
             }
 
@@ -123,7 +123,7 @@ namespace Invader::HEK {
             // Until it's a surface, search
             while(!node_index.flag_value() && !node_index.is_null()) {
                 if(node_index.int_value() >= this->bsp2d_node_count) {
-                    eprintf("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), this->bsp2d_node_count);
+                    eprintf_error("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), this->bsp2d_node_count);
                     throw OutOfBoundsException();
                 }
 
@@ -142,7 +142,7 @@ namespace Invader::HEK {
             }
 
             if(node_index.int_value() >= this->surface_count) {
-                eprintf("Invalid surface %u / %u in BSP.\n", node_index.int_value(), this->surface_count);
+                eprintf_error("Invalid surface %u / %u in BSP.\n", node_index.int_value(), this->surface_count);
                 throw OutOfBoundsException();
             }
 
@@ -167,7 +167,7 @@ namespace Invader::HEK {
             while(!node_index.flag_value() && !node_index.is_null()) {
                 // Make sure it's a valid index
                 if(node_index >= bsp3d_node_count) {
-                    eprintf("Invalid BSP3D node %u / %u in BSP.\n", node_index.int_value(), this->bsp3d_node_count);
+                    eprintf_error("Invalid BSP3D node %u / %u in BSP.\n", node_index.int_value(), this->bsp3d_node_count);
                     throw OutOfBoundsException();
                 }
 
@@ -258,7 +258,7 @@ namespace Invader::HEK {
             // Make sure the leaf is valid
             std::uint32_t leaf_index_t = node_index.int_value();
             if(leaf_index_t >= leaf_count) {
-                eprintf("invalid leaf index #%u / %u\n", leaf_index_t, leaf_count);
+                eprintf_error("invalid leaf index #%u / %u\n", leaf_index_t, leaf_count);
                 throw OutOfBoundsException();
             }
 
@@ -275,7 +275,7 @@ namespace Invader::HEK {
             // Make sure the BSP2D references are valid
             std::uint64_t bsp2d_end = static_cast<std::uint64_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count);
             if(bsp2d_end > this->bsp2d_reference_count) {
-                eprintf("invalid bsp2d reference range #%u - %zu / %u\n", leaf_bsp2d_reference_count, static_cast<std::size_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count), this->bsp2d_reference_count);
+                eprintf_error("invalid bsp2d reference range #%u - %zu / %u\n", leaf_bsp2d_reference_count, static_cast<std::size_t>(leaf_bsp2d_reference_index + leaf_bsp2d_reference_count), this->bsp2d_reference_count);
                 throw OutOfBoundsException();
             }
 
@@ -289,7 +289,7 @@ namespace Invader::HEK {
                 // Make sure the plane is valid
                 auto plane = reference.plane.read().int_value();
                 if(plane >= this->plane_count) {
-                    eprintf("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
+                    eprintf_error("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
                     throw OutOfBoundsException();
                 }
 

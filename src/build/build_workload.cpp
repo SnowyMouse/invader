@@ -45,7 +45,7 @@ namespace Invader {
         // If we're building non-custom edition maps, set workload.always_index_tags to false
         if(engine_target != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             if(workload.always_index_tags) {
-                eprintf("Warning: '-a' is ineffectual if not building a Halo Custom Edition cache file.\n");
+                eprintf_warn("Warning: '-a' is ineffectual if not building a Halo Custom Edition cache file.");
                 workload.always_index_tags = false;
             }
         }
@@ -94,7 +94,7 @@ namespace Invader {
                 auto path_str = path.string();
                 std::FILE *f = std::fopen(path_str.data(), "rb");
                 if(!f) {
-                    eprintf("Failed to open %s\n", path_str.data());
+                    eprintf_error("Failed to open %s", path_str.data());
                     return std::vector<Resource>();
                 }
                 std::fseek(f, 0, SEEK_END);
@@ -106,7 +106,7 @@ namespace Invader {
                 }
 
                 if(std::fread(resource_data_buffer.data(), data_size, 1, f) != 1) {
-                    eprintf("Failed to open %s\n", path_str.data());
+                    eprintf_error("Failed to open %s", path_str.data());
                     std::fclose(f);
                     return std::vector<Resource>();
                 }
@@ -141,7 +141,7 @@ namespace Invader {
         this->load_required_tags();
         this->tag_count = this->compiled_tags.size();
         if(this->tag_count > CACHE_FILE_MAX_TAG_COUNT) {
-            eprintf("Tag count exceeds maximum of %zu.\n", CACHE_FILE_MAX_TAG_COUNT);
+            eprintf_error("Tag count exceeds maximum of %zu.", CACHE_FILE_MAX_TAG_COUNT);
             throw MaximumTagDataSizeException();
         }
 
@@ -257,7 +257,7 @@ namespace Invader {
 
         // Check if we've exceeded the max amount of tag data
         if(max_tag_data_size > MAXIMUM_ALLOWED_TAG_SPACE) {
-            eprintf("Maximum tag data size exceeds budget.\n");
+            eprintf_error("Maximum tag data size exceeds budget.");
             throw MaximumTagDataSizeException();
         }
 
@@ -378,7 +378,7 @@ namespace Invader {
 
         // Check if we've exceeded the max file size.
         if(file.size() > CACHE_FILE_MAXIMUM_FILE_LENGTH) {
-            eprintf("Uncompressed file size exceeds budget.\n");
+            eprintf_error("Uncompressed file size exceeds budget.");
             throw MaximumFileSizeException();
         }
 
@@ -800,7 +800,7 @@ namespace Invader {
             if(compiled_tag->stub()) {
                 // Damage effects and object tags that are not in the correct location will break things
                 if(this->cache_file_type == ScenarioType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(compiled_tag->tag_class_int) || compiled_tag->tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
-                    eprintf("Warning: Network object %s.%s is missing.\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
+                    eprintf_warn("Warning: Network object %s.%s is missing.", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                     network_issue = true;
                 }
 
@@ -811,7 +811,7 @@ namespace Invader {
         }
 
         if(network_issue) {
-            eprintf("Warning: The game will crash in multiplayer if missing tags are used.\n");
+            eprintf_warn("Warning: The game will crash in multiplayer if missing tags are used.");
         }
     }
 
@@ -962,7 +962,7 @@ namespace Invader {
 
                                 // If the bitmap index is invalid, complain
                                 if(static_cast<std::size_t>(sprite.bitmap_index) >= bitmap_count) {
-                                    eprintf("Invalid bitmap index for sprite: %zu\n", static_cast<std::size_t>(bitmap_count));
+                                    eprintf_error("Invalid bitmap index for sprite: %zu", static_cast<std::size_t>(bitmap_count));
                                     throw OutOfBoundsException();
                                 }
 
@@ -1097,12 +1097,12 @@ namespace Invader {
                     // Make sure we're referencing the right things
                     auto &dobc = *reinterpret_cast<DetailObjectCollection<LittleEndian> *>(tag_ptr->data.data());
                     if(dobc.sprite_plate.tag_id.read().is_null()) {
-                        eprintf("Sprite plate tag ID is null\n");
+                        eprintf_error("Sprite plate tag ID is null");
                         throw InvalidTagDataException();
                     }
                     auto &bitmap_tag = this->compiled_tags[dobc.sprite_plate.tag_id.read().index];
                     if(bitmap_tag->tag_class_int != TagClassInt::TAG_CLASS_BITMAP) {
-                        eprintf("Sprite plate is not a bitmap\n");
+                        eprintf_error("Sprite plate is not a bitmap");
                         throw InvalidTagDataException();
                     }
 
@@ -1117,7 +1117,7 @@ namespace Invader {
                     for(std::uint32_t i = 0; i < dobc_count; i++) {
                         std::uint8_t sequence_index = dobc_type[i].sequence_index;
                         if(sequence_index >= sequences_count) {
-                            eprintf("Invalid sequence index %u / %u.\n", sequence_index, sequences_count);
+                            eprintf_error("Invalid sequence index %u / %u.", sequence_index, sequences_count);
                             throw OutOfBoundsException();
                         }
                         dobc_type[i].sprite_count = static_cast<std::uint8_t>(sequences[sequence_index].sprites.count.read());
@@ -1128,7 +1128,7 @@ namespace Invader {
                 else if(tag_ptr->tag_class_int == TagClassInt::TAG_CLASS_PARTICLE) {
                     auto &particle = *reinterpret_cast<Particle<LittleEndian> *>(tag_ptr->data.data());
                     if(particle.bitmap.tag_id.read().is_null()) {
-                        eprintf("Particle has no bitmap.\n");
+                        eprintf_error("Particle has no bitmap.");
                         throw InvalidTagDataException();
                     }
                     else {
@@ -1146,7 +1146,7 @@ namespace Invader {
                         for(std::uint32_t p = 0; p < particle_count; p++) {
                             auto &type = types[p];
                             if(type.sprite_bitmap.tag_id.read().is_null()) {
-                                eprintf("Weather particle system particle #%zu has no bitmap.\n", static_cast<std::size_t>(p));
+                                eprintf_error("Weather particle system particle #%zu has no bitmap.", static_cast<std::size_t>(p));
                                 throw InvalidTagDataException();
                             }
                             else {
@@ -1407,12 +1407,12 @@ namespace Invader {
                 return index;
             }
             catch(...) {
-                eprintf("Failed to compile %s.%s\n", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
+                eprintf_error("Failed to compile %s.%s", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
                 throw;
             }
         }
 
-        eprintf("Could not find %s.%s\n", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
+        eprintf_error("Could not find %s.%s", File::halo_path_to_preferred_path(path).data(), tag_class_to_extension(tag_class_int));
         throw FailedToOpenFileException();
     }
 
@@ -1426,7 +1426,7 @@ namespace Invader {
 
         // Error if greater than 31 characters.
         if(map_name_length > MAX_SCENARIO_LENGTH) {
-            eprintf("Scenario name %s exceeds %zu characters.\n", map_name.data(), MAX_SCENARIO_LENGTH);
+            eprintf_error("Scenario name %s exceeds %zu characters.", map_name.data(), MAX_SCENARIO_LENGTH);
             throw InvalidScenarioNameException();
         }
 
@@ -1577,14 +1577,14 @@ namespace Invader {
                     // Check if it's a valid reference
                     auto bsp_index = bsp_struct.structure_bsp.tag_id.read().index;
                     if(bsp_index >= this->compiled_tags.size()) {
-                        eprintf("Invalid BSP reference in scenario tag.\n");
+                        eprintf_error("Invalid BSP reference in scenario tag.");
                         throw InvalidDependencyException();
                     }
 
                     // Check if it's a BSP tag
                     auto &bsp_compiled_tag = this->compiled_tags[bsp_index];
                     if(bsp_compiled_tag->tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                        eprintf("Mismatched BSP reference in scenario tag.\n");
+                        eprintf_error("Mismatched BSP reference in scenario tag.");
                         throw InvalidDependencyException();
                     }
 
@@ -1627,7 +1627,7 @@ namespace Invader {
         // Adjust for all pointers
         for(auto &pointer : compiled_tag->pointers) {
             if(pointer.offset + sizeof(std::uint32_t) > compiled_tag->data.size() || pointer.offset_pointed > compiled_tag->data.size()) {
-                eprintf("Invalid pointer for %s.%s\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
+                eprintf_error("Invalid pointer for %s.%s", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                 throw InvalidPointerException();
             }
             std::uint32_t new_offset;
@@ -1653,7 +1653,7 @@ namespace Invader {
             }
 
             if(dependency.offset + sizeof(TagDependency<LittleEndian>) > compiled_tag->data.size()) {
-                eprintf("Invalid dependency offset for %s.%s\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
+                eprintf_error("Invalid dependency offset for %s.%s", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                 throw InvalidDependencyException();
             }
             auto &dependency_data = *reinterpret_cast<TagDependency<LittleEndian> *>(tag_data_data + dependency.offset);
@@ -1661,7 +1661,7 @@ namespace Invader {
             // Resolve the dependency
             std::size_t depended_tag_id = dependency_data.tag_id.read().index;
             if(depended_tag_id >= this->tag_count) {
-                eprintf("Invalid dependency index for %s.%s\n", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
+                eprintf_error("Invalid dependency index for %s.%s", compiled_tag->path.data(), tag_class_to_extension(compiled_tag->tag_class_int));
                 throw InvalidDependencyException();
             }
 
@@ -1715,7 +1715,7 @@ namespace Invader {
 
                         std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
                         if(pixels_offset > tag_asset_data_size) {
-                            eprintf("Invalid pixels offset for bitmap %zu for %s.%s\n", b, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
+                            eprintf_error("Invalid pixels offset for bitmap %zu for %s.%s", b, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
                             throw OutOfBoundsException();
                         }
                         offsets[b] = pixels_offset;
@@ -1865,13 +1865,13 @@ namespace Invader {
 
                     std::size_t vertex_size = part.vertex_count * sizeof(GBXModelVertexUncompressed<LittleEndian>);
                     if(vertex_size + vertex_offset > model_data_size) {
-                        eprintf("Invalid vertex size for part %zu-%zu for %s.%s\n", g, p, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
+                        eprintf_error("Invalid vertex size for part %zu-%zu for %s.%s", g, p, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
                         throw OutOfBoundsException();
                     }
 
                     std::size_t index_size = (part.triangle_count + 2) * sizeof(std::uint16_t);
                     if(index_size + index_offset > model_data_size) {
-                        eprintf("Invalid index size for part %zu-%zu for %s.%s\n", g, p, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
+                        eprintf_error("Invalid index size for part %zu-%zu for %s.%s", g, p, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
                         throw OutOfBoundsException();
                     }
 
@@ -2116,11 +2116,11 @@ namespace Invader {
                 encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
             }
             else if(bsps_found_in > 1) {
-                eprintf("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in BSP #%u).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
+                eprintf_warn("Warning: Encounter #%zu (%s) was found in %u BSPs (will place in BSP #%u).", static_cast<std::size_t>(encounter - encounters), encounter->name.string, bsps_found_in, encounter->precomputed_bsp_index.read());
                 warnings_given++;
             }
             else if(bsps_found_in == 0) {
-                eprintf("Warning: Encounter #%zu (%s) was found in 0 BSPs.\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string);
+                eprintf_warn("Warning: Encounter #%zu (%s) was found in 0 BSPs.", static_cast<std::size_t>(encounter - encounters), encounter->name.string);
                 warnings_given++;
                 encounter->precomputed_bsp_index = static_cast<std::uint16_t>(0xFFFF);
             }
@@ -2136,7 +2136,7 @@ namespace Invader {
 
                 // Make sure we have a collision BSP
                 if(sbsp.collision_bsp.count != 1) {
-                    eprintf("BSP is missing a collision BSP.\n");
+                    eprintf_error("BSP is missing a collision BSP.");
                     throw OutOfBoundsException();
                 }
                 auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
@@ -2145,7 +2145,7 @@ namespace Invader {
                 auto *render_leaves = reinterpret_cast<HEK::ScenarioStructureBSPLeaf<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.leaves.pointer));
                 auto leaves_count = sbsp.leaves.count.read();
                 if(collision_bsp.leaves.count != leaves_count) {
-                    eprintf("BSP leaf count is not correct.\n");
+                    eprintf_error("BSP leaf count is not correct.");
                     throw OutOfBoundsException();
                 }
 
@@ -2168,7 +2168,7 @@ namespace Invader {
                     }
 
                     if(leaves_count <= leaf) {
-                        eprintf("Invalid leaf index %u / %u in BSP.\n", leaf.int_value(), leaves_count);
+                        eprintf_error("Invalid leaf index %u / %u in BSP.", leaf.int_value(), leaves_count);
                         throw OutOfBoundsException();
                     }
 
@@ -2186,7 +2186,7 @@ namespace Invader {
             }
 
             if(max_hits > highest_count) {
-                eprintf("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%u / %u hits).\n", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
+                eprintf_warn("Warning: Encounter #%zu (%s) is partially outside of BSP #%u (%u / %u hits).", static_cast<std::size_t>(encounter - encounters), encounter->name.string, encounter->precomputed_bsp_index.read(), highest_count, max_hits);
                 warnings_given++;
 
                 // Show some information
@@ -2280,16 +2280,16 @@ namespace Invader {
             command_list.precomputed_bsp_index = highest_bsp;
 
             if(highest_bsp_count == 0) {
-                eprintf("Warning: Command list #%u (%s) was found in 0 BSPs.\n", c, command_list.name.string);
+                eprintf_warn("Warning: Command list #%u (%s) was found in 0 BSPs.", c, command_list.name.string);
                 warnings_given++;
             }
             else {
                 if(points_found < points_count) {
-                    eprintf("Warning: Command list #%u (%s) is partially outside of BSP #%u (%u / %u hits).\n", c, command_list.name.string, highest_bsp, points_found, points_count);
+                    eprintf_warn("Warning: Command list #%u (%s) is partially outside of BSP #%u (%u / %u hits).", c, command_list.name.string, highest_bsp, points_found, points_count);
                     warnings_given++;
                 }
                 else if(highest_bsp_count > 1) {
-                    eprintf("Warning: Command list #%u (%s) was found in %u BSPs (will place in BSP #%u).\n", c, command_list.name.string, highest_bsp_count, highest_bsp);
+                    eprintf_warn("Warning: Command list #%u (%s) was found in %u BSPs (will place in BSP #%u).", c, command_list.name.string, highest_bsp_count, highest_bsp);
                     warnings_given++;
                 }
             }
@@ -2309,7 +2309,7 @@ namespace Invader {
 
         // Make sure we have a collision BSP
         if(sbsp.collision_bsp.count != 1) {
-            eprintf("BSP is missing a collision BSP.\n");
+            eprintf_error("BSP is missing a collision BSP.");
             throw OutOfBoundsException();
         }
         auto &collision_bsp = *reinterpret_cast<HEK::ModelCollisionGeometryBSP<HEK::LittleEndian> *>(TRANSLATE_SBSP_TAG_DATA_PTR(sbsp.collision_bsp.pointer));
