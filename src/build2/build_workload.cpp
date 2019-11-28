@@ -309,12 +309,15 @@ namespace Invader {
                 }
                 // fallthrough
             case ErrorType::ERROR_TYPE_WARNING:
-                eprintf_warn("%s", error);
+                eprintf_warn("WARNING: %s", error);
                 this->warnings++;
                 break;
             case ErrorType::ERROR_TYPE_ERROR:
+                eprintf_error("ERROR: %s", error);
+                this->errors++;
+                break;
             case ErrorType::ERROR_TYPE_FATAL_ERROR:
-                eprintf_error("%s", error);
+                eprintf_error("FATAL ERROR: %s", error);
                 this->errors++;
                 break;
         }

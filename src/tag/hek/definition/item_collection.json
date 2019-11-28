@@ -24,6 +24,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 84
     },
     {
@@ -49,7 +50,6 @@
             }
         ],
         "type": "struct",
-        "pre_compile": true,
         "size": 92
     }
 ]

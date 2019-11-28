@@ -3,7 +3,6 @@
 #include <invader/map/map.hpp>
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
 
 namespace Invader::Parser {
     void ShaderEnvironment::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
