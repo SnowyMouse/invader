@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
             case 'f':
                 bitmap_options.mipmap_fade = std::strtof(arguments[0], nullptr);
                 if(bitmap_options.mipmap_fade < 0.0F || bitmap_options.mipmap_fade > 1.0F) {
-                    eprintf("Mipmap fade must be between 0-1\n");
+                    eprintf_error("Mipmap fade must be between 0-1");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
                 }
                 else {
-                    eprintf("Unknown mipmap scale type %s\n", arguments[0]);
+                    eprintf_error("Unknown mipmap scale type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
                 else {
-                    eprintf("Unknown format %s\n", arguments[0]);
+                    eprintf_error("Unknown format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
                 }
                 else {
-                    eprintf("Unknown type %s\n", arguments[0]);
+                    eprintf_error("Unknown type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
                             bitmap_options.dither_blue = true;
                             break;
                         default:
-                            eprintf("Unknown channel %c.\n", *c);
+                            eprintf_error("Unknown channel %c.", *c);
                             std::exit(EXIT_FAILURE);
                     }
                 }
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.palettize = false;
                 }
                 else {
-                    eprintf("Unknown palettize setting %s\n", arguments[0]);
+                    eprintf_error("Unknown palettize setting %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
                 }
                 else {
-                    eprintf("Unknown usage %s\n", arguments[0]);
+                    eprintf_error("Unknown usage %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
                     case 512:
                         break;
                     default:
-                        eprintf("Invalid sprite budget %u.\n", bitmap_options.sprite_budget.value());
+                        eprintf_error("Invalid sprite budget %u.", bitmap_options.sprite_budget.value());
                         std::exit(EXIT_FAILURE);
                 }
 
@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
             }
         }
         if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
-            eprintf("Failed to find a valid bitmap %s in the data directory.\n", remaining_arguments[0]);
+            eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
     // Ensure it's lowercase
     for(char &c : bitmap_tag) {
         if(c >= 'A' && c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", bitmap_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.data());
             return EXIT_FAILURE;
         }
     }
@@ -324,11 +324,10 @@ int main(int argc, char *argv[]) {
     std::filesystem::path tags_path(bitmap_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
         if(std::strcmp(bitmap_options.tags, "tags") == 0) {
-            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
-            eprintf("Use -t to define a tags directory.\n");
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf("Directory %s was not found or is not a directory\n", bitmap_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", bitmap_options.tags);
         }
         return EXIT_FAILURE;
     }
@@ -341,7 +340,7 @@ int main(int argc, char *argv[]) {
     if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
         // Here's in case we do fail. It cleans up and exits.
         auto exit_on_failure = [&tag_read, &final_path]() {
-            eprintf("%s could not be read.\n", final_path.data());
+            eprintf_error("%s could not be read.", final_path.data());
             eprintf("Use --ignore-tag or -I to override.\n");
             std::fclose(tag_read);
             exit(EXIT_FAILURE);
@@ -481,7 +480,8 @@ int main(int argc, char *argv[]) {
     }
 
     if(image_pixels == nullptr) {
-        eprintf("Failed to find %s in %s\nValid formats are:\n", bitmap_tag.data(), bitmap_options.data);
+        eprintf_error("Failed to find %s in %s", bitmap_tag.data(), bitmap_options.data);
+        eprintf("Valid formats are:\n");
         for(auto *format : SUPPORTED_FORMATS) {
             eprintf("    %s\n", format);
         }
@@ -504,7 +504,7 @@ int main(int argc, char *argv[]) {
             return ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
         }
         catch (std::exception &e) {
-            oprintf("Failed to process the image: %s\n", e.what());
+            eprintf_error("Failed to process the image: %s", e.what());
             std::exit(1);
         };
     };
@@ -562,7 +562,7 @@ int main(int argc, char *argv[]) {
         write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
     }
     catch (std::exception &e) {
-        eprintf("Failed to generate bitmap data: %s\n", e.what());
+        eprintf_error("Failed to generate bitmap data: %s", e.what());
         std::exit(1);
     }
     oprintf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
@@ -671,12 +671,12 @@ int main(int argc, char *argv[]) {
     std::filesystem::create_directories(tag_path.parent_path());
     std::FILE *tag_write = std::fopen(final_path.data(), "wb");
     if(!tag_write) {
-        eprintf("Error: Failed to open %s for writing.\n", final_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.", final_path.data());;
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, tag_write) != 1) {
-        eprintf("Error: Failed to write to %s.\n", final_path.data());
+        eprintf_error("Error: Failed to write to %s.", final_path.data());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

@@ -43,7 +43,7 @@ int main(int argc, const char **argv) {
 
     // Open input map
     if(!input_map_data.has_value()) {
-        eprintf("Failed to read %s\n", input);
+        eprintf_error("Failed to read %s", input);
         return RETURN_FAILED_ERROR;
     }
 
@@ -77,7 +77,7 @@ int main(int argc, const char **argv) {
             std::fclose(f);
         }
         catch(std::exception &e) {
-            eprintf("Exception %s\n", e.what());
+            eprintf_error("Exception %s", e.what());
             return RETURN_FAILED_ERROR;
         }
     }
@@ -90,7 +90,7 @@ int main(int argc, const char **argv) {
             // Open output
             std::FILE *f = std::fopen(output, "wb");
             if(!f) {
-                eprintf("Failed to open %s\n", output);
+                eprintf_error("Failed to open %s", output);
                 return RETURN_FAILED_ERROR;
             }
 
@@ -111,7 +111,7 @@ int main(int argc, const char **argv) {
             std::fclose(f);
         }
         catch(std::exception &e) {
-            eprintf("Exception: %s\n", e.what());
+            eprintf_error("Exception: %s", e.what());
             return RETURN_FAILED_ERROR;
         }
     }

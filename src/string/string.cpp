@@ -87,7 +87,7 @@ template <typename T, Invader::TagClassInt C> static std::vector<std::byte> gene
 }
 
 static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
-    eprintf("Error: Unimplemented.\n");
+    eprintf_error("Error: Unimplemented.");
     exit(EXIT_FAILURE);
 }
 
@@ -152,7 +152,7 @@ int main(int argc, char * const *argv) {
             string_tag = string_tag_maybe.value();
         }
         else {
-            eprintf("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
+            eprintf_error("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
@@ -163,7 +163,7 @@ int main(int argc, char * const *argv) {
     // Ensure it's lowercase
     for(const char *c = string_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.data());
             return EXIT_FAILURE;
         }
     }
@@ -171,11 +171,10 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tags_path(string_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
         if(std::strcmp(string_options.tags, "tags") == 0) {
-            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
-            eprintf("Use -t to define a tags directory.\n");
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf("Directory %s was not found or is not a directory\n", string_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory\n", string_options.tags);
         }
         return EXIT_FAILURE;
     }
@@ -187,7 +186,7 @@ int main(int argc, char * const *argv) {
     // Open a file
     std::FILE *f = std::fopen(input_path.data(), "rb");
     if(!f) {
-        eprintf("Failed to open %s for reading.\n", input_path.data());
+        eprintf_error("Failed to open %s for reading.", input_path.data());
         return EXIT_FAILURE;
     }
 
@@ -244,12 +243,12 @@ int main(int argc, char * const *argv) {
     std::filesystem::create_directories(tag_path.parent_path());
     std::FILE *tag_write = std::fopen(output_path.data(), "wb");
     if(!tag_write) {
-        eprintf("Error: Failed to open %s for writing.\n", output_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.\n", output_path.data());;
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(final_data.data(), final_data.size(), 1, tag_write) != 1) {
-        eprintf("Error: Failed to write to %s.\n", output_path.data());
+        eprintf_error("Error: Failed to write to %s.\n", output_path.data());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

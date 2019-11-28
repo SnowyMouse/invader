@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
             case 's':
                 font_options.pixel_size = static_cast<int>(std::strtol(args[0], nullptr, 10));
                 if(font_options.pixel_size <= 0) {
-                    eprintf("Invalid font size %s\n", args[0]);
+                    eprintf_error("Invalid font size %s", args[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     // Ensure it's lowercase
     for(const char *c = font_tag.data(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", font_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", font_tag.data());
             return EXIT_FAILURE;
         }
     }
@@ -120,11 +120,10 @@ int main(int argc, char *argv[]) {
     std::filesystem::path tags_path(font_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
         if(std::strcmp(font_options.tags, "tags") == 0) {
-            eprintf("No tags directory was given, and \"tags\" was not found or is not a directory.\n");
-            eprintf("Use -t to define a tags directory.\n");
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf("Directory %s was not found or is not a directory\n", font_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", font_options.tags);
         }
         return EXIT_FAILURE;
     }
@@ -145,7 +144,7 @@ int main(int argc, char *argv[]) {
         }
     }
     if(ext == FontExtension::FONT_EXTENSION_COUNT) {
-        eprintf("Failed to find a valid ttf or otf %s in the data directory.\n", remaining_arguments[0]);
+        eprintf_error("Failed to find a valid ttf or otf %s in the data directory.", remaining_arguments[0]);
         return EXIT_FAILURE;
     }
 
@@ -153,15 +152,15 @@ int main(int argc, char *argv[]) {
     FT_Library library;
     FT_Face face;
     if(FT_Init_FreeType(&library)) {
-        eprintf("Failed to initialize freetype.\n");
+        eprintf_error("Failed to initialize freetype.");
         return EXIT_FAILURE;
     }
     if(FT_New_Face(library, final_ttf_path.data(), 0, &face)) {
-        eprintf("Failed to open %s.\n", final_ttf_path.data());
+        eprintf_error("Failed to open %s.", final_ttf_path.data());
         return EXIT_FAILURE;
     }
     if(FT_Set_Pixel_Sizes(face, font_options.pixel_size, font_options.pixel_size)) {
-        eprintf("Failed to set pixel size %i.\n", font_options.pixel_size);
+        eprintf_error("Failed to set pixel size %i.", font_options.pixel_size);
         return EXIT_FAILURE;
     }
 
@@ -170,11 +169,11 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < 16384; i++) {
         auto index = FT_Get_Char_Index(face, i);
         if(FT_Load_Glyph(face, index, FT_LOAD_DEFAULT)) {
-            eprintf("Failed to load glyph %i\n", i);
+            eprintf_error("Failed to load glyph %i", i);
             return EXIT_FAILURE;
         }
         if(FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) {
-            eprintf("Failed to render glyph %i\n", i);
+            eprintf_error("Failed to render glyph %i", i);
             return EXIT_FAILURE;
         }
         RenderedCharacter c;
@@ -283,7 +282,7 @@ int main(int argc, char *argv[]) {
     std::filesystem::create_directories(tag_path.parent_path());
     std::FILE *f = std::fopen(final_tag_path.data(), "wb");
     if(!f) {
-        eprintf("Failed to open %s for writing.\n", final_tag_path.data());
+        eprintf_error("Failed to open %s for writing.", final_tag_path.data());
         return EXIT_FAILURE;
     }
 

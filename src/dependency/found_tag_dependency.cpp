@@ -75,14 +75,14 @@ namespace Invader {
                         break;
                     }
                     catch (std::exception &e) {
-                        eprintf("Failed to compile tag %s: %s\n", tag_path.string().data(), e.what());
+                        eprintf_error("Failed to compile tag %s: %s", tag_path.string().data(), e.what());
                         success = false;
                         return;
                     }
                 }
 
                 if(!found) {
-                    eprintf("Failed to open tag %s.%s.\n", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
+                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
                     success = false;
                     return;
                 }
@@ -134,7 +134,7 @@ namespace Invader {
                             // Attempt to open and read the tag
                             std::FILE *f = std::fopen(file.path().string().data(), "rb");
                             if(!f) {
-                                eprintf("Failed to open tag %s.\n", file.path().string().data());
+                                eprintf_error("Failed to open tag %s.", file.path().string().data());
                                 continue;
                             }
 
@@ -156,7 +156,7 @@ namespace Invader {
                                 }
                             }
                             catch (std::exception &e) {
-                                eprintf("Warning: Failed to compile tag %s: %s\n", file.path().string().data(), e.what());
+                                eprintf_warn("Warning: Failed to compile tag %s: %s", file.path().string().data(), e.what());
                             }
                         }
                     }

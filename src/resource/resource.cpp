@@ -74,7 +74,7 @@ int main(int argc, const char **argv) {
                     resource_options.default_fn = get_default_loc_resources;
                 }
                 else {
-                    eprintf("Invalid type %s. Use --help for more information.\n", arguments[0]);
+                    eprintf_error("Invalid type %s. Use --help for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 resource_options.resource_map_set = true;
@@ -83,12 +83,12 @@ int main(int argc, const char **argv) {
     });
 
     if(!resource_options.resource_map_set) {
-        eprintf("No resource map type was given. Use -h for more information.\n");
+        eprintf_error("No resource map type was given. Use -h for more information.");
         return EXIT_FAILURE;
     }
 
     if(resource_options.retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
-        eprintf("Only bitmaps.map and sounds.map can be made for retail.\n");
+        eprintf_error("Only bitmaps.map and sounds.map can be made for retail.");
         return EXIT_FAILURE;
     }
 
@@ -141,14 +141,14 @@ int main(int argc, const char **argv) {
         #define ATTEMPT_TO_OPEN(extension) { \
             std::FILE *f = open_tag(extension); \
             if(!f) { \
-                eprintf("Failed to open %s" extension "\n", tag_path.data()); \
+                eprintf_error("Failed to open %s" extension, tag_path.data()); \
                 return EXIT_FAILURE; \
             } \
             std::fseek(f, 0, SEEK_END); \
             tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
             std::fseek(f, 0, SEEK_SET); \
             if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                eprintf("Failed to read %s" extension "\n", tag_path.data()); \
+                eprintf_error("Failed to read %s" extension, tag_path.data()); \
                 return EXIT_FAILURE; \
             } \
             std::fclose(f); \
@@ -173,7 +173,7 @@ int main(int argc, const char **argv) {
                         tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
                         std::fseek(f, 0, SEEK_SET); \
                         if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                            eprintf("Failed to read %s" extension "\n", tag_path.data()); \
+                            eprintf_error("Failed to read %s" extension, tag_path.data()); \
                             return EXIT_FAILURE; \
                         } \
                         std::fclose(f); \
@@ -185,7 +185,7 @@ int main(int argc, const char **argv) {
                 #undef DO_THIS_FOR_ME_PLEASE
 
                 if(tag_data.size() == 0) {
-                    eprintf("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.\n", tag_path.data());
+                    eprintf_error("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.", tag_path.data());
                 }
 
                 break;
@@ -340,7 +340,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch(std::exception &e) {
-            eprintf("Failed to compile %s.%s due to an exception: %s\n", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
+            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
             return EXIT_FAILURE;
         }
 
@@ -383,14 +383,14 @@ int main(int argc, const char **argv) {
     *reinterpret_cast<ResourceMapHeader *>(resource_data.data()) = header;
 
     if(resource_data.size() >= 0xFFFFFFFF) {
-        eprintf("Resource map exceeds 4 GiB.\n");
+        eprintf_error("Resource map exceeds 4 GiB.");
         return EXIT_FAILURE;
     }
 
     // Open the file
     std::FILE *f = std::fopen(map_path.string().data(), "wb");
     if(!f) {
-        eprintf("Failed to open %s for writing.\n", map_path.string().data());
+        eprintf_error("Failed to open %s for writing.", map_path.string().data());
         return EXIT_FAILURE;
     }
 

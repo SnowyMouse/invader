@@ -66,7 +66,7 @@ int main(int argc, char * const *argv) {
             tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
         }
         else {
-            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
+            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
@@ -89,11 +89,11 @@ int main(int argc, char * const *argv) {
 
     auto tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
     if(c == nullptr) {
-        eprintf("Invalid tag path %s. Missing extension.\n", tag_path_to_find);
+        eprintf_error("Invalid tag path %s. Missing extension.", tag_path_to_find);
         return EXIT_FAILURE;
     }
     else if(tag_int_to_find == Invader::HEK::TAG_CLASS_NULL) {
-        eprintf("Invalid tag path %s. Unknown tag class %s.\n", tag_path_to_find, c);
+        eprintf_error("Invalid tag path %s. Unknown tag class %s.", tag_path_to_find, c);
         return EXIT_FAILURE;
     }
 

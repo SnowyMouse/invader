@@ -104,7 +104,7 @@ int main(int argc, const char **argv) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
                 else {
-                    eprintf("Unknown engine type %s.\n", arguments[0]);
+                    eprintf_error("Unknown engine type %s.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -128,7 +128,7 @@ int main(int argc, const char **argv) {
     });
 
     if(build_options.always_index_tags && build_options.no_external_tags) {
-        eprintf("%s: --no-index-tags conflicts with --always-index-tags.\n", argv[0]);
+        eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -145,7 +145,7 @@ int main(int argc, const char **argv) {
             scenario = scenario_maybe.value();
         }
         else {
-            eprintf("Failed to find a valid tag %s in the tags directory\n", remaining_arguments[0]);
+            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
             return RETURN_FAILED_UNHANDLED_ARGUMENT;
         }
     }
@@ -177,7 +177,7 @@ int main(int argc, const char **argv) {
                 }
 
                 if(!extension) {
-                    eprintf("Invalid index given. \"%s\" is missing an extension.\n", tag.data());
+                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.data());
                     return EXIT_FAILURE;
                 }
 
@@ -188,7 +188,7 @@ int main(int argc, const char **argv) {
                 for(char &c : substr) {
                     c = std::tolower(c);
                 }
-                
+
                 with_index.emplace_back(extension_to_tag_class(extension), substr);
             }
         }
@@ -198,13 +198,13 @@ int main(int argc, const char **argv) {
         if(build_options.forged_crc) {
             std::size_t given_crc32_length = std::strlen(build_options.forged_crc);
             if(given_crc32_length > 8 || given_crc32_length < 1) {
-                eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
+                eprintf_error("Invalid CRC32 %s (must be 1-8 digits)", argv[2]);
                 return 1;
             }
             for(std::size_t i = 0; i < given_crc32_length; i++) {
                 char c = std::tolower(build_options.forged_crc[i]);
                 if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
-                    eprintf("Invalid CRC32 %s (must be hexadecimal)\n", argv[2]);
+                    eprintf_error("Invalid CRC32 %s (must be hexadecimal)", argv[2]);
                     return 1;
                 }
             }
@@ -258,13 +258,13 @@ int main(int argc, const char **argv) {
 
         // Check if file is open
         if(!file) {
-            eprintf("Failed to open %s for writing.\n", final_file.data());
+            eprintf_error("Failed to open %s for writing.", final_file.data());
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
         // Write to file
         if(std::fwrite(map.data(), map.size(), 1, file) == 0) {
-            eprintf("Failed to save.\n");
+            eprintf_error("Failed to save.");
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
@@ -277,8 +277,8 @@ int main(int argc, const char **argv) {
         return RETURN_OK;
     }
     catch(std::exception &exception) {
-        eprintf("Failed to compile the map.\n");
-        eprintf("%s\n", exception.what());
+        eprintf_error("Failed to compile the map.");
+        eprintf_error("%s", exception.what());
         return RETURN_FAILED_EXCEPTION_ERROR;
     }
 }

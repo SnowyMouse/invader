@@ -34,7 +34,7 @@ int main(int argc, const char **argv) {
             case 'l':
                 compress_options.compression_level = std::strtol(arguments[0], nullptr, 10);
                 if(compress_options.compression_level < 1 || compress_options.compression_level > 19) {
-                    eprintf("Compression level must be between 1 and 19\n");
+                    eprintf_error("Compression level must be between 1 and 19");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
     auto start = std::chrono::steady_clock::now();
     auto input_file = File::open_file(input);
     if(!input_file.has_value()) {
-        eprintf("Failed to open %s\n", input);
+        eprintf_error("Failed to open %s", input);
         return EXIT_FAILURE;
     }
     auto input_file_data = input_file.value();
@@ -70,15 +70,15 @@ int main(int argc, const char **argv) {
             decompressed_data = Compression::decompress_map_data(input_file_data.data(), input_file_data.size());
         }
         catch(Invader::MapNeedsCompressedException &) {
-            eprintf("Failed to decompress %s: map is already uncompressed\n", compress_options.output);
+            eprintf_error("Failed to decompress %s: map is already uncompressed", compress_options.output);
             return EXIT_FAILURE;
         }
         catch(std::exception &e) {
-            eprintf("Failed to decompress %s: %s\n", compress_options.output, e.what());
+            eprintf_error("Failed to decompress %s: %s", compress_options.output, e.what());
             return EXIT_FAILURE;
         }
         if(!File::save_file(compress_options.output, decompressed_data)) {
-            eprintf("Failed to save %s\n", compress_options.output);
+            eprintf_error("Failed to save %s", compress_options.output);
             return EXIT_FAILURE;
         }
         auto finished = TIME_ELAPSED_MS;
@@ -90,15 +90,15 @@ int main(int argc, const char **argv) {
             compressed_data = Compression::compress_map_data(input_file_data.data(), input_file_data.size(), static_cast<int>(compress_options.compression_level));
         }
         catch(Invader::MapNeedsDecompressedException &) {
-            eprintf("Failed to decompress %s: map is already compressed\n", compress_options.output);
+            eprintf_error("Failed to decompress %s: map is already compressed", compress_options.output);
             return EXIT_FAILURE;
         }
         catch(std::exception &e) {
-            eprintf("Failed to compress %s: %s\n", compress_options.output, e.what());
+            eprintf_error("Failed to compress %s: %s", compress_options.output, e.what());
             return EXIT_FAILURE;
         }
         if(!File::save_file(compress_options.output, compressed_data)) {
-            eprintf("Failed to save %s\n", compress_options.output);
+            eprintf_error("Failed to save %s", compress_options.output);
             return EXIT_FAILURE;
         }
         auto finished = TIME_ELAPSED_MS;

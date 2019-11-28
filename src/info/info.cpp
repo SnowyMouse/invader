@@ -94,7 +94,7 @@ int main(int argc, const char **argv) {
                     map_info_options.type = DISPLAY_STUB_COUNT;
                 }
                 else {
-                    eprintf("Unknown type %s\n", args[0]);
+                    eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -112,7 +112,7 @@ int main(int argc, const char **argv) {
         map = std::make_unique<Map>(Map::map_with_move(std::move(file)));
     }
     catch (std::exception &e) {
-        eprintf("Failed to parse %s: %s\n", remaining_arguments[0], e.what());
+        eprintf_error("Failed to parse %s: %s", remaining_arguments[0], e.what());
         return EXIT_FAILURE;
     }
 
