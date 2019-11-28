@@ -146,6 +146,36 @@ namespace Invader {
          */
         std::size_t dedupe_structs();
 
+        enum ErrorType {
+            /**
+             * These are warnings that can be turned off. They report issues that don't affect the game, but the user may want to be made aware of them.
+             */
+            ERROR_TYPE_WARNING_PEDANTIC,
+
+            /**
+             * These are warnings that cannot be turned off. They report issues that do affect the game but still result in a valid cache file.
+             */
+            ERROR_TYPE_WARNING,
+
+            /**
+             * These are errors that prevent saving the cache file. They report issues that result in a potentially unplayable yet still technically valid cache file.
+             */
+            ERROR_TYPE_ERROR,
+
+            /**
+             * These are errors that halt building the cache file. They report issues that result in invalid and/or unusable cache files.
+             */
+            ERROR_TYPE_FATAL_ERROR
+        };
+
+        /**
+         * Report an error
+         * @param type      error type
+         * @param error     error message
+         * @param tag_index tag index
+         */
+        void report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index = std::nullopt);
+
     private:
         BuildWorkload2() = default;
 
@@ -157,7 +187,16 @@ namespace Invader {
         const std::vector<std::string> *tags_directories;
         void add_tags();
         std::size_t dedupe_tag_space;
+        bool hide_pedantic_warnings = false;
+        std::size_t warnings = 0;
+        std::size_t errors = 0;
     };
+
+    #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
+        char report_error_message[256]; \
+        std::snprintf(report_error_message, sizeof(report_error_message), __VA_ARGS__); \
+        workload.report_error(Invader::BuildWorkload2::ErrorType::type, report_error_message, tag_index); \
+    }
 }
 
 #endif

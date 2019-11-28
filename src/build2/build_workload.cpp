@@ -45,6 +45,16 @@ namespace Invader {
         }
 
         auto return_value = workload.build_cache_file();
+        if(workload.errors) {
+            eprintf_error("Build failed with %zu error%s and %zu warning%s", workload.errors, workload.errors == 1 ? "" : "s", workload.warnings, workload.warnings == 1 ? "" : "s");
+            throw InvalidTagDataException();
+        }
+        else if(workload.warnings) {
+            eprintf_warn("Build successful with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
+        }
+        else {
+            eprintf_success("Build successful");
+        }
         return return_value;
     }
 
@@ -289,5 +299,28 @@ namespace Invader {
         }
 
         return total_savings;
+    }
+
+    void BuildWorkload2::report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index) {
+        switch(type) {
+            case ErrorType::ERROR_TYPE_WARNING_PEDANTIC:
+                if(this->hide_pedantic_warnings) {
+                    return;
+                }
+                // fallthrough
+            case ErrorType::ERROR_TYPE_WARNING:
+                eprintf_warn("%s", error);
+                this->warnings++;
+                break;
+            case ErrorType::ERROR_TYPE_ERROR:
+            case ErrorType::ERROR_TYPE_FATAL_ERROR:
+                eprintf_error("%s", error);
+                this->errors++;
+                break;
+        }
+        if(tag_index.has_value()) {
+            auto &tag = this->tags[*tag_index];
+            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).data(), tag_class_to_extension(tag.tag_class_int));
+        }
     }
 }
