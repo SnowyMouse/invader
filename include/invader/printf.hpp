@@ -31,7 +31,7 @@ else {\
 }
 #define oprintf(...) std::fprintf(stdout, __VA_ARGS__)
 #define eprintf_success(...) if(ON_COLOR_TERM) {\
-    std::fprintf(stdout, "\x1B[1;38;5;2m"); \
+    std::fprintf(stdout, "\x1B[38;5;2m"); \
     std::fprintf(stdout, __VA_ARGS__); \
     std::fprintf(stdout, "\x1B[m\n"); \
 } \

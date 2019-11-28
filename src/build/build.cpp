@@ -127,6 +127,15 @@ int main(int argc, const char **argv) {
         }
     });
 
+    if(ON_COLOR_TERM) {
+        if(std::strcmp(build_options.forged_crc, "56617021") == 0) {
+            std::fprintf(stdout, "\x1B[38;5;51m");
+        }
+        else if(std::strcmp(build_options.forged_crc, "43687521") == 0) {
+            std::fprintf(stdout, "\x1B[38;5;204m");
+        }
+    }
+
     if(build_options.always_index_tags && build_options.no_external_tags) {
         eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
         return EXIT_FAILURE;
@@ -271,7 +280,13 @@ int main(int argc, const char **argv) {
         std::fclose(file);
 
         if(!build_options.quiet) {
-            oprintf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
+            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
+            if(ON_COLOR_TERM) {
+                oprintf("\x1B[m\n");
+            }
+            else {
+                oprintf("\n");
+            }
         }
 
         return RETURN_OK;
