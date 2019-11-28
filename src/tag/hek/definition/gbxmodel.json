@@ -509,6 +509,7 @@
         "type": "struct",
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
+        "pre_compile": true,
         "size": 132
     },
     {
@@ -664,6 +665,7 @@
         ],
         "type": "struct",
         "post_cache_deformat": true,
+        "pre_compile": true,
         "size": 232
     }
 ]

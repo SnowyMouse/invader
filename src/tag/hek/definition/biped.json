@@ -315,6 +315,7 @@
         ],
         "type": "struct",
         "inherits": "Unit",
+        "pre_compile": true,
         "size": 1268
     }
 ]

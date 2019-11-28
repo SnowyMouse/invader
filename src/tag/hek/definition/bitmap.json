@@ -262,6 +262,7 @@
         ],
         "type": "struct",
         "size": 48,
+        "pre_compile": true,
         "unsafe_to_dedupe": true
     },
     {
@@ -361,6 +362,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "post_cache_parse": true,
         "size": 108
     }

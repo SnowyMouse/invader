@@ -366,6 +366,7 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
+        "pre_compile": true,
         "size": 256
     },
     {
@@ -1559,6 +1560,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 648
     },
     {

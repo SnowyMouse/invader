@@ -9,6 +9,7 @@
         ],
         "type": "struct",
         "inherits": "Item",
+        "pre_compile": true,
         "size": 944
     }
 ]

@@ -4,6 +4,7 @@
         "fields": [],
         "type": "struct",
         "inherits": "BasicObject",
+        "pre_compile": true,
         "size": 508
     }
 ]

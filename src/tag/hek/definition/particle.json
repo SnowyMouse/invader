@@ -315,6 +315,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 356
     }
 ]

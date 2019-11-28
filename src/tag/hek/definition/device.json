@@ -182,6 +182,7 @@
         ],
         "type": "struct",
         "inherits": "Object",
+        "pre_compile": true,
         "size": 656
     }
 ]

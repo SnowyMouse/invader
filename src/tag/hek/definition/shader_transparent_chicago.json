@@ -219,6 +219,7 @@
         ],
         "type": "struct",
         "inherits": "Shader",
+        "pre_compile": true,
         "size": 108
     }
 ]

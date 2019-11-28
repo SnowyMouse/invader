@@ -254,6 +254,8 @@ for s in all_structs_arranged:
     struct_name = s["name"]
     post_cache_deformat = "post_cache_deformat" in s and s["post_cache_deformat"]
     post_cache_parse = "post_cache_parse" in s and s["post_cache_parse"]
+    pre_compile = "pre_compile" in s and s["pre_compile"]
+    post_compile = "post_compile" in s and s["post_compile"]
     private_functions = post_cache_deformat
 
     hpp.write("    struct {} {{\n".format(struct_name))
@@ -340,9 +342,15 @@ for s in all_structs_arranged:
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].unsafe_to_dedupe = {};\n".format("false" if ("unsafe_to_dedupe" in s and s["unsafe_to_dedupe"]) else "true"))
+    if pre_compile:
+        cpp_cache_format_data.write("        if(!this->cache_formatted) {\n")
+        cpp_cache_format_data.write("           this->pre_compile(workload, struct_index, offset);\n")
+        cpp_cache_format_data.write("        }\n")
     cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
     for struct in all_used_structs:
+        if ("non_cached" in struct and struct["non_cached"]):
+            continue
         name = struct["name"]
         if struct["type"] == "TagDependency":
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
@@ -388,6 +396,8 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
         else:
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
+        if post_compile:
+            cpp_cache_format_data.write("        this->post_compile(workload, struct_index, offset);\n".format(name, name))
     cpp_cache_format_data.write("    }\n")
 
     # generate_hek_tag_data()
@@ -673,6 +683,12 @@ for s in all_structs_arranged:
 
     if post_cache_parse:
         hpp.write("    void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
+
+    if pre_compile:
+        hpp.write("    void pre_compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset);\n")
+
+    if post_compile:
+        hpp.write("    void post_compile(BuildWorkload2 &workload, std::size_t struct_index, std::size_t offset);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")
