@@ -59,7 +59,7 @@ namespace Invader::HEK {
                 reflexive.samples.external = 0;
 
                 // If 16-bit PCM, then swap the endianness of this stuff
-                if(reflexive.compression == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+                if(reflexive.format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
                     auto *start_big = reinterpret_cast<BigEndian<std::uint16_t> *>(compiled.asset_data.data() + asset_offset);
                     auto *end_big = reinterpret_cast<BigEndian<std::uint16_t> *>(compiled.asset_data.data() + compiled.asset_data.size());
                     auto *start_little = reinterpret_cast<LittleEndian<std::uint16_t> *>(compiled.asset_data.data() + asset_offset);

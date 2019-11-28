@@ -108,7 +108,7 @@
                 "type": "Fraction"
             },
             {
-                "name": "compression",
+                "name": "format",
                 "type": "SoundFormat"
             },
             {
@@ -216,6 +216,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 72
     },
     {
@@ -311,7 +312,7 @@
                 "type": "SoundEncoding"
             },
             {
-                "name": "compression",
+                "name": "format",
                 "type": "SoundFormat"
             },
             {
