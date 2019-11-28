@@ -132,11 +132,11 @@ int main(int argc, const char **argv) {
         }
     });
 
-    if(ON_COLOR_TERM) {
-        if(std::strcmp(build_options.forged_crc, "56617021") == 0) {
+    if(build_options.forged_crc && ON_COLOR_TERM) {
+        if(std::strcmp(build_options.forged_crc, "21706156") == 0) {
             std::fprintf(stdout, "\x1B[38;5;51m");
         }
-        else if(std::strcmp(build_options.forged_crc, "43687521") == 0) {
+        else if(std::strcmp(build_options.forged_crc, "21756843") == 0) {
             std::fprintf(stdout, "\x1B[38;5;204m");
         }
     }
