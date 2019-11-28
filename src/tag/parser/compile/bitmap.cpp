@@ -10,14 +10,14 @@ namespace Invader::Parser {
     void BitmapData::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
-        std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data)->bitmap_tag_id)) - data;
+        std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
         auto &d = s.dependencies.emplace_back();
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
         d.tag_id_only = true;
     }
 
-    void Bitmap::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+    void Bitmap::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
         for(auto &data : this->bitmap_data) {
             std::size_t data_index = &data - this->bitmap_data.data();
             bool compressed = data.flags.compressed;
