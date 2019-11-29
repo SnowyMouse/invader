@@ -15,4 +15,8 @@ namespace Invader::Parser {
         this->cosine_maximum_looking_deviation.i = std::cos(this->maximum_looking_deviation.i);
         this->cosine_maximum_looking_deviation.j = std::cos(this->maximum_looking_deviation.j);
     }
+    
+    void ActorVariant::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+        this->grenade_velocity /= TICK_RATE;
+    }
 }
