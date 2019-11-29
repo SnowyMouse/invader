@@ -44,7 +44,7 @@ namespace Invader {
             }
         }
 
-        if(this->indexed || this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+        if(this->indexed || (this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 
