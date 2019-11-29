@@ -208,7 +208,7 @@ namespace Invader {
                     auto &new_struct = this->structs.emplace_back();
                     this->tags[return_value].base_struct = &new_struct - this->structs.data();
                     new_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
-                    tag_data.compile(*this, return_value, &new_struct - this->structs.data());
+                    tag_data.compile(*this, return_value, &new_struct - this->structs.data(), this->bsp_count++);
                     break;
                 }
                 default:
@@ -261,7 +261,7 @@ namespace Invader {
             for(std::size_t i = 0; i < this->structs.size() && !found_something; i++) {
                 for(std::size_t j = i + 1; j < this->structs.size(); j++) {
                     // Check if the structs are the same
-                    if(this->structs[i] == this->structs[j]) {
+                    if(this->structs[i].can_dedupe(this->structs[j])) {
                         // If so, go through every struct pointer. If they equal j, set to i. If they're greater than j, decrement
                         for(std::size_t k = 0; k < i; k++) {
                             for(auto &pointer : this->structs[k].pointers) {

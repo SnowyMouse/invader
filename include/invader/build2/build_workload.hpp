@@ -92,7 +92,7 @@ namespace Invader {
             bool unsafe_to_dedupe = false;
 
             /** BSP index */
-            std::size_t bsp = 0;
+            std::optional<std::size_t> bsp = 0;
 
             /**
              * Resolve the pointer
@@ -117,8 +117,13 @@ namespace Invader {
                 return this->resolve_pointer(reinterpret_cast<const std::byte *>(pointer_pointer) - this->data.data());
             }
 
-            bool operator==(const BuildWorkloadStruct &other) const noexcept {
-                return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && this->bsp == other.bsp && this->dependencies == other.dependencies && this->pointers == other.pointers && this->data == other.data;
+            /**
+             * Get whether or not a struct can be safely deduped and replaced with this
+             * @param  other other struct to check
+             * @return       true if it can be
+             */
+            bool can_dedupe(const BuildWorkloadStruct &other) {
+                return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && (!this->bsp.has_value() || this->bsp == other.bsp) && this->dependencies == other.dependencies && this->pointers == other.pointers && this->data == other.data;
             }
         };
 
@@ -157,6 +162,9 @@ namespace Invader {
 
         /** BSP struct */
         std::optional<std::size_t> bsp_struct;
+
+        /** BSP count */
+        std::size_t bsp_count = 0;
 
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
