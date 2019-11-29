@@ -1538,23 +1538,27 @@
             },
             {
                 "name": "minimum experience",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "maximum experience",
-                "type": "int32"
+                "type": "uint32",
+                "default": 10
             },
             {
                 "name": "minimum player count",
-                "type": "int32"
+                "type": "uint32",
+                "default": 1
             },
             {
                 "name": "maximum player count",
-                "type": "int32"
+                "type": "uint32",
+                "default": 16
             },
             {
                 "name": "rating",
-                "type": "int32"
+                "type": "uint32",
+                "default": 100
             },
             {
                 "type": "pad",
@@ -1575,13 +1579,15 @@
                 "name": "sounds",
                 "type": "TagReflexive",
                 "struct": "GlobalsSound",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "camera",
                 "type": "TagReflexive",
                 "struct": "GlobalsCamera",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "player control",
@@ -1593,25 +1599,29 @@
                 "name": "difficulty",
                 "type": "TagReflexive",
                 "struct": "GlobalsDifficulty",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "grenades",
                 "type": "TagReflexive",
                 "struct": "GlobalsGrenade",
-                "compound": true
+                "compound": true,
+                "minimum": 2
             },
             {
                 "name": "rasterizer data",
                 "type": "TagReflexive",
                 "struct": "GlobalsRasterizerData",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "interface bitmaps",
                 "type": "TagReflexive",
                 "struct": "GlobalsInterfaceBitmaps",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "weapon list",
@@ -1635,13 +1645,15 @@
                 "name": "player information",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerInformation",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "first person interface",
                 "type": "TagReflexive",
                 "struct": "GlobalsFirstPersonInterface",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "falling damage",
@@ -1659,7 +1671,8 @@
                 "name": "playlist members",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlaylistMember",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             }
         ],
         "type": "struct",

@@ -23,15 +23,26 @@ namespace Invader::Parser {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
         }
-        else if(this->multiplayer_information.size() != 1) {
-            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
+        else {
+            if(this->multiplayer_information.size() != 1) {
+                workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
+            }
+            if(this->weapon_list.size() < 16) {
+                workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have at least 16 weapons blocks which is required for the map type", tag_index);
+            }
         }
 
         if(*workload.cache_file_type == HEK::CacheFileType::CACHE_FILE_USER_INTERFACE) {
             this->falling_damage.clear();
+            this->materials.clear();
         }
-        else if(this->falling_damage.size() != 1) {
-            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
+        else {
+            if(this->falling_damage.size() != 1) {
+                workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
+            }
+            if(this->materials.size() != 32) {
+                workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 32 material blocks which is required for the map type", tag_index);
+            }
         }
     }
 }

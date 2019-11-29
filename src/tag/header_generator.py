@@ -369,6 +369,16 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        }\n")
         elif struct["type"] == "TagReflexive":
             cpp_cache_format_data.write("        std::size_t t_{}_count = this->{}.size();\n".format(name, name))
+            if "minimum" in struct:
+                minimum = struct["minimum"]
+                cpp_cache_format_data.write("        if(t_{}_count < {}) {{\n".format(name, minimum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have at least {} block{}\", tag_index);\n".format(name, minimum, "" if minimum == 1 else "s"))
+                cpp_cache_format_data.write("        }\n")
+            if "maximum" in struct:
+                maximum = struct["maximum"]
+                cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, minimum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have no more than {} block{}\", tag_index);\n".format(name, maximum, "" if maximum == 1 else "s"))
+                cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
             cpp_cache_format_data.write("            r.{}.count = static_cast<std::uint32_t>(t_{}_count);\n".format(name, name))
             cpp_cache_format_data.write("            auto &n = workload.structs.emplace_back();\n")
