@@ -158,11 +158,13 @@
             },
             {
                 "name": "map u scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "map v scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "map u offset",
@@ -198,7 +200,8 @@
             },
             {
                 "name": "u animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "u animation phase",
@@ -206,7 +209,8 @@
             },
             {
                 "name": "u animation scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "v animation source",
@@ -218,7 +222,8 @@
             },
             {
                 "name": "v animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "v animation phase",
@@ -226,7 +231,8 @@
             },
             {
                 "name": "v animation scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "rotation animation source",
@@ -238,7 +244,8 @@
             },
             {
                 "name": "rotation animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "rotation animation phase",
@@ -246,7 +253,8 @@
             },
             {
                 "name": "rotation animation scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "rotation animation center",

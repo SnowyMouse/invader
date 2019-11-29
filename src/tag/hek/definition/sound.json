@@ -249,15 +249,18 @@
             {
                 "name": "random pitch bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "name": "inner cone angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 6.28318548202515
             },
             {
                 "name": "outer cone angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 6.28318548202515
             },
             {
                 "name": "outer cone gain",

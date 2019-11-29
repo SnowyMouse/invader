@@ -117,7 +117,8 @@
             },
             {
                 "name": "gain",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "flags",
@@ -160,7 +161,8 @@
             {
                 "name": "zero detail unknown floats",
                 "type": "float",
-                "count": 2
+                "count": 2,
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "name": "one detail sound period",
@@ -169,15 +171,22 @@
             {
                 "name": "one detail unknown floats",
                 "type": "float",
-                "count": 2
+                "count": 2,
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "name": "unknown int",
-                "type": "int32"
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true,
+                "default": 4294967295
             },
             {
                 "name": "unknown float",
-                "type": "float"
+                "type": "float",
+                "endian": "little",
+                "cache_only": true,
+                "default": 15.0
             },
             {
                 "type": "pad",

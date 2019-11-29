@@ -21,7 +21,8 @@
             },
             {
                 "name": "offset exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "length",
@@ -41,7 +42,8 @@
             },
             {
                 "name": "radius exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -59,11 +61,13 @@
             },
             {
                 "name": "tint color exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "brightness exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -103,11 +107,13 @@
             },
             {
                 "name": "perpendicular brightness scale",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "parallel brightness scale",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "brightness scale source",

@@ -20,7 +20,8 @@
             },
             {
                 "name": "intensity exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "offset source",
@@ -36,7 +37,8 @@
             },
             {
                 "name": "offset exponent",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",

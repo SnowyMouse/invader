@@ -418,7 +418,8 @@
             },
             {
                 "name": "centroid primary weight",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "centroid secondary weight",
@@ -627,11 +628,13 @@
             },
             {
                 "name": "base map u scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "base map v scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",

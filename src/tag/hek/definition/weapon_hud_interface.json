@@ -148,11 +148,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -266,11 +268,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -390,11 +394,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -492,11 +498,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -621,11 +629,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",

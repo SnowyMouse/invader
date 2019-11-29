@@ -653,10 +653,32 @@ for s in all_structs_arranged:
             elif "bounds" in struct and struct["bounds"]:
                 cpp_read_hek_data.write("        r.{}.from = h.{}.from;\n".format(name, name))
                 cpp_read_hek_data.write("        r.{}.to = h.{}.to;\n".format(name, name))
+                if "default" in struct:
+                    default = struct["default"]
+                    suffix = "F" if isinstance(default[0], float) else ""
+                    cpp_read_hek_data.write("        if(r.{}.from == 0) {{\n".format(name))
+                    cpp_read_hek_data.write("            r.{}.from = {}{};\n".format(name, default[0], suffix))
+                    cpp_read_hek_data.write("        }\n")
+                    cpp_read_hek_data.write("        if(r.{}.to == 0) {{\n".format(name))
+                    cpp_read_hek_data.write("            r.{}.to = {}{};\n".format(name, default[1], suffix))
+                    cpp_read_hek_data.write("        }\n")
             elif "count" in struct and struct["count"] > 1:
                 cpp_read_hek_data.write("        std::copy(h.{}, h.{} + {}, r.{});\n".format(name, name, struct["count"], name))
+                if "default" in struct:
+                    default = struct["default"]
+                    suffix = "F" if isinstance(default[0], float) else ""
+                    for q in range(struct["count"]):
+                        cpp_read_hek_data.write("        if(r.{}[{}] == 0) {{\n".format(name, q))
+                        cpp_read_hek_data.write("            r.{}[{}] = {}{};\n".format(name, q, default[q], suffix))
+                        cpp_read_hek_data.write("        }\n")
             else:
                 cpp_read_hek_data.write("        r.{} = h.{};\n".format(name, name))
+                if "default" in struct:
+                    default = struct["default"]
+                    suffix = "F" if isinstance(default, float) else ""
+                    cpp_read_hek_data.write("        if(r.{} == 0) {{\n".format(name))
+                    cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
+                    cpp_read_hek_data.write("        }\n")
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 

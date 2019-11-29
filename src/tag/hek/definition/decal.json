@@ -97,7 +97,8 @@
             },
             {
                 "name": "animation speed",
-                "type": "uint16"
+                "type": "uint16",
+                "default": 1
             },
             {
                 "type": "pad",

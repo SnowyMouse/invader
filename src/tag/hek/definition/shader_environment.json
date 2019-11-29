@@ -172,7 +172,8 @@
             },
             {
                 "name": "bump map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "bump map",
@@ -203,11 +204,13 @@
             },
             {
                 "name": "u animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "u animation scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "v animation function",
@@ -219,11 +222,13 @@
             },
             {
                 "name": "v animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "v animation scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -261,7 +266,8 @@
             },
             {
                 "name": "primary animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "primary animation phase",
@@ -291,7 +297,8 @@
             },
             {
                 "name": "secondary animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "secondary animation phase",
@@ -321,7 +328,8 @@
             },
             {
                 "name": "plasma animation period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "plasma animation phase",
@@ -333,7 +341,8 @@
             },
             {
                 "name": "map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "map",

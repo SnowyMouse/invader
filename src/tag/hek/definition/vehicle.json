@@ -166,11 +166,13 @@
             },
             {
                 "name": "minimum flipping angular velocity",
-                "type": "float"
+                "type": "float",
+                "default": 0.2
             },
             {
                 "name": "maximum flipping angular velocity",
-                "type": "float"
+                "type": "float",
+                "default": 0.75
             },
             {
                 "type": "pad",
