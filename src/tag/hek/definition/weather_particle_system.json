@@ -129,8 +129,10 @@
                 "compound": true
             },
             {
-                "name": "unknown",
-                "type": "float"
+                "name": "sprite size",
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
@@ -142,7 +144,8 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true
+                "compound": true,
+                "non_null": true
             },
             {
                 "name": "render mode",
@@ -277,6 +280,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 604
     },
     {
@@ -298,7 +302,6 @@
             }
         ],
         "type": "struct",
-        "post_compile": true,
         "size": 48
     }
 ]

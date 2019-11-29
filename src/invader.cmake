@@ -110,6 +110,8 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/model_collision_geometry.cpp
     src/tag/parser/compile/damage_effect.cpp
     src/tag/parser/compile/font.cpp
+    src/tag/parser/compile/particle.cpp
+    src/tag/parser/compile/point_physics.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c

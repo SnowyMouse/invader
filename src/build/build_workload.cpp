@@ -1132,7 +1132,7 @@ namespace Invader {
                         throw InvalidTagDataException();
                     }
                     else {
-                        particle.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[particle.bitmap.tag_id.read().index]);
+                        particle.sprite_size = get_bitmap_tag_pixel_size(this->compiled_tags[particle.bitmap.tag_id.read().index]);
                     }
                 }
 
@@ -1150,7 +1150,7 @@ namespace Invader {
                                 throw InvalidTagDataException();
                             }
                             else {
-                                type.unknown = get_bitmap_tag_pixel_size(this->compiled_tags[type.sprite_bitmap.tag_id.read().index]);
+                                type.sprite_size = get_bitmap_tag_pixel_size(this->compiled_tags[type.sprite_bitmap.tag_id.read().index]);
                             }
                         }
                     }

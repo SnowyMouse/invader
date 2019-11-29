@@ -227,7 +227,8 @@
                 "name": "unknown int",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true
+                "cache_only": true,
+                "default": 1
             },
             {
                 "name": "shader flags",
@@ -467,7 +468,6 @@
             }
         ],
         "type": "struct",
-        "post_compile": true,
         "size": 104
     }
 ]

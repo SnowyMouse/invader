@@ -94,6 +94,29 @@ namespace Invader {
             /** BSP index */
             std::size_t bsp = 0;
 
+            /**
+             * Resolve the pointer
+             * @param offset offset of the pointer
+             * @return       the struct index if found
+             */
+            std::optional<std::size_t> resolve_pointer(std::size_t offset) const noexcept {
+                for(auto &p : pointers) {
+                    if(p.offset == offset) {
+                        return p.struct_index;
+                    }
+                }
+                return std::nullopt;
+            }
+
+            /**
+             * Resolve the pointer at the given address
+             * @param pointer_pointer pointer to look at
+             * @return                the struct index if found
+             */
+            std::optional<std::size_t> resolve_pointer(const HEK::LittleEndian<HEK::Pointer> *pointer_pointer) const noexcept {
+                return this->resolve_pointer(reinterpret_cast<const std::byte *>(pointer_pointer) - this->data.data());
+            }
+
             bool operator==(const BuildWorkloadStruct &other) const noexcept {
                 return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && this->bsp == other.bsp && this->dependencies == other.dependencies && this->pointers == other.pointers && this->data == other.data;
             }

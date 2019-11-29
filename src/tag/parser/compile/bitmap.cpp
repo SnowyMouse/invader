@@ -16,6 +16,15 @@ namespace Invader::Parser {
     }
 
     void Bitmap::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        for(auto &sequence : this->bitmap_group_sequence) {
+            for(auto &sprite : sequence.sprites) {
+                if(sprite.bitmap_index >= this->bitmap_data.size()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sprite %zu of sequence %zu has an invalid bitmap index", &sprite - sequence.sprites.data(), &sequence - this->bitmap_group_sequence.data());
+                    throw InvalidTagDataException();
+                }
+            }
+        }
+
         for(auto &data : this->bitmap_data) {
             std::size_t data_index = &data - this->bitmap_data.data();
             bool compressed = data.flags.compressed;
