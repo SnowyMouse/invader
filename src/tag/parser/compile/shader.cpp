@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/map/map.hpp>
-#include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
