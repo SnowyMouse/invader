@@ -107,6 +107,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/globals.cpp
     src/tag/parser/compile/scenario.cpp
     src/tag/parser/compile/model_collision_geometry.cpp
+    src/tag/parser/compile/damage_effect.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
