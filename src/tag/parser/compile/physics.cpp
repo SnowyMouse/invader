@@ -9,7 +9,7 @@ namespace Invader::Parser {
     void Physics::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Make sure we have exactly two matrices
         if(this->inertial_matrix_and_inverse.size() != 2) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Physics tag does not have exactly have 2 matrices");
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Physics tag does not have exactly have 2 matrices");
             throw InvalidTagDataException();
         }
 

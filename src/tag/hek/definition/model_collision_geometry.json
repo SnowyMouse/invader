@@ -204,11 +204,13 @@
             {
                 "name": "back child",
                 "flagged": true,
+                "comment": "refers to a BSP3D node if not signed and a leaf if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             },
             {
                 "name": "front child",
                 "flagged": true,
+                "comment": "refers to a BSP3D node if not signed and a leaf if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -256,6 +258,7 @@
             {
                 "name": "bsp2d node",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -273,11 +276,13 @@
             {
                 "name": "left child",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             },
             {
                 "name": "right child",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -289,7 +294,6 @@
         "fields": [
             {
                 "name": "plane",
-                "flagged": true,
                 "type": "uint32"
             },
             {
@@ -319,27 +323,27 @@
         "fields": [
             {
                 "name": "start vertex",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "end vertex",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "forward edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "reverse edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "left surface",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "right surface",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
@@ -355,7 +359,7 @@
             },
             {
                 "name": "first edge",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
