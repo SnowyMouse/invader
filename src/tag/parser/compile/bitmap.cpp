@@ -35,11 +35,11 @@ namespace Invader::Parser {
             switch(data.format) {
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                     bits_per_pixel = 32;
                     break;
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
                     bits_per_pixel = 16;
                     break;
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
