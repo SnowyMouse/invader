@@ -108,7 +108,7 @@
             }
         ],
         "type": "struct",
-        "post_compile": true,
+        "pre_compile": true,
         "size": 208
     }
 ]
