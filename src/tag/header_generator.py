@@ -672,10 +672,8 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.from == 0) {{\n".format(name))
+                    cpp_read_hek_data.write("        if(r.{}.from == 0 && r.{}.to == 0) {{\n".format(name, name))
                     cpp_read_hek_data.write("            r.{}.from = {}{};\n".format(name, default[0], suffix))
-                    cpp_read_hek_data.write("        }\n")
-                    cpp_read_hek_data.write("        if(r.{}.to == 0) {{\n".format(name))
                     cpp_read_hek_data.write("            r.{}.to = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("        }\n")
             elif "count" in struct and struct["count"] > 1:
