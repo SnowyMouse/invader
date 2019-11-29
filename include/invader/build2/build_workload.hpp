@@ -28,7 +28,7 @@ namespace Invader {
          * @param forge_crc         forge the CRC32 of the map
          * @param tag_data_address  address the tag data will be loaded to
          * @param rename_scenario   rename the scenario's base name (preserving the root path)
-         * @param dedupe_tag_space  number of bytes desired to be deduped
+         * @param optimize_level    level between 0 and 10
          */
         static std::vector<std::byte> compile_map (
             const char *scenario,
@@ -42,7 +42,7 @@ namespace Invader {
             const std::optional<std::uint32_t> &forge_crc = std::nullopt,
             const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
             const std::optional<std::string> &rename_scenario = std::nullopt,
-            std::size_t dedupe_tag_space = 0
+            unsigned int optimize_level = 0
         );
 
         /** Denotes an individual tag dependency */

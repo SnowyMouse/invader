@@ -19,12 +19,25 @@ namespace Invader {
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario,
-        std::size_t dedupe_tag_space
+        unsigned int optimize_level
     ) {
         BuildWorkload2 workload;
         workload.scenario = scenario;
         workload.tags_directories = &tags_directories;
-        workload.dedupe_tag_space = dedupe_tag_space;
+
+        if(optimize_level == 0) {
+            workload.dedupe_tag_space = 0;
+        }
+        else if(optimize_level > 10) {
+            std::terminate();
+        }
+        else if(optimize_level == 10) {
+            workload.dedupe_tag_space = SIZE_MAX;
+        }
+        else {
+            std::size_t multiplier = (2 << optimize_level);
+            workload.dedupe_tag_space = multiplier * multiplier * (1024);
+        }
 
         // Set the tag data address
         if(tag_data_address.has_value()) {

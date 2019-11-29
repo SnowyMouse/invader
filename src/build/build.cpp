@@ -47,7 +47,7 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
-        std::size_t dedupe_tag_space = 0;
+        unsigned int optimize_level = 0;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -64,7 +64,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
-    options.emplace_back("dedupe", 'd', 1, "Attempt to dedupe the requested amount.", "<KiB>");
+    options.emplace_back("optimize", 'O', 1, "Optimize the size, potentially improving tag space usage at a speed cost. Level must be between 0 and 10.", "<level>");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -126,8 +126,17 @@ int main(int argc, const char **argv) {
             case 'N':
                 build_options.rename_scenario = arguments[0];
                 break;
-            case 'd':
-                build_options.dedupe_tag_space = static_cast<std::size_t>(std::atoll(arguments[0])) * 1024;
+            case 'O':
+                try {
+                    build_options.optimize_level = std::atoi(arguments[0]);
+                }
+                catch(std::exception &) {
+                    build_options.optimize_level = static_cast<unsigned int>(~0);
+                }
+                if(build_options.optimize_level > 10) {
+                    eprintf_error("Optimize level must be a number between 0 and 10");
+                    std::exit(1);
+                }
                 break;
         }
     });
@@ -239,7 +248,7 @@ int main(int argc, const char **argv) {
             forged_crc,
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
-            build_options.dedupe_tag_space
+            build_options.optimize_level
         );
 
         if(build_options.compress) {
