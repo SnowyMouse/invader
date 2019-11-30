@@ -23,6 +23,10 @@ namespace Invader::Parser {
                 // TODO: Recompile scripts
                 workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement script re-compiling", tag_index);
             }
+
+            // TODO: Implement reference array rebuilding
+            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement reference array rebuilding", tag_index);
+            std::terminate();
         }
 
         // TODO: Swap endianness for script node table, adding a script syntax data and script string data block if none is present
