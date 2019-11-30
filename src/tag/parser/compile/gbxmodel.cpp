@@ -5,6 +5,23 @@
 
 namespace Invader::Parser {
     void GBXModel::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        bool model_part_warned = false;
+        for(auto &g : this->geometries) {
+            for(auto &p : g.parts) {
+                std::size_t compressed_vertex_count = p.compressed_vertices.size();
+                std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
+                if(uncompressed_vertex_count != compressed_vertex_count) {
+                    eprintf_error("Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count);
+                    workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
+                    model_part_warned = true;
+                    break;
+                }
+            }
+            if(model_part_warned) {
+                break;
+            }
+        }
+
         // Swap this stuff
         float super_low = this->super_low_detail_cutoff;
         float low = this->low_detail_cutoff;
@@ -17,9 +34,8 @@ namespace Invader::Parser {
         this->super_high_detail_cutoff = super_low;
 
         if(this->markers.size() == 0) {
-            eprintf_warn("Markers array is populated.");
-            eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader.");
-            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_WARNING, "To fix this, rebuild the model tag", tag_index);
+            eprintf_error("Markers array is populated.");
+            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
         }
 
         // Put all of the markers in the marker array
@@ -102,7 +118,7 @@ namespace Invader::Parser {
         HEK::Vector3D<HEK::LittleEndian> no_translation = {};
         write_node_data(0, identity, no_translation, write_node_data);
 
-        // exodux compatibility
+        // exodux compatibility - recalibrate the bitmask using a high pass filter on the exodux compatibility bit
         bool exodux_handler = false;
         bool exodux_parser = false;
 
@@ -138,5 +154,59 @@ namespace Invader::Parser {
                              (exodux_value & 0xFF) << 24;
             }
         }
+    }
+
+    void GBXModelGeometryPart::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        std::vector<HEK::Index> triangle_indices;
+
+        // Add it all
+        for(auto &t : this->triangles) {
+            triangle_indices.push_back(t.vertex0_index);
+            triangle_indices.push_back(t.vertex1_index);
+            triangle_indices.push_back(t.vertex2_index);
+        }
+
+        // Remove excess NULL_INDEX values
+        while(this->triangles.size() > 0 && triangle_indices[this->triangles.size() - 1] == NULL_INDEX) {
+            triangle_indices.erase(triangle_indices.begin() + (this->triangles.size() - 1));
+        }
+        this->triangle_count = triangle_indices.size();
+
+        // Make sure every triangle is valid
+        std::size_t uncompressed_vertices_count = this->uncompressed_vertices.size();
+        for(auto &t : triangle_indices) {
+            if(t >= uncompressed_vertices_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index in triangle indices is invalid (%u >= %zu)", t, uncompressed_vertices_count);
+                throw InvalidTagDataException();
+            }
+        }
+
+        // Add it to the triangles
+        triangle_indices.resize(this->triangle_count + 2, NULL_INDEX);
+        this->triangle_offset = workload.model_indices.size() * sizeof(workload.model_indices[0]);
+        this->triangle_offset_2 = this->triangle_offset;
+        workload.model_indices.insert(workload.model_indices.end(), triangle_indices.begin(), triangle_indices.end());
+
+        // Add the vertices, next
+        this->vertex_offset = workload.model_vertices.size() * sizeof(workload.model_vertices[0]);
+        this->vertex_count = this->uncompressed_vertices.size();
+        workload.model_vertices.reserve(this->vertex_offset + this->vertex_count);
+        for(auto &v : this->uncompressed_vertices) {
+            auto &mv = workload.model_vertices.emplace_back();
+            mv.binormal = v.binormal;
+            mv.node0_index = v.node0_index;
+            mv.node1_index = v.node1_index;
+            mv.node0_weight = v.node0_weight;
+            mv.node1_weight = v.node1_weight;
+            mv.normal = v.normal;
+            mv.position = v.position;
+            mv.tangent = v.tangent;
+            mv.texture_coords = v.texture_coords;
+        }
+
+        // Clear the rest
+        this->triangles.clear();
+        this->uncompressed_vertices.clear();
+        this->compressed_vertices.clear();
     }
 }

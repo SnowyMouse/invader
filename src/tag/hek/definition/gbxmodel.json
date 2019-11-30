@@ -401,12 +401,16 @@
             {
                 "name": "prev filthy part index",
                 "type": "int8",
-                "endian": null
+                "endian": null,
+                "default": -1,
+                "cache_only": true
             },
             {
                 "name": "next filthy part index",
                 "type": "int8",
-                "endian": null
+                "endian": null,
+                "default": -1,
+                "cache_only": true
             },
             {
                 "name": "centroid primary node",
@@ -453,7 +457,10 @@
             },
             {
                 "name": "do not crash the game",
-                "type": "uint32"
+                "type": "uint32",
+                "default": 1,
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "triangle count",
@@ -469,7 +476,10 @@
             },
             {
                 "name": "do not screw up the model",
-                "type": "uint32"
+                "type": "uint32",
+                "default": 4,
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "vertex count",

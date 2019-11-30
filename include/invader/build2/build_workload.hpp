@@ -152,7 +152,7 @@ namespace Invader {
         std::vector<Parser::GBXModelVertexUncompressed> model_vertices;
 
         /** Indices for models */
-        std::vector<std::uint16_t> model_indices;
+        std::vector<HEK::Index> model_indices;
 
         /** Raw data for bitmaps and sounds */
         std::vector<std::vector<std::byte>> raw_data;
