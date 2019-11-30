@@ -4,32 +4,6 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    /*
-    // Figure out the region
-    std::size_t region_index = instance.region_index;
-    std::size_t region_count = this->regions.size();
-    if(region_index >= region_count) {
-        eprintf_error("invalid region index %zu / %zu", region_index, region_count);
-        throw OutOfBoundsException();
-    }
-
-    // Next, figure out the region permutation
-    auto &region = this->regions[region_index];
-    std::size_t permutation_count = region.permutations.size();
-    std::size_t permutation_index = instance.permutation_index;
-    if(permutation_index >= permutation_count) {
-        eprintf_error("invalid permutation index %zu / %zu for region #%zu", permutation_index, permutation_count, region_index);
-        throw OutOfBoundsException();
-    }
-
-    // Lastly
-    auto &new_marker = region.permutations[permutation_index].markers.emplace_back();
-    new_marker.name = marker.name;
-    new_marker.node_index = instance.node_index;
-    new_marker.rotation = instance.rotation;
-    new_marker.translation = instance.translation;
-     */
-
     void GBXModel::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Swap this stuff
         float super_low = this->super_low_detail_cutoff;
@@ -78,5 +52,54 @@ namespace Invader::Parser {
                 }
             }
         }
+
+        // Set node stuff
+        std::size_t node_count = this->nodes.size();
+        std::vector<bool> node_done(node_count);
+        auto *nodes = this->nodes.data();
+
+        auto write_node_data = [&node_done, &nodes, &node_count, &workload, &tag_index](HEK::Index node_index, const auto &base_rotation, const auto &base_translation, const auto &recursion) {
+            if(node_index == NULL_INDEX) {
+                return;
+            }
+            if(node_done[node_index]) {
+                return;
+            }
+            node_done[node_index] = true;
+
+            auto &node = nodes[node_count];
+            node.scale = 1.0f;
+
+            auto node_rotation = quaternion_to_matrix(node.default_rotation);
+            auto total_rotation = multiply_matrix(base_rotation, node_rotation);
+            node.rotation = total_rotation;
+
+            auto node_translation = multiply_vector(node.default_translation, -1.0);
+            auto total_translation = rotate_vector(add_vector(node_translation, base_translation), node_rotation);
+            node.translation = total_translation;
+
+            bool fatal = false;
+            if(node.next_sibling_node_index != NULL_INDEX && node.next_sibling_node_index >= node_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Next sibling node index of node %u is invalid (%u >= %zu)", node_index, node.next_sibling_node_index, node_count);
+                fatal = true;
+            }
+            if(node.first_child_node_index != NULL_INDEX && node.first_child_node_index >= node_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "First child node index of node %u is invalid (%u >= %zu)", node_index, node.first_child_node_index, node_count);
+                fatal = true;
+            }
+            if(fatal) {
+                throw InvalidTagDataException();
+            }
+
+            recursion(node.next_sibling_node_index, base_rotation, base_translation, recursion);
+            recursion(node.first_child_node_index, total_rotation, total_translation, recursion);
+        };
+
+        HEK::Matrix<HEK::LittleEndian> identity = {};
+        for(int i = 0; i < 3; i++) {
+            identity.matrix[i][i] = 1.0f;
+        }
+        HEK::Vector3D<HEK::LittleEndian> no_translation = {};
+        write_node_data(0, identity, no_translation, write_node_data);
     }
 }

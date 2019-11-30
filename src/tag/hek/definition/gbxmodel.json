@@ -651,7 +651,8 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "GBXModelNode",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "name": "regions",

@@ -381,7 +381,7 @@ for s in all_structs_arranged:
                 cpp_cache_format_data.write("        }\n")
             if "maximum" in struct:
                 maximum = struct["maximum"]
-                cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, minimum))
+                cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, maximum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have no more than {} block{}\", tag_index);\n".format(name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
