@@ -113,6 +113,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/particle.cpp
     src/tag/parser/compile/point_physics.cpp
     src/tag/parser/compile/antenna.cpp
+    src/tag/parser/compile/scenario_structure_bsp.cpp
     src/tag/parser/compile/light.cpp
     src/tag/parser/compile/effect.cpp
     src/bitmap/stb/stb_impl.c

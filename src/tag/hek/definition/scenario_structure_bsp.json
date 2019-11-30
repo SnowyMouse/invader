@@ -25,7 +25,8 @@
                 "classes": [
                     "shader"
                 ],
-                "compound": true
+                "compound": true,
+                "non_null": true
             },
             {
                 "type": "pad",
@@ -39,6 +40,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 20
     },
     {
@@ -366,7 +368,7 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
-        "post_compile": true,
+        "pre_compile": true,
         "size": 256
     },
     {
@@ -1561,6 +1563,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "post_compile": true,
         "size": 648
     },
     {
