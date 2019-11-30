@@ -227,9 +227,11 @@ namespace Invader {
                 case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                     auto tag_data = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_file_data.data(), tag_file_data.size());
                     auto &new_struct = this->structs.emplace_back();
+                    std::size_t bsp = this->bsp_count++;
+                    new_struct.bsp = bsp;
                     this->tags[return_value].base_struct = &new_struct - this->structs.data();
                     new_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
-                    tag_data.compile(*this, return_value, &new_struct - this->structs.data(), this->bsp_count++);
+                    tag_data.compile(*this, return_value, &new_struct - this->structs.data(), bsp);
                     break;
                 }
                 default:
