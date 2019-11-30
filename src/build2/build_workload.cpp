@@ -35,8 +35,16 @@ namespace Invader {
             workload.dedupe_tag_space = SIZE_MAX;
         }
         else {
-            std::size_t multiplier = (2 << optimize_level);
-            workload.dedupe_tag_space = multiplier * multiplier * (1024);
+            std::size_t s;
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                s = CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET / 2;
+            }
+            else {
+                s = CACHE_FILE_MEMORY_LENGTH / 2;
+            }
+            s /= static_cast<std::size_t>(std::pow(10, 7));
+            s *= static_cast<std::size_t>(std::pow(optimize_level, 7));
+            workload.dedupe_tag_space = s;
         }
 
         // Set the tag data address
