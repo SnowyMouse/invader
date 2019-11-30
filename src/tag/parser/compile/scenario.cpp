@@ -10,5 +10,12 @@ namespace Invader::Parser {
         }
 
         // TODO: Swap endianness for script node table, adding a script syntax data and script string data block if none is present
+        std::terminate();
+    }
+
+    void ScenarioCutsceneTitle::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+        this->fade_in_time *= TICK_RATE;
+        this->fade_out_time *= TICK_RATE;
+        this->up_time *= TICK_RATE;
     }
 }
