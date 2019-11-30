@@ -79,6 +79,7 @@ namespace Invader::Parser {
                 new_marker.translation = instance.translation;
             }
         }
+        this->markers.clear();
 
         float super_low = this->super_low_detail_cutoff;
         float low = this->low_detail_cutoff;

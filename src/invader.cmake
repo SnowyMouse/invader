@@ -104,6 +104,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/damage_effect.cpp
     src/tag/parser/compile/effect.cpp
     src/tag/parser/compile/font.cpp
+    src/tag/parser/compile/gbxmodel.cpp
     src/tag/parser/compile/globals.cpp
     src/tag/parser/compile/glow.cpp
     src/tag/parser/compile/item_collection.cpp

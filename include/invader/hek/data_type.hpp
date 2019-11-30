@@ -119,6 +119,9 @@ namespace Invader::HEK {
             std::fill(this->string + length, this->string + sizeof(this->string), 0x0);
             return *this;
         }
+        bool operator==(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) == 0;
+        }
     };
 
     /**

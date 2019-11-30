@@ -16,7 +16,7 @@ namespace Invader::Parser {
         if(this->scripts.size() > 0) {
             if(this->source_files.size() == 0) {
                 eprintf_warn("Scenario tag has script data but no source file data");
-                eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader");
+                eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader.");
                 workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_WARNING, "To fix this, recompile the scripts", tag_index);
             }
             else {
