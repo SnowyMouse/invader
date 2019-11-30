@@ -101,5 +101,42 @@ namespace Invader::Parser {
         }
         HEK::Vector3D<HEK::LittleEndian> no_translation = {};
         write_node_data(0, identity, no_translation, write_node_data);
+
+        // exodux compatibility
+        bool exodux_handler = false;
+        bool exodux_parser = false;
+
+        for(auto &g : this->geometries) {
+            for(auto &p : g.parts) {
+                // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
+                std::uint32_t zoner = p.flags.zoner;
+                std::uint32_t exodux_value = (p.bullshit & zoner) ^ 0x7F7F7F7F;
+                if(exodux_handler) {
+                    // Since the exodux handler is active, we don't need to use the binary rainbow table for this value.
+                    exodux_value ^= 0x3C170A5E;
+                }
+                else {
+                    // Remodulate the upper 16 bits of the control magic since the exodux handler is not active
+                    exodux_value <<= 16;
+
+                    // Depending on if the parser is active, activate the precalculated bitmasks from the binary rainbow table
+                    exodux_value ^= exodux_parser ? 0x2D1E6921 : 0x291E7021;
+                    exodux_parser = !exodux_parser;
+                }
+
+                // Invert the last bit if using zoner mode
+                if(zoner) {
+                    exodux_value ^= 1;
+                }
+
+                exodux_handler = !exodux_handler;
+
+                // Do an endian swap of the exodux rainbow table checksum hash
+                p.bullshit = (exodux_value & 0xFF000000) >> 24 |
+                             (exodux_value & 0xFF0000) >> 8 |
+                             (exodux_value & 0xFF00) << 8 |
+                             (exodux_value & 0xFF) << 24;
+            }
+        }
     }
 }
