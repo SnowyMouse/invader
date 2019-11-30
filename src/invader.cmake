@@ -99,23 +99,24 @@ set(INVADER_SOURCE_FILES
     src/extract/extraction.cpp
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
+    src/tag/parser/compile/antenna.cpp
     src/tag/parser/compile/bitmap.cpp
-    src/tag/parser/compile/object.cpp
-    src/tag/parser/compile/item_collection.cpp
-    src/tag/parser/compile/shader.cpp
-    src/tag/parser/compile/sound.cpp
-    src/tag/parser/compile/physics.cpp
-    src/tag/parser/compile/globals.cpp
-    src/tag/parser/compile/scenario.cpp
-    src/tag/parser/compile/model_collision_geometry.cpp
     src/tag/parser/compile/damage_effect.cpp
+    src/tag/parser/compile/effect.cpp
     src/tag/parser/compile/font.cpp
+    src/tag/parser/compile/globals.cpp
+    src/tag/parser/compile/glow.cpp
+    src/tag/parser/compile/item_collection.cpp
+    src/tag/parser/compile/light.cpp
+    src/tag/parser/compile/model_collision_geometry.cpp
+    src/tag/parser/compile/object.cpp
     src/tag/parser/compile/particle.cpp
     src/tag/parser/compile/point_physics.cpp
-    src/tag/parser/compile/antenna.cpp
+    src/tag/parser/compile/physics.cpp
+    src/tag/parser/compile/scenario.cpp
     src/tag/parser/compile/scenario_structure_bsp.cpp
-    src/tag/parser/compile/light.cpp
-    src/tag/parser/compile/effect.cpp
+    src/tag/parser/compile/shader.cpp
+    src/tag/parser/compile/sound.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
