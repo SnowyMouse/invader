@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void Effect::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Effect::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         bool has_damage_effect = false;
 
         for(auto &e : this->events) {

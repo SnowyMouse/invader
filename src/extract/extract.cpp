@@ -8,7 +8,7 @@
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
 #include <invader/extract/extraction.hpp>
-#include <invader/tag/compiled_tag.hpp>
+#include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <regex>
 
@@ -220,11 +220,18 @@ int main(int argc, const char **argv) {
         try {
             new_tag = Invader::Extraction::extract_tag(tag);
 
-            // If we're recursive, we want to also
+            // If we're recursive, we want to also get that stuff, too
             if(extract_options.recursive) {
-                auto dependencies = Invader::CompiledTag(tag.get_path(), new_tag.data(), new_tag.size()).dependencies;
+                auto tag_compiled = Invader::BuildWorkload::compile_single_tag(new_tag.data(), new_tag.size(), std::vector<std::string>(), false);
+                std::vector<std::pair<const std::string *, Invader::TagClassInt>> dependencies;
+                for(auto &s : tag_compiled.structs) {
+                    for(auto &d : s.dependencies) {
+                        auto &tag = tag_compiled.tags[d.tag_index];
+                        dependencies.emplace_back(&tag.path, tag.tag_class_int);
+                    }
+                }
                 for(auto &d : dependencies) {
-                    auto tag_index = map->find_tag(d.path.data(), d.tag_class_int);
+                    auto tag_index = map->find_tag(d.first->data(), d.second);
                     if(tag_index.has_value() && extracted_tags[*tag_index] == false) {
                         all_tags_to_extract.push_back(*tag_index);
                     }

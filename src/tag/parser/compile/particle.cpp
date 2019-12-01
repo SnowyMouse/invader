@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    float get_bitmap_tag_pixel_size(BuildWorkload2 &workload, std::size_t bitmap_tag_index) {
+    float get_bitmap_tag_pixel_size(BuildWorkload &workload, std::size_t bitmap_tag_index) {
+        if(workload.disable_recursion) {
+            return 1.0F;
+        }
+
         auto &bitmap_tag_struct = workload.structs[*workload.tags[bitmap_tag_index].base_struct];
         auto &bitmap_tag_data = *reinterpret_cast<Bitmap::struct_little *>(bitmap_tag_struct.data.data());
         float pixel_size = 1.0F;
@@ -61,12 +65,12 @@ namespace Invader::Parser {
         return pixel_size;
     }
 
-    void Particle::post_compile(BuildWorkload2 &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
+    void Particle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->bitmap.tag_id.index);
         particle.sprite_size = this->sprite_size;
     }
-    void WeatherParticleSystemParticleType::post_compile(BuildWorkload2 &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
+    void WeatherParticleSystemParticleType::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->sprite_bitmap.tag_id.index);
         particle.sprite_size = this->sprite_size;

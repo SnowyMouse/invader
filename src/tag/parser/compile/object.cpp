@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
     template <typename T> void compile_object(T &tag) {
         tag.has_change_colors = tag.change_colors.size() > 0;
     }
 
-    void Biped::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Biped::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_BIPED;
         compile_object(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
@@ -19,37 +19,37 @@ namespace Invader::Parser {
         this->sine_uphill_falloff_angle = static_cast<float>(std::sin(this->uphill_falloff_angle));
         this->sine_uphill_cutoff_angle = static_cast<float>(std::sin(this->uphill_cutoff_angle));
     }
-    void Vehicle::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Vehicle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_VEHICLE;
         compile_object(*this);
     }
-    void Weapon::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Weapon::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this);
     }
-    void Equipment::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Equipment::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_EQUIPMENT;
         compile_object(*this);
     }
-    void Garbage::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Garbage::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_GARBAGE;
         compile_object(*this);
     }
-    void Projectile::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Projectile::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PROJECTILE;
         compile_object(*this);
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }
-    void Scenery::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Scenery::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SCENERY;
         compile_object(*this);
     }
-    void Placeholder::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Placeholder::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PLACEHOLDER;
         compile_object(*this);
     }
-    void SoundScenery::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void SoundScenery::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SOUND_SCENERY;
         compile_object(*this);
     }
@@ -61,24 +61,24 @@ namespace Invader::Parser {
         tag.inverse_position_acceleration_time = 1.0f / (TICK_RATE * tag.position_acceleration_time);
     }
 
-    void DeviceMachine::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void DeviceMachine::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
         compile_object(*this);
         compile_device(*this);
         this->door_open_time_ticks = static_cast<std::uint32_t>(this->door_open_time * TICK_RATE);
     }
-    void DeviceControl::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void DeviceControl::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_CONTROL;
         compile_object(*this);
         compile_device(*this);
     }
-    void DeviceLightFixture::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void DeviceLightFixture::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
         compile_object(*this);
         compile_device(*this);
     }
 
-    void ObjectFunction::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void ObjectFunction::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         if(this->bounds.from == 0.0f && this->bounds.to == 0.0f) {
             this->bounds.to = 1.0f; \
         }
@@ -89,7 +89,7 @@ namespace Invader::Parser {
         this->inverse_period = 1.0f / this->period;
     }
 
-    void WeaponTrigger::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
+    void WeaponTrigger::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
         this->illumination_recovery_rate = 1.0f / TICK_RATE / this->illumination_recovery_time;
         this->ejection_port_recovery_rate = 1.0f / TICK_RATE / this->ejection_port_recovery_time;
 

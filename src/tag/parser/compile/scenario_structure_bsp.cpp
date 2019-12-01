@@ -2,16 +2,22 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void ScenarioStructureBSPCollisionMaterial::post_compile(BuildWorkload2 &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
+    void ScenarioStructureBSPCollisionMaterial::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto *data = workload.structs[struct_index].data.data();
         auto &material = *reinterpret_cast<struct_little *>(data + offset);
+
+        if(workload.disable_recursion) {
+            material.material = static_cast<HEK::MaterialType>(0xFFFF);
+            return;
+        }
+        
         this->material = reinterpret_cast<Shader::struct_little *>(workload.structs[(*workload.tags[this->shader.tag_id.index].base_struct)].data.data())->material_type;
         material.material = this->material;
     }
-    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->compressed_vertices.clear();
 
         if(this->lightmap_vertices_count != 0) {
@@ -43,7 +49,7 @@ namespace Invader::Parser {
         }
     }
 
-    void ScenarioStructureBSP::post_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+    void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         // Check lightmaps
         bool lightmaps_present = false;
         bool only_transparent = true;
@@ -91,6 +97,11 @@ namespace Invader::Parser {
             // Go through each fog plane
             for(std::size_t i = 0; i < fog_plane_count; i++) {
                 auto &plane = fog_planes[i];
+                plane.material_type = static_cast<HEK::MaterialType>(0xFFFF);
+
+                if(workload.disable_recursion) {
+                    continue;
+                }
 
                 // Find what region this fog is in
                 std::size_t region_index = plane.front_region;
@@ -105,10 +116,12 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "BSP fog palette index exceeds fog palette count (%zu >= %zu)", palette_index, fog_palette_count);
                     continue;
                 }
+
                 const auto &fog_id = fog_palette[palette_index].fog.tag_id.read();
                 if(fog_id.is_null()) {
                     continue;
                 }
+
                 auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
                 if(fog.flags.read().is_water) {
                     plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void GBXModel::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         bool model_part_warned = false;
         for(auto &g : this->geometries) {
             for(auto &p : g.parts) {
@@ -12,7 +12,7 @@ namespace Invader::Parser {
                 std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
                 if(uncompressed_vertex_count != compressed_vertex_count) {
                     eprintf_error("Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count);
-                    workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
+                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
                     model_part_warned = true;
                     break;
                 }
@@ -35,7 +35,7 @@ namespace Invader::Parser {
 
         if(this->markers.size() == 0) {
             eprintf_error("Markers array is populated.");
-            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
         }
 
         // Put all of the markers in the marker array
@@ -156,7 +156,7 @@ namespace Invader::Parser {
         }
     }
 
-    void GBXModelGeometryPart::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::vector<HEK::Index> triangle_indices;
 
         // Add it all

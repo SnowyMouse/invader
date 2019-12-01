@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void Font::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void Font::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Clear the character tables
         this->character_tables.clear();
 

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void ModelCollisionGeometry::pre_compile(BuildWorkload2 &, std::size_t , std::size_t, std::size_t) {
+    void ModelCollisionGeometry::pre_compile(BuildWorkload &, std::size_t , std::size_t, std::size_t) {
         this->shield_recharge_rate = 1.0F / this->recharge_time / TICK_RATE;
     }
-    void ModelCollisionGeometryBSP::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void ModelCollisionGeometryBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t bsp3d_count = this->bsp3d_nodes.size();
         std::size_t bsp2d_count = this->bsp2d_nodes.size();
         std::size_t leaf_count = this->leaves.size();

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/parser/parser.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void SoundPermutation::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+    void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         // Flip the endianness of the 16-bit PCM stream
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t size = this->samples.size() / 2;
@@ -39,13 +39,13 @@ namespace Invader::Parser {
         workload.tags[tag_index].asset_data.emplace_back(&r - workload.raw_data.data());
     }
 
-    void SoundPitchRange::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void SoundPitchRange::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
         this->playback_rate = 1.0f / this->natural_pitch;
     }
 
-    void Sound::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, 1.0f / TICK_RATE);
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;

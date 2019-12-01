@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void Antenna::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Antenna::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         float length = 0.0f;
 
         for(auto &part : this->vertices) {

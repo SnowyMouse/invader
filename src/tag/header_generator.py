@@ -232,7 +232,7 @@ hpp.write("#include <optional>\n")
 hpp.write("#include \"../../map/map.hpp\"\n")
 hpp.write("#include \"../hek/definition.hpp\"\n\n")
 hpp.write("namespace Invader {\n")
-hpp.write("    class BuildWorkload2;\n")
+hpp.write("    class BuildWorkload;\n")
 hpp.write("}\n")
 hpp.write("namespace Invader::Parser {\n")
 hpp.write("    struct Dependency {\n")
@@ -246,7 +246,7 @@ write_for_all_cpps("#include <invader/map/map.hpp>\n")
 write_for_all_cpps("#include <invader/map/tag.hpp>\n")
 write_for_all_cpps("#include <invader/tag/hek/header.hpp>\n")
 write_for_all_cpps("#include <invader/printf.hpp>\n")
-cpp_cache_format_data.write("#include <invader/build2/build_workload.hpp>\n")
+cpp_cache_format_data.write("#include <invader/build/build_workload.hpp>\n")
 cpp_save_hek_data.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
 write_for_all_cpps("namespace Invader::Parser {\n")
 
@@ -338,8 +338,8 @@ for s in all_structs_arranged:
     hpp.write("         * @param bsp          BSP index to use\n")
     hpp.write("         * @param offset       struct offset\n")
     hpp.write("         */\n")
-    hpp.write("        void compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0);\n")
-    cpp_cache_format_data.write("    void {}::compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
+    hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0);\n")
+    cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].unsafe_to_dedupe = {};\n".format("false" if ("unsafe_to_dedupe" in s and s["unsafe_to_dedupe"]) else "true"))
@@ -366,7 +366,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        else {\n")
             if "non_null" in struct and struct["non_null"]:
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must not be null\", tag_index);\n".format(name))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must not be null\", tag_index);\n".format(name))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
             else:
                 cpp_cache_format_data.write("            r.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
@@ -376,13 +376,13 @@ for s in all_structs_arranged:
             if "minimum" in struct:
                 minimum = struct["minimum"]
                 cpp_cache_format_data.write("        if(t_{}_count < {}) {{\n".format(name, minimum))
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have at least {} block{}\", tag_index);\n".format(name, minimum, "" if minimum == 1 else "s"))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have at least {} block{}\", tag_index);\n".format(name, minimum, "" if minimum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             if "maximum" in struct:
                 maximum = struct["maximum"]
                 cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, maximum))
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have no more than {} block{}\", tag_index);\n".format(name, maximum, "" if maximum == 1 else "s"))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have no more than {} block{}\", tag_index);\n".format(name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
@@ -415,7 +415,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
         elif struct["type"] == "enum":
             cpp_cache_format_data.write("        if(static_cast<std::uint16_t>(r.{}) >= {}) {{\n".format(name, len(struct["options"])))
-            cpp_cache_format_data.write("            workload.report_error(BuildWorkload2::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} exceeds maximum value of {}\", tag_index);\n".format(name, len(struct["options"])))
+            cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} exceeds maximum value of {}\", tag_index);\n".format(name, len(struct["options"])))
             cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
@@ -706,10 +706,7 @@ for s in all_structs_arranged:
     hpp.write("         */\n")
     hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size);\n".format(struct_name))
     cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size) {{\n".format(struct_name, struct_name))
-    cpp_read_hek_data.write("        if(data_size < sizeof(HEK::TagFileHeader)) {\n")
-    cpp_read_hek_data.write("            eprintf_error(\"data is too small to have a header\");")
-    cpp_read_hek_data.write("            throw OutOfBoundsException();\n")
-    cpp_read_hek_data.write("        }\n")
+    cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size, true);\n")
     cpp_read_hek_data.write("        std::size_t data_read = 0;\n")
     cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
     cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read);\n")
@@ -730,10 +727,10 @@ for s in all_structs_arranged:
         hpp.write("    void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
 
     if pre_compile:
-        hpp.write("    void pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("    void pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     if post_compile:
-        hpp.write("    void post_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("    void post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")

@@ -2,10 +2,10 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
-#include <invader/build2/build_workload.hpp>
+#include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void BitmapData::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+    void BitmapData::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
@@ -15,7 +15,7 @@ namespace Invader::Parser {
         d.tag_id_only = true;
     }
 
-    void Bitmap::pre_compile(BuildWorkload2 &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         for(auto &sequence : this->bitmap_group_sequence) {
             for(auto &sprite : sequence.sprites) {
                 if(sprite.bitmap_index >= this->bitmap_data.size()) {

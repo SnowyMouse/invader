@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void Actor::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Actor::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         #define SET_INVERTED_VALUE(normal,inverted) { if(normal > 0.0F) { inverted = 1.0F / (TICK_RATE * normal); } else { inverted = 0.0F; } }
 
         SET_INVERTED_VALUE(this->combat_perception_time, this->inverse_combat_perception_time);
@@ -16,7 +16,7 @@ namespace Invader::Parser {
         this->cosine_maximum_looking_deviation.j = std::cos(this->maximum_looking_deviation.j);
     }
     
-    void ActorVariant::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void ActorVariant::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->grenade_velocity /= TICK_RATE;
     }
 }

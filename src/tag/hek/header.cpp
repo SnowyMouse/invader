@@ -90,4 +90,39 @@ namespace Invader::HEK {
         this->version = TagFileHeader::version_for_tag(tag_class_int);
         #endif
     }
+
+    void TagFileHeader::validate_header(const TagFileHeader *header, std::size_t tag_file_size, bool verbose, std::optional<TagClassInt> expected_tag_class) {
+        if(tag_file_size < sizeof(*header)) {
+            if(verbose) {
+                eprintf_error("Size of buffer is too small to contain a header");
+            }
+            throw InvalidTagDataHeaderException();
+        }
+
+        if(header->blam != BLAM) {
+            if(verbose) {
+                eprintf_error("Blam literal in header is incorrect");
+            }
+            throw InvalidTagDataHeaderException();
+        }
+
+        auto tag_class = header->tag_class_int.read();
+        auto expected_version = version_for_tag(tag_class);
+        if(header->version != expected_version) {
+            if(verbose) {
+                eprintf_error("Version in header is wrong (%u expected, %u gotten)", expected_version, header->version.read());
+            }
+            throw InvalidTagDataHeaderException();
+        }
+
+        if(expected_tag_class.has_value()) {
+            auto expected_tag_class_value = *expected_tag_class;
+            if(expected_tag_class_value != tag_class) {
+                if(verbose) {
+                    eprintf_error("Unexpected tag class in header (%s expected, %s gotten)", tag_class_to_extension(expected_tag_class_value), tag_class_to_extension(tag_class));
+                }
+                throw InvalidTagDataHeaderException();
+            }
+        }
+    }
 }

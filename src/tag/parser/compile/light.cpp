@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void Light::pre_compile(BuildWorkload2 &, std::size_t, std::size_t, std::size_t) {
+    void Light::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->cos_cutoff_angle = std::cos(this->cutoff_angle);
         this->cos_falloff_angle = std::cos(this->falloff_angle);
         this->sin_cutoff_angle = std::sin(this->cutoff_angle);
