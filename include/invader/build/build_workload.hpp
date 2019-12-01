@@ -155,7 +155,7 @@ namespace Invader {
             /** Asset data structs */
             std::vector<std::size_t> asset_data;
 
-            /** Index of the tag */
+            /** Index of the tag (in a resource map) */
             std::optional<std::size_t> tag_index;
 
             /** Base struct index of the tag */
@@ -245,6 +245,7 @@ namespace Invader {
         std::vector<std::byte> build_cache_file();
         const std::vector<std::string> *tags_directories;
         void add_tags();
+        void generate_tag_array();
         std::size_t dedupe_tag_space;
         bool hide_pedantic_warnings = false;
         std::size_t warnings = 0;

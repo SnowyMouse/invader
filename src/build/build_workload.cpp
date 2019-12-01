@@ -81,8 +81,19 @@ namespace Invader {
     }
 
     std::vector<std::byte> BuildWorkload::build_cache_file() {
-        // Before we begin, add all of the tags
+        // First, make our tag data header and array
+        this->structs.resize(2);
+        this->structs[0].unsafe_to_dedupe = true;
+        auto &tag_data_ptr = this->structs[0].pointers.emplace_back();
+        tag_data_ptr.offset = 0;
+        tag_data_ptr.struct_index = 1;
+        this->structs[1].unsafe_to_dedupe = true;
+
+        // Add all of the tags
         this->add_tags();
+
+        // Generate the tag array
+        this->generate_tag_array();
 
         // Dedupe structs
         if(this->dedupe_tag_space) {
@@ -392,5 +403,82 @@ namespace Invader {
         workload.tags_directories = &tags_directories;
         workload.compile_tag_recursively(tag, tag_class_int);
         return workload;
+    }
+
+    void BuildWorkload::generate_tag_array() {
+        this->structs[1].data.resize(sizeof(HEK::CacheFileTagDataTag) * this->tags.size());
+        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(this->structs[1].data.data());
+
+        // Set tag classes, paths, etc.
+        std::size_t tag_count = this->tags.size();
+        for(std::size_t t = 0; t < tag_count; t++) {
+            auto &tag_index = tag_array[tag_count];
+            auto &tag = this->tags[t];
+
+            // Tag path
+            auto &new_path = this->structs.emplace_back();
+            std::size_t new_path_struct = this->structs.size();
+            auto &tag_path_ptr = this->structs[1].pointers.emplace_back();
+            tag_path_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_path) - reinterpret_cast<std::byte *>(tag_array);
+            tag_path_ptr.struct_index = new_path_struct;
+            new_path.data.insert(new_path.data.end(), reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data() + tag.path.size() + 1));
+
+            // Tag data
+            auto primary_class = tag.tag_class_int;
+            if(!tag.tag_index.has_value() || primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                auto &tag_data_ptr = this->structs[1].pointers.emplace_back();
+                tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
+                tag_data_ptr.struct_index = *tag.base_struct;
+            }
+
+            // Tag ID
+            auto &tag_id = this->structs[1].dependencies.emplace_back();
+            tag_id.tag_id_only = true;
+            tag_id.offset = reinterpret_cast<std::byte *>(&tag_index.tag_id) - reinterpret_cast<std::byte *>(tag_array);
+            tag_id.tag_index = t;
+
+            // Not strictly required to set the secondary or tertiary classes, but we do it anyway
+            tag_index.primary_class = tag.tag_class_int;
+            tag_index.secondary_class = TagClassInt::TAG_CLASS_NULL;
+            tag_index.tertiary_class = TagClassInt::TAG_CLASS_NULL;
+            switch(tag.tag_class_int) {
+                case TagClassInt::TAG_CLASS_BIPED:
+                case TagClassInt::TAG_CLASS_VEHICLE:
+                    tag_index.secondary_class = TagClassInt::TAG_CLASS_UNIT;
+                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+                    break;
+                case TagClassInt::TAG_CLASS_WEAPON:
+                case TagClassInt::TAG_CLASS_GARBAGE:
+                case TagClassInt::TAG_CLASS_EQUIPMENT:
+                    tag_index.secondary_class = TagClassInt::TAG_CLASS_ITEM;
+                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+                    break;
+                case TagClassInt::TAG_CLASS_DEVICE_CONTROL:
+                case TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE:
+                case TagClassInt::TAG_CLASS_DEVICE_MACHINE:
+                    tag_index.secondary_class = TagClassInt::TAG_CLASS_DEVICE;
+                    tag_index.tertiary_class = TagClassInt::TAG_CLASS_OBJECT;
+                    break;
+                case TagClassInt::TAG_CLASS_SCENERY:
+                case TagClassInt::TAG_CLASS_SOUND_SCENERY:
+                case TagClassInt::TAG_CLASS_PLACEHOLDER:
+                case TagClassInt::TAG_CLASS_PROJECTILE:
+                    tag_index.secondary_class = TagClassInt::TAG_CLASS_OBJECT;
+                    break;
+                case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
+                case TagClassInt::TAG_CLASS_SHADER_MODEL:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
+                case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
+                    tag_index.secondary_class = TagClassInt::TAG_CLASS_SHADER;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
