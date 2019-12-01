@@ -160,6 +160,9 @@ namespace Invader {
 
             /** Base struct index of the tag */
             std::optional<std::size_t> base_struct;
+
+            /** Tag path struct index of the tag */
+            std::optional<std::size_t> tag_path;
         };
 
         /** Structs being worked with */
@@ -242,6 +245,7 @@ namespace Invader {
         const char *scenario;
         std::size_t scenario_index;
         std::uint32_t tag_data_address;
+        std::size_t tag_data_size;
         std::vector<std::byte> build_cache_file();
         const std::vector<std::string> *tags_directories;
         void add_tags();
@@ -251,12 +255,13 @@ namespace Invader {
         std::size_t warnings = 0;
         std::size_t errors = 0;
         std::size_t dedupe_structs();
+        void generate_tag_data(std::vector<std::vector<std::byte>> &tag_data);
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
         char report_error_message[256]; \
         std::snprintf(report_error_message, sizeof(report_error_message), __VA_ARGS__); \
-        workload.report_error(Invader::BuildWorkload::ErrorType::type, report_error_message, tag_index); \
+        (workload).report_error(Invader::BuildWorkload::ErrorType::type, report_error_message, tag_index); \
     }
 }
 

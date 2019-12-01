@@ -56,12 +56,15 @@ namespace Invader {
             switch(engine_target) {
                 case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
                     break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                     break;
                 default:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                     break;
             }
         }
@@ -99,6 +102,10 @@ namespace Invader {
         if(this->dedupe_tag_space) {
             this->dedupe_structs();
         }
+
+        // Tag data
+        std::vector<std::vector<std::byte>> tag_data;
+        this->generate_tag_data(tag_data);
 
         std::terminate();
     }
@@ -421,6 +428,7 @@ namespace Invader {
             auto &tag_path_ptr = this->structs[1].pointers.emplace_back();
             tag_path_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_path) - reinterpret_cast<std::byte *>(tag_array);
             tag_path_ptr.struct_index = new_path_struct;
+            tag.tag_path = new_path_struct;
             new_path.data.insert(new_path.data.end(), reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data() + tag.path.size() + 1));
 
             // Tag data
@@ -478,6 +486,117 @@ namespace Invader {
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    void BuildWorkload::generate_tag_data(std::vector<std::vector<std::byte>> &tag_data) {
+        auto &structs = this->structs;
+        auto &tags = this->tags;
+
+        // Pointer offset to where
+        std::vector<std::pair<std::size_t, std::size_t>> pointers;
+        auto name_tag_data_pointer = this->tag_data_address;
+
+        auto recursively_generate_data = [&structs, &tags, &pointers, &name_tag_data_pointer](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) -> std::size_t {
+            auto &s = structs[struct_index];
+
+            // Return the pointer thingy
+            if(s.offset.has_value()) {
+                return *s.offset;
+            }
+
+            // Set the offset thingy
+            std::size_t offset = data.size();
+            s.offset = offset;
+            data.insert(data.end(), s.data.begin(), s.data.end());
+
+            // Get the pointers
+            for(auto &pointer : s.pointers) {
+                pointers.emplace_back(offset, recursively_generate_data(data, pointer.struct_index, recursively_generate_data));
+            }
+
+            // Get the pointers
+            for(auto &dependency : s.dependencies) {
+                HEK::TagID new_tag_id = { static_cast<std::uint32_t>(dependency.tag_index) };
+
+                if(dependency.tag_id_only) {
+                    *reinterpret_cast<HEK::LittleEndian<HEK::TagID> *>(data.data() + dependency.offset) = new_tag_id;
+                }
+                else {
+                    std::size_t tag_path_offset = recursively_generate_data(data, *tags[new_tag_id.index].tag_path, recursively_generate_data);
+                    auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + dependency.offset);
+                    dependency_struct.tag_class_int = tags[new_tag_id.index].tag_class_int;
+                    dependency_struct.tag_id = new_tag_id;
+                    dependency_struct.path_pointer = name_tag_data_pointer + static_cast<HEK::Pointer>(tag_path_offset);
+                }
+            }
+
+            // Append stuff
+            data.insert(data.end(), REQUIRED_PADDING_32_BIT(data.size()), std::byte());
+            return offset;
+        };
+
+        // Build the tag data for the main tag data
+        auto &tag_data_struct = tag_data.emplace_back();
+        recursively_generate_data(tag_data_struct, 0, recursively_generate_data);
+        auto *tag_data_b = tag_data_struct.data();
+
+        // Adjust the pointers
+        for(auto &p : pointers) {
+            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + p.second);
+        }
+
+        // Get the scenario tag
+        auto &scenario_tag = tags[this->scenario_index];
+        auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
+        std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
+        if(bsp_count != this->bsp_count) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
+            throw InvalidTagDataException();
+        }
+        else if(bsp_count) {
+            auto scenario_bsps_struct_index = *structs[*scenario_tag.base_struct].resolve_pointer(reinterpret_cast<const std::byte *>(&scenario_tag_data.structure_bsps.pointer) - reinterpret_cast<const std::byte *>(&scenario_tag_data));
+            std::size_t file_offset = sizeof(HEK::CacheFileHeader);
+            auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(tag_data[0].data() + *structs[scenario_bsps_struct_index].offset);
+
+            // Go through each BSP tag
+            for(std::size_t i = 0; i < tags.size(); i++) {
+                auto &t = tags[i];
+                if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                    continue;
+                }
+
+                // Build the tag data for the BSP data now
+                pointers.clear();
+                auto &bsp_data_struct = tag_data.emplace_back();
+                recursively_generate_data(bsp_data_struct, 0, recursively_generate_data);
+                std::size_t bsp_size = bsp_data_struct.size();
+                HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
+                tag_data_b = bsp_data_struct.data();
+
+                // Chu
+                for(auto &p : pointers) {
+                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(tag_data_base + p.second);
+                }
+
+                // Do the thing now
+                file_offset += bsp_size;
+
+                // Find the BSP in the scenario array thingy
+                bool found = false;
+                for(std::size_t b = 0; b < bsp_count; b++) {
+                    if(scenario_bsps_struct_data[b].structure_bsp.tag_id.read().index == i) {
+                        scenario_bsps_struct_data[b].bsp_address = tag_data_base;
+                        scenario_bsps_struct_data[b].bsp_size = bsp_size;
+                        scenario_bsps_struct_data[b].bsp_start = file_offset;
+                        found = true;
+                    }
+                }
+                if(!found) {
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "Scenario does not reference BSP %s", t.path.data());
+                    throw InvalidTagDataException();
+                }
             }
         }
     }
