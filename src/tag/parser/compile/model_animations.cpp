@@ -131,7 +131,7 @@ namespace Invader::Parser {
         std::size_t expected_frame_info_size = required_frame_info_size * frame_count;
         std::size_t frame_info_size = this->frame_info.size();
         if(expected_frame_info_size != frame_info_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame info side (%zu expected, %zu gotten)", struct_index, expected_frame_info_size, frame_info_size);
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame info size (%zu expected, %zu gotten)", struct_index, expected_frame_info_size, frame_info_size);
             throw InvalidTagDataException();
         }
 
