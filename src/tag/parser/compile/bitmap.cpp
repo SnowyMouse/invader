@@ -109,7 +109,7 @@ namespace Invader::Parser {
             std::size_t end = start + size;
             if(start > max_size || size > max_size || end > max_size) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu range (0x%08zX - 0x%08zX) exceeds the processed pixel data size (0x%08zX)", data_index, start, end, max_size);
-                throw OutOfBoundsException();
+                throw InvalidTagDataException();
             }
 
             // Add it all

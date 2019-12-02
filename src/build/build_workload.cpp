@@ -281,10 +281,9 @@ namespace Invader {
 
         try {
             this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_class_int);
-            oprintf_success("Compiled %s", formatted_path);
         }
         catch(std::exception &e) {
-            eprintf("failed to compile %s\n", formatted_path);
+            eprintf("Failed to compile tag %s\n", formatted_path);
             throw;
         }
 
