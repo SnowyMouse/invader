@@ -2,6 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::Parser {
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -20,7 +21,7 @@ namespace Invader::Parser {
         #define CHECK_PALETTE_AND_SPAWNS(object_type_str, scenario_object_type, scenario_palette_type, object_type_int) { \
             std::size_t type_count = this->scenario_palette_type.size(); \
             std::size_t count = this->scenario_object_type.size(); \
-            std::vector<bool> used(type_count); \
+            std::vector<std::uint32_t> used(type_count); \
             for(std::size_t i = 0; i < count; i++) { \
                 auto &r = this->scenario_object_type[i]; \
                 std::size_t name_index = r.name; \
@@ -45,12 +46,22 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
                 } \
                 else { \
-                    used[type_index] = true; \
+                    used[type_index]++; \
                 } \
             } \
             for(std::size_t i = 0; i < type_count; i++) { \
+                auto &palette = this->scenario_palette_type[i].name; \
+                bool is_null = palette.path.size() == 0; \
                 if(!used[i]) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu is unused", i); \
+                    if(is_null) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
+                    } \
+                    else { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).data(), HEK::tag_class_to_extension(palette.tag_class_int)); \
+                    } \
+                } \
+                else if(is_null) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu is null, so %zu reference%s will be unused", i, static_cast<std::size_t>(used[i]), used[i] == 1 ? "" : "s"); \
                 } \
             } \
         }
