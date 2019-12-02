@@ -13,6 +13,75 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
+        // Check for unused stuff
+        std::size_t name_count = this->object_names.size();
+        std::vector<std::uint32_t> name_used(name_count);
+
+        #define CHECK_PALETTE_AND_SPAWNS(object_type_str, scenario_object_type, scenario_palette_type, object_type_int) { \
+            std::size_t type_count = this->scenario_palette_type.size(); \
+            std::size_t count = this->scenario_object_type.size(); \
+            std::vector<bool> used(type_count); \
+            for(std::size_t i = 0; i < count; i++) { \
+                auto &r = this->scenario_object_type[i]; \
+                std::size_t name_index = r.name; \
+                if(name_index != NULL_INDEX) { \
+                    /* Check the name to see if it's valid */ \
+                    if(name_index >= name_count) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
+                    } \
+                    /* If it is, increment the used counter and assign everything */ \
+                    else { \
+                        name_used[name_index]++; \
+                        auto &name = this->object_names[r.name]; \
+                        name.object_index = name_index; \
+                        name.object_type = HEK::ObjectType::object_type_int; \
+                    } \
+                } \
+                std::size_t type_index = r.type; \
+                if(type_index == NULL_INDEX) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " spawn #%zu has no object type, so it will be unused", i); \
+                } \
+                else if(type_index >= type_count) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
+                } \
+                else { \
+                    used[type_index] = true; \
+                } \
+            } \
+            for(std::size_t i = 0; i < type_count; i++) { \
+                if(!used[i]) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu is unused", i); \
+                } \
+            } \
+        }
+
+        CHECK_PALETTE_AND_SPAWNS("Biped", bipeds, biped_palette, OBJECT_TYPE_BIPED);
+        CHECK_PALETTE_AND_SPAWNS("Vehicle", vehicles, vehicle_palette, OBJECT_TYPE_VEHICLE);
+        CHECK_PALETTE_AND_SPAWNS("Weapon", weapons, weapon_palette, OBJECT_TYPE_WEAPON);
+        CHECK_PALETTE_AND_SPAWNS("Equipment", equipment, equipment_palette, OBJECT_TYPE_EQUIPMENT);
+        CHECK_PALETTE_AND_SPAWNS("Scenery", scenery, scenery_palette, OBJECT_TYPE_SCENERY);
+        CHECK_PALETTE_AND_SPAWNS("Machine", machines, machine_palette, OBJECT_TYPE_DEVICE_MACHINE);
+        CHECK_PALETTE_AND_SPAWNS("Control", controls, control_palette, OBJECT_TYPE_DEVICE_CONTROL);
+        CHECK_PALETTE_AND_SPAWNS("Light fixture", light_fixtures, light_fixture_palette, OBJECT_TYPE_DEVICE_LIGHT_FIXTURE);
+        CHECK_PALETTE_AND_SPAWNS("Sound scenery", sound_scenery, sound_scenery_palette, OBJECT_TYPE_SOUND_SCENERY);
+
+        #undef CHECK_PALETTE_AND_SPAWNS
+
+        // Make sure we don't have any fun stuff with object names going on
+        for(std::size_t i = 0; i < name_count; i++) {
+            std::size_t used = name_used[i];
+            auto &name = this->object_names[i];
+            const char *name_str = name.name.string;
+            if(used == 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Object name #%zu (%s) is unused", i, name_str);
+                name.object_index = NULL_INDEX;
+                name.object_type = static_cast<HEK::ObjectType>(NULL_INDEX);
+            }
+            else if(used > 1) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
+            }
+        }
+
         // If we don't have any string data, allocate 512 bytes
         if(this->script_string_data.size() == 0) {
             this->script_string_data.resize(512);
