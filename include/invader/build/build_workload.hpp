@@ -192,6 +192,9 @@ namespace Invader {
         /** Recursion is disabled */
         bool disable_recursion = false;
 
+        /** Hide pedantic warnings */
+        bool hide_pedantic_warnings = false;
+
         /**
          * Add the tag
          * @param tag_path      path of the tag
@@ -251,7 +254,6 @@ namespace Invader {
         void add_tags();
         void generate_tag_array();
         std::size_t dedupe_tag_space;
-        bool hide_pedantic_warnings = false;
         std::size_t warnings = 0;
         std::size_t errors = 0;
         std::size_t dedupe_structs();
