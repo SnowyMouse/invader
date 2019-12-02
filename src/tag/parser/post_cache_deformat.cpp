@@ -244,7 +244,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::ModelAnimationAnimation::post_cache_deformat() {
+    void Invader::Parser::ModelAnimationsAnimation::post_cache_deformat() {
         std::vector<std::byte> frame_data = this->frame_data;
         std::vector<std::byte> frame_info = this->frame_info;
         std::vector<std::byte> default_data = this->default_data;
@@ -256,13 +256,13 @@ namespace Invader::Parser {
                 required_frame_info_size = 0;
                 break;
             case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
-                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDy::struct_little);
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDy::struct_little);
                 break;
             case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
-                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDyaw::struct_little);
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDyaw::struct_little);
                 break;
             case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
-                required_frame_info_size = sizeof(ModelAnimationFrameInfoDxDyDzDyaw::struct_little);
+                required_frame_info_size = sizeof(ModelAnimationsFrameInfoDxDyDzDyaw::struct_little);
                 break;
             default:
                 eprintf_error("unknown frame info type");
@@ -277,22 +277,22 @@ namespace Invader::Parser {
             switch(this->frame_info_type) {
                 case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationFrameInfoDxDy::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationFrameInfoDxDy::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDy::struct_little *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
                 case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DYAW:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationFrameInfoDxDyDyaw::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationFrameInfoDxDyDyaw::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDyaw::struct_little *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
                 case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
                     swap_endian_array(
-                        reinterpret_cast<ModelAnimationFrameInfoDxDyDzDyaw::struct_big *>(this->frame_info.data()),
-                        reinterpret_cast<ModelAnimationFrameInfoDxDyDzDyaw::struct_little *>(frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::struct_big *>(this->frame_info.data()),
+                        reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::struct_little *>(frame_info.data()),
                         this->frame_count
                     );
                     break;
@@ -337,13 +337,13 @@ namespace Invader::Parser {
             }
 
             if(has_rotation) {
-                frame_data_size_expected += sizeof(ModelAnimationRotation::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationsRotation::struct_little) * frame_count;
             }
             if(has_transform) {
-                frame_data_size_expected += sizeof(ModelAnimationTransform::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationsTransform::struct_little) * frame_count;
             }
             if(has_scale) {
-                frame_data_size_expected += sizeof(ModelAnimationScale::struct_little) * frame_count;
+                frame_data_size_expected += sizeof(ModelAnimationscale::struct_little) * frame_count;
             }
 
             rotation_count += has_rotation;
@@ -356,8 +356,8 @@ namespace Invader::Parser {
         }
 
         // Make sure frame and default size is correct
-        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationRotation::struct_big) + scale_count * sizeof(ModelAnimationScale::struct_big) + transform_count * sizeof(ModelAnimationTransform::struct_big);
-        std::size_t max_frame_size = node_count * (sizeof(ModelAnimationRotation::struct_big) + sizeof(ModelAnimationScale::struct_big) + sizeof(ModelAnimationTransform::struct_big));
+        std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
+        std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
         if(frame_size != total_frame_size) {
             eprintf_error("frame size (%zu) != total frame size (%zu)", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
@@ -377,22 +377,22 @@ namespace Invader::Parser {
 
                 for(std::size_t node = 0; node < this->node_count; node++) {
                     if(!rotate[node]) {
-                        auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_big *>(default_data_big);
-                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_little *>(default_data_little);
+                        auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
+                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
                         rotation_big = rotation_little;
                         default_data_big += sizeof(rotation_big);
                         default_data_little += sizeof(rotation_big);
                     }
                     if(!transform[node]) {
-                        auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_big *>(default_data_big);
-                        const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_little *>(default_data_little);
+                        auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
+                        const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
                         transform_big = transform_little;
                         default_data_big += sizeof(transform_big);
                         default_data_little += sizeof(transform_big);
                     }
                     if(!scale[node]) {
-                        auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_big *>(default_data_big);
-                        const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_little *>(default_data_little);
+                        auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
+                        const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
                         scale_big = scale_little;
                         default_data_big += sizeof(scale_big);
                         default_data_little += sizeof(scale_big);
@@ -425,22 +425,22 @@ namespace Invader::Parser {
                 for(std::size_t frame = 0; frame < frame_count; frame++) {
                     for(std::size_t node = 0; node < this->node_count; node++) {
                         if(rotate[node]) {
-                            auto &rotation_big = *reinterpret_cast<ModelAnimationRotation::struct_little *>(frame_data_big);
-                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationRotation::struct_big *>(frame_data_little);
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_little *>(frame_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_big *>(frame_data_little);
                             rotation_big = rotation_little;
                             frame_data_big += sizeof(rotation_big);
                             frame_data_little += sizeof(rotation_big);
                         }
                         if(transform[node]) {
-                            auto &transform_big = *reinterpret_cast<ModelAnimationTransform::struct_little *>(frame_data_big);
-                            const auto &transform_little = *reinterpret_cast<const ModelAnimationTransform::struct_big *>(frame_data_little);
+                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_little *>(frame_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_big *>(frame_data_little);
                             transform_big = transform_little;
                             frame_data_big += sizeof(transform_big);
                             frame_data_little += sizeof(transform_big);
                         }
                         if(scale[node]) {
-                            auto &scale_big = *reinterpret_cast<ModelAnimationScale::struct_little *>(frame_data_big);
-                            const auto &scale_little = *reinterpret_cast<const ModelAnimationScale::struct_big *>(frame_data_little);
+                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_little *>(frame_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_big *>(frame_data_little);
                             scale_big = scale_little;
                             frame_data_big += sizeof(scale_big);
                             frame_data_little += sizeof(scale_big);
