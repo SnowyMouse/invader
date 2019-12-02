@@ -253,7 +253,8 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "uint32"
+                "type": "uint32",
+                "flagged": true
             },
             {
                 "name": "bsp2d node",
