@@ -11,8 +11,8 @@ namespace Invader::Parser {
                 std::size_t compressed_vertex_count = p.compressed_vertices.size();
                 std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
                 if(uncompressed_vertex_count != compressed_vertex_count) {
-                    eprintf_error("Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count);
-                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count)
+                    eprintf_warn("To fix this, rebuild the model tag");
                     model_part_warned = true;
                     break;
                 }
@@ -33,9 +33,9 @@ namespace Invader::Parser {
         this->high_detail_cutoff = low;
         this->super_high_detail_cutoff = super_low;
 
-        if(this->markers.size() == 0) {
-            eprintf_error("Markers array is populated.");
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "To fix this, rebuild the model tag", tag_index);
+        if(this->markers.size() > 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Markers array is populated, but this array should be empty", tag_index);
+            eprintf_warn("To fix this, rebuild the model tag");
         }
 
         // Put all of the markers in the marker array
