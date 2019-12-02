@@ -16,7 +16,6 @@ namespace Invader::Parser {
         // Get the dimensions of the bitmaps
         std::uint32_t bitmap_count = bitmap_tag_data.bitmap_data.count;
         std::optional<std::size_t> bitmap_data_index = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_data.pointer);
-        bool error_reported = false;
 
         if(bitmap_data_index.has_value()) {
             std::vector<std::pair<std::uint16_t, std::uint16_t>> bitmap_dimensions(bitmap_count);
