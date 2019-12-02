@@ -78,7 +78,7 @@ namespace Invader {
             eprintf_warn("Build successful with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
         }
         else {
-            eprintf_success("Build successful");
+            oprintf_success("Build successful");
         }
         return return_value;
     }
@@ -281,6 +281,7 @@ namespace Invader {
 
         try {
             this->compile_tag_data_recursively(tag_file_data.data(), tag_file_data.size(), return_value, tag_class_int);
+            oprintf_success("Compiled %s", formatted_path);
         }
         catch(std::exception &e) {
             eprintf("failed to compile %s\n", formatted_path);
