@@ -162,7 +162,7 @@ namespace Invader::Parser {
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // TODO: Position encounters and command lists
-        if(this->encounters.size() == 0 || this->command_lists.size() == 0) {
+        if(this->encounters.size() != 0 || this->command_lists.size() != 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "TODO: Implement encounter and command list BSP location", tag_index);
             std::terminate();
         }
