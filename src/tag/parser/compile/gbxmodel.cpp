@@ -84,7 +84,7 @@ namespace Invader::Parser {
             }
             node_done[node_index] = true;
 
-            auto &node = nodes[node_count];
+            auto &node = nodes[node_index];
             node.scale = 1.0f;
 
             auto node_rotation = quaternion_to_matrix(node.default_rotation);
