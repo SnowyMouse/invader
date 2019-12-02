@@ -190,7 +190,7 @@ with open(sys.argv[1], "w") as f:
                 break
 
         # And we can't forget the copy part
-        f.write("        ENDIAN_TEMPLATE(NewEndian) operator {}<NewEndian>() const noexcept {{\n".format(s["name"]))
+        f.write("        ENDIAN_TEMPLATE(NewEndian) operator {}<NewEndian>() const {{\n".format(s["name"]))
         f.write("            {}<NewEndian> copy{};\n".format(s["name"], " = {}" if padding_present else ""))
 
         for ds in depended_structs:
