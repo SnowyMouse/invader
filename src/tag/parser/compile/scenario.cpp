@@ -112,7 +112,9 @@ namespace Invader::Parser {
             t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(this->script_syntax_data.data());
             *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(this->script_syntax_data.data()) = t;
 
-            if(t.element_size != sizeof(ScenarioScriptNode::struct_little)) {
+            auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(this->script_syntax_data.data() + sizeof(t));
+            auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
+            if(t.element_size != sizeof(*start_big)) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
                 throw InvalidTagDataException();
             }
@@ -124,8 +126,6 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
 
-            auto *start_big = reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(this->script_syntax_data.data() + sizeof(t));
-            auto *start_little = reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(start_big);
             for(std::size_t i = 0; i < element_count; i++) {
                 start_little[i] = start_big[i];
             }
