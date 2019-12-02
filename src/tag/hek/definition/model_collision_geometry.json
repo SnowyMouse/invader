@@ -25,7 +25,7 @@
         "width": 32
     },
     {
-        "name": "ModelCollisionGeometryLeafFlags",
+        "name": "ModelCollisionGeometryBSPLeafFlags",
         "type": "bitfield",
         "fields": [
             "contains double sided surfaces"
@@ -33,7 +33,7 @@
         "width": 16
     },
     {
-        "name": "ModelCollisionGeometrySurfaceFlags",
+        "name": "ModelCollisionGeometryBSPSurfaceFlags",
         "type": "bitfield",
         "fields": [
             "two sided",
@@ -218,7 +218,7 @@
         "size": 12
     },
     {
-        "name": "ModelCollisionGeometryPlane",
+        "name": "ModelCollisionGeometryBSPPlane",
         "fields": [
             {
                 "name": "plane",
@@ -230,11 +230,11 @@
         "size": 16
     },
     {
-        "name": "ModelCollisionGeometryLeaf",
+        "name": "ModelCollisionGeometryBSPLeaf",
         "fields": [
             {
                 "name": "flags",
-                "type": "ModelCollisionGeometryLeafFlags"
+                "type": "ModelCollisionGeometryBSPLeafFlags"
             },
             {
                 "name": "bsp2d reference count",
@@ -290,7 +290,7 @@
         "size": 20
     },
     {
-        "name": "ModelCollisionGeometrySurface",
+        "name": "ModelCollisionGeometryBSPSurface",
         "fields": [
             {
                 "name": "plane",
@@ -302,7 +302,7 @@
             },
             {
                 "name": "flags",
-                "type": "ModelCollisionGeometrySurfaceFlags",
+                "type": "ModelCollisionGeometryBSPSurfaceFlags",
                 "endian": null
             },
             {
@@ -319,7 +319,7 @@
         "size": 12
     },
     {
-        "name": "ModelCollisionGeometryEdge",
+        "name": "ModelCollisionGeometryBSPEdge",
         "fields": [
             {
                 "name": "start vertex",
@@ -350,7 +350,7 @@
         "size": 24
     },
     {
-        "name": "ModelCollisionGeometryVertex",
+        "name": "ModelCollisionGeometryBSPVertex",
         "fields": [
             {
                 "name": "point",
@@ -377,13 +377,13 @@
             {
                 "name": "planes",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryPlane",
+                "struct": "ModelCollisionGeometryBSPPlane",
                 "compound": true
             },
             {
                 "name": "leaves",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryLeaf",
+                "struct": "ModelCollisionGeometryBSPLeaf",
                 "compound": true
             },
             {
@@ -401,19 +401,19 @@
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometrySurface",
+                "struct": "ModelCollisionGeometryBSPSurface",
                 "compound": true
             },
             {
                 "name": "edges",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryEdge",
+                "struct": "ModelCollisionGeometryBSPEdge",
                 "compound": true
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryVertex",
+                "struct": "ModelCollisionGeometryBSPVertex",
                 "compound": true
             }
         ],
