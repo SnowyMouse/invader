@@ -207,12 +207,15 @@ namespace Invader::Parser {
         // Make sure frame and default size is correct
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
-        if(static_cast<std::size_t>(this->frame_size) != total_frame_size) {
-            throw OutOfBoundsException();
+        if(this->frame_size != total_frame_size) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame size (%zu expected, %zu gotten)", struct_index, total_frame_size, static_cast<std::size_t>(this->frame_size));
+            throw InvalidTagDataException();
         }
 
-        if(static_cast<std::size_t>(default_data_size) != (max_frame_size - total_frame_size)) {
-            throw OutOfBoundsException();
+        std::size_t expected_default_data_size = max_frame_size - total_frame_size;
+        if(default_data_size != expected_default_data_size) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid default data size (%zu expected, %zu gotten)", struct_index, expected_default_data_size, default_data_size);
+            throw InvalidTagDataException();
         }
 
         // Get whether or not it's compressed
