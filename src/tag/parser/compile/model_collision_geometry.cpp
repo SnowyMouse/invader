@@ -55,7 +55,7 @@ namespace Invader::Parser {
             std::size_t leaf_bsp2d_reference_count = leaf.bsp2d_reference_count;
             std::size_t leaf_end_bsp2d_reference = leaf_bsp2d_reference_count + leaf_first_bsp2d_reference;
 
-            if(bsp2d_reference_count && (leaf_first_bsp2d_reference >= bsp2d_reference_count || leaf_bsp2d_reference_count > bsp2d_reference_count || leaf_end_bsp2d_reference > bsp2d_reference_count)) {
+            if(leaf_bsp2d_reference_count && (leaf_first_bsp2d_reference >= bsp2d_reference_count || leaf_bsp2d_reference_count > bsp2d_reference_count || leaf_end_bsp2d_reference > bsp2d_reference_count)) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP leaf #%zu has an invalid BSP2D reference range (%zu - %zu / %zu)", &leaf - this->leaves.data(), leaf_first_bsp2d_reference, leaf_end_bsp2d_reference, bsp2d_reference_count);
                 throw InvalidTagDataException();
             }
