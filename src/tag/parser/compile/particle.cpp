@@ -47,10 +47,6 @@ namespace Invader::Parser {
                             // Get yer values here. Get 'em while they're hot.
                             float width_bitmap = 1.0F / std::fabs(sprite.right - sprite.left) / bitmap_dimensions[sprite.bitmap_index].first;
                             float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
-                            if(width_bitmap != height_bitmap && !error_reported) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, bitmap_tag_index, "Sprite bitmap is not 1:1 aspect ratio");
-                                error_reported = true;
-                            }
 
                             // There!
                             float larger = (width_bitmap > height_bitmap) ? width_bitmap : height_bitmap;

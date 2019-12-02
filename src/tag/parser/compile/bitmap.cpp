@@ -25,6 +25,9 @@ namespace Invader::Parser {
             }
         }
 
+        auto max_size = this->processed_pixel_data.size();
+        auto *pixel_data = this->processed_pixel_data.data();
+
         for(auto &data : this->bitmap_data) {
             std::size_t data_index = &data - this->bitmap_data.data();
             bool compressed = data.flags.compressed;
@@ -85,7 +88,7 @@ namespace Invader::Parser {
                 }
             }
 
-            if(depth != 1 && type == HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+            if(depth != 1 && type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is not a 3D texture but has depth (%zu != 1)", data_index, depth);
             }
 
@@ -131,7 +134,7 @@ namespace Invader::Parser {
 
             // Do it
             for(std::size_t i = 0; i <= data.mipmap_count; i++) {
-                size += width * height * depth * multiplier * bits_per_pixel;
+                size += width * height * depth * multiplier * bits_per_pixel / 8;
 
                 // Divide by 2, resetting back to 1 when needed
                 width /= 2;
@@ -159,7 +162,6 @@ namespace Invader::Parser {
             }
 
             // Make sure we won't explode
-            auto max_size = this->processed_pixel_data.size();
             std::size_t end = start + size;
             if(start > max_size || size > max_size || end > max_size) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu range (0x%08zX - 0x%08zX) exceeds the processed pixel data size (0x%08zX)", data_index, start, end, max_size);
@@ -168,7 +170,7 @@ namespace Invader::Parser {
 
             // Add it all
             std::size_t raw_data_index = workload.raw_data.size();
-            workload.raw_data.emplace_back(this->processed_pixel_data.data() + start, this->processed_pixel_data.data() + end);
+            workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
             workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
         }
     }

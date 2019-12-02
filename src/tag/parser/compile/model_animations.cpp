@@ -31,11 +31,6 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid sound frame index (%zu >= %zu)", i, sound_frame_index, frame_count);
             }
 
-            std::size_t loop_frame_index = animation->loop_frame_index;
-            if(loop_frame_index >= animation->frame_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid loop frame index (%zu >= %zu)", i, loop_frame_index, frame_count);
-            }
-
             std::size_t key_frame_index = animation->key_frame_index;
             if(key_frame_index >= animation->frame_count) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid key frame index (%zu >= %zu)", i, key_frame_index, frame_count);
