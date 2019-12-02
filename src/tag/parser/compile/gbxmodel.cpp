@@ -66,6 +66,7 @@ namespace Invader::Parser {
                         ma.instances.push_back(instance);
                     }
                 }
+                p.markers.clear();
             }
         }
 
