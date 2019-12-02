@@ -2,6 +2,8 @@
 Invader is an open source toolkit for creating maps and assets for Halo: Combat
 Evolved on the PC. See LICENSE for more information about the license.
 
+Discord server: https://discord.gg/RCX3nvw
+
 ## Getting started
 This readme addresses a few topics:
 - [Contributing]
