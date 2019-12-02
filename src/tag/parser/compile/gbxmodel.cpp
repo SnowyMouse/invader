@@ -168,8 +168,8 @@ namespace Invader::Parser {
         }
 
         // Remove excess NULL_INDEX values
-        while(this->triangles.size() > 0 && triangle_indices[this->triangles.size() - 1] == NULL_INDEX) {
-            triangle_indices.erase(triangle_indices.begin() + (this->triangles.size() - 1));
+        while(triangle_indices.size() > 0 && triangle_indices[triangle_indices.size() - 1] == NULL_INDEX) {
+            triangle_indices.erase(triangle_indices.begin() + (triangle_indices.size() - 1));
         }
         this->triangle_count = triangle_indices.size();
 
@@ -177,7 +177,7 @@ namespace Invader::Parser {
         std::size_t uncompressed_vertices_count = this->uncompressed_vertices.size();
         for(auto &t : triangle_indices) {
             if(t >= uncompressed_vertices_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index in triangle indices is invalid (%u >= %zu)", t, uncompressed_vertices_count);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), uncompressed_vertices_count);
                 throw InvalidTagDataException();
             }
         }
