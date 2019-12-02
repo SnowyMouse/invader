@@ -13,7 +13,7 @@ namespace Invader::Parser {
             material.material = static_cast<HEK::MaterialType>(0xFFFF);
             return;
         }
-        
+
         this->material = reinterpret_cast<Shader::struct_little *>(workload.structs[(*workload.tags[this->shader.tag_id.index].base_struct)].data.data())->material_type;
         material.material = this->material;
     }
@@ -26,6 +26,7 @@ namespace Invader::Parser {
             }
 
             auto *vertices = this->uncompressed_vertices.data();
+            auto uncompressed_vertices_size = this->uncompressed_vertices.size();
 
             auto *lightmap_rendered_vertices_big = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_big *>(vertices);
             auto *lightmap_rendered_vertices_little = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(lightmap_rendered_vertices_big);
@@ -35,8 +36,8 @@ namespace Invader::Parser {
 
             auto *lightmap_vertices_end = lightmap_lightmap_vertices_big + this->lightmap_vertices_count;
             std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
-            if(expected_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, this->uncompressed_vertices.size());
+            if(expected_size != uncompressed_vertices_size) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
                 throw InvalidTagDataException();
             }
 
