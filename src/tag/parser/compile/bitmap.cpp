@@ -15,6 +15,7 @@ namespace Invader::Parser {
         d.tag_id_only = true;
         this->pointer = 0xFFFFFFFF;
         this->flags.external = 0;
+        this->flags.make_it_actually_work = 1;
     }
 
     void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
