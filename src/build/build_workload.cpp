@@ -25,7 +25,7 @@ namespace Invader {
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario,
-        unsigned int optimize_level
+        bool optimize_space
     ) {
         BuildWorkload workload;
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
@@ -33,31 +33,10 @@ namespace Invader {
         workload.tags_directories = &tags_directories;
         workload.engine_target = engine_target;
         workload.forge_crc = forge_crc;
+        workload.optimize_space = optimize_space;
 
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).data());
-        }
-
-        if(optimize_level == 0) {
-            workload.dedupe_tag_space = 0;
-        }
-        else if(optimize_level > 10) {
-            std::terminate();
-        }
-        else if(optimize_level == 10) {
-            workload.dedupe_tag_space = SIZE_MAX;
-        }
-        else {
-            std::size_t s;
-            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                s = CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET / 2;
-            }
-            else {
-                s = CACHE_FILE_MEMORY_LENGTH / 2;
-            }
-            s /= static_cast<std::size_t>(std::pow(10, 7));
-            s *= static_cast<std::size_t>(std::pow(optimize_level, 7));
-            workload.dedupe_tag_space = s;
         }
 
         // Set the tag data address
@@ -119,7 +98,7 @@ namespace Invader {
         tag_data_ptr.struct_index = 1;
 
         // Dedupe structs
-        if(this->dedupe_tag_space) {
+        if(this->optimize_space) {
             this->dedupe_structs();
         }
 
@@ -420,7 +399,7 @@ namespace Invader {
         bool found_something = true;
         std::size_t total_savings = 0;
 
-        while(found_something && total_savings < this->dedupe_tag_space) {
+        while(found_something) {
             found_something = false;
             for(std::size_t i = 0; i < this->structs.size() && !found_something; i++) {
                 for(std::size_t j = i + 1; j < this->structs.size(); j++) {
@@ -452,10 +431,6 @@ namespace Invader {
                         this->structs.erase(this->structs.begin() + j);
                         found_something = true;
                         j--;
-
-                        if(total_savings >= this->dedupe_tag_space) {
-                            return total_savings;
-                        }
                     }
                 }
             }
