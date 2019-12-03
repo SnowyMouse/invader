@@ -27,7 +27,8 @@ namespace Invader {
         unsigned int optimize_level
     ) {
         BuildWorkload workload;
-        workload.scenario = scenario;
+        auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
+        workload.scenario = scenario_name_fixed.data();
         workload.tags_directories = &tags_directories;
         workload.engine_target = engine_target;
 
@@ -776,7 +777,7 @@ namespace Invader {
         if(*last_slash == 0) {
             throw InvalidScenarioNameException();
         }
-        if(std::snprintf(this->scenario_name.string, sizeof(this->scenario_name.string), "%s", name) >= sizeof(this->scenario_name.string)) {
+        if(static_cast<std::size_t>(std::snprintf(this->scenario_name.string, sizeof(this->scenario_name.string), "%s", last_slash)) >= sizeof(this->scenario_name.string)) {
             throw InvalidScenarioNameException();
         }
     }
