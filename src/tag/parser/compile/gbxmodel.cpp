@@ -173,6 +173,8 @@ namespace Invader::Parser {
         while(triangle_indices.size() > 0 && triangle_indices[triangle_indices.size() - 1] == NULL_INDEX) {
             triangle_indices.erase(triangle_indices.begin() + (triangle_indices.size() - 1));
         }
+
+        // Subtract two (since each index is technically an individual triangle, minus the last two indices since you need three indices to make a triangle)
         this->triangle_count = triangle_indices.size() - 2;
 
         // Make sure every triangle is valid
