@@ -106,9 +106,11 @@ namespace Invader {
             this->dedupe_structs();
         }
 
-        // Tag data
-        std::vector<std::vector<std::byte>> tag_data;
-        this->generate_tag_data(tag_data);
+        // Get the tag data
+        std::size_t end_of_bsps = this->generate_tag_data();
+
+        // Get the bitmap and sound data in there
+        this->generate_bitmap_sound_data(end_of_bsps);
 
         std::terminate();
     }
@@ -502,7 +504,7 @@ namespace Invader {
         }
     }
 
-    void BuildWorkload::generate_tag_data(std::vector<std::vector<std::byte>> &tag_data) {
+    std::size_t BuildWorkload::generate_tag_data() {
         auto &structs = this->structs;
         auto &tags = this->tags;
         std::size_t tag_count = tags.size();
@@ -553,7 +555,7 @@ namespace Invader {
         };
 
         // Build the tag data for the main tag data
-        auto &tag_data_struct = tag_data.emplace_back();
+        auto &tag_data_struct = map_data_structs.emplace_back();
         recursively_generate_data(tag_data_struct, 0, recursively_generate_data);
         auto *tag_data_b = tag_data_struct.data();
 
@@ -566,14 +568,14 @@ namespace Invader {
         auto &scenario_tag = tags[this->scenario_index];
         auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
         std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
+        std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
         if(bsp_count != this->bsp_count) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
             throw InvalidTagDataException();
         }
         else if(bsp_count) {
             auto scenario_bsps_struct_index = *structs[*scenario_tag.base_struct].resolve_pointer(reinterpret_cast<const std::byte *>(&scenario_tag_data.structure_bsps.pointer) - reinterpret_cast<const std::byte *>(&scenario_tag_data));
-            std::size_t file_offset = sizeof(HEK::CacheFileHeader);
-            auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(tag_data[0].data() + *structs[scenario_bsps_struct_index].offset);
+            auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(map_data_structs[0].data() + *structs[scenario_bsps_struct_index].offset);
 
             // Go through each BSP tag
             for(std::size_t i = 0; i < tag_count; i++) {
@@ -584,7 +586,7 @@ namespace Invader {
 
                 // Build the tag data for the BSP data now
                 pointers.clear();
-                auto &bsp_data_struct = tag_data.emplace_back();
+                auto &bsp_data_struct = map_data_structs.emplace_back();
                 recursively_generate_data(bsp_data_struct, 0, recursively_generate_data);
                 std::size_t bsp_size = bsp_data_struct.size();
                 HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
@@ -595,21 +597,86 @@ namespace Invader {
                     *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(tag_data_base + p.second);
                 }
 
-                // Do the thing now
-                file_offset += bsp_size;
-
                 // Find the BSP in the scenario array thingy
                 bool found = false;
                 for(std::size_t b = 0; b < bsp_count; b++) {
                     if(scenario_bsps_struct_data[b].structure_bsp.tag_id.read().index == i) {
                         scenario_bsps_struct_data[b].bsp_address = tag_data_base;
                         scenario_bsps_struct_data[b].bsp_size = bsp_size;
-                        scenario_bsps_struct_data[b].bsp_start = file_offset;
+                        scenario_bsps_struct_data[b].bsp_start = bsp_end;
                         found = true;
                     }
                 }
+
+                // Add up the size
+                bsp_end += bsp_size;
+
                 if(!found) {
                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).data(), HEK::tag_class_to_extension(t.tag_class_int));
+                }
+            }
+        }
+        return bsp_end;
+    }
+
+    void BuildWorkload::generate_bitmap_sound_data(std::size_t file_offset) {
+        // Prepare for the worst
+        std::size_t total_raw_data_size = 0;
+        for(auto &r : this->raw_data) {
+            total_raw_data_size += r.size();
+        }
+        auto &all_raw_data = this->all_raw_data;
+        all_raw_data.reserve(total_raw_data_size);
+
+        // Offset followed by size
+        std::vector<std::pair<std::size_t, std::size_t>> all_assets;
+
+        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &file_offset](const std::vector<std::byte> &raw_data) -> std::uint32_t {
+            std::size_t raw_data_size = raw_data.size();
+            for(auto &a : all_assets) {
+                if(a.second == raw_data_size && std::memcmp(raw_data.data(), all_raw_data.data() + a.first, raw_data_size) == 0) {
+                    return static_cast<std::uint32_t>(a.first + file_offset);
+                }
+            }
+
+            auto &new_asset = all_assets.emplace_back();
+            new_asset.first = all_raw_data.size();
+            new_asset.second = raw_data_size;
+            all_raw_data.insert(all_raw_data.end(), raw_data.begin(), raw_data.end());
+            return static_cast<std::uint32_t>(new_asset.first + file_offset);
+        };
+
+        // Go through each tag
+        for(auto &t : this->tags) {
+            auto asset_count = t.asset_data.size();
+            if(t.resource_index.has_value() || asset_count == 0 || t.external_asset_data) {
+                continue;
+            }
+            std::size_t resource_index = 0;
+            if(t.tag_class_int == TagClassInt::TAG_CLASS_BITMAP) {
+                auto &bitmap_struct = this->structs[*t.base_struct];
+                auto &bitmap_header = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_struct.data.data());
+                std::size_t bitmap_data_count = bitmap_header.bitmap_data.count.read();
+                auto bitmap_data_array = reinterpret_cast<Parser::BitmapData::struct_little *>(this->map_data_structs[0].data() + *this->structs[*bitmap_struct.resolve_pointer(&bitmap_header.bitmap_data.pointer)].offset);
+                for(std::size_t b = 0; b < bitmap_data_count; b++) {
+                    auto &bitmap_data = bitmap_data_array[b];
+                    bitmap_data.pixels_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]]);
+                }
+            }
+            else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
+                auto &sound_struct = this->structs[*t.base_struct];
+                auto &sound_header = *reinterpret_cast<Parser::Sound::struct_little *>(sound_struct.data.data());
+                std::size_t pitch_range_count = sound_header.pitch_ranges.count.read();
+                auto &pitch_range_struct = this->structs[*sound_struct.resolve_pointer(&sound_header.pitch_ranges.pointer)];
+                auto *pitch_range_array = reinterpret_cast<Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
+                for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                    auto &pitch_range = pitch_range_array[pr];
+                    std::size_t permutation_count = pitch_range.permutations.count.read();
+                    auto *permutation_array = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->map_data_structs[0].data() + *this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].offset);
+                    for(std::size_t pe = 0; pe < permutation_count; pe++) {
+                        auto &permutation = permutation_array[pe];
+                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]]);
+                    }
                 }
             }
         }

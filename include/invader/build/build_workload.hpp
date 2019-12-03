@@ -161,6 +161,9 @@ namespace Invader {
             /** Base struct index of the tag */
             std::optional<std::size_t> base_struct;
 
+            /** The asset data is external */
+            bool external_asset_data = false;
+
             /** Tag path struct index of the tag */
             std::optional<std::size_t> tag_path;
         };
@@ -257,7 +260,10 @@ namespace Invader {
         std::size_t warnings = 0;
         std::size_t errors = 0;
         std::size_t dedupe_structs();
-        void generate_tag_data(std::vector<std::vector<std::byte>> &tag_data);
+        std::vector<std::vector<std::byte>> map_data_structs;
+        std::vector<std::byte> all_raw_data;
+        std::size_t generate_tag_data();
+        void generate_bitmap_sound_data(std::size_t file_offset);
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
