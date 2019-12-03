@@ -416,7 +416,11 @@ namespace Invader {
     }
 
     void BuildWorkload::generate_tag_array() {
-        TAG_ARRAY_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataTag) * this->tags.size());
+        std::size_t tag_count = this->tags.size();
+        if(tag_count > UINT16_MAX) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum number of tags exceeded (%zu > %zu)", tag_count, static_cast<std::size_t>(UINT16_MAX));
+            throw InvalidTagDataException();
+        }
         auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TAG_ARRAY_STRUCT.data.data());
 
         // Set tag classes, paths, etc.
