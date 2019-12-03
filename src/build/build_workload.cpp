@@ -422,7 +422,7 @@ namespace Invader {
         // Set tag classes, paths, etc.
         std::size_t tag_count = this->tags.size();
         for(std::size_t t = 0; t < tag_count; t++) {
-            auto &tag_index = tag_array[tag_count];
+            auto &tag_index = tag_array[t];
             auto &tag = this->tags[t];
 
             // Tag path
