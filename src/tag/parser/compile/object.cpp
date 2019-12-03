@@ -6,6 +6,7 @@
 namespace Invader::Parser {
     template <typename T> void compile_object(T &tag) {
         tag.has_change_colors = tag.change_colors.size() > 0;
+        tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 
     void Biped::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
