@@ -13,6 +13,7 @@ namespace Invader::Parser {
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
         d.tag_id_only = true;
+        this->flags.external = 0;
     }
 
     void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -173,6 +174,7 @@ namespace Invader::Parser {
             std::size_t raw_data_index = workload.raw_data.size();
             workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
             workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
+            data.pixels_count = static_cast<std::uint32_t>(size);
         }
     }
 }
