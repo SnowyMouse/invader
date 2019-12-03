@@ -160,6 +160,9 @@ namespace Invader::Parser {
     void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::vector<HEK::Index> triangle_indices;
 
+        // Add 1 to this
+        workload.part_count++;
+
         // Add it all
         for(auto &t : this->triangles) {
             triangle_indices.push_back(t.vertex0_index);

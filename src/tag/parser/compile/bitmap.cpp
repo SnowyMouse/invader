@@ -59,32 +59,33 @@ namespace Invader::Parser {
                     exceeded = true;
                 }
 
-                switch(type) {
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
-                        if(width > 2048 || height > 2048) {
-                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 2048x2048 (%zux%zux)", data_index, width, height);
-                             exceeded = true;
-                        }
-                        break;
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                        if(width > 256 || height > 256 || depth > 256) {
-                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 256x256x256 (%zux%zux)", data_index, width, height);
-                             exceeded = true;
-                        }
-                        break;
-                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                        if(width > 512 || height > 512) {
-                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 512x512 (%zux%zux)", data_index, width, height);
-                             exceeded = true;
-                        }
-                        break;
-                    default:
-                        std::terminate();
-                }
-
-                if(exceeded) {
-                    eprintf_warn("Some compliant hardware may not be able to render this bitmap");
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    switch(type) {
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
+                            if(width > 2048 || height > 2048) {
+                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 2048x2048 (%zux%zux)", data_index, width, height);
+                                 exceeded = true;
+                            }
+                            break;
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                            if(width > 256 || height > 256 || depth > 256) {
+                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 256x256x256 (%zux%zux)", data_index, width, height);
+                                 exceeded = true;
+                            }
+                            break;
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                            if(width > 512 || height > 512) {
+                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 512x512 (%zux%zux)", data_index, width, height);
+                                 exceeded = true;
+                            }
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                    if(exceeded) {
+                        eprintf_warn("Some compliant hardware may not be able to render this bitmap");
+                    }
                 }
             }
 

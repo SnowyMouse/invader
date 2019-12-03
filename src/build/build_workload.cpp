@@ -4,6 +4,7 @@
 #include <invader/hek/map.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/header.hpp>
+#include <invader/version.hpp>
 
 namespace Invader {
     using namespace HEK;
@@ -28,6 +29,11 @@ namespace Invader {
         BuildWorkload workload;
         workload.scenario = scenario;
         workload.tags_directories = &tags_directories;
+        workload.engine_target = engine_target;
+
+        if(rename_scenario.has_value()) {
+            workload.set_scenario_name((*rename_scenario).data());
+        }
 
         if(optimize_level == 0) {
             workload.dedupe_tag_space = 0;
@@ -90,9 +96,6 @@ namespace Invader {
         // First, make our tag data header and array
         this->structs.resize(2);
         TAG_DATA_HEADER_STRUCT.unsafe_to_dedupe = true;
-        auto &tag_data_ptr = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
-        tag_data_ptr.offset = 0;
-        tag_data_ptr.struct_index = 1;
         TAG_ARRAY_STRUCT.unsafe_to_dedupe = true;
 
         // Add all of the tags
@@ -100,6 +103,17 @@ namespace Invader {
 
         // Generate the tag array
         this->generate_tag_array();
+
+        // Set the scenario tag thingy
+        auto &scenario_tag_dependency = TAG_DATA_HEADER_STRUCT.dependencies.emplace_back();
+        auto &header_struct_data_temp = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(TAG_DATA_HEADER_STRUCT.data.data());
+        scenario_tag_dependency.tag_id_only = true;
+        scenario_tag_dependency.tag_index = this->scenario_index;
+        scenario_tag_dependency.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp.scenario_tag) - reinterpret_cast<const std::byte *>(&header_struct_data_temp);
+        TAG_DATA_HEADER_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataHeaderPC));
+        auto &tag_data_ptr = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
+        tag_data_ptr.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp.tag_array_address) - reinterpret_cast<const std::byte *>(&header_struct_data_temp);
+        tag_data_ptr.struct_index = 1;
 
         // Dedupe structs
         if(this->dedupe_tag_space) {
@@ -112,7 +126,65 @@ namespace Invader {
         // Get the bitmap and sound data in there
         this->generate_bitmap_sound_data(end_of_bsps);
 
-        std::terminate();
+        std::vector<std::byte> final_data;
+        HEK::CacheFileHeader header = {};
+        std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
+        header.engine = this->engine_target;
+        header.map_type = *this->cache_file_type;
+        header.name = this->scenario_name;
+
+        // Add header stuff
+        final_data.resize(sizeof(HEK::CacheFileHeader));
+
+        // Go through each BSP and add that stuff
+        for(std::size_t b = 0; b < this->bsp_count; b++) {
+            final_data.insert(final_data.end(), this->map_data_structs[b + 1].begin(), this->map_data_structs[b + 1].end());
+        }
+
+        // Now add all the raw data
+        final_data.insert(final_data.end(), this->all_raw_data.begin(), this->all_raw_data.end());
+
+        // Let's get the model data there
+        std::size_t model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+        final_data.resize(model_offset, std::byte());
+        final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(this->model_vertices.data()), reinterpret_cast<std::byte *>(this->model_vertices.data() + this->model_vertices.size()));
+
+        // Now add model indices
+        std::size_t vertex_size = this->model_vertices.size() * sizeof(*this->model_vertices.data());
+        final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(this->model_indices.data()), reinterpret_cast<std::byte *>(this->model_indices.data() + this->model_indices.size()));
+
+        // We're almost there
+        std::size_t tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+        std::size_t model_data_size = tag_data_offset - model_offset;
+        final_data.resize(tag_data_offset, std::byte());
+
+        // Add tag data
+        final_data.insert(final_data.end(), this->map_data_structs[0].begin(), this->map_data_structs[0].end());
+        auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
+        tag_data_struct.tag_count = static_cast<std::uint32_t>(this->tags.size());
+        tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
+        tag_data_struct.model_part_count = static_cast<std::uint32_t>(this->part_count);
+        tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(this->part_count);
+        tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
+        tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
+        tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
+
+        // Lastly, do the header
+        std::size_t tag_data_size = this->map_data_structs[0].size();
+        header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
+        header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
+            header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
+            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
+        }
+        else {
+            header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD;
+            header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT;
+            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
+        }
+
+        return final_data;
     }
 
     void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
@@ -297,6 +369,7 @@ namespace Invader {
 
     void BuildWorkload::add_tags() {
         this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
+        this->set_scenario_name(this->scenario);
 
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
@@ -679,6 +752,32 @@ namespace Invader {
                     }
                 }
             }
+        }
+    }
+
+    void BuildWorkload::set_scenario_name(const char *name) {
+        if(this->scenario_name.string[0]) {
+            auto &scenario_tag = this->tags[this->scenario_index];
+            const char *last_slash = scenario_tag.path.data();
+            for(const char *c = last_slash; *c; c++) {
+                if(*c == '\\') {
+                    last_slash = c + 1;
+                }
+            }
+            scenario_tag.path = scenario_tag.path.substr(0, last_slash - scenario_tag.path.data()) + name;
+            return;
+        }
+        const char *last_slash = name;
+        for(const char *c = name; *c; c++) {
+            if(*c == '\\') {
+                last_slash = c + 1;
+            }
+        }
+        if(*last_slash == 0) {
+            throw InvalidScenarioNameException();
+        }
+        if(std::snprintf(this->scenario_name.string, sizeof(this->scenario_name.string), "%s", name) >= sizeof(this->scenario_name.string)) {
+            throw InvalidScenarioNameException();
         }
     }
 }

@@ -198,6 +198,12 @@ namespace Invader {
         /** Hide pedantic warnings */
         bool hide_pedantic_warnings = false;
 
+        /** Engine target */
+        HEK::CacheFileEngine engine_target;
+
+        /** Part count ?*/
+        std::size_t part_count = 0;
+
         /**
          * Add the tag
          * @param tag_path      path of the tag
@@ -264,6 +270,8 @@ namespace Invader {
         std::vector<std::byte> all_raw_data;
         std::size_t generate_tag_data();
         void generate_bitmap_sound_data(std::size_t file_offset);
+        HEK::TagString scenario_name = {};
+        void set_scenario_name(const char *name);
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
