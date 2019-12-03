@@ -13,6 +13,7 @@ namespace Invader::Parser {
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
         d.tag_id_only = true;
+        this->pointer = 0xFFFFFFFF;
         this->flags.external = 0;
     }
 

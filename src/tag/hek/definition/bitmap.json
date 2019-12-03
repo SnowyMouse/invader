@@ -249,7 +249,9 @@
             },
             {
                 "name": "pointer",
-                "type": "Pointer"
+                "type": "Pointer",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
