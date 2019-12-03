@@ -351,7 +351,7 @@ for s in all_structs_arranged:
     cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset + tag_index * 0);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
     for struct in all_used_structs:
-        if ("non_cached" in struct and struct["non_cached"]):
+        if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
             continue
         name = struct["name"]
         if struct["type"] == "TagDependency":
