@@ -193,18 +193,12 @@ namespace Invader::Parser {
         bool found = false;
 
         if(indices_count >= this_indices_count) {
-            for(std::size_t i = 0; !found && i <= indices_count - this_indices_count; i++) {
-                found = true;
-                // See if the indices match
-                for(std::size_t q = 0; q < this_indices_count; q++) {
-                    if(triangle_indices[q] != workload.model_indices[q + i]) {
-                        found = false;
-                        break;
-                    }
-                }
-                // If so, set the triangle offset to this instead
-                if(found) {
+            for(std::size_t i = 0; i <= indices_count - this_indices_count; i++) {
+                // If triangles match, set the triangle offset to this instead
+                if(std::equal(triangle_indices.begin(), triangle_indices.end(), workload.model_indices.begin() + i)) {
+                    found = true;
                     this->triangle_offset = i * sizeof(workload.model_indices[0]);
+                    break;
                 }
             }
         }
