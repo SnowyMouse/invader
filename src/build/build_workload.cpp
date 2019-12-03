@@ -8,6 +8,9 @@
 namespace Invader {
     using namespace HEK;
 
+    #define TAG_DATA_HEADER_STRUCT (this->structs[0])
+    #define TAG_ARRAY_STRUCT (this->structs[1])
+
     std::vector<std::byte> BuildWorkload::compile_map (
         const char *scenario,
         const std::vector<std::string> &tags_directories,
@@ -86,11 +89,11 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // First, make our tag data header and array
         this->structs.resize(2);
-        this->structs[0].unsafe_to_dedupe = true;
-        auto &tag_data_ptr = this->structs[0].pointers.emplace_back();
+        TAG_DATA_HEADER_STRUCT.unsafe_to_dedupe = true;
+        auto &tag_data_ptr = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
         tag_data_ptr.offset = 0;
         tag_data_ptr.struct_index = 1;
-        this->structs[1].unsafe_to_dedupe = true;
+        TAG_ARRAY_STRUCT.unsafe_to_dedupe = true;
 
         // Add all of the tags
         this->add_tags();
@@ -413,8 +416,8 @@ namespace Invader {
     }
 
     void BuildWorkload::generate_tag_array() {
-        this->structs[1].data.resize(sizeof(HEK::CacheFileTagDataTag) * this->tags.size());
-        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(this->structs[1].data.data());
+        TAG_ARRAY_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataTag) * this->tags.size());
+        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TAG_ARRAY_STRUCT.data.data());
 
         // Set tag classes, paths, etc.
         std::size_t tag_count = this->tags.size();
@@ -424,23 +427,23 @@ namespace Invader {
 
             // Tag path
             auto &new_path = this->structs.emplace_back();
-            std::size_t new_path_struct = this->structs.size();
-            auto &tag_path_ptr = this->structs[1].pointers.emplace_back();
+            new_path.data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data() + tag.path.size() + 1));
+            std::size_t new_path_struct = &new_path - this->structs.data();
+            auto &tag_path_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
             tag_path_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_path) - reinterpret_cast<std::byte *>(tag_array);
             tag_path_ptr.struct_index = new_path_struct;
             tag.tag_path = new_path_struct;
-            new_path.data.insert(new_path.data.end(), reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data() + tag.path.size() + 1));
 
             // Tag data
             auto primary_class = tag.tag_class_int;
             if(!tag.tag_index.has_value() || primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                auto &tag_data_ptr = this->structs[1].pointers.emplace_back();
+                auto &tag_data_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
                 tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
                 tag_data_ptr.struct_index = *tag.base_struct;
             }
 
             // Tag ID
-            auto &tag_id = this->structs[1].dependencies.emplace_back();
+            auto &tag_id = TAG_ARRAY_STRUCT.dependencies.emplace_back();
             tag_id.tag_id_only = true;
             tag_id.offset = reinterpret_cast<std::byte *>(&tag_index.tag_id) - reinterpret_cast<std::byte *>(tag_array);
             tag_id.tag_index = t;
