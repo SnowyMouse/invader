@@ -259,7 +259,7 @@ namespace Invader::HEK {
                 // Make sure the plane is valid
                 auto plane = reference.plane.read();
                 if(plane >= this->plane_count) {
-                    eprintf_error("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
+                    eprintf_error("invalid plane range for BSP #%u / %u\n", plane.int_value(), this->plane_count);
                     throw OutOfBoundsException();
                 }
 
