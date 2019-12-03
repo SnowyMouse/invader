@@ -156,7 +156,7 @@ namespace Invader {
             std::vector<std::size_t> asset_data;
 
             /** Index of the tag (in a resource map) */
-            std::optional<std::size_t> tag_index;
+            std::optional<std::size_t> resource_index;
 
             /** Base struct index of the tag */
             std::optional<std::size_t> base_struct;

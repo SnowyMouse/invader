@@ -441,7 +441,11 @@ namespace Invader {
 
             // Tag data
             auto primary_class = tag.tag_class_int;
-            if(!tag.tag_index.has_value() || primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+            tag_index.indexed = tag.resource_index.has_value();
+            if(tag.resource_index.has_value() && primary_class != TagClassInt::TAG_CLASS_SOUND) {
+                tag_index.tag_data = *tag.resource_index;
+            }
+            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                 auto &tag_data_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
                 tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
                 tag_data_ptr.struct_index = *tag.base_struct;
