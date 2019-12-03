@@ -13,6 +13,24 @@ namespace Invader {
     #define TAG_DATA_HEADER_STRUCT (this->structs[0])
     #define TAG_ARRAY_STRUCT (this->structs[1])
 
+    bool BuildWorkload::BuildWorkloadStruct::can_dedupe(const BuildWorkload::BuildWorkloadStruct &other) const noexcept {
+        if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp)) {
+            return false;
+        }
+
+        std::size_t this_size = this->data.size();
+        std::size_t other_size = other.data.size();
+
+        if(this->dependencies == other.dependencies && this->pointers == other.pointers && this_size == other_size) {
+            return std::memcmp(this->data.data(), other.data.data(), this_size) == 0;
+        }
+
+        if(this->dependencies.size() == 0 && other.dependencies.size() == 0 && this->pointers.size() == 0 && other.pointers.size() == 0 && this_size >= other_size) {
+            return std::memcmp(this->data.data(), other.data.data(), other_size) == 0;
+        }
+        return false;
+    }
+
     std::vector<std::byte> BuildWorkload::compile_map (
         const char *scenario,
         const std::vector<std::string> &tags_directories,
@@ -408,29 +426,26 @@ namespace Invader {
                         // If so, go through every struct pointer. If they equal j, set to i. If they're greater than j, decrement
                         for(std::size_t k = 0; k < this->structs.size(); k++) {
                             for(auto &pointer : this->structs[k].pointers) {
-                                if(pointer.struct_index > j) {
-                                    pointer.struct_index--;
-                                }
-                                else if(pointer.struct_index == j) {
-                                    pointer.struct_index = i;
+                                auto &struct_index = pointer.struct_index;
+                                if(struct_index == j) {
+                                    struct_index = i;
                                 }
                             }
                         }
 
                         // Also go through every tag, too
                         for(auto &tag : this->tags) {
-                            if(tag.base_struct > j) {
-                                (*tag.base_struct)--;
-                            }
-                            else if(tag.base_struct == j) {
-                                tag.base_struct = i;
+                            if(tag.base_struct.has_value()) {
+                                auto &base_struct = tag.base_struct.value();
+                                if(base_struct == j) {
+                                    base_struct = i;
+                                }
                             }
                         }
 
                         total_savings += this->structs[j].data.size();
-                        this->structs.erase(this->structs.begin() + j);
+                        this->structs[j].unsafe_to_dedupe = true;
                         found_something = true;
-                        j--;
                     }
                 }
             }
@@ -529,7 +544,7 @@ namespace Invader {
             // Tag data
             auto primary_class = tag.tag_class_int;
             tag_index.indexed = tag.resource_index.has_value();
-            if(tag.resource_index.has_value() && primary_class != TagClassInt::TAG_CLASS_SOUND) {
+            if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
             }
             else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
@@ -594,7 +609,7 @@ namespace Invader {
         auto &tags = this->tags;
         std::size_t tag_count = tags.size();
 
-        // Pointer offset to where
+        // Pointer offset to what struct
         std::vector<std::pair<std::size_t, std::size_t>> pointers;
         auto name_tag_data_pointer = this->tag_data_address;
         auto &tag_array_struct = TAG_ARRAY_STRUCT;
@@ -603,12 +618,12 @@ namespace Invader {
             return static_cast<HEK::Pointer>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
         };
 
-        auto recursively_generate_data = [&structs, &tags, &pointers, &pointer_of_tag_path](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) -> std::size_t {
+        auto recursively_generate_data = [&structs, &tags, &pointers, &pointer_of_tag_path](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
             auto &s = structs[struct_index];
 
             // Return the pointer thingy
             if(s.offset.has_value()) {
-                return *s.offset;
+                return;
             }
 
             // Set the offset thingy
@@ -618,7 +633,8 @@ namespace Invader {
 
             // Get the pointers
             for(auto &pointer : s.pointers) {
-                pointers.emplace_back(pointer.offset + offset, recursively_generate_data(data, pointer.struct_index, recursively_generate_data));
+                recursively_generate_data(data, pointer.struct_index, recursively_generate_data);
+                pointers.emplace_back(pointer.offset + offset, pointer.struct_index);
             }
 
             // Get the pointers
@@ -640,7 +656,6 @@ namespace Invader {
 
             // Append stuff
             data.insert(data.end(), REQUIRED_PADDING_32_BIT(data.size()), std::byte());
-            return offset;
         };
 
         // Build the tag data for the main tag data
@@ -650,7 +665,7 @@ namespace Invader {
 
         // Adjust the pointers
         for(auto &p : pointers) {
-            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + p.second);
+            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + *this->structs[p.second].offset);
         }
 
         // Get the tag path pointers working
@@ -689,7 +704,9 @@ namespace Invader {
 
                 // Chu
                 for(auto &p : pointers) {
-                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(tag_data_base + p.second);
+                    auto &struct_pointed_to = this->structs[p.second];
+                    auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
+                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset);
                 }
 
                 // Find the BSP in the scenario array thingy

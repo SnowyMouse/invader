@@ -139,9 +139,7 @@ namespace Invader {
              * @param  other other struct to check
              * @return       true if it can be
              */
-            bool can_dedupe(const BuildWorkloadStruct &other) {
-                return !this->unsafe_to_dedupe && !other.unsafe_to_dedupe && (!this->bsp.has_value() || this->bsp == other.bsp) && this->dependencies == other.dependencies && this->pointers == other.pointers && this->data == other.data;
-            }
+            bool can_dedupe(const BuildWorkloadStruct &other) const noexcept;
         };
 
         /** Denotes an individual tag */
