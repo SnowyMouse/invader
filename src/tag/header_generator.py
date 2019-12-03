@@ -247,6 +247,7 @@ write_for_all_cpps("#include <invader/map/tag.hpp>\n")
 write_for_all_cpps("#include <invader/tag/hek/header.hpp>\n")
 write_for_all_cpps("#include <invader/printf.hpp>\n")
 cpp_cache_format_data.write("#include <invader/build/build_workload.hpp>\n")
+cpp_read_cache_file_data.write("#include <invader/file/file.hpp>\n")
 cpp_save_hek_data.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
 write_for_all_cpps("namespace Invader::Parser {\n")
 
@@ -349,7 +350,7 @@ for s in all_structs_arranged:
         cpp_cache_format_data.write("        }\n")
         cpp_cache_format_data.write("        this->cache_formatted = true;\n")
     cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset + tag_index * 0);\n")
-    cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r + 1), std::byte());\n")
+    cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r), std::byte());\n")
     for struct in all_used_structs:
         if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
             continue
@@ -526,7 +527,7 @@ for s in all_structs_arranged:
                 cpp_read_cache_file_data.write("                r.{}.path = referenced_tag.get_path();\n".format(name))
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                eprintf_error(\"invalid reference for {}.{} in %s.%s\", tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                eprintf_error(\"Invalid reference for {}.{} in %s.%s\", File::preferred_path_to_halo_path(tag.get_path()).data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                throw;\n")
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            for(char &c : r.{}.path) {{\n".format(name))
@@ -543,7 +544,7 @@ for s in all_structs_arranged:
                 cpp_read_cache_file_data.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("                catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                    eprintf_error(\"failed to parse {}.{} #%zu in %s.%s\", i, tag.get_path().data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                    eprintf_error(\"Failed to parse {}.{} #%zu in %s.%s\", i, File::preferred_path_to_halo_path(tag.get_path()).data(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                    throw;\n")
                 cpp_read_cache_file_data.write("                }\n")
                 cpp_read_cache_file_data.write("            }\n")
