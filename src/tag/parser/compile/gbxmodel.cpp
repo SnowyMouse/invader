@@ -182,11 +182,36 @@ namespace Invader::Parser {
             }
         }
 
-        // Add it to the triangles
+        // Add two blank indices
         triangle_indices.resize(this->triangle_count + 2, NULL_INDEX);
-        this->triangle_offset = workload.model_indices.size() * sizeof(workload.model_indices[0]);
+
+        // See if we can find a copy of this
+        std::size_t this_indices_count = triangle_indices.size();
+        std::size_t indices_count = workload.model_indices.size();
+        bool found = false;
+
+        if(indices_count >= this_indices_count) {
+            for(std::size_t i = 0; !found && i <= indices_count - this_indices_count; i++) {
+                found = true;
+                // See if the indices match
+                for(std::size_t q = 0; q < this_indices_count; q++) {
+                    if(triangle_indices[q] != workload.model_indices[q + i]) {
+                        found = false;
+                        break;
+                    }
+                }
+                // If so, set the triangle offset to this instead
+                if(found) {
+                    this->triangle_offset = i * sizeof(workload.model_indices[0]);
+                }
+            }
+        }
+
+        if(!found) {
+            this->triangle_offset = indices_count * sizeof(workload.model_indices[0]);
+            workload.model_indices.insert(workload.model_indices.end(), triangle_indices.begin(), triangle_indices.end());
+        }
         this->triangle_offset_2 = this->triangle_offset;
-        workload.model_indices.insert(workload.model_indices.end(), triangle_indices.begin(), triangle_indices.end());
 
         // Add the vertices, next
         this->vertex_offset = workload.model_vertices.size() * sizeof(workload.model_vertices[0]);
