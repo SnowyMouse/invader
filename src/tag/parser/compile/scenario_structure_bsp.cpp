@@ -18,35 +18,21 @@ namespace Invader::Parser {
         material.material = this->material;
     }
     void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->compressed_vertices.clear();
+        if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
+        }
 
-        if(this->lightmap_vertices_count != 0) {
-            if(this->lightmap_vertices_count != this->rendered_vertices_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
-            }
+        auto *vertices = this->uncompressed_vertices.data();
+        auto uncompressed_vertices_size = this->uncompressed_vertices.size();
 
-            auto *vertices = this->uncompressed_vertices.data();
-            auto uncompressed_vertices_size = this->uncompressed_vertices.size();
+        auto *lightmap_rendered_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(vertices);
+        auto *lightmap_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(lightmap_rendered_vertices + this->rendered_vertices_count);
 
-            auto *lightmap_rendered_vertices_big = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_big *>(vertices);
-            auto *lightmap_rendered_vertices_little = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(lightmap_rendered_vertices_big);
-
-            auto *lightmap_lightmap_vertices_big = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_big *>(lightmap_rendered_vertices_big + this->rendered_vertices_count);
-            auto *lightmap_lightmap_vertices_little = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(lightmap_lightmap_vertices_big);
-
-            auto *lightmap_vertices_end = lightmap_lightmap_vertices_big + this->lightmap_vertices_count;
-            std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
-            if(expected_size != uncompressed_vertices_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
-                throw InvalidTagDataException();
-            }
-
-            for(std::size_t v = 0; v < this->rendered_vertices_count; v++) {
-                lightmap_rendered_vertices_little[v] = lightmap_rendered_vertices_big[v];
-            }
-            for(std::size_t v = 0; v < this->lightmap_vertices_count; v++) {
-                lightmap_lightmap_vertices_little[v] = lightmap_lightmap_vertices_big[v];
-            }
+        auto *lightmap_vertices_end = lightmap_lightmap_vertices + this->lightmap_vertices_count;
+        std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
+        if(expected_size != uncompressed_vertices_size) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
+            throw InvalidTagDataException();
         }
     }
 
