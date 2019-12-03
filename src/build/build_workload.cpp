@@ -421,10 +421,11 @@ namespace Invader {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum number of tags exceeded (%zu > %zu)", tag_count, static_cast<std::size_t>(UINT16_MAX));
             throw InvalidTagDataException();
         }
+
+        TAG_ARRAY_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataTag) * tag_count);
         auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TAG_ARRAY_STRUCT.data.data());
 
         // Set tag classes, paths, etc.
-        std::size_t tag_count = this->tags.size();
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag_index = tag_array[t];
             auto &tag = this->tags[t];
@@ -500,6 +501,7 @@ namespace Invader {
     void BuildWorkload::generate_tag_data(std::vector<std::vector<std::byte>> &tag_data) {
         auto &structs = this->structs;
         auto &tags = this->tags;
+        std::size_t tag_count = tags.size();
 
         // Pointer offset to where
         std::vector<std::pair<std::size_t, std::size_t>> pointers;
@@ -525,15 +527,17 @@ namespace Invader {
 
             // Get the pointers
             for(auto &dependency : s.dependencies) {
-                HEK::TagID new_tag_id = { static_cast<std::uint32_t>(dependency.tag_index) };
+                auto tag_index = dependency.tag_index;
+                std::uint32_t full_id = static_cast<std::uint32_t>(tag_index + 0xE174) << 16 | static_cast<std::uint16_t>(tag_index);
+                HEK::TagID new_tag_id = { full_id };
 
                 if(dependency.tag_id_only) {
-                    *reinterpret_cast<HEK::LittleEndian<HEK::TagID> *>(data.data() + dependency.offset) = new_tag_id;
+                    *reinterpret_cast<HEK::LittleEndian<HEK::TagID> *>(data.data() + offset + dependency.offset) = new_tag_id;
                 }
                 else {
-                    std::size_t tag_path_offset = recursively_generate_data(data, *tags[new_tag_id.index].tag_path, recursively_generate_data);
-                    auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + dependency.offset);
-                    dependency_struct.tag_class_int = tags[new_tag_id.index].tag_class_int;
+                    std::size_t tag_path_offset = recursively_generate_data(data, *tags[tag_index].tag_path, recursively_generate_data);
+                    auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
+                    dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
                     dependency_struct.tag_id = new_tag_id;
                     dependency_struct.path_pointer = name_tag_data_pointer + static_cast<HEK::Pointer>(tag_path_offset);
                 }
@@ -568,7 +572,7 @@ namespace Invader {
             auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(tag_data[0].data() + *structs[scenario_bsps_struct_index].offset);
 
             // Go through each BSP tag
-            for(std::size_t i = 0; i < tags.size(); i++) {
+            for(std::size_t i = 0; i < tag_count; i++) {
                 auto &t = tags[i];
                 if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                     continue;
@@ -601,8 +605,7 @@ namespace Invader {
                     }
                 }
                 if(!found) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "Scenario does not reference BSP %s", t.path.data());
-                    throw InvalidTagDataException();
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).data(), HEK::tag_class_to_extension(t.tag_class_int));
                 }
             }
         }
