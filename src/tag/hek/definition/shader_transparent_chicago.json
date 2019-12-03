@@ -48,11 +48,13 @@
             },
             {
                 "name": "map u scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "map v scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "map u offset",
