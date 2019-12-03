@@ -172,10 +172,10 @@ namespace Invader {
         std::vector<BuildWorkloadStruct> structs;
 
         /** Vertices for models */
-        std::vector<Parser::GBXModelVertexUncompressed> model_vertices;
+        std::vector<Parser::GBXModelVertexUncompressed::struct_little> model_vertices;
 
         /** Indices for models */
-        std::vector<HEK::Index> model_indices;
+        std::vector<HEK::LittleEndian<HEK::Index>> model_indices;
 
         /** Raw data for bitmaps and sounds */
         std::vector<std::vector<std::byte>> raw_data;
@@ -201,7 +201,7 @@ namespace Invader {
         /** Engine target */
         HEK::CacheFileEngine engine_target;
 
-        /** Part count ?*/
+        /** Part count */
         std::size_t part_count = 0;
 
         /**
