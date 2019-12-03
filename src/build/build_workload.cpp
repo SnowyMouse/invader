@@ -325,6 +325,11 @@ namespace Invader {
     }
 
     std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int) {
+        // Convert this before doing anything
+        if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
+            tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
+        }
+
         // Search for the tag
         std::size_t return_value = this->tags.size();
         bool found = false;
@@ -354,10 +359,6 @@ namespace Invader {
 
         // Find it
         char formatted_path[256];
-        if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
-            tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
-            this->tags[return_value].tag_class_int = tag_class_int;
-        }
         std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
         Invader::File::halo_path_to_preferred_path_chars(formatted_path);
         auto new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
