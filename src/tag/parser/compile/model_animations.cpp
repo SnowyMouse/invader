@@ -7,6 +7,11 @@ namespace Invader::Parser {
     void ModelAnimations::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t animation_count = this->animations.size();
         std::size_t sound_count = this->sound_references.size();
+
+        for(auto &a : this->animations) {
+            a.main_animation_index = NULL_INDEX;
+        }
+
         for(std::size_t i = 0; i < animation_count; i++) {
             auto *animation = this->animations.data() + i;
 
@@ -42,7 +47,7 @@ namespace Invader::Parser {
             }
 
             // Check if we already did things to this
-            if(animation->main_animation_index) {
+            if(animation->main_animation_index != NULL_INDEX) {
                 continue;
             }
 
@@ -52,7 +57,7 @@ namespace Invader::Parser {
             // Go through each animation. Make sure the weights are all correct.
             while(true) {
                 // Set the main animation index
-                animation->main_animation_index = static_cast<std::uint32_t>(i);
+                animation->main_animation_index = static_cast<std::uint16_t>(i);
 
                 // Set weight to a default value
                 animation->relative_weight = 1.0F;
@@ -102,7 +107,6 @@ namespace Invader::Parser {
         // Get the required frame size for sanity checking
         auto frame_type = this->frame_info_type;
         auto frame_count = static_cast<std::size_t>(this->frame_count);
-        this->main_animation_index = 0;
 
         std::size_t required_frame_info_size;
         switch(frame_type) {
