@@ -602,7 +602,7 @@ namespace Invader {
 
             // Get the pointers
             for(auto &pointer : s.pointers) {
-                pointers.emplace_back(offset, recursively_generate_data(data, pointer.struct_index, recursively_generate_data));
+                pointers.emplace_back(pointer.offset + offset, recursively_generate_data(data, pointer.struct_index, recursively_generate_data));
             }
 
             // Get the pointers
