@@ -21,13 +21,10 @@ namespace Invader {
         std::size_t this_size = this->data.size();
         std::size_t other_size = other.data.size();
 
-        if(this->dependencies == other.dependencies && this->pointers == other.pointers && this_size == other_size) {
-            return std::memcmp(this->data.data(), other.data.data(), this_size) == 0;
-        }
-
-        if(this->dependencies.size() == 0 && other.dependencies.size() == 0 && this->pointers.size() == 0 && other.pointers.size() == 0 && this_size >= other_size) {
+        if(this->dependencies == other.dependencies && this->pointers == other.pointers && this_size >= other_size) {
             return std::memcmp(this->data.data(), other.data.data(), other_size) == 0;
         }
+
         return false;
     }
 
