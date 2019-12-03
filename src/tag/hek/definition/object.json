@@ -270,7 +270,8 @@
         "fields": [
             {
                 "name": "weight",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "color lower bound",
