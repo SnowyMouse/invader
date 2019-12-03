@@ -361,7 +361,7 @@ namespace Invader {
         Invader::File::halo_path_to_preferred_path_chars(formatted_path);
         auto new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
         if(!new_path.has_value()) {
-            eprintf_error("Failed to find %s\n", formatted_path);
+            eprintf_error("Failed to find %s", formatted_path);
             throw InvalidTagPathException();
         }
 
