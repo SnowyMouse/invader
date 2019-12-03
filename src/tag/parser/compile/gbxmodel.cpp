@@ -10,7 +10,7 @@ namespace Invader::Parser {
             for(auto &p : g.parts) {
                 std::size_t compressed_vertex_count = p.compressed_vertices.size();
                 std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
-                if(uncompressed_vertex_count != compressed_vertex_count) {
+                if(uncompressed_vertex_count != compressed_vertex_count && compressed_vertex_count != 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count)
                     eprintf_warn("To fix this, rebuild the model tag");
                     model_part_warned = true;
