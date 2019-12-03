@@ -272,6 +272,7 @@ namespace Invader {
         void generate_bitmap_sound_data(std::size_t file_offset);
         HEK::TagString scenario_name = {};
         void set_scenario_name(const char *name);
+        std::optional<std::uint32_t> forge_crc;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \

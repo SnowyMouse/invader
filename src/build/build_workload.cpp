@@ -5,6 +5,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/hek/header.hpp>
 #include <invader/version.hpp>
+#include <invader/crc/hek/crc.hpp>
 
 namespace Invader {
     using namespace HEK;
@@ -31,6 +32,7 @@ namespace Invader {
         workload.scenario = scenario_name_fixed.data();
         workload.tags_directories = &tags_directories;
         workload.engine_target = engine_target;
+        workload.forge_crc = forge_crc;
 
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).data());
@@ -182,6 +184,20 @@ namespace Invader {
         else {
             header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD;
             header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT;
+            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
+        }
+
+        // Calculate the CRC32
+        std::uint32_t new_random = 0;
+        std::uint32_t new_crc = calculate_map_crc(final_data.data(), final_data.size(), this->forge_crc.has_value() ? &this->forge_crc.value() : nullptr, &new_random);
+        tag_data_struct.random_number = new_random;
+        header.crc32 = new_crc;
+
+        // Copy it again, this time with the new CRC32
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
+        }
+        else {
             *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
         }
 
