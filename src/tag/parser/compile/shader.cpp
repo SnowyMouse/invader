@@ -7,6 +7,11 @@ namespace Invader::Parser {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_ENVIRONMENT;
         this->bump_map_scale_xy.x = this->bump_map_scale;
         this->bump_map_scale_xy.y = this->bump_map_scale;
+        if(this->material_color.red == 0.0F && this->material_color.green == 0.0F && this->material_color.blue == 0.0F) {
+            this->material_color.red = 1.0F;
+            this->material_color.green = 1.0F;
+            this->material_color.blue = 1.0F;
+        }
     }
     void ShaderModel::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_MODEL;
