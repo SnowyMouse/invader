@@ -105,7 +105,8 @@
             },
             {
                 "name": "gain",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "format",
@@ -119,7 +120,8 @@
                 "name": "samples pointer",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true
+                "cache_only": true,
+                "default": 4294967295
             },
             {
                 "type": "pad",

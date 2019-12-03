@@ -159,7 +159,7 @@ namespace Invader::Parser {
                     if(width < 4) {
                         width = 4;
                     }
-                    else if(height < 4) {
+                    if(height < 4) {
                         height = 4;
                     }
                 }
