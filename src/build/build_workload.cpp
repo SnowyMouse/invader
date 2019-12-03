@@ -425,7 +425,7 @@ namespace Invader {
                     // Check if the structs are the same
                     if(this->structs[i].can_dedupe(this->structs[j])) {
                         // If so, go through every struct pointer. If they equal j, set to i. If they're greater than j, decrement
-                        for(std::size_t k = 0; k < i; k++) {
+                        for(std::size_t k = 0; k < this->structs.size(); k++) {
                             for(auto &pointer : this->structs[k].pointers) {
                                 if(pointer.struct_index > j) {
                                     pointer.struct_index--;
