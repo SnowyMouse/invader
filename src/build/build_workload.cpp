@@ -661,7 +661,7 @@ namespace Invader {
                 // Build the tag data for the BSP data now
                 pointers.clear();
                 auto &bsp_data_struct = map_data_structs.emplace_back();
-                recursively_generate_data(bsp_data_struct, 0, recursively_generate_data);
+                recursively_generate_data(bsp_data_struct, *t.base_struct, recursively_generate_data);
                 std::size_t bsp_size = bsp_data_struct.size();
                 HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
                 tag_data_b = bsp_data_struct.data();
