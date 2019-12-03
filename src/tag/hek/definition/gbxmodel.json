@@ -246,7 +246,8 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "GBXModelRegionPermutationMarker",
-                "compound": true
+                "compound": true,
+                "compile_ignore": true
             }
         ],
         "type": "struct",

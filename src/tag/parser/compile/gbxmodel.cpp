@@ -66,7 +66,6 @@ namespace Invader::Parser {
                         ma.instances.push_back(instance);
                     }
                 }
-                p.markers.clear();
             }
         }
 
@@ -232,10 +231,5 @@ namespace Invader::Parser {
             mv.tangent = v.tangent;
             mv.texture_coords = v.texture_coords;
         }
-
-        // Clear the rest
-        this->triangles.clear();
-        this->uncompressed_vertices.clear();
-        this->compressed_vertices.clear();
     }
 }
