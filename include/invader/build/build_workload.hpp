@@ -164,8 +164,8 @@ namespace Invader {
             /** The asset data is external */
             bool external_asset_data = false;
 
-            /** Tag path struct index of the tag */
-            std::optional<std::size_t> tag_path;
+            /** Tag path offset of the tag */
+            std::size_t path_offset;
         };
 
         /** Structs being worked with */

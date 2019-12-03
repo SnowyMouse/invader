@@ -517,21 +517,39 @@ namespace Invader {
         }
 
         TAG_ARRAY_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataTag) * tag_count);
+
+        // Reserve tag paths
+        std::size_t potential_size = 0;
+        for(std::size_t t = 0; t < tag_count; t++) {
+            potential_size += this->tags[t].path.size() + 1;
+        }
+        TAG_ARRAY_STRUCT.data.reserve(TAG_ARRAY_STRUCT.data.size() + potential_size);
+
+        // Tag path
+        for(std::size_t t = 0; t < tag_count; t++) {
+            bool found = false;
+            auto &tag = this->tags[t];
+            for(std::size_t t2 = 0; t2 < t; t2++) {
+                auto &tag2 = this->tags[t2];
+                if(tag2.path == tag.path) {
+                    tag.path_offset = tag2.path_offset;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                tag.path_offset = TAG_ARRAY_STRUCT.data.size();
+                TAG_ARRAY_STRUCT.data.insert(TAG_ARRAY_STRUCT.data.end(), reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data()) + 1 + tag.path.size());
+            }
+        }
+        TAG_ARRAY_STRUCT.data.resize(TAG_ARRAY_STRUCT.data.size() + REQUIRED_PADDING_32_BIT(TAG_ARRAY_STRUCT.data.size()));
+
         auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TAG_ARRAY_STRUCT.data.data());
 
         // Set tag classes, paths, etc.
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag_index = tag_array[t];
             auto &tag = this->tags[t];
-
-            // Tag path
-            auto &new_path = this->structs.emplace_back();
-            new_path.data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data() + tag.path.size() + 1));
-            std::size_t new_path_struct = &new_path - this->structs.data();
-            auto &tag_path_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
-            tag_path_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_path) - reinterpret_cast<std::byte *>(tag_array);
-            tag_path_ptr.struct_index = new_path_struct;
-            tag.tag_path = new_path_struct;
 
             // Tag data
             auto primary_class = tag.tag_class_int;
@@ -604,8 +622,13 @@ namespace Invader {
         // Pointer offset to where
         std::vector<std::pair<std::size_t, std::size_t>> pointers;
         auto name_tag_data_pointer = this->tag_data_address;
+        auto &tag_array_struct = TAG_ARRAY_STRUCT;
 
-        auto recursively_generate_data = [&structs, &tags, &pointers, &name_tag_data_pointer](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) -> std::size_t {
+        auto pointer_of_tag_path = [&tags, &name_tag_data_pointer, &tag_array_struct](std::size_t tag_index) -> HEK::Pointer {
+            return static_cast<HEK::Pointer>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
+        };
+
+        auto recursively_generate_data = [&structs, &tags, &pointers, &pointer_of_tag_path](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) -> std::size_t {
             auto &s = structs[struct_index];
 
             // Return the pointer thingy
@@ -633,11 +656,10 @@ namespace Invader {
                     *reinterpret_cast<HEK::LittleEndian<HEK::TagID> *>(data.data() + offset + dependency.offset) = new_tag_id;
                 }
                 else {
-                    std::size_t tag_path_offset = recursively_generate_data(data, *tags[tag_index].tag_path, recursively_generate_data);
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
                     dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
                     dependency_struct.tag_id = new_tag_id;
-                    dependency_struct.path_pointer = name_tag_data_pointer + static_cast<HEK::Pointer>(tag_path_offset);
+                    dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
                 }
             }
 
@@ -654,6 +676,12 @@ namespace Invader {
         // Adjust the pointers
         for(auto &p : pointers) {
             *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + p.second);
+        }
+
+        // Get the tag path pointers working
+        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(tag_data_struct.data() + *TAG_ARRAY_STRUCT.offset);
+        for(std::size_t t = 0; t < tag_count; t++) {
+            tag_array[t].tag_path = pointer_of_tag_path(t);
         }
 
         // Get the scenario tag
