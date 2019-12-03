@@ -356,6 +356,7 @@ namespace Invader {
         char formatted_path[256];
         if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
             tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
+            this->tags[return_value].tag_class_int = tag_class_int;
         }
         std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
         Invader::File::halo_path_to_preferred_path_chars(formatted_path);
