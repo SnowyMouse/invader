@@ -173,7 +173,7 @@ namespace Invader::Parser {
         while(triangle_indices.size() > 0 && triangle_indices[triangle_indices.size() - 1] == NULL_INDEX) {
             triangle_indices.erase(triangle_indices.begin() + (triangle_indices.size() - 1));
         }
-        this->triangle_count = triangle_indices.size();
+        this->triangle_count = triangle_indices.size() - 2;
 
         // Make sure every triangle is valid
         std::size_t uncompressed_vertices_count = this->uncompressed_vertices.size();
@@ -183,9 +183,6 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
         }
-
-        // Add two blank indices
-        triangle_indices.resize(this->triangle_count + 2, NULL_INDEX);
 
         // See if we can find a copy of this
         std::size_t this_indices_count = triangle_indices.size();
