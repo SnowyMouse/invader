@@ -2873,6 +2873,7 @@
                 "classes": [
                     "scenario_structure_bsp"
                 ],
+                "hidden": true,
                 "compound": true
             },
             {
@@ -2881,6 +2882,7 @@
                 "classes": [
                     "scenario_structure_bsp"
                 ],
+                "hidden": true,
                 "compound": true
             },
             {
@@ -2889,6 +2891,7 @@
                 "classes": [
                     "sky"
                 ],
+                "hidden": true,
                 "compound": true
             },
             {
@@ -2910,6 +2913,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
                 "compound": true,
+                "hidden": true,
                 "ignore_cached": true
             },
             {
@@ -2928,6 +2932,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "hidden": true,
                 "compound": true
             },
             {
@@ -2956,6 +2961,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioObjectName",
                 "compound": true,
+                "hidden": true,
                 "maximum": 65534
             },
             {
