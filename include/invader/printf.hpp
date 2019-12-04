@@ -44,10 +44,10 @@ else {\
 #else
 
 // Otherwise, we have eprintf and oprintf as an inline, variadic function that does nothing. This is so we don't get any unused variable warnings.
-static inline void eprintf(...) {}
+static inline int eprintf(...) {}
 static inline void eprintf_error(...) {}
 static inline void eprintf_warn(...) {}
-static inline void oprintf(...) {}
+static inline int oprintf(...) {}
 static inline void oflush() {}
 #endif
 

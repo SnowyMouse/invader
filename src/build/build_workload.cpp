@@ -459,15 +459,30 @@ namespace Invader {
     std::size_t BuildWorkload::dedupe_structs() {
         bool found_something = true;
         std::size_t total_savings = 0;
+        std::size_t highest_i = 0;
+        std::size_t struct_count = this->structs.size();
+        std::size_t characters_written = 0;
+        std::size_t total_struct_size = 0;
+
+        for(auto &s : this->structs) {
+            total_struct_size += s.data.size();
+        }
 
         while(found_something) {
             found_something = false;
-            for(std::size_t i = 0; i < this->structs.size() && !found_something; i++) {
-                for(std::size_t j = i + 1; j < this->structs.size(); j++) {
+            for(std::size_t i = 0; i < struct_count && !found_something; i++) {
+                if(this->structs[i].unsafe_to_dedupe) {
+                    continue;
+                }
+                for(std::size_t j = i + 1; j < struct_count; j++) {
+                    if(this->structs[j].unsafe_to_dedupe) {
+                        continue;
+                    }
+
                     // Check if the structs are the same
                     if(this->structs[i].can_dedupe(this->structs[j])) {
                         // If so, go through every struct pointer. If they equal j, set to i. If they're greater than j, decrement
-                        for(std::size_t k = 0; k < this->structs.size(); k++) {
+                        for(std::size_t k = 0; k < struct_count; k++) {
                             for(auto &pointer : this->structs[k].pointers) {
                                 auto &struct_index = pointer.struct_index;
                                 if(struct_index == j) {
@@ -488,10 +503,31 @@ namespace Invader {
 
                         total_savings += this->structs[j].data.size();
                         this->structs[j].unsafe_to_dedupe = true;
+
+                        if(!found_something && i > highest_i) {
+                            highest_i = i;
+
+                            if(this->verbose) {
+                                oprintf("\r");
+                                characters_written = static_cast<std::size_t>(oprintf("Optimizing tag space... %5.00f %% complete, %.01f KiB (%.02f %%) deduped", 100.0 * highest_i / struct_count, total_savings / 1024.0, 100.0 * total_savings / total_struct_size));
+                                oflush();
+                            }
+                        }
+
                         found_something = true;
                     }
                 }
             }
+        }
+
+        if(this->verbose) {
+            oprintf("\r");
+            while(characters_written) {
+                oprintf(" ");
+                characters_written--;
+            }
+            oprintf("\r");
+            oflush();
         }
 
         return total_savings;
