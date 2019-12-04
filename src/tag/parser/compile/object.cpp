@@ -123,7 +123,9 @@ namespace Invader::Parser {
             switch(dt.tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP:
                 case TagClassInt::TAG_CLASS_SOUND:
-                    resources.push_back(tag_index);
+                    if(!ignore_shader_resources) {
+                        resources.push_back(tag_index);
+                    }
                     break;
                 case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
                 case TagClassInt::TAG_CLASS_SHADER_MODEL:
@@ -146,7 +148,7 @@ namespace Invader::Parser {
             }
         }
         for(auto &p : s.pointers) {
-            recursively_get_all_predicted_resources_from_struct(workload, p.struct_index, resources, false);
+            recursively_get_all_predicted_resources_from_struct(workload, p.struct_index, resources, ignore_shader_resources);
         }
     }
 
@@ -177,11 +179,13 @@ namespace Invader::Parser {
 
             auto &prs = workload.structs.emplace_back();
             predicted_resources.reserve(resources_count);
+            prs.dependencies.reserve(resources_count);
             for(std::size_t r : resources) {
                 auto &resource = predicted_resources.emplace_back();
                 auto &resource_tag = workload.tags[r];
                 resource.type = resource_tag.tag_class_int == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOUCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOUCE_TYPE_SOUND;
                 resource.tag = HEK::TagID { static_cast<std::uint32_t>(r) };
+                resource.resource_index = 0;
                 auto &resource_dep = prs.dependencies.emplace_back();
                 resource_dep.tag_id_only = true;
                 resource_dep.tag_index = r;
