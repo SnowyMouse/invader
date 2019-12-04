@@ -128,15 +128,6 @@ int main(int argc, const char **argv) {
         }
     });
 
-    if(build_options.forged_crc && ON_COLOR_TERM) {
-        if(std::strcmp(build_options.forged_crc, "21706156") == 0) {
-            std::fprintf(stdout, "\x1B[38;5;51m");
-        }
-        else if(std::strcmp(build_options.forged_crc, "21756843") == 0) {
-            std::fprintf(stdout, "\x1B[38;5;204m");
-        }
-    }
-
     if(build_options.always_index_tags && build_options.no_external_tags) {
         eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
         return EXIT_FAILURE;
