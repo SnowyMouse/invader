@@ -558,8 +558,8 @@ namespace Invader {
 
             // Not strictly required to set the secondary or tertiary classes, but we do it anyway
             tag_index.primary_class = tag.tag_class_int;
-            tag_index.secondary_class = TagClassInt::TAG_CLASS_NULL;
-            tag_index.tertiary_class = TagClassInt::TAG_CLASS_NULL;
+            tag_index.secondary_class = TagClassInt::TAG_CLASS_NONE;
+            tag_index.tertiary_class = TagClassInt::TAG_CLASS_NONE;
             switch(tag.tag_class_int) {
                 case TagClassInt::TAG_CLASS_BIPED:
                 case TagClassInt::TAG_CLASS_VEHICLE:
