@@ -864,6 +864,7 @@
         "type": "struct",
         "inherits": "Item",
         "pre_compile": true,
+        "post_compile": true,
         "size": 1288
     }
 ]

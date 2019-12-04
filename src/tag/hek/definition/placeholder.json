@@ -5,6 +5,7 @@
         "type": "struct",
         "inherits": "BasicObject",
         "pre_compile": true,
+        "post_compile": true,
         "size": 508
     }
 ]
