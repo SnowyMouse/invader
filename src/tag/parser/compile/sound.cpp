@@ -31,7 +31,7 @@ namespace Invader::Parser {
 
         auto &new_id_2 = workload.structs[struct_index].dependencies.emplace_back();
         new_id_2.tag_index = tag_index;
-        new_id_1.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_1) - data;
+        new_id_2.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_1) - data;
         new_id_2.tag_id_only = true;
 
         // Add samples
