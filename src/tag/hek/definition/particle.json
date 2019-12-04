@@ -132,7 +132,8 @@
             {
                 "name": "radius animation",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "type": "pad",
@@ -149,11 +150,13 @@
             },
             {
                 "name": "fade start size",
-                "type": "float"
+                "type": "float",
+                "default": 5.0
             },
             {
                 "name": "fade end size",
-                "type": "float"
+                "type": "float",
+                "default": 4.0
             },
             {
                 "type": "pad",
