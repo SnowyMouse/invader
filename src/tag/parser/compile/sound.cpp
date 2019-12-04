@@ -20,9 +20,10 @@ namespace Invader::Parser {
             }
         }
 
-        // Add the two lone IDs
+        // Add the two lone IDs and set the sample size
         auto *data = workload.structs[struct_index].data.data();
         auto &this_struct = *reinterpret_cast<struct_little *>(data + offset);
+        this_struct.samples.size = static_cast<std::uint32_t>(this->samples.size());
 
         auto &new_id_1 = workload.structs[struct_index].dependencies.emplace_back();
         new_id_1.tag_index = tag_index;

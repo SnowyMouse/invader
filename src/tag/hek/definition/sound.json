@@ -184,7 +184,8 @@
             {
                 "name": "bend bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 0.0, 1.0 ]
             },
             {
                 "name": "actual permutation count",
