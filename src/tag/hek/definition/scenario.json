@@ -2962,7 +2962,8 @@
                 "name": "scenery",
                 "type": "TagReflexive",
                 "struct": "ScenarioScenery",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "scenery palette",
@@ -2975,7 +2976,8 @@
                 "name": "bipeds",
                 "type": "TagReflexive",
                 "struct": "ScenarioBiped",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "biped palette",
@@ -2988,20 +2990,23 @@
                 "name": "vehicles",
                 "type": "TagReflexive",
                 "struct": "ScenarioVehicle",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "vehicle palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
                 "compound": true,
-                "maximum": 65534
+                "maximum": 65534,
+                "maximum": 65535
             },
             {
                 "name": "equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "equipment palette",
@@ -3014,7 +3019,8 @@
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ScenarioWeapon",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "weapon palette",
@@ -3034,7 +3040,8 @@
                 "name": "machines",
                 "type": "TagReflexive",
                 "struct": "ScenarioMachine",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "machine palette",
@@ -3047,7 +3054,8 @@
                 "name": "controls",
                 "type": "TagReflexive",
                 "struct": "ScenarioControl",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "control palette",
@@ -3060,7 +3068,8 @@
                 "name": "light fixtures",
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixture",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "light fixture palette",
@@ -3073,7 +3082,8 @@
                 "name": "sound scenery",
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundScenery",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "sound scenery palette",
