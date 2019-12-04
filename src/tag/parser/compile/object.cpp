@@ -20,6 +20,39 @@ namespace Invader::Parser {
         this->sine_uphill_falloff_angle = static_cast<float>(std::sin(this->uphill_falloff_angle));
         this->sine_uphill_cutoff_angle = static_cast<float>(std::sin(this->uphill_cutoff_angle));
     }
+    void Biped::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        auto &head_index = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset)->head_model_node_index;
+        auto &model_id = this->model.tag_id;
+
+        this->head_model_node_index = NULL_INDEX;
+        if(model_id.is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped is missing a model tag, so it will not spawn", tag_index);
+        }
+        else {
+            auto &model_tag = workload.tags[model_id.index];
+            auto &model_tag_header = workload.structs[*model_tag.base_struct];
+            auto &model_tag_header_struct = *reinterpret_cast<GBXModel::struct_little *>(model_tag_header.data.data());
+            std::size_t node_count = model_tag_header_struct.nodes.count.read();
+            if(node_count) {
+                auto *nodes = reinterpret_cast<GBXModelNode::struct_little *>(workload.structs[*model_tag_header.resolve_pointer(&model_tag_header_struct.nodes.pointer)].data.data());
+                for(std::size_t n = 0; n < node_count; n++) {
+                    auto &node = nodes[n];
+                    if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
+                        this->head_model_node_index = static_cast<HEK::Index>(n);
+                    }
+                }
+
+                if(this->head_model_node_index == NULL_INDEX) {
+                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no \"bip01 head\" node, so the biped will not spawn", tag_index);
+                }
+            }
+            else {
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no nodes, so the biped will not spawn", tag_index);
+            }
+        }
+
+        head_index = this->head_model_node_index;
+    }
     void Vehicle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_VEHICLE;
         compile_object(*this);
