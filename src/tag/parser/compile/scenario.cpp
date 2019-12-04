@@ -166,6 +166,102 @@ namespace Invader::Parser {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "TODO: Implement encounter and command list BSP location", tag_index);
             std::terminate();
         }
+
+        // Decals
+        std::size_t decal_count = decals.size();
+        if(decal_count > 0) {
+            for(auto &b : this->structure_bsps) {
+                auto &bsp_id = b.structure_bsp.tag_id;
+                if(!bsp_id.is_null()) {
+                    auto &bsp_tag_struct = workload.structs[*workload.structs[*(workload.tags[bsp_id.index].base_struct)].resolve_pointer(static_cast<std::size_t>(0))];
+                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
+                    std::vector<ScenarioStructureBSPRuntimeDecal::struct_little> runtime_decals;
+                    std::size_t bsp_cluster_count = bsp_tag_data.clusters.count.read();
+
+                    if(bsp_cluster_count == 0) {
+                        continue;
+                    }
+
+                    // Make sure we know which decals we used for this BSP so we don't reuse them
+                    std::vector<bool> used(decal_count, false);
+
+                    // Now let's go do stuff
+                    auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.clusters.pointer)];
+                    auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(bsp_cluster_struct.data.data());
+
+                    // Get clusters
+                    for(std::size_t c = 0; c < bsp_cluster_count; c++) {
+                        auto &cluster = clusters[c];
+                        std::vector possible(decal_count, false);
+                        std::size_t subcluster_count = cluster.subclusters.count.read();
+                        if(subcluster_count == 0) {
+                            continue;
+                        }
+
+                        auto &subcluster_struct = workload.structs[*bsp_cluster_struct.resolve_pointer(&cluster.subclusters.pointer)];
+                        auto *subclusters = reinterpret_cast<ScenarioStructureBSPSubcluster::struct_little *>(subcluster_struct.data.data());
+
+                        // Go through subclusters to see which one can hold a decal
+                        for(std::size_t s = 0; s < subcluster_count; s++) {
+                            auto &subcluster = subclusters[s];
+                            for(std::size_t d = 0; d < decal_count; d++) {
+                                if(used[d]) {
+                                    continue;
+                                }
+                                auto &decal = decals[d];
+                                float x = decal.position.x;
+                                float y = decal.position.y;
+                                float z = decal.position.z;
+                                if(x >= subcluster.world_bounds_x.from && x <= subcluster.world_bounds_x.to &&
+                                   y >= subcluster.world_bounds_y.from && y <= subcluster.world_bounds_y.to &&
+                                   z >= subcluster.world_bounds_z.from && z <= subcluster.world_bounds_z.to) {
+                                    possible[d] = decal.decal_type != NULL_INDEX;
+                                }
+                            }
+                        }
+
+                        // Now add all of the decals that we found
+                        std::size_t runtime_decal_count_first = runtime_decals.size();
+                        std::size_t cluster_decal_count = 0;
+
+                        for(std::size_t p = 0; p < decal_count; p++) {
+                            if(possible[p]) {
+                                auto &decal_to_copy = this->decals[p];
+                                auto &decal = runtime_decals.emplace_back();
+                                decal.decal_type = decal_to_copy.decal_type;
+                                decal.pitch = decal_to_copy.pitch;
+                                decal.yaw = decal_to_copy.yaw;
+                                decal.position = decal_to_copy.position;
+                                cluster_decal_count++;
+                                used[p] = true;
+                            }
+                        }
+
+                        // Set the decal count
+                        if(cluster_decal_count != 0) {
+                            cluster.first_decal_index = static_cast<std::int16_t>(runtime_decal_count_first);
+                            cluster.decal_count = static_cast<std::int16_t>(cluster_decal_count);
+                        }
+                        else {
+                            cluster.first_decal_index = -1;
+                            cluster.decal_count = 0;
+                        }
+                    }
+
+                    // Set the decal count to the number of decals we used and add it to the end of the BSP
+                    bsp_tag_data.runtime_decals.count = static_cast<std::uint32_t>(runtime_decals.size());
+
+                    if(runtime_decals.size() != 0) {
+                        auto &new_struct_ptr = bsp_tag_struct.pointers.emplace_back();
+                        new_struct_ptr.offset = reinterpret_cast<const std::byte *>(&bsp_tag_data.runtime_decals.pointer) - reinterpret_cast<const std::byte *>(&bsp_tag_data);
+                        new_struct_ptr.struct_index = workload.structs.size();
+                        auto &new_struct = workload.structs.emplace_back();
+                        new_struct.bsp = workload.structs[*workload.tags[bsp_id.index].base_struct].bsp;
+                        new_struct.data = std::vector<std::byte>(reinterpret_cast<std::byte *>(runtime_decals.data()), reinterpret_cast<std::byte *>(runtime_decals.data() + runtime_decals.size()));
+                    }
+                }
+            }
+        }
     }
 
     void ScenarioCutsceneTitle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
