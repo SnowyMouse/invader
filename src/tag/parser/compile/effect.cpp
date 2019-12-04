@@ -3,6 +3,10 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
+    void EffectParticle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->relative_direction_vector = HEK::euler2d_to_vector(this->relative_direction);
+    }
+
     void Effect::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         bool has_damage_effect = false;
 
