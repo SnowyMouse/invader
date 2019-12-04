@@ -28,6 +28,10 @@ namespace Invader::Parser {
             }
         }
 
+        while(this->bitmap_group_sequence.size() > 0 && this->bitmap_group_sequence[this->bitmap_group_sequence.size() - 1].first_bitmap_index == NULL_INDEX) {
+            this->bitmap_group_sequence.erase(this->bitmap_group_sequence.begin() + (this->bitmap_group_sequence.size() - 1));
+        }
+
         auto max_size = this->processed_pixel_data.size();
         auto *pixel_data = this->processed_pixel_data.data();
 
