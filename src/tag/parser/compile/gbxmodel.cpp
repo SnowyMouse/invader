@@ -211,9 +211,9 @@ namespace Invader::Parser {
         // Add the vertices, next
         this->vertex_offset = workload.model_vertices.size() * sizeof(workload.model_vertices[0]);
         this->vertex_count = this->uncompressed_vertices.size();
-        workload.model_vertices.reserve(this->vertex_offset + this->vertex_count);
+        std::vector<GBXModelVertexUncompressed::struct_little> vertices_of_fun;
         for(auto &v : this->uncompressed_vertices) {
-            auto &mv = workload.model_vertices.emplace_back();
+            auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
             mv.node0_index = v.node0_index;
             mv.node1_index = v.node1_index;
@@ -223,6 +223,27 @@ namespace Invader::Parser {
             mv.position = v.position;
             mv.tangent = v.tangent;
             mv.texture_coords = v.texture_coords;
+        }
+
+        // Let's see if we can also dedupe this
+        std::size_t this_vertices_count = vertices_of_fun.size();
+        std::size_t vertices_count = workload.model_vertices.size();
+        found = false;
+
+        if(vertices_count >= this_vertices_count) {
+            for(std::size_t i = 0; i <= vertices_count - this_vertices_count; i++) {
+                // If vertices match, set the vertices offset to this instead
+                if(std::memcmp(workload.model_vertices.data() + i, vertices_of_fun.data(), sizeof(workload.model_indices[0]) * this_vertices_count) == 0) {
+                    found = true;
+                    this->vertex_offset = i * sizeof(workload.model_vertices[0]);
+                    break;
+                }
+            }
+        }
+
+        if(!found) {
+            this->vertex_offset = vertices_count * sizeof(workload.model_vertices[0]);
+            workload.model_vertices.insert(workload.model_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
         }
     }
 }

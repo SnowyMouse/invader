@@ -106,7 +106,7 @@ namespace Invader::Parser {
             t.data = 0x64407440;
             t.element_size = sizeof(ScenarioScriptNode::struct_little);
             t.maximum_count = 32;
-            t.next_id = 0xE174;
+            t.next_id = 0xE741;
             t.one = 1;
             t.size = 0;
             std::copy(SCRIPT_NODE_LITERAL, SCRIPT_NODE_LITERAL + sizeof(SCRIPT_NODE_LITERAL), t.name.string);
