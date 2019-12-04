@@ -302,7 +302,7 @@
             },
             {
                 "name": "head model node index",
-                "type": "uint16",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
