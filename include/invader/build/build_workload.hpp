@@ -271,6 +271,9 @@ namespace Invader {
         HEK::TagString scenario_name = {};
         void set_scenario_name(const char *name);
         std::optional<std::uint32_t> forge_crc;
+        bool verbose = false;
+        std::size_t raw_bitmap_size = 0;
+        std::size_t raw_sound_size = 0;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \

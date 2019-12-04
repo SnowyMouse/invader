@@ -49,6 +49,7 @@ namespace Invader {
         workload.engine_target = engine_target;
         workload.forge_crc = forge_crc;
         workload.optimize_space = optimize_space;
+        workload.verbose = verbose;
 
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).data());
@@ -83,11 +84,13 @@ namespace Invader {
         else if(workload.warnings) {
             eprintf_warn("Build successful with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
         }
-        else {
+        else if(workload.verbose) {
             oprintf_success("Build successful");
         }
         return return_value;
     }
+
+    #define BYTES_TO_MiB(bytes) (bytes / 1024.0 / 1024.0)
 
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // First, make our tag data header and array
@@ -97,6 +100,13 @@ namespace Invader {
 
         // Add all of the tags
         this->add_tags();
+
+        // Display the scenario name and information
+        if(this->verbose) {
+            oprintf("Scenario:          %s\n", this->scenario_name.string);
+            oprintf("Engine:            %s\n", HEK::engine_name(this->engine_target));
+            oprintf("Map type:          %s\n", HEK::type_name(*this->cache_file_type));
+        }
 
         // Generate the tag array
         this->generate_tag_array();
@@ -146,24 +156,28 @@ namespace Invader {
             }
             bsp_size += this_bsp_size;
         }
-        oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
-        if(this->verbose && bsp_size > 0) {
-            auto &scenario_tag_struct = this->structs[*this->tags[this->scenario_index].base_struct];
-            auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
-            auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(this->map_data_structs[0].data() + *this->structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
-            for(std::size_t b = 0; b < bsp_count; b++) {
-                auto &bsp = scenario_tag_bsps[b];
-                std::size_t bss = bsp.bsp_size.read();
-                oprintf(
-                    "                   %s (%.02f MiB)%s\n",
-                    File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).data(),
-                    BYTES_TO_MiB(bss),
-                    (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
-                );
+        
+        if(this->verbose) {
+            oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
+            if(bsp_size > 0) {
+                auto &scenario_tag_struct = this->structs[*this->tags[this->scenario_index].base_struct];
+                auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
+                auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(this->map_data_structs[0].data() + *this->structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
+                for(std::size_t b = 0; b < bsp_count; b++) {
+                    auto &bsp = scenario_tag_bsps[b];
+                    std::size_t bss = bsp.bsp_size.read();
+                    oprintf(
+                        "                   %s (%.02f MiB)%s\n",
+                        File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).data(),
+                        BYTES_TO_MiB(bss),
+                        (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
+                    );
+                }
+
+                if(largest_bsp_count < bsp_count) {
+                    oprintf("                  * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+                }
             }
-        }
-        if(largest_bsp_count < bsp_count) {
-            oprintf("                  * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
         }
 
         // Get the bitmap and sound data in there
@@ -232,6 +246,13 @@ namespace Invader {
         std::uint32_t new_crc = calculate_map_crc(final_data.data(), final_data.size(), this->forge_crc.has_value() ? &this->forge_crc.value() : nullptr, &new_random);
         tag_data_struct.random_number = new_random;
         header.crc32 = new_crc;
+
+        if(this->verbose) {
+            oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
+            oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(this->all_raw_data.size()), BYTES_TO_MiB(this->raw_bitmap_size), BYTES_TO_MiB(this->raw_sound_size));
+            oprintf("CRC32 checksum:    0x%08X\n", new_crc);
+            oprintf("Uncompressed size: %.02f / %.02f\n", BYTES_TO_MiB(final_data.size()), BYTES_TO_MiB(UINT32_MAX));
+        }
 
         // Copy it again, this time with the new CRC32
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
@@ -822,7 +843,7 @@ namespace Invader {
         // Offset followed by size
         std::vector<std::pair<std::size_t, std::size_t>> all_assets;
 
-        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &file_offset](const std::vector<std::byte> &raw_data) -> std::uint32_t {
+        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &file_offset](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
             std::size_t raw_data_size = raw_data.size();
             for(auto &a : all_assets) {
                 if(a.second == raw_data_size && std::memcmp(raw_data.data(), all_raw_data.data() + a.first, raw_data_size) == 0) {
@@ -833,6 +854,7 @@ namespace Invader {
             auto &new_asset = all_assets.emplace_back();
             new_asset.first = all_raw_data.size();
             new_asset.second = raw_data_size;
+            counter += raw_data_size;
             all_raw_data.insert(all_raw_data.end(), raw_data.begin(), raw_data.end());
             return static_cast<std::uint32_t>(new_asset.first + file_offset);
         };
@@ -851,7 +873,7 @@ namespace Invader {
                 auto bitmap_data_array = reinterpret_cast<Parser::BitmapData::struct_little *>(this->map_data_structs[0].data() + *this->structs[*bitmap_struct.resolve_pointer(&bitmap_header.bitmap_data.pointer)].offset);
                 for(std::size_t b = 0; b < bitmap_data_count; b++) {
                     auto &bitmap_data = bitmap_data_array[b];
-                    bitmap_data.pixels_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]]);
+                    bitmap_data.pixels_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_bitmap_size);
                 }
             }
             else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
@@ -866,7 +888,7 @@ namespace Invader {
                     auto *permutation_array = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->map_data_structs[0].data() + *this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].offset);
                     for(std::size_t pe = 0; pe < permutation_count; pe++) {
                         auto &permutation = permutation_array[pe];
-                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]]);
+                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_sound_size);
                     }
                 }
             }
