@@ -185,7 +185,8 @@
                 "name": "sprites",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             }
         ],
         "type": "struct",
@@ -354,13 +355,15 @@
                 "name": "bitmap group sequence",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "name": "bitmap data",
                 "type": "TagReflexive",
                 "struct": "BitmapData",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             }
         ],
         "type": "struct",
