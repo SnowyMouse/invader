@@ -112,13 +112,59 @@ namespace Invader {
         tag_data_ptr.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp.tag_array_address) - reinterpret_cast<const std::byte *>(&header_struct_data_temp);
         tag_data_ptr.struct_index = 1;
 
+        if(this->errors > 0) {
+            return std::vector<std::byte>();
+        }
+
         // Dedupe structs
         if(this->optimize_space) {
-            this->dedupe_structs();
+            std::size_t deduped = this->dedupe_structs();
+            if(this->verbose) {
+                oprintf("Tag space deduped: %.02f MiB\n", BYTES_TO_MiB(deduped));
+            }
         }
 
         // Get the tag data
         std::size_t end_of_bsps = this->generate_tag_data();
+        if(this->verbose) {
+            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", this->tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(this->map_data_structs[0].size()));
+        }
+
+        // List BSPs
+        std::size_t bsp_size = 0;
+        std::size_t largest_bsp_size = 0;
+        std::size_t largest_bsp_count = 0;
+        std::size_t bsp_count = this->map_data_structs.size() - 1;
+        for(std::size_t i = 1; i < 1 + bsp_count; i++) {
+            std::size_t this_bsp_size = this->map_data_structs[i].size();
+            if(this_bsp_size > largest_bsp_size) {
+                largest_bsp_size = this_bsp_size;
+                largest_bsp_count = 1;
+            }
+            else if(this_bsp_size == largest_bsp_size) {
+                largest_bsp_count++;
+            }
+            bsp_size += this_bsp_size;
+        }
+        oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
+        if(this->verbose && bsp_size > 0) {
+            auto &scenario_tag_struct = this->structs[*this->tags[this->scenario_index].base_struct];
+            auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
+            auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(this->map_data_structs[0].data() + *this->structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
+            for(std::size_t b = 0; b < bsp_count; b++) {
+                auto &bsp = scenario_tag_bsps[b];
+                std::size_t bss = bsp.bsp_size.read();
+                oprintf(
+                    "                   %s (%.02f MiB)%s\n",
+                    File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).data(),
+                    BYTES_TO_MiB(bss),
+                    (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
+                );
+            }
+        }
+        if(largest_bsp_count < bsp_count) {
+            oprintf("                  * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+        }
 
         // Get the bitmap and sound data in there
         this->generate_bitmap_sound_data(end_of_bsps);
