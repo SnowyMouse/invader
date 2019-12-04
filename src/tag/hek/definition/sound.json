@@ -178,7 +178,8 @@
             },
             {
                 "name": "natural pitch",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "bend bounds",
@@ -267,11 +268,13 @@
             },
             {
                 "name": "outer cone gain",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "random gain modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "maximum bend per second",
@@ -283,15 +286,18 @@
             },
             {
                 "name": "zero skip fraction modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "zero gain modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "zero pitch modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -299,15 +305,18 @@
             },
             {
                 "name": "one skip fraction modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "one gain modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "one pitch modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",

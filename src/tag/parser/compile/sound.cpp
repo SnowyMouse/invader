@@ -42,7 +42,7 @@ namespace Invader::Parser {
     void SoundPitchRange::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
-        this->playback_rate = 1.0f / this->natural_pitch;
+        this->playback_rate = 1.0f / (this->natural_pitch == 0.0F ? 1.0F : this->natural_pitch);
     }
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
