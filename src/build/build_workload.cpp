@@ -43,6 +43,10 @@ namespace Invader {
         bool optimize_space
     ) {
         BuildWorkload workload;
+
+        // Start benchmark
+        auto start = std::chrono::steady_clock::now();
+
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
         workload.scenario = scenario_name_fixed.data();
         workload.tags_directories = &tags_directories;
@@ -78,15 +82,34 @@ namespace Invader {
 
         auto return_value = workload.build_cache_file();
         if(workload.errors) {
-            eprintf_error("Build failed with %zu error%s and %zu warning%s", workload.errors, workload.errors == 1 ? "" : "s", workload.warnings, workload.warnings == 1 ? "" : "s");
+            if(workload.verbose) {
+                if(workload.warnings) {
+                    oprintf_fail("Build failed with %zu error%s and %zu warning%s", workload.errors, workload.errors == 1 ? "" : "s", workload.warnings, workload.warnings == 1 ? "" : "s");
+                }
+                else {
+                    oprintf_fail("Build failed with %zu error%s", workload.errors, workload.errors == 1 ? "" : "s");
+                }
+            }
             throw InvalidTagDataException();
         }
-        else if(workload.warnings) {
-            eprintf_warn("Build successful with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
+
+        if(workload.verbose) {
+            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0);
+            if(ON_COLOR_TERM) {
+                oprintf("\x1B[m\n");
+            }
+            else {
+                oprintf("\n");
+            }
+
+            if(workload.warnings) {
+                oprintf_success_warn("Build successful with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
+            }
+            else {
+                oprintf_success("Build successful");
+            }
         }
-        else if(workload.verbose) {
-            oprintf_success("Build successful");
-        }
+
         return return_value;
     }
 
@@ -156,7 +179,7 @@ namespace Invader {
             }
             bsp_size += this_bsp_size;
         }
-        
+
         if(this->verbose) {
             oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
             if(bsp_size > 0) {

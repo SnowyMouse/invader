@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <iostream>
-#include <chrono>
 #include <fstream>
-using clock_type = std::chrono::steady_clock;
-
 #include <vector>
 #include <cstring>
 #include <filesystem>
@@ -167,9 +164,6 @@ int main(int argc, const char **argv) {
     }
 
     try {
-        // Start benchmark
-        auto start = clock_type::now();
-
         // Get the index
         std::vector<std::tuple<TagClassInt, std::string>> with_index;
         if(build_options.index.size()) {
@@ -283,16 +277,6 @@ int main(int argc, const char **argv) {
         }
 
         std::fclose(file);
-
-        if(!build_options.quiet) {
-            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
-            if(ON_COLOR_TERM) {
-                oprintf("\x1B[m\n");
-            }
-            else {
-                oprintf("\n");
-            }
-        }
 
         return RETURN_OK;
     }

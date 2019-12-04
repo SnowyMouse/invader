@@ -39,6 +39,24 @@ else {\
     std::fprintf(stdout, __VA_ARGS__); \
     std::fprintf(stdout, "\n"); \
 }
+#define oprintf_success_warn(...) if(ON_COLOR_TERM) {\
+    std::fprintf(stdout, "\x1B[1;38;5;3m"); \
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\x1B[m\n"); \
+} \
+else {\
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\n"); \
+}
+#define oprintf_fail(...) if(ON_COLOR_TERM) {\
+    std::fprintf(stdout, "\x1B[1;38;5;1m"); \
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\x1B[m\n"); \
+} \
+else {\
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\n"); \
+}
 #define oflush() std::fflush(stdout)
 
 #else
@@ -48,6 +66,9 @@ static inline int eprintf(...) {}
 static inline void eprintf_error(...) {}
 static inline void eprintf_warn(...) {}
 static inline int oprintf(...) {}
+static inline void oprintf_success(...) {}
+static inline void oprintf_warn(...) {}
+static inline void oprintf_fail(...) {}
 static inline void oflush() {}
 #endif
 
