@@ -471,9 +471,37 @@ namespace Invader {
 
         // Find it
         char formatted_path[256];
-        std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
-        Invader::File::halo_path_to_preferred_path_chars(formatted_path);
-        auto new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
+        std::optional<std::string> new_path;
+        if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
+            std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+            Invader::File::halo_path_to_preferred_path_chars(formatted_path);
+            new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
+        }
+        else {
+            #define TRY_THIS(new_int) if(!new_path.has_value()) { \
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(new_int)); \
+                Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
+                new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true); \
+                tag_class_int = new_int; \
+            }
+            TRY_THIS(TagClassInt::TAG_CLASS_BIPED);
+            TRY_THIS(TagClassInt::TAG_CLASS_VEHICLE);
+            TRY_THIS(TagClassInt::TAG_CLASS_WEAPON);
+            TRY_THIS(TagClassInt::TAG_CLASS_EQUIPMENT);
+            TRY_THIS(TagClassInt::TAG_CLASS_GARBAGE);
+            TRY_THIS(TagClassInt::TAG_CLASS_SCENERY);
+            TRY_THIS(TagClassInt::TAG_CLASS_PLACEHOLDER);
+            TRY_THIS(TagClassInt::TAG_CLASS_SOUND_SCENERY);
+            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_CONTROL);
+            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_MACHINE);
+            TRY_THIS(TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE);
+            #undef TRY_THIS
+            if(!new_path.has_value()) {
+                tag_class_int = TagClassInt::TAG_CLASS_OBJECT;
+                std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
+            }
+        }
+
         if(!new_path.has_value()) {
             eprintf_error("Failed to find %s", formatted_path);
             throw InvalidTagPathException();
