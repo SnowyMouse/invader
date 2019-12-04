@@ -1593,7 +1593,8 @@
                 "name": "player control",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerControl",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "difficulty",
