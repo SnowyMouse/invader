@@ -253,7 +253,7 @@ namespace Invader {
         // Compress if needed
         std::size_t uncompressed_size = final_data.size();
         if(static_cast<std::uint64_t>(uncompressed_size) > UINT32_MAX) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed. %zu > %zu", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed %zu > %zu", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
             throw MaximumFileSizeException();
         }
 
