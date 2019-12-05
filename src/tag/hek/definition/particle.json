@@ -201,10 +201,11 @@
                 "size": 36
             },
             {
-                "name": "one",
+                "name": "make it actually work",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true
+                "cache_only": true,
+                "default": 1
             },
             {
                 "name": "shader flags",
