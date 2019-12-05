@@ -146,7 +146,10 @@
             },
             {
                 "name": "contact deterioration",
-                "type": "float"
+                "type": "float",
+                "non_cached": true,
+                "comment": "this value is totally broken and locks the game up if it's non-zero; even tool.exe sets it to zero",
+                "hidden": true
             },
             {
                 "name": "fade start size",
