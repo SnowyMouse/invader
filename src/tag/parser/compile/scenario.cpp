@@ -84,7 +84,7 @@ namespace Invader::Parser {
             auto &name = this->object_names[i];
             const char *name_str = name.name.string;
             if(used == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is unused", i, name_str);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Object name #%zu (%s) is unused", i, name_str);
             }
             else if(used > 1) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
@@ -144,8 +144,7 @@ namespace Invader::Parser {
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // TODO: Position encounters and command lists
         if(this->encounters.size() != 0 || this->command_lists.size() != 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "TODO: Implement encounter and command list BSP location", tag_index);
-            std::terminate();
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter and command list BSP location", tag_index);
         }
 
         // Decals
