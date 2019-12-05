@@ -319,7 +319,7 @@ namespace Invader {
                 }
 
                 if(largest_bsp_count < bsp_count) {
-                    oprintf("                  * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+                    oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
                 }
             }
             oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
@@ -483,18 +483,6 @@ namespace Invader {
             }
         }
 
-        // If it wasn't found in the current array list, add it to the list and let's begin
-        if(!found) {
-            auto &tag = this->tags.emplace_back();
-            tag.path = tag_path;
-            tag.tag_class_int = tag_class_int;
-        }
-
-        // And we're done! Maybe?
-        if(this->disable_recursion) {
-            return return_value;
-        }
-
         // Find it
         char formatted_path[256];
         std::optional<std::string> new_path;
@@ -526,6 +514,32 @@ namespace Invader {
                 tag_class_int = TagClassInt::TAG_CLASS_OBJECT;
                 std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
             }
+            else {
+                // Look for it again
+                for(std::size_t i = 0; i < return_value; i++) {
+                    auto &tag = this->tags[i];
+                    if(tag.tag_class_int == tag_class_int && tag.path == tag_path) {
+                        if(tag.base_struct.has_value()) {
+                            return i;
+                        }
+                        return_value = i;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If it wasn't found in the current array list, add it to the list and let's begin
+        if(!found) {
+            auto &tag = this->tags.emplace_back();
+            tag.path = tag_path;
+            tag.tag_class_int = tag_class_int;
+        }
+
+        // And we're done! Maybe?
+        if(this->disable_recursion) {
+            return return_value;
         }
 
         if(!new_path.has_value()) {
