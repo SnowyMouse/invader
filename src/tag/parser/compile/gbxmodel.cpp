@@ -61,9 +61,22 @@ namespace Invader::Parser {
 
                     // Add the marker and then add it!
                     if(!found) {
-                        auto &ma = this->markers.emplace_back();
+                        GBXModelMarker ma = {};
+
                         ma.name = m.name;
                         ma.instances.push_back(instance);
+
+                        for(auto &marker_group : this->markers) {
+                            if(std::strcmp(marker_group.name.string, m.name.string) > 0) {
+                                this->markers.insert(this->markers.begin() + (&marker_group - this->markers.data()), ma);
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if(!found) {
+                            this->markers.push_back(ma);
+                        }
                     }
                 }
             }
