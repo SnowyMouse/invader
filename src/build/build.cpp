@@ -8,7 +8,6 @@
 
 #include <invader/build/build_workload.hpp>
 #include <invader/map/map.hpp>
-#include <invader/compress/compression.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
@@ -223,17 +222,9 @@ int main(int argc, const char **argv) {
             forged_crc,
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
-            build_options.optimize_space
+            build_options.optimize_space,
+            build_options.compress
         );
-
-        if(build_options.compress) {
-            std::size_t size_before = map.size();
-            oprintf("Compressing...");
-            oflush();
-            map = Compression::compress_map_data(map.data(), map.size());
-            std::size_t new_size = map.size();
-            oprintf("\rCompressed size:   %.02f MiB (%.02f %%)\n", new_size / 1024.0F / 1024.0F, 100.0F * new_size / size_before);
-        }
 
         // Set the map name
         const char *map_name;

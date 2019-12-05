@@ -6,6 +6,7 @@
 #include <invader/tag/hek/header.hpp>
 #include <invader/version.hpp>
 #include <invader/crc/hek/crc.hpp>
+#include <invader/compress/compression.hpp>
 
 namespace Invader {
     using namespace HEK;
@@ -40,7 +41,8 @@ namespace Invader {
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario,
-        bool optimize_space
+        bool optimize_space,
+        bool compress
     ) {
         BuildWorkload workload;
 
@@ -51,6 +53,7 @@ namespace Invader {
         workload.forge_crc = forge_crc;
         workload.optimize_space = optimize_space;
         workload.verbose = verbose;
+        workload.compress = compress;
 
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).data());
@@ -247,6 +250,33 @@ namespace Invader {
             oprintf(" done\n");
         }
 
+        // Compress if needed
+        std::size_t uncompressed_size = final_data.size();
+        if(static_cast<std::uint64_t>(uncompressed_size) > UINT32_MAX) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed. %zu > %zu", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
+            throw MaximumFileSizeException();
+        }
+
+        // Copy it again, this time with the new CRC32
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
+        }
+        else {
+            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
+        }
+
+        // Compress if needed
+        if(this->compress) {
+            if(this->verbose) {
+                oprintf("Compressing...");
+                oflush();
+            }
+            final_data = Compression::compress_map_data(final_data.data(), final_data.size());
+            if(this->verbose) {
+                oprintf(" done\n");
+            }
+        }
+
         // Display the scenario name and information
         if(this->verbose) {
             if(this->warnings) {
@@ -295,7 +325,11 @@ namespace Invader {
             oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
             oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(this->all_raw_data.size()), BYTES_TO_MiB(this->raw_bitmap_size), BYTES_TO_MiB(this->raw_sound_size));
             oprintf("CRC32 checksum:    0x%08X\n", new_crc);
-            oprintf("Uncompressed size: %.02f / %.02f\n", BYTES_TO_MiB(final_data.size()), BYTES_TO_MiB(UINT32_MAX));
+            if(this->compress) {
+                std::size_t compressed_size = final_data.size();
+                oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
+            }
+            oprintf("Uncompressed size: %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(UINT32_MAX), 100.0 * uncompressed_size / UINT32_MAX);
             oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0);
 
             if(easter_egg) {
@@ -303,14 +337,6 @@ namespace Invader {
             }
 
             oprintf("\n");
-        }
-
-        // Copy it again, this time with the new CRC32
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
-        }
-        else {
-            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
         }
 
         return final_data;

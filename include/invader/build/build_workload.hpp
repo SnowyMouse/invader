@@ -28,6 +28,7 @@ namespace Invader {
          * @param tag_data_address  address the tag data will be loaded to
          * @param rename_scenario   rename the scenario's base name (preserving the root path)
          * @param optimize_space    should dedupe structs
+         * @param compress          Zstd-compress the resulting map file
          */
         static std::vector<std::byte> compile_map (
             const char *scenario,
@@ -41,7 +42,8 @@ namespace Invader {
             const std::optional<std::uint32_t> &forge_crc = std::nullopt,
             const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
             const std::optional<std::string> &rename_scenario = std::nullopt,
-            bool optimize_space = false
+            bool optimize_space = false,
+            bool compress = false
         );
 
         /**
@@ -274,6 +276,7 @@ namespace Invader {
         bool verbose = false;
         std::size_t raw_bitmap_size = 0;
         std::size_t raw_sound_size = 0;
+        bool compress = false;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
