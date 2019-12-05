@@ -48,9 +48,9 @@ namespace Invader::Parser {
                             float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
 
                             // There!
-                            float larger = (width_bitmap > height_bitmap) ? width_bitmap : height_bitmap;
-                            if(pixel_size > larger) {
-                                pixel_size = larger;
+                            float smaller = (height_bitmap > width_bitmap) ? width_bitmap : height_bitmap;
+                            if(pixel_size > smaller) {
+                                pixel_size = smaller;
                             }
                         }
                     }
