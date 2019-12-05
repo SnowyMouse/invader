@@ -22,6 +22,7 @@ namespace Invader::Parser {
         if(*workload.cache_file_type != HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
+            this->weapon_list.clear();
         }
         else {
             if(this->multiplayer_information.size() != 1) {
