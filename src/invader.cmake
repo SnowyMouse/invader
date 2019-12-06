@@ -23,7 +23,6 @@ set(INVADER_SOURCE_FILES
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
     src/compress/compression.cpp
-    src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/bitmap.cpp
     src/tag/hek/class/model_collision_geometry.cpp

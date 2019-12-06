@@ -6,7 +6,6 @@
 
 #include <invader/map/map.hpp>
 #include <invader/resource/resource_map.hpp>
-#include <invader/tag/compiled_tag.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
