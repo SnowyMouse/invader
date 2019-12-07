@@ -187,8 +187,15 @@ namespace Invader::Parser {
             triangle_indices.erase(triangle_indices.begin() + (triangle_indices.size() - 1));
         }
 
+        // Get the final size
+        std::size_t triangle_indices_size = triangle_indices.size();
+        if(triangle_indices_size < 3) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Triangle index count is invalid (%zu < 3)", triangle_indices_size);
+            throw InvalidTagDataException();
+        }
+
         // Subtract two (since each index is technically an individual triangle, minus the last two indices since you need three indices to make a triangle)
-        this->triangle_count = triangle_indices.size() - 2;
+        this->triangle_count = triangle_indices_size - 2;
 
         // Make sure every triangle is valid
         std::size_t uncompressed_vertices_count = this->uncompressed_vertices.size();
@@ -200,7 +207,7 @@ namespace Invader::Parser {
         }
 
         // See if we can find a copy of this
-        std::size_t this_indices_count = triangle_indices.size();
+        std::size_t this_indices_count = triangle_indices_size;
         std::size_t indices_count = workload.model_indices.size();
         bool found = false;
 
