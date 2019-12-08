@@ -171,6 +171,7 @@ int main(int argc, const char **argv) {
                         loc++;
                         break;
                 }
+                continue;
             }
 
             switch(tag.get_tag_class_int()) {
