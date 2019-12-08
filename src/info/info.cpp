@@ -107,7 +107,7 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "external-loc") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_LOC;
                 }
-                else if(std::strcmp(args[0], "external-bitmaps") == 0) {
+                else if(std::strcmp(args[0], "external-sounds") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_SOUNDS;
                 }
                 else {
