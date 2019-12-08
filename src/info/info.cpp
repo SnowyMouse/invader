@@ -37,7 +37,8 @@ int main(int argc, const char **argv) {
         DISPLAY_SCENARIO_PATH,
         DISPLAY_TAG_COUNT,
         DISPLAY_STUB_COUNT,
-        DISPLAY_TAGS
+        DISPLAY_TAGS,
+        DISPLAY_UNIVERSAL
     };
 
     // Options struct
@@ -47,7 +48,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags, universal", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -126,6 +127,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "external-sound-indices") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_SOUND_INDICES;
                 }
+                else if(std::strcmp(args[0], "universal") == 0) {
+                    map_info_options.type = DISPLAY_UNIVERSAL;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -169,13 +173,15 @@ int main(int argc, const char **argv) {
 
     // Does the map require external data?
     std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
-    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags]() -> bool {
+    bool universal;
+    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &universal]() -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
         bitmap_indices = 0;
         sound_indices = 0;
         loc_indices = 0;
+        universal = true;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
             if(tag.is_indexed()) {
@@ -236,6 +242,7 @@ int main(int argc, const char **argv) {
         }
         total_indices = loc_indices + bitmap_indices + sound_indices;
         total_tags = loc + bitmaps + sounds;
+        universal = total_indices == total_tags;
         return total_tags != 0;
     };
 
@@ -269,12 +276,24 @@ int main(int argc, const char **argv) {
             bool external_data_used = uses_external_data();
             bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
             auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
-            oprintf("CRC32:             0x%08X%s\n", crc, (crc != header.crc32) ? " (mismatched)" : "");
-            oprintf("Integrity:         %s\n", dirty ? "Dirty" : "Clean (probably)");
+
+            if(crc != header.crc32) {
+                oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
+            }
+            else {
+                oprintf_success("CRC32:             0x%08X (matches)", crc);
+            }
+
+            if(dirty) {
+                oprintf_success_warn("Integrity:         Dirty");
+            }
+            else {
+                oprintf_success("Integrity:         Clean");
+            }
 
             if(unsupported_external_data) {
                 if(external_data_used) {
-                    oprintf("External data:     Yes (WARNING: This is unsupported by this engine!)\n");
+                    oprintf_success_warn("External data:     Yes (WARNING: This is unsupported by this engine!)");
                 }
                 else {
                     oprintf("External data:     N/A\n");
@@ -291,13 +310,24 @@ int main(int argc, const char **argv) {
                 else {
                     oprintf("Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)\n", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
                 }
+                if(!universal) {
+                    oprintf_success_warn("Universal:         No (map will not work on some versions of the game)");
+                }
+                else {
+                    oprintf_success("Universal:         Yes (map will work on all versions of the game)");
+                }
             }
             else {
                 oprintf("External data:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
             }
 
             // Is it protected?
-            oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
+            if(!map->is_protected()) {
+                oprintf_success("Protected:         No (probably)");
+            }
+            else {
+                oprintf_success_warn("Protected:         Yes");
+            }
 
             // Compress and compression ratio
             oprintf("Compressed:        %s", compressed ? "Yes" : "No\n");
@@ -385,6 +415,10 @@ int main(int argc, const char **argv) {
         case DISPLAY_EXTERNAL_SOUND_INDICES:
             uses_external_data();
             oprintf("%zu\n", sound_indices);
+            break;
+        case DISPLAY_UNIVERSAL:
+            uses_external_data();
+            oprintf("%s\n", universal ? "yes" : "no");
             break;
     }
 }
