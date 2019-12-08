@@ -232,6 +232,7 @@ namespace Invader::Parser {
         this->vertex_offset = workload.model_vertices.size() * sizeof(workload.model_vertices[0]);
         this->vertex_count = this->uncompressed_vertices.size();
         std::vector<GBXModelVertexUncompressed::struct_little> vertices_of_fun;
+        vertices_of_fun.reserve(this->vertex_count);
         for(auto &v : this->uncompressed_vertices) {
             auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
