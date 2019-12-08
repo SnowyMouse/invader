@@ -8,6 +8,8 @@
 #include <invader/version.hpp>
 #include <invader/tag/parser/parser.hpp>
 
+#include "language/language.hpp"
+
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
 int main(int argc, const char **argv) {
@@ -31,14 +33,14 @@ int main(int argc, const char **argv) {
         DISPLAY_EXTERNAL_SOUND_INDICES,
         DISPLAY_EXTERNAL_SOUNDS,
         DISPLAY_EXTERNAL_TAGS,
+        DISPLAY_LANGUAGES,
         DISPLAY_MAP_TYPE,
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
         DISPLAY_SCENARIO_PATH,
         DISPLAY_TAG_COUNT,
         DISPLAY_STUB_COUNT,
-        DISPLAY_TAGS,
-        DISPLAY_UNIVERSAL
+        DISPLAY_TAGS
     };
 
     // Options struct
@@ -48,7 +50,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags, universal", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -127,8 +129,8 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "external-sound-indices") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_SOUND_INDICES;
                 }
-                else if(std::strcmp(args[0], "universal") == 0) {
-                    map_info_options.type = DISPLAY_UNIVERSAL;
+                else if(std::strcmp(args[0], "languages") == 0) {
+                    map_info_options.type = DISPLAY_LANGUAGES;
                 }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
@@ -171,10 +173,11 @@ int main(int argc, const char **argv) {
         return false;
     };
 
-    // Does the map require external data?
+    // Does the map require external data? If so, what.
     std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
+    std::vector<std::string> languages;
     bool universal;
-    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &universal]() -> bool {
+    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &universal, &languages]() -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
@@ -182,6 +185,12 @@ int main(int argc, const char **argv) {
         sound_indices = 0;
         loc_indices = 0;
         universal = true;
+
+        std::vector<std::size_t> bitmaps_offsets;
+        std::vector<std::size_t> bitmaps_sizes;
+        std::vector<std::size_t> sounds_offsets;
+        std::vector<std::size_t> sounds_sizes;
+
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
             if(tag.is_indexed()) {
@@ -207,12 +216,16 @@ int main(int argc, const char **argv) {
                     auto &bitmap_header = tag.get_base_struct<HEK::Bitmap>();
                     std::size_t bitmap_data_count = bitmap_header.bitmap_data.count;
                     auto *bitmap_data = tag.resolve_reflexive(bitmap_header.bitmap_data);
+                    bool found_it_this_bitmap = false;
                     for(std::size_t b = 0; b < bitmap_data_count; b++) {
-                        if(bitmap_data[b].flags.read().external) {
-                            bitmaps++;
-                            break;
+                        auto &bd = bitmap_data[b];
+                        if(bd.flags.read().external) {
+                            found_it_this_bitmap = true;
+                            bitmaps_offsets.emplace_back(bd.pixels_offset.read());
+                            bitmaps_sizes.emplace_back(bd.pixels_count.read());
                         }
                     }
+                    bitmaps += found_it_this_bitmap;
                     break;
                 }
 
@@ -220,19 +233,22 @@ int main(int argc, const char **argv) {
                     auto &sound_header = tag.get_base_struct<HEK::Sound>();
                     std::size_t pitch_range_count = sound_header.pitch_ranges.count;
                     auto *pitch_ranges = tag.resolve_reflexive(sound_header.pitch_ranges);
-                    bool break_early = false;
-                    for(std::size_t pr = 0; pr < pitch_range_count && !break_early; pr++) {
+                    bool found_it_this_sound = false;
+                    for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
                         auto &pitch_range = pitch_ranges[pr];
                         auto *permutations = tag.resolve_reflexive(pitch_range.permutations);
                         std::size_t permutation_count = pitch_range.permutations.count;
                         for(std::size_t pe = 0; pe < permutation_count; pe++) {
-                            if(permutations[pe].samples.external & 1) {
-                                break_early = true;
-                                sounds++;
+                            auto &p = permutations[pe];
+                            if(p.samples.external & 1) {
+                                found_it_this_sound = true;
+                                sounds_offsets.emplace_back(p.samples.file_offset.read());
+                                sounds_sizes.emplace_back(p.samples.size.read());
                                 break;
                             }
                         }
                     }
+                    sounds += found_it_this_sound;
                     break;
                 }
 
@@ -240,9 +256,12 @@ int main(int argc, const char **argv) {
                     break;
             }
         }
+
         total_indices = loc_indices + bitmap_indices + sound_indices;
         total_tags = loc + bitmaps + sounds;
-        universal = total_indices == total_tags;
+
+        languages = get_languages_for_resources(bitmaps_offsets.data(), bitmaps_sizes.data(), bitmaps_offsets.size(), sounds_offsets.data(), sounds_sizes.data(), sounds_offsets.size(), universal);
+
         return total_tags != 0;
     };
 
@@ -311,10 +330,18 @@ int main(int argc, const char **argv) {
                     oprintf("Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)\n", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
                 }
                 if(!universal) {
-                    oprintf_success_warn("Universal:         No (map will NOT work on all versions of the game)");
+                    if(languages.size() == 0) {
+                        oprintf_success_warn("Valid languages:   Unknown");
+                    }
+                    else {
+                        oprintf_success_warn("Valid languages:   %zu (map may NOT work on all versions of the game)", languages.size());
+                        for(auto &l : languages) {
+                            oprintf_success_warn("                   %s", l.data());
+                        }
+                    }
                 }
                 else {
-                    oprintf_success("Universal:         Yes (map will work on all versions of the game)");
+                    oprintf_success("Valid languages:   Any (map will work on all released versions of the game)");
                 }
             }
             else {
@@ -416,9 +443,20 @@ int main(int argc, const char **argv) {
             uses_external_data();
             oprintf("%zu\n", sound_indices);
             break;
-        case DISPLAY_UNIVERSAL:
+        case DISPLAY_LANGUAGES:
             uses_external_data();
-            oprintf("%s\n", universal ? "yes" : "no");
+            if(universal) {
+                oprintf("any");
+            }
+            else {
+                for(auto &l : languages) {
+                    if(&l != (languages.data())) {
+                        oprintf(" ");
+                    }
+                    oprintf("%s", l.data());
+                }
+            }
+            oprintf("\n");
             break;
     }
 }
