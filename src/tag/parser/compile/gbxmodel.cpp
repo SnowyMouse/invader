@@ -176,6 +176,7 @@ namespace Invader::Parser {
         workload.part_count++;
 
         // Add it all
+        triangle_indices.reserve(this->triangles.size() * 3);
         for(auto &t : this->triangles) {
             triangle_indices.push_back(t.vertex0_index);
             triangle_indices.push_back(t.vertex1_index);
@@ -237,7 +238,6 @@ namespace Invader::Parser {
         this->triangle_offset_2 = this->triangle_offset;
 
         // Add the vertices, next
-        this->vertex_offset = workload.model_vertices.size() * sizeof(workload.model_vertices[0]);
         this->vertex_count = this->uncompressed_vertices.size();
         std::vector<GBXModelVertexUncompressed::struct_little> vertices_of_fun;
         vertices_of_fun.reserve(this->vertex_count);
@@ -245,7 +245,12 @@ namespace Invader::Parser {
             auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
             mv.node0_index = v.node0_index;
-            mv.node1_index = v.node1_index;
+            if(v.node1_index == NULL_INDEX) {
+                mv.node1_index = 0;
+            }
+            else {
+                mv.node1_index = v.node1_index;
+            }
             mv.node0_weight = v.node0_weight;
             mv.node1_weight = v.node1_weight;
             mv.normal = v.normal;
