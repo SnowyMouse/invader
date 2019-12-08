@@ -8,6 +8,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -110,6 +111,14 @@ add_custom_command(
     COMMAND "${CMAKE_COMMAND}" "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DGIT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/.git" "-DOUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" -DPROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} -DPROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR} -DPROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH} -DIN_GIT_REPO=${IN_GIT_REPO} -P ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/.git/refs/heads/${INVADER_GIT_BRANCH}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/version.cmake"
+)
+
+# Make the language.cpp file
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py" "${CMAKE_CURRENT_BINARY_DIR}/language.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py"
 )
 
 # Build the resource list

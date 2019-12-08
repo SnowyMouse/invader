@@ -19,9 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
   externally indexed loc tags
 - invader-info: Added `-T external-sound-indices` which indicates the number of
   externally indexed sound tags
-- invader-info: Added `-T universal` which indicates whether the map works with
-  all versions of the game; this is planned to be replaced with a language
-  check instead
+- invader-info: Added `-T languages` which lists all languages valid for the
+  map separated with spaces
 
 ### Changed
 - invader-info: Now outputs some details in color on some terminals
