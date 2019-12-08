@@ -448,6 +448,9 @@ int main(int argc, const char **argv) {
             if(universal) {
                 oprintf("any");
             }
+            else if(languages.size() == 0) {
+                oprintf("unknown");
+            }
             else {
                 for(auto &l : languages) {
                     if(&l != (languages.data())) {
