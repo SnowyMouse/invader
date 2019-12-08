@@ -309,11 +309,13 @@
             },
             {
                 "name": "color plate width",
-                "type": "int16"
+                "type": "uint16",
+                "non_cached": true
             },
             {
                 "name": "color plate height",
-                "type": "int16"
+                "type": "uint16",
+                "non_cached": true
             },
             {
                 "name": "compressed color plate data",
