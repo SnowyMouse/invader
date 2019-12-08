@@ -23,10 +23,14 @@ int main(int argc, const char **argv) {
         DISPLAY_CRC32_MISMATCHED,
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
+        DISPLAY_EXTERNAL_BITMAP_INDICES,
         DISPLAY_EXTERNAL_BITMAPS,
         DISPLAY_EXTERNAL_DATA,
         DISPLAY_EXTERNAL_LOC,
+        DISPLAY_EXTERNAL_LOC_INDICES,
+        DISPLAY_EXTERNAL_SOUND_INDICES,
         DISPLAY_EXTERNAL_SOUNDS,
+        DISPLAY_EXTERNAL_INDICES,
         DISPLAY_MAP_TYPE,
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
@@ -43,7 +47,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmaps, external-data, external-loc, external-sounds, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-tags, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -98,8 +102,11 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "stub-count") == 0) {
                     map_info_options.type = DISPLAY_STUB_COUNT;
                 }
-                else if(std::strcmp(args[0], "external-data") == 0) {
-                    map_info_options.type = DISPLAY_EXTERNAL_DATA;
+                else if(std::strcmp(args[0], "external-tags") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_TAGS;
+                }
+                else if(std::strcmp(args[0], "external-indices") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_INDICES;
                 }
                 else if(std::strcmp(args[0], "external-bitmaps") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_BITMAPS;
@@ -109,6 +116,15 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "external-sounds") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_SOUNDS;
+                }
+                else if(std::strcmp(args[0], "external-bitmap-indices") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_BITMAP_INDICES;
+                }
+                else if(std::strcmp(args[0], "external-loc-indices") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_LOC_INDICES;
+                }
+                else if(std::strcmp(args[0], "external-sound-indices") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_SOUND_INDICES;
                 }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
@@ -152,23 +168,29 @@ int main(int argc, const char **argv) {
     };
 
     // Does the map require external data?
-    std::size_t bitmaps, sounds, loc;
-    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc]() -> bool {
+    std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
+    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags]() -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
+        bitmap_indices = 0;
+        sound_indices = 0;
+        loc_indices = 0;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
             if(tag.is_indexed()) {
                 switch(tag.get_tag_class_int()) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         bitmaps++;
+                        bitmap_indices++;
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         sounds++;
+                        sound_indices++;
                         break;
                     default:
                         loc++;
+                        loc_indices++;
                         break;
                 }
                 continue;
@@ -212,7 +234,9 @@ int main(int argc, const char **argv) {
                     break;
             }
         }
-        return bitmaps != 0 || loc != 0 || sounds != 0;
+        total_indices = loc_indices + bitmap_indices + sound_indices;
+        total_tags = loc + bitmaps + sounds;
+        return total_tags != 0;
     };
 
     // Get stub count
@@ -257,10 +281,16 @@ int main(int argc, const char **argv) {
                 }
             }
             else if(!external_data_used) {
-                oprintf("External data:     No\n");
+                oprintf("External data:     0\n");
             }
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf("External data:     Yes (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", bitmaps, loc, sounds);
+                oprintf("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", total_tags, bitmaps, loc, sounds);
+                if(total_indices == 0) {
+                    oprintf("Indexed tags:      0\n");
+                }
+                else {
+                    oprintf("Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)\n", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
+                }
             }
             else {
                 oprintf("External data:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
@@ -324,8 +354,9 @@ int main(int argc, const char **argv) {
         case DISPLAY_STUB_COUNT:
             oprintf("%zu\n", stub_count());
             break;
-        case DISPLAY_EXTERNAL_DATA:
-            oprintf("%s\n", uses_external_data() ? "yes" : "no");
+        case DISPLAY_EXTERNAL_TAGS:
+            uses_external_data();
+            oprintf("%zu\n", total_tags);
             break;
         case DISPLAY_EXTERNAL_BITMAPS:
             uses_external_data();
@@ -338,6 +369,22 @@ int main(int argc, const char **argv) {
         case DISPLAY_EXTERNAL_SOUNDS:
             uses_external_data();
             oprintf("%zu\n", sounds);
+            break;
+        case DISPLAY_EXTERNAL_INDICES:
+            uses_external_data();
+            oprintf("%zu\n", total_indices);
+            break;
+        case DISPLAY_EXTERNAL_BITMAP_INDICES:
+            uses_external_data();
+            oprintf("%zu\n", bitmap_indices);
+            break;
+        case DISPLAY_EXTERNAL_LOC_INDICES:
+            uses_external_data();
+            oprintf("%zu\n", loc_indices);
+            break;
+        case DISPLAY_EXTERNAL_SOUND_INDICES:
+            uses_external_data();
+            oprintf("%zu\n", sound_indices);
             break;
     }
 }
