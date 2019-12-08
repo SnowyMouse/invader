@@ -25,12 +25,12 @@ int main(int argc, const char **argv) {
         DISPLAY_ENGINE,
         DISPLAY_EXTERNAL_BITMAP_INDICES,
         DISPLAY_EXTERNAL_BITMAPS,
-        DISPLAY_EXTERNAL_TAGS,
+        DISPLAY_EXTERNAL_INDICES,
         DISPLAY_EXTERNAL_LOC,
         DISPLAY_EXTERNAL_LOC_INDICES,
         DISPLAY_EXTERNAL_SOUND_INDICES,
         DISPLAY_EXTERNAL_SOUNDS,
-        DISPLAY_EXTERNAL_INDICES,
+        DISPLAY_EXTERNAL_TAGS,
         DISPLAY_MAP_TYPE,
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
@@ -47,7 +47,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-tags, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
