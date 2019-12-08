@@ -5,6 +5,26 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - Added colors for various diagnostic messages depending on the user's terminal
+- invader-info: Added `-T external-tags` which indicates the number of tags
+  that use external resource maps, including indexed tags
+- invader-info: Added `-T external-bitmaps` which indicates the number of
+  bitmap tags that use external resource maps, including indexed tags
+- invader-info: Added `-T external-loc` which indicates the number of loc tags
+  that use external resource maps, including indexed tags
+- invader-info: Added `-T external-sounds` which indicates the number of sound
+  tags that use external resource maps, including indexed tags
+- invader-info: Added `-T external-bitmap-indices` which indicates the number
+  of externally indexed bitmap tags
+- invader-info: Added `-T external-loc-indices` which indicates the number of
+  externally indexed loc tags
+- invader-info: Added `-T external-sound-indices` which indicates the number of
+  externally indexed sound tags
+- invader-info: Added `-T universal` which indicates whether the map works with
+  all versions of the game; this is planned to be replaced with a language
+  check instead
+
+### Changed
+- invader-info: Now outputs some details in color on some terminals
 
 ## [0.20.2] - 2019-11-27
 ### Changed
