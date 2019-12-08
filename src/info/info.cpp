@@ -311,7 +311,7 @@ int main(int argc, const char **argv) {
                     oprintf("Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)\n", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
                 }
                 if(!universal) {
-                    oprintf_success_warn("Universal:         No (map will not work on some versions of the game)");
+                    oprintf_success_warn("Universal:         No (map will NOT work on all versions of the game)");
                 }
                 else {
                     oprintf_success("Universal:         Yes (map will work on all versions of the game)");
