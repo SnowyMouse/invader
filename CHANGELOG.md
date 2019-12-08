@@ -23,6 +23,9 @@ This is used for recording Invader's changes. This changelog is based on
   all versions of the game; this is planned to be replaced with a language
   check instead
 
+### Changed
+- invader-info: Now outputs some details in color on some terminals
+
 ## [0.20.2] - 2019-11-27
 ### Changed
 - Enabling hidden value extraction now produces unusable tag files to
