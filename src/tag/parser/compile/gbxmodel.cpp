@@ -183,15 +183,23 @@ namespace Invader::Parser {
         }
 
         // Remove excess NULL_INDEX values
-        while(triangle_indices.size() > 0 && triangle_indices[triangle_indices.size() - 1] == NULL_INDEX) {
-            triangle_indices.erase(triangle_indices.begin() + (triangle_indices.size() - 1));
-        }
+        std::size_t triangle_indices_size;
+        while(true) {
+            // Make sure we have enough indices for a triangle
+            triangle_indices_size = triangle_indices.size();
+            if(triangle_indices_size < 3) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Triangle index count is invalid (%zu < 3)", triangle_indices_size);
+                throw InvalidTagDataException();
+            }
 
-        // Get the final size
-        std::size_t triangle_indices_size = triangle_indices.size();
-        if(triangle_indices_size < 3) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Triangle index count is invalid (%zu < 3)", triangle_indices_size);
-            throw InvalidTagDataException();
+            // Here we go again
+            auto &index = triangle_indices[triangle_indices_size - 1];
+            if(index == NULL_INDEX) {
+                triangle_indices.erase(triangle_indices.begin() + (&index - triangle_indices.data()));
+            }
+            else {
+                break;
+            }
         }
 
         // Subtract two (since each index is technically an individual triangle, minus the last two indices since you need three indices to make a triangle)
