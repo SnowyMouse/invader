@@ -5,7 +5,14 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - Added colors for various diagnostic messages depending on the user's terminal
-- invader-info: Added `-T external-data`
+- invader-info: Added `-T external-data` which indicates if external resource
+  maps are required
+- invader-info: Added `-T external-bitmaps` which indicates the number of
+  bitmap tags that use external resource maps
+- invader-info: Added `-T external-loc` which indicates the number of loc tags
+  that use external resource maps
+- invader-info: Added `-T external-sounds` which indicates the number of sound
+  tags that use external resource maps
 
 ## [0.20.2] - 2019-11-27
 ### Changed

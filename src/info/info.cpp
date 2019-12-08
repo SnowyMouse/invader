@@ -23,7 +23,10 @@ int main(int argc, const char **argv) {
         DISPLAY_CRC32_MISMATCHED,
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
+        DISPLAY_EXTERNAL_BITMAPS,
         DISPLAY_EXTERNAL_DATA,
+        DISPLAY_EXTERNAL_LOC,
+        DISPLAY_EXTERNAL_SOUNDS,
         DISPLAY_MAP_TYPE,
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
@@ -40,7 +43,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-data, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmaps, external-data, external-loc, external-sounds, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -98,6 +101,15 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "external-data") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_DATA;
                 }
+                else if(std::strcmp(args[0], "external-bitmaps") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_BITMAPS;
+                }
+                else if(std::strcmp(args[0], "external-loc") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_LOC;
+                }
+                else if(std::strcmp(args[0], "external-bitmaps") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_SOUNDS;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -140,11 +152,25 @@ int main(int argc, const char **argv) {
     };
 
     // Does the map require external data?
-    auto uses_external_data = [&tag_count, &map]() {
+    std::size_t bitmaps, sounds, loc;
+    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc]() -> bool {
+        bitmaps = 0;
+        sounds = 0;
+        loc = 0;
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
             if(tag.is_indexed()) {
-                return true;
+                switch(tag.get_tag_class_int()) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                        bitmaps++;
+                        break;
+                    case TagClassInt::TAG_CLASS_SOUND:
+                        sounds++;
+                        break;
+                    default:
+                        loc++;
+                        break;
+                }
             }
 
             switch(tag.get_tag_class_int()) {
@@ -154,7 +180,8 @@ int main(int argc, const char **argv) {
                     auto *bitmap_data = tag.resolve_reflexive(bitmap_header.bitmap_data);
                     for(std::size_t b = 0; b < bitmap_data_count; b++) {
                         if(bitmap_data[b].flags.read().external) {
-                            return true;
+                            bitmaps++;
+                            break;
                         }
                     }
                     break;
@@ -164,13 +191,16 @@ int main(int argc, const char **argv) {
                     auto &sound_header = tag.get_base_struct<HEK::Sound>();
                     std::size_t pitch_range_count = sound_header.pitch_ranges.count;
                     auto *pitch_ranges = tag.resolve_reflexive(sound_header.pitch_ranges);
-                    for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                    bool break_early = false;
+                    for(std::size_t pr = 0; pr < pitch_range_count && !break_early; pr++) {
                         auto &pitch_range = pitch_ranges[pr];
                         auto *permutations = tag.resolve_reflexive(pitch_range.permutations);
                         std::size_t permutation_count = pitch_range.permutations.count;
                         for(std::size_t pe = 0; pe < permutation_count; pe++) {
                             if(permutations[pe].samples.external & 1) {
-                                return true;
+                                break_early = true;
+                                sounds++;
+                                break;
                             }
                         }
                     }
@@ -181,7 +211,7 @@ int main(int argc, const char **argv) {
                     break;
             }
         }
-        return false;
+        return bitmaps != 0 || loc != 0 || sounds != 0;
     };
 
     // Get stub count
@@ -211,10 +241,29 @@ int main(int argc, const char **argv) {
 
             // Get CRC
             auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
-            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected();
+            bool external_data_used = uses_external_data();
+            bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
             oprintf("CRC32:             0x%08X%s\n", crc, (crc != header.crc32) ? " (mismatched)" : "");
             oprintf("Integrity:         %s\n", dirty ? "Dirty" : "Clean (probably)");
-            oprintf("External data:     %s\n", uses_external_data() ? "Yes" : "No");
+
+            if(unsupported_external_data) {
+                if(external_data_used) {
+                    oprintf("External data:     Yes (WARNING: This is unsupported by this engine!)\n");
+                }
+                else {
+                    oprintf("External data:     N/A\n");
+                }
+            }
+            else if(!external_data_used) {
+                oprintf("External data:     No\n");
+            }
+            else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                oprintf("External data:     Yes (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", bitmaps, loc, sounds);
+            }
+            else {
+                oprintf("External data:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
+            }
 
             // Is it protected?
             oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
@@ -276,6 +325,18 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_EXTERNAL_DATA:
             oprintf("%s\n", uses_external_data() ? "yes" : "no");
+            break;
+        case DISPLAY_EXTERNAL_BITMAPS:
+            uses_external_data();
+            oprintf("%zu\n", bitmaps);
+            break;
+        case DISPLAY_EXTERNAL_LOC:
+            uses_external_data();
+            oprintf("%zu\n", loc);
+            break;
+        case DISPLAY_EXTERNAL_SOUNDS:
+            uses_external_data();
+            oprintf("%zu\n", sounds);
             break;
     }
 }
