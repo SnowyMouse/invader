@@ -267,7 +267,7 @@ namespace Invader::Parser {
         if(vertices_count >= this_vertices_count) {
             for(std::size_t i = 0; i <= vertices_count - this_vertices_count; i++) {
                 // If vertices match, set the vertices offset to this instead
-                if(std::memcmp(workload.model_vertices.data() + i, vertices_of_fun.data(), sizeof(workload.model_indices[0]) * this_vertices_count) == 0) {
+                if(std::memcmp(workload.model_vertices.data() + i, vertices_of_fun.data(), sizeof(workload.model_vertices[0]) * this_vertices_count) == 0) {
                     found = true;
                     this->vertex_offset = i * sizeof(workload.model_vertices[0]);
                     break;
