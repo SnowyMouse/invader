@@ -223,18 +223,18 @@ namespace Invader::Parser {
         if(indices_count >= this_indices_count) {
             auto &first = triangle_indices[0];
             auto &last = triangle_indices[triangle_indices_size - 1];
-            std::size_t check_size = this_indices_count - 2;
+            std::size_t check_size = this_indices_count - 1;
 
             for(std::size_t i = 0; i <= indices_count - this_indices_count; i++) {
                 auto *model_data = workload.model_indices.data() + i;
 
-                // Check the first and last indices first
-                if(model_data[triangle_indices_size - 1] != last || model_data[0] != first) {
+                // Check the last index, first, since it's most likely to be different
+                if(model_data[triangle_indices_size - 1] != last) {
                     continue;
                 }
 
                 // If triangles match, set the triangle offset to this instead
-                if(std::memcmp(&first + 1, model_data + 1, sizeof(workload.model_indices[0]) * check_size) == 0) {
+                if(std::memcmp(&first, model_data, sizeof(workload.model_indices[0]) * check_size) == 0) {
                     found = true;
                     this->triangle_offset = i * sizeof(workload.model_indices[0]);
                     break;
