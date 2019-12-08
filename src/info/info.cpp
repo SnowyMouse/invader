@@ -293,14 +293,14 @@ int main(int argc, const char **argv) {
 
             if(unsupported_external_data) {
                 if(external_data_used) {
-                    oprintf_success_warn("External data:     Yes (WARNING: This is unsupported by this engine!)");
+                    oprintf_success_warn("External tags:     Yes (WARNING: This is unsupported by this engine!)");
                 }
                 else {
-                    oprintf("External data:     N/A\n");
+                    oprintf("External tags:     N/A\n");
                 }
             }
             else if(!external_data_used) {
-                oprintf("External data:     0\n");
+                oprintf("External tags:     0\n");
             }
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 oprintf("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", total_tags, bitmaps, loc, sounds);
@@ -318,7 +318,7 @@ int main(int argc, const char **argv) {
                 }
             }
             else {
-                oprintf("External data:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
+                oprintf("External tags:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
             }
 
             // Is it protected?
