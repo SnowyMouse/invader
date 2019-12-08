@@ -6,6 +6,7 @@
 #include <invader/command_line_option.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/version.hpp>
+#include <invader/tag/parser/parser.hpp>
 
 #define BYTES_TO_MiB(bytes) ((bytes) / 1024.0 / 1024.0)
 
@@ -22,6 +23,7 @@ int main(int argc, const char **argv) {
         DISPLAY_CRC32_MISMATCHED,
         DISPLAY_DIRTY,
         DISPLAY_ENGINE,
+        DISPLAY_EXTERNAL_DATA,
         DISPLAY_MAP_TYPE,
         DISPLAY_PROTECTED,
         DISPLAY_SCENARIO,
@@ -38,7 +40,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-data, protected, map-type, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -93,6 +95,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "stub-count") == 0) {
                     map_info_options.type = DISPLAY_STUB_COUNT;
                 }
+                else if(std::strcmp(args[0], "external-data") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_DATA;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -134,6 +139,51 @@ int main(int argc, const char **argv) {
         return false;
     };
 
+    // Does the map require external data?
+    auto uses_external_data = [&tag_count, &map]() {
+        for(std::size_t i = 0; i < tag_count; i++) {
+            auto &tag = map->get_tag(i);
+            if(tag.is_indexed()) {
+                return true;
+            }
+
+            switch(tag.get_tag_class_int()) {
+                case TagClassInt::TAG_CLASS_BITMAP: {
+                    auto &bitmap_header = tag.get_base_struct<HEK::Bitmap>();
+                    std::size_t bitmap_data_count = bitmap_header.bitmap_data.count;
+                    auto *bitmap_data = tag.resolve_reflexive(bitmap_header.bitmap_data);
+                    for(std::size_t b = 0; b < bitmap_data_count; b++) {
+                        if(bitmap_data[b].flags.read().external) {
+                            return true;
+                        }
+                    }
+                    break;
+                }
+
+                case TagClassInt::TAG_CLASS_SOUND: {
+                    auto &sound_header = tag.get_base_struct<HEK::Sound>();
+                    std::size_t pitch_range_count = sound_header.pitch_ranges.count;
+                    auto *pitch_ranges = tag.resolve_reflexive(sound_header.pitch_ranges);
+                    for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                        auto &pitch_range = pitch_ranges[pr];
+                        auto *permutations = tag.resolve_reflexive(pitch_range.permutations);
+                        std::size_t permutation_count = pitch_range.permutations.count;
+                        for(std::size_t pe = 0; pe < permutation_count; pe++) {
+                            if(permutations[pe].samples.external & 1) {
+                                return true;
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+        return false;
+    };
+
     // Get stub count
     auto stub_count = [&tag_count, &map]() {
         std::size_t count = 0;
@@ -164,6 +214,7 @@ int main(int argc, const char **argv) {
             auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected();
             oprintf("CRC32:             0x%08X%s\n", crc, (crc != header.crc32) ? " (mismatched)" : "");
             oprintf("Integrity:         %s\n", dirty ? "Dirty" : "Clean (probably)");
+            oprintf("External data:     %s\n", uses_external_data() ? "Yes" : "No");
 
             // Is it protected?
             oprintf("Protected:         %s\n", map->is_protected() ? "Yes" : "No (probably)");
@@ -222,6 +273,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_STUB_COUNT:
             oprintf("%zu\n", stub_count());
+            break;
+        case DISPLAY_EXTERNAL_DATA:
+            oprintf("%s\n", uses_external_data() ? "yes" : "no");
             break;
     }
 }

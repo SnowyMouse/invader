@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - Added colors for various diagnostic messages depending on the user's terminal
+- invader-info: Added `-T external-data`
 
 ## [0.20.2] - 2019-11-27
 ### Changed
