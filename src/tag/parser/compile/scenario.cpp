@@ -33,8 +33,8 @@ namespace Invader::Parser {
                     /* If it is, increment the used counter and assign everything */ \
                     else { \
                         name_used[name_index]++; \
-                        auto &name = this->object_names[r.name]; \
-                        name.object_index = name_index; \
+                        auto &name = this->object_names[name_index]; \
+                        name.object_index = static_cast<HEK::Index>(i); \
                         name.object_type = HEK::ObjectType::object_type_int; \
                     } \
                 } \
