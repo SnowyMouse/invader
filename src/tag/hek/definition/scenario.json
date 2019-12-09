@@ -3218,7 +3218,8 @@
             {
                 "name": "script syntax data",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "compile_ignore": true
             },
             {
                 "name": "script string data",
