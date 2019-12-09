@@ -424,6 +424,12 @@ namespace Invader {
     bool Map::is_protected() const noexcept {
         using namespace HEK;
 
+        // We can get this right off the bat
+        if(this->get_tag(this->get_scenario_tag_id()).get_tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO) {
+            return true;
+        }
+
+        // Go through each tag
         auto tag_count = this->get_tag_count();
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag = this->get_tag(t);
