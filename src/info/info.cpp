@@ -325,10 +325,11 @@ int main(int argc, const char **argv) {
                 }
             }
             else if(!external_data_used) {
-                oprintf("External tags:     0\n");
+                oprintf_success("External tags:     0 (map will work regardless of resource maps)");
             }
+
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", total_tags, bitmaps, loc, sounds);
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)", total_tags, bitmaps, loc, sounds);
 
                 char message[256];
                 if(total_indices == 0) {
@@ -360,7 +361,7 @@ int main(int argc, const char **argv) {
                 }
             }
             else {
-                oprintf("External tags:     Yes (%zu bitmaps.map, %zu sounds.map)\n", bitmaps, sounds);
+                oprintf_success_lesser_warn("External tags:     Yes (%zu bitmaps.map, %zu sounds.map)", bitmaps, sounds);
             }
 
             // Is it protected?

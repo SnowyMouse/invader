@@ -48,6 +48,15 @@ else {\
     std::fprintf(stdout, __VA_ARGS__); \
     std::fprintf(stdout, "\n"); \
 }
+#define oprintf_success_lesser_warn(...) if(ON_COLOR_TERM) {\
+    std::fprintf(stdout, "\x1B[1;38;5;5m"); \
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\x1B[m\n"); \
+} \
+else {\
+    std::fprintf(stdout, __VA_ARGS__); \
+    std::fprintf(stdout, "\n"); \
+}
 #define oprintf_fail(...) if(ON_COLOR_TERM) {\
     std::fprintf(stdout, "\x1B[1;38;5;1m"); \
     std::fprintf(stdout, __VA_ARGS__); \
