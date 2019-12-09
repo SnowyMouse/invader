@@ -21,6 +21,9 @@ This is used for recording Invader's changes. This changelog is based on
   externally indexed sound tags
 - invader-info: Added `-T languages` which lists all languages valid for the
   map separated with spaces
+- invader-info: Added `-T external-pointers` which indicates whether the map
+  uses external pointers (sometimes occurs if built from tool.exe due to a bug
+  with indexing raw data)
 
 ### Changed
 - invader-info: Now outputs some details in color on some terminals
