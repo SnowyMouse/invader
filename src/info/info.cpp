@@ -30,6 +30,7 @@ int main(int argc, const char **argv) {
         DISPLAY_EXTERNAL_INDICES,
         DISPLAY_EXTERNAL_LOC,
         DISPLAY_EXTERNAL_LOC_INDICES,
+        DISPLAY_EXTERNAL_POINTERS,
         DISPLAY_EXTERNAL_SOUND_INDICES,
         DISPLAY_EXTERNAL_SOUNDS,
         DISPLAY_EXTERNAL_TAGS,
@@ -50,7 +51,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -132,6 +133,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "languages") == 0) {
                     map_info_options.type = DISPLAY_LANGUAGES;
                 }
+                else if(std::strcmp(args[0], "external-pointers") == 0) {
+                    map_info_options.type = DISPLAY_EXTERNAL_POINTERS;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -176,15 +180,15 @@ int main(int argc, const char **argv) {
     // Does the map require external data? If so, what.
     std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
     std::vector<std::string> languages;
-    bool universal;
-    auto uses_external_data = [&tag_count, &map, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &universal, &languages]() -> bool {
+    bool all_languages, no_external_pointers;
+    auto uses_external_data = [&tag_count, &map, &no_external_pointers, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &all_languages, &languages]() -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
         bitmap_indices = 0;
         sound_indices = 0;
         loc_indices = 0;
-        universal = true;
+        all_languages = true;
 
         std::vector<std::size_t> bitmaps_offsets;
         std::vector<std::size_t> bitmaps_sizes;
@@ -260,7 +264,9 @@ int main(int argc, const char **argv) {
         total_indices = loc_indices + bitmap_indices + sound_indices;
         total_tags = loc + bitmaps + sounds;
 
-        languages = get_languages_for_resources(bitmaps_offsets.data(), bitmaps_sizes.data(), bitmaps_offsets.size(), sounds_offsets.data(), sounds_sizes.data(), sounds_offsets.size(), universal);
+        languages = get_languages_for_resources(bitmaps_offsets.data(), bitmaps_sizes.data(), bitmaps_offsets.size(), sounds_offsets.data(), sounds_sizes.data(), sounds_offsets.size(), all_languages);
+
+        no_external_pointers = total_indices == total_tags;
 
         return total_tags != 0;
     };
@@ -323,25 +329,34 @@ int main(int argc, const char **argv) {
             }
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 oprintf("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)\n", total_tags, bitmaps, loc, sounds);
+
+                char message[256];
                 if(total_indices == 0) {
-                    oprintf("Indexed tags:      0\n");
+                    std::snprintf(message, sizeof(message), "Indexed tags:      0");
                 }
                 else {
-                    oprintf("Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)\n", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
+                    std::snprintf(message, sizeof(message), "Indexed tags:      %zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_indices, bitmap_indices, bitmap_indices == 1 ? "" : "s", loc_indices, sound_indices, sound_indices == 1 ? "" : "s");
                 }
-                if(!universal) {
+                if(no_external_pointers) {
+                    oprintf_success("%s", message);
+                }
+                else {
+                    oprintf_success_warn("%s", message);
+                    oprintf_success_warn("                   Uses direct resource pointers (likely from a tool.exe bug)");
+                }
+                if(!all_languages) {
                     if(languages.size() == 0) {
                         oprintf_success_warn("Valid languages:   Unknown");
                     }
                     else {
-                        oprintf_success_warn("Valid languages:   %zu (map may NOT work on all versions of the game)", languages.size());
+                        oprintf_success_warn("Valid languages:   %zu (map may NOT work on all original releases of the game)", languages.size());
                         for(auto &l : languages) {
                             oprintf_success_warn("                   %s", l.data());
                         }
                     }
                 }
                 else {
-                    oprintf_success("Valid languages:   Any (map will work on all released versions of the game)");
+                    oprintf_success("Valid languages:   Any (map will work on all original releases of the game)");
                 }
             }
             else {
@@ -443,9 +458,13 @@ int main(int argc, const char **argv) {
             uses_external_data();
             oprintf("%zu\n", sound_indices);
             break;
+        case DISPLAY_EXTERNAL_POINTERS:
+            uses_external_data();
+            oprintf("%s\n", !no_external_pointers ? "yes" : "no");
+            break;
         case DISPLAY_LANGUAGES:
             uses_external_data();
-            if(universal) {
+            if(all_languages) {
                 oprintf("any");
             }
             else if(languages.size() == 0) {
