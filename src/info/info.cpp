@@ -369,7 +369,7 @@ int main(int argc, const char **argv) {
                 oprintf_success("Protected:         No (probably)");
             }
             else {
-                oprintf_success_warn("Protected:         Yes");
+                oprintf_fail("Protected:         Yes");
             }
 
             // Compress and compression ratio
