@@ -98,18 +98,27 @@ namespace Invader::Parser {
 
         // If we don't have any syntax data, let's make some stuff
         static constexpr char SCRIPT_NODE_LITERAL[] = "script node";
+        static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
         if(this->script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::struct_little t = {};
+            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 32;
             t.count = 0;
             t.data = 0x64407440;
-            t.element_size = sizeof(ScenarioScriptNode::struct_little);
-            t.maximum_count = 32;
+            t.element_size = SCRIPT_ELEMENT_SIZE;
+            t.maximum_count = DEFAULT_SCRIPT_NODE_COUNT;
             t.next_id = 0xE741;
             t.one = 1;
             t.size = 0;
             std::copy(SCRIPT_NODE_LITERAL, SCRIPT_NODE_LITERAL + sizeof(SCRIPT_NODE_LITERAL), t.name.string);
 
-            this->script_syntax_data.resize(sizeof(t) + t.element_size * t.maximum_count);
+            this->script_syntax_data.resize(sizeof(t) + SCRIPT_ELEMENT_SIZE * DEFAULT_SCRIPT_NODE_COUNT);
+            auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(this->script_syntax_data.data() + sizeof(t));
+            for(std::size_t i = 0; i < DEFAULT_SCRIPT_NODE_COUNT; i++) {
+                auto &node = first_node[i];
+                std::memset(&node, 0xCA, sizeof(node));
+                node.salt = 0;
+            }
+
             std::copy(reinterpret_cast<const std::byte *>(&t), reinterpret_cast<const std::byte *>(&t + 1), this->script_syntax_data.data());
         }
         else {
@@ -123,13 +132,13 @@ namespace Invader::Parser {
 
             auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(this->script_syntax_data.data() + sizeof(t));
             auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
-            if(t.element_size != sizeof(*start_big)) {
+            if(t.element_size != SCRIPT_ELEMENT_SIZE) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
                 throw InvalidTagDataException();
             }
 
             std::size_t element_count = t.maximum_count;
-            std::size_t expected_table_size = element_count * sizeof(*start_big) + sizeof(t);
+            std::size_t expected_table_size = element_count * SCRIPT_ELEMENT_SIZE + sizeof(t);
             if(this->script_syntax_data.size() != expected_table_size) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, this->script_syntax_data.size());
                 throw InvalidTagDataException();
@@ -141,142 +150,140 @@ namespace Invader::Parser {
         }
 
         // If we have scripts, do stuff
-        if(this->scripts.size() > 0) {
-            if(this->source_files.size() == 0) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Scenario tag has script data but no source file data", tag_index);
-                eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader.");
-                eprintf_warn("To fix this, recompile the scripts");
+        if(this->source_files.size() == 0 && (this->scripts.size() > 0)) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Scenario tag has script data but no source file data", tag_index);
+            eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader.");
+            eprintf_warn("To fix this, recompile the scripts");
+        }
+        else {
+            // TODO: Recompile scripts
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement script re-compiling", tag_index);
+        }
+
+        // Let's start on the script data
+        BuildWorkload::BuildWorkloadStruct script_data_struct = {};
+        script_data_struct.data = std::move(this->script_syntax_data);
+        const char *string_data = reinterpret_cast<const char *>(this->script_string_data.data());
+        std::size_t string_data_length = this->script_string_data.size();
+
+        // Ensure we're null terminated
+        while(string_data_length > 0) {
+            if(string_data[string_data_length - 1] != 0) {
+                string_data_length--;
             }
             else {
-                // TODO: Recompile scripts
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement script re-compiling", tag_index);
+                break;
             }
-
-            // Let's start on the script data
-            BuildWorkload::BuildWorkloadStruct script_data_struct = {};
-            script_data_struct.data = std::move(this->script_syntax_data);
-            const char *string_data = reinterpret_cast<const char *>(this->script_string_data.data());
-            std::size_t string_data_length = this->script_string_data.size();
-
-            // Ensure we're null terminated
-            while(string_data_length > 0) {
-                if(string_data[string_data_length - 1] != 0) {
-                    string_data_length--;
-                }
-                else {
-                    break;
-                }
-            }
-
-            const char *string_data_end = string_data + string_data_length;
-            auto *syntax_data = script_data_struct.data.data();
-            auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
-            std::uint16_t element_count = table_header.size.read();
-            auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
-            std::size_t errors = 0;
-
-            for(std::uint16_t i = 0; i < element_count; i++) {
-                // Check if we know the class
-                std::optional<TagClassInt> tag_class;
-                auto &node = nodes[i];
-
-                // Check the class type
-                switch(node.type.read()) {
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
-                        tag_class = HEK::TAG_CLASS_SOUND;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
-                        tag_class = HEK::TAG_CLASS_EFFECT;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
-                        tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
-                        tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
-                        tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
-                        tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
-                        tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
-                        break;
-
-                    case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
-                        tag_class = HEK::TAG_CLASS_OBJECT;
-                        break;
-
-                    default:
-                        continue;
-                }
-
-                if(tag_class.has_value()) {
-                    // Check if we should leave it alone
-                    auto flags = node.flags.read();
-                    if(flags.is_global || flags.is_script_call) {
-                        continue;
-                    }
-
-                    // Get the string
-                    const char *string = string_data + node.string_offset.read();
-                    if(string >= string_data_end) {
-                        if(++errors == 5) {
-                            eprintf_error("... and more errors. Suffice it to say, the script node table needs recompiled");
-                            break;
-                        }
-                        else {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Script node #%zu has an invalid string offset", static_cast<std::size_t>(i));
-                        }
-                        continue;
-                    }
-
-                    // Add it to the list
-                    std::size_t dependency_offset = reinterpret_cast<const std::byte *>(&node.data) - syntax_data;
-                    std::size_t new_id = workload.compile_tag_recursively(string, *tag_class);
-                    node.data = HEK::TagID { static_cast<std::uint32_t>(new_id) };
-                    auto &dependency = script_data_struct.dependencies.emplace_back();
-                    dependency.offset = dependency_offset;
-                    dependency.tag_id_only = true;
-                    dependency.tag_index = new_id;
-
-                    // Let's also add up a reference too. This is 110% pointless and only wastes tag data space, but it's what tool.exe does, and a Vap really wanted it.
-                    bool exists = false;
-                    auto &new_tag = workload.tags[new_id];
-                    for(auto &r : this->references) {
-                        if(r.reference.tag_class_int == new_tag.tag_class_int && r.reference.path == new_tag.path) {
-                            exists = true;
-                            break;
-                        }
-                    }
-                    if(!exists) {
-                        auto &reference = this->references.emplace_back().reference;
-                        reference.tag_class_int = new_tag.tag_class_int;
-                        reference.path = new_tag.path;
-                        reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
-                    }
-                }
-            }
-
-            if(errors > 0 && errors < 5) {
-                eprintf_error("The scripts need recompiled");
-            }
-
-            // Add the new structs
-            auto &new_ptr = workload.structs[struct_index].pointers.emplace_back();
-            auto &scenario_struct = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data());
-            scenario_struct.script_syntax_data.size = static_cast<std::uint32_t>(script_data_struct.data.size());
-            new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
-            new_ptr.struct_index = workload.structs.size();
-            workload.structs.emplace_back(std::move(script_data_struct));
         }
+
+        const char *string_data_end = string_data + string_data_length;
+        auto *syntax_data = script_data_struct.data.data();
+        auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
+        std::uint16_t element_count = table_header.size.read();
+        auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
+        std::size_t errors = 0;
+
+        for(std::uint16_t i = 0; i < element_count; i++) {
+            // Check if we know the class
+            std::optional<TagClassInt> tag_class;
+            auto &node = nodes[i];
+
+            // Check the class type
+            switch(node.type.read()) {
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_LOOPING_SOUND:
+                    tag_class = HEK::TAG_CLASS_SOUND_LOOPING;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ANIMATION_GRAPH:
+                    tag_class = HEK::TAG_CLASS_MODEL_ANIMATIONS;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_ACTOR_VARIANT:
+                    tag_class = HEK::TAG_CLASS_ACTOR_VARIANT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_DAMAGE_EFFECT:
+                    tag_class = HEK::TAG_CLASS_DAMAGE_EFFECT;
+                    break;
+
+                case HEK::SCENARIO_SCRIPT_VALUE_TYPE_OBJECT_DEFINITION:
+                    tag_class = HEK::TAG_CLASS_OBJECT;
+                    break;
+
+                default:
+                    continue;
+            }
+
+            if(tag_class.has_value()) {
+                // Check if we should leave it alone
+                auto flags = node.flags.read();
+                if(flags.is_global || flags.is_script_call) {
+                    continue;
+                }
+
+                // Get the string
+                const char *string = string_data + node.string_offset.read();
+                if(string >= string_data_end) {
+                    if(++errors == 5) {
+                        eprintf_error("... and more errors. Suffice it to say, the script node table needs recompiled");
+                        break;
+                    }
+                    else {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Script node #%zu has an invalid string offset", static_cast<std::size_t>(i));
+                    }
+                    continue;
+                }
+
+                // Add it to the list
+                std::size_t dependency_offset = reinterpret_cast<const std::byte *>(&node.data) - syntax_data;
+                std::size_t new_id = workload.compile_tag_recursively(string, *tag_class);
+                node.data = HEK::TagID { static_cast<std::uint32_t>(new_id) };
+                auto &dependency = script_data_struct.dependencies.emplace_back();
+                dependency.offset = dependency_offset;
+                dependency.tag_id_only = true;
+                dependency.tag_index = new_id;
+
+                // Let's also add up a reference too. This is 110% pointless and only wastes tag data space, but it's what tool.exe does, and a Vap really wanted it.
+                bool exists = false;
+                auto &new_tag = workload.tags[new_id];
+                for(auto &r : this->references) {
+                    if(r.reference.tag_class_int == new_tag.tag_class_int && r.reference.path == new_tag.path) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if(!exists) {
+                    auto &reference = this->references.emplace_back().reference;
+                    reference.tag_class_int = new_tag.tag_class_int;
+                    reference.path = new_tag.path;
+                    reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
+                }
+            }
+        }
+
+        if(errors > 0 && errors < 5) {
+            eprintf_error("The scripts need recompiled");
+        }
+
+        // Add the new structs
+        auto &new_ptr = workload.structs[struct_index].pointers.emplace_back();
+        auto &scenario_struct = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data());
+        scenario_struct.script_syntax_data.size = static_cast<std::uint32_t>(script_data_struct.data.size());
+        new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
+        new_ptr.struct_index = workload.structs.size();
+        workload.structs.emplace_back(std::move(script_data_struct));
     }
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
