@@ -48,6 +48,32 @@
         "type": "enum"
     },
     {
+        "name": "WeaponHUDInterfaceCrosshairTypeFlags",
+        "fields": [
+            "aim",
+            "zoom",
+            "charge",
+            "should reload",
+            "flash heat",
+            "flash total ammo",
+            "flash battery",
+            "reload overheat",
+            "flash when firing and no ammo",
+            "flash when throwing and no grenade",
+            "low ammo and none left to reload",
+            "should reload secondary trigger",
+            "flash secondary total ammo",
+            "flash secondary reload",
+            "flash when firing secondary trigger with no ammo",
+            "low secondary ammo and none left to reload",
+            "primary trigger ready",
+            "secondary trigger ready",
+            "flash when firing with depleted battery"
+        ],
+        "type": "bitfield",
+        "width": 32
+    },
+    {
         "name": "WeaponHUDInterfaceNumberWeaponSpecificFlags",
         "type": "bitfield",
         "fields": [
@@ -947,7 +973,7 @@
             },
             {
                 "name": "crosshair types",
-                "type": "uint32",
+                "type": "WeaponHUDInterfaceCrosshairTypeFlags",
                 "endian": "little",
                 "cache_only": true
             },
