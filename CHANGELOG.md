@@ -24,6 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Added `-T external-pointers` which indicates whether the map
   uses external pointers (sometimes occurs if built from tool.exe due to a bug
   with indexing raw data)
+- invader-info: Added `-T tags-external-pointers` which list tags that have
+  external pointers that were not indexed
 
 ### Changed
 - invader-info: Now outputs some details in color on some terminals

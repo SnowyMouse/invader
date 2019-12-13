@@ -41,7 +41,8 @@ int main(int argc, const char **argv) {
         DISPLAY_SCENARIO_PATH,
         DISPLAY_TAG_COUNT,
         DISPLAY_STUB_COUNT,
-        DISPLAY_TAGS
+        DISPLAY_TAGS,
+        DISPLAY_TAGS_EXTERNAL_POINTERS
     };
 
     // Options struct
@@ -51,7 +52,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-pointers", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -136,6 +137,9 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "external-pointers") == 0) {
                     map_info_options.type = DISPLAY_EXTERNAL_POINTERS;
                 }
+                else if(std::strcmp(args[0], "tags-external-pointers") == 0) {
+                    map_info_options.type = DISPLAY_TAGS_EXTERNAL_POINTERS;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -181,7 +185,7 @@ int main(int argc, const char **argv) {
     std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
     std::vector<std::string> languages;
     bool all_languages, no_external_pointers;
-    auto uses_external_data = [&tag_count, &map, &no_external_pointers, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &all_languages, &languages]() -> bool {
+    auto uses_external_data = [&tag_count, &map, &no_external_pointers, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &all_languages, &languages](bool list_tags_with_external_pointers = false) -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
@@ -230,6 +234,9 @@ int main(int argc, const char **argv) {
                         }
                     }
                     bitmaps += found_it_this_bitmap;
+                    if(found_it_this_bitmap && list_tags_with_external_pointers) {
+                        oprintf("%s.bitmap\n", File::halo_path_to_preferred_path(tag.get_path()).data());
+                    }
                     break;
                 }
 
@@ -253,6 +260,9 @@ int main(int argc, const char **argv) {
                         }
                     }
                     sounds += found_it_this_sound;
+                    if(found_it_this_sound && list_tags_with_external_pointers) {
+                        oprintf("%s.sound\n", File::halo_path_to_preferred_path(tag.get_path()).data());
+                    }
                     break;
                 }
 
@@ -462,6 +472,9 @@ int main(int argc, const char **argv) {
         case DISPLAY_EXTERNAL_POINTERS:
             uses_external_data();
             oprintf("%s\n", !no_external_pointers ? "yes" : "no");
+            break;
+        case DISPLAY_TAGS_EXTERNAL_POINTERS:
+            uses_external_data(true);
             break;
         case DISPLAY_LANGUAGES:
             uses_external_data();
