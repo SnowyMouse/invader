@@ -66,7 +66,7 @@ namespace Invader::Parser {
                     exceeded = true;
                 }
 
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && !workload.hide_pedantic_warnings) {
                     switch(type) {
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
