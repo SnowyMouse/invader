@@ -218,7 +218,7 @@ namespace Invader::Parser {
         if(tag.is_indexed()) {
             auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(0, 0)) - 1);
             this->format = tag_data.format;
-            this->encoding = tag_data.encoding;
+            this->channel_count = tag_data.channel_count;
         }
     }
 

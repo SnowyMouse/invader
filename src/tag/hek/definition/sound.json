@@ -75,7 +75,7 @@
         "type": "enum"
     },
     {
-        "name": "SoundEncoding",
+        "name": "SoundChannelCount",
         "options": [
             "mono",
             "stereo"
@@ -324,8 +324,8 @@
                 "size": 12
             },
             {
-                "name": "encoding",
-                "type": "SoundEncoding"
+                "name": "channel count",
+                "type": "SoundChannelCount"
             },
             {
                 "name": "format",
