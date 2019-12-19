@@ -75,7 +75,7 @@
         "type": "enum"
     },
     {
-        "name": "SoundEncoding",
+        "name": "SoundChannelCount",
         "options": [
             "mono",
             "stereo"
@@ -108,7 +108,7 @@
                 "type": "Fraction"
             },
             {
-                "name": "compression",
+                "name": "format",
                 "type": "SoundFormat"
             },
             {
@@ -305,11 +305,11 @@
                 "size": 12
             },
             {
-                "name": "encoding",
-                "type": "SoundEncoding"
+                "name": "channel count",
+                "type": "SoundChannelCount"
             },
             {
-                "name": "compression",
+                "name": "format",
                 "type": "SoundFormat"
             },
             {

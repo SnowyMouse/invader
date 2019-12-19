@@ -216,13 +216,13 @@ namespace Invader::Parser {
         this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE);
         if(tag.is_indexed()) {
             auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(0, 0)) - 1);
-            this->compression = tag_data.compression;
-            this->encoding = tag_data.encoding;
+            this->format = tag_data.format;
+            this->channel_count = tag_data.channel_count;
         }
     }
 
     void Invader::Parser::SoundPermutation::post_cache_deformat() {
-        if(this->compression == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *end = start + this->samples.size() / sizeof(*start);
 
