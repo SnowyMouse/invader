@@ -110,7 +110,7 @@ namespace Invader {
             eprintf_error("Second subchunk is not a data subchunk");
             throw InvalidInputSoundException();
         }
-        if(data_subchunk.subchunk_size < data_length) {
+        if(data_length < data_subchunk.subchunk_size) {
             eprintf_error("Data subchunk size is wrong");
             throw InvalidInputSoundException();
         }

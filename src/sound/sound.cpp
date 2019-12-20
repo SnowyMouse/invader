@@ -77,7 +77,7 @@ int main(int argc, const char **argv) {
     }
 
     // Parse the sound tag
-    Parser::Sound sound_tag;
+    Parser::Sound sound_tag = {};
     if(std::filesystem::exists(tag_path)) {
         if(std::filesystem::is_directory(tag_path)) {
             eprintf_error("A directory exists at %s where a file was expected", tag_path.string().data());
@@ -226,6 +226,28 @@ int main(int argc, const char **argv) {
     else if(highest_sample_rate > 44100) {
         highest_sample_rate = 44100;
     }
+    if(highest_sample_rate == 22050) {
+        sound_tag.sample_rate = SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ;
+    }
+    else if(highest_sample_rate == 44100) {
+        sound_tag.sample_rate = SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ;
+    }
+    else {
+        eprintf_error("Unsupported sample rate %u", highest_sample_rate);
+        return EXIT_FAILURE;
+    }
+
+    // Sound tags currently only support single and dual channels
+    if(highest_channel_count == 1) {
+        sound_tag.channel_count = SoundChannelCount::SOUND_CHANNEL_COUNT_MONO;
+    }
+    else if(highest_channel_count == 2) {
+        sound_tag.channel_count = SoundChannelCount::SOUND_CHANNEL_COUNT_STEREO;
+    }
+    else {
+        eprintf_error("Unsupported channel count %u", highest_channel_count);
+        return EXIT_FAILURE;
+    }
 
     // Resample permutations when needed
     for(auto &permutation : permutations) {
@@ -261,8 +283,9 @@ int main(int argc, const char **argv) {
 
                 // Write the new sample value
                 std::int64_t new_sample_data = sample / divide_by * multiply_by;
-                for(std::size_t b = 0; b < bytes_per_sample; b++) {
-                    new_sample[b] = static_cast<std::byte>(new_sample_data << (b * 8));
+                for(std::size_t b = 0; b < new_bytes_per_sample; b++) {
+                    std::int64_t significance = 8 * b;
+                    new_sample[b] = static_cast<std::byte>(new_sample_data >> significance);
                 }
 
                 old_sample += bytes_per_sample;
