@@ -131,9 +131,9 @@
                 "type": "TagID"
             },
             {
-                "name": "vorbis sample count",
+                "name": "buffer size",
                 "type": "uint32",
-                "comment": "Vorbis only; sample rate (44100 Hz or 22050 Hz) x song length (seconds) x channel count (1 if mono; 2 if stereo)",
+                "comment": "this is the buffer size used to encode (and, for Ogg, decompress) the permutation data (unused in Xbox ADPCM)",
                 "endian": "little"
             },
             {
