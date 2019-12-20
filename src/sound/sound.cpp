@@ -59,9 +59,6 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "xbox-adpcm") == 0) {
                     sound_options.format = SoundFormat::SOUND_FORMAT_XBOX_ADPCM;
                 }
-                else if(std::strcmp(arguments[0], "ima-adpcm") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_IMA_ADPCM;
-                }
                 else {
                     eprintf_error("Unknown sound format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
