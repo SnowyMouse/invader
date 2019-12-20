@@ -347,21 +347,27 @@ int main(int argc, const char **argv) {
         }
     }
 
-    // Make the sound tag
-    for(auto &permutation : permutations) {
-        // Add a new permutation
-        auto new_permutation = [&pitch_range, &permutation, &format]() -> Parser::SoundPermutation & {
-            auto &p = pitch_range.permutations.emplace_back();
-            if(permutation.name.size() >= sizeof(TagString)) {
-                eprintf_error("Permutation name %s has at least %zu characters", permutation.name.data(), permutation.name.size());;
-            }
-            std::memset(p.name.string, 0, sizeof(p.name.string));
-            std::strncpy(p.name.string, permutation.name.data(), sizeof(p.name.string) - 1);
-            p.format = format;
-            return p;
-        };
+    // Add a new permutation
+    auto new_permutation = [&pitch_range, &format](SoundReader::Sound &permutation) -> Parser::SoundPermutation & {
+        auto &p = pitch_range.permutations.emplace_back();
+        if(permutation.name.size() >= sizeof(TagString)) {
+            eprintf_error("Permutation name %s has at least %zu characters", permutation.name.data(), permutation.name.size());;
+        }
+        std::memset(p.name.string, 0, sizeof(p.name.string));
+        std::strncpy(p.name.string, permutation.name.data(), sizeof(p.name.string) - 1);
+        p.format = format;
+        return p;
+    };
 
+    // Add initial permutations
+    for(auto &permutation : permutations) {
+        new_permutation(permutation);
+    }
+
+    // Make the sound tag
+    for(std::size_t i = 0; i < actual_permutation_count; i++) {
         // Encode a permutation
+        auto &permutation = permutations[i];
         auto encode_permutation = [&permutation, &format](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
@@ -387,17 +393,19 @@ int main(int argc, const char **argv) {
             }
         };
 
-        // Split based on the sample count
+        // Split if requested
         if(split) {
             const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
             std::size_t digested = 0;
             auto *samples_data = permutation.pcm.data();
             std::size_t total_size = permutation.pcm.size();
             while(digested < total_size) {
-                auto &p = new_permutation();
+                // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
+                auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
                 std::size_t remaining_size = total_size - digested;
                 std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
+                // Encode it
                 auto *sample_data_start = samples_data + digested;
                 encode_permutation(p, std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size));
                 digested += permutation_size;
@@ -416,7 +424,7 @@ int main(int argc, const char **argv) {
             }
         }
         else {
-            auto &p = new_permutation();
+            auto &p = pitch_range.permutations[i];
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
         }
