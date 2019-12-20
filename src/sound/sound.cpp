@@ -19,6 +19,7 @@ int main(int argc, const char **argv) {
         const char *tags = "tags";
         std::optional<bool> split;
         std::optional<SoundFormat> format;
+        bool fs_path = false;
     } sound_options;
 
     std::vector<CommandLineOption> options;
@@ -27,6 +28,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 64 KiB chunks.");
     options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm. Default (new tag): 16-bit-pcm");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
@@ -63,12 +65,33 @@ int main(int argc, const char **argv) {
                     eprintf_error("Unknown sound format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
+                break;
+
+            case 'P':
+                sound_options.fs_path = true;
+                break;
         }
     });
 
     // Get our paths and make sure a data directory exists
-    auto tag_path = std::filesystem::path(sound_options.tags) / (std::string(remaining_arguments[0]) + ".sound");
-    auto data_path = std::filesystem::path(sound_options.data) / std::string(remaining_arguments[0]);
+    std::string halo_tag_path;
+    if(sound_options.fs_path) {
+        std::vector<std::string> data;
+        data.emplace_back(std::string(sound_options.data));
+        try {
+            halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
+        }
+        catch(std::exception &) {
+            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.data);
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        halo_tag_path = remaining_arguments[0];
+    }
+
+    auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
+    auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
     if(!std::filesystem::is_directory(data_path)) {
         eprintf_error("No directory exists at %s", data_path.string().data());
         return EXIT_FAILURE;
