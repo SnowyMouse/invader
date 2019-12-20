@@ -11,6 +11,8 @@
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
+    static constexpr std::size_t SPLIT_SAMPLE_COUNT = 116480;
+    static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
 
     struct SoundOptions {
         const char *data = "data";
@@ -45,7 +47,6 @@ int main(int argc, const char **argv) {
 
             case 's':
                 sound_options.split = true;
-                eprintf_error("-s is not implemented at the moment...\n");
                 break;
 
             case 'F':
@@ -208,8 +209,8 @@ int main(int argc, const char **argv) {
 
     // Set the actual permutation count
     auto actual_permutation_count = permutations.size();
-    if(actual_permutation_count > UINT16_MAX) {
-        eprintf_error("Maximum number of actual permutations (%zu > %zu) exceeded", actual_permutation_count, static_cast<std::size_t>(UINT16_MAX));
+    if(actual_permutation_count > MAX_PERMUTATIONS) {
+        eprintf_error("Maximum number of actual permutations (%zu > %zu) exceeded", actual_permutation_count, MAX_PERMUTATIONS);
         return EXIT_FAILURE;
     }
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
@@ -249,17 +250,19 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
+    std::size_t highest_bytes_per_sample = highest_bits_per_sample / 8;
+
     // Resample permutations when needed
     for(auto &permutation : permutations) {
         std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
         std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
 
         // Bits per sample doesn't match; we can fix that though
-        if(bytes_per_sample != highest_bits_per_sample / 8) {
+        if(bytes_per_sample != highest_bytes_per_sample) {
             // Allocate stuff
-            double divide_by = std::pow(256, bytes_per_sample / 8);
-            std::size_t new_bytes_per_sample = highest_bits_per_sample / 8;
-            double multiply_by = std::pow(256, new_bytes_per_sample / 8);
+            double divide_by = std::pow(256, bytes_per_sample);
+            std::size_t new_bytes_per_sample = highest_bytes_per_sample;
+            double multiply_by = std::pow(256, highest_bytes_per_sample);
 
             std::vector<std::byte> new_samples(sample_count * new_bytes_per_sample);
             const std::byte *old_sample = permutation.pcm.data();
@@ -325,10 +328,6 @@ int main(int argc, const char **argv) {
     }
 
     // Make the sound tag
-    if(split) {
-        eprintf_warn("Splitting is unimplemented");
-        split = false;
-    }
     for(auto &permutation : permutations) {
         // Add a new permutation
         auto new_permutation = [&pitch_range, &permutation, &format]() -> Parser::SoundPermutation & {
@@ -342,18 +341,19 @@ int main(int argc, const char **argv) {
             return p;
         };
 
-        // Encode
-        auto encode_permutation = [&permutation](Parser::SoundPermutation &permutation_to_write) {
-            switch(permutation_to_write.format) {
+        // Encode a permutation
+        auto encode_permutation = [&permutation, &format](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+            switch(format) {
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                     if(permutation.bits_per_sample == 16) {
-                        const auto *data = reinterpret_cast<const LittleEndian<std::uint16_t> *>(permutation.pcm.data());
-                        permutation_to_write.samples = std::vector<std::byte>(permutation.pcm.size());
-                        auto *new_data = reinterpret_cast<BigEndian<std::uint16_t> *>(permutation_to_write.samples.data());
-                        std::size_t sample_count = permutation.pcm.size() / sizeof(*data);
+                        const auto *data = reinterpret_cast<const LittleEndian<std::uint16_t> *>(pcm.data());
+                        std::vector<std::byte> samples = std::vector<std::byte>(pcm.size());
+                        auto *new_data = reinterpret_cast<BigEndian<std::uint16_t> *>(samples.data());
+                        std::size_t sample_count = pcm.size() / sizeof(*data);
                         for(std::size_t s = 0; s < sample_count; s++) {
                             new_data[s] = data[s];
                         }
+                        p.samples = samples;
                         break;
                     }
                     else {
@@ -366,17 +366,42 @@ int main(int argc, const char **argv) {
             }
         };
 
+        // Split based on the sample count
         if(split) {
-            std::terminate();
+            const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
+            std::size_t digested = 0;
+            auto *samples_data = permutation.pcm.data();
+            std::size_t total_size = permutation.pcm.size();
+            while(digested < total_size) {
+                auto &p = new_permutation();
+                std::size_t remaining_size = total_size - digested;
+                std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
+
+                auto *sample_data_start = samples_data + digested;
+                encode_permutation(p, std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size));
+                digested += permutation_size;
+
+                if(digested == total_size) {
+                    p.next_permutation_index = NULL_INDEX;
+                }
+                else {
+                    std::size_t next_permutation = pitch_range.permutations.size();
+                    if(next_permutation > MAX_PERMUTATIONS) {
+                        eprintf_error("Maximum number of total permutations (%zu > %zu) exceeded", next_permutation, MAX_PERMUTATIONS);
+                        return EXIT_FAILURE;
+                    }
+                    p.next_permutation_index = static_cast<Index>(next_permutation);
+                }
+            }
         }
         else {
             auto &p = new_permutation();
             p.next_permutation_index = NULL_INDEX;
-            p.samples = permutation.pcm;
-            encode_permutation(p);
+            encode_permutation(p, permutation.pcm);
         }
     }
 
+    // Wrap it up
     std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
     static constexpr char DEFAULT_NAME[] = "default";
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
