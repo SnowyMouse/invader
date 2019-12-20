@@ -363,6 +363,8 @@ int main(int argc, const char **argv) {
 
         // Encode a permutation
         auto encode_permutation = [&permutation, &format](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+            p.vorbis_sample_count = pcm.size();
+
             switch(format) {
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                     if(permutation.bits_per_sample == 16) {
