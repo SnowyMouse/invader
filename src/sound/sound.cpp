@@ -404,8 +404,12 @@ int main(int argc, const char **argv) {
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
     sound_tag.pitch_ranges[0] = pitch_range;
     auto sound_tag_data = sound_tag.generate_hek_tag_data(TagClassInt::TAG_CLASS_SOUND);
-    bool saved = Invader::File::save_file(tag_path.string().data(), sound_tag_data);
-    if(!saved) {
+
+    // Create missing directories if needed
+    std::filesystem::create_directories(tag_path.parent_path());
+
+    // Save
+    if(!Invader::File::save_file(tag_path.string().data(), sound_tag_data)) {
         eprintf_error("Failed to save %s", tag_path.string().data());
         return EXIT_FAILURE;
     }
