@@ -26,7 +26,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 64 KiB chunks.");
-    options.emplace_back("format", 'F', 0, "Set the format. Can be: 16-bit-pcm. Default (new tag): 16-bit-pcm");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm. Default (new tag): 16-bit-pcm");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
