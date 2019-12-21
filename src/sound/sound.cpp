@@ -419,18 +419,15 @@ int main(int argc, const char **argv) {
 
         // Split if requested
         std::size_t size;
-        std::size_t sub_permutations;
         if(split) {
             const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
             std::size_t digested = 0;
             auto *samples_data = permutation.pcm.data();
             std::size_t total_size = permutation.pcm.size();
-            sub_permutations = 0;
             size = 0;
             while(digested < total_size) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
                 auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
-                sub_permutations++;
                 std::size_t remaining_size = total_size - digested;
                 std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
@@ -457,19 +454,11 @@ int main(int argc, const char **argv) {
             auto &p = pitch_range.permutations[i];
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
-            sub_permutations = 1;
             size = p.samples.size();
         }
 
         // Print sound info
-        oprintf("    Sound #%zu (%s): %zu:%.2f [input: %zu-bit, %s, %zu Hz]", i, permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
-
-        if(split) {
-            oprintf(", (%zu sub-permutation%s)", static_cast<std::size_t>(sub_permutations), sub_permutations == 1 ? "" : "s");
-        }
-
-        // Show length and size
-        oprintf(" - %.03f MiB\n", size / 1024.0 / 1024.0);
+        oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
 
         total_size += size;
     }
