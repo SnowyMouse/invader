@@ -9,7 +9,7 @@ namespace Invader::Parser {
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t size = this->samples.size() / 2;
             if(size * 2 != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size", offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", offset / sizeof(struct_little));
                 throw InvalidTagDataException();
             }
 
@@ -18,6 +18,27 @@ namespace Invader::Parser {
             for(std::size_t i = 0; i < size; i++) {
                 samples_big[i] = samples[i];
             }
+        }
+
+        // Warn about this
+        bool buffer_size_required = (this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == HEK::SoundFormat::SOUND_FORMAT_OGG);
+        if(buffer_size_required) {
+            bool stock_halo_wont_play_it = false;
+            if(this->vorbis_sample_count == 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", struct_index);
+                stock_halo_wont_play_it = true;
+            }
+            // Make sure the value is set
+            else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->vorbis_sample_count != this->samples.size()) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", struct_index);
+                stock_halo_wont_play_it = true;
+            }
+            if(stock_halo_wont_play_it) {
+                eprintf_warn("Stock Halo will not play it.");
+            }
+        }
+        else {
+            this->vorbis_sample_count = 0;
         }
 
         // Add the two lone IDs and set the sample size
@@ -60,7 +81,11 @@ namespace Invader::Parser {
             }
         }
         if(errors) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound format does not match %zu permutation%s", errors, errors == 1 ? "" : "s");
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound format does not match %zu permutation%s.", errors, errors == 1 ? "" : "s");
+        }
+
+        if(this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
     }
 }
