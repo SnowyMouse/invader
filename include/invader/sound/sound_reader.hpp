@@ -21,6 +21,15 @@ namespace Invader {
             /** Number of bits per sample */
             std::uint32_t bits_per_sample;
 
+            /** Sample rate of input file */
+            std::uint32_t input_sample_rate;
+
+            /** Channel count of input file */
+            std::uint32_t input_channel_count;
+
+            /** Number of bits per sample of input file */
+            std::uint32_t input_bits_per_sample;
+
             /** PCM data */
             std::vector<std::byte> pcm;
 

@@ -82,6 +82,9 @@ namespace Invader {
         result.bits_per_sample = fmt_subchunk.bits_per_sample;
         result.channel_count = fmt_subchunk.channel_count;
         result.sample_rate = fmt_subchunk.sample_rate;
+        result.input_bits_per_sample = fmt_subchunk.bits_per_sample;
+        result.input_channel_count = fmt_subchunk.channel_count;
+        result.input_sample_rate = fmt_subchunk.sample_rate;
 
         // Some more verification
         std::uint16_t expected_align = result.channel_count * result.bits_per_sample / 8;

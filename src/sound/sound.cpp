@@ -365,9 +365,31 @@ int main(int argc, const char **argv) {
     }
 
     // Make the sound tag
+    const char *output_name = nullptr;
+    switch(format) {
+        case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+            output_name = "16-bit PCM";
+            break;
+        case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
+            output_name = "IMA ADPCM";
+            break;
+        case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+            output_name = "Xbox ADPCM";
+            break;
+        case SoundFormat::SOUND_FORMAT_OGG:
+            output_name = "Ogg Vorbis";
+            break;
+    }
+    oprintf("Output: %s, %s, %zu Hz%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "");
+    oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
+    std::size_t total_size = 0;
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
-        // Encode a permutation
         auto &permutation = permutations[i];
+
+        // Calculate length
+        double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
+
+        // Encode a permutation
         auto encode_permutation = [&permutation, &format](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
@@ -394,20 +416,26 @@ int main(int argc, const char **argv) {
         };
 
         // Split if requested
+        std::size_t size;
+        std::size_t sub_permutations;
         if(split) {
             const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
             std::size_t digested = 0;
             auto *samples_data = permutation.pcm.data();
             std::size_t total_size = permutation.pcm.size();
+            sub_permutations = 0;
+            size = 0;
             while(digested < total_size) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
                 auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
+                sub_permutations++;
                 std::size_t remaining_size = total_size - digested;
                 std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
                 // Encode it
                 auto *sample_data_start = samples_data + digested;
                 encode_permutation(p, std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size));
+                size = p.samples.size();
                 digested += permutation_size;
 
                 if(digested == total_size) {
@@ -427,8 +455,23 @@ int main(int argc, const char **argv) {
             auto &p = pitch_range.permutations[i];
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
+            sub_permutations = 1;
+            size = p.samples.size();
         }
+
+        // Print sound info
+        oprintf("    Sound #%zu (%s): %zu:%.2f [input: %zu-bit, %s, %zu Hz]", i, permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
+
+        if(split) {
+            oprintf(", (%zu sub-permutation%s)", static_cast<std::size_t>(sub_permutations), sub_permutations == 1 ? "" : "s");
+        }
+
+        // Show length and size
+        oprintf(" - %.03f MiB\n", size / 1024.0 / 1024.0);
+
+        total_size += size;
     }
+    oprintf("Total: %.03f MiB\n", total_size / 1024.0 / 1024.0);
 
     // Wrap it up
     std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
