@@ -388,7 +388,6 @@ int main(int argc, const char **argv) {
     }
     oprintf("Output: %s, %s, %zu Hz%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "");
     oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
-    std::size_t total_size = 0;
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
         auto &permutation = permutations[i];
 
@@ -422,15 +421,13 @@ int main(int argc, const char **argv) {
         };
 
         // Split if requested
-        std::size_t size;
         if(split) {
             const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
             std::size_t digested = 0;
-            size = 0;
             while(permutation.pcm.size() > 0) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
                 auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
-                std::size_t remaining_size = total_size - digested;
+                std::size_t remaining_size = permutation.pcm.size();
                 std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
                 // Encode it
@@ -438,12 +435,11 @@ int main(int argc, const char **argv) {
                 auto sample_data = std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size);
                 permutation.pcm = std::vector<std::byte>(permutation.pcm.begin() + permutation_size, permutation.pcm.end());
                 encode_permutation(p, sample_data);
-                size = p.samples.size();
                 p.samples.shrink_to_fit();
                 permutation.pcm.shrink_to_fit();
                 digested += permutation_size;
 
-                if(digested == total_size) {
+                if(permutation.pcm.size() == 0) {
                     p.next_permutation_index = NULL_INDEX;
                 }
                 else {
@@ -461,16 +457,12 @@ int main(int argc, const char **argv) {
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
             p.samples.shrink_to_fit();
-            size = p.samples.size();
         }
 
         // Print sound info
         oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
         permutation.pcm = std::vector<std::byte>();
-
-        total_size += size;
     }
-    oprintf("Total: %.03f MiB\n", total_size / 1024.0 / 1024.0);
 
     // Wrap it up
     std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
@@ -478,6 +470,7 @@ int main(int argc, const char **argv) {
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
     sound_tag.pitch_ranges[0] = std::move(pitch_range);
     auto sound_tag_data = sound_tag.generate_hek_tag_data(TagClassInt::TAG_CLASS_SOUND, true);
+    oprintf("Total: %.03f MiB\n", sound_tag_data.size() / 1024.0 / 1024.0);
 
     // Create missing directories if needed
     std::filesystem::create_directories(tag_path.parent_path());
