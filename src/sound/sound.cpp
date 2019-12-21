@@ -224,6 +224,9 @@ int main(int argc, const char **argv) {
             eprintf_error("Multiple permutations with the same name (%s) cannot be added", sound.name.data());
             return EXIT_FAILURE;
         }
+
+        // Make it small
+        sound.pcm.shrink_to_fit();
     }
 
     // Make sure we have stuff
@@ -341,6 +344,7 @@ int main(int argc, const char **argv) {
             }
 
             permutation.pcm = std::move(new_samples);
+            permutation.pcm.shrink_to_fit();
             permutation.channel_count = 2;
         }
 
@@ -422,19 +426,21 @@ int main(int argc, const char **argv) {
         if(split) {
             const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
             std::size_t digested = 0;
-            auto *samples_data = permutation.pcm.data();
-            std::size_t total_size = permutation.pcm.size();
             size = 0;
-            while(digested < total_size) {
+            while(permutation.pcm.size() > 0) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
                 auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
                 std::size_t remaining_size = total_size - digested;
                 std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
                 // Encode it
-                auto *sample_data_start = samples_data + digested;
-                encode_permutation(p, std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size));
+                auto *sample_data_start = permutation.pcm.data();
+                auto sample_data = std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size);
+                permutation.pcm = std::vector<std::byte>(permutation.pcm.begin() + permutation_size, permutation.pcm.end());
+                encode_permutation(p, sample_data);
                 size = p.samples.size();
+                p.samples.shrink_to_fit();
+                permutation.pcm.shrink_to_fit();
                 digested += permutation_size;
 
                 if(digested == total_size) {
@@ -454,6 +460,7 @@ int main(int argc, const char **argv) {
             auto &p = pitch_range.permutations[i];
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
+            p.samples.shrink_to_fit();
             size = p.samples.size();
         }
 
@@ -469,7 +476,7 @@ int main(int argc, const char **argv) {
     std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
     static constexpr char DEFAULT_NAME[] = "default";
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
-    sound_tag.pitch_ranges[0] = pitch_range;
+    sound_tag.pitch_ranges[0] = std::move(pitch_range);
     auto sound_tag_data = sound_tag.generate_hek_tag_data(TagClassInt::TAG_CLASS_SOUND);
 
     // Create missing directories if needed
