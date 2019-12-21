@@ -31,7 +31,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("split", 's', 0, "Split permutations into 64 KiB chunks.");
     options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis. Default (new tag): 16-bit-pcm");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
-    options.emplace_back("vorbis-quality", "q", 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
+    options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
