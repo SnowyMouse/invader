@@ -7,11 +7,12 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/sound/sound_reader.hpp>
 #include <invader/version.hpp>
+#include <vorbis/vorbisenc.h>
 
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
-    static constexpr std::size_t SPLIT_SAMPLE_COUNT = 116480;
+    static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
     static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
 
     struct SoundOptions {
@@ -20,6 +21,7 @@ int main(int argc, const char **argv) {
         std::optional<bool> split;
         std::optional<SoundFormat> format;
         bool fs_path = false;
+        float vorbis_quality = 1.0F;
     } sound_options;
 
     std::vector<CommandLineOption> options;
@@ -27,8 +29,9 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 64 KiB chunks.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm. Default (new tag): 16-bit-pcm");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis. Default (new tag): 16-bit-pcm");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("vorbis-quality", "q", 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
@@ -63,6 +66,14 @@ int main(int argc, const char **argv) {
                 }
                 else {
                     eprintf_error("Unknown sound format %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
+            case 'q':
+                sound_options.vorbis_quality = std::atof(arguments[0]);
+                if(sound_options.vorbis_quality > 1.0F || sound_options.vorbis_quality < -0.1F) {
+                    eprintf_error("Vorbis quality is outside of the allowed range of -0.1 to 1.0");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -244,7 +255,7 @@ int main(int argc, const char **argv) {
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     // If doing 16-bit PCM, set to 16-bit PCM regardless
-    if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM && highest_bits_per_sample != 16) {
+    if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
         highest_bits_per_sample = 16;
     }
 
@@ -393,10 +404,12 @@ int main(int argc, const char **argv) {
 
         // Calculate length
         double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
+        std::size_t sample_size = highest_bytes_per_sample * highest_channel_count;
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &highest_channel_count, &highest_sample_rate, &highest_bytes_per_sample, &sample_size](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
+                // Basically, just make it big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                     if(permutation.bits_per_sample == 16) {
                         p.buffer_size = pcm.size();
@@ -414,6 +427,108 @@ int main(int argc, const char **argv) {
                         eprintf_error("Needs to be 16-bit PCM, first");
                         std::exit(EXIT_FAILURE);
                     }
+                // Encode to Vorbis in an Ogg container
+                case SoundFormat::SOUND_FORMAT_OGG: {
+                    // Begin
+                    std::vector<std::byte> output_samples;
+                    vorbis_info vi;
+                    vorbis_info_init(&vi);
+                    auto ret = vorbis_encode_init_vbr(&vi, highest_channel_count, highest_sample_rate, sound_options.vorbis_quality);
+                    if(ret) {
+                        eprintf_error("Failed to initialize vorbis encoder");
+                        std::exit(EXIT_FAILURE);
+                    }
+
+                    // Set the comment
+                    vorbis_comment vc;
+                    vorbis_comment_init(&vc);
+                    vorbis_comment_add_tag(&vc, "ENCODER", full_version());
+
+                    // Start making a vorbis block
+                    vorbis_dsp_state vd;
+                    vorbis_block vb;
+                    vorbis_analysis_init(&vd, &vi);
+                    vorbis_block_init(&vd, &vb);
+
+                    // Ogg packet stuff
+                    ogg_packet header;
+                    ogg_packet header_comm;
+                    ogg_packet header_code;
+                    ogg_stream_state os;
+                    ogg_stream_init(&os, 0);
+                    vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
+                    ogg_stream_packetin(&os, &header);
+                    ogg_stream_packetin(&os, &header_comm);
+                    ogg_stream_packetin(&os, &header_code);
+
+                    // Analyze data
+                    std::size_t sample_count = pcm.size() / sample_size;
+                    p.buffer_size = sample_count * highest_channel_count * 2;
+                    float **buffer = vorbis_analysis_buffer(&vd, sample_count);
+                    auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
+                    for(std::size_t i = 0; i < sample_count; i ++) {
+                        auto *sample = pcm.data() + i * sample_size;
+                        for(std::size_t c = 0; c < highest_channel_count; c++) {
+                            auto *channel_sample = sample + c * highest_bytes_per_sample;
+                            auto &sample_data = buffer[c][i];
+                            sample_data = 0.0F;
+
+                            // Get the sample value
+                            std::int64_t sample = 0;
+                            for(std::size_t b = 0; b < highest_bytes_per_sample; b++) {
+                                std::int64_t significance = 8 * b;
+                                if(b + 1 == highest_bytes_per_sample) {
+                                    sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(channel_sample[b])) << significance;
+                                }
+                                else {
+                                    sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(channel_sample[b])) << significance;
+                                }
+                            }
+
+                            // Do it
+                            sample_data = sample / static_cast<float>(sample > 0 ? (divide_by - 1) : (divide_by));
+                        }
+                    }
+                    vorbis_analysis_wrote(&vd, sample_count);
+
+                    // Encode the block
+                    while(vorbis_analysis_blockout(&vd, &vb) == 1) {
+                        vorbis_analysis(&vb, nullptr);
+                        vorbis_bitrate_addblock(&vb);
+                        int eos = 0;
+                        ogg_packet op;
+                        while(vorbis_bitrate_flushpacket(&vd, &op)) {
+                            ogg_stream_packetin(&os, &op);
+                            while(!eos) {
+                                // Do it
+                                ogg_page og;
+                                int result = ogg_stream_pageout(&os, &og);
+                                if(result == 0) {
+                                    break;
+                                }
+
+                                // Write data
+                                output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
+                                output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
+
+                                // End
+                                if(ogg_page_eos(&og)) {
+                                    eos = 1;
+                                }
+                            }
+                        }
+                    }
+
+                    // Clean up
+                    ogg_stream_clear(&os);
+                    vorbis_block_clear(&vb);
+                    vorbis_dsp_clear(&vd);
+                    vorbis_comment_clear(&vc);
+                    vorbis_info_clear(&vi);
+
+                    p.samples = std::move(output_samples);
+                    break;
+                }
                 default:
                     eprintf_error("Unimplemented sound format");
                     std::exit(EXIT_FAILURE);
@@ -422,7 +537,7 @@ int main(int argc, const char **argv) {
 
         // Split if requested
         if(split) {
-            const std::size_t MAX_SPLIT_SIZE = SPLIT_SAMPLE_COUNT * highest_bytes_per_sample;
+            const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % sample_size);
             std::size_t digested = 0;
             while(permutation.pcm.size() > 0) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
