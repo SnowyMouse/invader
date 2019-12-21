@@ -459,6 +459,7 @@ int main(int argc, const char **argv) {
 
         // Print sound info
         oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
+        permutation.pcm = std::vector<std::byte>();
 
         total_size += size;
     }
