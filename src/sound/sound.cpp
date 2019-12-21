@@ -206,7 +206,12 @@ int main(int argc, const char **argv) {
             return EXIT_FAILURE;
         }
         auto filename = path.filename().string();
+
         sound.name = filename.substr(0, filename.size() - extension.size());
+        if(sound.name.size() >= sizeof(TagString)) {
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.data(), sound.name.size(), sizeof(TagString));
+            std::exit(EXIT_FAILURE);
+        }
 
         // Check for duplicates
         std::size_t times_appeared = 0;
@@ -350,9 +355,6 @@ int main(int argc, const char **argv) {
     // Add a new permutation
     auto new_permutation = [&pitch_range, &format](SoundReader::Sound &permutation) -> Parser::SoundPermutation & {
         auto &p = pitch_range.permutations.emplace_back();
-        if(permutation.name.size() >= sizeof(TagString)) {
-            eprintf_error("Permutation name %s has at least %zu characters", permutation.name.data(), permutation.name.size());;
-        }
         std::memset(p.name.string, 0, sizeof(p.name.string));
         std::strncpy(p.name.string, permutation.name.data(), sizeof(p.name.string) - 1);
         p.format = format;
