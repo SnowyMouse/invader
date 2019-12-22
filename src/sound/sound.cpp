@@ -470,39 +470,51 @@ int main(int argc, const char **argv) {
                     // Analyze data
                     std::size_t sample_count = pcm.size() / sample_size;
                     p.buffer_size = sample_count * sample_size_16_bit;
-                    float **buffer = vorbis_analysis_buffer(&vd, sample_count);
-                    auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
-                    for(std::size_t i = 0; i < sample_count; i++) {
-                        auto *sample = pcm.data() + i * sample_size;
-                        for(std::size_t c = 0; c < highest_channel_count; c++) {
-                            auto *channel_sample = sample + c * highest_bytes_per_sample;
-                            auto &sample_data = buffer[c][i];
-                            sample_data = 0.0F;
+                    std::size_t split_count = 1024;
+                    for(std::size_t s = 0; s < sample_count; s += split_count) {
+                        float **buffer = vorbis_analysis_buffer(&vd, split_count);
+                        std::size_t sample_count_to_encode = (sample_count - s);
 
-                            // Get the sample value
-                            std::int64_t sample = 0;
-                            for(std::size_t b = 0; b < highest_bytes_per_sample; b++) {
-                                std::int64_t significance = 8 * b;
-                                if(b + 1 == highest_bytes_per_sample) {
-                                    sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(channel_sample[b])) << significance;
+                        if(sample_count_to_encode > split_count) {
+                            sample_count_to_encode = split_count;
+                        }
+
+                        auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
+
+                        for(std::size_t i = 0; i < sample_count_to_encode; i++) {
+                            auto *sample = pcm.data() + (s + i) * sample_size;
+                            for(std::size_t c = 0; c < highest_channel_count; c++) {
+                                auto *channel_sample = sample + c * highest_bytes_per_sample;
+                                auto &sample_data = buffer[c][i];
+                                sample_data = 0.0F;
+
+                                // Get the sample value
+                                std::int64_t sample = 0;
+                                for(std::size_t b = 0; b < highest_bytes_per_sample; b++) {
+                                    std::int64_t significance = 8 * b;
+                                    if(b + 1 == highest_bytes_per_sample) {
+                                        sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(channel_sample[b])) << significance;
+                                    }
+                                    else {
+                                        sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(channel_sample[b])) << significance;
+                                    }
                                 }
-                                else {
-                                    sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(channel_sample[b])) << significance;
-                                }
+
+                                // Do it
+                                sample_data = sample / static_cast<float>(sample > 0 ? (divide_by - 1) : (divide_by));
                             }
-
-                            // Do it
-                            sample_data = sample / static_cast<float>(sample > 0 ? (divide_by - 1) : (divide_by));
+                        }
+                        ret = vorbis_analysis_wrote(&vd, sample_count_to_encode);
+                        if(ret) {
+                            eprintf_error("Failed to read samples");
+                            std::exit(EXIT_FAILURE);
                         }
                     }
-                    ret = vorbis_analysis_wrote(&vd, sample_count);
-                    if(ret) {
-                        eprintf_error("Failed to read samples");
-                        std::exit(EXIT_FAILURE);
-                    }
+                    vorbis_analysis_wrote(&vd, 0);
 
                     // Encode the blocks
                     int eos = 0;
+                    output_samples.reserve(sample_count * 4);
                     while(vorbis_analysis_blockout(&vd, &vb) == 1) {
                         vorbis_analysis(&vb, nullptr);
                         vorbis_bitrate_addblock(&vb);
@@ -521,7 +533,9 @@ int main(int argc, const char **argv) {
                                 }
 
                                 // End
-                                eos = ogg_page_eos(&og);
+                                if(ogg_page_eos(&og)) {
+                                    eos = 1;
+                                }
                             }
                         }
                     }
@@ -533,6 +547,7 @@ int main(int argc, const char **argv) {
                     vorbis_comment_clear(&vc);
                     vorbis_info_clear(&vi);
 
+                    output_samples.shrink_to_fit();
                     p.samples = std::move(output_samples);
                     break;
                 }
