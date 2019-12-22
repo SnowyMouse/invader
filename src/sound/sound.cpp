@@ -90,100 +90,10 @@ int main(int argc, const char **argv) {
                 break;
 
             case 'c':
-                if(std::strcmp(arguments[0], "ambient-computers") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS;
+                try {
+                    sound_options.sound_class = SoundClass_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "ambient-machinery") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_AMBIENT_MACHINERY;
-                }
-                else if(std::strcmp(arguments[0], "ambient-nature") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_AMBIENT_NATURE;
-                }
-                else if(std::strcmp(arguments[0], "device-computers") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_DEVICE_COMPUTERS;
-                }
-                else if(std::strcmp(arguments[0], "device-door") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_DEVICE_DOOR;
-                }
-                else if(std::strcmp(arguments[0], "device-force-field") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD;
-                }
-                else if(std::strcmp(arguments[0], "device-machinery") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_DEVICE_MACHINERY;
-                }
-                else if(std::strcmp(arguments[0], "device-nature") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_DEVICE_NATURE;
-                }
-                else if(std::strcmp(arguments[0], "first-person-damage") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE;
-                }
-                else if(std::strcmp(arguments[0], "game-event") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_GAME_EVENT;
-                }
-                else if(std::strcmp(arguments[0], "music") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_MUSIC;
-                }
-                else if(std::strcmp(arguments[0], "object-impacts") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_OBJECT_IMPACTS;
-                }
-                else if(std::strcmp(arguments[0], "particle-impacts") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_PARTICLE_IMPACTS;
-                }
-                else if(std::strcmp(arguments[0], "projectile-impact") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_PROJECTILE_IMPACT;
-                }
-                else if(std::strcmp(arguments[0], "projectile-detonation") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_PROJECTILE_DETONATION;
-                }
-                else if(std::strcmp(arguments[0], "scripted-dialog-force-unspatialized") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED;
-                }
-                else if(std::strcmp(arguments[0], "scripted-dialog-other") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER;
-                }
-                else if(std::strcmp(arguments[0], "scripted-dialog-player") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER;
-                }
-                else if(std::strcmp(arguments[0], "scripted-effect") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_SCRIPTED_EFFECT;
-                }
-                else if(std::strcmp(arguments[0], "slow-particle-impacts") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS;
-                }
-                else if(std::strcmp(arguments[0], "unit-dialog") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_UNIT_DIALOG;
-                }
-                else if(std::strcmp(arguments[0], "unit-footsteps") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS;
-                }
-                else if(std::strcmp(arguments[0], "vehicle-collision") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_VEHICLE_COLLISION;
-                }
-                else if(std::strcmp(arguments[0], "vehicle-engine") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_VEHICLE_ENGINE;
-                }
-                else if(std::strcmp(arguments[0], "weapon-charge") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_CHARGE;
-                }
-                else if(std::strcmp(arguments[0], "weapon-empty") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_EMPTY;
-                }
-                else if(std::strcmp(arguments[0], "weapon-fire") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_FIRE;
-                }
-                else if(std::strcmp(arguments[0], "weapon-idle") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_IDLE;
-                }
-                else if(std::strcmp(arguments[0], "weapon-overheat") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_OVERHEAT;
-                }
-                else if(std::strcmp(arguments[0], "weapon-ready") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_READY;
-                }
-                else if(std::strcmp(arguments[0], "weapon-reload") == 0) {
-                    sound_options.sound_class = SoundClass::SOUND_CLASS_WEAPON_RELOAD;
-                }
-                else {
+                catch(std::exception &) {
                     eprintf_error("Unknown sound class %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
@@ -244,11 +154,15 @@ int main(int argc, const char **argv) {
         sound_tag.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
         sound_tag.flags.split_long_sound_into_permutations = 0;
 
-        if(!sound_options.format.has_value()) {
+        if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
             return EXIT_FAILURE;
         }
+        sound_tag.sound_class = *sound_options.sound_class;
     }
+
+    // Hold onto this
+    auto sound_class = sound_tag.sound_class;
 
     // If a format is defined, use it
     if(sound_options.format.has_value()) {
@@ -515,7 +429,7 @@ int main(int argc, const char **argv) {
             output_name = "Ogg Vorbis";
             break;
     }
-    oprintf("Output: %s, %s, %zu Hz%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "");
+    oprintf("Output: %s, %s, %zu Hz%s, %s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class));
     oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
         auto &permutation = permutations[i];
