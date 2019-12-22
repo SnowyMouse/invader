@@ -469,20 +469,24 @@ int main(int argc, const char **argv) {
 
                     // Analyze data
                     std::size_t sample_count = pcm.size() / sample_size;
-                    p.buffer_size = sample_count * sample_size_16_bit;
+                    p.buffer_size = static_cast<std::uint32_t>(sample_count * sample_size_16_bit);
                     std::size_t split_count = 1024;
-                    for(std::size_t s = 0; s < sample_count; s += split_count) {
-                        float **buffer = vorbis_analysis_buffer(&vd, split_count);
+                    std::size_t encoded_count = 0;
+                    auto *pcm_data = pcm.data();
+                    std::size_t s = 0;
+                    while(true) {
                         std::size_t sample_count_to_encode = (sample_count - s);
+                        float **buffer = vorbis_analysis_buffer(&vd, sample_count_to_encode);
 
                         if(sample_count_to_encode > split_count) {
                             sample_count_to_encode = split_count;
                         }
+                        encoded_count += sample_count_to_encode;
 
                         auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
 
                         for(std::size_t i = 0; i < sample_count_to_encode; i++) {
-                            auto *sample = pcm.data() + (s + i) * sample_size;
+                            auto *sample = pcm_data + (s + i) * sample_size;
                             for(std::size_t c = 0; c < highest_channel_count; c++) {
                                 auto *channel_sample = sample + c * highest_bytes_per_sample;
                                 auto &sample_data = buffer[c][i];
@@ -535,6 +539,12 @@ int main(int argc, const char **argv) {
                                 }
                             }
                         }
+
+                        // Increment; break if we did 0
+                        if(sample_count_to_encode == 0) {
+                            break;
+                        }
+                        s += sample_count_to_encode;
                     }
 
                     // Clean up
