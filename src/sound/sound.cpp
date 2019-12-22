@@ -405,9 +405,10 @@ int main(int argc, const char **argv) {
         // Calculate length
         double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
         std::size_t sample_size = highest_bytes_per_sample * highest_channel_count;
+        std::size_t sample_size_16_bit = sizeof(std::int16_t) * highest_channel_count;
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &highest_channel_count, &highest_sample_rate, &highest_bytes_per_sample, &sample_size](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &highest_channel_count, &highest_sample_rate, &highest_bytes_per_sample, &sample_size, &sample_size_16_bit](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
                 // Basically, just make it big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
@@ -451,22 +452,22 @@ int main(int argc, const char **argv) {
                     vorbis_block_init(&vd, &vb);
 
                     // Ogg packet stuff
-                    ogg_packet header;
-                    ogg_packet header_comm;
-                    ogg_packet header_code;
+                    ogg_packet op;
+                    ogg_packet op_comm;
+                    ogg_packet op_code;
                     ogg_stream_state os;
                     ogg_stream_init(&os, 0);
-                    vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
-                    ogg_stream_packetin(&os, &header);
-                    ogg_stream_packetin(&os, &header_comm);
-                    ogg_stream_packetin(&os, &header_code);
+                    vorbis_analysis_headerout(&vd, &vc, &op, &op_comm, &op_code);
+                    ogg_stream_packetin(&os, &op);
+                    ogg_stream_packetin(&os, &op_comm);
+                    ogg_stream_packetin(&os, &op_code);
 
                     // Analyze data
                     std::size_t sample_count = pcm.size() / sample_size;
-                    p.buffer_size = sample_count * highest_channel_count * 2;
+                    p.buffer_size = sample_count * sample_size_16_bit;
                     float **buffer = vorbis_analysis_buffer(&vd, sample_count);
                     auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
-                    for(std::size_t i = 0; i < sample_count; i ++) {
+                    for(std::size_t i = 0; i < sample_count; i++) {
                         auto *sample = pcm.data() + i * sample_size;
                         for(std::size_t c = 0; c < highest_channel_count; c++) {
                             auto *channel_sample = sample + c * highest_bytes_per_sample;
@@ -489,32 +490,33 @@ int main(int argc, const char **argv) {
                             sample_data = sample / static_cast<float>(sample > 0 ? (divide_by - 1) : (divide_by));
                         }
                     }
-                    vorbis_analysis_wrote(&vd, sample_count);
+                    ret = vorbis_analysis_wrote(&vd, sample_count);
+                    if(ret) {
+                        eprintf_error("Failed to read samples");
+                        std::exit(EXIT_FAILURE);
+                    }
 
-                    // Encode the block
+                    // Encode the blocks
+                    int eos = 0;
                     while(vorbis_analysis_blockout(&vd, &vb) == 1) {
                         vorbis_analysis(&vb, nullptr);
                         vorbis_bitrate_addblock(&vb);
-                        int eos = 0;
                         ogg_packet op;
                         while(vorbis_bitrate_flushpacket(&vd, &op)) {
                             ogg_stream_packetin(&os, &op);
                             while(!eos) {
-                                // Do it
+                                // Write data
                                 ogg_page og;
-                                int result = ogg_stream_pageout(&os, &og);
-                                if(result == 0) {
+                                if(ogg_stream_pageout(&os, &og)) {
+                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
+                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
+                                }
+                                else {
                                     break;
                                 }
 
-                                // Write data
-                                output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
-                                output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
-
                                 // End
-                                if(ogg_page_eos(&og)) {
-                                    eos = 1;
-                                }
+                                eos = ogg_page_eos(&og);
                             }
                         }
                     }
