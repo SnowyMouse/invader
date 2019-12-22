@@ -4,8 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 9:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 10:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -13,9 +13,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[7].lower() == "on" else False
+extract_hidden = True if sys.argv[8].lower() == "on" else False
 
-for i in range(8, len(sys.argv)):
+for i in range(9, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -97,6 +97,12 @@ with open(sys.argv[1], "w") as f:
     f.write("#include \"../../hek/data_type.hpp\"\n\n")
     f.write("namespace Invader::HEK {\n")
 
+    ecpp = open(sys.argv[7], "w")
+    ecpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+    ecpp.write("#include <cstring>\n")
+    ecpp.write("#include <invader/tag/hek/definition.hpp>\n\n")
+    ecpp.write("namespace Invader::HEK {\n")
+
     # Write enums at the top first, then bitfields
     for e in all_enums:
         f.write("    enum {} : TagEnum {{\n".format(e["name"]))
@@ -109,16 +115,57 @@ with open(sys.argv[1], "w") as f:
                 prefix += "_"
             prefix += i.upper()
 
+        def format_enum(value):
+            return "{}_{}".format(prefix,value.upper())
+
+        def format_enum_str(value):
+            return value.replace("_", "-")
+
         for n in range(0,len(e["options"])):
-            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper(), "," if n + 1 < len(e["options"]) else ""))
+            f.write("        {}{}\n".format(format_enum(e["options"][n]), "," if n + 1 < len(e["options"]) else ""))
 
         f.write("    };\n")
+
+        f.write("    /**\n")
+        f.write("     * Get the string representation of the enum.\n")
+        f.write("     * @param value value of the enum\n")
+        f.write("     * @return      string representation of the enum\n")
+        f.write("     */\n")
+        f.write("    const char *{}_to_string({} value);\n".format(e["name"], e["name"]))
+        ecpp.write("    const char *{}_to_string({} value) {{\n".format(e["name"], e["name"]))
+        ecpp.write("        switch(value) {\n")
+        for n in e["options"]:
+            ecpp.write("        case {}::{}:\n".format(e["name"], format_enum(n)))
+            ecpp.write("            return \"{}\";\n".format(format_enum_str(n)))
+        ecpp.write("        default:\n")
+        ecpp.write("            throw std::exception();\n")
+        ecpp.write("        }\n")
+        ecpp.write("    }\n")
+
+        f.write("    /**\n")
+        f.write("     * Get the enum value from the string.\n")
+        f.write("     * @param value value of the enum as a string\n")
+        f.write("     * @return      value of the enum\n")
+        f.write("     */\n")
+        f.write("    {} {}_from_string(const char *value);\n".format(e["name"], e["name"]))
+        ecpp.write("    {} {}_from_string(const char *value) {{\n".format(e["name"], e["name"]))
+        for n in range(0,len(e["options"])):
+            ecpp.write("        {}if(std::strcmp(value, \"{}\")) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
+            ecpp.write("             return {}::{};\n".format(e["name"], format_enum(e["options"][n])))
+            ecpp.write("        }\n")
+        ecpp.write("        else {\n")
+        ecpp.write("            throw std::exception();\n")
+        ecpp.write("        }\n")
+        ecpp.write("    }\n")
 
     for b in all_bitfields:
         f.write("    struct {} {{\n".format(b["name"]))
         for q in b["fields"]:
             f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
         f.write("    };\n")
+
+    ecpp.write("}\n")
+    ecpp.close()
 
     # Now the hard part
     padding_present = False

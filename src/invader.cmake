@@ -8,6 +8,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -136,8 +137,8 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Have invader-extract extract hidden values
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
