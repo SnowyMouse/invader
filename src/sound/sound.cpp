@@ -509,32 +509,29 @@ int main(int argc, const char **argv) {
                             eprintf_error("Failed to read samples");
                             std::exit(EXIT_FAILURE);
                         }
-                    }
-                    vorbis_analysis_wrote(&vd, 0);
 
-                    // Encode the blocks
-                    int eos = 0;
-                    output_samples.reserve(sample_count * 4);
-                    while(vorbis_analysis_blockout(&vd, &vb) == 1) {
-                        vorbis_analysis(&vb, nullptr);
-                        vorbis_bitrate_addblock(&vb);
-                        ogg_packet op;
-                        while(vorbis_bitrate_flushpacket(&vd, &op)) {
-                            ogg_stream_packetin(&os, &op);
-                            while(!eos) {
-                                // Write data
-                                ogg_page og;
-                                if(ogg_stream_pageout(&os, &og)) {
-                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
-                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
-                                }
-                                else {
-                                    break;
-                                }
+                        // Encode the blocks
+                        int eos = 0;
+                        while(vorbis_analysis_blockout(&vd, &vb) == 1) {
+                            vorbis_analysis(&vb, nullptr);
+                            vorbis_bitrate_addblock(&vb);
+                            while(vorbis_bitrate_flushpacket(&vd, &op)) {
+                                ogg_stream_packetin(&os, &op);
+                                while(!eos) {
+                                    // Write data
+                                    ogg_page og;
+                                    if(ogg_stream_pageout(&os, &og)) {
+                                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
+                                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
+                                    }
+                                    else {
+                                        break;
+                                    }
 
-                                // End
-                                if(ogg_page_eos(&og)) {
-                                    eos = 1;
+                                    // End
+                                    if(ogg_page_eos(&og)) {
+                                        eos = 1;
+                                    }
                                 }
                             }
                         }
