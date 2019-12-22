@@ -150,7 +150,7 @@ with open(sys.argv[1], "w") as f:
         f.write("    {} {}_from_string(const char *value);\n".format(e["name"], e["name"]))
         ecpp.write("    {} {}_from_string(const char *value) {{\n".format(e["name"], e["name"]))
         for n in range(0,len(e["options"])):
-            ecpp.write("        {}if(std::strcmp(value, \"{}\")) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
+            ecpp.write("        {}if(std::strcmp(value, \"{}\") == 0) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
             ecpp.write("             return {}::{};\n".format(e["name"], format_enum(e["options"][n])))
             ecpp.write("        }\n")
         ecpp.write("        else {\n")
