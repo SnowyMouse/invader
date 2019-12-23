@@ -123,7 +123,7 @@ namespace Invader {
         return result;
     }
 
-    static FLAC__StreamDecoderWriteStatus write_flac_data(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data) {
+    static FLAC__StreamDecoderWriteStatus write_flac_data(const FLAC__StreamDecoder *, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data) {
         auto &result = *reinterpret_cast<SoundReader::Sound *>(client_data);
         auto bytes = frame->header.bits_per_sample / 8;
         for(std::size_t i = 0; i < frame->header.blocksize; i++) {
@@ -137,7 +137,7 @@ namespace Invader {
         return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
     }
 
-    static void on_flac_metadata(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data) {
+    static void on_flac_metadata(const FLAC__StreamDecoder *, const FLAC__StreamMetadata *metadata, void *client_data) {
         if(metadata->type == FLAC__MetadataType::FLAC__METADATA_TYPE_STREAMINFO) {
             auto &result = *reinterpret_cast<SoundReader::Sound *>(client_data);
             auto &stream_info = metadata->data.stream_info;
@@ -148,20 +148,35 @@ namespace Invader {
             result.input_channel_count = stream_info.channels;
             result.input_sample_rate = stream_info.sample_rate;
         }
-    };
+    }
 
-    static void on_flac_error(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data) {
+    static void on_flac_error(const FLAC__StreamDecoder *, FLAC__StreamDecoderErrorStatus, void *client_data) {
         reinterpret_cast<SoundReader::Sound *>(client_data)->pcm.clear();
-    };
+    }
 
     SoundReader::Sound SoundReader::sound_from_flac(const char *path) {
         Sound result = {};
-        
+
         FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
-        std::vector<std::byte> data;
-        FLAC__stream_decoder_init_file(decoder, path, write_flac_data, on_flac_metadata, on_flac_error, &result);
-        FLAC__stream_decoder_process_until_end_of_stream(decoder);
-        FLAC__stream_decoder_delete(decoder);
+        try {
+            if(FLAC__stream_decoder_init_file(decoder, path, write_flac_data, on_flac_metadata, on_flac_error, &result) != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+                eprintf_error("Failed to init FLAC stream");
+                throw InvalidInputSoundException();
+            }
+            if(!FLAC__stream_decoder_process_until_end_of_stream(decoder)) {
+                eprintf_error("Failed to init FLAC stream");
+                throw InvalidInputSoundException();
+            }
+            if(result.pcm.size() == 0) {
+                eprintf_error("Invalid or empty PCM stream from FLAC");
+                throw InvalidInputSoundException();
+            }
+            FLAC__stream_decoder_delete(decoder);
+        }
+        catch(std::exception &) {
+            FLAC__stream_decoder_delete(decoder);
+            throw;
+        }
 
         return result;
     }
