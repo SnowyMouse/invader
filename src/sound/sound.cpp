@@ -479,11 +479,9 @@ int main(int argc, const char **argv) {
         std::size_t sample_size_16_bit = sizeof(std::int16_t) * highest_channel_count;
         std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
         std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
-        std::size_t total_sample_count = permutation.pcm.size() / bytes_per_sample_one_channel;
-        std::size_t effective_sample_count = total_sample_count / permutation.channel_count;
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &sample_size_16_bit, &bytes_per_sample_one_channel, &total_sample_count, &effective_sample_count](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &sample_size_16_bit, &bytes_per_sample_one_channel](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
                 // Basically, just make it big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
@@ -507,7 +505,9 @@ int main(int argc, const char **argv) {
                 case SoundFormat::SOUND_FORMAT_OGG: {
                     // Begin
                     std::vector<std::byte> output_samples;
-                    std::vector<float> float_samples = int_to_float(pcm.data(), total_sample_count, bytes_per_sample_one_channel);
+                    std::size_t split_sample_count = pcm.size() / bytes_per_sample_one_channel;
+                    std::size_t split_effective_sample_count = split_sample_count / permutation.channel_count;
+                    std::vector<float> float_samples = int_to_float(pcm.data(), split_sample_count, bytes_per_sample_one_channel);
 
                     vorbis_info vi;
                     vorbis_info_init(&vi);
@@ -547,7 +547,7 @@ int main(int argc, const char **argv) {
                     }
 
                     // Analyze data
-                    p.buffer_size = static_cast<std::uint32_t>(effective_sample_count * sample_size_16_bit);
+                    p.buffer_size = static_cast<std::uint32_t>(split_effective_sample_count * sample_size_16_bit);
                     static constexpr std::size_t SPLIT_COUNT = 1024;
                     std::size_t encoded_count = 0;
 
@@ -556,7 +556,7 @@ int main(int argc, const char **argv) {
                     std::size_t samples_read = 0;
                     while(!eos) {
                         // Subtract the sample count minus the number of samples read (we can and will get 0 here, too - this is intentional)
-                        std::size_t sample_count_to_encode = (effective_sample_count - samples_read);
+                        std::size_t sample_count_to_encode = (split_effective_sample_count - samples_read);
                         float **buffer = vorbis_analysis_buffer(&vd, sample_count_to_encode);
 
                         // Make sure we don't read more than SPLIT_COUNT, since libvorbis can segfault if we read too much at once.
