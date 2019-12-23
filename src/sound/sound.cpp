@@ -418,6 +418,8 @@ int main(int argc, const char **argv) {
     }
 
     // Resample permutations when needed
+    oprintf("Loading sounds... ");
+    oflush();
     for(auto &permutation : permutations) {
         std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
         std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
@@ -480,6 +482,7 @@ int main(int argc, const char **argv) {
             permutation.channel_count = 2;
         }
     }
+    oprintf("done!\n");
 
     // Add a new permutation
     auto new_permutation = [&pitch_range, &format](SoundReader::Sound &permutation) -> Parser::SoundPermutation & {
