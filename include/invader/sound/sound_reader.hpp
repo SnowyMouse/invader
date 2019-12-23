@@ -39,11 +39,17 @@ namespace Invader {
 
         /**
          * Get the sound from a WAV file
-         * @param  data        pointer to the data
-         * @param  data_length length of the data
-         * @return             sound
+         * @param  path path to the file
+         * @return      sound
          */
-        static Sound sound_from_wav(const std::byte *data, std::size_t data_length);
+        static Sound sound_from_wav(const char *file);
+
+        /**
+         * Get the sound from a FLAC file
+         * @param  path path to the file
+         * @return      sound
+         */
+        static Sound sound_from_flac(const char *file);
 
     private:
         SoundReader() = default;

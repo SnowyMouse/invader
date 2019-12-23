@@ -302,23 +302,13 @@ int main(int argc, const char **argv) {
         }
         auto extension = path.extension().string();
 
-        // Open the file
-        auto file = Invader::File::open_file(path_str.data());
-        if(!file.has_value()) {
-            eprintf_error("Unable to open %s", path_str.data());
-            return EXIT_FAILURE;
-        }
-        auto &file_data = *file;
-
         // Get the sound
         auto &sound = permutations.emplace_back();
         if(extension == ".wav") {
-            sound = SoundReader::sound_from_wav(file_data.data(), file_data.size());
+            sound = SoundReader::sound_from_wav(path_str.data());
         }
         else if(extension == ".flac") {
-            eprintf_error("Unexpected FLAC file %s", path_str.data());
-            eprintf_warn("FLAC files are not implemented");
-            return EXIT_FAILURE;
+            sound = SoundReader::sound_from_flac(path_str.data());
         }
         else {
             eprintf_error("Unknown file format for %s", path_str.data());
