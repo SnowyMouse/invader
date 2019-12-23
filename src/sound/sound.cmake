@@ -8,7 +8,7 @@ if(${INVADER_RESOURCE})
     add_executable(invader-sound
         src/sound/sound.cpp
     )
-    target_link_libraries(invader-sound invader ogg vorbis vorbisenc)
+    target_link_libraries(invader-sound invader ogg vorbis vorbisenc samplerate)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-sound)
 endif()

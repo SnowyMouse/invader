@@ -8,6 +8,7 @@
 #include <invader/sound/sound_reader.hpp>
 #include <invader/version.hpp>
 #include <vorbis/vorbisenc.h>
+#include <samplerate.h>
 
 static std::vector<float> int_to_float(const std::byte *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
     std::vector<float> samples;
@@ -77,12 +78,12 @@ static std::vector<std::byte> int_to_int(const std::byte *pcm, std::size_t sampl
     return samples;
 }
 
-/*static std::vector<std::byte> float_to_int(const float *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
+static std::vector<std::byte> float_to_int(const float *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
     std::vector<std::byte> samples;
     samples.reserve(sample_count * bytes_per_sample);
 
     // Calculate what we multiply by
-    std::int64_t multiply_by = std::pow(256, bytes_per_sample);
+    std::int64_t multiply_by = std::pow(256, bytes_per_sample) / 2.0;
     std::int64_t multiply_by_minus_one = multiply_by - 1;
     std::int64_t multiply_by_arr[2] = { multiply_by_minus_one, multiply_by };
 
@@ -94,7 +95,7 @@ static std::vector<std::byte> int_to_int(const std::byte *pcm, std::size_t sampl
     }
 
     return samples;
-}*/
+}
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -404,6 +405,37 @@ int main(int argc, const char **argv) {
         std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
         std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
 
+        // Sample rate doesn't match; this can be fixed with resampling
+        if(permutation.sample_rate != highest_sample_rate) {
+            double ratio = static_cast<double>(highest_sample_rate) / permutation.sample_rate;
+            std::vector<float> float_samples = int_to_float(permutation.pcm.data(), sample_count, bytes_per_sample);
+            std::vector<float> new_samples(float_samples.size() * ratio);
+            permutation.sample_rate = highest_sample_rate;
+
+            // Resample it
+            SRC_DATA data = {};
+            data.data_in = float_samples.data();
+            data.data_out = new_samples.data();
+            data.input_frames = float_samples.size() / permutation.channel_count;
+            data.output_frames = new_samples.size() / permutation.channel_count;
+            data.src_ratio = ratio;
+            int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation.channel_count);
+            if(res) {
+                eprintf_error("Failed to resample: %s", src_strerror(res));
+                return EXIT_FAILURE;
+            }
+            new_samples.resize(data.output_frames_gen * permutation.channel_count);
+
+            // Set stuff
+            if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+                bytes_per_sample = sizeof(std::uint16_t);
+            }
+            permutation.input_sample_rate = highest_sample_rate;
+            permutation.bits_per_sample = bytes_per_sample * 8;
+            sample_count = new_samples.size();
+            permutation.pcm = float_to_int(new_samples.data(), sample_count, bytes_per_sample);
+        }
+
         // Bits per sample doesn't match; we can fix that though
         if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
@@ -429,13 +461,6 @@ int main(int argc, const char **argv) {
             permutation.pcm = std::move(new_samples);
             permutation.pcm.shrink_to_fit();
             permutation.channel_count = 2;
-        }
-
-        // Sample rate doesn't match; this can be fixed with interpolation
-        if(permutation.sample_rate != highest_sample_rate) {
-            eprintf_error("Sample rate (%u) does not match the selected sample rate (%u)", permutation.sample_rate, highest_sample_rate);
-            eprintf_warn("TODO: Interpolation");
-            return EXIT_FAILURE;
         }
     }
 
