@@ -111,6 +111,7 @@ int main(int argc, const char **argv) {
         bool fs_path = false;
         float vorbis_quality = 1.0F;
         std::optional<SoundClass> sound_class;
+        std::optional<std::uint32_t> sample_rate;
     } sound_options;
 
     std::vector<CommandLineOption> options;
@@ -121,6 +122,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
     options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis. Default (new tag): 16-bit-pcm");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.");
     options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload");
 
@@ -175,6 +177,14 @@ int main(int argc, const char **argv) {
 
             case 'P':
                 sound_options.fs_path = true;
+                break;
+
+            case 'r':
+                sound_options.sample_rate = static_cast<std::uint32_t>(std::atol(arguments[0]));
+                if(sound_options.sample_rate != 22050 && sound_options.sample_rate != 44100) {
+                    eprintf_error("Only 22050 Hz and 44100 Hz sample rates are allowed");
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'c':
@@ -371,11 +381,16 @@ int main(int argc, const char **argv) {
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     // Sound tags currently only support 22.05 kHz and 44.1 kHz
-    if(highest_sample_rate > 22050) {
-        highest_sample_rate = 44100;
+    if(!sound_options.sample_rate.has_value()) {
+        if(highest_sample_rate > 22050) {
+            highest_sample_rate = 44100;
+        }
+        else {
+            highest_sample_rate = 22050;
+        }
     }
     else {
-        highest_sample_rate = 22050;
+        highest_sample_rate = *sound_options.sample_rate;
     }
 
     // Set the tag data
