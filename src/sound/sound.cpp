@@ -563,7 +563,6 @@ int main(int argc, const char **argv) {
                         if(sample_count_to_encode > SPLIT_COUNT) {
                             sample_count_to_encode = SPLIT_COUNT;
                         }
-                        encoded_count += sample_count_to_encode;
 
                         // Load each sample
                         for(std::size_t i = 0; i < sample_count_to_encode; i++) {
@@ -604,6 +603,7 @@ int main(int argc, const char **argv) {
                         }
 
                         // Increment
+                        encoded_count += sample_count_to_encode;
                         samples_read += sample_count_to_encode;
                     }
 
