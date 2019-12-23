@@ -511,7 +511,6 @@ int main(int argc, const char **argv) {
             output_name = "Ogg Vorbis";
             break;
     }
-    oprintf("Output: %s, %s, %zu Hz%s, %s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class));
     oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
         auto &permutation = permutations[i];
@@ -716,7 +715,7 @@ int main(int argc, const char **argv) {
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
     sound_tag.pitch_ranges[0] = std::move(pitch_range);
     auto sound_tag_data = sound_tag.generate_hek_tag_data(TagClassInt::TAG_CLASS_SOUND, true);
-    oprintf("Total: %.03f MiB\n", sound_tag_data.size() / 1024.0 / 1024.0);
+    oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0);
 
     // Create missing directories if needed
     std::filesystem::create_directories(tag_path.parent_path());
