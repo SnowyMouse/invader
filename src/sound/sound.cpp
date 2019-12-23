@@ -447,7 +447,7 @@ int main(int argc, const char **argv) {
             if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
                 bytes_per_sample = sizeof(std::uint16_t);
             }
-            permutation.input_sample_rate = highest_sample_rate;
+            permutation.sample_rate = highest_sample_rate;
             permutation.bits_per_sample = bytes_per_sample * 8;
             sample_count = new_samples.size();
             permutation.pcm = float_to_int(new_samples.data(), sample_count, bytes_per_sample);
