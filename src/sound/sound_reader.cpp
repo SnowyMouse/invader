@@ -123,10 +123,46 @@ namespace Invader {
         return result;
     }
 
+    static FLAC__StreamDecoderWriteStatus write_flac_data(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data) {
+        auto &result = *reinterpret_cast<SoundReader::Sound *>(client_data);
+        auto bytes = frame->header.bits_per_sample / 8;
+        for(std::size_t i = 0; i < frame->header.blocksize; i++) {
+            for(std::size_t c = 0; c < frame->header.channels; c++) {
+                auto &s = buffer[c][i];
+                for(std::size_t b = 0; b < bytes; b++) {
+                    result.pcm.emplace_back(static_cast<std::byte>((s >> b * 8) & 0xFF));
+                }
+            }
+        }
+        return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
+    }
+
+    static void on_flac_metadata(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data) {
+        if(metadata->type == FLAC__MetadataType::FLAC__METADATA_TYPE_STREAMINFO) {
+            auto &result = *reinterpret_cast<SoundReader::Sound *>(client_data);
+            auto &stream_info = metadata->data.stream_info;
+            result.bits_per_sample = stream_info.bits_per_sample;
+            result.channel_count = stream_info.channels;
+            result.sample_rate = stream_info.sample_rate;
+            result.input_bits_per_sample = stream_info.bits_per_sample;
+            result.input_channel_count = stream_info.channels;
+            result.input_sample_rate = stream_info.sample_rate;
+        }
+    };
+
+    static void on_flac_error(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data) {
+        reinterpret_cast<SoundReader::Sound *>(client_data)->pcm.clear();
+    };
+
     SoundReader::Sound SoundReader::sound_from_flac(const char *path) {
         Sound result = {};
-        eprintf_error("Unimplemented");
-        std::exit(1);
+        
+        FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
+        std::vector<std::byte> data;
+        FLAC__stream_decoder_init_file(decoder, path, write_flac_data, on_flac_metadata, on_flac_error, &result);
+        FLAC__stream_decoder_process_until_end_of_stream(decoder);
+        FLAC__stream_decoder_delete(decoder);
+
         return result;
     }
 }
