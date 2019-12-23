@@ -371,12 +371,14 @@ int main(int argc, const char **argv) {
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     // Sound tags currently only support 22.05 kHz and 44.1 kHz
-    if(highest_sample_rate < 22050) {
-        highest_sample_rate = 22050;
-    }
-    else if(highest_sample_rate > 44100) {
+    if(highest_sample_rate > 22050) {
         highest_sample_rate = 44100;
     }
+    else {
+        highest_sample_rate = 22050;
+    }
+
+    // Set the tag data
     if(highest_sample_rate == 22050) {
         sound_tag.sample_rate = SoundSampleRate::SOUND_SAMPLE_RATE_22050_HZ;
     }
