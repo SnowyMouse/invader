@@ -9,6 +9,93 @@
 #include <invader/version.hpp>
 #include <vorbis/vorbisenc.h>
 
+static std::vector<float> int_to_float(const std::byte *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
+    std::vector<float> samples;
+    samples.reserve(sample_count);
+
+    // Calculate what we divide by
+    float divide_by = std::pow(256, bytes_per_sample) / 2.0F;
+    float divide_by_minus_one = divide_by - 1;
+    float divide_by_arr[2] = { divide_by_minus_one, divide_by };
+
+    for(std::size_t i = 0; i < sample_count; i++) {
+        std::int64_t sample = 0;
+
+        // Get the sample value
+        for(std::size_t b = 0; b < bytes_per_sample; b++) {
+            std::int64_t significance = 8 * b;
+            if(b + 1 == bytes_per_sample) {
+                sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(pcm[b])) << significance;
+            }
+            else {
+                sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(pcm[b])) << significance;
+            }
+        }
+
+        // Add it
+        samples.emplace_back(sample / divide_by_arr[sample < 0]);
+        pcm += bytes_per_sample;
+    }
+
+    return samples;
+}
+
+static std::vector<std::byte> int_to_int(const std::byte *pcm, std::size_t sample_count, std::size_t bytes_per_sample, std::size_t new_bytes_per_sample) {
+    std::vector<std::byte> samples;
+    samples.reserve(sample_count * new_bytes_per_sample);
+
+    // Calculate what we divide by
+    std::int64_t divide_by = std::pow(256, bytes_per_sample);
+
+    // Calculate what we multiply by
+    std::int64_t multiply_by = std::pow(256, new_bytes_per_sample);
+
+    for(std::size_t i = 0; i < sample_count; i++) {
+        std::int64_t sample = 0;
+
+        // Get the sample value
+        for(std::size_t b = 0; b < bytes_per_sample; b++) {
+            std::int64_t significance = 8 * b;
+            if(b + 1 == bytes_per_sample) {
+                sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(pcm[b])) << significance;
+            }
+            else {
+                sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(pcm[b])) << significance;
+            }
+        }
+
+        // Get the new sample value
+        std::int64_t new_sample = sample * multiply_by / divide_by;
+        for(std::size_t b = 0; b < new_bytes_per_sample; b++) {
+            samples.emplace_back(static_cast<std::byte>((new_sample >> b * 8) & 0xFF));
+        }
+
+        // Add it
+        pcm += bytes_per_sample;
+    }
+
+    return samples;
+}
+
+/*static std::vector<std::byte> float_to_int(const float *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
+    std::vector<std::byte> samples;
+    samples.reserve(sample_count * bytes_per_sample);
+
+    // Calculate what we multiply by
+    std::int64_t multiply_by = std::pow(256, bytes_per_sample);
+    std::int64_t multiply_by_minus_one = multiply_by - 1;
+    std::int64_t multiply_by_arr[2] = { multiply_by_minus_one, multiply_by };
+
+    for(std::size_t i = 0; i < sample_count; i++) {
+        std::int64_t sample = pcm[i] * multiply_by_arr[pcm[i] < 0];
+        for(std::size_t b = 0; b < bytes_per_sample; b++) {
+            samples.emplace_back(static_cast<std::byte>((sample >> b * 8) & 0xFF));
+        }
+    }
+
+    return samples;
+}*/
+
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
@@ -191,7 +278,6 @@ int main(int argc, const char **argv) {
 
     std::uint16_t highest_channel_count = 0;
     std::uint32_t highest_sample_rate = 0;
-    std::uint16_t highest_bits_per_sample = 0;
 
     std::vector<SoundReader::Sound> permutations;
 
@@ -234,9 +320,6 @@ int main(int argc, const char **argv) {
         }
         if(highest_sample_rate < sound.sample_rate) {
             highest_sample_rate = sound.sample_rate;
-        }
-        if(highest_bits_per_sample < sound.bits_per_sample) {
-            highest_bits_per_sample = sound.bits_per_sample;
         }
 
         // Make sure we can actually work with this
@@ -286,11 +369,6 @@ int main(int argc, const char **argv) {
     }
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
-    // If doing 16-bit PCM, set to 16-bit PCM regardless
-    if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-        highest_bits_per_sample = 16;
-    }
-
     // Sound tags currently only support 22.05 kHz and 44.1 kHz
     if(highest_sample_rate < 22050) {
         highest_sample_rate = 22050;
@@ -321,55 +399,17 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    std::size_t highest_bytes_per_sample = highest_bits_per_sample / 8;
-
     // Resample permutations when needed
     for(auto &permutation : permutations) {
         std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
         std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
 
         // Bits per sample doesn't match; we can fix that though
-        if(bytes_per_sample != highest_bytes_per_sample) {
-            // Allocate stuff
-            double divide_by = std::pow(256, bytes_per_sample);
-            std::size_t new_bytes_per_sample = highest_bytes_per_sample;
-            double multiply_by = std::pow(256, highest_bytes_per_sample);
-
-            std::vector<std::byte> new_samples(sample_count * new_bytes_per_sample);
-            const std::byte *old_sample = permutation.pcm.data();
-            const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
-            std::byte *new_sample = new_samples.data();
-
-            // Go through each sample
-            while(old_sample < old_sample_end) {
-                std::int64_t sample = 0;
-
-                // Get the sample value
-                for(std::size_t b = 0; b < bytes_per_sample; b++) {
-                    std::int64_t significance = 8 * b;
-                    if(b + 1 == bytes_per_sample) {
-                        sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(old_sample[b])) << significance;
-                    }
-                    else {
-                        sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(old_sample[b])) << significance;
-                    }
-                }
-
-                // Write the new sample value
-                std::int64_t new_sample_data = sample / divide_by * multiply_by;
-                for(std::size_t b = 0; b < new_bytes_per_sample; b++) {
-                    std::int64_t significance = 8 * b;
-                    new_sample[b] = static_cast<std::byte>(new_sample_data >> significance);
-                }
-
-                old_sample += bytes_per_sample;
-                new_sample += new_bytes_per_sample;
-            }
-
+        if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
+            permutation.pcm = int_to_int(permutation.pcm.data(), sample_count, bytes_per_sample, new_bytes_per_sample);
             bytes_per_sample = new_bytes_per_sample;
-
-            permutation.pcm = std::move(new_samples);
-            permutation.bits_per_sample = highest_bits_per_sample;
+            permutation.bits_per_sample = new_bytes_per_sample * 8;
         }
 
         // Channel count doesn't match; we can fix that though
@@ -436,11 +476,14 @@ int main(int argc, const char **argv) {
 
         // Calculate length
         double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
-        std::size_t sample_size = highest_bytes_per_sample * highest_channel_count;
         std::size_t sample_size_16_bit = sizeof(std::int16_t) * highest_channel_count;
+        std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
+        std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
+        std::size_t total_sample_count = permutation.pcm.size() / bytes_per_sample_one_channel;
+        std::size_t effective_sample_count = total_sample_count / permutation.channel_count;
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &highest_channel_count, &highest_sample_rate, &highest_bytes_per_sample, &sample_size, &sample_size_16_bit](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &sample_size_16_bit, &bytes_per_sample_one_channel, &total_sample_count, &effective_sample_count](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
                 // Basically, just make it big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
@@ -457,16 +500,18 @@ int main(int argc, const char **argv) {
                         break;
                     }
                     else {
-                        eprintf_error("Needs to be 16-bit PCM, first");
+                        eprintf_error("Needs to be 16-bit PCM, first. I think this is a bug.");
                         std::exit(EXIT_FAILURE);
                     }
                 // Encode to Vorbis in an Ogg container
                 case SoundFormat::SOUND_FORMAT_OGG: {
                     // Begin
                     std::vector<std::byte> output_samples;
+                    std::vector<float> float_samples = int_to_float(pcm.data(), total_sample_count, bytes_per_sample_one_channel);
+
                     vorbis_info vi;
                     vorbis_info_init(&vi);
-                    auto ret = vorbis_encode_init_vbr(&vi, highest_channel_count, highest_sample_rate, sound_options.vorbis_quality);
+                    auto ret = vorbis_encode_init_vbr(&vi, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
                     if(ret) {
                         eprintf_error("Failed to initialize vorbis encoder");
                         std::exit(EXIT_FAILURE);
@@ -487,6 +532,7 @@ int main(int argc, const char **argv) {
                     ogg_packet op;
                     ogg_packet op_comm;
                     ogg_packet op_code;
+                    ogg_page og;
                     ogg_stream_state os;
                     ogg_stream_init(&os, 0);
                     vorbis_analysis_headerout(&vd, &vc, &op, &op_comm, &op_code);
@@ -495,46 +541,33 @@ int main(int argc, const char **argv) {
                     ogg_stream_packetin(&os, &op_code);
 
                     // Analyze data
-                    std::size_t sample_count = pcm.size() / sample_size;
-                    p.buffer_size = static_cast<std::uint32_t>(sample_count * sample_size_16_bit);
-                    std::size_t split_count = 1024;
+                    p.buffer_size = static_cast<std::uint32_t>(effective_sample_count * sample_size_16_bit);
+                    static constexpr std::size_t SPLIT_COUNT = 1024;
                     std::size_t encoded_count = 0;
-                    auto *pcm_data = pcm.data();
-                    std::size_t s = 0;
-                    while(true) {
-                        std::size_t sample_count_to_encode = (sample_count - s);
+
+                    // Loop until we're done
+                    bool eos = false;
+                    std::size_t samples_read = 0;
+                    while(!eos) {
+                        // Subtract the sample count minus the number of samples read (we can and will get 0 here, too - this is intentional)
+                        std::size_t sample_count_to_encode = (effective_sample_count - samples_read);
                         float **buffer = vorbis_analysis_buffer(&vd, sample_count_to_encode);
 
-                        if(sample_count_to_encode > split_count) {
-                            sample_count_to_encode = split_count;
+                        // Make sure we don't read more than SPLIT_COUNT, since libvorbis can segfault if we read too much at once.
+                        if(sample_count_to_encode > SPLIT_COUNT) {
+                            sample_count_to_encode = SPLIT_COUNT;
                         }
                         encoded_count += sample_count_to_encode;
 
-                        auto divide_by = std::pow(256, highest_bytes_per_sample) / 2;
-
+                        // Load each sample
                         for(std::size_t i = 0; i < sample_count_to_encode; i++) {
-                            auto *sample = pcm_data + (s + i) * sample_size;
-                            for(std::size_t c = 0; c < highest_channel_count; c++) {
-                                auto *channel_sample = sample + c * highest_bytes_per_sample;
-                                auto &sample_data = buffer[c][i];
-                                sample_data = 0.0F;
-
-                                // Get the sample value
-                                std::int64_t sample = 0;
-                                for(std::size_t b = 0; b < highest_bytes_per_sample; b++) {
-                                    std::int64_t significance = 8 * b;
-                                    if(b + 1 == highest_bytes_per_sample) {
-                                        sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(channel_sample[b])) << significance;
-                                    }
-                                    else {
-                                        sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(channel_sample[b])) << significance;
-                                    }
-                                }
-
-                                // Do it
-                                sample_data = sample / static_cast<float>(sample > 0 ? (divide_by - 1) : (divide_by));
+                            auto *sample = float_samples.data() + (i + encoded_count) * permutation.channel_count;
+                            for(std::size_t c = 0; c < permutation.channel_count; c++) {
+                                buffer[c][i] = sample[c];
                             }
                         }
+
+                        // Set how many samples we wrote
                         ret = vorbis_analysis_wrote(&vd, sample_count_to_encode);
                         if(ret) {
                             eprintf_error("Failed to read samples");
@@ -542,36 +575,30 @@ int main(int argc, const char **argv) {
                         }
 
                         // Encode the blocks
-                        int eos = 0;
                         while(vorbis_analysis_blockout(&vd, &vb) == 1) {
                             vorbis_analysis(&vb, nullptr);
                             vorbis_bitrate_addblock(&vb);
                             while(vorbis_bitrate_flushpacket(&vd, &op)) {
                                 ogg_stream_packetin(&os, &op);
                                 while(!eos) {
-                                    // Write data
-                                    ogg_page og;
-                                    if(ogg_stream_pageout(&os, &og)) {
-                                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
-                                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
-                                    }
-                                    else {
+                                    // Write data if we have a page
+                                    if(!ogg_stream_pageout(&os, &og)) {
                                         break;
                                     }
 
-                                    // End
+                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
+                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
+
+                                    // End if we need to
                                     if(ogg_page_eos(&og)) {
-                                        eos = 1;
+                                        eos = true;
                                     }
                                 }
                             }
                         }
 
-                        // Increment; break if we did 0
-                        if(sample_count_to_encode == 0) {
-                            break;
-                        }
-                        s += sample_count_to_encode;
+                        // Increment
+                        samples_read += sample_count_to_encode;
                     }
 
                     // Clean up
@@ -593,7 +620,7 @@ int main(int argc, const char **argv) {
 
         // Split if requested
         if(split) {
-            const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % sample_size);
+            const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
             std::size_t digested = 0;
             while(permutation.pcm.size() > 0) {
                 // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
