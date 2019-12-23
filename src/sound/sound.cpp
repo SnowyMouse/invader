@@ -530,15 +530,21 @@ int main(int argc, const char **argv) {
 
                     // Ogg packet stuff
                     ogg_packet op;
-                    ogg_packet op_comm;
+                    ogg_packet op_comment;
                     ogg_packet op_code;
                     ogg_page og;
                     ogg_stream_state os;
                     ogg_stream_init(&os, 0);
-                    vorbis_analysis_headerout(&vd, &vc, &op, &op_comm, &op_code);
+                    vorbis_analysis_headerout(&vd, &vc, &op, &op_comment, &op_code);
                     ogg_stream_packetin(&os, &op);
-                    ogg_stream_packetin(&os, &op_comm);
+                    ogg_stream_packetin(&os, &op_comment);
                     ogg_stream_packetin(&os, &op_code);
+
+                    // Do stuff until we don't do stuff anymore since we need the data on a separate page
+                    while(ogg_stream_flush(&os, &og)) {
+                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
+                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
+                    }
 
                     // Analyze data
                     p.buffer_size = static_cast<std::uint32_t>(effective_sample_count * sample_size_16_bit);
