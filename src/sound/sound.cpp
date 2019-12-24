@@ -424,146 +424,22 @@ int main(int argc, const char **argv) {
 
         // Calculate length
         double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
-        std::size_t sample_size_16_bit = sizeof(std::int16_t) * highest_channel_count;
         std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
         std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &sample_size_16_bit, &bytes_per_sample_one_channel](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
             switch(format) {
-                // Basically, just make it big endian
+                // Basically, just make it 16-bit big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                    if(permutation.bits_per_sample == 16) {
-                        p.buffer_size = pcm.size();
-                        const auto *data = reinterpret_cast<const LittleEndian<std::uint16_t> *>(pcm.data());
-                        std::vector<std::byte> samples = std::vector<std::byte>(pcm.size());
-                        auto *new_data = reinterpret_cast<BigEndian<std::uint16_t> *>(samples.data());
-                        std::size_t sample_count = pcm.size() / sizeof(*data);
-                        for(std::size_t s = 0; s < sample_count; s++) {
-                            new_data[s] = data[s];
-                        }
-                        p.samples = samples;
-                        break;
-                    }
-                    else {
-                        eprintf_error("Needs to be 16-bit PCM, first. I think this is a bug.");
-                        std::exit(EXIT_FAILURE);
-                    }
+                    p.samples = Invader::SoundEncoder::convert_to_16_bit_pcm_big_endian(pcm, permutation.bits_per_sample);
+                    p.buffer_size = p.samples.size();
+                    break;
+
                 // Encode to Vorbis in an Ogg container
                 case SoundFormat::SOUND_FORMAT_OGG: {
-                    // Begin
-                    std::vector<std::byte> output_samples;
-                    std::size_t split_sample_count = pcm.size() / bytes_per_sample_one_channel;
-                    std::size_t split_effective_sample_count = split_sample_count / permutation.channel_count;
-                    std::vector<float> float_samples = SoundEncoder::convert_int_to_float(pcm, bytes_per_sample_one_channel * 8);
-
-                    vorbis_info vi;
-                    vorbis_info_init(&vi);
-                    auto ret = vorbis_encode_init_vbr(&vi, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
-                    if(ret) {
-                        eprintf_error("Failed to initialize vorbis encoder");
-                        std::exit(EXIT_FAILURE);
-                    }
-
-                    // Set the comment
-                    vorbis_comment vc;
-                    vorbis_comment_init(&vc);
-                    vorbis_comment_add_tag(&vc, "ENCODER", full_version());
-
-                    // Start making a vorbis block
-                    vorbis_dsp_state vd;
-                    vorbis_block vb;
-                    vorbis_analysis_init(&vd, &vi);
-                    vorbis_block_init(&vd, &vb);
-
-                    // Ogg packet stuff
-                    ogg_packet op;
-                    ogg_packet op_comment;
-                    ogg_packet op_code;
-                    ogg_page og;
-                    ogg_stream_state os;
-                    ogg_stream_init(&os, 0);
-                    vorbis_analysis_headerout(&vd, &vc, &op, &op_comment, &op_code);
-                    ogg_stream_packetin(&os, &op);
-                    ogg_stream_packetin(&os, &op_comment);
-                    ogg_stream_packetin(&os, &op_code);
-
-                    // Do stuff until we don't do stuff anymore since we need the data on a separate page
-                    while(ogg_stream_flush(&os, &og)) {
-                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
-                        output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
-                    }
-
-                    // Analyze data
-                    p.buffer_size = static_cast<std::uint32_t>(split_effective_sample_count * sample_size_16_bit);
-                    static constexpr std::size_t SPLIT_COUNT = 1024;
-                    std::size_t encoded_count = 0;
-
-                    // Loop until we're done
-                    bool eos = false;
-                    std::size_t samples_read = 0;
-                    while(!eos) {
-                        // Subtract the sample count minus the number of samples read (we can and will get 0 here, too - this is intentional)
-                        std::size_t sample_count_to_encode = (split_effective_sample_count - samples_read);
-                        float **buffer = vorbis_analysis_buffer(&vd, sample_count_to_encode);
-
-                        // Make sure we don't read more than SPLIT_COUNT, since libvorbis can segfault if we read too much at once.
-                        if(sample_count_to_encode > SPLIT_COUNT) {
-                            sample_count_to_encode = SPLIT_COUNT;
-                        }
-
-                        // Load each sample
-                        for(std::size_t i = 0; i < sample_count_to_encode; i++) {
-                            auto *sample = float_samples.data() + (i + encoded_count) * permutation.channel_count;
-                            for(std::size_t c = 0; c < permutation.channel_count; c++) {
-                                buffer[c][i] = sample[c];
-                            }
-                        }
-
-                        // Set how many samples we wrote
-                        ret = vorbis_analysis_wrote(&vd, sample_count_to_encode);
-                        if(ret) {
-                            eprintf_error("Failed to read samples");
-                            std::exit(EXIT_FAILURE);
-                        }
-
-                        // Encode the blocks
-                        while(vorbis_analysis_blockout(&vd, &vb) == 1) {
-                            vorbis_analysis(&vb, nullptr);
-                            vorbis_bitrate_addblock(&vb);
-                            while(vorbis_bitrate_flushpacket(&vd, &op)) {
-                                ogg_stream_packetin(&os, &op);
-                                while(!eos) {
-                                    // Write data if we have a page
-                                    if(!ogg_stream_pageout(&os, &og)) {
-                                        break;
-                                    }
-
-                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.header), reinterpret_cast<std::byte *>(og.header) + og.header_len);
-                                    output_samples.insert(output_samples.end(), reinterpret_cast<std::byte *>(og.body), reinterpret_cast<std::byte *>(og.body) + og.body_len);
-
-                                    // End if we need to
-                                    if(ogg_page_eos(&og)) {
-                                        eos = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        // Increment
-                        encoded_count += sample_count_to_encode;
-                        samples_read += sample_count_to_encode;
-                    }
-
-                    // Clean up
-                    ogg_stream_clear(&os);
-                    vorbis_block_clear(&vb);
-                    vorbis_dsp_clear(&vd);
-                    vorbis_comment_clear(&vc);
-                    vorbis_info_clear(&vi);
-
-                    output_samples.shrink_to_fit();
-                    p.samples = std::move(output_samples);
+                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
+                    p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
                 }
                 default:

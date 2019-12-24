@@ -14,8 +14,9 @@ namespace Invader::SoundEncoder {
      * @param bits_per_sample bits per sample of the PCM data
      * @param channel_count   channel count
      * @param sample_rate     sample rate
+     * @param vorbis_quality  vorbis quality
      */
-    std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate);
+    std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality);
 
     /**
      * Encode the PCM data to big endian PCM

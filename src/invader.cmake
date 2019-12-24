@@ -195,4 +195,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC)
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
