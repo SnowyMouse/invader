@@ -5,97 +5,11 @@
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/sound/sound_encoder.hpp>
 #include <invader/sound/sound_reader.hpp>
 #include <invader/version.hpp>
 #include <vorbis/vorbisenc.h>
 #include <samplerate.h>
-
-static std::vector<float> int_to_float(const std::byte *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
-    std::vector<float> samples;
-    samples.reserve(sample_count);
-
-    // Calculate what we divide by
-    float divide_by = std::pow(256, bytes_per_sample) / 2.0F;
-    float divide_by_minus_one = divide_by - 1;
-    float divide_by_arr[2] = { divide_by_minus_one, divide_by };
-
-    for(std::size_t i = 0; i < sample_count; i++) {
-        std::int64_t sample = 0;
-
-        // Get the sample value
-        for(std::size_t b = 0; b < bytes_per_sample; b++) {
-            std::int64_t significance = 8 * b;
-            if(b + 1 == bytes_per_sample) {
-                sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(pcm[b])) << significance;
-            }
-            else {
-                sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(pcm[b])) << significance;
-            }
-        }
-
-        // Add it
-        samples.emplace_back(sample / divide_by_arr[sample < 0]);
-        pcm += bytes_per_sample;
-    }
-
-    return samples;
-}
-
-static std::vector<std::byte> int_to_int(const std::byte *pcm, std::size_t sample_count, std::size_t bytes_per_sample, std::size_t new_bytes_per_sample) {
-    std::vector<std::byte> samples;
-    samples.reserve(sample_count * new_bytes_per_sample);
-
-    // Calculate what we divide by
-    std::int64_t divide_by = std::pow(256, bytes_per_sample);
-
-    // Calculate what we multiply by
-    std::int64_t multiply_by = std::pow(256, new_bytes_per_sample);
-
-    for(std::size_t i = 0; i < sample_count; i++) {
-        std::int64_t sample = 0;
-
-        // Get the sample value
-        for(std::size_t b = 0; b < bytes_per_sample; b++) {
-            std::int64_t significance = 8 * b;
-            if(b + 1 == bytes_per_sample) {
-                sample |= static_cast<std::int64_t>(static_cast<std::int8_t>(pcm[b])) << significance;
-            }
-            else {
-                sample |= static_cast<std::int64_t>(static_cast<std::uint8_t>(pcm[b])) << significance;
-            }
-        }
-
-        // Get the new sample value
-        std::int64_t new_sample = sample * multiply_by / divide_by;
-        for(std::size_t b = 0; b < new_bytes_per_sample; b++) {
-            samples.emplace_back(static_cast<std::byte>((new_sample >> b * 8) & 0xFF));
-        }
-
-        // Add it
-        pcm += bytes_per_sample;
-    }
-
-    return samples;
-}
-
-static std::vector<std::byte> float_to_int(const float *pcm, std::size_t sample_count, std::size_t bytes_per_sample) {
-    std::vector<std::byte> samples;
-    samples.reserve(sample_count * bytes_per_sample);
-
-    // Calculate what we multiply by
-    std::int64_t multiply_by = std::pow(256, bytes_per_sample) / 2.0;
-    std::int64_t multiply_by_minus_one = multiply_by - 1;
-    std::int64_t multiply_by_arr[2] = { multiply_by_minus_one, multiply_by };
-
-    for(std::size_t i = 0; i < sample_count; i++) {
-        std::int64_t sample = pcm[i] * multiply_by_arr[pcm[i] < 0];
-        for(std::size_t b = 0; b < bytes_per_sample; b++) {
-            samples.emplace_back(static_cast<std::byte>((sample >> b * 8) & 0xFF));
-        }
-    }
-
-    return samples;
-}
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -417,7 +331,7 @@ int main(int argc, const char **argv) {
         // Sample rate doesn't match; this can be fixed with resampling
         if(permutation.sample_rate != highest_sample_rate) {
             double ratio = static_cast<double>(highest_sample_rate) / permutation.sample_rate;
-            std::vector<float> float_samples = int_to_float(permutation.pcm.data(), sample_count, bytes_per_sample);
+            std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
             std::vector<float> new_samples(float_samples.size() * ratio);
             permutation.sample_rate = highest_sample_rate;
 
@@ -442,13 +356,13 @@ int main(int argc, const char **argv) {
             permutation.sample_rate = highest_sample_rate;
             permutation.bits_per_sample = bytes_per_sample * 8;
             sample_count = new_samples.size();
-            permutation.pcm = float_to_int(new_samples.data(), sample_count, bytes_per_sample);
+            permutation.pcm = SoundEncoder::convert_float_to_int(new_samples, permutation.bits_per_sample);
         }
 
         // Bits per sample doesn't match; we can fix that though
         if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
-            permutation.pcm = int_to_int(permutation.pcm.data(), sample_count, bytes_per_sample, new_bytes_per_sample);
+            permutation.pcm = SoundEncoder::convert_int_to_int(permutation.pcm, permutation.bits_per_sample, new_bytes_per_sample * 8);
             bytes_per_sample = new_bytes_per_sample;
             permutation.bits_per_sample = new_bytes_per_sample * 8;
         }
@@ -541,7 +455,7 @@ int main(int argc, const char **argv) {
                     std::vector<std::byte> output_samples;
                     std::size_t split_sample_count = pcm.size() / bytes_per_sample_one_channel;
                     std::size_t split_effective_sample_count = split_sample_count / permutation.channel_count;
-                    std::vector<float> float_samples = int_to_float(pcm.data(), split_sample_count, bytes_per_sample_one_channel);
+                    std::vector<float> float_samples = SoundEncoder::convert_int_to_float(pcm, bytes_per_sample_one_channel * 8);
 
                     vorbis_info vi;
                     vorbis_info_init(&vi);
