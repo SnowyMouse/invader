@@ -403,9 +403,17 @@ Options:
 This program generates sound tags. Sound tag data is stored in the data
 directory as a directory containing .wav and/or .flac files. Each file is one
 permutation, and only 16-bit and 24-bit PCM with either one or two channels are
-supported as input. Also, you cannot have two permutations with the same name
-(i.e. permutation.wav and permutation.flac). Also, unless you are modifying an
-existing sound tag, you will need to supply a sound class.
+supported as input.
+
+You cannot have two permutations with the same name (i.e. mypermutation.wav and
+mypermutation.flac). Also, unless you are modifying an existing sound tag, you
+will need to supply a sound class.
+
+You can, however, supply permutations with differing bit depths and sample
+rates and channel count. By default, the highest sample rate will be used for
+the entire tag, and if that is not 22050 Hz or 44100 Hz, then it will
+automatically be resampled.
+
 
 ```
 Usage: invader-sound [options] <sound-tag>
