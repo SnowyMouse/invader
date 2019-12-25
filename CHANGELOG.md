@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- New tool: invader-sound - Generates sound tags
 - Added colors for various diagnostic messages depending on the user's terminal
 - invader-info: Added `-T external-tags` which indicates the number of tags
   that use external resource maps, including indexed tags
