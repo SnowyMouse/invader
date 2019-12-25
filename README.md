@@ -436,6 +436,9 @@ Options:
                                vehicle-engine, weapon-charge, weapon-empty,
                                weapon-fire, weapon-idle, weapon-overheat,
                                weapon-ready, weapon-reload
+  -C --channel-count           Set the channel count. Can be: mono, stereo. By
+                               default, this is determined based on the input
+                               audio.
   -d --data <dir>              Use the specified data directory.
   -F --format                  Set the format. Can be: 16-bit-pcm, ogg-vorbis,
                                xbox-adpcm. Default (new tag): 16-bit-pcm
