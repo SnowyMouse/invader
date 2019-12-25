@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.21.1] - 2019-12-25
+### Added
+- invader-sound: Added `--channel-count` to allow you to specify the channel
+  count. If you specify mono, this will mix down all stereo to mono for you.
+- invader-sound: Added support for 32-bit float PCM audio
+
 ## [0.21.0] - 2019-12-25
 ### Added
 - New tool: invader-sound - Generates sound tags
