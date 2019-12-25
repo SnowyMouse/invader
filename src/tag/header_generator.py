@@ -100,8 +100,18 @@ with open(sys.argv[1], "w") as f:
     ecpp = open(sys.argv[7], "w")
     ecpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     ecpp.write("#include <cstring>\n")
+    ecpp.write("#include <cctype>\n")
     ecpp.write("#include <invader/tag/hek/definition.hpp>\n\n")
     ecpp.write("namespace Invader::HEK {\n")
+    ecpp.write("    static inline bool equal_string_case_insensitive(const char *a, const char *b) noexcept {\n")
+    ecpp.write("        while(std::tolower(*a) == std::tolower(*b)) {\n")
+    ecpp.write("            if(*a == 0) {\n")
+    ecpp.write("                return true;\n")
+    ecpp.write("            }\n")
+    ecpp.write("            a++; b++;\n")
+    ecpp.write("        }\n")
+    ecpp.write("        return false;\n")
+    ecpp.write("    }\n")
 
     # Write enums at the top first, then bitfields
     for e in all_enums:
@@ -150,7 +160,7 @@ with open(sys.argv[1], "w") as f:
         f.write("    {} {}_from_string(const char *value);\n".format(e["name"], e["name"]))
         ecpp.write("    {} {}_from_string(const char *value) {{\n".format(e["name"], e["name"]))
         for n in range(0,len(e["options"])):
-            ecpp.write("        {}if(std::strcmp(value, \"{}\") == 0) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
+            ecpp.write("        {}if(equal_string_case_insensitive(value, \"{}\")) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
             ecpp.write("             return {}::{};\n".format(e["name"], format_enum(e["options"][n])))
             ecpp.write("        }\n")
         ecpp.write("        else {\n")

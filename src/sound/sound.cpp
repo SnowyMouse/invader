@@ -66,16 +66,10 @@ int main(int argc, const char **argv) {
                 break;
 
             case 'F':
-                if(std::strcmp(arguments[0], "ogg-vorbis") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_OGG_VORBIS;
+                try {
+                    sound_options.format = SoundFormat_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "16-bit-pcm") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
-                }
-                else if(std::strcmp(arguments[0], "xbox-adpcm") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_XBOX_ADPCM;
-                }
-                else {
+                catch(std::exception &) {
                     eprintf_error("Unknown sound format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
@@ -367,7 +361,7 @@ int main(int argc, const char **argv) {
             permutation.bits_per_sample = new_bytes_per_sample * 8;
         }
 
-        // Channel count doesn't match; we can fix that though
+        // Mono -> Stereo (just duplicate the channels)
         if(permutation.channel_count == 1 && highest_channel_count == 2) {
             std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
             const std::byte *old_sample = permutation.pcm.data();

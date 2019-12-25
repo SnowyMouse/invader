@@ -54,6 +54,23 @@ namespace Invader::SoundEncoder {
      * @param new_bits_per_sample new bits per sample
      */
     std::vector<std::byte> convert_float_to_int(const std::vector<float> &pcm, std::size_t new_bits_per_sample);
+
+    /**
+     * Read the sample as an int
+     * @param  pcm             pointer to sample
+     * @param  bits_per_sample number of bits per sample
+     * @return                 sample
+     */
+    std::int32_t read_sample(const std::byte *pcm, std::size_t bits_per_sample) noexcept;
+
+    /**
+     * Write the sample in little endian
+     * @param  sample          sample to write
+     * @param  pcm             pointer to write to
+     * @param  bits_per_sample number of bits per sample
+     * @return                 sample
+     */
+    void write_sample(std::int32_t sample, std::byte *pcm, std::size_t bits_per_sample) noexcept;
 }
 
 #endif
