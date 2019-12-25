@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.21.0] - 2019-12-25
 ### Added
 - New tool: invader-sound - Generates sound tags
 - Added colors for various diagnostic messages depending on the user's terminal
