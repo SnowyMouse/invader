@@ -23,6 +23,8 @@ set(INVADER_SOURCE_FILES
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
     src/compress/compression.cpp
+    src/sound/sound_encoder.cpp
+    src/sound/sound_reader.cpp
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
@@ -193,4 +195,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES})
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)

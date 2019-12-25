@@ -93,6 +93,16 @@ namespace Invader {
     DEFINE_EXCEPTION(InvalidBitmapFormatException, "bitmap format is invalid");
 
     /**
+     * This is thrown when an invalid sound input is given when making a sound tag
+     */
+    DEFINE_EXCEPTION(InvalidInputSoundException, "input sound is invalid");
+
+    /**
+     * This is thrown when an error occurs when encoding sound
+     */
+    DEFINE_EXCEPTION(SoundEncodeFailureException, "sound failed to encode");
+
+    /**
      * This is thrown when a map needs decompressed, first
      */
     DEFINE_EXCEPTION(MapNeedsDecompressedException, "compressed map needs to be decompressed");

@@ -6,6 +6,7 @@
 #ifndef NO_OUTPUT
 
 #include <cstdlib>
+#include <cstring>
 
 // If NO_OUTPUT is not enabled, then we have eprintf and oprintf as a macro for, basically, printf
 #include <cstdio>
