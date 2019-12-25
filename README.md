@@ -400,7 +400,12 @@ Options:
 
 
 ### invader-sound
-This program generates sound tags.
+This program generates sound tags. Sound tag data is stored in the data
+directory as a directory containing .wav and/or .flac files. Each file is one
+permutation, and only 16-bit and 24-bit PCM with either one or two channels are
+supported as input. Also, you cannot have two permutations with the same name
+(i.e. permutation.wav and permutation.flac). Also, unless you are modifying an
+existing sound tag, you will need to supply a sound class.
 
 ```
 Usage: invader-sound [options] <sound-tag>
@@ -440,6 +445,46 @@ Options:
                                times to add more directories, ordered by
                                precedence.
 ```
+
+#### Splitting
+The Halo engine was written to primarily handle short-length sounds. It cannot
+handle extremely long audio sections due to memory and engine limitations, and
+this is regardless of the audio format being used since all audio is eventually
+handled as a 16-bit PCM stream.
+
+Stock tool.exe splits Ogg Vorbis audio into 910 KiB chunks and all other audio
+to 227.5 KiB chunks before compression, but we found that looping issues were
+more likely to occur with the higher chunk size. Therefore, all splitting is
+done on 227.5 KiB with invader-sound.
+
+For sounds that are more than 2.5 seconds long if 44100 Hz stereo, 5 seconds if
+22050 Hz stereo, or 10 seconds long if 22050 Hz mono, such as music or extended
+dialog, we recommend enabling splitting.
+
+#### Audio formats
+These are the different audio formats that invader-sound supports.
+
+Format           | Bitrate (44100 Hz stereo) | Type
+---------------- | ------------------------- | --------------------------------
+16-bit PCM       | 1411.2 kbps               | Lossless unless input is >16-bit
+Ogg Vorbis (1.0) | ~435.8 kbps (varies)      | Max quality, lossy
+Ogg Vorbis (0.5) | ~142.7 kbps (varies)      | "Transparent" quality, lossy
+Ogg Vorbis (0.3) | ~105.6 kbps (varies)      | Oggenc's default quality, lossy
+Xbox ADPCM       | ~390.8 kbps               | Lossy, fixed bitrate
+
+##### Which one should I use?
+The only lossless format available is 16-bit PCM. This will, however, result in
+a drastic increase in map size, so it is not recommended to use this with long
+sounds.
+
+Ogg Vorbis provides a good tradeoff in terms of bitrate and quality. Using 0.5
+is considered "transparent" provided you use a lossless audio input (if not,
+then you may need to use a higher quality value), and this also gives you lower
+bitrate and better quality than Xbox ADPCM.
+
+Xbox ADPCM does not compress as efficiently as Ogg Vorbis, but it decodes
+considerably faster, so this may be beneficial for firing effects. However, we
+instead recommend using uncompressed 16-bit PCM if possible.
 
 ## Frequently asked questions
 These are a selection of questions that have been asked over the course of
