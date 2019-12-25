@@ -1,3 +1,6 @@
+// NOTE: This was modified by MosesofEgypt to be an Xbox ADPCM encoder. It does
+// NOT do IMA ADPCM
+
 ////////////////////////////////////////////////////////////////////////////
 //                           **** ADPCM-XQ ****                           //
 //                  Xtreme Quality ADPCM Encoder/Decoder                  //
