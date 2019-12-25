@@ -427,13 +427,13 @@ int main(int argc, const char **argv) {
         std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
         std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
 
-        // Generate mouth data
+        // Generate mouth data (a lot of this comes from MosesofEgypt's Reclaimer)
         auto generate_mouth_data = [&permutation](Parser::SoundPermutation &p, const std::vector<std::uint8_t> &pcm_8_bit) {
             // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
             std::size_t samples_per_tick = static_cast<std::size_t>((permutation.sample_rate * permutation.channel_count) / TICK_RATE + 0.5);
             std::size_t sample_count = pcm_8_bit.size();
 
-            // Generate samples
+            // Generate samples, adding an extra tick for incomplete ticks
             std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
             p.mouth_data = std::vector<std::byte>(tick_count);
             auto *pcm_data = pcm_8_bit.data();
