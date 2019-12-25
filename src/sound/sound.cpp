@@ -242,7 +242,7 @@ int main(int argc, const char **argv) {
             eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.data());
             return EXIT_FAILURE;
         }
-        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 16 || sound.bits_per_sample > 64) {
+        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 32) {
             eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
             return EXIT_FAILURE;
         }
