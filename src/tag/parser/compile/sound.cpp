@@ -21,15 +21,15 @@ namespace Invader::Parser {
         }
 
         // Warn about this
-        bool buffer_size_required = (this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == HEK::SoundFormat::SOUND_FORMAT_OGG);
+        bool buffer_size_required = (this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM || this->format == HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS);
         if(buffer_size_required) {
             bool stock_halo_wont_play_it = false;
-            if(this->vorbis_sample_count == 0) {
+            if(this->buffer_size == 0) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", struct_index);
                 stock_halo_wont_play_it = true;
             }
             // Make sure the value is set
-            else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->vorbis_sample_count != this->samples.size()) {
+            else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", struct_index);
                 stock_halo_wont_play_it = true;
             }
@@ -38,7 +38,7 @@ namespace Invader::Parser {
             }
         }
         else {
-            this->vorbis_sample_count = 0;
+            this->buffer_size = 0;
         }
 
         // Add the two lone IDs and set the sample size

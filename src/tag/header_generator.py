@@ -4,9 +4,8 @@ import sys
 import json
 import os
 
-if len(sys.argv) < 10:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
-    sys.exit(1)
+if len(sys.argv) < 11:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
 
 files = []
 all_enums = []
@@ -15,7 +14,7 @@ all_structs = []
 
 extract_hidden = True if sys.argv[8].lower() == "on" else False
 
-for i in range(9, len(sys.argv)):
+for i in range(10, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -97,6 +96,12 @@ with open(sys.argv[1], "w") as f:
     f.write("#include \"../../hek/data_type.hpp\"\n\n")
     f.write("namespace Invader::HEK {\n")
 
+    ecpp = open(sys.argv[8], "w")
+    ecpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+    ecpp.write("#include <cstring>\n")
+    ecpp.write("#include <invader/tag/hek/definition.hpp>\n\n")
+    ecpp.write("namespace Invader::HEK {\n")
+
     # Write enums at the top first, then bitfields
     for e in all_enums:
         f.write("    enum {} : TagEnum {{\n".format(e["name"]))
@@ -109,16 +114,57 @@ with open(sys.argv[1], "w") as f:
                 prefix += "_"
             prefix += i.upper()
 
+        def format_enum(value):
+            return "{}_{}".format(prefix,value.upper())
+
+        def format_enum_str(value):
+            return value.replace("_", "-")
+
         for n in range(0,len(e["options"])):
-            f.write("        {}_{}{}\n".format(prefix,e["options"][n].upper(), "," if n + 1 < len(e["options"]) else ""))
+            f.write("        {}{}\n".format(format_enum(e["options"][n]), "," if n + 1 < len(e["options"]) else ""))
 
         f.write("    };\n")
+
+        f.write("    /**\n")
+        f.write("     * Get the string representation of the enum.\n")
+        f.write("     * @param value value of the enum\n")
+        f.write("     * @return      string representation of the enum\n")
+        f.write("     */\n")
+        f.write("    const char *{}_to_string({} value);\n".format(e["name"], e["name"]))
+        ecpp.write("    const char *{}_to_string({} value) {{\n".format(e["name"], e["name"]))
+        ecpp.write("        switch(value) {\n")
+        for n in e["options"]:
+            ecpp.write("        case {}::{}:\n".format(e["name"], format_enum(n)))
+            ecpp.write("            return \"{}\";\n".format(format_enum_str(n)))
+        ecpp.write("        default:\n")
+        ecpp.write("            throw std::exception();\n")
+        ecpp.write("        }\n")
+        ecpp.write("    }\n")
+
+        f.write("    /**\n")
+        f.write("     * Get the enum value from the string.\n")
+        f.write("     * @param value value of the enum as a string\n")
+        f.write("     * @return      value of the enum\n")
+        f.write("     */\n")
+        f.write("    {} {}_from_string(const char *value);\n".format(e["name"], e["name"]))
+        ecpp.write("    {} {}_from_string(const char *value) {{\n".format(e["name"], e["name"]))
+        for n in range(0,len(e["options"])):
+            ecpp.write("        {}if(std::strcmp(value, \"{}\") == 0) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
+            ecpp.write("             return {}::{};\n".format(e["name"], format_enum(e["options"][n])))
+            ecpp.write("        }\n")
+        ecpp.write("        else {\n")
+        ecpp.write("            throw std::exception();\n")
+        ecpp.write("        }\n")
+        ecpp.write("    }\n")
 
     for b in all_bitfields:
         f.write("    struct {} {{\n".format(b["name"]))
         for q in b["fields"]:
             f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
         f.write("    };\n")
+
+    ecpp.write("}\n")
+    ecpp.close()
 
     # Now the hard part
     padding_present = False
@@ -436,10 +482,11 @@ for s in all_structs_arranged:
     hpp.write("\n        /**\n")
     hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
     hpp.write("         * @param  generate_header_class generate a cache file header with the class, too\n")
+    hpp.write("         * @param  clear_on_save         clear data as it's being saved (reduces memory usage but you can't work on the tag anymore)\n")
     hpp.write("         * @return cache file data\n")
     hpp.write("         */\n")
-    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt);\n")
-    cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class) {{\n".format(struct_name))
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false);\n")
+    cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
     cpp_save_hek_data.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
     cpp_save_hek_data.write("        std::size_t tag_header_offset = 0;\n")
@@ -471,15 +518,21 @@ for s in all_structs_arranged:
                 cpp_save_hek_data.write("            const std::size_t FIRST_STRUCT_OFFSET = converted_data.size();\n")
                 cpp_save_hek_data.write("            converted_data.insert(converted_data.end(), total_size, std::byte());\n")
                 cpp_save_hek_data.write("            for(std::size_t i = 0; i < ref_{}_size; i++) {{\n".format(name))
-                cpp_save_hek_data.write("                const auto converted_struct = this->{}[i].generate_hek_tag_data();\n".format(name))
+                cpp_save_hek_data.write("                const auto converted_struct = this->{}[i].generate_hek_tag_data(std::nullopt, clear_on_save);\n".format(name))
                 cpp_save_hek_data.write("                const auto *struct_data = converted_struct.data();\n")
                 cpp_save_hek_data.write("                std::copy(struct_data, struct_data + STRUCT_SIZE, converted_data.data() + FIRST_STRUCT_OFFSET + STRUCT_SIZE * i);\n")
                 cpp_save_hek_data.write("                converted_data.insert(converted_data.end(), struct_data + STRUCT_SIZE, struct_data + converted_struct.size());\n")
+                cpp_save_hek_data.write("            }\n")
+                cpp_save_hek_data.write("            if(clear_on_save) {\n")
+                cpp_save_hek_data.write("                this->{} = std::vector<{}>();\n".format(name, struct["struct"]))
                 cpp_save_hek_data.write("            }\n")
                 cpp_save_hek_data.write("        }\n")
             elif struct["type"] == "TagDataOffset":
                 cpp_save_hek_data.write("        b.{}.size = static_cast<std::uint32_t>(this->{}.size());\n".format(name, name))
                 cpp_save_hek_data.write("        converted_data.insert(converted_data.end(), this->{}.begin(), this->{}.end());\n".format(name, name, name))
+                cpp_save_hek_data.write("        if(clear_on_save) {\n")
+                cpp_save_hek_data.write("            this->{} = std::vector<std::byte>();\n".format(name))
+                cpp_save_hek_data.write("        }\n")
             elif "bounds" in struct and struct["bounds"]:
                 cpp_save_hek_data.write("        b.{}.from = this->{}.from;\n".format(name, name))
                 cpp_save_hek_data.write("        b.{}.to = this->{}.to;\n".format(name, name))
@@ -489,7 +542,7 @@ for s in all_structs_arranged:
                 cpp_save_hek_data.write("        b.{} = this->{};\n".format(name, name))
         cpp_save_hek_data.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")
     cpp_save_hek_data.write("        if(generate_header_class.has_value()) {\n")
-    cpp_save_hek_data.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(0, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")
+    cpp_save_hek_data.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(clear_on_save ^ clear_on_save, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")
     cpp_save_hek_data.write("        }\n")
     cpp_save_hek_data.write("        return converted_data;\n")
     cpp_save_hek_data.write("    }\n")

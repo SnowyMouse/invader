@@ -34,9 +34,10 @@ namespace Invader {
         oprintf("Credits:\n");
         oprintf("  Kavawuvi                       - Lead Developer, Project owner\n");
         oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n");
+        oprintf("  MosesofEgypt                   - Tag data & model data research and code,\n");
+        oprintf("                                   mouth data generation, Xbox ADPCM code\n");
         oprintf("\n");
         oprintf("Special thanks:\n");
-        oprintf("  MosesofEgypt                   - Lots of help with tag data and model geometry\n");
         oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
         oprintf("\n");
         oprintf("Software used in this program:\n");
@@ -45,7 +46,7 @@ namespace Invader {
         oprintf("\n");
         oprintf("Other links:\n");
         oprintf("  Invader source code            - https://github.com/Kavawuvi/invader\n");
-        oprintf("  Mo's Editing Kit               - https://bitbucket.org/Moses_of_Egypt/mek/\n");
+        oprintf("  Mo's Editing Kit               - https://github.com/MosesofEgypt/mek/\n");
     }
 
     const char *full_version() {

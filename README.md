@@ -41,6 +41,8 @@ some of these dependencies may have their own dependencies.
 - Python 3.7 or newer
 - Zstandard 1.3 or newer
 - LibTIFF 3.6 or newer
+- libvorbis 1.3.6 or newer
+- libsamplerate 0.1.9 or newer
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
@@ -115,6 +117,7 @@ work with, this project is split into different programs.
 - [invader-indexer]
 - [invader-info]
 - [invader-resource]
+- [invader-sound]
 
 ### invader-archive
 This program generates a .tar.xz archive containing all of the tags used to
@@ -395,6 +398,49 @@ Options:
                                loc.
 ```
 
+
+### invader-sound
+This program generates sound tags.
+
+```
+Usage: invader-sound [options] <sound-tag>
+
+Create or modify a sound tag.
+
+Options:
+  -c --class                   Set the class. This is required when generating
+                               new sounds. Can be: ambient-computers,
+                               ambient-machinery, ambient-nature,
+                               device-computers, device-door,
+                               device-force-field, device-machinery,
+                               device-nature, first-person-damage, game-event,
+                               music, object-impacts, particle-impacts,
+                               projectile-impact, projectile-detonation,
+                               scripted-dialog-force-unspatialized,
+                               scripted-dialog-other, scripted-dialog-player,
+                               scripted-effect, slow-particle-impacts,
+                               unit-dialog, unit-footsteps, vehicle-collision,
+                               vehicle-engine, weapon-charge, weapon-empty,
+                               weapon-fire, weapon-idle, weapon-overheat,
+                               weapon-ready, weapon-reload
+  -d --data <dir>              Use the specified data directory.
+  -F --format                  Set the format. Can be: 16-bit-pcm, ogg-vorbis,
+                               xbox-adpcm. Default (new tag): 16-bit-pcm
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -P --fs-path                 Use a filesystem path for the data.
+  -q --vorbis-quality          Set the Vorbis quality. This can be between -0.1
+                               and 1.0. Default: 1.0
+  -r --sample-rate             Set the sample rate in Hz. Halo supports 22050
+                               and 44100. By default, this is determined based
+                               on the input audio.
+  -s --split                   Split permutations into 227.5 KiB chunks.
+  -S --no-split                Do not split permutations.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+```
+
 ## Frequently asked questions
 These are a selection of questions that have been asked over the course of
 Invader's development.
@@ -563,3 +609,4 @@ for multiplayer maps.
 [invader-indexer]: #invader-indexer
 [invader-info]: #invader-info
 [invader-resource]: #invader-resource
+[invader-sound]: #invader-sound
