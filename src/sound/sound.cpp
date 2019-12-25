@@ -67,7 +67,7 @@ int main(int argc, const char **argv) {
 
             case 'F':
                 if(std::strcmp(arguments[0], "ogg-vorbis") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_OGG;
+                    sound_options.format = SoundFormat::SOUND_FORMAT_OGG_VORBIS;
                 }
                 else if(std::strcmp(arguments[0], "16-bit-pcm") == 0) {
                     sound_options.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
@@ -414,7 +414,7 @@ int main(int argc, const char **argv) {
         case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
             output_name = "Xbox ADPCM";
             break;
-        case SoundFormat::SOUND_FORMAT_OGG:
+        case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
             break;
     }
@@ -437,7 +437,7 @@ int main(int argc, const char **argv) {
                     break;
 
                 // Encode to Vorbis in an Ogg container
-                case SoundFormat::SOUND_FORMAT_OGG: {
+                case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
                     p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
