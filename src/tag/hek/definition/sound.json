@@ -5,7 +5,7 @@
             "16-bit PCM",
             "Xbox ADPCM",
             "IMA ADPCM",
-            "Ogg"
+            "Ogg Vorbis"
         ],
         "type": "enum"
     },
