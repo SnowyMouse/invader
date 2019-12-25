@@ -19,6 +19,14 @@ namespace Invader::SoundEncoder {
     std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality);
 
     /**
+     * Encode the PCM data to Xbox ADPCM
+     * @param pcm             PCM data
+     * @param bits_per_sample bits per sample of the PCM data
+     * @param channel_count   number of channels
+     */
+    std::vector<std::byte> encode_to_xbox_adpcm(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::size_t channel_count);
+
+    /**
      * Encode the PCM data to big endian PCM
      * @param pcm             PCM data
      * @param bits_per_sample bits per sample of the PCM data

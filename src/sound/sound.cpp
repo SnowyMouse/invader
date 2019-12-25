@@ -34,7 +34,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis. Default (new tag): 16-bit-pcm");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm. Default (new tag): 16-bit-pcm");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.");
     options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
@@ -534,11 +534,17 @@ int main(int argc, const char **argv) {
                     break;
 
                 // Encode to Vorbis in an Ogg container
-                case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
+                case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                     p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
-                }
+
+                // Encode to Xbox ADPCMeme
+                case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                    p.samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation.bits_per_sample, permutation.channel_count);
+                    p.buffer_size = 0;
+                    break;
+
                 default:
                     eprintf_error("Unimplemented sound format");
                     std::exit(EXIT_FAILURE);

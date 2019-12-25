@@ -25,6 +25,7 @@ set(INVADER_SOURCE_FILES
     src/compress/compression.cpp
     src/sound/sound_encoder.cpp
     src/sound/sound_reader.cpp
+    src/sound/adpcm_xq/adpcm-lib.c
     src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
     src/tag/hek/class/actor.cpp
