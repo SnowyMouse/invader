@@ -427,8 +427,105 @@ int main(int argc, const char **argv) {
         std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
         std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
 
+        // Generate mouth data
+        auto generate_mouth_data = [&permutation](Parser::SoundPermutation &p, const std::vector<std::uint8_t> &pcm_8_bit) {
+            // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
+            std::size_t samples_per_tick = static_cast<std::size_t>((permutation.sample_rate * permutation.channel_count) / TICK_RATE + 0.5);
+            std::size_t sample_count = pcm_8_bit.size();
+
+            // Generate samples
+            std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
+            p.mouth_data = std::vector<std::byte>(tick_count);
+            auto *pcm_data = pcm_8_bit.data();
+
+            // Get max and total
+            std::uint8_t max = 0;
+            double mouth_total = 0;
+            for(std::size_t t = 0; t < tick_count; t++) {
+                // Get the sample range, accounting for when there aren't enough ticks
+                std::size_t first_sample = t * samples_per_tick;
+                std::size_t sample_count_to_check = sample_count - first_sample;
+                if(sample_count_to_check > samples_per_tick) {
+                    sample_count_to_check = samples_per_tick;
+                }
+                std::size_t last_sample = first_sample + sample_count_to_check;
+                double total = 0;
+                for(std::size_t s = first_sample; s < last_sample; s++) {
+                    total += pcm_data[s];
+                }
+
+                // Divide by samples per tick
+                double average = total / samples_per_tick;
+                mouth_total += average;
+                p.mouth_data[t] = static_cast<std::byte>(average);
+
+                if(average > max) {
+                    max = average;
+                }
+            }
+
+            // Get average and min, clamping min to 0-255
+            double average = mouth_total / tick_count;
+            double min = 2.0 * average - max;
+            if(min > UINT8_MAX) {
+                min = UINT8_MAX;
+            }
+            else if(min < 0) {
+                min = 0;
+            }
+
+            // Get range
+            double range = static_cast<double>(max + average) / 2 - min;
+
+            // Do nothing if there's no range
+            if(range == 0) {
+                return;
+            }
+
+            // Go through each sample
+            for(std::size_t t = 0; t < tick_count; t++) {
+                double sample = (static_cast<std::uint8_t>(p.mouth_data[t]) - min) / range;
+
+                // Clamp to 0 - 255
+                if(sample >= 1.0) {
+                    p.mouth_data[t] = static_cast<std::byte>(UINT8_MAX);
+                }
+                else if(sample <= 0.0) {
+                    p.mouth_data[t] = static_cast<std::byte>(0);
+                }
+                else {
+                    p.mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
+                }
+            }
+        };
+
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options](Parser::SoundPermutation &p, const std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &sound_class, &generate_mouth_data](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
+            // Generate mouth data if needed
+            switch(sound_class) {
+                case SoundClass::SOUND_CLASS_UNIT_DIALOG:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED: {
+                    // Convert samples to 8-bit unsigned so we can use it to generate mouth data
+                    auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
+                    std::vector<std::uint8_t> pcm_8_bit;
+                    pcm_8_bit.reserve(samples_float.size());
+                    for(auto &f : samples_float) {
+                        float ff = f;
+                        if(ff < 0.0F) {
+                            ff *= -1.0F;
+                        }
+                        pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
+                    }
+                    samples_float = {};
+
+                    generate_mouth_data(p, pcm_8_bit);
+                }
+                default:
+                    break;
+            }
+
             switch(format) {
                 // Basically, just make it 16-bit big endian
                 case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
