@@ -5,11 +5,14 @@
 
 namespace Invader::Parser {
     void WeaponHUDInterface::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        std::uint32_t crosshair_types = 0;
+        union {
+            std::uint32_t inty;
+            HEK::WeaponHUDInterfaceCrosshairTypeFlags flaggy;
+        } crosshair_types = {};
         for(auto &c : this->crosshairs) {
-            crosshair_types |= (1 << c.crosshair_type);
+            crosshair_types.inty |= (1 << c.crosshair_type);
         }
-        this->crosshair_types = *reinterpret_cast<HEK::WeaponHUDInterfaceCrosshairTypeFlags *>(crosshair_types);
+        this->crosshair_types = crosshair_types.flaggy;
 
         if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && this->crosshair_types.zoom == 0) {
             std::size_t zooms = 0;

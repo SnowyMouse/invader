@@ -548,7 +548,7 @@ namespace Invader {
         }
 
         // Open it
-        auto tag_file = Invader::File::open_file((*new_path).data());
+        auto tag_file = Invader::File::open_file(new_path->data());
         if(!tag_file.has_value()) {
             eprintf_error("Failed to open %s\n", formatted_path);
             throw FailedToOpenFileException();
