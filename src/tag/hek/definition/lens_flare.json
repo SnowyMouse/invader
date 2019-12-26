@@ -232,6 +232,7 @@
             {
                 "name": "rotation function scale",
                 "type": "Angle",
+                "comment": "Yes, the default is indeed 360 radians.",
                 "default": 360.0
             },
             {
