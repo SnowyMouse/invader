@@ -8,6 +8,7 @@ namespace Invader::HEK {
     void compile_device_light_fixture_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         BEGIN_COMPILE(DeviceLightFixture)
         COMPILE_DEVICE_DATA
+        tag.object_type = ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
         FINISH_COMPILE
     }
 }
