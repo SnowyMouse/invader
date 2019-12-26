@@ -72,7 +72,7 @@
                 "name": "open",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -81,7 +81,7 @@
                 "name": "close",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -90,7 +90,7 @@
                 "name": "opened",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -99,7 +99,7 @@
                 "name": "closed",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -108,7 +108,7 @@
                 "name": "depowered",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -117,7 +117,7 @@
                 "name": "repowered",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
@@ -134,7 +134,7 @@
                 "name": "delay effect",
                 "type": "TagDependency",
                 "classes": [
-                    ".sound",
+                    "sound",
                     "effect"
                 ],
                 "compound": true
