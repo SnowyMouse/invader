@@ -353,6 +353,11 @@ namespace Invader {
         }
 
         auto *header = reinterpret_cast<const HEK::TagFileHeader *>(tag_data);
+
+        if(!tag_class_int.has_value()) {
+            tag_class_int = header->tag_class_int;
+        }
+
         HEK::TagFileHeader::validate_header(header, tag_data_size, true, tag_class_int);
 
         switch(*tag_class_int) {
