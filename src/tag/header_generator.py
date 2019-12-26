@@ -737,6 +737,27 @@ for s in all_structs_arranged:
                 cpp_read_hek_data.write("        data_size -= h_{}_size;\n".format(name))
                 cpp_read_hek_data.write("        data_read += h_{}_size;\n".format(name))
                 cpp_read_hek_data.write("        data += h_{}_size;\n".format(name))
+            elif struct["type"] == "ColorRGB":
+                cpp_read_hek_data.write("        r.{} = h.{};\n".format(name, name))
+                if "default" in struct:
+                    default = struct["default"]
+                    suffix = "F" if isinstance(default[0], float) else ""
+                    cpp_read_hek_data.write("        if(r.{}.red == 0 && r.{}.green == 0 && r.{}.blue == 0) {{\n".format(name,name,name))
+                    cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[0], suffix))
+                    cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[1], suffix))
+                    cpp_read_hek_data.write("            r.{}.blue = {}{};\n".format(name, default[2], suffix))
+                    cpp_read_hek_data.write("        }\n")
+            elif struct["type"] == "ColorARGB" or struct["type"] == "ColorARGBInt":
+                cpp_read_hek_data.write("        r.{} = h.{};\n".format(name, name))
+                if "default" in struct:
+                    default = struct["default"]
+                    suffix = "F" if isinstance(default[0], float) else ""
+                    cpp_read_hek_data.write("        if(r.{}.alpha == 0 && r.{}.red == 0 && r.{}.green == 0 && r.{}.blue == 0) {{\n".format(name,name,name,name))
+                    cpp_read_hek_data.write("            r.{}.alpha = {}{};\n".format(name, default[0], suffix))
+                    cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[1], suffix))
+                    cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[2], suffix))
+                    cpp_read_hek_data.write("            r.{}.blue = {}{};\n".format(name, default[3], suffix))
+                    cpp_read_hek_data.write("        }\n")
             elif "bounds" in struct and struct["bounds"]:
                 cpp_read_hek_data.write("        r.{}.from = h.{}.from;\n".format(name, name))
                 cpp_read_hek_data.write("        r.{}.to = h.{}.to;\n".format(name, name))
