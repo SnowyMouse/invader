@@ -42,7 +42,7 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
-        bool optimize_space;
+        bool optimize_space = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
