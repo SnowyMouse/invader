@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.21.2] - 2019-12-26
+### Fixed
+- invader-build: Fixed an issue with some old device_light_fixture tags being
+  treated as device_control tags. This generally did not result in gameplay
+  issues, but it may have resulted in a prompt to "activate" it when the player
+  was close to the object.
+
 ## [0.21.1] - 2019-12-25
 ### Added
 - invader-sound: Added `--channel-count` to allow you to specify the channel
