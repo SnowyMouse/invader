@@ -4,6 +4,7 @@
 #include <invader/printf.hpp>
 #include <invader/error.hpp>
 #include <invader/sound/sound_reader.hpp>
+#include <invader/sound/sound_encoder.hpp>
 #include <FLAC/stream_decoder.h>
 
 namespace Invader::SoundReader {
@@ -74,8 +75,8 @@ namespace Invader::SoundReader {
                 eprintf_error("Fmt subchunk size is wrong");
                 throw InvalidInputSoundException();
             }
-            if(fmt_subchunk.audio_format != 1) {
-                eprintf_error("WAV data is not PCM");
+            if(fmt_subchunk.audio_format != 1 && fmt_subchunk.audio_format != 3) {
+                eprintf_error("WAV data type (%u) is not PCM", static_cast<unsigned int>(fmt_subchunk.audio_format));
                 throw InvalidInputSoundException();
             }
 
@@ -102,14 +103,38 @@ namespace Invader::SoundReader {
                 throw InvalidInputSoundException();
             }
 
-            // Get the data
-            WAVSubchunkHeader data_subchunk;
-            READ_OR_BAIL(data_subchunk);
+            // Search for the data subchunk
+            WAVSubchunkHeader subchunk = {};
+            while(true) {
+                READ_OR_BAIL(subchunk);
+                if(subchunk.subchunk_id == 0x64617461) {
+                    break;
+                }
+                else {
+                    std::fseek(file, static_cast<long>(subchunk.subchunk_size.read()), SEEK_CUR);
+                }
+            }
 
-            result.pcm = std::vector<std::byte>(data_subchunk.subchunk_size);
-            if(std::fread(result.pcm.data(), data_subchunk.subchunk_size, 1, file) != 1) {
-                eprintf_error("Failed to read data");
-                throw InvalidInputSoundException();
+            // Convert PCM to integer
+            std::size_t data_size = subchunk.subchunk_size;
+            if(fmt_subchunk.audio_format == 1) {
+                result.pcm = std::vector<std::byte>(data_size);
+                if(std::fread(result.pcm.data(), data_size, 1, file) != 1) {
+                    eprintf_error("Failed to read data");
+                    throw InvalidInputSoundException();
+                }
+            }
+            else if(fmt_subchunk.audio_format == 3) {
+                std::vector<float> pcm_float(data_size / sizeof(*pcm_float.data()));
+                if(std::fread(pcm_float.data(), data_size, 1, file) != 1) {
+                    eprintf_error("Failed to read data");
+                    throw InvalidInputSoundException();
+                }
+                result.bits_per_sample = 24;
+                result.pcm = SoundEncoder::convert_float_to_int(pcm_float, 24);
+            }
+            else {
+                std::terminate();
             }
         }
         catch(std::exception &) {

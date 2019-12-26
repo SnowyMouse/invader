@@ -1,3 +1,6 @@
+// NOTE: This was modified by MosesofEgypt to be an Xbox ADPCM encoder. It does
+// NOT do IMA ADPCM
+
 ////////////////////////////////////////////////////////////////////////////
 //                           **** ADPCM-XQ ****                           //
 //                  Xtreme Quality ADPCM Encoder/Decoder                  //
@@ -16,7 +19,7 @@
  * configuration is to store 505 samples into a 256 byte block, although other sizes are
  * permitted as long as the number of samples is one greater than a multiple of 8. When
  * multiple channels are present, they are interleaved in the data with an 8-sample
- * interval. 
+ * interval.
  */
 
 /********************************* 4-bit ADPCM encoder ********************************/

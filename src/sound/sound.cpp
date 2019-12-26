@@ -24,6 +24,7 @@ int main(int argc, const char **argv) {
         std::optional<SoundFormat> format;
         bool fs_path = false;
         float vorbis_quality = 1.0F;
+        std::optional<std::size_t> channel_count;
         std::optional<SoundClass> sound_class;
         std::optional<std::uint32_t> sample_rate;
     } sound_options;
@@ -36,6 +37,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
     options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm. Default (new tag): 16-bit-pcm");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.");
     options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload");
@@ -65,17 +67,21 @@ int main(int argc, const char **argv) {
                 sound_options.split = false;
                 break;
 
+            case 'C':
+                try {
+                    sound_options.channel_count = SoundChannelCount_from_string(arguments[0]) == SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1 : 2;
+                }
+                catch(std::exception &) {
+                    eprintf_error("Unknown channel count %s (should be \"mono\" or \"stereo\")", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
             case 'F':
-                if(std::strcmp(arguments[0], "ogg-vorbis") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_OGG_VORBIS;
+                try {
+                    sound_options.format = SoundFormat_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "16-bit-pcm") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
-                }
-                else if(std::strcmp(arguments[0], "xbox-adpcm") == 0) {
-                    sound_options.format = SoundFormat::SOUND_FORMAT_XBOX_ADPCM;
-                }
-                else {
+                catch(std::exception &) {
                     eprintf_error("Unknown sound format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
@@ -242,7 +248,7 @@ int main(int argc, const char **argv) {
             eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.data());
             return EXIT_FAILURE;
         }
-        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 16 || sound.bits_per_sample > 64) {
+        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
             eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
             return EXIT_FAILURE;
         }
@@ -268,6 +274,11 @@ int main(int argc, const char **argv) {
 
         // Make it small
         sound.pcm.shrink_to_fit();
+    }
+
+    // Force channel count
+    if(sound_options.channel_count.has_value()) {
+        highest_channel_count = *sound_options.channel_count;
     }
 
     // Make sure we have stuff
@@ -367,7 +378,7 @@ int main(int argc, const char **argv) {
             permutation.bits_per_sample = new_bytes_per_sample * 8;
         }
 
-        // Channel count doesn't match; we can fix that though
+        // Mono -> Stereo (just duplicate the channels)
         if(permutation.channel_count == 1 && highest_channel_count == 2) {
             std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
             const std::byte *old_sample = permutation.pcm.data();
@@ -384,6 +395,28 @@ int main(int argc, const char **argv) {
             permutation.pcm = std::move(new_samples);
             permutation.pcm.shrink_to_fit();
             permutation.channel_count = 2;
+        }
+
+        // Stereo -> Mono (mixdown)
+        else if(permutation.channel_count == 2 && highest_channel_count == 1) {
+            std::vector<std::byte> new_samples(sample_count * bytes_per_sample / 2);
+            std::byte *new_sample = new_samples.data();
+            const std::byte *old_sample = permutation.pcm.data();
+            const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
+
+            while(old_sample < old_sample_end) {
+                std::int32_t a = Invader::SoundEncoder::read_sample(old_sample, permutation.bits_per_sample);
+                std::int32_t b = Invader::SoundEncoder::read_sample(old_sample + bytes_per_sample, permutation.bits_per_sample);
+                std::int64_t ab = a + b;
+                Invader::SoundEncoder::write_sample(static_cast<std::int32_t>(ab / 2), new_sample, permutation.bits_per_sample);
+
+                old_sample += bytes_per_sample * 2;
+                new_sample += bytes_per_sample;
+            }
+
+            permutation.pcm = std::move(new_samples);
+            permutation.pcm.shrink_to_fit();
+            permutation.channel_count = 1;
         }
     }
     oprintf("done!\n");

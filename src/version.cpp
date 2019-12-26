@@ -35,7 +35,8 @@ namespace Invader {
         oprintf("  Kavawuvi                       - Lead Developer, Project owner\n");
         oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n");
         oprintf("  MosesofEgypt                   - Tag data & model data research and code,\n");
-        oprintf("                                   mouth data generation, Xbox ADPCM code\n");
+        oprintf("                                   mouth data generation, ADPCM-XQ Xbox ADPCM\n");
+        oprintf("                                   conversion\n");
         oprintf("\n");
         oprintf("Special thanks:\n");
         oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
