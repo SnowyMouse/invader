@@ -260,7 +260,6 @@
             }
         ],
         "type": "struct",
-        "post_cache_deformat": true,
         "size": 240
     }
 ]

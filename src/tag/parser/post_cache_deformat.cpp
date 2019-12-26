@@ -233,10 +233,6 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::LensFlare::post_cache_deformat() {
-        this->rotation_function_scale = DEGREES_TO_RADIANS(this->rotation_function_scale);
-    }
-
     template <typename A, typename B> static void swap_endian_array(A *to, const B *from, std::size_t count) {
         for(std::size_t i = 0; i < count; i++) {
             to[i] = from[i];
