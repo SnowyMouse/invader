@@ -105,8 +105,8 @@ make
 
 ## Programs
 To remove the reliance of one huge executable, something that has caused issues
-with Halo Custom Edition's tool.exe, as well as make things easier for me to
-work with, this project is split into different programs.
+with Halo Custom Edition's tool.exe, as well as make things easier to develop,
+this project is split into different programs.
 - [invader-archive]
 - [invader-bitmap]
     - [Uncompressed bitmap formats]
@@ -518,7 +518,7 @@ Ogg Vorbis (0.5) | ~142.7 kbps (varies)      | "Transparent" quality, lossy
 Ogg Vorbis (0.3) | ~105.6 kbps (varies)      | Oggenc's default quality, lossy
 Xbox ADPCM       | ~390.8 kbps               | Lossy, fixed bitrate
 
-##### Which audio format should I use?
+#### Which audio format should I use?
 The only lossless format available is 16-bit PCM. This will, however, result in
 a drastic increase in map size, so it is not recommended to use this with long
 sounds.
