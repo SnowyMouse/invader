@@ -109,6 +109,10 @@ with Halo Custom Edition's tool.exe, as well as make things easier for me to
 work with, this project is split into different programs.
 - [invader-archive]
 - [invader-bitmap]
+    - [Uncompressed bitmap formats]
+    - [Block-compressed bitmap formats]
+    - [More bitmap formats]
+    - [Which bitmap format should I use?]
 - [invader-build]
 - [invader-compress]
 - [invader-dependency]
@@ -118,6 +122,9 @@ work with, this project is split into different programs.
 - [invader-info]
 - [invader-resource]
 - [invader-sound]
+    - [What is splitting?]
+    - [Audio formats]
+    - [Which audio format should I use?]
 
 ### invader-archive
 This program generates a .tar.xz archive containing all of the tags used to
@@ -216,8 +223,11 @@ smaller than 4x4 while still being block-compressed.
 
 There is no difference in RGB quality between dxt1, dxt3, or dxt5. The only
 difference is in how alpha is handled. Therefore, if dxt3 or dxt5 is specified
-and a bitmap does not have any alpha, then dxt1 will automatically be used to
-keep the size as small as possible.
+and a bitmap does not have transparency, then dxt1 will automatically be used
+to keep the size as small as possible.
+
+We do not recommend using these formats. They are only provided for completion
+sake.
 
 Format | Bits/px | Alpha              | Notes
 ------ | ------- | ------------------ | --------------------------------------
@@ -225,9 +235,9 @@ DXT1   | 4       |                    | 100% alpha
 DXT3   | 8       | 4-bit explicit     | Better for shapes like HUDs
 DXT5   | 8       | 4-bit interpolated | Better for alpha gradients like clouds
 
-#### More formats
-These formats were originally available on Xbox and do not work on stock Halo
-PC without a mod (e.g. [Chimera]). They all use explicit RGB and/or alpha.
+#### More bitmap formats
+These formats were originally available on Xbox and do not work on stock Halo.
+They all use explicit RGB and/or alpha.
 
 If you use monochrome with a monochrome bitmap used as input, then there will
 be no loss in quality.
@@ -238,6 +248,31 @@ monochrome   | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)
 monochrome   | A8       | 8       | 8-bit   |         | 100% intensity
 monochrome   | Y8       | 8       |         | 8-bit   | 100% alpha
 palettized   | P8       | 8       | Indexed | Indexed | Bump compression only
+
+#### Which bitmap format should I use?
+32-bit color and monochrome (with monochrome input) have zero quality loss.
+Unfortunately, Halo PC does not support monochrome, and it'd easily be the best
+choice for monochrome textures like HUD masks. So, the best format with zero
+loss in quality is 32-bit color. Obviously, this results in a larger file size,
+with a 1024x1024 bitmap taking up ~5.3 MiB and a 2048x2048 bitmap taking up
+~21.3 MiB, with mipmaps included for both. But if you don't care, this is the
+best way to go.
+
+16-bit color works well on some textures without any noticeable impact, such as
+noise maps and some simple textures, but it is subject to banding due to a lack
+of color depth. The color depth also gets significantly worse if you use an
+alpha channel.
+
+dxt1 takes up very little space, but make no mistake: it's a lossy compression
+format, and the image will lose finer details as a result - an issue that
+16-bit often does not have. As such, it's quite bad on HUDs, detail maps,
+bumpmaps, and multipurpose maps, and, in our opinion, literally anything else.
+
+dxt3 and dxt5 use dxt1 for color, only differing in how alpha works. Alpha is
+explicit on dxt3, thus dxt3 works better for things that need definite shape
+such as HUD backgrounds. It will result in banding on gradients, however. dxt5
+compresses alpha to be interpolated like the color, so it works better for
+more things than dxt3.
 
 ### invader-build
 This program builds cache files.
@@ -457,7 +492,7 @@ Options:
                                precedence.
 ```
 
-#### Splitting
+#### What is splitting?
 The Halo engine was written to primarily handle short-length sounds. It cannot
 handle extremely long audio sections due to memory and engine limitations, and
 this is regardless of the audio format being used since all audio is eventually
@@ -470,7 +505,7 @@ done on 227.5 KiB with invader-sound.
 
 For sounds that are more than 2.5 seconds long if 44100 Hz stereo, 5 seconds if
 22050 Hz stereo, or 10 seconds long if 22050 Hz mono, such as music or extended
-dialog, we recommend enabling splitting.
+dialogue, we recommend enabling splitting.
 
 #### Audio formats
 These are the different audio formats that invader-sound supports.
@@ -483,7 +518,7 @@ Ogg Vorbis (0.5) | ~142.7 kbps (varies)      | "Transparent" quality, lossy
 Ogg Vorbis (0.3) | ~105.6 kbps (varies)      | Oggenc's default quality, lossy
 Xbox ADPCM       | ~390.8 kbps               | Lossy, fixed bitrate
 
-##### Which one should I use?
+##### Which audio format should I use?
 The only lossless format available is 16-bit PCM. This will, however, result in
 a drastic increase in map size, so it is not recommended to use this with long
 sounds.
@@ -500,7 +535,6 @@ instead recommend using uncompressed 16-bit PCM if possible.
 ## Frequently asked questions
 These are a selection of questions that have been asked over the course of
 Invader's development.
-
 - [What operating systems are supported?]
 - [Why GPL and not MIT or BSD?]
 - [Are there any GUI tools?]
@@ -666,3 +700,11 @@ for multiplayer maps.
 [invader-info]: #invader-info
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound
+
+[Uncompressed bitmap formats]: #uncompressed-bitmap-formats
+[Block-compressed bitmap formats]: #block-compressed-bitmap-formats
+[More bitmap formats]: #more-bitmap-formats
+[Which bitmap format should I use?]: #which-bitmap-formats-should-i-use
+[What is splitting?]: #what-is-splitting
+[Audio formats]: #audio-formats
+[Which audio format should I use?]: #which-audio-format-should-i-use
