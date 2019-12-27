@@ -2750,21 +2750,24 @@
         "fields": [
             {
                 "name": "bsp start",
-                "type": "uint32",
                 "drop_on_extract_hidden": true,
-                "cache_only": true
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
             },
             {
                 "name": "bsp size",
-                "type": "uint32",
                 "drop_on_extract_hidden": true,
-                "cache_only": true
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
             },
             {
                 "name": "bsp address",
-                "type": "uint32",
                 "drop_on_extract_hidden": true,
-                "cache_only": true
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
             },
             {
                 "type": "pad",

@@ -464,17 +464,20 @@
             },
             {
                 "name": "triangle count",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "triangle offset",
+                "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
                 "drop_on_extract_hidden": true
             },
             {
                 "name": "triangle offset 2",
+                "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
                 "drop_on_extract_hidden": true
@@ -488,6 +491,7 @@
             },
             {
                 "name": "vertex count",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
