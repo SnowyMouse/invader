@@ -2749,14 +2749,17 @@
         "fields": [
             {
                 "name": "bsp start",
+                "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "bsp size",
+                "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "bsp address",
+                "cache_only": true,
                 "type": "uint32"
             },
             {

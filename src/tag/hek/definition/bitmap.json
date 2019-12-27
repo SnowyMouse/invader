@@ -241,6 +241,8 @@
             },
             {
                 "name": "pixels count",
+                "endian": "little",
+                "cache_only": true,
                 "type": "uint32"
             },
             {
