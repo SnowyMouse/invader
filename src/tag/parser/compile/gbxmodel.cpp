@@ -290,5 +290,9 @@ namespace Invader::Parser {
             this->vertex_offset = vertices_count * sizeof(workload.model_vertices[0]);
             workload.model_vertices.insert(workload.model_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
         }
+
+        // Don't forget to set these memes
+        this->do_not_crash_the_game = 1;
+        this->do_not_screw_up_the_model = 4;
     }
 }

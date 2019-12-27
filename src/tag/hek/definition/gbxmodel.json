@@ -459,7 +459,6 @@
             {
                 "name": "do not crash the game",
                 "type": "uint32",
-                "default": 1,
                 "cache_only": true,
                 "endian": "little"
             },
@@ -480,7 +479,6 @@
             {
                 "name": "do not screw up the model",
                 "type": "uint32",
-                "default": 4,
                 "cache_only": true,
                 "endian": "little"
             },

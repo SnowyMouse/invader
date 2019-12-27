@@ -2750,15 +2750,18 @@
         "fields": [
             {
                 "name": "bsp start",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "name": "bsp size",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "name": "bsp address",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "type": "pad",
