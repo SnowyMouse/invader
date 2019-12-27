@@ -13,6 +13,7 @@ namespace Invader::Parser {
         if(*workload.cache_file_type == HEK::CacheFileType::CACHE_FILE_USER_INTERFACE) {
             this->unit.path.clear();
             this->unit.tag_id = HEK::TagID::null_tag_id();
+            this->unit.tag_class_int = TagClassInt::TAG_CLASS_NONE;
         }
         else if(this->unit.path.size() == 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag player information is missing a player unit which is required for the map type", tag_index);
