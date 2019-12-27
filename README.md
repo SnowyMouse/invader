@@ -510,13 +510,13 @@ dialogue, we recommend enabling splitting.
 #### Audio formats
 These are the different audio formats that invader-sound supports.
 
-Format           | Bitrate (44100 Hz stereo) | Type
----------------- | ------------------------- | --------------------------------
-16-bit PCM       | 1411.2 kbps               | Lossless unless input is >16-bit
-Ogg Vorbis (1.0) | ~435.8 kbps (varies)      | Max quality, lossy
-Ogg Vorbis (0.5) | ~142.7 kbps (varies)      | "Transparent" quality, lossy
-Ogg Vorbis (0.3) | ~105.6 kbps (varies)      | Oggenc's default quality, lossy
-Xbox ADPCM       | ~390.8 kbps               | Lossy, fixed bitrate
+Format                | Bitrate (44100 Hz stereo) | Type
+--------------------- | ------------------------- | ---------------------------
+16-bit PCM            | 1411.2 kbps               | Lossless if input is 16-bit
+Ogg Vorbis (`-q 1`)   | ~500.0 kbps (on average)  | Lossy; Max quality
+Ogg Vorbis (`-q 0.5`) | ~160.0 kbps (on average)  | Lossy; Transparent quality
+Ogg Vorbis (`-q 0.3`) | ~112.0 kbps (on average)  | Lossy; Oggenc default
+Xbox ADPCM            | ~390.8 kbps               | Lossy
 
 #### Which audio format should I use?
 The only lossless format available is 16-bit PCM. This will, however, result in
@@ -524,9 +524,9 @@ a drastic increase in map size, so it is not recommended to use this with long
 sounds.
 
 Ogg Vorbis provides a good tradeoff in terms of bitrate and quality. Using 0.5
-is considered "transparent" provided you use a lossless audio input (if not,
-then you may need to use a higher quality value), and this also gives you lower
-bitrate and better quality than Xbox ADPCM.
+is considered "transparent" (unnoticeable quality loss) provided you use a
+lossless audio input (if not, then you may need to use a higher quality value),
+and this also gives you lower bitrate and better quality than Xbox ADPCM.
 
 Xbox ADPCM does not compress as efficiently as Ogg Vorbis, but it decodes
 considerably faster, so this may be beneficial for firing effects. However, we
