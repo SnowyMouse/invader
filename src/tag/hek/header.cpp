@@ -82,8 +82,8 @@ namespace Invader::HEK {
         std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), std::byte());
 
         // Set values
-        #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->tag_class_int = tag_class_int;
+        #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->blam = BLAM;
         this->header_size = sizeof(*this);
         this->something_255 = 255;
