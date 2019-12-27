@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-extract: Tag IDs are now set to FFFFFFFF when extracted. This will
+  make extracted tags more reproducible independent of the map being extracted.
+
 ## [0.21.3] - 2019-12-26
 ### Fixed
 - invader-build: Fixed converting radians to degrees with the lens_flare
