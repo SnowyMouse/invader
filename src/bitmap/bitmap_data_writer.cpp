@@ -35,7 +35,7 @@ namespace Invader {
                     bitmap.depth = 1;
                     break;
             }
-            bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
+            bitmap.pixel_data_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
             std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
             // Get the data
@@ -450,7 +450,7 @@ namespace Invader {
             bitmap_data_pixels.insert(bitmap_data_pixels.end(), current_bitmap_pixels.begin(), current_bitmap_pixels.end());
 
             bitmap.mipmap_count = mipmap_count;
-            bitmap.pixels_count = current_bitmap_pixels.size();
+            bitmap.pixel_data_size = current_bitmap_pixels.size();
 
             BitmapDataFlags flags = {};
             flags.compressed = compressed;

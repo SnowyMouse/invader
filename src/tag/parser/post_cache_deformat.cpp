@@ -14,9 +14,9 @@ namespace Invader::Parser {
         this->color_plate_width = 0;
         for(auto &bitmap_data : this->bitmap_data) {
             const std::byte *bitmap_data_ptr;
-            bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixels_offset, bitmap_data.pixels_count, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
-            bitmap_data.pixels_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
-            this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixels_count);
+            bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
+            bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
+            this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
             bitmap_data.flags.external = 0;
         }
     }

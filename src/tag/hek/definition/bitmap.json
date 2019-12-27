@@ -236,11 +236,11 @@
                 "size": 2
             },
             {
-                "name": "pixels offset",
+                "name": "pixel data offset",
                 "type": "uint32"
             },
             {
-                "name": "pixels count",
+                "name": "pixel data size",
                 "endian": "little",
                 "cache_only": true,
                 "type": "uint32"

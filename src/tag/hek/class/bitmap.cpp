@@ -112,13 +112,13 @@ namespace Invader::HEK {
                 case BITMAP_DATA_FORMAT_Y8:
                 case BITMAP_DATA_FORMAT_P8_BUMP:
                 case BITMAP_DATA_FORMAT_AY8:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count);
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count);
                     break;
 
                 // 8-bit DXT (4x4 blocks)
                 case BITMAP_DATA_FORMAT_DXT3:
                 case BITMAP_DATA_FORMAT_DXT5:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt);
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count_dxt);
                     break;
 
                 // 16-bit
@@ -126,31 +126,31 @@ namespace Invader::HEK {
                 case BITMAP_DATA_FORMAT_R5G6B5:
                 case BITMAP_DATA_FORMAT_A1R5G5B5:
                 case BITMAP_DATA_FORMAT_A4R4G4B4:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 2);
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count * 2);
                     break;
 
                 // 32-bit
                 case BITMAP_DATA_FORMAT_X8R8G8B8:
                 case BITMAP_DATA_FORMAT_A8R8G8B8:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 4);
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count * 4);
                     break;
 
                 // 4-bit DXT (4x4 blocks)
                 case BITMAP_DATA_FORMAT_DXT1:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
                     break;
 
                 // lol
                 default:
-                    reflexive.pixels_count = 0;
+                    reflexive.pixel_data_size = 0;
             }
 
             switch(reflexive.type.read()) {
                 case BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                    reflexive.pixels_count = reflexive.pixels_count * 6;
+                    reflexive.pixel_data_size = reflexive.pixel_data_size * 6;
                     break;
                 case BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                    reflexive.pixels_count = reflexive.pixels_count;
+                    reflexive.pixel_data_size = reflexive.pixel_data_size;
                     break;
                 default:
                     break;

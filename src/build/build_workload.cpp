@@ -623,33 +623,33 @@ namespace Invader {
                         auto &bitmap = bitmaps[bitmap_data];
 
                         // Record this data
-                        std::uint32_t pixel_count = bitmap.pixels_count;
-                        std::uint32_t pixel_offset = bitmap.pixels_offset;
-                        std::size_t end = static_cast<std::size_t>(pixel_count) + pixel_offset;
-                        auto *bitmap_pixels = tag->asset_data.data() + bitmap.pixels_offset;
+                        std::uint32_t pixel_data_size = bitmap.pixel_data_size;
+                        std::uint32_t pixel_offset = bitmap.pixel_data_offset;
+                        std::size_t end = static_cast<std::size_t>(pixel_data_size) + pixel_offset;
+                        auto *bitmap_pixels = tag->asset_data.data() + bitmap.pixel_data_offset;
 
                         // Iterate through each bitmap resource
                         bool success = false;
                         for(auto &b : this->bitmaps) {
                             // Check if we have a match
-                            if(b.data.size() == pixel_count && std::memcmp(bitmap_pixels, b.data.data(), pixel_count) == 0) {
+                            if(b.data.size() == pixel_data_size && std::memcmp(bitmap_pixels, b.data.data(), pixel_data_size) == 0) {
                                 // Set the external flags
                                 auto flags = bitmap.flags.read();
                                 flags.external = 1;
                                 bitmap.flags = flags;
-                                bitmap.pixels_offset = static_cast<std::uint32_t>(b.data_offset);
+                                bitmap.pixel_data_offset = static_cast<std::uint32_t>(b.data_offset);
 
                                 // Next, adjust all pointers after this
                                 for(std::uint32_t bitmap_data_remove = bitmap_data + 1; bitmap_data_remove < bitmap_data_count; bitmap_data_remove++) {
                                     auto &bitmap_remove = bitmaps[bitmap_data_remove];
-                                    bitmap_remove.pixels_offset = bitmap_remove.pixels_offset.read() - pixel_count;
+                                    bitmap_remove.pixel_data_offset = bitmap_remove.pixel_data_offset.read() - pixel_data_size;
                                 }
 
                                 // Lastly, delete the data we just removed
                                 std::vector<std::byte> new_asset_data(tag->asset_data.data(), tag->asset_data.data() + pixel_offset);
                                 new_asset_data.insert(new_asset_data.end(), tag->asset_data.data() + end, tag->asset_data.data() + tag->asset_data.size());
                                 tag->asset_data = new_asset_data;
-                                asset_data_removed += pixel_count;
+                                asset_data_removed += pixel_data_size;
                                 hit = true;
                                 success = true;
                                 break;
@@ -1713,12 +1713,12 @@ namespace Invader {
                             continue;
                         }
 
-                        std::size_t pixels_offset = bitmaps_data[b].pixels_offset;
-                        if(pixels_offset > tag_asset_data_size) {
+                        std::size_t pixel_data_offset = bitmaps_data[b].pixel_data_offset;
+                        if(pixel_data_offset > tag_asset_data_size) {
                             eprintf_error("Invalid pixels offset for bitmap %zu for %s.%s", b, this->compiled_tags[i]->path.data(), tag_class_to_extension(this->compiled_tags[i]->tag_class_int));
                             throw OutOfBoundsException();
                         }
-                        offsets[b] = pixels_offset;
+                        offsets[b] = pixel_data_offset;
                     }
 
                     // Calculate the sizes of each bitmap
@@ -1748,20 +1748,20 @@ namespace Invader {
                             continue;
                         }
 
-                        bitmaps_data[b].pixels_count = static_cast<std::uint32_t>(sizes[b]);
+                        bitmaps_data[b].pixel_data_size = static_cast<std::uint32_t>(sizes[b]);
 
                         // Make sure it's not duplicate
                         bool duped = false;
                         for(auto &asset : all_asset_data) {
                             if(asset.size == sizes[b] && std::memcmp(tag_asset_data + offsets[b], file.data() + asset.offset, asset.size) == 0) {
-                                bitmaps_data[b].pixels_offset = static_cast<std::uint32_t>(asset.offset);
+                                bitmaps_data[b].pixel_data_offset = static_cast<std::uint32_t>(asset.offset);
                                 duped = true;
                                 break;
                             }
                         }
 
                         if(!duped) {
-                            bitmaps_data[b].pixels_offset = static_cast<std::uint32_t>(file.size());
+                            bitmaps_data[b].pixel_data_offset = static_cast<std::uint32_t>(file.size());
                             all_asset_data.push_back(DedupingAssetData { file.size(), sizes[b] });
                             file.insert(file.end(), tag_asset_data + offsets[b], tag_asset_data + offsets[b] + sizes[b]);
                         }
