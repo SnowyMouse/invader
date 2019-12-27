@@ -2749,16 +2749,19 @@
         "fields": [
             {
                 "name": "bsp start",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "bsp size",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "bsp address",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },

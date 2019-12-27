@@ -456,16 +456,19 @@
             },
             {
                 "name": "triangle count",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "triangle offset",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "triangle offset 2",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
@@ -475,6 +478,7 @@
             },
             {
                 "name": "vertex count",
+                "endian": "little",
                 "cache_only": true,
                 "type": "uint32"
             },
