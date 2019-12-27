@@ -450,7 +450,6 @@ namespace Invader {
             bitmap_data_pixels.insert(bitmap_data_pixels.end(), current_bitmap_pixels.begin(), current_bitmap_pixels.end());
 
             bitmap.mipmap_count = mipmap_count;
-            bitmap.pixel_data_size = current_bitmap_pixels.size();
 
             BitmapDataFlags flags = {};
             flags.compressed = compressed;
