@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <time.h>
+#include <stdio.h>
+
 #include <invader/build/build_workload.hpp>
 #include <invader/hek/map.hpp>
 #include <invader/file/file.hpp>
@@ -88,6 +91,9 @@ namespace Invader {
     #define BYTES_TO_MiB(bytes) (bytes / 1024.0 / 1024.0)
 
     std::vector<std::byte> BuildWorkload::build_cache_file() {
+        // Yay
+        this->april_fools();
+
         // Start benchmark
         auto start = std::chrono::steady_clock::now();
 
@@ -1042,6 +1048,20 @@ namespace Invader {
         }
         if(static_cast<std::size_t>(std::snprintf(this->scenario_name.string, sizeof(this->scenario_name.string), "%s", last_slash)) >= sizeof(this->scenario_name.string)) {
             throw InvalidScenarioNameException();
+        }
+    }
+
+    void BuildWorkload::april_fools() const noexcept {
+        // lol
+        time_t t = time(nullptr);
+        struct tm tm = *localtime(&t);
+        if(tm.tm_mday == 1 && tm.tm_mon == 3) {
+            if(std::filesystem::exists("toolbeta.map")) {
+                oprintf_success("Successfully found toolbeta.map. You still need to set your working directory.");
+            }
+            else {
+                eprintf_warn("WARNING: Failed to load toolbeta.map. Make sure to set your working directory.");
+            }
         }
     }
 }
