@@ -464,16 +464,19 @@
             },
             {
                 "name": "triangle count",
+                "cache_only": true,
                 "type": "uint32"
             },
             {
                 "name": "triangle offset",
                 "type": "uint32",
+                "cache_only": true,
                 "drop_on_extract_hidden": true
             },
             {
                 "name": "triangle offset 2",
                 "type": "uint32",
+                "cache_only": true,
                 "drop_on_extract_hidden": true
             },
             {
@@ -485,6 +488,7 @@
             },
             {
                 "name": "vertex count",
+                "cache_only": true,
                 "type": "uint32"
             },
             {

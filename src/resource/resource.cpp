@@ -237,7 +237,7 @@ int main(int argc, const char **argv) {
 
                                 // Push it good
                                 paths.push_back(path_temp);
-                                std::size_t size = bitmap->pixels_count.read();
+                                std::size_t size = bitmap->pixel_data_size.read();
                                 sizes.push_back(size);
                                 offsets.push_back(resource_data.size());
                                 resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
@@ -246,7 +246,7 @@ int main(int argc, const char **argv) {
                             }
                             // Otherwise set the sizes
                             else {
-                                bitmap->pixels_offset = resource_data.size() + bitmap->pixels_offset;
+                                bitmap->pixel_data_offset = resource_data.size() + bitmap->pixel_data_offset;
                                 auto flags = bitmap->flags.read();
                                 flags.external = 1;
                                 bitmap->flags = flags;

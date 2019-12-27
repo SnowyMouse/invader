@@ -1003,7 +1003,7 @@ namespace Invader {
                 auto bitmap_data_array = reinterpret_cast<Parser::BitmapData::struct_little *>(this->map_data_structs[0].data() + *this->structs[*bitmap_struct.resolve_pointer(&bitmap_header.bitmap_data.pointer)].offset);
                 for(std::size_t b = 0; b < bitmap_data_count; b++) {
                     auto &bitmap_data = bitmap_data_array[b];
-                    bitmap_data.pixels_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_bitmap_size);
+                    bitmap_data.pixel_data_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_bitmap_size);
                 }
             }
             else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {

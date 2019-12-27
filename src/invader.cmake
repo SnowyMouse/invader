@@ -91,7 +91,7 @@ add_library(invader-bitmap-p8-palette STATIC
 )
 
 # This is fun
-option(INVADER_EXTRACT_HIDDEN_VALUES "Have invader-extract extract hidden values (deprecated)")
+option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for debugging Invader ONLY - this WILL break tags")
 
 # Include definition script
 add_custom_command(

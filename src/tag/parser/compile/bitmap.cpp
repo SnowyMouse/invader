@@ -43,7 +43,7 @@ namespace Invader::Parser {
             bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5);
 
             std::size_t depth = data.depth;
-            std::size_t start = data.pixels_offset;
+            std::size_t start = data.pixel_data_offset;
             std::size_t size = 0;
             std::size_t width = data.width;
             std::size_t height = data.height;
@@ -180,7 +180,7 @@ namespace Invader::Parser {
             std::size_t raw_data_index = workload.raw_data.size();
             workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
             workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
-            data.pixels_count = static_cast<std::uint32_t>(size);
+            data.pixel_data_size = static_cast<std::uint32_t>(size);
         }
     }
 }

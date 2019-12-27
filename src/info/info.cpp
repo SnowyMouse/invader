@@ -229,8 +229,8 @@ int main(int argc, const char **argv) {
                         auto &bd = bitmap_data[b];
                         if(bd.flags.read().external) {
                             found_it_this_bitmap = true;
-                            bitmaps_offsets.emplace_back(bd.pixels_offset.read());
-                            bitmaps_sizes.emplace_back(bd.pixels_count.read());
+                            bitmaps_offsets.emplace_back(bd.pixel_data_offset.read());
+                            bitmaps_sizes.emplace_back(bd.pixel_data_size.read());
                         }
                     }
                     bitmaps += found_it_this_bitmap;

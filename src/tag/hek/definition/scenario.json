@@ -2751,17 +2751,20 @@
             {
                 "name": "bsp start",
                 "type": "uint32",
-                "drop_on_extract_hidden": true
+                "drop_on_extract_hidden": true,
+                "cache_only": true
             },
             {
                 "name": "bsp size",
                 "type": "uint32",
-                "drop_on_extract_hidden": true
+                "drop_on_extract_hidden": true,
+                "cache_only": true
             },
             {
                 "name": "bsp address",
                 "type": "uint32",
-                "drop_on_extract_hidden": true
+                "drop_on_extract_hidden": true,
+                "cache_only": true
             },
             {
                 "type": "pad",
