@@ -508,7 +508,10 @@ for s in all_structs_arranged:
     if len(all_used_structs) > 0:
         cpp_save_hek_data.write("        struct_big b = {};\n")
         for struct in all_used_structs:
-            if ("cache_only" in struct and struct["cache_only"] and not extract_hidden) or ("never_extract" in struct and struct["never_extract"]):
+            if "cache_only" in struct and struct["cache_only"] and not extract_hidden:
+                continue
+            if "drop_on_extract_hidden" in struct and struct["drop_on_extract_hidden"]:
+                cpp_save_hek_data.write("        b.{} = {{}};\n".format(name))
                 continue
             name = struct["name"]
             if struct["type"] == "TagDependency":

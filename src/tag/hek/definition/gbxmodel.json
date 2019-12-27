@@ -469,16 +469,17 @@
             {
                 "name": "triangle offset",
                 "type": "uint32",
-                "never_extract": true
+                "drop_on_extract_hidden": true
             },
             {
                 "name": "triangle offset 2",
                 "type": "uint32",
-                "never_extract": true
+                "drop_on_extract_hidden": true
             },
             {
                 "name": "do not screw up the model",
                 "type": "uint32",
+                "drop_on_extract_hidden": true,
                 "cache_only": true,
                 "endian": "little"
             },
@@ -499,7 +500,7 @@
             {
                 "name": "vertex offset",
                 "type": "uint32",
-                "never_extract": true
+                "drop_on_extract_hidden": true
             },
             {
                 "type": "pad",
