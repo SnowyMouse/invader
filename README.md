@@ -512,11 +512,11 @@ These are the different audio formats that invader-sound supports.
 
 Format                | Bitrate (44100 Hz stereo) | Type
 --------------------- | ------------------------- | ---------------------------
-16-bit PCM            | 1411.2 kbps (constant)    | Lossless if input is 16-bit
-Ogg Vorbis (`-q 1`)   | ~435.8 kbps (variable)    | Lossy; Max quality
-Ogg Vorbis (`-q 0.5`) | ~142.7 kbps (variable)    | Lossy; Transparent quality
-Ogg Vorbis (`-q 0.3`) | ~105.6 kbps (variable)    | Lossy; Oggenc default
-Xbox ADPCM            | ~390.8 kbps (constant)    | Lossy
+16-bit PCM            | 1411.2 kbps               | Lossless if input is 16-bit
+Ogg Vorbis (`-q 1`)   | ~500.0 kbps (on average)  | Lossy; Max quality
+Ogg Vorbis (`-q 0.5`) | ~160.0 kbps (on average)  | Lossy; Transparent quality
+Ogg Vorbis (`-q 0.3`) | ~112.0 kbps (on average)  | Lossy; Oggenc default
+Xbox ADPCM            | ~390.8 kbps               | Lossy
 
 #### Which audio format should I use?
 The only lossless format available is 16-bit PCM. This will, however, result in
