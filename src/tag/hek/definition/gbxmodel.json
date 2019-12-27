@@ -469,11 +469,13 @@
             },
             {
                 "name": "triangle offset",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "name": "triangle offset 2",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "name": "do not screw up the model",
@@ -498,7 +500,8 @@
             },
             {
                 "name": "vertex offset",
-                "type": "uint32"
+                "type": "uint32",
+                "never_extract": true
             },
             {
                 "type": "pad",
