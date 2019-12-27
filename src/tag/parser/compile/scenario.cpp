@@ -284,6 +284,33 @@ namespace Invader::Parser {
         new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
         new_ptr.struct_index = workload.structs.size();
         workload.structs.emplace_back(std::move(script_data_struct));
+
+        // BSP transitions
+        std::size_t trigger_volume_count = this->trigger_volumes.size();
+        for(std::size_t tv = 0; tv < trigger_volume_count; tv++) {
+            auto &trigger_volume = this->trigger_volumes[tv];
+            if(std::strncmp(trigger_volume.name.string, "bsp", 3) != 0) {
+                continue;
+            }
+
+            // Parse it
+            unsigned int bsp_from = ~0;
+            unsigned int bsp_to = ~0;
+            if(std::sscanf(trigger_volume.name.string, "bsp%u,%u", &bsp_from, &bsp_to) != 2) {
+                continue;
+            }
+
+            // Save it
+            if(bsp_from >= this->structure_bsps.size() || bsp_to >= this->structure_bsps.size()) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+            }
+            else {
+                auto &bsp_switch_trigger_volume = this->bsp_switch_trigger_volumes.emplace_back();
+                bsp_switch_trigger_volume.trigger_volume = static_cast<HEK::Index>(tv);
+                bsp_switch_trigger_volume.source = static_cast<HEK::Index>(bsp_from);
+                bsp_switch_trigger_volume.destination = static_cast<HEK::Index>(bsp_to);
+            }
+        }
     }
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
