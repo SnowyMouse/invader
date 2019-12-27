@@ -575,6 +575,9 @@ for s in all_structs_arranged:
         cpp_read_cache_file_data.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
         for struct in all_used_structs:
             name = struct["name"]
+            if struct["type"] == "TagID":
+                cpp_read_cache_file_data.write("        r.{} = HEK::TagID::null_tag_id();\n".format(name))
+                continue
             if ("non_cached" in struct and struct["non_cached"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
                 continue
             if struct["type"] == "TagDependency":
@@ -758,6 +761,8 @@ for s in all_structs_arranged:
                     cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[2], suffix))
                     cpp_read_hek_data.write("            r.{}.blue = {}{};\n".format(name, default[3], suffix))
                     cpp_read_hek_data.write("        }\n")
+            elif struct["type"] == "TagID":
+                cpp_read_hek_data.write("        r.{} = HEK::TagID::null_tag_id();\n".format(name))
             elif "bounds" in struct and struct["bounds"]:
                 cpp_read_hek_data.write("        r.{}.from = h.{}.from;\n".format(name, name))
                 cpp_read_hek_data.write("        r.{}.to = h.{}.to;\n".format(name, name))
