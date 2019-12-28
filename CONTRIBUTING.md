@@ -66,7 +66,7 @@ For all new issues:
   [closed] issues.
 - Ensure your issue is relevant for the latest version of the Invader source
   code. This is why it is recommended that you compile Invader from source.
-- Ensure your issue is not out of scope (see the [scope conventions])
+- Ensure your issue is not out of scope (see the [scope conventions]).
 
 For new issues, it is recommended to prefix the title with **one** of these:
 - `[New feature]` - New feature for multiple programs or one that doesn't yet
@@ -75,28 +75,26 @@ For new issues, it is recommended to prefix the title with **one** of these:
   Invader library that is typically only used by a specific Invader program
 - `[invader]` - This is an issue for the Invader library
 
-If you don't do this, a moderator will try to do it for you, instead.
-
-For bug reports:
-- If the bug is related to a specific data file, please attach or link a
-  compressed archive of the file.
-- If the bug is related to a specific tag or tag set, please attach or link a
-  compressed archive of the tag set.
-    - The only exception to this rule is if it can be reproduced using the tag
-      set that comes with the Halo Editing Kit without any other tags.
-- If the bug is related to a specific map, please attach or link a compressed
-  archive of the map file.
-- For archives, using either .7z, .tar.xz, .xz, .tar.gz, .gz, or .zip is
-  recommended. Please avoid using proprietary formats like .rar for
-  attachments.
-- The reason for these requirements is to allow others to reproduce your issue.
-  Merely naming the file would mean that anyone who wanted to investigate and
-  resolve your issue would have to search for the file on the Internet. Not
-  only would this take time, but there is no guarantee the find the file you're
-  describing would be found, let alone the correct version of it.
-
-A simple way to remember this is: If a bug cannot be reproduced, then it isn't
-a bug and your issue will be closed.
+For all new bug reports, ensure your issue has enough information for us to
+reproduce the bug:
+- You must specify the version of Invader that your bug report applies to
+  (e.g. `Invader 0.21.3.r1153.179f7d4`). If you are unsure about this,
+  use `invader-build -i` to get this string.
+- You must specify the version of the game required to reproduce the bug, if
+  necessary. Use univocal names such as "Custom Edition" or "Retail" and avoid
+  ambiguous names such as "CE" and "PC" when doing this.
+- You must include any and all relevant files that cause the bug, unless
+  these files came with the original game OR Halo Editing Kit (again, specify).
+    - We recommend using formats such as .7z, .zip, .tar.xz, or .tar.zst.
+      Proprietary formats such as .rar should not be used. You may either link
+      to a download page or attach it to your issue.
+    - If your issue is tag related, you can optionally use invader-info to
+      archive tags and their dependencies into a .tar.xz archive.
+    - Do not only specify the map name or file name, as searching the Internet
+      for the specific map takes time, and there is no guarantee we will find
+      the correct version of the map.
+- A simple way to remember this is: If a bug cannot be reproduced, then it
+  isn't a bug, and your issue will be closed.
 
 ## Scope conventions
 Issues and pull requests must remain in the scope of Invader. Here are some
