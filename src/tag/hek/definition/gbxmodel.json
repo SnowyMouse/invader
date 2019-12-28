@@ -207,7 +207,7 @@
             {
                 "name": "permutation number",
                 "type": "uint16",
-                "endian": "little",
+                "endian": "Index",
                 "cache_only": true
             },
             {
@@ -251,6 +251,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 88
     },
     {

@@ -295,4 +295,32 @@ namespace Invader::Parser {
         this->do_not_crash_the_game = 1;
         this->do_not_screw_up_the_model = 4;
     }
+
+    void GBXModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        const char *last_hyphen = nullptr;
+        for(const char &c : this->name.string) {
+            if(c == '-') {
+                last_hyphen = &c + 1;
+            }
+        }
+        this->permutation_number = NULL_INDEX;
+        if(last_hyphen && *last_hyphen) {
+            unsigned long permutation_number;
+            try {
+                permutation_number = std::stoul(last_hyphen, nullptr, 10);
+            }
+            catch(std::out_of_range &) {
+                permutation_number = ~0;
+            }
+            catch(std::exception &) {
+                return;
+            }
+            if(permutation_number >= NULL_INDEX) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation %s has an index that is out of range (%lu >= %zu)", this->name.string, permutation_number, static_cast<std::size_t>(NULL_INDEX));
+            }
+            else {
+                this->permutation_number = static_cast<HEK::Index>(permutation_number);
+            }
+        }
+    }
 }
