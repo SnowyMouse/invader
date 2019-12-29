@@ -56,7 +56,7 @@
                 "type": "float",
                 "cache_only": true,
                 "endian": "little",
-                "default": 2.0
+                "comment": "Not setting this to 2 breaks the first person flashlight."
             },
             {
                 "name": "sin cutoff angle",
