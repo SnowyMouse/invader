@@ -293,6 +293,7 @@ namespace Invader {
         bool compress = false;
         void april_fools() const noexcept;
         void externalize_tags() noexcept;
+        void delete_raw_data(std::size_t index);
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \

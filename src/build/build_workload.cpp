@@ -116,16 +116,16 @@ namespace Invader {
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                     workload.bitmaps = open_resource_map("bitmaps.map");
-                    workload.bitmaps = open_resource_map("sounds.map");
+                    workload.sounds = open_resource_map("sounds.map");
                     break;
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    workload.bitmaps = open_resource_map("loc.map");
+                    workload.loc = open_resource_map("loc.map");
                     // fallthrough
                 default:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                     workload.bitmaps = open_resource_map("bitmaps.map");
-                    workload.bitmaps = open_resource_map("sounds.map");
+                    workload.sounds = open_resource_map("sounds.map");
                     break;
             }
         }
@@ -1061,7 +1061,11 @@ namespace Invader {
                 auto bitmap_data_array = reinterpret_cast<Parser::BitmapData::struct_little *>(this->map_data_structs[0].data() + *this->structs[*bitmap_struct.resolve_pointer(&bitmap_header.bitmap_data.pointer)].offset);
                 for(std::size_t b = 0; b < bitmap_data_count; b++) {
                     auto &bitmap_data = bitmap_data_array[b];
-                    bitmap_data.pixel_data_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_bitmap_size);
+                    auto &index = t.asset_data[resource_index++];
+                    if(index == static_cast<std::size_t>(~0)) {
+                        continue;
+                    }
+                    bitmap_data.pixel_data_offset = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
                 }
             }
             else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
@@ -1076,7 +1080,11 @@ namespace Invader {
                     auto *permutation_array = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->map_data_structs[0].data() + *this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].offset);
                     for(std::size_t pe = 0; pe < permutation_count; pe++) {
                         auto &permutation = permutation_array[pe];
-                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[t.asset_data[resource_index++]], this->raw_sound_size);
+                        auto &index = t.asset_data[resource_index++];
+                        if(index == static_cast<std::size_t>(~0)) {
+                            continue;
+                        }
+                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
                     }
                 }
             }
@@ -1152,9 +1160,35 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 for(auto &t : this->tags) {
                     switch(t.tag_class_int) {
-                        case TagClassInt::TAG_CLASS_BITMAP:
-                            // TODO: Bitmaps
+                        // Find and remove bitmaps
+                        case TagClassInt::TAG_CLASS_BITMAP: {
+                            auto &bitmap_tag_struct = this->structs[*t.base_struct];
+                            auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
+                            std::size_t bitmap_data_count = bitmap_tag.bitmap_data.count;
+                            if(bitmap_data_count) {
+                                auto *all_bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_data.pointer)].data.data());
+                                for(std::size_t b = 0; b < bitmap_data_count; b++) {
+                                    auto &bitmap_data = all_bitmap_data[b];
+                                    std::size_t raw_data_index = t.asset_data[b];
+                                    auto &raw_data = this->raw_data[raw_data_index];
+                                    auto *raw_data_data = raw_data.data();
+                                    std::size_t raw_data_size = raw_data.size();
+
+                                    // Find bitmaps
+                                    for(auto &ab : this->bitmaps) {
+                                        if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                            this->delete_raw_data(raw_data_index);
+                                            bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
+                                            auto flags = bitmap_data.flags.read();
+                                            flags.external = 1;
+                                            bitmap_data.flags = flags;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                             break;
+                        }
                         case TagClassInt::TAG_CLASS_SOUND:
                             // TODO: Sounds
                             break;
@@ -1166,5 +1200,19 @@ namespace Invader {
             default:
                 break;
         }
+    }
+
+    void BuildWorkload::delete_raw_data(std::size_t index) {
+        for(auto &t : this->tags) {
+            for(auto &r : t.asset_data) {
+                if(r == index) {
+                    r = static_cast<std::size_t>(~0);
+                }
+                else if(r > index && r != static_cast<std::size_t>(~0)) {
+                    r--;
+                }
+            }
+        }
+        this->raw_data.erase(this->raw_data.begin() + index);
     }
 }
