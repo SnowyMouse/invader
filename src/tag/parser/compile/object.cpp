@@ -80,9 +80,6 @@ namespace Invader::Parser {
     }
 
     void ObjectFunction::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        if(this->bounds.from == 0.0f && this->bounds.to == 0.0f) {
-            this->bounds.to = 1.0f; \
-        }
         this->inverse_bounds = 1.0f / (this->bounds.to - this->bounds.from);
         if(this->step_count > 1) {
             this->inverse_step = 1.0f / (this->step_count - 1);

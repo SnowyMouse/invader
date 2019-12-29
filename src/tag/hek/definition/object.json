@@ -209,7 +209,8 @@
             {
                 "name": "bounds",
                 "bounds": true,
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": [0.0, 1.0]
             },
             {
                 "type": "pad",
