@@ -40,7 +40,7 @@ namespace Invader {
         bool no_external_tags,
         bool always_index_tags,
         bool verbose,
-        const std::optional<std::vector<std::tuple<TagClassInt, std::string>>> &with_index,
+        const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index,
         const std::optional<std::uint32_t> &forge_crc,
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario,
@@ -48,6 +48,25 @@ namespace Invader {
         bool compress
     ) {
         BuildWorkload workload;
+
+        // Start benchmark
+        workload.start = std::chrono::steady_clock::now();
+
+        // Don't allow two things to be used at once
+        if(no_external_tags && always_index_tags) {
+            throw std::exception();
+        }
+
+        // Use indexing
+        if(with_index.has_value()) {
+            auto &index = *with_index;
+            for(auto &tag : index) {
+                auto &new_tag = workload.tags.emplace_back();
+                new_tag.path = tag.second;
+                new_tag.tag_class_int = tag.first;
+                new_tag.stubbed = true;
+            }
+        }
 
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
         workload.scenario = scenario_name_fixed.data();
@@ -57,6 +76,27 @@ namespace Invader {
         workload.optimize_space = optimize_space;
         workload.verbose = verbose;
         workload.compress = compress;
+
+        // Attempt to open the resource map
+        auto open_resource_map = [&maps_directory, &no_external_tags, &workload](const char *map) -> std::vector<Resource> {
+            if(no_external_tags) {
+                return std::vector<Resource>();
+            }
+            else {
+                oprintf("Reading %s...", map);
+                oflush();
+                auto map_path = std::filesystem::path(maps_directory) / map;
+                auto map_path_str = map_path.string();
+                auto map_data = Invader::File::open_file(map_path_str.data());
+                if(!map_data.has_value()) {
+                    oprintf(" failed\n");
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Failed to open %s", map_path_str.data());
+                    throw FailedToOpenFileException();
+                }
+                oprintf(" done\n");
+                return load_resource_map(map_data->data(), map_data->size());
+            }
+        };
 
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).data());
@@ -75,10 +115,17 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                    workload.bitmaps = open_resource_map("bitmaps.map");
+                    workload.bitmaps = open_resource_map("sounds.map");
                     break;
+                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    workload.bitmaps = open_resource_map("loc.map");
+                    // fallthrough
                 default:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                    workload.bitmaps = open_resource_map("bitmaps.map");
+                    workload.bitmaps = open_resource_map("sounds.map");
                     break;
             }
         }
@@ -93,9 +140,6 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // Yay
         this->april_fools();
-
-        // Start benchmark
-        auto start = std::chrono::steady_clock::now();
 
         // First, make our tag data header and array
         this->structs.resize(2);
@@ -336,7 +380,7 @@ namespace Invader {
                 oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
             }
             oprintf("Uncompressed size: %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(UINT32_MAX), 100.0 * uncompressed_size / UINT32_MAX);
-            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count() / 1000.0);
+            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - this->start).count() / 1000.0);
 
             if(easter_egg) {
                 oprintf("\x1B[m");
@@ -490,6 +534,7 @@ namespace Invader {
                 }
                 return_value = i;
                 found = true;
+                tag.stubbed = false;
                 break;
             }
         }
@@ -605,6 +650,14 @@ namespace Invader {
         this->compile_tag_recursively("ui\\shell\\strings\\loading", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
         this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagClassInt::TAG_CLASS_BITMAP);
         this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
+
+        // Mark stubs
+        for(auto &tag : this->tags) {
+            if(tag.stubbed) {
+                tag.path = "MISSINGNO.";
+                tag.tag_class_int = TagClassInt::TAG_CLASS_NONE;
+            }
+        }
     }
 
     std::size_t BuildWorkload::dedupe_structs() {

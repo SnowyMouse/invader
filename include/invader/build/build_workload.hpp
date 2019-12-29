@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <filesystem>
+#include <chrono>
 #include "../hek/map.hpp"
 #include "../resource/resource_map.hpp"
 #include "../tag/parser/parser.hpp"
@@ -38,7 +39,7 @@ namespace Invader {
             bool no_external_tags = false,
             bool always_index_tags = false,
             bool verbose = false,
-            const std::optional<std::vector<std::tuple<TagClassInt, std::string>>> &with_index = std::nullopt,
+            const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index = std::nullopt,
             const std::optional<std::uint32_t> &forge_crc = std::nullopt,
             const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
             const std::optional<std::string> &rename_scenario = std::nullopt,
@@ -164,9 +165,21 @@ namespace Invader {
             /** The asset data is external */
             bool external_asset_data = false;
 
+            /** The tag is stubbed out */
+            bool stubbed = false;
+
             /** Tag path offset of the tag */
             std::size_t path_offset;
         };
+
+        /** Bitmaps resources */
+        std::vector<Resource> bitmaps;
+
+        /** Sounds resources */
+        std::vector<Resource> sounds;
+
+        /** Loc resources */
+        std::vector<Resource> loc;
 
         /** Structs being worked with */
         std::vector<BuildWorkloadStruct> structs;
@@ -254,6 +267,7 @@ namespace Invader {
     private:
         BuildWorkload() = default;
 
+        std::chrono::steady_clock::time_point start;
         const char *scenario;
         std::size_t scenario_index;
         std::uint32_t tag_data_address;
