@@ -33,6 +33,7 @@ namespace Invader::Parser {
 
         // Copy the table header
         ScenarioScriptNodeTable::struct_big table = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(script_data);
+        table.first_element_ptr = 0; // for consistency since this can be anything
         *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(script_data) = table;
 
         // Make sure it's not bullshit
