@@ -59,6 +59,7 @@ namespace Invader::Parser {
         // Add samples
         auto &r = workload.raw_data.emplace_back(this->samples);
         workload.tags[tag_index].asset_data.emplace_back(&r - workload.raw_data.data());
+        this->samples_pointer = 0xFFFFFFFF;
     }
 
     void SoundPitchRange::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {

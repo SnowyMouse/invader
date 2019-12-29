@@ -120,8 +120,7 @@
                 "name": "samples pointer",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true,
-                "default": 4294967295
+                "cache_only": true
             },
             {
                 "type": "pad",
