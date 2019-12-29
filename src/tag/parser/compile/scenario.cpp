@@ -129,6 +129,7 @@ namespace Invader::Parser {
             }
             t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(this->script_syntax_data.data());
             *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(this->script_syntax_data.data()) = t;
+            t.first_element_ptr = 0;
 
             auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(this->script_syntax_data.data() + sizeof(t));
             auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
