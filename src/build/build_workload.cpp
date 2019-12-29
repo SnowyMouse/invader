@@ -1175,10 +1175,9 @@ namespace Invader {
                                     std::size_t bitmap_data_other_count = bitmap_tag_other.bitmap_data.count;
 
                                     // Make sure we have the same number of stuff
-                                    if(bitmap_data_count == bitmap_data_other_count) {
-                                        const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
-
+                                    if(bitmap_data_count > 0 && bitmap_data_count == bitmap_data_other_count) {
                                         // Make sure it's not out-of-bounds
+                                        const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
                                         if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other.data.size()) {
                                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", t.path.data());
                                             match = false;
@@ -1232,12 +1231,101 @@ namespace Invader {
                         case TagClassInt::TAG_CLASS_SOUND: {
                             auto index = find_tag_index(t.path, this->sounds, true);
                             if(index.has_value()) {
-                                if(this->always_index_tags) {
+                                bool match = true;
+                                if(!this->always_index_tags) {
+                                    const auto &sound_tag_struct = this->structs[*t.base_struct];
+                                    const auto &sound_tag = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct.data.data());
+                                    const auto &sound_tag_struct_other = this->sounds[*index];
+                                    const auto *sound_tag_struct_other_data = sound_tag_struct_other.data.data();
+                                    std::size_t sound_tag_struct_other_size = sound_tag_struct_other.data.size();
+                                    const auto &sound_tag_struct_other_raw = this->sounds[*index - 1];
+                                    const auto *sound_tag_struct_other_raw_data = sound_tag_struct_other_raw.data.data();
+                                    std::size_t sound_tag_struct_raw_data_size = sound_tag_struct_other_raw.data.size();
+                                    std::size_t sound_tag_struct_raw_data_translation = sound_tag_struct_other_raw.data_offset;
+                                    const auto &sound_tag_other = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct_other_data);
+                                    std::size_t pitch_range_count = sound_tag.pitch_ranges.count;
+                                    std::size_t pitch_range_other_count = sound_tag_other.pitch_ranges.count;
+
+                                    // Make sure we have the same number of stuff
+                                    if(pitch_range_count > 0 && pitch_range_count == pitch_range_other_count) {
+                                        // Make sure it's not out-of-bounds
+                                        const auto *sound_data_ref = sound_tag_struct_other_data + sizeof(sound_tag);
+                                        const auto &pitch_range_struct = this->structs[*sound_tag_struct.resolve_pointer(&sound_tag.pitch_ranges.pointer)];
+                                        const auto *all_pitch_ranges = reinterpret_cast<const Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
+                                        const auto *all_pitch_ranges_other = reinterpret_cast<const Parser::SoundPitchRange::struct_little *>(sound_data_ref);
+                                        if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_pitch_ranges_other + pitch_range_other_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (pitch ranges go out of bounds)", t.path.data());
+                                            match = false;
+                                            break;
+                                        }
+
+                                        // Make sure we get match to equal the bitmap data count
+                                        std::size_t raw_data_index_index = 0;
+                                        for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                                            // Get the bitmap data
+                                            const auto &pitch_range = all_pitch_ranges[pr];
+                                            const auto &pitch_range_other = all_pitch_ranges_other[pr];
+
+                                            std::size_t permutation_count = pitch_range.permutations.count;
+                                            std::size_t permutation_other_count = pitch_range_other.permutations.count;
+
+                                            if(permutation_count != permutation_other_count) {
+                                                match = false;
+                                                break;
+                                            }
+
+                                            if(permutation_count == 0) {
+                                                continue;
+                                            }
+
+                                            // Bounds check
+                                            const auto *all_permutations_other = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(sound_data_ref + pitch_range_other.permutations.pointer);
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_permutations_other + permutation_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (permutations go out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            for(std::size_t p = 0; p < permutation_count; p++) {
+                                                auto &permutation_other = all_permutations_other[p];
+
+                                                std::size_t raw_data_index = t.asset_data[raw_data_index_index++];
+                                                auto &raw_data = this->raw_data[raw_data_index];
+
+                                                auto *raw_data_data = raw_data.data();
+                                                std::size_t raw_data_size = raw_data.size();
+
+                                                auto *raw_data_other_data = sound_tag_struct_other_raw_data + permutation_other.samples.file_offset - sound_tag_struct_raw_data_translation;
+                                                std::size_t raw_data_other_size = permutation_other.samples.size;
+
+                                                // Make sure it's not bullshit
+                                                if(raw_data_other_data > (sound_tag_struct_other_raw_data + sound_tag_struct_raw_data_size)) {
+                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sample data goes out of bounds)", t.path.data());
+                                                    match = false;
+                                                    break;
+                                                }
+
+                                                // Make sure the sizes match
+                                                if(raw_data_other_size != raw_data_size) {
+                                                    match = false;
+                                                    break;
+                                                }
+
+                                                // Check the data
+                                                if(std::memcmp(raw_data_other_data, raw_data_data, raw_data_size) != 0) {
+                                                    match = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if(match) {
                                     t.resource_index = index;
                                     this->structs[*t.base_struct].pointers.clear(); // clear the pointers rather than null out the base struct since Halo still requires it for sounds
                                     break;
                                 }
-                                // TODO: Compare sound data
                             }
                             break;
                         }
