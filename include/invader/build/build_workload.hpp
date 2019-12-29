@@ -291,6 +291,7 @@ namespace Invader {
         std::size_t raw_bitmap_size = 0;
         std::size_t raw_sound_size = 0;
         bool compress = false;
+        bool always_index_tags = false;
         void april_fools() const noexcept;
         void externalize_tags() noexcept;
         void delete_raw_data(std::size_t index);

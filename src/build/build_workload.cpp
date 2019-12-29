@@ -76,6 +76,7 @@ namespace Invader {
         workload.optimize_space = optimize_space;
         workload.verbose = verbose;
         workload.compress = compress;
+        workload.always_index_tags = always_index_tags;
 
         // Attempt to open the resource map
         auto open_resource_map = [&maps_directory, &no_external_tags, &workload](const char *map) -> std::vector<Resource> {
@@ -1135,22 +1136,78 @@ namespace Invader {
         switch(this->engine_target) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 for(auto &t : this->tags) {
+                    // Find the tag
+                    auto find_tag_index = [](const std::string &path, const std::vector<Resource> &resources, bool every_other) -> std::optional<std::size_t> {
+                        std::size_t count = resources.size();
+                        std::size_t iterate_count, iterate_start;
+                        if(every_other) {
+                            iterate_count = 2;
+                            iterate_start = 1;
+                        }
+                        else {
+                            iterate_count = 1;
+                            iterate_start = 0;
+                        }
+                        for(std::size_t i = iterate_start; i < count; i += iterate_count) {
+                            if(resources[i].path == path) {
+                                return i;
+                            }
+                        }
+                        return std::nullopt;
+                    };
+
                     switch(t.tag_class_int) {
-                        case TagClassInt::TAG_CLASS_BITMAP:
-                            // TODO: Bitmaps
+                        case TagClassInt::TAG_CLASS_BITMAP: {
+                            auto index = find_tag_index(t.path, this->bitmaps, true);
+                            if(index.has_value()) {
+                                if(this->always_index_tags) {
+                                    t.resource_index = index;
+                                    t.base_struct = std::nullopt;
+                                    break;
+                                }
+                                // TODO: Compare bitmap data
+                            }
                             break;
-                        case TagClassInt::TAG_CLASS_SOUND:
-                            // TODO: Sounds
+                        }
+                        case TagClassInt::TAG_CLASS_SOUND: {
+                            auto index = find_tag_index(t.path, this->sounds, true);
+                            if(index.has_value()) {
+                                if(this->always_index_tags) {
+                                    t.resource_index = index;
+                                    this->structs[*t.base_struct].pointers.clear(); // clear the pointers rather than null out the base struct since Halo still requires it for sounds
+                                    break;
+                                }
+                                // TODO: Compare sound data
+                            }
                             break;
+                        }
                         case TagClassInt::TAG_CLASS_FONT:
-                            // TODO: Fonts
-                            break;
                         case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                            // TODO: Unicode string lists
+                        case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
+                            auto index = find_tag_index(t.path, this->sounds, true);
+                            if(index.has_value()) {
+                                if(this->always_index_tags) {
+                                    t.resource_index = index;
+                                    t.base_struct = std::nullopt;
+                                    break;
+                                }
+                                switch(t.tag_class_int) {
+                                    case TagClassInt::TAG_CLASS_FONT:
+                                        // TODO: Compare font data
+                                        break;
+                                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                                        // TODO: Compare unicode string list data
+                                        break;
+                                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                                        // TODO: Compare HUD message text data
+                                        break;
+                                    default:
+                                        // There is no way we can get here
+                                        std::terminate();
+                                }
+                            }
                             break;
-                        case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                            // TODO: HUD message texts
-                            break;
+                        }
                         default:
                             break;
                     }
@@ -1160,6 +1217,7 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 for(auto &t : this->tags) {
                     switch(t.tag_class_int) {
+                        // Iterate through each permutation in each pitch range to find the bitmap
                         case TagClassInt::TAG_CLASS_BITMAP: {
                             auto &bitmap_tag_struct = this->structs[*t.base_struct];
                             auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
@@ -1188,6 +1246,8 @@ namespace Invader {
                             }
                             break;
                         }
+
+                        // Iterate through each permutation in each pitch range to find the sound
                         case TagClassInt::TAG_CLASS_SOUND: {
                             auto &sound_tag_struct = this->structs[*t.base_struct];
                             auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
