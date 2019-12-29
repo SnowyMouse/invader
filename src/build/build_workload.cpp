@@ -1480,7 +1480,7 @@ namespace Invader {
                                                     const auto *string_data_other = loc_tag_struct_other_data + string_other.string.pointer;
 
                                                     if(static_cast<std::size_t>(string_data_other + string_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (pixel data goes out of bounds)", t.path.data());
+                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (string goes out of bounds)", t.path.data());
                                                         match = false;
                                                         break;
                                                     }
@@ -1494,9 +1494,54 @@ namespace Invader {
                                         }
                                         break;
                                     }
-                                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
-                                        // TODO: Compare HUD message text data
+                                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
+                                        const auto &hud_message_tag = *reinterpret_cast<const Parser::HUDMessageText::struct_little *>(loc_tag_struct.data.data());
+                                        if(loc_tag_struct_other_size < sizeof(hud_message_tag)) {
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.data());
+                                            match = false;
+                                            break;
+                                        }
+                                        const auto &hud_message_tag_other = *reinterpret_cast<const Parser::HUDMessageText::struct_little *>(loc_tag_struct_other_data);
+
+                                        std::size_t message_count = hud_message_tag.messages.count;
+                                        std::size_t message_count_other = hud_message_tag_other.messages.count;
+
+                                        std::size_t message_element_count = hud_message_tag.message_elements.count;
+                                        std::size_t message_element_count_other = hud_message_tag_other.message_elements.count;
+
+                                        std::size_t text_data_size = hud_message_tag.text_data.size;
+                                        std::size_t text_data_size_other = hud_message_tag_other.text_data.size;
+
+                                        match = message_count == message_count_other && message_element_count == message_element_count_other && text_data_size == text_data_size_other;
+
+                                        // Give up if needed
+                                        if(!match) {
+                                            break;
+                                        }
+
+                                        if(message_count > 0) {
+                                            // TODO: Check these
+                                        }
+
+                                        if(message_element_count > 0) {
+                                            // TODO: Check these
+                                        }
+
+                                        // Make sure the text data is the same
+                                        if(text_data_size > 0) {
+                                            const auto *text_data = this->structs[*loc_tag_struct.resolve_pointer(&hud_message_tag.text_data.pointer)].data.data();
+                                            const auto *text_data_other = loc_tag_struct_other_data + hud_message_tag_other.text_data.pointer;
+
+                                            if(static_cast<std::size_t>(text_data_other + text_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (text data goes out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            match = std::memcmp(text_data, text_data_other, text_data_size) == 0;
+                                        }
                                         break;
+                                    }
                                     default:
                                         // There is no way we can get here
                                         std::terminate();
