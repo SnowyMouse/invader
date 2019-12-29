@@ -180,15 +180,13 @@
                 "name": "unknown int",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true,
-                "default": 4294967295
+                "cache_only": true
             },
             {
                 "name": "unknown float",
                 "type": "float",
                 "endian": "little",
-                "cache_only": true,
-                "default": 15.0
+                "cache_only": true
             },
             {
                 "type": "pad",
@@ -216,6 +214,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 84
     }
 ]

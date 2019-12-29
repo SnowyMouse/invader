@@ -89,4 +89,9 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
     }
+
+    void SoundLooping::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->unknown_int = 0xFFFFFFFF;
+        this->unknown_float = 15.0F;
+    }
 }

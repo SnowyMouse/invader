@@ -185,8 +185,7 @@
             {
                 "name": "unknown int",
                 "type": "uint32",
-                "cache_only": true,
-                "default": 1
+                "cache_only": true
             },
             {
                 "name": "shader flags",
@@ -313,6 +312,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 324
     }
 ]

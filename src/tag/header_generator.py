@@ -6,6 +6,7 @@ import os
 
 if len(sys.argv) < 11:
     print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+    sys.exit(1)
 
 files = []
 all_enums = []
@@ -39,6 +40,9 @@ for i in range(10, len(sys.argv)):
             all_bitfields.append(s)
         elif s["type"] == "struct":
             for f in s["fields"]:
+                if ("cache_only" in f and f["cache_only"]) and ("default" in f):
+                    print("{}::{} - default AND cache_only cannot be used together in a field since they may be unexpectedly modified".format(s["name"],f["name"]), file=sys.stderr)
+                    sys.exit(1)
                 if f["type"] != "pad":
                     f["name"] = make_name_fun(f["name"], False)
             all_structs.append(s)

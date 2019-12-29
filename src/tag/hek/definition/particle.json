@@ -207,8 +207,7 @@
                 "name": "make it actually work",
                 "type": "uint32",
                 "endian": "little",
-                "cache_only": true,
-                "default": 1
+                "cache_only": true
             },
             {
                 "name": "shader flags",

@@ -404,14 +404,12 @@
                 "name": "prev filthy part index",
                 "type": "int8",
                 "endian": null,
-                "default": -1,
                 "cache_only": true
             },
             {
                 "name": "next filthy part index",
                 "type": "int8",
                 "endian": null,
-                "default": -1,
                 "cache_only": true
             },
             {

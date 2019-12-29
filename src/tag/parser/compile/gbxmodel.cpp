@@ -294,6 +294,8 @@ namespace Invader::Parser {
         // Don't forget to set these memes
         this->do_not_crash_the_game = 1;
         this->do_not_screw_up_the_model = 4;
+        this->prev_filthy_part_index = -1;
+        this->next_filthy_part_index = -1;
     }
 
     void GBXModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
