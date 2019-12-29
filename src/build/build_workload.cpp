@@ -1332,13 +1332,9 @@ namespace Invader {
                         case TagClassInt::TAG_CLASS_FONT:
                         case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                         case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
-                            auto index = find_tag_index(t.path, this->sounds, true);
+                            auto index = find_tag_index(t.path, this->loc, true);
                             if(index.has_value()) {
-                                if(this->always_index_tags) {
-                                    t.resource_index = index;
-                                    t.base_struct = std::nullopt;
-                                    break;
-                                }
+                                bool match = true;
                                 switch(t.tag_class_int) {
                                     case TagClassInt::TAG_CLASS_FONT:
                                         // TODO: Compare font data
@@ -1352,6 +1348,11 @@ namespace Invader {
                                     default:
                                         // There is no way we can get here
                                         std::terminate();
+                                }
+                                if(match) {
+                                    t.resource_index = index;
+                                    t.base_struct = std::nullopt;
+                                    break;
                                 }
                             }
                             break;
