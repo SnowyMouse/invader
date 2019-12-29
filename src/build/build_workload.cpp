@@ -1348,13 +1348,96 @@ namespace Invader {
                         case TagClassInt::TAG_CLASS_FONT:
                         case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                         case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
-                            auto index = find_tag_index(t.path, this->loc, true);
+                            auto index = find_tag_index(t.path, this->loc, false);
                             if(index.has_value()) {
                                 bool match = true;
+
+                                const auto &loc_tag_struct_other = this->loc[*index];
+                                const auto *loc_tag_struct_other_data = loc_tag_struct_other.data.data();
+                                std::size_t loc_tag_struct_other_size = loc_tag_struct_other.data.size();
+
+                                const auto &loc_tag_struct = this->structs[*t.base_struct];
+
                                 switch(t.tag_class_int) {
-                                    case TagClassInt::TAG_CLASS_FONT:
-                                        // TODO: Compare font data
+                                    case TagClassInt::TAG_CLASS_FONT: {
+                                        const auto &font_tag = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct.data.data());
+                                        if(loc_tag_struct_other_size < sizeof(font_tag)) {
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (loc main struct goes out of bounds)", t.path.data());
+                                            match = false;
+                                            break;
+                                        }
+                                        const auto &font_tag_other = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct_other_data);
+
+                                        // First, get the character counts of both
+                                        std::size_t character_count = font_tag.characters.count;
+                                        std::size_t character_count_other = font_tag_other.characters.count;
+                                        std::size_t pixel_data_size = font_tag.pixels.size;
+                                        std::size_t pixel_data_size_other = font_tag_other.pixels.size;
+
+                                        // Next, compare the data
+                                        match = font_tag_other.ascending_height == font_tag.ascending_height &&
+                                                font_tag_other.descending_height == font_tag.descending_height &&
+                                                std::memcmp(font_tag_other.flags.value, font_tag.flags.value, sizeof(font_tag.flags.value)) == 0 &&
+                                                font_tag_other.leading_height == font_tag.leading_height &&
+                                                font_tag_other.leading_width == font_tag.leading_width &&
+                                                character_count == character_count_other &&
+                                                pixel_data_size == pixel_data_size_other;
+
+                                        // No match? Break.
+                                        if(!match) {
+                                            break;
+                                        }
+
+                                        // Now, compare the characters
+                                        if(character_count > 0) {
+                                            const auto *character_data = reinterpret_cast<const Parser::FontCharacter::struct_little *>(this->structs[*loc_tag_struct.resolve_pointer(&font_tag.characters.pointer)].data.data());
+                                            const auto *character_data_other = reinterpret_cast<const Parser::FontCharacter::struct_little *>(loc_tag_struct_other_data + font_tag_other.characters.pointer);
+
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(character_data_other + character_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (character data goes out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            for(std::size_t c = 0; c < character_count; c++) {
+                                                const auto &character = character_data[c];
+                                                const auto &character_other = character_data_other[c];
+
+                                                match = character.bitmap_height == character_other.bitmap_height &&
+                                                        character.bitmap_origin_x == character_other.bitmap_origin_x &&
+                                                        character.bitmap_origin_y == character_other.bitmap_origin_y &&
+                                                        character.bitmap_width == character_other.bitmap_width &&
+                                                        character.character == character_other.character &&
+                                                        character.pixels_offset == character_other.pixels_offset;
+
+                                                // No match? Break.
+                                                if(!match) {
+                                                    break;
+                                                }
+                                            }
+
+                                            // If we didn't get a match, stop
+                                            if(!match) {
+                                                break;
+                                            }
+                                        }
+
+                                        if(pixel_data_size > 0) {
+                                            const auto *pixel_data = this->structs[*loc_tag_struct.resolve_pointer(&font_tag.pixels.pointer)].data.data();
+                                            const auto *pixel_data_other = loc_tag_struct_other_data + font_tag_other.pixels.pointer;
+
+                                            if(static_cast<std::size_t>(pixel_data_other + pixel_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (pixel data goes out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            match = std::memcmp(pixel_data, pixel_data_other, pixel_data_size) == 0;
+                                        }
+
+                                        // If we're still here, check the font data, too
                                         break;
+                                    }
                                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                                         // TODO: Compare unicode string list data
                                         break;
