@@ -1271,6 +1271,13 @@ namespace Invader {
                         default:
                             break;
                     }
+
+                    // Clear off stuff
+                    if(t.resource_index.has_value()) {
+                        for(auto &a : t.asset_data) {
+                            this->delete_raw_data(a);
+                        }
+                    }
                 }
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
