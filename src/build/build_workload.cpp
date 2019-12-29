@@ -1362,7 +1362,7 @@ namespace Invader {
                                     case TagClassInt::TAG_CLASS_FONT: {
                                         const auto &font_tag = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(font_tag)) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (loc main struct goes out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (font main struct goes out of bounds)", t.path.data());
                                             match = false;
                                             break;
                                         }
@@ -1422,6 +1422,7 @@ namespace Invader {
                                             }
                                         }
 
+                                        // Lastly, check pixel data
                                         if(pixel_data_size > 0) {
                                             const auto *pixel_data = this->structs[*loc_tag_struct.resolve_pointer(&font_tag.pixels.pointer)].data.data();
                                             const auto *pixel_data_other = loc_tag_struct_other_data + font_tag_other.pixels.pointer;
@@ -1434,13 +1435,65 @@ namespace Invader {
 
                                             match = std::memcmp(pixel_data, pixel_data_other, pixel_data_size) == 0;
                                         }
-
-                                        // If we're still here, check the font data, too
                                         break;
                                     }
-                                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                                        // TODO: Compare unicode string list data
+                                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST: {
+                                        const auto &ustr_tag = *reinterpret_cast<const Parser::UnicodeStringList::struct_little *>(loc_tag_struct.data.data());
+                                        if(loc_tag_struct_other_size < sizeof(ustr_tag)) {
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.data());
+                                            match = false;
+                                            break;
+                                        }
+                                        const auto &ustr_tag_other = *reinterpret_cast<const Parser::UnicodeStringList::struct_little *>(loc_tag_struct_other_data);
+                                        std::size_t string_count = ustr_tag.strings.count;
+                                        std::size_t string_count_other = ustr_tag_other.strings.count;
+                                        if(string_count != string_count_other) {
+                                            match = false;
+                                            break;
+                                        }
+                                        if(string_count > 0) {
+                                            const auto &string_list_struct = this->structs[*loc_tag_struct.resolve_pointer(&ustr_tag.strings.pointer)];
+                                            const auto *string_list = reinterpret_cast<const Parser::UnicodeStringListString::struct_little *>(string_list_struct.data.data());
+                                            const auto *string_list_other = reinterpret_cast<const Parser::UnicodeStringListString::struct_little *>(loc_tag_struct_other_data + ustr_tag_other.strings.pointer);
+
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(string_list_other + string_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (strings go out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            // Check each string
+                                            for(std::size_t s = 0; s < string_count; s++) {
+                                                const auto &string = string_list[s];
+                                                const auto &string_other = string_list_other[s];
+                                                std::size_t string_data_size = string.string.size;
+                                                std::size_t string_data_size_other = string_other.string.size;
+
+                                                // Make sure the sizes match
+                                                if(string_data_size != string_data_size_other) {
+                                                    match = false;
+                                                    break;
+                                                }
+
+                                                if(string_data_size > 0) {
+                                                    const auto *string_data = this->structs[*string_list_struct.resolve_pointer(&string.string.pointer)].data.data();
+                                                    const auto *string_data_other = loc_tag_struct_other_data + string_other.string.pointer;
+
+                                                    if(static_cast<std::size_t>(string_data_other + string_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (pixel data goes out of bounds)", t.path.data());
+                                                        match = false;
+                                                        break;
+                                                    }
+
+                                                    match = std::memcmp(string_data, string_data_other, string_data_size) == 0;
+                                                    if(!match) {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
                                         break;
+                                    }
                                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
                                         // TODO: Compare HUD message text data
                                         break;
