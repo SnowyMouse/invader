@@ -1166,9 +1166,18 @@ namespace Invader {
                                     const auto &bitmap_tag = *reinterpret_cast<const Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
                                     const auto &bitmap_tag_struct_other = this->bitmaps[*index];
                                     const auto *bitmap_tag_struct_other_data = bitmap_tag_struct_other.data.data();
+                                    std::size_t bitmap_tag_struct_other_size = bitmap_tag_struct_other.data.size();
+
+                                    if(bitmap_tag_struct_other_size < sizeof(bitmap_tag)) {
+                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap main struct goes out of bounds)", t.path.data());
+                                        match = false;
+                                        break;
+                                    }
+
                                     const auto &bitmap_tag_struct_other_raw = this->bitmaps[*index - 1];
                                     const auto *bitmap_tag_struct_other_raw_data = bitmap_tag_struct_other_raw.data.data();
                                     std::size_t bitmap_tag_struct_raw_data_size = bitmap_tag_struct_other_raw.data.size();
+
                                     std::size_t bitmap_tag_struct_raw_data_translation = bitmap_tag_struct_other_raw.data_offset;
                                     const auto &bitmap_tag_other = *reinterpret_cast<const Parser::Bitmap::struct_little *>(bitmap_tag_struct_other_data);
                                     std::size_t bitmap_data_count = bitmap_tag.bitmap_data.count;
@@ -1178,7 +1187,7 @@ namespace Invader {
                                     if(bitmap_data_count > 0 && bitmap_data_count == bitmap_data_other_count) {
                                         // Make sure it's not out-of-bounds
                                         const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
-                                        if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other.data.size()) {
+                                        if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
                                             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", t.path.data());
                                             match = false;
                                             break;
@@ -1238,6 +1247,13 @@ namespace Invader {
                                     const auto &sound_tag_struct_other = this->sounds[*index];
                                     const auto *sound_tag_struct_other_data = sound_tag_struct_other.data.data();
                                     std::size_t sound_tag_struct_other_size = sound_tag_struct_other.data.size();
+
+                                    if(sound_tag_struct_other_size < sizeof(sound_tag)) {
+                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sound main struct goes out of bounds)", t.path.data());
+                                        match = false;
+                                        break;
+                                    }
+
                                     const auto &sound_tag_struct_other_raw = this->sounds[*index - 1];
                                     const auto *sound_tag_struct_other_raw_data = sound_tag_struct_other_raw.data.data();
                                     std::size_t sound_tag_struct_raw_data_size = sound_tag_struct_other_raw.data.size();
