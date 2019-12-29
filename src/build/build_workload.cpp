@@ -152,6 +152,11 @@ namespace Invader {
         }
         this->add_tags();
 
+        // If we have resource maps to check, check them
+        if(this->bitmaps.size() != 0) {
+            this->externalize_tags();
+        }
+
         // Generate the tag array
         this->generate_tag_array();
 
@@ -1115,6 +1120,51 @@ namespace Invader {
             else {
                 eprintf_warn("WARNING: Failed to load toolbeta.map. Make sure to set your working directory.");
             }
+        }
+    }
+
+    void BuildWorkload::externalize_tags() noexcept {
+        switch(this->engine_target) {
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                for(auto &t : this->tags) {
+                    switch(t.tag_class_int) {
+                        case TagClassInt::TAG_CLASS_BITMAP:
+                            // TODO: Bitmaps
+                            break;
+                        case TagClassInt::TAG_CLASS_SOUND:
+                            // TODO: Sounds
+                            break;
+                        case TagClassInt::TAG_CLASS_FONT:
+                            // TODO: Fonts
+                            break;
+                        case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                            // TODO: Unicode string lists
+                            break;
+                        case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                            // TODO: HUD message texts
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                for(auto &t : this->tags) {
+                    switch(t.tag_class_int) {
+                        case TagClassInt::TAG_CLASS_BITMAP:
+                            // TODO: Bitmaps
+                            break;
+                        case TagClassInt::TAG_CLASS_SOUND:
+                            // TODO: Sounds
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 }

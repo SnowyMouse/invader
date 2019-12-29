@@ -292,6 +292,7 @@ namespace Invader {
         std::size_t raw_sound_size = 0;
         bool compress = false;
         void april_fools() const noexcept;
+        void externalize_tags() noexcept;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
