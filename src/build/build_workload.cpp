@@ -1160,7 +1160,6 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 for(auto &t : this->tags) {
                     switch(t.tag_class_int) {
-                        // Find and remove bitmaps
                         case TagClassInt::TAG_CLASS_BITMAP: {
                             auto &bitmap_tag_struct = this->structs[*t.base_struct];
                             auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
@@ -1176,7 +1175,7 @@ namespace Invader {
 
                                     // Find bitmaps
                                     for(auto &ab : this->bitmaps) {
-                                        if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                        if(ab.data.size() == raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
                                             this->delete_raw_data(raw_data_index);
                                             bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
                                             auto flags = bitmap_data.flags.read();
@@ -1189,9 +1188,41 @@ namespace Invader {
                             }
                             break;
                         }
-                        case TagClassInt::TAG_CLASS_SOUND:
-                            // TODO: Sounds
+                        case TagClassInt::TAG_CLASS_SOUND: {
+                            auto &sound_tag_struct = this->structs[*t.base_struct];
+                            auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
+                            std::size_t sound_pitch_range_count = sound_tag.pitch_ranges.count;
+                            std::size_t resource_index = 0;
+                            if(sound_pitch_range_count) {
+                                auto &pitch_range_struct = this->structs[*sound_tag_struct.resolve_pointer(&sound_tag.pitch_ranges.pointer)];
+                                auto *all_pitch_ranges = reinterpret_cast<Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
+                                for(std::size_t pr = 0; pr < sound_pitch_range_count; pr++) {
+                                    auto &pitch_range = all_pitch_ranges[pr];
+                                    std::size_t permutation_count = pitch_range.permutations.count;
+                                    if(permutation_count) {
+                                        auto *all_permutations = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
+                                        for(std::size_t p = 0; p < permutation_count; p++) {
+                                            auto &permutation = all_permutations[p];
+                                            std::size_t raw_data_index = t.asset_data[resource_index++];
+                                            auto &raw_data = this->raw_data[raw_data_index];
+                                            auto *raw_data_data = raw_data.data();
+                                            std::size_t raw_data_size = raw_data.size();
+
+                                            // Find sounds
+                                            for(auto &ab : this->sounds) {
+                                                if(ab.data.size() == raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                                    this->delete_raw_data(raw_data_index);
+                                                    permutation.samples.file_offset = static_cast<std::uint32_t>(ab.data_offset);
+                                                    permutation.samples.external = 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             break;
+                        }
                         default:
                             break;
                     }
