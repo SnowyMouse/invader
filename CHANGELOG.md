@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-extract: Tag IDs are now set to FFFFFFFF when extracted. This will
   make extracted tags more reproducible independent of the map being extracted.
+- invader-extract: The maps folder the map is in is used if no maps folder is
+  supplied
 
 ## [0.21.3] - 2019-12-26
 ### Fixed
