@@ -468,7 +468,9 @@
             {
                 "name": "sound effect",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "sound"
+                ],
                 "compound": true
             },
             {
@@ -634,7 +636,9 @@
             {
                 "name": "text label unicode strings list",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "unicode_string_list"
+                ],
                 "compound": true
             },
             {

@@ -2576,7 +2576,9 @@
             {
                 "name": "reference",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "*"
+                ],
                 "compound": true
             }
         ],
@@ -3293,7 +3295,7 @@
                 "name": "custom object names",
                 "type": "TagDependency",
                 "classes": [
-                    "unicode_string"
+                    "unicode_string_list"
                 ],
                 "compound": true
             },
@@ -3301,7 +3303,7 @@
                 "name": "ingame help text",
                 "type": "TagDependency",
                 "classes": [
-                    "unicode_string"
+                    "unicode_string_list"
                 ],
                 "compound": true
             },
@@ -3309,7 +3311,7 @@
                 "name": "hud messages",
                 "type": "TagDependency",
                 "classes": [
-                    "hud_messages"
+                    "hud_message_text"
                 ],
                 "compound": true
             },

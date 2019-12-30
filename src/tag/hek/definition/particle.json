@@ -74,7 +74,7 @@
                 "name": "sir marty exchanged his children for thine",
                 "type": "TagDependency",
                 "classes": [
-                    "material_effect"
+                    "material_effects"
                 ],
                 "compound": true
             },

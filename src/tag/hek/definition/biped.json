@@ -170,7 +170,7 @@
                 "name": "footsteps",
                 "type": "TagDependency",
                 "classes": [
-                    "footsteps"
+                    "material_effects"
                 ],
                 "compound": true
             },

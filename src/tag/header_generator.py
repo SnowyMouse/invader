@@ -45,6 +45,12 @@ for i in range(10, len(sys.argv)):
                     sys.exit(1)
                 if f["type"] != "pad":
                     f["name"] = make_name_fun(f["name"], False)
+                if f["type"] == "TagDependency" and len(f["classes"]) == 1 and f["classes"][0] == "shader":
+                    shader_classes = ["shader", "shader_environment", "shader_model", "shader_transparent_chicago", "shader_transparent_chicago_extended", "shader_transparent_glass", "shader_transparent_meter", "shader_transparent_plasma", "shader_transparent_water"]
+                    f["classes"] = shader_classes
+                if f["type"] == "TagDependency" and len(f["classes"]) == 1 and f["classes"][0] == "object":
+                    shader_classes = ["biped", "device_control", "device_light_fixture", "device_machine", "device", "equipment", "item", "garbage", "item", "placeholder", "projectile", "scenery", "unit", "vehicle", "weapon"]
+                    f["classes"] = shader_classes
             all_structs.append(s)
         else:
             print("Unknown object type {}".format(s["type"]), file=sys.stderr)
@@ -419,6 +425,34 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
             cpp_cache_format_data.write("        r.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
             cpp_cache_format_data.write("        if(this->{}.path.size() > 0) {{\n".format(name))
+
+            # Make sure the class is correct for the reference
+            if struct["classes"][0] != "*":
+                test_line = ""
+                error_line = ""
+                classes = struct["classes"]
+                classes_len = len(classes)
+                for c in range(0, classes_len):
+                    if c != 0:
+                        test_line = " && " + test_line
+                    test_line = "this->{}.tag_class_int != TagClassInt::TAG_CLASS_{}".format(name, classes[c].upper()) + test_line
+                if classes_len == 1:
+                    error_line = " {}".format(classes[0])
+                elif classes_len == 2:
+                    error_line = " {} or {}".format(classes[0], classes[1])
+                else:
+                    for c in range(0, classes_len):
+                        if c != 0:
+                            error_line = error_line + ","
+                        if c + 1 == classes_len:
+                            error_line = error_line + " or"
+                        error_line = error_line + " {}".format(classes[c])
+
+                cpp_cache_format_data.write("            if({}) {{\n".format(test_line))
+                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{} must be{}, found %s, instead\", tag_class_to_extension(this->{}.tag_class_int));\n".format(name, error_line, name))
+                cpp_cache_format_data.write("                throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("            }\n")
+
             cpp_cache_format_data.write("            std::size_t index = workload.compile_tag_recursively(this->{}.path.data(), this->{}.tag_class_int);\n".format(name, name))
             cpp_cache_format_data.write("            this->{}.tag_id.index = static_cast<std::uint16_t>(index);\n".format(name))
             cpp_cache_format_data.write("            r.{}.tag_id = this->{}.tag_id;\n".format(name, name))

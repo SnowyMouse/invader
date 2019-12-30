@@ -143,7 +143,7 @@
                 "name": "special key labels string list",
                 "type": "TagDependency",
                 "classes": [
-                    "unicode_string"
+                    "unicode_string_list"
                 ],
                 "compound": true
             },

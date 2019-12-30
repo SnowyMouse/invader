@@ -813,7 +813,7 @@
                 "name": "particle system",
                 "type": "TagDependency",
                 "classes": [
-                    "weather_system"
+                    "weather_particle_system"
                 ],
                 "compound": true
             },

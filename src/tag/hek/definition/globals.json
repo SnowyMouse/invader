@@ -916,7 +916,7 @@
                 "name": "hud digits definition",
                 "type": "TagDependency",
                 "classes": [
-                    "hud_numbers"
+                    "hud_number"
                 ],
                 "compound": true
             },
@@ -969,7 +969,8 @@
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
-                    "item"
+                    "weapon",
+                    "equipment"
                 ]
             }
         ],
@@ -999,7 +1000,8 @@
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
-                    "unit"
+                    "vehicle",
+                    "biped"
                 ]
             }
         ],
@@ -1027,7 +1029,7 @@
                 "name": "flag",
                 "type": "TagDependency",
                 "classes": [
-                    "item"
+                    "weapon"
                 ],
                 "compound": true
             },
@@ -1035,7 +1037,8 @@
                 "name": "unit",
                 "type": "TagDependency",
                 "classes": [
-                    "unit"
+                    "vehicle",
+                    "biped"
                 ],
                 "compound": true
             },
@@ -1065,7 +1068,7 @@
                 "name": "ball",
                 "type": "TagDependency",
                 "classes": [
-                    "item"
+                    "weapon"
                 ],
                 "compound": true
             },
@@ -1090,7 +1093,8 @@
                 "name": "unit",
                 "type": "TagDependency",
                 "classes": [
-                    "unit"
+                    "vehicle",
+                    "biped"
                 ],
                 "compound": true
             },
@@ -1219,7 +1223,10 @@
             {
                 "name": "first person hands",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "gbxmodel",
+                    "model"
+                ],
                 "compound": true
             },
             {
@@ -1233,7 +1240,9 @@
             {
                 "name": "shield meter",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "meter"
+                ],
                 "compound": true
             },
             {
@@ -1244,7 +1253,9 @@
             {
                 "name": "body meter",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "meter"
+                ],
                 "compound": true
             },
             {

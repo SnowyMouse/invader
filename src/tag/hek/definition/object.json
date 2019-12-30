@@ -133,7 +133,8 @@
                     "antenna",
                     "glow",
                     "light_volume",
-                    "lightning"
+                    "lightning",
+                    "flag"
                 ]
             },
             {
@@ -363,7 +364,8 @@
                 "name": "model",
                 "type": "TagDependency",
                 "classes": [
-                    "gbxmodel"
+                    "gbxmodel",
+                    "model"
                 ],
                 "compound": true
             },
@@ -371,7 +373,7 @@
                 "name": "animation graph",
                 "type": "TagDependency",
                 "classes": [
-                    "animation"
+                    "model_animations"
                 ],
                 "compound": true
             },
