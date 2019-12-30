@@ -316,10 +316,96 @@ namespace Invader::Parser {
         }
     }
 
+    struct BSPData {
+        bool valid = false;
+        const ModelCollisionGeometryBSP3DNode::struct_little *bsp3d_nodes = nullptr;
+        std::uint32_t bsp3d_node_count = 0;
+        const ModelCollisionGeometryBSPPlane::struct_little *planes = nullptr;
+        std::uint32_t plane_count = 0;
+        const ModelCollisionGeometryBSPLeaf::struct_little *leaves = nullptr;
+        std::uint32_t leaf_count = 0;
+        const ModelCollisionGeometryBSP2DNode::struct_little *bsp2d_nodes = nullptr;
+        std::uint32_t bsp2d_node_count = 0;
+        const ModelCollisionGeometryBSP2DReference::struct_little *bsp2d_references = nullptr;
+        std::uint32_t bsp2d_reference_count = 0;
+        const ModelCollisionGeometryBSPSurface::struct_little *surfaces = nullptr;
+        std::uint32_t surface_count = 0;
+        const ModelCollisionGeometryBSPEdge::struct_little *edges = nullptr;
+        std::uint32_t edge_count = 0;
+        const ModelCollisionGeometryBSPVertex::struct_little *vertices = nullptr;
+        std::uint32_t vertex_count = 0;
+    };
+
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        // Get the bsp data; saves us from having to get it again
+        std::vector<BSPData> bsp_data;
+        bsp_data.reserve(this->structure_bsps.size());
+        for(auto &b : this->structure_bsps) {
+            auto &bsp_data_s = bsp_data.emplace_back();
+            if(b.structure_bsp.tag_id.is_null()) {
+                continue;
+            }
+
+            auto &bsp_tag_struct = workload.structs[*workload.tags[b.structure_bsp.tag_id.index].base_struct];
+            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
+            if(bsp_tag_data.collision_bsp.count == 0) {
+                continue;
+            }
+
+            auto &collision_bsp_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.collision_bsp.pointer)];
+            auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
+
+            bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
+            bsp_data_s.plane_count = collision_bsp_data.planes.count;
+            bsp_data_s.leaf_count = collision_bsp_data.leaves.count;
+            bsp_data_s.bsp2d_node_count = collision_bsp_data.bsp2d_nodes.count;
+            bsp_data_s.bsp2d_reference_count = collision_bsp_data.bsp2d_references.count;
+            bsp_data_s.surface_count = collision_bsp_data.surfaces.count;
+            bsp_data_s.edge_count = collision_bsp_data.edges.count;
+            bsp_data_s.vertex_count = collision_bsp_data.vertices.count;
+
+            if(bsp_data_s.bsp3d_node_count) {
+                bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
+            }
+            if(bsp_data_s.plane_count) {
+                bsp_data_s.planes = reinterpret_cast<const ModelCollisionGeometryBSPPlane::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.planes.pointer)].data.data());
+            }
+            if(bsp_data_s.leaf_count) {
+                bsp_data_s.leaves = reinterpret_cast<const ModelCollisionGeometryBSPLeaf::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.leaves.pointer)].data.data());
+            }
+            if(bsp_data_s.bsp2d_node_count) {
+                bsp_data_s.bsp2d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP2DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_nodes.pointer)].data.data());
+            }
+            if(bsp_data_s.bsp2d_reference_count) {
+                bsp_data_s.bsp2d_references = reinterpret_cast<const ModelCollisionGeometryBSP2DReference::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_references.pointer)].data.data());
+            }
+            if(bsp_data_s.surface_count) {
+                bsp_data_s.surfaces = reinterpret_cast<const ModelCollisionGeometryBSPSurface::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.surfaces.pointer)].data.data());
+            }
+            if(bsp_data_s.edge_count) {
+                bsp_data_s.edges = reinterpret_cast<const ModelCollisionGeometryBSPEdge::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.edges.pointer)].data.data());
+            }
+            if(bsp_data_s.vertex_count) {
+                bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
+            }
+        }
+
         // TODO: Position encounters and command lists
-        if(this->encounters.size() != 0 || this->command_lists.size() != 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter and command list BSP location", tag_index);
+        for(auto &encounter : this->encounters) {
+            if(encounter.flags.manual_bsp_index_specified) {
+                continue;
+            }
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter BSP location", tag_index);
+            break;
+        }
+
+        // Determine where the command list is
+        for(auto &command_list : this->command_lists) {
+            if(command_list.flags.manual_bsp_index) {
+                continue;
+            }
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement command list BSP location", tag_index);
+            break;
         }
 
         // Decals
