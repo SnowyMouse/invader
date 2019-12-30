@@ -334,6 +334,8 @@ namespace Invader::Parser {
         std::uint32_t edge_count = 0;
         const ModelCollisionGeometryBSPVertex::struct_little *vertices = nullptr;
         std::uint32_t vertex_count = 0;
+        const ScenarioStructureBSPLeaf::struct_little *render_leaves = nullptr;
+        std::uint32_t render_leaf_count = 0;
     };
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
@@ -367,6 +369,7 @@ namespace Invader::Parser {
             bsp_data_s.surface_count = collision_bsp_data.surfaces.count;
             bsp_data_s.edge_count = collision_bsp_data.edges.count;
             bsp_data_s.vertex_count = collision_bsp_data.vertices.count;
+            bsp_data_s.render_leaf_count = bsp_tag_data.leaves.count;
 
             if(bsp_data_s.bsp3d_node_count) {
                 bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
@@ -392,6 +395,9 @@ namespace Invader::Parser {
             if(bsp_data_s.vertex_count) {
                 bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
             }
+            if(bsp_data_s.render_leaf_count) {
+                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
+            }
         }
 
         std::size_t bsp_find_warnings = 0;
@@ -399,8 +405,8 @@ namespace Invader::Parser {
         // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = this->encounters.size();
         if(encounter_list_count != 0) {
-            bool warned = false;
-            auto *encounter_array = reinterpret_cast<ScenarioEncounter::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
+            auto &encounter_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)];
+            auto *encounter_array = reinterpret_cast<ScenarioEncounter::struct_little *>(encounter_struct.data.data());
             for(std::size_t i = 0; i < encounter_list_count; i++) {
                 auto &encounter = this->encounters[i];
                 auto &encounter_data = encounter_array[i];
@@ -408,26 +414,144 @@ namespace Invader::Parser {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     continue;
                 }
-                if(warned) {
-                    continue;
-                }
 
-                bool raycast = encounter.flags._3d_firing_positions;
+                std::size_t best_bsp = NULL_INDEX;
+                std::size_t best_bsp_hits = 0;
+                std::size_t total_best_bsps = 0;
+                std::size_t max_hits = 0;
+
+                std::vector<std::pair<HEK::Index, HEK::Index>> firing_positions_indices;
+                std::size_t firing_position_count = encounter.firing_positions.size();
+                firing_positions_indices.reserve(firing_position_count);
+
+                bool raycast = encounter.flags._3d_firing_positions == 0;
                 for(std::size_t b = 0; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
 
+                    auto intersects_directly_below = [&bsp](HEK::Point3D<HEK::LittleEndian> &position, std::uint32_t &surface_index, float distance) -> bool {
+                        auto position_below = position;
+                        position_below.z = position_below.z - distance;
+
+                        std::uint32_t leaf_index;
+                        HEK::Point3D<HEK::LittleEndian> intersection_point;
+                        return check_for_intersection(
+                            position, position_below,
+                            bsp.bsp3d_nodes,
+                            bsp.bsp3d_node_count,
+                            bsp.planes,
+                            bsp.plane_count,
+                            bsp.leaves,
+                            bsp.leaf_count,
+                            bsp.bsp2d_nodes,
+                            bsp.bsp2d_node_count,
+                            bsp.bsp2d_references,
+                            bsp.bsp2d_reference_count,
+                            bsp.surfaces,
+                            bsp.surface_count,
+                            bsp.edges,
+                            bsp.edge_count,
+                            bsp.vertices,
+                            bsp.vertex_count,
+                            intersection_point,
+                            surface_index,
+                            leaf_index
+                        );
+                    };
+
+                    std::size_t hits = 0;
+                    std::size_t total_hits = 0;
+
+                    for(auto &s : encounter.squads) {
+                        for(auto &p : s.starting_locations) {
+                            total_hits++;
+                            auto leaf = leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
+
+                            bool in_bsp = !leaf.is_null();
+                            if(in_bsp) {
+                                // If raycasting check for a surface that is 0.5 world units below it
+                                if(raycast) {
+                                    std::uint32_t surface_index;
+                                    if(!intersects_directly_below(p.position, surface_index, 2.0F)) {
+                                        in_bsp = false;
+                                    }
+                                }
+
+                                // Add 1 if still in BSP
+                                hits += in_bsp;
+                            }
+                        }
+                    }
+
+                    firing_positions_indices.clear();
+                    for(auto &f : encounter.firing_positions) {
+                        total_hits++;
+                        auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
+
+                        bool in_bsp = !leaf.is_null();
+                        if(in_bsp) {
+                            // If raycasting check for a surface that is 0.5 world units below it
+                            std::uint32_t surface_index;
+                            if(raycast) {
+                                in_bsp = intersects_directly_below(f.position, surface_index, 0.5F);
+                            }
+                            else {
+                                surface_index = NULL_INDEX;
+                            }
+
+                            // Add 1 if still in BSP and set cluster index
+                            if(in_bsp) {
+                                hits++;
+                                firing_positions_indices.emplace_back(bsp.render_leaves[leaf.int_value()].cluster, static_cast<HEK::Index>(surface_index));
+                            }
+                        }
+                    }
+
+                    if(hits > best_bsp_hits) {
+                        best_bsp_hits = hits;
+                        best_bsp = b;
+                        total_best_bsps = 1;
+                        max_hits = total_hits;
+
+                        if(firing_position_count > 0) {
+                            auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
+                            auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
+                            for(std::size_t i = 0; i < firing_positions_indices.size(); i++) {
+                                auto &position = firing_positions_data[i];
+                                auto &position_index = firing_positions_indices[i];
+                                position.cluster_index = position_index.first;
+                                position.surface_index = position_index.second;
+                            }
+                        }
+                    }
+                    else if(hits == best_bsp_hits) {
+                        total_best_bsps++;
+                    }
                 }
 
-                warned = true;
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter BSP location", tag_index);
+                encounter.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                if(best_bsp_hits == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
+                    bsp_find_warnings++;
+                }
+                else if(best_bsp_hits != max_hits) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, encounter.name.string, best_bsp, best_bsp_hits, max_hits);
+                    bsp_find_warnings++;
+                }
+                else if(total_best_bsps > 1) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                    bsp_find_warnings++;
+                }
             }
         }
 
         // Determine which BSP the command lists fall in
         std::size_t command_list_count = this->command_lists.size();
-        if(command_list_count != 0) {
+        if(command_list_count != 0 && false) {
             auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
             for(std::size_t i = 0; i < command_list_count; i++) {
+                eprintf_warn("TODO: Command lists\n");
+                break;
+
                 auto &command_list = this->command_lists[i];
                 auto &command_list_data = command_list_array[i];
 
@@ -477,7 +601,7 @@ namespace Invader::Parser {
                     bsp_find_warnings++;
                 }
                 else if(best_bsp_hits != max_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP#%zu", i, command_list.name.string, best_bsp);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits);
                     bsp_find_warnings++;
                 }
                 else if(total_best_bsps > 1) {
