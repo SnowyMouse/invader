@@ -3,6 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/hek/class/model_collision_geometry.hpp>
 
 namespace Invader::Parser {
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
@@ -342,7 +343,8 @@ namespace Invader::Parser {
 
         // Get the bsp data; saves us from having to get it again
         std::vector<BSPData> bsp_data;
-        bsp_data.reserve(this->structure_bsps.size());
+        std::size_t bsp_count = this->structure_bsps.size();
+        bsp_data.reserve(bsp_count);
         for(auto &b : this->structure_bsps) {
             auto &bsp_data_s = bsp_data.emplace_back();
             if(b.structure_bsp.tag_id.is_null()) {
@@ -393,7 +395,7 @@ namespace Invader::Parser {
             }
         }
 
-        // TODO: Position encounters and command lists
+        // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = this->encounters.size();
         if(encounter_list_count != 0) {
             bool warned = false;
@@ -408,15 +410,21 @@ namespace Invader::Parser {
                 if(warned) {
                     continue;
                 }
+
+                bool raycast = encounter.flags._3d_firing_positions;
+                for(std::size_t b = 0; b < bsp_count; b++) {
+                    auto &bsp = bsp_data[b];
+
+                }
+
                 warned = true;
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter BSP location", tag_index);
             }
         }
 
-        // Determine where the command list is
+        // Determine which BSP the command lists fall in
         std::size_t command_list_count = this->command_lists.size();
         if(command_list_count != 0) {
-            bool warned = false;
             auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
             for(std::size_t i = 0; i < command_list_count; i++) {
                 auto &command_list = this->command_lists[i];
@@ -425,11 +433,29 @@ namespace Invader::Parser {
                     command_list_data.precomputed_bsp_index = command_list.manual_bsp_index;
                     continue;
                 }
-                if(warned) {
-                    continue;
+
+                // Go through each BSP
+                std::size_t best_bsp = 0;
+                std::size_t best_bsp_hits = 0;
+                std::size_t total_best_bsps = 0;
+                for(std::size_t b = 0; b < bsp_count; b++) {
+                    auto &bsp = bsp_data[b];
+                    std::size_t hits = 0;
+
+                    // Basically, add 1 for every time we find it in here
+                    for(auto &p : command_list.points) {
+                        hits += !leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
+                    }
+
+                    if(hits > best_bsp_hits) {
+                        best_bsp_hits = hits;
+                        best_bsp = b;
+                        total_best_bsps = 1;
+                    }
+                    else if(hits == best_bsp_hits) {
+                        total_best_bsps++;
+                    }
                 }
-                warned = true;
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement command list BSP location", tag_index);
             }
         }
 
