@@ -154,7 +154,7 @@ namespace Invader::Parser {
         if(this->scripts.size() > 0) {
             if(this->scripts.size() > 0) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Scenario tag has script data but no source file data", tag_index);
-                eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader.");
+                eprintf_warn("This is DEPRECATED. See https://github.com/Kavawuvi/invader/issues/80");
                 eprintf_warn("To fix this, recompile the scripts");
             }
             else {
