@@ -691,7 +691,7 @@ namespace Invader {
 
         while(found_something) {
             found_something = false;
-            for(std::size_t i = 0; i < struct_count && !found_something; i++) {
+            for(std::size_t i = 0; i < struct_count; i++) {
                 if(this->structs[i].unsafe_to_dedupe) {
                     continue;
                 }
