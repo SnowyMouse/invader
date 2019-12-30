@@ -45,12 +45,19 @@ for i in range(10, len(sys.argv)):
                     sys.exit(1)
                 if f["type"] != "pad":
                     f["name"] = make_name_fun(f["name"], False)
-                if f["type"] == "TagDependency" and len(f["classes"]) == 1 and f["classes"][0] == "shader":
-                    shader_classes = ["shader", "shader_environment", "shader_model", "shader_transparent_chicago", "shader_transparent_chicago_extended", "shader_transparent_glass", "shader_transparent_meter", "shader_transparent_plasma", "shader_transparent_water"]
-                    f["classes"] = shader_classes
-                if f["type"] == "TagDependency" and len(f["classes"]) == 1 and f["classes"][0] == "object":
-                    shader_classes = ["biped", "device_control", "device_light_fixture", "device_machine", "device", "equipment", "item", "garbage", "item", "placeholder", "projectile", "scenery", "unit", "vehicle", "weapon"]
-                    f["classes"] = shader_classes
+                if f["type"] == "TagDependency":
+                    # Superclasses
+                    def expand_superclass(arr, superclass, subclass):
+                        for i in arr:
+                            if i == superclass:
+                                for s in subclass:
+                                    arr.append(s)
+                                break
+                    expand_superclass(f["classes"], "object", ["unit", "device", "item", "projectile", "scenery"])
+                    expand_superclass(f["classes"], "unit", ["vehicle", "biped"])
+                    expand_superclass(f["classes"], "item", ["weapon", "garbage", "equipment"])
+                    expand_superclass(f["classes"], "shader", ["shader_environment", "shader_model", "shader_transparent_chicago", "shader_transparent_chicago_extended", "shader_transparent_glass", "shader_transparent_meter", "shader_transparent_plasma", "shader_transparent_water"])
+                    expand_superclass(f["classes"], "device", ["device_control", "device_light_fixture", "device_machine"])
             all_structs.append(s)
         else:
             print("Unknown object type {}".format(s["type"]), file=sys.stderr)

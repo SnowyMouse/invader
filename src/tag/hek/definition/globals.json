@@ -969,8 +969,7 @@
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
-                    "weapon",
-                    "equipment"
+                    "item"
                 ]
             }
         ],
@@ -1000,8 +999,7 @@
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
-                    "vehicle",
-                    "biped"
+                    "unit"
                 ]
             }
         ],
@@ -1037,8 +1035,7 @@
                 "name": "unit",
                 "type": "TagDependency",
                 "classes": [
-                    "vehicle",
-                    "biped"
+                    "unit"
                 ],
                 "compound": true
             },
@@ -1093,8 +1090,7 @@
                 "name": "unit",
                 "type": "TagDependency",
                 "classes": [
-                    "vehicle",
-                    "biped"
+                    "unit"
                 ],
                 "compound": true
             },

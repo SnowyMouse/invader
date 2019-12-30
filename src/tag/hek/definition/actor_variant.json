@@ -110,8 +110,7 @@
                 "name": "unit",
                 "type": "TagDependency",
                 "classes": [
-                    "vehicle",
-                    "biped"
+                    "unit"
                 ],
                 "compound": true
             },

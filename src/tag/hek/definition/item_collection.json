@@ -14,8 +14,7 @@
                 "name": "item",
                 "type": "TagDependency",
                 "classes": [
-                    "weapon",
-                    "equipment"
+                    "item"
                 ],
                 "compound": true
             },
