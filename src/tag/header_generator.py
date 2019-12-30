@@ -421,6 +421,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        if(this->{}.path.size() > 0) {{\n".format(name))
             cpp_cache_format_data.write("            std::size_t index = workload.compile_tag_recursively(this->{}.path.data(), this->{}.tag_class_int);\n".format(name, name))
             cpp_cache_format_data.write("            this->{}.tag_id.index = static_cast<std::uint16_t>(index);\n".format(name))
+            cpp_cache_format_data.write("            r.{}.tag_id = this->{}.tag_id;\n".format(name, name))
             cpp_cache_format_data.write("            auto &d = workload.structs[struct_index].dependencies.emplace_back();\n")
             cpp_cache_format_data.write("            d.offset = reinterpret_cast<std::byte *>(&r.{}) - start;\n".format(name))
             cpp_cache_format_data.write("            d.tag_index = index;\n".format(name))

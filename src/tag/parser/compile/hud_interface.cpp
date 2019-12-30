@@ -4,6 +4,8 @@
 #include <invader/file/file.hpp>
 #include <invader/build/build_workload.hpp>
 
+#include "hud_interface.hpp"
+
 namespace Invader::Parser {
     void WeaponHUDInterface::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         union {
@@ -28,11 +30,9 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%zu overlay%s set to change on zoom, but no zoom crosshairs exist.", zooms, zooms == 1 ? " is" : "s are");
             }
         }
-
-        // Make sure sequence indices are valid
     }
 
-    static void get_sequence_data(const Invader::BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size) {
+    void get_sequence_data(const Invader::BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size) {
         if(tag_id.is_null()) {
             sequence_count = 0;
             sequences = nullptr;

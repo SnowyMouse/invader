@@ -3,6 +3,8 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
 
+#include "hud_interface.hpp"
+
 namespace Invader::Parser {
     template <typename T> void compile_object(T &tag) {
         tag.has_change_colors = tag.change_colors.size() > 0;
@@ -229,8 +231,60 @@ namespace Invader::Parser {
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
     }
-    void Weapon::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
+
+        // Make sure zoom levels aren't too high for the HUD interface
+        if(this->magnification_levels && !this->hud_interface.tag_id.is_null()) {
+            auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];
+            auto &weapon_hud_interface_struct = workload.structs[*weapon_hud_interface_tag.base_struct];
+            auto &weapon_hud_interface = *reinterpret_cast<const WeaponHUDInterface::struct_little *>(weapon_hud_interface_struct.data.data());
+            std::size_t crosshair_count = weapon_hud_interface.crosshairs.count;
+            if(crosshair_count) {
+                auto &crosshairs_struct = workload.structs[weapon_hud_interface_struct.resolve_pointer(&weapon_hud_interface.crosshairs.pointer).value()];
+                auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::struct_little *>(crosshairs_struct.data.data());
+                for(std::size_t c = 0; c < crosshair_count; c++) {
+                    auto &crosshair = crosshairs[c];
+                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM) {
+                        continue;
+                    }
+
+                    std::size_t overlay_count = crosshair.crosshair_overlays.count;
+                    if(overlay_count) {
+                        const BitmapGroupSequence::struct_little *sequences;
+                        std::size_t sequence_count;
+                        char bitmap_tag_path[512];
+                        get_sequence_data(workload, crosshair.crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+                        auto &crosshair_overlays_struct = workload.structs[*crosshairs_struct.resolve_pointer(&crosshair.crosshair_overlays.pointer)];
+                        auto *crosshair_overlays = reinterpret_cast<const WeaponHUDInterfaceCrosshairOverlay::struct_little *>(crosshair_overlays_struct.data.data());
+
+                        // Make sure stuff is there
+                        for(std::size_t o = 0; o < overlay_count; o++) {
+                            auto &overlay = crosshair_overlays[o];
+                            if(overlay.sequence_index == NULL_INDEX) {
+                                continue;
+                            }
+                            // if this is false, the HUD interface tag will error on building anyway - no need to make multiple errors that are the same thing if we can help it
+                            else if(overlay.sequence_index < sequence_count) {
+                                auto &sequence = sequences[overlay.sequence_index];
+                                bool not_a_sprite = overlay.flags.read().not_a_sprite;
+                                std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
+                                if(this->magnification_levels > max_zoom_levels) {
+                                    const char *noun;
+                                    if(not_a_sprite) {
+                                        noun = "bitmap";
+                                    }
+                                    else {
+                                        noun = "sprite";
+                                    }
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Weapon has %zu magnification levels, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     void Equipment::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
