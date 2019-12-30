@@ -262,6 +262,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 180
     },
     {
@@ -388,6 +389,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 180
     },
     {
@@ -643,6 +645,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 104
     },
     {
@@ -786,6 +789,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 104
     },
     {

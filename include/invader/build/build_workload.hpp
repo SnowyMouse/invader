@@ -298,7 +298,7 @@ namespace Invader {
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
-        char report_error_message[256]; \
+        char report_error_message[2048]; \
         std::snprintf(report_error_message, sizeof(report_error_message), __VA_ARGS__); \
         (workload).report_error(Invader::BuildWorkload::ErrorType::type, report_error_message, tag_index); \
     }
