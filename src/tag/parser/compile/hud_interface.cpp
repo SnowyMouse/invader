@@ -40,7 +40,7 @@ namespace Invader::Parser {
         }
         else {
             const auto &bitmap_tag = workload.tags[tag_id.index];
-            std::snprintf(bitmap_tag_path, sizeof(bitmap_tag_path_size), "%s.%s", bitmap_tag.path.data(), HEK::tag_class_to_extension(bitmap_tag.tag_class_int));
+            std::snprintf(bitmap_tag_path, bitmap_tag_path_size, "%s.%s", bitmap_tag.path.data(), HEK::tag_class_to_extension(bitmap_tag.tag_class_int));
             Invader::File::halo_path_to_preferred_path_chars(bitmap_tag_path);
             const auto &bitmap_struct = workload.structs[*bitmap_tag.base_struct];
             const auto &bitmap = *reinterpret_cast<const Bitmap::struct_little *>(bitmap_struct.data.data());
