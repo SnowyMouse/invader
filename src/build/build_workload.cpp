@@ -669,7 +669,6 @@ namespace Invader {
     std::size_t BuildWorkload::dedupe_structs() {
         bool found_something = true;
         std::size_t total_savings = 0;
-        std::size_t highest_i = 0;
         std::size_t struct_count = this->structs.size();
         std::size_t total_struct_size = 0;
 
@@ -677,17 +676,8 @@ namespace Invader {
             total_struct_size += s.data.size();
         }
 
-        bool verbose = this->verbose;
-        auto update_dedupe_indicator = [&highest_i, &struct_count, &total_savings, &total_struct_size, &verbose](bool done) {
-            if(verbose) {
-                oprintf("\r");
-                oprintf("Optimizing tag space... %3.00f %% complete, %.01f KiB (%.02f %%) deduped", 100.0 * highest_i / struct_count, total_savings / 1024.0, 100.0 * total_savings / total_struct_size);
-                if(done) {
-                    oprintf("\n");
-                }
-                oflush();
-            }
-        };
+        oprintf("Optimizing tag space...");
+        oflush();
 
         while(found_something) {
             found_something = false;
@@ -725,20 +715,13 @@ namespace Invader {
                         total_savings += this->structs[j].data.size();
                         this->structs[j].unsafe_to_dedupe = true;
 
-                        if(!found_something && i > highest_i) {
-                            highest_i = i;
-                            update_dedupe_indicator(false);
-                        }
-
                         found_something = true;
                     }
                 }
             }
         }
 
-        highest_i = struct_count;
-
-        update_dedupe_indicator(true);
+        oprintf(" done\n");
 
         return total_savings;
     }
