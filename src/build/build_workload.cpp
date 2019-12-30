@@ -666,7 +666,7 @@ namespace Invader {
         }
     }
 
-    std::size_t BuildWorkload::dedupe_structs() {
+    void BuildWorkload::dedupe_structs() {
         bool found_something = true;
         std::size_t total_savings = 0;
         std::size_t struct_count = this->structs.size();
@@ -720,10 +720,7 @@ namespace Invader {
                 }
             }
         }
-
-        oprintf(" done\n");
-
-        return total_savings;
+        oprintf(" done; reduced tag space usage by %.02f MiB\n", BYTES_TO_MiB(total_savings));
     }
 
     void BuildWorkload::report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index) {

@@ -279,7 +279,7 @@ namespace Invader {
         bool optimize_space;
         std::size_t warnings = 0;
         std::size_t errors = 0;
-        std::size_t dedupe_structs();
+        void dedupe_structs();
         std::vector<std::vector<std::byte>> map_data_structs;
         std::vector<std::byte> all_raw_data;
         std::size_t generate_tag_data();
