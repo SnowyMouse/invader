@@ -116,8 +116,9 @@ namespace Invader::Parser {
             }
             else {
                 auto &sequence = sequences[this->sequence_index];
-                if(sequence.bitmap_count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu has 0 bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                // TODO: Determine when sprites or bitmaps are chosen. Does Halo do it automatically based on bitmap count/sprite count or does it use the bitmap tag thing? I can't see any other way of it knowing.
+                if(sequence.bitmap_count == 0 && sequence.sprites.count == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu has 0 sprites/bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
                 }
             }
         }
