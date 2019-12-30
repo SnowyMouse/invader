@@ -471,9 +471,7 @@ namespace Invader::Parser {
                                 // If raycasting check for a surface that is 0.5 world units below it
                                 if(raycast) {
                                     std::uint32_t surface_index;
-                                    if(!intersects_directly_below(p.position, surface_index, 2.0F)) {
-                                        in_bsp = false;
-                                    }
+                                    in_bsp = intersects_directly_below(p.position, surface_index, 2.0F);
                                 }
 
                                 // Add 1 if still in BSP
@@ -490,18 +488,18 @@ namespace Invader::Parser {
                         bool in_bsp = !leaf.is_null();
                         if(in_bsp) {
                             // If raycasting check for a surface that is 0.5 world units below it
-                            std::uint32_t surface_index;
+                            std::uint32_t surface_index = NULL_INDEX;
                             if(raycast) {
                                 in_bsp = intersects_directly_below(f.position, surface_index, 0.5F);
-                            }
-                            else {
-                                surface_index = NULL_INDEX;
                             }
 
                             // Add 1 if still in BSP and set cluster index
                             if(in_bsp) {
                                 hits++;
                                 firing_positions_indices.emplace_back(bsp.render_leaves[leaf.int_value()].cluster, static_cast<HEK::Index>(surface_index));
+                            }
+                            else {
+                                firing_positions_indices.emplace_back(NULL_INDEX, NULL_INDEX);
                             }
                         }
                     }
@@ -515,9 +513,9 @@ namespace Invader::Parser {
                         if(firing_position_count > 0) {
                             auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
                             auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
-                            for(std::size_t i = 0; i < firing_positions_indices.size(); i++) {
-                                auto &position = firing_positions_data[i];
-                                auto &position_index = firing_positions_indices[i];
+                            for(std::size_t f = 0; f < firing_position_count; f++) {
+                                auto &position = firing_positions_data[f];
+                                auto &position_index = firing_positions_indices[f];
                                 position.cluster_index = position_index.first;
                                 position.surface_index = position_index.second;
                             }
@@ -528,7 +526,8 @@ namespace Invader::Parser {
                     }
                 }
 
-                encounter.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                
                 if(best_bsp_hits == 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
                     bsp_find_warnings++;
