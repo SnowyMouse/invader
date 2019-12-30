@@ -318,7 +318,6 @@ namespace Invader::Parser {
     }
 
     struct BSPData {
-        bool valid = false;
         const ModelCollisionGeometryBSP3DNode::struct_little *bsp3d_nodes = nullptr;
         std::uint32_t bsp3d_node_count = 0;
         const ModelCollisionGeometryBSPPlane::struct_little *planes = nullptr;
@@ -351,13 +350,13 @@ namespace Invader::Parser {
                 continue;
             }
 
-            auto &bsp_tag_struct = workload.structs[*workload.tags[b.structure_bsp.tag_id.index].base_struct];
+            auto &bsp_tag_struct = workload.structs[workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()].resolve_pointer(static_cast<std::size_t>(0)).value()];
             auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
             if(bsp_tag_data.collision_bsp.count == 0) {
                 continue;
             }
 
-            auto &collision_bsp_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.collision_bsp.pointer)];
+            auto &collision_bsp_struct = workload.structs[bsp_tag_struct.resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
             auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
 
             bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
@@ -395,6 +394,8 @@ namespace Invader::Parser {
             }
         }
 
+        std::size_t bsp_find_warnings = 0;
+
         // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = this->encounters.size();
         if(encounter_list_count != 0) {
@@ -429,21 +430,33 @@ namespace Invader::Parser {
             for(std::size_t i = 0; i < command_list_count; i++) {
                 auto &command_list = this->command_lists[i];
                 auto &command_list_data = command_list_array[i];
+
+                // If manually specifying a BSP, don't bother checking anything
                 if(command_list.flags.manual_bsp_index) {
                     command_list_data.precomputed_bsp_index = command_list.manual_bsp_index;
                     continue;
                 }
 
+                // If there are no points, set to a null BSP
+                if(command_list.points.size() == 0) {
+                    command_list_data.precomputed_bsp_index = ~static_cast<std::uint16_t>(0);
+                    continue;
+                }
+
                 // Go through each BSP
-                std::size_t best_bsp = 0;
+                std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
+                std::size_t max_hits = 0;
                 for(std::size_t b = 0; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
+
                     std::size_t hits = 0;
+                    std::size_t total_hits = 0;
 
                     // Basically, add 1 for every time we find it in here
                     for(auto &p : command_list.points) {
+                        total_hits++;
                         hits += !leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
                     }
 
@@ -451,12 +464,34 @@ namespace Invader::Parser {
                         best_bsp_hits = hits;
                         best_bsp = b;
                         total_best_bsps = 1;
+                        max_hits = total_hits;
                     }
                     else if(hits == best_bsp_hits) {
                         total_best_bsps++;
                     }
                 }
+
+                command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                if(best_bsp_hits == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
+                    bsp_find_warnings++;
+                }
+                else if(best_bsp_hits != max_hits) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP#%zu", i, command_list.name.string, best_bsp);
+                    bsp_find_warnings++;
+                }
+                else if(total_best_bsps > 1) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                    bsp_find_warnings++;
+                }
             }
+        }
+
+        if(bsp_find_warnings == 1) {
+            eprintf_warn("Use manual BSP indices to silence this warning");
+        }
+        else if(bsp_find_warnings > 1) {
+            eprintf_warn("Use manual BSP indices to silence these warnings");
         }
 
         // Decals
