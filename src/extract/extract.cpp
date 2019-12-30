@@ -112,6 +112,14 @@ int main(int argc, const char **argv) {
     std::vector<std::byte> loc, bitmaps, sounds;
 
     // Load asset data
+    if(!extract_options.maps_directory.has_value()) {
+        std::filesystem::path map = std::string(remaining_arguments[0]);
+        auto maps_folder = std::filesystem::absolute(map).parent_path();
+        if(std::filesystem::is_directory(maps_folder)) {
+            extract_options.maps_directory = maps_folder.string();
+        }
+    }
+
     if(extract_options.maps_directory.has_value()) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
