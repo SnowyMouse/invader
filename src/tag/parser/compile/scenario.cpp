@@ -336,7 +336,10 @@ namespace Invader::Parser {
         std::uint32_t vertex_count = 0;
     };
 
-    void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
+        auto &scenario_struct = workload.structs[struct_index];
+        const auto &scenario_data = *reinterpret_cast<const struct_little *>(scenario_struct.data.data() + struct_offset);
+
         // Get the bsp data; saves us from having to get it again
         std::vector<BSPData> bsp_data;
         bsp_data.reserve(this->structure_bsps.size());
@@ -391,21 +394,43 @@ namespace Invader::Parser {
         }
 
         // TODO: Position encounters and command lists
-        for(auto &encounter : this->encounters) {
-            if(encounter.flags.manual_bsp_index_specified) {
-                continue;
+        std::size_t encounter_list_count = this->encounters.size();
+        if(encounter_list_count != 0) {
+            bool warned = false;
+            auto *encounter_array = reinterpret_cast<ScenarioEncounter::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
+            for(std::size_t i = 0; i < encounter_list_count; i++) {
+                auto &encounter = this->encounters[i];
+                auto &encounter_data = encounter_array[i];
+                if(encounter.flags.manual_bsp_index_specified) {
+                    encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
+                    continue;
+                }
+                if(warned) {
+                    continue;
+                }
+                warned = true;
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter BSP location", tag_index);
             }
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement encounter BSP location", tag_index);
-            break;
         }
 
         // Determine where the command list is
-        for(auto &command_list : this->command_lists) {
-            if(command_list.flags.manual_bsp_index) {
-                continue;
+        std::size_t command_list_count = this->command_lists.size();
+        if(command_list_count != 0) {
+            bool warned = false;
+            auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
+            for(std::size_t i = 0; i < command_list_count; i++) {
+                auto &command_list = this->command_lists[i];
+                auto &command_list_data = command_list_array[i];
+                if(command_list.flags.manual_bsp_index) {
+                    command_list_data.precomputed_bsp_index = command_list.manual_bsp_index;
+                    continue;
+                }
+                if(warned) {
+                    continue;
+                }
+                warned = true;
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement command list BSP location", tag_index);
             }
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Implement command list BSP location", tag_index);
-            break;
         }
 
         // Decals
