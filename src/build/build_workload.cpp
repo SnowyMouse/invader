@@ -1519,12 +1519,50 @@ namespace Invader {
                                             break;
                                         }
 
+                                        // Make sure the messages are the same
                                         if(message_count > 0) {
-                                            // TODO: Check these
+                                            const auto *messages = reinterpret_cast<const Parser::HUDMessageTextMessage::struct_little *>(this->structs[*loc_tag_struct.resolve_pointer(&hud_message_tag.messages.pointer)].data.data());
+                                            const auto *messages_other = reinterpret_cast<const Parser::HUDMessageTextMessage::struct_little *>(loc_tag_struct_other_data + hud_message_tag_other.messages.pointer);
+
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(messages_other + message_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (messages go out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            for(std::size_t i = 0; i < message_count; i++) {
+                                                auto &message = messages[i];
+                                                auto &message_other = messages_other[i];
+
+                                                // If they are different, bail
+                                                match = message.name == message_other.name && message.panel_count == message_other.panel_count && message.start_index_into_text_blob == message_other.start_index_into_text_blob && message.start_index_of_message_block == message_other.start_index_of_message_block;
+                                                if(!match) {
+                                                    break;
+                                                }
+                                            }
                                         }
 
+                                        // Make sure the message elements are the same
                                         if(message_element_count > 0) {
-                                            // TODO: Check these
+                                            const auto *message_elements = reinterpret_cast<const Parser::HUDMessageTextElement::struct_little *>(this->structs[*loc_tag_struct.resolve_pointer(&hud_message_tag.message_elements.pointer)].data.data());
+                                            const auto *message_elements_other = reinterpret_cast<const Parser::HUDMessageTextElement::struct_little *>(loc_tag_struct_other_data + hud_message_tag_other.message_elements.pointer);
+
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(message_elements_other + message_element_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (message elements go out of bounds)", t.path.data());
+                                                match = false;
+                                                break;
+                                            }
+
+                                            for(std::size_t i = 0; i < message_element_count; i++) {
+                                                auto &element = message_elements[i];
+                                                auto &element_other = message_elements_other[i];
+
+                                                // If they are different, bail
+                                                match = element.data == element_other.data && element.type == element_other.type;
+                                                if(!match) {
+                                                    break;
+                                                }
+                                            }
                                         }
 
                                         // Make sure the text data is the same
