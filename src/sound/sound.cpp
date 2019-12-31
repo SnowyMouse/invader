@@ -136,6 +136,9 @@ int main(int argc, const char **argv) {
         halo_tag_path = remaining_arguments[0];
     }
 
+    // Remove trailing slashes
+    halo_tag_path = Invader::File::remove_trailing_slashes(halo_tag_path);
+
     auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
     auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
     if(!std::filesystem::is_directory(data_path)) {

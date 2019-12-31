@@ -204,4 +204,23 @@ namespace Invader::File {
         }
         return std::string(base_name);
     }
+
+    std::string remove_trailing_slashes(const std::string &path) {
+        std::vector<char> v = std::vector<char>(path.c_str(), path.c_str() + path.size());
+        v.push_back(0);
+        remove_trailing_slashes_chars(v.data());
+        return std::string(v.data());
+    }
+
+    void remove_trailing_slashes_chars(char *path) {
+        long path_length = static_cast<long>(std::strlen(path));
+        for(long i = path_length - 1; i >= 0; i++) {
+            if(path[i] == '/' || path[i] == std::filesystem::path::preferred_separator) {
+                path[i] = 0;
+            }
+            else {
+                break;
+            }
+        }
+    }
 }

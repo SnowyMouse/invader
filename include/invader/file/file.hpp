@@ -76,6 +76,19 @@ namespace Invader::File {
     std::string preferred_path_to_halo_path(const std::string &tag_path);
 
     /**
+     * Remove trailing slashes from the path
+     * @param  path path to remove trailing slashes from
+     * @return      output path
+     */
+    std::string remove_trailing_slashes(const std::string &path);
+
+    /**
+     * Remove trailing slashes from the path
+     * @param  path path to remove trailing slashes from
+     */
+    void remove_trailing_slashes_chars(char *path);
+
+    /**
      * Get the base name of the tag path
      * @param  tag_path tag path to get
      * @return          base name
