@@ -291,8 +291,7 @@
             },
             {
                 "name": "zero gain modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "zero pitch modifier",
