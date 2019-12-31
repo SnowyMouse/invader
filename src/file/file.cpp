@@ -163,14 +163,14 @@ namespace Invader::File {
 
     std::string halo_path_to_preferred_path(const std::string &tag_path) {
         const char *tag_path_c = tag_path.c_str();
-        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size());
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size() + 1);
         halo_path_to_preferred_path_chars(tag_path_cv.data());
         return tag_path_cv.data();
     }
 
     std::string preferred_path_to_halo_path(const std::string &tag_path) {
         const char *tag_path_c = tag_path.c_str();
-        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size());
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size() + 1);
         preferred_path_to_halo_path_chars(tag_path_cv.data());
         return tag_path_cv.data();
     }
@@ -208,7 +208,8 @@ namespace Invader::File {
     }
 
     std::string remove_trailing_slashes(const std::string &path) {
-        std::vector<char> v = std::vector<char>(path.c_str(), path.c_str() + path.size());
+        const char *path_str = path.c_str();
+        std::vector<char> v = std::vector<char>(path_str, path_str + path.size() + 1);
         v.push_back(0);
         remove_trailing_slashes_chars(v.data());
         return std::string(v.data());
