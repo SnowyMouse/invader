@@ -556,10 +556,10 @@ for s in all_structs_arranged:
         for struct in all_used_structs:
             if "cache_only" in struct and struct["cache_only"] and not extract_hidden:
                 continue
+            name = struct["name"]
             if "drop_on_extract_hidden" in struct and struct["drop_on_extract_hidden"]:
                 cpp_save_hek_data.write("        b.{} = {{}};\n".format(name))
                 continue
-            name = struct["name"]
             if struct["type"] == "TagDependency":
                 cpp_save_hek_data.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
                 cpp_save_hek_data.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
