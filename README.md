@@ -625,9 +625,10 @@ Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
 for 32-bit x86 Windows.
 
 The reason 32-bit builds are not provided is because 32-bit builds are slower
-and more limited than x86_64 due to architectural differences. People who are
-unsure may also download a 32-bit build even though a 64-build will work
-better. Nearly all desktop PCs made today come with a 64-bit operating system.
+and more limited than x86_64 due to architectural differences (e.g. fewer
+registers to hold temporary data). People who are unsure may also download a
+32-bit build even though a 64-build will work better. Nearly all desktop PCs
+made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for the Gearbox port of Halo on the
