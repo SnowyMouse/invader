@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
     }
 
     // Require a tag
-    std::string base_tag;
+    std::vector<char> base_tag;
     if(archive_options.use_filesystem_path) {
         // See if the tag path is valid
         std::optional<std::string> base_tag_maybe;
@@ -68,7 +68,8 @@ int main(int argc, const char **argv) {
             base_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], archive_options.tags, std::string(".scenario"));
         }
         if(base_tag_maybe.has_value()) {
-            base_tag = base_tag_maybe.value();
+            const char *str = (*base_tag_maybe).c_str();
+            base_tag.insert(base_tag.end(), str, str + (*base_tag_maybe).size());
         }
         else {
             eprintf_error("Failed to find a valid%stag %s in the tags directory", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
@@ -79,8 +80,9 @@ int main(int argc, const char **argv) {
         }
     }
     else {
-        base_tag = Invader::File::preferred_path_to_halo_path(remaining_arguments[0]);
+        base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
+    std::string base_tag_cpp_str = base_tag.data();
 
     // Variables to hold this
     std::vector<std::pair<std::string, std::string>> archive_list;
@@ -89,16 +91,16 @@ int main(int argc, const char **argv) {
     static const char extension[] = ".tar.xz";
     if(archive_options.output.size() == 0) {
         // Set output
-        archive_options.output = Invader::File::base_name(base_tag) + extension;
+        archive_options.output = Invader::File::base_name(base_tag.data()) + extension;
     }
     else {
         bool fail = true;
         if(archive_options.output.size() > sizeof(extension)) {
-            fail = std::strcmp(archive_options.output.data() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
+            fail = std::strcmp(archive_options.output.c_str() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
         }
 
         if(fail) {
-            eprintf_error("Invalid output file %s. This should end with .tar.xz.\n", archive_options.output.data());
+            eprintf_error("Invalid output file %s. This should end with .tar.xz.\n", archive_options.output.c_str());
             return EXIT_FAILURE;
         }
     }
@@ -145,7 +147,7 @@ int main(int argc, const char **argv) {
             }
 
             if(!exists) {
-                eprintf_error("Failed to find %s. Archive could not be made.\n", full_tag_path.data());
+                eprintf_error("Failed to find %s. Archive could not be made.\n", full_tag_path.c_str());
                 return EXIT_FAILURE;
             }
         }
@@ -170,10 +172,10 @@ int main(int argc, const char **argv) {
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag_cpp_str;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), base_tag);
+                archive_list.emplace_back(tag_path.string(), base_tag_cpp_str);
                 break;
             }
         }
@@ -184,7 +186,7 @@ int main(int argc, const char **argv) {
         }
 
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag.substr(0, c - tag_path_to_find - 1).data(), tag_int_to_find, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_cpp_str.substr(0, c - tag_path_to_find - 1).c_str(), tag_int_to_find, archive_options.tags, false, true, success);
         if(!success) {
             eprintf_error("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
@@ -193,7 +195,7 @@ int main(int argc, const char **argv) {
         // Make sure there aren't any broken dependencies
         for(auto &dependency : dependencies) {
             if(dependency.broken) {
-                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.data(), tag_class_to_extension(dependency.class_int));
+                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
                 return EXIT_FAILURE;
             }
 
@@ -206,15 +208,15 @@ int main(int argc, const char **argv) {
     auto *archive = archive_write_new();
     archive_write_add_filter_xz(archive);
     archive_write_set_format_pax_restricted(archive);
-    archive_write_open_filename(archive, archive_options.output.data());
+    archive_write_open_filename(archive, archive_options.output.c_str());
 
     // Go through each tag path we got
     for(std::size_t i = 0; i < archive_list.size(); i++) {
-        const char *path = archive_list[i].first.data();
+        const char *path = archive_list[i].first.c_str();
 
         // Begin
         auto *entry = archive_entry_new();
-        archive_entry_set_pathname(entry, archive_list[i].second.data());
+        archive_entry_set_pathname(entry, archive_list[i].second.c_str());
         archive_entry_set_perm(entry, 0644);
         archive_entry_set_filetype(entry, AE_IFREG);
 

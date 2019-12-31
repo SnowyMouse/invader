@@ -104,13 +104,13 @@ namespace Invader {
 
                     // Print the left column (parameters and stuff)
                     char left_column[INV_COMMAND_LINE_ARGUMENT_SIZE];
-                    std::size_t l = std::snprintf(left_column, sizeof(left_column), "  -%c --%s", option.char_name, option.full_name.data());
+                    std::size_t l = std::snprintf(left_column, sizeof(left_column), "  -%c --%s", option.char_name, option.full_name.c_str());
                     if(l >= sizeof(left_column)) {
                         std::fprintf(stderr, "Left column exceeded!\n");
                         std::terminate();
                     }
                     if(option.parameters.has_value()) {
-                        l += std::snprintf(left_column + l, sizeof(left_column) - l, " %s", option.parameters.value().data());
+                        l += std::snprintf(left_column + l, sizeof(left_column) - l, " %s", option.parameters.value().c_str());
                         if(l >= sizeof(left_column)) {
                             std::fprintf(stderr, "Left column exceeded!\n");
                             std::terminate();
@@ -123,7 +123,7 @@ namespace Invader {
                         return;
                     }
 
-                    const char *description = option.description.value().data();
+                    const char *description = option.description.value().c_str();
 
                     // Print the right column (description)
                     std::size_t r = 0;

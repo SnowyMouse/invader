@@ -142,7 +142,7 @@ int main(int argc, const char **argv) {
     auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
     auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
     if(!std::filesystem::is_directory(data_path)) {
-        eprintf_error("No directory exists at %s", data_path.string().data());
+        eprintf_error("No directory exists at %s", data_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -150,17 +150,17 @@ int main(int argc, const char **argv) {
     Parser::Sound sound_tag = {};
     if(std::filesystem::exists(tag_path)) {
         if(std::filesystem::is_directory(tag_path)) {
-            eprintf_error("A directory exists at %s where a file was expected", tag_path.string().data());
+            eprintf_error("A directory exists at %s where a file was expected", tag_path.string().c_str());
             return EXIT_FAILURE;
         }
-        auto sound_file = File::open_file(tag_path.string().data());
+        auto sound_file = File::open_file(tag_path.string().c_str());
         if(sound_file.has_value()) {
             auto &sound_data = *sound_file;
             try {
                 sound_tag = Parser::Sound::parse_hek_tag_file(sound_data.data(), sound_data.size());
             }
             catch(std::exception &e) {
-                eprintf_error("An error occurred while attempting to read %s", tag_path.string().data());
+                eprintf_error("An error occurred while attempting to read %s", tag_path.string().c_str());
                 return EXIT_FAILURE;
             }
         }
@@ -220,7 +220,7 @@ int main(int argc, const char **argv) {
         auto path = wav.path();
         auto path_str = path.string();
         if(wav.is_directory()) {
-            eprintf_error("Unexpected directory %s", path_str.data());
+            eprintf_error("Unexpected directory %s", path_str.c_str());
             return EXIT_FAILURE;
         }
         auto extension = path.extension().string();
@@ -234,7 +234,7 @@ int main(int argc, const char **argv) {
             sound = SoundReader::sound_from_flac(path_str.data());
         }
         else {
-            eprintf_error("Unknown file format for %s", path_str.data());
+            eprintf_error("Unknown file format for %s", path_str.c_str());
             return EXIT_FAILURE;
         }
 
@@ -248,7 +248,7 @@ int main(int argc, const char **argv) {
 
         // Make sure we can actually work with this
         if(sound.channel_count > 2 || sound.channel_count < 1) {
-            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.data());
+            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
             return EXIT_FAILURE;
         }
         if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
@@ -259,7 +259,7 @@ int main(int argc, const char **argv) {
 
         sound.name = filename.substr(0, filename.size() - extension.size());
         if(sound.name.size() >= sizeof(TagString)) {
-            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.data(), sound.name.size(), sizeof(TagString));
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(TagString));
             std::exit(EXIT_FAILURE);
         }
 
@@ -271,7 +271,7 @@ int main(int argc, const char **argv) {
             }
         }
         if(times_appeared != 1) {
-            eprintf_error("Multiple permutations with the same name (%s) cannot be added", sound.name.data());
+            eprintf_error("Multiple permutations with the same name (%s) cannot be added", sound.name.c_str());
             return EXIT_FAILURE;
         }
 
@@ -286,7 +286,7 @@ int main(int argc, const char **argv) {
 
     // Make sure we have stuff
     if(permutations.size() == 0) {
-        eprintf_error("No permutations found in %s", data_path.string().data());
+        eprintf_error("No permutations found in %s", data_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -428,7 +428,7 @@ int main(int argc, const char **argv) {
     auto new_permutation = [&pitch_range, &format](SoundReader::Sound &permutation) -> Parser::SoundPermutation & {
         auto &p = pitch_range.permutations.emplace_back();
         std::memset(p.name.string, 0, sizeof(p.name.string));
-        std::strncpy(p.name.string, permutation.name.data(), sizeof(p.name.string) - 1);
+        std::strncpy(p.name.string, permutation.name.c_str(), sizeof(p.name.string) - 1);
         p.format = format;
         return p;
     };
@@ -627,7 +627,7 @@ int main(int argc, const char **argv) {
         }
 
         // Print sound info
-        oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.data(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
+        oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.c_str(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
         permutation.pcm = std::vector<std::byte>();
     }
 
@@ -643,8 +643,8 @@ int main(int argc, const char **argv) {
     std::filesystem::create_directories(tag_path.parent_path());
 
     // Save
-    if(!Invader::File::save_file(tag_path.string().data(), sound_tag_data)) {
-        eprintf_error("Failed to save %s", tag_path.string().data());
+    if(!Invader::File::save_file(tag_path.string().c_str(), sound_tag_data)) {
+        eprintf_error("Failed to save %s", tag_path.string().c_str());
         return EXIT_FAILURE;
     }
 }

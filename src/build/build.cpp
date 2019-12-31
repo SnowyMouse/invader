@@ -186,7 +186,7 @@ int main(int argc, const char **argv) {
                 }
 
                 if(!extension) {
-                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.data());
+                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.c_str());
                     return EXIT_FAILURE;
                 }
 

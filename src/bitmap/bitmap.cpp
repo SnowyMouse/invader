@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
     // Ensure it's lowercase
     for(char &c : bitmap_tag) {
         if(c >= 'A' && c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.c_str());
             return EXIT_FAILURE;
         }
     }
@@ -337,10 +337,10 @@ int main(int argc, char *argv[]) {
 
     // See if we can get anything out of this
     std::FILE *tag_read;
-    if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
+    if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.c_str(), "rb"))) {
         // Here's in case we do fail. It cleans up and exits.
         auto exit_on_failure = [&tag_read, &final_path]() {
-            eprintf_error("%s could not be read.", final_path.data());
+            eprintf_error("%s could not be read.", final_path.c_str());
             eprintf("Use --ignore-tag or -I to override.\n");
             std::fclose(tag_read);
             exit(EXIT_FAILURE);
@@ -464,12 +464,12 @@ int main(int argc, char *argv[]) {
             switch(i) {
                 case SUPPORTED_FORMATS_TIF:
                 case SUPPORTED_FORMATS_TIFF:
-                    image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
+                    image_pixels = load_tiff(image_path.c_str(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_PNG:
                 case SUPPORTED_FORMATS_TGA:
                 case SUPPORTED_FORMATS_BMP:
-                    image_pixels = load_image(image_path.data(), image_width, image_height, image_size);
+                    image_pixels = load_image(image_path.c_str(), image_width, image_height, image_size);
                     break;
                 default:
                     std::terminate();
@@ -480,7 +480,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(image_pixels == nullptr) {
-        eprintf_error("Failed to find %s in %s", bitmap_tag.data(), bitmap_options.data);
+        eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
         eprintf("Valid formats are:\n");
         for(auto *format : SUPPORTED_FORMATS) {
             eprintf("    %s\n", format);
@@ -669,14 +669,14 @@ int main(int argc, char *argv[]) {
 
     // Write it all
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *tag_write = std::fopen(final_path.data(), "wb");
+    std::FILE *tag_write = std::fopen(final_path.c_str(), "wb");
     if(!tag_write) {
-        eprintf_error("Error: Failed to open %s for writing.", final_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.", final_path.c_str());
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, tag_write) != 1) {
-        eprintf_error("Error: Failed to write to %s.", final_path.data());
+        eprintf_error("Error: Failed to write to %s.", final_path.c_str());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

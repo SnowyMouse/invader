@@ -184,7 +184,7 @@ namespace Invader::HEK {
         // Make sure we don't have any stragglers
         for(std::size_t n = 0; n < nodes_count; n++) {
             if(!node_done[n]) {
-                eprintf_warn("Warning: Orphaned node #%zu in %s.%s", n, File::halo_path_to_preferred_path(compiled.path.data()).data(), tag_class_to_extension(compiled.tag_class_int));
+                eprintf_warn("Warning: Orphaned node #%zu in %s.%s", n, File::halo_path_to_preferred_path(compiled.path.c_str()).c_str(), tag_class_to_extension(compiled.tag_class_int));
             }
         }
 

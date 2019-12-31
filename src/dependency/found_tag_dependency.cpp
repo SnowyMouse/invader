@@ -20,7 +20,7 @@ namespace Invader {
                 bool found = false;
                 for(auto &tags_directory : tags) {
                     std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
-                    std::FILE *f = std::fopen(tag_path.string().data(), "rb");
+                    std::FILE *f = std::fopen(tag_path.string().c_str(), "rb");
                     if(!f) {
                         continue;
                     }
@@ -68,21 +68,21 @@ namespace Invader {
                                 found_tags.emplace_back(dependency.path, class_to_use, true, "");
                             }
                             else if(recursive) {
-                                recursion(dependency.path.data(), class_to_use, recursion);
+                                recursion(dependency.path.c_str(), class_to_use, recursion);
                             }
                         }
                         found = true;
                         break;
                     }
                     catch (std::exception &e) {
-                        eprintf_error("Failed to compile tag %s: %s", tag_path.string().data(), e.what());
+                        eprintf_error("Failed to compile tag %s: %s", tag_path.string().c_str(), e.what());
                         success = false;
                         return;
                     }
                 }
 
                 if(!found) {
-                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.data(), tag_class_to_extension(tag_int_to_find));
+                    eprintf_error("Failed to open tag %s.%s.", tag_path_to_find.c_str(), tag_class_to_extension(tag_int_to_find));
                     success = false;
                     return;
                 }
@@ -104,7 +104,7 @@ namespace Invader {
                         }
                         else if(file.is_regular_file()) {
                             std::string dir_tag_path = current_path + file.path().filename().stem().string();
-                            auto class_int = Invader::HEK::extension_to_tag_class(file.path().extension().string().data() + 1);
+                            auto class_int = Invader::HEK::extension_to_tag_class(file.path().extension().string().c_str() + 1);
 
                             // Skip some obvious stuff as well as null tag class ints
                             if(
@@ -132,9 +132,9 @@ namespace Invader {
                             }
 
                             // Attempt to open and read the tag
-                            std::FILE *f = std::fopen(file.path().string().data(), "rb");
+                            std::FILE *f = std::fopen(file.path().string().c_str(), "rb");
                             if(!f) {
-                                eprintf_error("Failed to open tag %s.", file.path().string().data());
+                                eprintf_error("Failed to open tag %s.", file.path().string().c_str());
                                 continue;
                             }
 
@@ -156,7 +156,7 @@ namespace Invader {
                                 }
                             }
                             catch (std::exception &e) {
-                                eprintf_warn("Warning: Failed to compile tag %s: %s", file.path().string().data(), e.what());
+                                eprintf_warn("Warning: Failed to compile tag %s: %s", file.path().string().c_str(), e.what());
                             }
                         }
                     }

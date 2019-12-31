@@ -116,7 +116,7 @@ namespace Invader::File {
         }
 
         // Otherwise, check if we have the extension
-        if(TAG_PATH_LENGTH > EXTENSION_LENGTH && std::strcmp(tag_path.data() + TAG_PATH_LENGTH - EXTENSION_LENGTH, expected_extension.data()) == 0) {
+        if(TAG_PATH_LENGTH > EXTENSION_LENGTH && std::strcmp(tag_path.c_str() + TAG_PATH_LENGTH - EXTENSION_LENGTH, expected_extension.c_str()) == 0) {
             // If the user simply put ".scenario" at the end, remove it
             if(Invader::File::tag_path_to_file_path(tag_path, tags, true).has_value()) {
                 return tag_path.substr(0, TAG_PATH_LENGTH - EXTENSION_LENGTH);
@@ -162,15 +162,17 @@ namespace Invader::File {
     }
 
     std::string halo_path_to_preferred_path(const std::string &tag_path) {
-        auto path_copy = tag_path;
-        halo_path_to_preferred_path_chars(path_copy.data());
-        return path_copy;
+        const char *tag_path_c = tag_path.c_str();
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size());
+        halo_path_to_preferred_path_chars(tag_path_cv.data());
+        return tag_path_cv.data();
     }
 
     std::string preferred_path_to_halo_path(const std::string &tag_path) {
-        auto path_copy = tag_path;
-        preferred_path_to_halo_path_chars(path_copy.data());
-        return path_copy;
+        const char *tag_path_c = tag_path.c_str();
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size());
+        preferred_path_to_halo_path_chars(tag_path_cv.data());
+        return tag_path_cv.data();
     }
 
     const char *base_name_chars(const char *tag_path) noexcept {
@@ -189,7 +191,7 @@ namespace Invader::File {
     }
 
     std::string base_name(const std::string &tag_path, bool drop_extension) {
-        const char *base_name = base_name_chars(tag_path.data());
+        const char *base_name = base_name_chars(tag_path.c_str());
 
         if(drop_extension) {
             const char *base_name_end = nullptr;

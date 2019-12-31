@@ -67,7 +67,7 @@ int main(int argc, const char **argv) {
                     // Replace double slashes (or more) with one slash
                     std::string path = std::regex_replace(tag.path, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
 
-                    std::fprintf(f, "%s\n", path.data());
+                    std::fprintf(f, "%s\n", path.c_str());
                 }
             }
             catch(std::exception &) {
@@ -101,7 +101,7 @@ int main(int argc, const char **argv) {
 
                     // Replace double slashes (or more) with one slash
                     std::string path = std::regex_replace(tag.get_path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-                    std::fprintf(f, "%s.%s\n", path.data(), tag_class_to_extension(tag.get_tag_class_int()));
+                    std::fprintf(f, "%s.%s\n", path.c_str(), tag_class_to_extension(tag.get_tag_class_int()));
                 }
             }
             catch(std::exception &) {

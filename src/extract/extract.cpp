@@ -103,7 +103,7 @@ int main(int argc, const char **argv) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", extract_options.tags_directory.data());
+            eprintf_error("Directory %s was not found or is not a directory", extract_options.tags_directory.c_str());
         }
         return EXIT_FAILURE;
     }
@@ -124,7 +124,7 @@ int main(int argc, const char **argv) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
             auto potential_map_path = (maps_directory / map).string();
-            auto potential_map = Invader::File::open_file(potential_map_path.data());
+            auto potential_map = Invader::File::open_file(potential_map_path.c_str());
             if(potential_map.has_value()) {
                 return *potential_map;
             }
@@ -207,7 +207,7 @@ int main(int argc, const char **argv) {
 
         // Make sure we don't have any dot slashes (i.e. ../ or ./) to prevent a potential directory traversal attack
         if(std::regex_match(path, BAD_PATH_DIRECTORY)) {
-            eprintf_error("Error: %s.%s contains an unsafe path", path.data(), tag_extension);
+            eprintf_error("Error: %s.%s contains an unsafe path", path.c_str(), tag_extension);
             return false;
         }
 
@@ -232,7 +232,7 @@ int main(int argc, const char **argv) {
             if(extract_options.recursive) {
                 auto dependencies = Invader::CompiledTag(tag.get_path(), new_tag.data(), new_tag.size()).dependencies;
                 for(auto &d : dependencies) {
-                    auto tag_index = map->find_tag(d.path.data(), d.tag_class_int);
+                    auto tag_index = map->find_tag(d.path.c_str(), d.tag_class_int);
                     if(tag_index.has_value() && extracted_tags[*tag_index] == false) {
                         all_tags_to_extract.push_back(*tag_index);
                     }
@@ -240,7 +240,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch (std::exception &e) {
-            eprintf_error("Error: Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).data(), tag_extension, e.what());
+            eprintf_error("Error: Failed to extract %s.%s: %s", Invader::File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_extension, e.what());
             return false;
         }
 
@@ -286,8 +286,8 @@ int main(int argc, const char **argv) {
 
         // Save it
         auto tag_path_str = tag_path_to_write_to.string();
-        if(!Invader::File::save_file(tag_path_str.data(), new_tag)) {
-            eprintf_error("Error: Failed to save %s", tag_path_str.data());
+        if(!Invader::File::save_file(tag_path_str.c_str(), new_tag)) {
+            eprintf_error("Error: Failed to save %s", tag_path_str.c_str());
             return false;
         }
 
@@ -320,7 +320,7 @@ int main(int argc, const char **argv) {
             auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
 
             for(auto &query : extract_options.search_queries) {
-                if(string_matches(full_tag_path.data(), query.data())) {
+                if(string_matches(full_tag_path.c_str(), query.c_str())) {
                     all_tags_to_extract.emplace_back(t);
                     break;
                 }
@@ -345,11 +345,11 @@ int main(int argc, const char **argv) {
         total++;
         const auto &tag_map = map->get_tag(tag);
         if(extract_tag(tag)) {
-            oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            oprintf_success("Extracted %s.%s", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
             extracted++;
         }
         else {
-            oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).data(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
         }
     }
 
