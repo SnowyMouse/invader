@@ -1,8 +1,15 @@
 # Invader
 Invader is an open source toolkit for creating maps and assets for Halo: Combat
-Evolved on the PC. See LICENSE for more information about the license.
+Evolved on the PC.
 
 Our Discord server is https://discord.gg/RCX3nvw
+
+## License
+Invader is licensed under version 3.0 of the GNU General Public License. Note
+that Invader is NOT licensed under any later or previous version of the GNU
+GPL.
+
+See COPYING for a copy of version 3 of the GNU General Public License.
 
 ## Getting started
 This readme addresses a few topics:
@@ -551,6 +558,9 @@ Invader does not support any one operating system, but Invader is developed on
 Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
 
 ### Why GPL and not MIT or BSD?
+Invader uses version 3 of the GNU GPL because we feel that Invader and all
+derivatives and modifications of Invader should stay free and open.
+
 The Halo CE modding community has a habit of obfuscating knowledge that could
 be used to help other people. This is often done through these means:
 - [Map protection]
@@ -558,22 +568,32 @@ be used to help other people. This is often done through these means:
 - [Obfuscating software]
 - [Keeping helpful information locked behind secret forums and groups]
 
+Many great accomplishments have been lost to time, as most of the people who
+made them are no longer there to support what they have made.
+
 Often times, people will say they will release the source code in the future,
 or they will at least consider releasing the source code. In nearly all cases
-of this, the source code was never released. In fact, many great
-accomplishments have been lost to time, as most of the people who made them are
-no longer there to support what they have made.
+of this, the source code was never released. The GNU GPL solves this problem
+by requiring everyone to have access to the source code when binary code is
+released.
 
-As others are forced to rely on this software, then over time, people realize
-how broken, incomplete, or even incompatible the software is. For example, the
-Halo Editing Kit has numerous issues that prevent people from making the
-content they want to make, yet [it is still the only way to fully create maps].
-As a result, making closed source software does nothing but harm for any sort
-of community.
+As time goes on, unmaintained, closed-source software becomes more seemingly
+broken, incomplete, or even incompatible. For example, the Halo Editing Kit has
+numerous issues that prevent people from making the content they want to make,
+yet [it is still the only way to fully create maps]. The worst part about this
+is that, in many cases, people do not make any sort of effort to replace this
+software with working software, as they do not feel it is worth the time or
+effort. Therefore, the broken, unmaintained software continues being used. This
+is where Invader comes in.
 
-In our opinion, having a requirement that people give back to the community
-any changes to Invader that they have released is not too much to ask for. That
-is why Invader is GPL.
+In our opinion, we feel that modding tools should be open for all to use,
+share, change, and learn from. At the same time, we also feel that a
+requirement for people give back to the community the source code to any
+derivatives of our tools they have chosen to share is not too much to ask for,
+as this ensures that modding stays free and open instead of left to stagnation
+behind closed groups and obfuscation as modding this game has been in the past.
+
+That is why Invader uses version 3 of the GNU GPL.
 
 ### Are there any GUI tools?
 Officially, none of these tools currently have graphical user interfaces. Some
@@ -605,9 +625,10 @@ Only 64-bit builds are uploaded to [Nightly Builds]. You can compile Invader
 for 32-bit x86 Windows.
 
 The reason 32-bit builds are not provided is because 32-bit builds are slower
-and more limited than x86_64 due to architectural differences. People who are
-unsure may also download a 32-bit build even though a 64-build will work
-better. Nearly all desktop PCs made today come with a 64-bit operating system.
+and more limited than x86_64 due to architectural differences (e.g. fewer
+registers to hold temporary data). People who are unsure may also download a
+32-bit build even though a 64-build will work better. Nearly all desktop PCs
+made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for the Gearbox port of Halo on the
