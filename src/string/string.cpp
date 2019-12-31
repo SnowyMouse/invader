@@ -26,7 +26,7 @@ template <typename T, Invader::TagClassInt C> static std::vector<std::byte> gene
     // Start building a list of strings
     std::vector<std::string> strings;
     std::size_t string_length = input_string.size();
-    const char *c = input_string.data();
+    const char *c = input_string.c_str();
 
     // Separate into lines
     std::string string;
@@ -71,11 +71,11 @@ template <typename T, Invader::TagClassInt C> static std::vector<std::byte> gene
         if(sizeof(T) == sizeof(char16_t)) {
             auto string_data = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(reinterpret_cast<char *>(str.data()));
             string_size = string_data.size() * sizeof(T);
-            tag_data.insert(tag_data.end(), reinterpret_cast<std::byte *>(string_data.data()), reinterpret_cast<std::byte *>(string_data.data() + string_data.size() + 1));
+            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(string_data.c_str()), reinterpret_cast<const std::byte *>(string_data.c_str() + string_data.size() + 1));
         }
         else {
             string_size = str.size();
-            tag_data.insert(tag_data.end(), reinterpret_cast<std::byte *>(str.data()), reinterpret_cast<std::byte *>(str.data() + str.size() + 1));
+            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(str.c_str()), reinterpret_cast<const std::byte *>(str.c_str() + str.size() + 1));
         }
 
         auto &data_str = reinterpret_cast<StringListString<BigEndian> *>(tag_data.data() + string_list_string_offset)->string;
@@ -161,9 +161,9 @@ int main(int argc, char * const *argv) {
     }
 
     // Ensure it's lowercase
-    for(const char *c = string_tag.data(); *c; c++) {
+    for(const char *c = string_tag.c_str(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.c_str());
             return EXIT_FAILURE;
         }
     }
@@ -184,9 +184,9 @@ int main(int argc, char * const *argv) {
     auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
 
     // Open a file
-    std::FILE *f = std::fopen(input_path.data(), "rb");
+    std::FILE *f = std::fopen(input_path.c_str(), "rb");
     if(!f) {
-        eprintf_error("Failed to open %s for reading.", input_path.data());
+        eprintf_error("Failed to open %s for reading.", input_path.c_str());
         return EXIT_FAILURE;
     }
 
@@ -241,14 +241,14 @@ int main(int argc, char * const *argv) {
     // Write it all
     std::filesystem::path tag_path(output_path);
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *tag_write = std::fopen(output_path.data(), "wb");
+    std::FILE *tag_write = std::fopen(output_path.c_str(), "wb");
     if(!tag_write) {
-        eprintf_error("Error: Failed to open %s for writing.\n", output_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.\n", output_path.c_str());;
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(final_data.data(), final_data.size(), 1, tag_write) != 1) {
-        eprintf_error("Error: Failed to write to %s.\n", output_path.data());
+        eprintf_error("Error: Failed to write to %s.\n", output_path.c_str());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

@@ -69,7 +69,7 @@ namespace Invader {
         }
 
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
-        workload.scenario = scenario_name_fixed.data();
+        workload.scenario = scenario_name_fixed.c_str();
         workload.tags_directories = &tags_directories;
         workload.engine_target = engine_target;
         workload.forge_crc = forge_crc;
@@ -88,10 +88,10 @@ namespace Invader {
                 oflush();
                 auto map_path = std::filesystem::path(maps_directory) / map;
                 auto map_path_str = map_path.string();
-                auto map_data = Invader::File::open_file(map_path_str.data());
+                auto map_data = Invader::File::open_file(map_path_str.c_str());
                 if(!map_data.has_value()) {
                     oprintf(" failed\n");
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Failed to open %s", map_path_str.data());
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Failed to open %s", map_path_str.c_str());
                     throw FailedToOpenFileException();
                 }
                 oprintf(" done\n");
@@ -100,7 +100,7 @@ namespace Invader {
         };
 
         if(rename_scenario.has_value()) {
-            workload.set_scenario_name((*rename_scenario).data());
+            workload.set_scenario_name((*rename_scenario).c_str());
         }
 
         // Set the tag data address
@@ -368,7 +368,7 @@ namespace Invader {
                     std::size_t bss = bsp.bsp_size.read();
                     oprintf(
                         "                   %s (%.02f MiB)%s\n",
-                        File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).data(),
+                        File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).c_str(),
                         BYTES_TO_MiB(bss),
                         (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
                     );
@@ -745,7 +745,7 @@ namespace Invader {
         }
         if(tag_index.has_value()) {
             auto &tag = this->tags[*tag_index];
-            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).data(), tag_class_to_extension(tag.tag_class_int));
+            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
         }
     }
 
@@ -798,7 +798,8 @@ namespace Invader {
             }
             if(!found) {
                 tag.path_offset = TAG_ARRAY_STRUCT.data.size();
-                TAG_ARRAY_STRUCT.data.insert(TAG_ARRAY_STRUCT.data.end(), reinterpret_cast<const std::byte *>(tag.path.data()), reinterpret_cast<const std::byte *>(tag.path.data()) + 1 + tag.path.size());
+                const std::byte *tag_path_str = reinterpret_cast<const std::byte *>(tag.path.c_str());
+                TAG_ARRAY_STRUCT.data.insert(TAG_ARRAY_STRUCT.data.end(), tag_path_str, tag_path_str + 1 + tag.path.size());
             }
         }
         TAG_ARRAY_STRUCT.data.resize(TAG_ARRAY_STRUCT.data.size() + REQUIRED_PADDING_32_BIT(TAG_ARRAY_STRUCT.data.size()));
@@ -993,7 +994,7 @@ namespace Invader {
                 bsp_end += bsp_size;
 
                 if(!found) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).data(), HEK::tag_class_to_extension(t.tag_class_int));
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                 }
             }
         }
@@ -1075,13 +1076,13 @@ namespace Invader {
     void BuildWorkload::set_scenario_name(const char *name) {
         if(this->scenario_name.string[0]) {
             auto &scenario_tag = this->tags[this->scenario_index];
-            const char *last_slash = scenario_tag.path.data();
+            const char *last_slash = scenario_tag.path.c_str();
             for(const char *c = last_slash; *c; c++) {
                 if(*c == '\\') {
                     last_slash = c + 1;
                 }
             }
-            scenario_tag.path = scenario_tag.path.substr(0, last_slash - scenario_tag.path.data()) + name;
+            scenario_tag.path = scenario_tag.path.substr(0, last_slash - scenario_tag.path.c_str()) + name;
             return;
         }
         const char *last_slash = name;
@@ -1149,7 +1150,7 @@ namespace Invader {
                                     std::size_t bitmap_tag_struct_other_size = bitmap_tag_struct_other.data.size();
 
                                     if(bitmap_tag_struct_other_size < sizeof(bitmap_tag)) {
-                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap main struct goes out of bounds)", t.path.data());
+                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap main struct goes out of bounds)", t.path.c_str());
                                         match = false;
                                         break;
                                     }
@@ -1168,7 +1169,7 @@ namespace Invader {
                                         // Make sure it's not out-of-bounds
                                         const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
                                         if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", t.path.c_str());
                                             match = false;
                                             break;
                                         }
@@ -1189,7 +1190,7 @@ namespace Invader {
 
                                             // Make sure it's not bullshit
                                             if(raw_data_other_data > (bitmap_tag_struct_other_raw_data + bitmap_tag_struct_raw_data_size)) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1229,7 +1230,7 @@ namespace Invader {
                                     std::size_t sound_tag_struct_other_size = sound_tag_struct_other.data.size();
 
                                     if(sound_tag_struct_other_size < sizeof(sound_tag)) {
-                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sound main struct goes out of bounds)", t.path.data());
+                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sound main struct goes out of bounds)", t.path.c_str());
                                         match = false;
                                         break;
                                     }
@@ -1250,7 +1251,7 @@ namespace Invader {
                                         const auto *all_pitch_ranges = reinterpret_cast<const Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
                                         const auto *all_pitch_ranges_other = reinterpret_cast<const Parser::SoundPitchRange::struct_little *>(sound_data_ref);
                                         if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_pitch_ranges_other + pitch_range_other_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (pitch ranges go out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (pitch ranges go out of bounds)", t.path.c_str());
                                             match = false;
                                             break;
                                         }
@@ -1277,7 +1278,7 @@ namespace Invader {
                                             // Bounds check
                                             const auto *all_permutations_other = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(sound_data_ref + pitch_range_other.permutations.pointer);
                                             if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_permutations_other + permutation_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (permutations go out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (permutations go out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1296,7 +1297,7 @@ namespace Invader {
 
                                                 // Make sure it's not bullshit
                                                 if(raw_data_other_data > (sound_tag_struct_other_raw_data + sound_tag_struct_raw_data_size)) {
-                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sample data goes out of bounds)", t.path.data());
+                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in sounds.map appears to be corrupt (sample data goes out of bounds)", t.path.c_str());
                                                     match = false;
                                                     break;
                                                 }
@@ -1342,7 +1343,7 @@ namespace Invader {
                                     case TagClassInt::TAG_CLASS_FONT: {
                                         const auto &font_tag = *reinterpret_cast<const Parser::Font::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(font_tag)) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (font main struct goes out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (font main struct goes out of bounds)", t.path.c_str());
                                             match = false;
                                             break;
                                         }
@@ -1374,7 +1375,7 @@ namespace Invader {
                                             const auto *character_data_other = reinterpret_cast<const Parser::FontCharacter::struct_little *>(loc_tag_struct_other_data + font_tag_other.characters.pointer);
 
                                             if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(character_data_other + character_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (character data goes out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (character data goes out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1408,7 +1409,7 @@ namespace Invader {
                                             const auto *pixel_data_other = loc_tag_struct_other_data + font_tag_other.pixels.pointer;
 
                                             if(static_cast<std::size_t>(pixel_data_other + pixel_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (pixel data goes out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (pixel data goes out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1420,7 +1421,7 @@ namespace Invader {
                                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST: {
                                         const auto &ustr_tag = *reinterpret_cast<const Parser::UnicodeStringList::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(ustr_tag)) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.c_str());
                                             match = false;
                                             break;
                                         }
@@ -1437,7 +1438,7 @@ namespace Invader {
                                             const auto *string_list_other = reinterpret_cast<const Parser::UnicodeStringListString::struct_little *>(loc_tag_struct_other_data + ustr_tag_other.strings.pointer);
 
                                             if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(string_list_other + string_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (strings go out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (strings go out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1460,7 +1461,7 @@ namespace Invader {
                                                     const auto *string_data_other = loc_tag_struct_other_data + string_other.string.pointer;
 
                                                     if(static_cast<std::size_t>(string_data_other + string_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (string goes out of bounds)", t.path.data());
+                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (string goes out of bounds)", t.path.c_str());
                                                         match = false;
                                                         break;
                                                     }
@@ -1477,7 +1478,7 @@ namespace Invader {
                                     case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
                                         const auto &hud_message_tag = *reinterpret_cast<const Parser::HUDMessageText::struct_little *>(loc_tag_struct.data.data());
                                         if(loc_tag_struct_other_size < sizeof(hud_message_tag)) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.data());
+                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (unicode string list main struct goes out of bounds)", t.path.c_str());
                                             match = false;
                                             break;
                                         }
@@ -1505,7 +1506,7 @@ namespace Invader {
                                             const auto *messages_other = reinterpret_cast<const Parser::HUDMessageTextMessage::struct_little *>(loc_tag_struct_other_data + hud_message_tag_other.messages.pointer);
 
                                             if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(messages_other + message_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (messages go out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (messages go out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1528,7 +1529,7 @@ namespace Invader {
                                             const auto *message_elements_other = reinterpret_cast<const Parser::HUDMessageTextElement::struct_little *>(loc_tag_struct_other_data + hud_message_tag_other.message_elements.pointer);
 
                                             if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(message_elements_other + message_element_count) - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (message elements go out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (message elements go out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }
@@ -1551,7 +1552,7 @@ namespace Invader {
                                             const auto *text_data_other = loc_tag_struct_other_data + hud_message_tag_other.text_data.pointer;
 
                                             if(static_cast<std::size_t>(text_data_other + text_data_size - loc_tag_struct_other_data) > loc_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (text data goes out of bounds)", t.path.data());
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, std::nullopt, "%s in loc.map appears to be corrupt (text data goes out of bounds)", t.path.c_str());
                                                 match = false;
                                                 break;
                                             }

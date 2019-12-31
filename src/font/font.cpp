@@ -109,9 +109,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Ensure it's lowercase
-    for(const char *c = font_tag.data(); *c; c++) {
+    for(const char *c = font_tag.c_str(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", font_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", font_tag.c_str());
             return EXIT_FAILURE;
         }
     }
@@ -155,8 +155,8 @@ int main(int argc, char *argv[]) {
         eprintf_error("Failed to initialize freetype.");
         return EXIT_FAILURE;
     }
-    if(FT_New_Face(library, final_ttf_path.data(), 0, &face)) {
-        eprintf_error("Failed to open %s.", final_ttf_path.data());
+    if(FT_New_Face(library, final_ttf_path.c_str(), 0, &face)) {
+        eprintf_error("Failed to open %s.", final_ttf_path.c_str());
         return EXIT_FAILURE;
     }
     if(FT_Set_Pixel_Sizes(face, font_options.pixel_size, font_options.pixel_size)) {
@@ -280,9 +280,9 @@ int main(int argc, char *argv[]) {
 
     // Write
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *f = std::fopen(final_tag_path.data(), "wb");
+    std::FILE *f = std::fopen(final_tag_path.c_str(), "wb");
     if(!f) {
-        eprintf_error("Failed to open %s for writing.", final_tag_path.data());
+        eprintf_error("Failed to open %s for writing.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }
 

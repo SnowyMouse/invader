@@ -130,7 +130,7 @@ int main(int argc, const char **argv) {
         auto open_tag = [&resource_options, &tag_path](const char *extension) -> std::FILE * {
             for(auto &tags_folder : resource_options.tags) {
                 auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string() + extension;
-                std::FILE *f = std::fopen(tag_path_str.data(), "rb");
+                std::FILE *f = std::fopen(tag_path_str.c_str(), "rb");
                 if(f) {
                     return f;
                 }
@@ -141,14 +141,14 @@ int main(int argc, const char **argv) {
         #define ATTEMPT_TO_OPEN(extension) { \
             std::FILE *f = open_tag(extension); \
             if(!f) { \
-                eprintf_error("Failed to open %s" extension, tag_path.data()); \
+                eprintf_error("Failed to open %s" extension, tag_path.c_str()); \
                 return EXIT_FAILURE; \
             } \
             std::fseek(f, 0, SEEK_END); \
             tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
             std::fseek(f, 0, SEEK_SET); \
             if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                eprintf_error("Failed to read %s" extension, tag_path.data()); \
+                eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
                 return EXIT_FAILURE; \
             } \
             std::fclose(f); \
@@ -173,7 +173,7 @@ int main(int argc, const char **argv) {
                         tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
                         std::fseek(f, 0, SEEK_SET); \
                         if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                            eprintf_error("Failed to read %s" extension, tag_path.data()); \
+                            eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
                             return EXIT_FAILURE; \
                         } \
                         std::fclose(f); \
@@ -185,7 +185,7 @@ int main(int argc, const char **argv) {
                 #undef DO_THIS_FOR_ME_PLEASE
 
                 if(tag_data.size() == 0) {
-                    eprintf_error("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.", tag_path.data());
+                    eprintf_error("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.", tag_path.c_str());
                 }
 
                 break;
@@ -233,7 +233,7 @@ int main(int argc, const char **argv) {
                             // If we're on retail, push the pixel data
                             if(resource_options.retail) {
                                 // Generate the path to add
-                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", tag.data(), b);
+                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", tag.c_str(), b);
 
                                 // Push it good
                                 paths.push_back(path_temp);
@@ -295,7 +295,7 @@ int main(int argc, const char **argv) {
                                     auto *permutation = permutations + p;
                                     if(resource_options.retail) {
                                         // Generate the path to add
-                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", tag.data(), pr, p);
+                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", tag.c_str(), pr, p);
 
                                         // Push it REAL good
                                         paths.push_back(path_temp);
@@ -354,7 +354,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
+            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_class_int), e.what());
             return EXIT_FAILURE;
         }
 
@@ -389,7 +389,7 @@ int main(int argc, const char **argv) {
         index.size = sizes[i];
         index.data_offset = offsets[i];
         index.path_offset = resource_names_arr.size();
-        resource_names_arr.insert(resource_names_arr.end(), reinterpret_cast<std::byte *>(paths[i].data()), reinterpret_cast<std::byte *>(paths[i].data()) + paths[i].size() + 1);
+        resource_names_arr.insert(resource_names_arr.end(), reinterpret_cast<const std::byte *>(paths[i].c_str()), reinterpret_cast<const std::byte *>(paths[i].c_str()) + paths[i].size() + 1);
     }
     header.resource_count = resource_count;
     header.paths = resource_data.size();
@@ -402,9 +402,9 @@ int main(int argc, const char **argv) {
     }
 
     // Open the file
-    std::FILE *f = std::fopen(map_path.string().data(), "wb");
+    std::FILE *f = std::fopen(map_path.string().c_str(), "wb");
     if(!f) {
-        eprintf_error("Failed to open %s for writing.", map_path.string().data());
+        eprintf_error("Failed to open %s for writing.", map_path.string().c_str());
         return EXIT_FAILURE;
     }
 

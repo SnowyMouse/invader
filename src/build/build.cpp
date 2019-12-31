@@ -174,19 +174,21 @@ int main(int argc, const char **argv) {
                 }
 
                 if(!extension) {
-                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.data());
+                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.c_str());
                     return EXIT_FAILURE;
                 }
 
-                auto substr = tag.substr(0, extension - tag.data() - 1);
-                File::preferred_path_to_halo_path_chars(substr.data());
+                auto substr = tag.substr(0, extension - tag.c_str() - 1);
+                const char *substr_c = substr.c_str();
+                std::vector<char> substr_v(substr_c, substr_c + substr.size() + 1);
+                File::preferred_path_to_halo_path_chars(substr_v.data());
 
                 // Lowercase everything
                 for(char &c : substr) {
                     c = std::tolower(c);
                 }
 
-                with_index.emplace_back(extension_to_tag_class(extension), substr);
+                with_index.emplace_back(extension_to_tag_class(extension), substr_v.data());
             }
         }
 
@@ -211,7 +213,7 @@ int main(int argc, const char **argv) {
 
         // Build!
         auto map = Invader::BuildWorkload::compile_map(
-            scenario.data(),
+            scenario.c_str(),
             build_options.tags,
             build_options.engine,
             build_options.maps,
@@ -232,7 +234,7 @@ int main(int argc, const char **argv) {
             map_name = build_options.rename_scenario;
         }
         else {
-            map_name = File::base_name_chars(scenario.data());
+            map_name = File::base_name_chars(scenario.c_str());
         }
 
         // Format path to maps/map_name.map if output not specified
@@ -244,11 +246,11 @@ int main(int argc, const char **argv) {
             final_file = build_options.output;
         }
 
-        std::FILE *file = std::fopen(final_file.data(), "wb");
+        std::FILE *file = std::fopen(final_file.c_str(), "wb");
 
         // Check if file is open
         if(!file) {
-            eprintf_error("Failed to open %s for writing.", final_file.data());
+            eprintf_error("Failed to open %s for writing.", final_file.c_str());
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 

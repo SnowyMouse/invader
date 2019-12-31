@@ -58,7 +58,7 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
                     } \
                     else { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).data(), HEK::tag_class_to_extension(palette.tag_class_int)); \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_class_to_extension(palette.tag_class_int)); \
                     } \
                 } \
                 else if(is_null) { \
@@ -527,7 +527,7 @@ namespace Invader::Parser {
                 }
 
                 encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
-                
+
                 if(best_bsp_hits == 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
                     bsp_find_warnings++;

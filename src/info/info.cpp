@@ -235,7 +235,7 @@ int main(int argc, const char **argv) {
                     }
                     bitmaps += found_it_this_bitmap;
                     if(found_it_this_bitmap && list_tags_with_external_pointers) {
-                        oprintf("%s.bitmap\n", File::halo_path_to_preferred_path(tag.get_path()).data());
+                        oprintf("%s.bitmap\n", File::halo_path_to_preferred_path(tag.get_path()).c_str());
                     }
                     break;
                 }
@@ -261,7 +261,7 @@ int main(int argc, const char **argv) {
                     }
                     sounds += found_it_this_sound;
                     if(found_it_this_sound && list_tags_with_external_pointers) {
-                        oprintf("%s.sound\n", File::halo_path_to_preferred_path(tag.get_path()).data());
+                        oprintf("%s.sound\n", File::halo_path_to_preferred_path(tag.get_path()).c_str());
                     }
                     break;
                 }
@@ -362,7 +362,7 @@ int main(int argc, const char **argv) {
                     else {
                         oprintf_success_warn("Valid languages:   %zu (map may NOT work on all original releases of the game)", languages.size());
                         for(auto &l : languages) {
-                            oprintf_success_warn("                   %s", l.data());
+                            oprintf_success_warn("                   %s", l.c_str());
                         }
                     }
                 }
@@ -411,7 +411,7 @@ int main(int argc, const char **argv) {
             oprintf("%s\n", header.name.string);
             break;
         case DISPLAY_SCENARIO_PATH:
-            oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).get_path()).data());
+            oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).get_path()).c_str());
             break;
         case DISPLAY_TAG_COUNT:
             oprintf("%zu\n", tag_count);
@@ -422,7 +422,7 @@ int main(int argc, const char **argv) {
         case DISPLAY_TAGS:
             for(std::size_t t = 0; t < tag_count; t++) {
                 auto &tag = map->get_tag(t);
-                oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).data(), tag_class_to_extension(tag.get_tag_class_int()));
+                oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_class_to_extension(tag.get_tag_class_int()));
             }
             break;
         case DISPLAY_COMPRESSION_RATIO:
@@ -489,7 +489,7 @@ int main(int argc, const char **argv) {
                     if(&l != (languages.data())) {
                         oprintf(" ");
                     }
-                    oprintf("%s", l.data());
+                    oprintf("%s", l.c_str());
                 }
             }
             oprintf("\n");
