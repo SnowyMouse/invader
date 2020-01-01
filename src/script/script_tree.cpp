@@ -212,7 +212,7 @@ namespace Invader::ScriptTree {
                     c = '-';
                 }
             }
-            global.global_type = HEK::ScenarioScriptValueType_from_string(global_type_value.data());
+            global.global_type = HEK::ScenarioScriptValueType_from_string(global_type_value.c_str());
         }
         catch(std::exception &) {
             RETURN_ERROR_TOKEN(first_token[2], "Invalid global type");

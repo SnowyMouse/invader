@@ -88,7 +88,7 @@ int main(int argc, const char **argv) {
 
     // Make sure we have a scripts directory
     if(!std::filesystem::exists(script_directory_path)) {
-        eprintf("Missing a scripts directory at %s\n", script_directory_path.string().data());
+        eprintf("Missing a scripts directory at %s\n", script_directory_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -103,9 +103,9 @@ int main(int argc, const char **argv) {
         auto &path = file.path();
         if(file.is_regular_file() && path.extension() == ".hsc") {
             auto path_str = path.string();
-            auto file_data_maybe = Invader::File::open_file(path_str.data());
+            auto file_data_maybe = Invader::File::open_file(path_str.c_str());
             if(!file_data_maybe.has_value()) {
-                eprintf("Failed to open %s\n", path_str.data());
+                eprintf("Failed to open %s\n", path_str.c_str());
                 return EXIT_FAILURE;
             }
             auto &file_data = file_data_maybe.value();
@@ -122,18 +122,18 @@ int main(int argc, const char **argv) {
 
             // On failure, explain what happened
             if(error) {
-                eprintf("Error parsing script %s\n", path_str.data());
-                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.data()).data());
-                eprintf("The error was: %s\n", error_message.data());
+                eprintf("Error parsing script %s\n", path_str.c_str());
+                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
+                eprintf("The error was: %s\n", error_message.c_str());
                 return EXIT_FAILURE;
             }
 
             // Make a syntax tree
             auto tree = ScriptTree::compile_script_tree(tokens, error, error_line, error_column, error_token, error_message);
             if(error) {
-                eprintf("Error compiling script %s\n", path_str.data());
-                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.data()).data());
-                eprintf("The error was: %s\n", error_message.data());
+                eprintf("Error compiling script %s\n", path_str.c_str());
+                eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
+                eprintf("The error was: %s\n", error_message.c_str());
                 return EXIT_FAILURE;
             }
         }
