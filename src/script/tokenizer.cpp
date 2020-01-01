@@ -202,13 +202,8 @@ namespace Invader::Tokenizer {
                     if(contains_space) {
                         string_data += "\"";
                         for(const char &c : std::get<std::string>(t.value)) {
-                            char b[3] = {};
-                            if(c == '"') {
-                                std::snprintf(b, sizeof(b), "\\%c", c);
-                            }
-                            else {
-                                std::snprintf(b, sizeof(b), "%c", c);
-                            }
+                            char b[2] = {};
+                            std::snprintf(b, sizeof(b), "%c", c);
                             string_data += b;
                         }
                         string_data += "\"";
