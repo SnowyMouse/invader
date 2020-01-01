@@ -314,4 +314,148 @@ namespace Invader::ScriptTree {
     }
 
     #undef RETURN_ERROR_TOKEN
+
+    std::vector<Tokenizer::Token> decompile_script_tree(const std::vector<Object> &script_tree) {
+        std::vector<Tokenizer::Token> r;
+
+        auto decompile_object = [&r](const Object &object, auto &decompile_object) -> void {
+            auto decompile_block = [&decompile_object] (const Object::Block &block) -> void {
+                if(block.size() == 0) {
+                    return;
+                }
+                for(auto &o : block) {
+                    decompile_object(o, decompile_object);
+                }
+            };
+
+            switch(object.type) {
+                case Object::Type::TYPE_BLOCK:
+                    decompile_block(std::get<Object::Block>(object.value));
+                    break;
+                case Object::Type::TYPE_TOKEN:
+                    r.emplace_back(std::get<Tokenizer::Token>(object.value));
+                    break;
+                case Object::Type::TYPE_GLOBAL: {
+                    auto &lp = r.emplace_back();
+                    lp.column = 0;
+                    lp.line = 0;
+                    lp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN;
+
+                    auto &global_literal = r.emplace_back();
+                    global_literal.column = 0;
+                    global_literal.line = 0;
+                    global_literal.raw_value = "global";
+                    global_literal.type = Tokenizer::Token::Type::TYPE_STRING;
+                    global_literal.value = global_literal.raw_value;
+
+                    auto &global = std::get<Object::Global>(object.value);
+
+                    auto &global_type = r.emplace_back();
+                    global_type.column = 0;
+                    global_type.line = 0;
+                    global_type.type = Tokenizer::Token::Type::TYPE_STRING;
+                    global_type.raw_value = HEK::ScenarioScriptValueType_to_string(global.global_type);
+                    for(char &c : global_type.raw_value) {
+                        if(c == '-') {
+                            c = ' ';
+                        }
+                    }
+                    global_type.value = global_type.raw_value;
+
+                    auto &global_name = r.emplace_back();
+                    global_name.column = 0;
+                    global_name.line = 0;
+                    global_name.raw_value = global.global_name;
+                    global_name.type = Tokenizer::Token::Type::TYPE_STRING;
+                    global_name.value = global_name.raw_value;
+
+                    decompile_block(global.block);
+
+                    auto &rp = r.emplace_back();
+                    rp.column = 0;
+                    rp.line = 0;
+                    rp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE;
+                    break;
+                }
+                case Object::Type::TYPE_SCRIPT: {
+                    auto &script = std::get<Object::Script>(object.value);
+                    auto &lp = r.emplace_back();
+                    lp.column = 0;
+                    lp.line = 0;
+                    lp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN;
+
+                    auto &script_literal = r.emplace_back();
+                    script_literal.column = 0;
+                    script_literal.line = 0;
+                    script_literal.raw_value = "script";
+                    script_literal.type = Tokenizer::Token::Type::TYPE_STRING;
+                    script_literal.value = script_literal.raw_value;
+
+                    auto &script_type = r.emplace_back();
+                    script_type.column = 0;
+                    script_type.line = 0;
+                    script_type.raw_value = HEK::ScenarioScriptType_to_string(script.script_type);
+                    script_type.type = Tokenizer::Token::Type::TYPE_STRING;
+                    script_type.value = script_type.raw_value;
+
+                    if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC) {
+                        auto &script_return_type = r.emplace_back();
+                        script_return_type.column = 0;
+                        script_return_type.line = 0;
+                        script_return_type.type = Tokenizer::Token::Type::TYPE_STRING;
+                        script_return_type.raw_value = HEK::ScenarioScriptValueType_to_string(script.script_return_type);
+                        for(char &c : script_return_type.raw_value) {
+                            if(c == '-') {
+                                c = ' ';
+                            }
+                        }
+                        script_return_type.value = script_return_type.raw_value;
+                    }
+
+                    auto &script_name = r.emplace_back();
+                    script_name.column = 0;
+                    script_name.line = 0;
+                    script_name.raw_value = script.script_name;
+                    script_name.type = Tokenizer::Token::Type::TYPE_STRING;
+                    script_name.value = script_name.raw_value;
+
+                    decompile_block(script.block);
+
+                    auto &rp = r.emplace_back();
+                    rp.column = 0;
+                    rp.line = 0;
+                    rp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE;
+                    break;
+                }
+                case Object::Type::TYPE_FUNCTION_CALL: {
+                    auto &lp = r.emplace_back();
+                    lp.column = 0;
+                    lp.line = 0;
+                    lp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_OPEN;
+
+                    auto &function_call = std::get<Object::FunctionCall>(object.value);
+                    auto &function_name = r.emplace_back();
+                    function_name.column = 0;
+                    function_name.line = 0;
+                    function_name.raw_value = function_call.function_name;
+                    function_name.type = Tokenizer::Token::Type::TYPE_STRING;
+                    function_name.value = function_name.raw_value;
+
+                    decompile_block(function_call.block);
+
+                    auto &rp = r.emplace_back();
+                    rp.column = 0;
+                    rp.line = 0;
+                    rp.type = Tokenizer::Token::Type::TYPE_PARENTHESIS_CLOSE;
+                    break;
+                }
+            }
+        };
+
+        for(auto &t : script_tree) {
+            decompile_object(t, decompile_object);
+        }
+
+        return r;
+    }
 }

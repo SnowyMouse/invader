@@ -43,6 +43,13 @@ namespace Invader::Tokenizer {
      * @param error_message if an error occurred, this is the message
      */
     std::vector<Token> tokenize(const char *string, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+
+    /**
+     * Convert the tokens back to an HSC script
+     * @param  tokens tokens to convert
+     * @return        HSC script
+     */
+    std::string detokenize(const std::vector<Token> &tokens);
 }
 
 #endif

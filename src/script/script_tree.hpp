@@ -47,8 +47,8 @@ namespace Invader::ScriptTree {
             FunctionCall
         >;
 
-        Type type;
-        Value value;
+        Type type = {};
+        Value value = {};
     };
 
     /**
@@ -62,6 +62,12 @@ namespace Invader::ScriptTree {
      * @return               vector of objects
      */
     std::vector<Object> compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+
+    /**
+     * Decompile a script tree to tokens
+     * @param script_tree script tree to decompile
+     */
+    std::vector<Tokenizer::Token> decompile_script_tree(const std::vector<Object> &script_tree);
 }
 
 #endif
