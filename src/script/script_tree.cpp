@@ -9,7 +9,7 @@ namespace Invader::ScriptTree {
     // Get a principal object (script or global)
     static std::optional<Object> get_principal_object(const Token *first_token, const Token *last_token, std::size_t &advance, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
-    std::vector<Object> compile_script_tree(const std::vector<Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
+    std::vector<Object> compile_tokens(const std::vector<Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message) {
         std::vector<Object> objects;
         error = false;
 

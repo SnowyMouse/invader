@@ -61,7 +61,7 @@ namespace Invader::ScriptTree {
      * @param  error_message if an error occurs, this will be the error message
      * @return               vector of objects
      */
-    std::vector<Object> compile_script_tree(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
+    std::vector<Object> compile_tokens(const std::vector<Tokenizer::Token> &tokens, bool &error, std::size_t &error_line, std::size_t &error_column, std::string &error_token, std::string &error_message);
 
     /**
      * Decompile a script tree to tokens
