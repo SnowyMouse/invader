@@ -21,7 +21,6 @@ int main(int argc, const char **argv) {
 
     // Add our options
     std::vector<CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
     options.emplace_back("info", 'i', 0);
     options.emplace_back("data", 'd', 1);
     options.emplace_back("tags", 't', 1);
