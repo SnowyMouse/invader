@@ -121,7 +121,7 @@ int main(int argc, const char **argv) {
 
             // On failure, explain what happened
             if(error) {
-                eprintf("Error parsing script %s\n", path_str.c_str());
+                eprintf_error("Error parsing script %s", path_str.c_str());
                 eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
                 eprintf("The error was: %s\n", error_message.c_str());
                 return EXIT_FAILURE;
@@ -130,7 +130,7 @@ int main(int argc, const char **argv) {
             // Make a syntax tree
             auto tree = ScriptTree::compile_script_tree(tokens, error, error_line, error_column, error_token, error_message);
             if(error) {
-                eprintf("Error compiling script %s\n", path_str.c_str());
+                eprintf_error("Error compiling script %s", path_str.c_str());
                 eprintf("%zu:%zu %s\n", error_line, error_column, clean_token(error_token.c_str()).c_str());
                 eprintf("The error was: %s\n", error_message.c_str());
                 return EXIT_FAILURE;
