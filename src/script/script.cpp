@@ -161,5 +161,6 @@ int main(int argc, const char **argv) {
     bool error;
     std::string error_message;
     auto new_s = Compiler::decompile_scenario(s, error, error_message);
-    oprintf("%s\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
+    oprintf("%s\n\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
+    oprintf("%s\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(all_scripts)).c_str());
 }

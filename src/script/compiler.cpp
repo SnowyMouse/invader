@@ -132,6 +132,10 @@ namespace Invader::Compiler {
                     o.value = t;
                     return o;
                 }
+                case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNPARSED: {
+                    return decompile_node(n.next_node.read(), decompile_node);
+                }
+                // fallthrough
                 default:
                     ScriptTree::Object o = {};
                     o.type = ScriptTree::Object::Type::TYPE_TOKEN;
@@ -145,7 +149,7 @@ namespace Invader::Compiler {
 
         // Go through each global
         for(auto &g : scenario.globals) {
-            auto value = decompile_node(g.type, decompile_node);
+            auto value = decompile_node(g.initialization_expression_index, decompile_node);
 
             ScriptTree::Object script_call = {};
             script_call.type = ScriptTree::Object::Type::TYPE_GLOBAL;
