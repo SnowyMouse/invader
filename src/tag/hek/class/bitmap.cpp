@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-
-#include "bitmap.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_bitmap_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -11,10 +10,18 @@ namespace Invader::HEK {
         ASSERT_SIZE(tag.compressed_color_plate_data.size);
         INCREMENT_DATA_PTR(tag.compressed_color_plate_data.size);
 
+        // Zero out color plate data
+        tag.color_plate_width = 0;
+        tag.color_plate_height = 0;
+        tag.compressed_color_plate_data = {};
+
         auto *processed_data = data;
         ASSERT_SIZE(tag.processed_pixel_data.size);
         compiled.asset_data.insert(compiled.asset_data.begin(), processed_data, processed_data + tag.processed_pixel_data.size);
         INCREMENT_DATA_PTR(tag.processed_pixel_data.size);
+
+        // Zero out processed data, too
+        tag.processed_pixel_data = {};
 
         // Get all of the data. We'll need to comb over it in a bit.
         std::vector<BitmapGroupSequence<LittleEndian>> sequence_data;
@@ -32,7 +39,7 @@ namespace Invader::HEK {
         std::size_t last_sequence;
         for(last_sequence = 0; last_sequence < sequence_data.size(); last_sequence++) {
             auto &sequence = sequence_data[last_sequence];
-            if(sequence.first_bitmap_index == -1) {
+            if(sequence.first_bitmap_index == NULL_INDEX) {
                 break;
             }
         }
@@ -76,60 +83,74 @@ namespace Invader::HEK {
             // Calculate number of pixels
             std::size_t mipmap_width = reflexive.width;
             std::size_t mipmap_height = reflexive.height;
+            std::size_t mipmap_depth = reflexive.depth;
             for(std::size_t mipmap = 0; mipmap <= total_mipmap_count; mipmap++) {
-                total_pixel_count += mipmap_height * mipmap_width;
-                total_pixel_count_dxt += (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height);
+                total_pixel_count += mipmap_height * mipmap_width * mipmap_depth;
+                std::size_t dxt_size = (mipmap_width < 4 ? 4 : mipmap_width) * (mipmap_height <= 4 ? 4 : mipmap_height) * mipmap_depth;
+                total_pixel_count_dxt += dxt_size;
 
                 mipmap_height /= 2;
                 mipmap_width /= 2;
+
+                if(reflexive.type == BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+                    mipmap_depth /= 2;
+                }
+
+                if(mipmap_height == 0) {
+                    mipmap_height = 1;
+                }
+
+                if(mipmap_width == 0) {
+                    mipmap_width = 1;
+                }
             }
 
             // Now, set the size based on number of pixels
             switch(reflexive.format.read()) {
                 // 8-bit
-                case BITMAP_FORMAT_A8:
-                case BITMAP_FORMAT_Y8:
-                case BITMAP_FORMAT_P8_BUMP:
-                case BITMAP_FORMAT_AY8:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count);
+                case BITMAP_DATA_FORMAT_A8:
+                case BITMAP_DATA_FORMAT_Y8:
+                case BITMAP_DATA_FORMAT_P8_BUMP:
+                case BITMAP_DATA_FORMAT_AY8:
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count);
                     break;
 
                 // 8-bit DXT (4x4 blocks)
-                case BITMAP_FORMAT_DXT3:
-                case BITMAP_FORMAT_DXT5:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt);
+                case BITMAP_DATA_FORMAT_DXT3:
+                case BITMAP_DATA_FORMAT_DXT5:
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count_dxt);
                     break;
 
                 // 16-bit
-                case BITMAP_FORMAT_A8Y8:
-                case BITMAP_FORMAT_R5G6B5:
-                case BITMAP_FORMAT_A1R5G5B5:
-                case BITMAP_FORMAT_A4R4G4B4:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 2);
+                case BITMAP_DATA_FORMAT_A8Y8:
+                case BITMAP_DATA_FORMAT_R5G6B5:
+                case BITMAP_DATA_FORMAT_A1R5G5B5:
+                case BITMAP_DATA_FORMAT_A4R4G4B4:
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count * 2);
                     break;
 
                 // 32-bit
-                case BITMAP_FORMAT_X8R8G8B8:
-                case BITMAP_FORMAT_A8R8G8B8:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count * 4);
+                case BITMAP_DATA_FORMAT_X8R8G8B8:
+                case BITMAP_DATA_FORMAT_A8R8G8B8:
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count * 4);
                     break;
 
                 // 4-bit DXT (4x4 blocks)
-                case BITMAP_FORMAT_DXT1:
-                    reflexive.pixels_count = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
+                case BITMAP_DATA_FORMAT_DXT1:
+                    reflexive.pixel_data_size = static_cast<std::uint32_t>(total_pixel_count_dxt / 2);
                     break;
 
                 // lol
                 default:
-                    reflexive.pixels_count = 0;
+                    reflexive.pixel_data_size = 0;
             }
 
             switch(reflexive.type.read()) {
                 case BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                    reflexive.pixels_count = reflexive.pixels_count * 6;
+                    reflexive.pixel_data_size = reflexive.pixel_data_size * 6;
                     break;
                 case BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                    reflexive.pixels_count = reflexive.pixels_count * reflexive.depth.read();
+                    reflexive.pixel_data_size = reflexive.pixel_data_size;
                     break;
                 default:
                     break;

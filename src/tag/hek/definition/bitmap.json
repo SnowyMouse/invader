@@ -1,0 +1,368 @@
+[
+    {
+        "name": "BitmapDataType",
+        "options": [
+            "2d texture",
+            "3d texture",
+            "cube map",
+            "white"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapDataFormat",
+        "options": [
+            "a8",
+            "y8",
+            "ay8",
+            "a8y8",
+            "unused1",
+            "unused2",
+            "r5g6b5",
+            "unused3",
+            "a1r5g5b5",
+            "a4r4g4b4",
+            "x8r8g8b8",
+            "a8r8g8b8",
+            "unused4",
+            "unused5",
+            "dxt1",
+            "dxt3",
+            "dxt5",
+            "p8 bump"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapType",
+        "options": [
+            "2d textures",
+            "3d textures",
+            "cube maps",
+            "sprites",
+            "interface bitmaps"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapFormat",
+        "options": [
+            "compressed with color key transparency",
+            "compressed with explicit alpha",
+            "compressed with interpolated alpha",
+            "16-bit color",
+            "32-bit color",
+            "monochrome"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapUsage",
+        "options": [
+            "alpha blend",
+            "default",
+            "height map",
+            "detail map",
+            "light map",
+            "vector map"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapSpriteBudgetSize",
+        "options": [
+            "32x32",
+            "64x64",
+            "128x128",
+            "256x256",
+            "512x512"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapSpriteUsage",
+        "options": [
+            "blend add subtract max",
+            "multiply min",
+            "double multiply"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "BitmapDataFlags",
+        "type": "bitfield",
+        "fields": [
+            "power of two dimensions",
+            "compressed",
+            "palettized",
+            "swizzled",
+            "linear",
+            "v16u16",
+            "unused",
+            "make it actually work",
+            "external"
+        ],
+        "width": 16
+    },
+    {
+        "name": "BitmapFlags",
+        "type": "bitfield",
+        "fields": [
+            "enable diffusion dithering",
+            "disable height map compression",
+            "uniform sprite sequences",
+            "filthy sprite bug fix",
+            "invader nearest mipmap alpha",
+            "invader nearest mipmap alpha and color",
+            "invader dither alpha",
+            "invader dither red",
+            "invader dither green",
+            "invader dither blue"
+        ],
+        "width": 16
+    },
+    {
+        "name": "BitmapGroupSprite",
+        "fields": [
+            {
+                "name": "bitmap index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "left",
+                "type": "float"
+            },
+            {
+                "name": "right",
+                "type": "float"
+            },
+            {
+                "name": "top",
+                "type": "float"
+            },
+            {
+                "name": "bottom",
+                "type": "float"
+            },
+            {
+                "name": "registration point",
+                "type": "Point2D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "BitmapGroupSequence",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "first bitmap index",
+                "type": "Index"
+            },
+            {
+                "name": "bitmap count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "sprites",
+                "type": "TagReflexive",
+                "struct": "BitmapGroupSprite",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 64
+    },
+    {
+        "name": "BitmapData",
+        "fields": [
+            {
+                "name": "bitmap class",
+                "type": "TagClassInt"
+            },
+            {
+                "name": "width",
+                "type": "uint16"
+            },
+            {
+                "name": "height",
+                "type": "uint16"
+            },
+            {
+                "name": "depth",
+                "type": "uint16"
+            },
+            {
+                "name": "type",
+                "type": "BitmapDataType"
+            },
+            {
+                "name": "format",
+                "type": "BitmapDataFormat"
+            },
+            {
+                "name": "flags",
+                "type": "BitmapDataFlags"
+            },
+            {
+                "name": "registration point",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "mipmap count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "pixel data offset",
+                "type": "uint32"
+            },
+            {
+                "name": "pixel data size",
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
+            },
+            {
+                "name": "bitmap tag id",
+                "type": "TagID"
+            },
+            {
+                "name": "pointer",
+                "type": "Pointer"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            }
+        ],
+        "type": "struct",
+        "size": 48
+    },
+    {
+        "name": "Bitmap",
+        "fields": [
+            {
+                "name": "type",
+                "type": "BitmapType"
+            },
+            {
+                "name": "format",
+                "type": "BitmapFormat"
+            },
+            {
+                "name": "usage",
+                "type": "BitmapUsage"
+            },
+            {
+                "name": "flags",
+                "type": "BitmapFlags"
+            },
+            {
+                "name": "detail fade factor",
+                "type": "Fraction"
+            },
+            {
+                "name": "sharpen amount",
+                "type": "Fraction"
+            },
+            {
+                "name": "bump height",
+                "type": "Fraction"
+            },
+            {
+                "name": "sprite budget size",
+                "type": "BitmapSpriteBudgetSize"
+            },
+            {
+                "name": "sprite budget count",
+                "type": "uint16"
+            },
+            {
+                "name": "color plate width",
+                "type": "int16"
+            },
+            {
+                "name": "color plate height",
+                "type": "int16"
+            },
+            {
+                "name": "compressed color plate data",
+                "type": "TagDataOffset",
+                "compound": true,
+                "non_cached": true
+            },
+            {
+                "name": "processed pixel data",
+                "type": "TagDataOffset",
+                "compound": true,
+                "non_cached": true
+            },
+            {
+                "name": "blur filter size",
+                "type": "float"
+            },
+            {
+                "name": "alpha bias",
+                "type": "float"
+            },
+            {
+                "name": "mipmap count",
+                "type": "uint16"
+            },
+            {
+                "name": "sprite usage",
+                "type": "BitmapSpriteUsage"
+            },
+            {
+                "name": "sprite spacing",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "bitmap group sequence",
+                "type": "TagReflexive",
+                "struct": "BitmapGroupSequence",
+                "compound": true
+            },
+            {
+                "name": "bitmap data",
+                "type": "TagReflexive",
+                "struct": "BitmapData",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "post_cache_parse": true,
+        "size": 108
+    }
+]

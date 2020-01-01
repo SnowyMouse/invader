@@ -1,26 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifdef _WIN32
-#include <windows.h>
-#define PATH_BUFFER_LENGTH MAX_PATH
-#else
-#include <linux/limits.h>
-#define PATH_BUFFER_LENGTH PATH_MAX
-#endif
-
 #include <memory>
 #include <cstdio>
 
-#include "compiled_tag.hpp"
-
-#include "../error.hpp"
-#include "hek/header.hpp"
-#include "hek/class/globals.hpp"
-#include "hek/class/damage_effect.hpp"
-#include "hek/class/object.hpp"
-#include "hek/class/weapon.hpp"
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/error.hpp>
+#include <invader/tag/hek/header.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/hek/class/damage_effect.hpp>
+#include <invader/tag/hek/class/weapon.hpp>
 
 namespace Invader::HEK {
+    void compile_globals_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, ScenarioType type);
+    void compile_damage_effect_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, DamageEffectJasonJones jason_jones);
+    void compile_object_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, ObjectType type);
+    void compile_weapon_tag(CompiledTag &compiled, const std::byte *data, std::size_t size, WeaponJasonJones jason_jones);
+
     /**
      * Compile the tag
      * @param compiled  CompiledTag reference
@@ -298,9 +293,9 @@ namespace Invader {
         return this->resolve_pointer(static_cast<std::size_t>(reinterpret_cast<std::byte *>(offset) - this->data.data()));
     }
 
-    CompiledTag::CompiledTag(const std::string &path, HEK::TagClassInt class_int) : path(path), tag_class_int(class_int), p_stub(true) {}
+    CompiledTag::CompiledTag(const std::string &path, TagClassInt class_int) : path(path), tag_class_int(class_int), p_stub(true) {}
 
-    CompiledTag::CompiledTag(const std::string &path, HEK::TagClassInt class_int, const std::byte *data, std::size_t size, CacheFileType type) : CompiledTag(path, data, size, type) {
+    CompiledTag::CompiledTag(const std::string &path, TagClassInt class_int, const std::byte *data, std::size_t size, CacheFileType type) : CompiledTag(path, data, size, type) {
         if(this->tag_class_int != class_int) {
             throw UnexpectedTagClassException();
         }

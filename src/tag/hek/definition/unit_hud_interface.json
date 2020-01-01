@@ -1,0 +1,1134 @@
+[
+    {
+        "name": "UnitHUDInterfacePanelType",
+        "options": [
+            "integrated light"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "UnitHUDInterfaceAuxiliaryOverlayFlags",
+        "type": "bitfield",
+        "fields": [
+            "use team color"
+        ],
+        "width": 16
+    },
+    {
+        "name": "UnitHUDInterfaceHUDSoundLatchedTo",
+        "type": "bitfield",
+        "fields": [
+            "shield recharging",
+            "shield damaged",
+            "shield low",
+            "shield empty",
+            "health low",
+            "health empty",
+            "health minor damage",
+            "health major damage"
+        ],
+        "width": 32
+    },
+    {
+        "name": "UnitHUDInterfaceAuxiliaryPanelMeterMoreFlags",
+        "type": "bitfield",
+        "fields": [
+            "show only when active",
+            "flash once if activated while disabled"
+        ],
+        "width": 32
+    },
+    {
+        "name": "UnitHUDInterfaceAuxiliaryOverlay",
+        "fields": [
+            {
+                "name": "anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "width scale",
+                "type": "float"
+            },
+            {
+                "name": "height scale",
+                "type": "float"
+            },
+            {
+                "name": "scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "flash period",
+                "type": "float"
+            },
+            {
+                "name": "flash delay",
+                "type": "float"
+            },
+            {
+                "name": "number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "flash length",
+                "type": "float"
+            },
+            {
+                "name": "disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "multitex overlay",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "type",
+                "type": "UnitHUDInterfacePanelType"
+            },
+            {
+                "name": "flags",
+                "type": "UnitHUDInterfaceAuxiliaryOverlayFlags"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            }
+        ],
+        "type": "struct",
+        "size": 132
+    },
+    {
+        "name": "UnitHUDInterfaceHUDSound",
+        "fields": [
+            {
+                "name": "sound",
+                "type": "TagDependency",
+                "classes": [
+                    "sound",
+                    "sound_looping"
+                ],
+                "compound": true
+            },
+            {
+                "name": "latched to",
+                "type": "UnitHUDInterfaceHUDSoundLatchedTo"
+            },
+            {
+                "name": "scale",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "size": 56
+    },
+    {
+        "name": "UnitHUDInterfaceAuxiliaryPanel",
+        "fields": [
+            {
+                "name": "type",
+                "type": "UnitHUDInterfacePanelType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "background anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "background width scale",
+                "type": "float"
+            },
+            {
+                "name": "background height scale",
+                "type": "float"
+            },
+            {
+                "name": "background scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "background interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "background default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "background flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "background flash period",
+                "type": "float"
+            },
+            {
+                "name": "background flash delay",
+                "type": "float"
+            },
+            {
+                "name": "background number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "background flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "background flash length",
+                "type": "float"
+            },
+            {
+                "name": "background disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "background sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "background multitex overlay",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "meter anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "meter width scale",
+                "type": "float"
+            },
+            {
+                "name": "meter height scale",
+                "type": "float"
+            },
+            {
+                "name": "meter scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "meter meter bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "meter color at meter minimum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "meter color at meter maximum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "meter flash color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "meter empty color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "meter flags",
+                "type": "HUDInterfaceMeterFlags"
+            },
+            {
+                "name": "meter minimum meter value",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "meter sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "meter alpha multiplier",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "meter alpha bias",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "meter value scale",
+                "type": "int16"
+            },
+            {
+                "name": "meter opacity",
+                "type": "float"
+            },
+            {
+                "name": "meter translucency",
+                "type": "float"
+            },
+            {
+                "name": "meter disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "meter minimum fraction cutoff",
+                "type": "float"
+            },
+            {
+                "name": "meter more flags",
+                "type": "UnitHUDInterfaceAuxiliaryPanelMeterMoreFlags"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "type": "pad",
+                "size": 64
+            }
+        ],
+        "type": "struct",
+        "size": 324
+    },
+    {
+        "name": "UnitHUDInterface",
+        "fields": [
+            {
+                "name": "anchor",
+                "type": "HUDInterfaceAnchor"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "hud background anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "hud background width scale",
+                "type": "float"
+            },
+            {
+                "name": "hud background height scale",
+                "type": "float"
+            },
+            {
+                "name": "hud background scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "hud background interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hud background default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "hud background flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "hud background flash period",
+                "type": "float"
+            },
+            {
+                "name": "hud background flash delay",
+                "type": "float"
+            },
+            {
+                "name": "hud background number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "hud background flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "hud background flash length",
+                "type": "float"
+            },
+            {
+                "name": "hud background disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "hud background sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "hud background multitex overlay",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "shield panel background anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "shield panel background width scale",
+                "type": "float"
+            },
+            {
+                "name": "shield panel background height scale",
+                "type": "float"
+            },
+            {
+                "name": "shield panel background scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "shield panel background interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shield panel background default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel background flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel background flash period",
+                "type": "float"
+            },
+            {
+                "name": "shield panel background flash delay",
+                "type": "float"
+            },
+            {
+                "name": "shield panel background number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "shield panel background flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "shield panel background flash length",
+                "type": "float"
+            },
+            {
+                "name": "shield panel background disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "shield panel background sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "shield panel background multitex overlay",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "shield panel meter anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "shield panel meter width scale",
+                "type": "float"
+            },
+            {
+                "name": "shield panel meter height scale",
+                "type": "float"
+            },
+            {
+                "name": "shield panel meter scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "shield panel meter meter bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shield panel meter color at meter minimum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter color at meter maximum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter flash color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter empty color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter flags",
+                "type": "HUDInterfaceMeterFlags"
+            },
+            {
+                "name": "shield panel meter minimum meter value",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "shield panel meter sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "shield panel meter alpha multiplier",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "shield panel meter alpha bias",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "shield panel meter value scale",
+                "type": "int16"
+            },
+            {
+                "name": "shield panel meter opacity",
+                "type": "float"
+            },
+            {
+                "name": "shield panel meter translucency",
+                "type": "float"
+            },
+            {
+                "name": "shield panel meter disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "shield panel meter overcharge minimum color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter overcharge maximum color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter overcharge flash color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shield panel meter overcharge empty color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "health panel background anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "health panel background width scale",
+                "type": "float"
+            },
+            {
+                "name": "health panel background height scale",
+                "type": "float"
+            },
+            {
+                "name": "health panel background scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "health panel background interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "health panel background default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel background flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel background flash period",
+                "type": "float"
+            },
+            {
+                "name": "health panel background flash delay",
+                "type": "float"
+            },
+            {
+                "name": "health panel background number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "health panel background flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "health panel background flash length",
+                "type": "float"
+            },
+            {
+                "name": "health panel background disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "health panel background sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "health panel background multitex overlay",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "health panel meter anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "health panel meter width scale",
+                "type": "float"
+            },
+            {
+                "name": "health panel meter height scale",
+                "type": "float"
+            },
+            {
+                "name": "health panel meter scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "health panel meter meter bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "health panel meter color at meter minimum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel meter color at meter maximum",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel meter flash color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel meter empty color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel meter flags",
+                "type": "HUDInterfaceMeterFlags"
+            },
+            {
+                "name": "health panel meter minimum meter value",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "health panel meter sequence index",
+                "type": "Index"
+            },
+            {
+                "name": "health panel meter alpha multiplier",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "health panel meter alpha bias",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "health panel meter value scale",
+                "type": "int16"
+            },
+            {
+                "name": "health panel meter opacity",
+                "type": "float"
+            },
+            {
+                "name": "health panel meter translucency",
+                "type": "float"
+            },
+            {
+                "name": "health panel meter disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "health panel meter medium health left color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "health panel meter max color health fraction cutoff",
+                "type": "float"
+            },
+            {
+                "name": "health panel meter min color health fraction cutoff",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "motion sensor background anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "motion sensor background width scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor background height scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor background scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "motion sensor background interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "motion sensor background default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "motion sensor background flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "motion sensor background flash period",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor background flash delay",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor background number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "motion sensor background flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "motion sensor background flash length",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor background disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "motion sensor background sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "motion sensor background multitex overlays",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "motion sensor foreground anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "motion sensor foreground width scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor foreground height scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor foreground scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "motion sensor foreground interface bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "motion sensor foreground default color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "motion sensor foreground flashing color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "motion sensor foreground flash period",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor foreground flash delay",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor foreground number of flashes",
+                "type": "uint16"
+            },
+            {
+                "name": "motion sensor foreground flash flags",
+                "type": "HUDInterfaceFlashFlags"
+            },
+            {
+                "name": "motion sensor foreground flash length",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor foreground disabled color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "motion sensor foreground sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "motion sensor foreground multitex overlays",
+                "type": "TagReflexive",
+                "struct": "HUDInterfaceMultitextureOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "motion sensor center anchor offset",
+                "type": "Point2DInt",
+                "compound": true
+            },
+            {
+                "name": "motion sensor center width scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor center height scale",
+                "type": "float"
+            },
+            {
+                "name": "motion sensor center scaling flags",
+                "type": "HUDInterfaceScalingFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "auxiliary overlay anchor",
+                "type": "HUDInterfaceAnchor"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "overlays",
+                "type": "TagReflexive",
+                "struct": "UnitHUDInterfaceAuxiliaryOverlay",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "sounds",
+                "type": "TagReflexive",
+                "struct": "UnitHUDInterfaceHUDSound",
+                "compound": true
+            },
+            {
+                "name": "meters",
+                "type": "TagReflexive",
+                "struct": "UnitHUDInterfaceAuxiliaryPanel",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 356
+            },
+            {
+                "type": "pad",
+                "size": 48
+            }
+        ],
+        "type": "struct",
+        "size": 1388
+    }
+]

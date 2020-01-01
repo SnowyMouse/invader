@@ -3,11 +3,12 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-#include "../eprintf.hpp"
-#include "../version.hpp"
-#include "../tag/hek/header.hpp"
-#include "../tag/hek/class/string_list.hpp"
-#include "../command_line_option.hpp"
+#include <invader/printf.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/header.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 enum Format {
     STRING_LIST_FORMAT_UTF_16,
@@ -15,7 +16,7 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+template <typename T, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
     using namespace Invader::HEK;
 
     // Make the file header
@@ -25,7 +26,7 @@ template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte>
     // Start building a list of strings
     std::vector<std::string> strings;
     std::size_t string_length = input_string.size();
-    const char *c = input_string.data();
+    const char *c = input_string.c_str();
 
     // Separate into lines
     std::string string;
@@ -70,11 +71,11 @@ template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte>
         if(sizeof(T) == sizeof(char16_t)) {
             auto string_data = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(reinterpret_cast<char *>(str.data()));
             string_size = string_data.size() * sizeof(T);
-            tag_data.insert(tag_data.end(), reinterpret_cast<std::byte *>(string_data.data()), reinterpret_cast<std::byte *>(string_data.data() + string_data.size() + 1));
+            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(string_data.c_str()), reinterpret_cast<const std::byte *>(string_data.c_str() + string_data.size() + 1));
         }
         else {
             string_size = str.size();
-            tag_data.insert(tag_data.end(), reinterpret_cast<std::byte *>(str.data()), reinterpret_cast<std::byte *>(str.data() + str.size() + 1));
+            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(str.c_str()), reinterpret_cast<const std::byte *>(str.c_str() + str.size() + 1));
         }
 
         auto &data_str = reinterpret_cast<StringListString<BigEndian> *>(tag_data.data() + string_list_string_offset)->string;
@@ -86,38 +87,42 @@ template <typename T, Invader::HEK::TagClassInt C> static std::vector<std::byte>
 }
 
 static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
-    eprintf("Error: Unimplemented.\n");
+    eprintf_error("Error: Unimplemented.");
     exit(EXIT_FAILURE);
 }
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("format", 'f', 1);
+    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be utf-16, hmt, or latin-1. Default: utf-16");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
+
+    static constexpr char DESCRIPTION[] = "Generate string list tags.";
+    static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
-        const char *path;
         const char *data = "data";
         const char *tags = "tags";
         Format format = Format::STRING_LIST_FORMAT_UTF_16;
         const char *output_extension = ".unicode_string_list";
+        bool use_filesystem_path = false;
     } string_options;
 
-    string_options.path = argv[0];
-
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, 'h', string_options, [](char opt, const std::vector<const char *> &arguments, StringOptions &string_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
                 string_options.tags = arguments[0];
                 break;
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
             case 'd':
                 string_options.data = arguments[0];
+                break;
+            case 'P':
+                string_options.use_filesystem_path = true;
                 break;
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
@@ -133,51 +138,55 @@ int main(int argc, char * const *argv) {
                     string_options.output_extension = ".hud_message_text";
                 }
                 break;
-            default:
-                eprintf("Usage: %s [options] <tag>\n\n", arguments[0]);
-                eprintf("Generate string list tags.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --format,-f <format>         Set string list format. Can be utf-16, hmt, or\n");
-                eprintf("                               or latin-1. Default: utf-16\n");
-                eprintf("  --data,-d <dir>              Use the specified data directory.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory.\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 
+    const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
+
     // Check if there's a string tag
-    const char *string_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A string tag path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
+    std::string string_tag;
+    if(string_options.use_filesystem_path) {
+        std::vector<std::string> data(&string_options.data, &string_options.data + 1);
+        auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+        if(string_tag_maybe.has_value()) {
+            string_tag = string_tag_maybe.value();
+        }
+        else {
+            eprintf_error("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
     else {
         string_tag = remaining_arguments[0];
     }
 
     // Ensure it's lowercase
-    for(const char *c = string_tag; *c; c++) {
+    for(const char *c = string_tag.c_str(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag);
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.c_str());
             return EXIT_FAILURE;
         }
     }
 
     std::filesystem::path tags_path(string_options.tags);
+    if(!std::filesystem::is_directory(tags_path)) {
+        if(std::strcmp(string_options.tags, "tags") == 0) {
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
+        }
+        else {
+            eprintf_error("Directory %s was not found or is not a directory\n", string_options.tags);
+        }
+        return EXIT_FAILURE;
+    }
     std::filesystem::path data_path(string_options.data);
 
-    auto input_path = (data_path / string_tag).string() + (string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
+    auto input_path = (data_path / string_tag).string() + valid_extension;
     auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
 
     // Open a file
-    std::FILE *f = std::fopen(input_path.data(), "rb");
+    std::FILE *f = std::fopen(input_path.c_str(), "rb");
     if(!f) {
-        eprintf("Failed to open %s for reading.\n", input_path.data());
+        eprintf_error("Failed to open %s for reading.", input_path.c_str());
         return EXIT_FAILURE;
     }
 
@@ -219,10 +228,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(string_options.format) {
         case STRING_LIST_FORMAT_UTF_16:
-            final_data = generate_string_list_tag<char16_t, Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
-            final_data = generate_string_list_tag<char, Invader::HEK::TagClassInt::TAG_CLASS_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
             final_data = generate_hud_message_text_tag(text);
@@ -232,14 +241,14 @@ int main(int argc, char * const *argv) {
     // Write it all
     std::filesystem::path tag_path(output_path);
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *tag_write = std::fopen(output_path.data(), "wb");
+    std::FILE *tag_write = std::fopen(output_path.c_str(), "wb");
     if(!tag_write) {
-        eprintf("Error: Failed to open %s for writing.\n", output_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.\n", output_path.c_str());;
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(final_data.data(), final_data.size(), 1, tag_write) != 1) {
-        eprintf("Error: Failed to write to %s.\n", output_path.data());
+        eprintf_error("Error: Failed to write to %s.\n", output_path.c_str());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

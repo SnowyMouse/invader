@@ -1,0 +1,71 @@
+[
+    {
+        "name": "MachineType",
+        "options": [
+            "door",
+            "platform",
+            "gear"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "MachineCollisionResponse",
+        "options": [
+            "pause until crushed",
+            "reverse directions"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "MachineFlags",
+        "type": "bitfield",
+        "fields": [
+            "pathfinding obstacle",
+            "but not when open",
+            "elevator"
+        ],
+        "width": 16
+    },
+    {
+        "name": "DeviceMachine",
+        "fields": [
+            {
+                "name": "machine type",
+                "type": "MachineType"
+            },
+            {
+                "name": "machine flags",
+                "type": "MachineFlags"
+            },
+            {
+                "name": "door open time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 80
+            },
+            {
+                "name": "collision response",
+                "type": "MachineCollisionResponse"
+            },
+            {
+                "name": "elevator node",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 52
+            },
+            {
+                "name": "door open time ticks",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Device",
+        "size": 804
+    }
+]

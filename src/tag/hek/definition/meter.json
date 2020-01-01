@@ -1,0 +1,109 @@
+[
+    {
+        "name": "MeterInterpolateColors",
+        "options": [
+            "linearly",
+            "faster near empty",
+            "faster near full",
+            "through random noise"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "MeterAnchorColors",
+        "options": [
+            "at both ends",
+            "at empty",
+            "at full"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "Meter",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "IsUnusedFlag"
+            },
+            {
+                "name": "stencil bitmaps",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true,
+                "non_cached": true
+            },
+            {
+                "name": "source bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true,
+                "non_cached": true
+            },
+            {
+                "name": "stencil sequence index",
+                "type": "uint16"
+            },
+            {
+                "name": "source sequence index",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "interpolate colors",
+                "type": "MeterInterpolateColors"
+            },
+            {
+                "name": "anchor colors",
+                "type": "MeterAnchorColors"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "empty color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "full color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "unmask distance",
+                "type": "float"
+            },
+            {
+                "name": "mask distance",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "encoded stencil",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 172
+    }
+]

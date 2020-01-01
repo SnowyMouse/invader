@@ -1,0 +1,202 @@
+[
+    {
+        "name": "LightningMarkerFlag",
+        "type": "bitfield",
+        "fields": [
+            "not connected to next marker"
+        ],
+        "width": 16
+    },
+    {
+        "name": "LightningMarker",
+        "fields": [
+            {
+                "name": "attachment marker",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "LightningMarkerFlag"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "octaves to next marker",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 76
+            },
+            {
+                "name": "random position bounds",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "random jitter",
+                "type": "float"
+            },
+            {
+                "name": "thickness",
+                "type": "float"
+            },
+            {
+                "name": "tint",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 76
+            }
+        ],
+        "type": "struct",
+        "size": 228
+    },
+    {
+        "name": "LightningShader",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "make it work",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "shader flags",
+                "type": "ParticleShaderFlags"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "map flags",
+                "type": "IsUnfilteredFlag"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "some more stuff that should be set for some reason",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 56
+            },
+            {
+                "type": "pad",
+                "size": 28
+            }
+        ],
+        "type": "struct",
+        "size": 180
+    },
+    {
+        "name": "Lightning",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "near fade distance",
+                "type": "float"
+            },
+            {
+                "name": "far fade distance",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "jitter scale source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "thickness scale source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "tint modulation source",
+                "type": "FunctionNameNullable"
+            },
+            {
+                "name": "brightness scale source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "bitmap",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 84
+            },
+            {
+                "name": "markers",
+                "type": "TagReflexive",
+                "struct": "LightningMarker",
+                "compound": true
+            },
+            {
+                "name": "shader",
+                "type": "TagReflexive",
+                "struct": "LightningShader",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 88
+            }
+        ],
+        "type": "struct",
+        "size": 264
+    }
+]

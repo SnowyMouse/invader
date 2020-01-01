@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef NO_OUTPUT
-#include <chrono>
-using clock_type = std::chrono::steady_clock;
-#include <iostream>
-#endif
-
 #include <vector>
 #include <cstring>
 #include <regex>
 
-#include "../map/map.hpp"
-#include "../resource/resource_map.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "../version.hpp"
+#include <invader/map/map.hpp>
+#include <invader/resource/resource_map.hpp>
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include <invader/file/file.hpp>
+#include <invader/command_line_option.hpp>
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -25,58 +22,62 @@ int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
 
-    if(argc < 3) {
-        eprintf("Usage: %s <input map> <output index>\n", argv[0]);
-        return RETURN_FAILED_NOTHING_TO_DO;
-    }
+    std::vector<Invader::CommandLineOption> options;
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
-    const char *output = argv[2];
-    const char *input = argv[1];
+    static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
+    static constexpr char USAGE[] = "[options] <input-map> <output-txt>";
+
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<std::nullptr_t>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, nullptr, [](char opt, const auto &, std::nullptr_t) {
+        switch(opt) {
+            case 'i':
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
+        }
+    });
+
+    const char *output = remaining_arguments[1];
+    const char *input = remaining_arguments[0];
+
+    auto input_map_data = File::open_file(input);
 
     // Open input map
-    FILE *f = std::fopen(input, "rb");
-    if(!f) {
-        eprintf("Failed to open %s.\n", input);
+    if(!input_map_data.has_value()) {
+        eprintf_error("Failed to read %s", input);
         return RETURN_FAILED_ERROR;
     }
-    std::fseek(f, 0, SEEK_END);
-    std::size_t size = std::ftell(f);
-    auto map_data = std::make_unique<std::byte []>(size);
-    std::fseek(f, 0, SEEK_SET);
-    if(std::fread(map_data.get(), size, 1, f) != 1) {
-        eprintf("Failed to read %s\n", argv[1]);
-        return RETURN_FAILED_ERROR;
-    }
-    std::fclose(f);
 
-    f = nullptr;
+    auto input_map = std::move(*input_map_data);
 
     // If it's a resource map, try parsing that
-    if(size >= 4 && *reinterpret_cast<std::uint32_t *>(map_data.get()) <= 3) {
+    if(input_map.size() >= 4 && *reinterpret_cast<std::uint32_t *>(input_map.data()) <= 3) {
         try {
-            auto map = load_resource_map(map_data.get(), size);
+            auto map = load_resource_map(input_map.data(), input_map.size());
             auto tag_count = map.size();
-            int skip = *reinterpret_cast<std::uint32_t *>(map_data.get()) != 3 ? 1 : 0;
+            int skip = *reinterpret_cast<std::uint32_t *>(input_map.data()) != 3 ? 1 : 0;
 
             // Open the output!
-            f = std::fopen(output, "wb");
-            std::fprintf(f, "%zu\n", tag_count / (1 + skip));
+            std::FILE *f = std::fopen(output, "wb");
 
             // Go through tags
-            for(std::size_t i = skip; i < tag_count; i+= 1 + skip) {
-                auto &tag = map[i];
+            try {
+                for(std::size_t i = skip; i < tag_count; i+= 1 + skip) {
+                    auto &tag = map[i];
 
-                // Replace double slashes (or more) with one slash
-                std::string path = std::regex_replace(tag.name, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
+                    // Replace double slashes (or more) with one slash
+                    std::string path = std::regex_replace(tag.path, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
 
-                std::fprintf(f, "%s\n", path.data());
+                    std::fprintf(f, "%s\n", path.c_str());
+                }
             }
-
+            catch(std::exception &) {
+                std::fclose(f);
+                return RETURN_FAILED_ERROR;
+            }
             std::fclose(f);
         }
         catch(std::exception &e) {
-            eprintf("Exception %s\n", e.what());
-            std::fclose(f);
+            eprintf_error("Exception %s", e.what());
             return RETURN_FAILED_ERROR;
         }
     }
@@ -84,31 +85,33 @@ int main(int argc, const char **argv) {
     // If not, it's probably a cache file
     else {
         try {
-            auto map = Map::map_with_pointer(map_data.get(), size);
+            auto map = Map::map_with_move(std::move(input_map));
 
             // Open output
-            f = std::fopen(output, "wb");
+            std::FILE *f = std::fopen(output, "wb");
             if(!f) {
-                eprintf("Failed to open %s\n", output);
+                eprintf_error("Failed to open %s", output);
                 return RETURN_FAILED_ERROR;
             }
 
-            auto tag_count = map.tag_count();
-            std::fprintf(f, "%zu\n", tag_count);
-            for(std::size_t i = 0; i < tag_count; i++) {
-                auto &tag = map.get_tag(i);
+            try {
+                auto tag_count = map.get_tag_count();
+                for(std::size_t i = 0; i < tag_count; i++) {
+                    auto &tag = map.get_tag(i);
 
-                // Replace double slashes (or more) with one slash
-                std::string path = std::regex_replace(tag.path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-
-                std::fprintf(f, "%u\t%s\n", tag.tag_class_int(), path.data());
+                    // Replace double slashes (or more) with one slash
+                    std::string path = std::regex_replace(tag.get_path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
+                    std::fprintf(f, "%s.%s\n", path.c_str(), tag_class_to_extension(tag.get_tag_class_int()));
+                }
             }
-
+            catch(std::exception &) {
+                std::fclose(f);
+                return RETURN_FAILED_ERROR;
+            }
             std::fclose(f);
         }
         catch(std::exception &e) {
-            eprintf("Exception: %s\n", e.what());
-            std::fclose(f);
+            eprintf_error("Exception: %s", e.what());
             return RETURN_FAILED_ERROR;
         }
     }

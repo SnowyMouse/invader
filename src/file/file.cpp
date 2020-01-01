@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "file.hpp"
+#include <invader/file/file.hpp>
 
 #include <cstdio>
 #include <filesystem>
+#include <cstring>
 
 namespace Invader::File {
     std::optional<std::vector<std::byte>> open_file(const char *path) {
@@ -11,7 +12,7 @@ namespace Invader::File {
         std::filesystem::path file_path(path);
 
         // Make sure we're dealing with a file we can open
-        if(std::filesystem::is_regular_file(file_path)) {
+        if(!std::filesystem::is_regular_file(file_path)) {
             return std::nullopt;
         }
 
@@ -57,5 +58,172 @@ namespace Invader::File {
 
         std::fclose(f);
         return true;
+    }
+
+    std::optional<std::string> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::string> &tags, bool must_exist) {
+        // if it's an absolute path, we can't do anything about this
+        std::filesystem::path tag_path_path(tag_path);
+        if(tag_path_path.is_absolute()) {
+            return std::nullopt;
+        }
+
+        for(auto &tags_directory_string : tags) {
+            std::filesystem::path tags_directory(tags_directory_string);
+            auto file_path = tags_directory / tag_path_path;
+            if(!must_exist || std::filesystem::exists(file_path)) {
+                return file_path.string();
+            }
+        }
+        return std::nullopt;
+    }
+
+    std::optional<std::string> file_path_to_tag_path(const std::string &file_path, const std::vector<std::string> &tags, bool must_exist) {
+        // Get the absolute file path. It doesn't matter if it exists.
+        auto absolute_file_path = std::filesystem::absolute(file_path);
+        if(must_exist && !std::filesystem::exists(absolute_file_path)) {
+            return std::nullopt;
+        }
+        auto absolute_file_path_str = absolute_file_path.string();
+        auto root_path_str = absolute_file_path.root_path();
+
+        for(auto &tags_directory_string : tags) {
+            // Get the absolute path
+            bool ends_with_separator = tags_directory_string[tags_directory_string.size() - 1] == '/' || tags_directory_string[tags_directory_string.size() - 1] == std::filesystem::path::preferred_separator;
+            auto tags_directory = std::filesystem::absolute(ends_with_separator ? tags_directory_string.substr(0,tags_directory_string.size() - 1) : tags_directory_string);
+
+            // Go back until we get something that's the same
+            auto path_check = absolute_file_path;
+            while(path_check.has_parent_path() && path_check != root_path_str) {
+                path_check = path_check.parent_path();
+                if(path_check == tags_directory) {
+                    auto path_check_str = path_check.string();
+                    auto path_check_size = path_check_str.size();
+                    auto converted_path = absolute_file_path_str.substr(path_check_size + 1, absolute_file_path_str.size() - path_check_size - 1);
+                    return converted_path;
+                }
+            }
+        }
+        return std::nullopt;
+    }
+
+    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension) {
+        std::size_t EXTENSION_LENGTH = expected_extension.size();
+        std::size_t TAG_PATH_LENGTH = tag_path.size();
+
+        // If the path is too small to have the extension, no dice
+        if(EXTENSION_LENGTH >= tag_path.size()) {
+            return std::nullopt;
+        }
+
+        // Otherwise, check if we have the extension
+        if(TAG_PATH_LENGTH > EXTENSION_LENGTH && std::strcmp(tag_path.c_str() + TAG_PATH_LENGTH - EXTENSION_LENGTH, expected_extension.c_str()) == 0) {
+            // If the user simply put ".scenario" at the end, remove it
+            if(Invader::File::tag_path_to_file_path(tag_path, tags, true).has_value()) {
+                return tag_path.substr(0, TAG_PATH_LENGTH - EXTENSION_LENGTH);
+            }
+
+            // Otherwise see if we can find it
+            else {
+                auto tag_maybe = Invader::File::file_path_to_tag_path(tag_path, tags, true);
+                if(tag_maybe.has_value()) {
+                    auto &tag = tag_maybe.value();
+                    return tag.substr(0, tag.size() - EXTENSION_LENGTH);
+                }
+                else {
+                    return std::nullopt;
+                }
+            }
+        }
+
+        // We don't? Give up.
+        return std::nullopt;
+    }
+
+    constexpr char SYSTEM_PATH_SEPARATOR = std::filesystem::path::preferred_separator;
+    constexpr char HALO_PATH_SEPARATOR = '\\';
+    constexpr char PORTABLE_PATH_SEPARATOR = '/';
+
+    void halo_path_to_preferred_path_chars(char *tag_path) noexcept {
+        if(SYSTEM_PATH_SEPARATOR != HALO_PATH_SEPARATOR) {
+            for(char *c = tag_path; *c != 0; c++) {
+                if(*c == HALO_PATH_SEPARATOR) {
+                    *c = SYSTEM_PATH_SEPARATOR;
+                }
+            }
+        }
+    }
+
+    void preferred_path_to_halo_path_chars(char *tag_path) noexcept {
+        for(char *c = tag_path; *c != 0; c++) {
+            if(*c == SYSTEM_PATH_SEPARATOR || *c == PORTABLE_PATH_SEPARATOR) {
+                *c = HALO_PATH_SEPARATOR;
+            }
+        }
+    }
+
+    std::string halo_path_to_preferred_path(const std::string &tag_path) {
+        const char *tag_path_c = tag_path.c_str();
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size() + 1);
+        halo_path_to_preferred_path_chars(tag_path_cv.data());
+        return tag_path_cv.data();
+    }
+
+    std::string preferred_path_to_halo_path(const std::string &tag_path) {
+        const char *tag_path_c = tag_path.c_str();
+        std::vector<char> tag_path_cv(tag_path_c, tag_path_c + tag_path.size() + 1);
+        preferred_path_to_halo_path_chars(tag_path_cv.data());
+        return tag_path_cv.data();
+    }
+
+    const char *base_name_chars(const char *tag_path) noexcept {
+        const char *base_name = tag_path;
+        while(*tag_path) {
+            if(*tag_path == '\\' || *tag_path == '/' || *tag_path == std::filesystem::path::preferred_separator) {
+                base_name = tag_path + 1;
+            }
+            tag_path++;
+        }
+        return base_name;
+    }
+
+    char *base_name_chars(char *tag_path) noexcept {
+        return const_cast<char *>(base_name_chars(const_cast<const char *>(tag_path)));
+    }
+
+    std::string base_name(const std::string &tag_path, bool drop_extension) {
+        const char *base_name = base_name_chars(tag_path.c_str());
+
+        if(drop_extension) {
+            const char *base_name_end = nullptr;
+            for(const char *c = base_name; *c; c++) {
+                if(*c == '.') {
+                    base_name_end = c;
+                }
+            }
+            if(base_name_end) {
+                return std::string(base_name, base_name_end);
+            }
+        }
+        return std::string(base_name);
+    }
+
+    std::string remove_trailing_slashes(const std::string &path) {
+        const char *path_str = path.c_str();
+        std::vector<char> v = std::vector<char>(path_str, path_str + path.size() + 1);
+        v.push_back(0);
+        remove_trailing_slashes_chars(v.data());
+        return std::string(v.data());
+    }
+
+    void remove_trailing_slashes_chars(char *path) {
+        long path_length = static_cast<long>(std::strlen(path));
+        for(long i = path_length - 1; i >= 0; i++) {
+            if(path[i] == '/' || path[i] == std::filesystem::path::preferred_separator) {
+                path[i] = 0;
+            }
+            else {
+                break;
+            }
+        }
     }
 }

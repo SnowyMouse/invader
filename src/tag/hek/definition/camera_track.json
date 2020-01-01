@@ -1,0 +1,44 @@
+[
+    {
+        "name": "CameraTrackControlPoint",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "orientation",
+                "type": "Quaternion",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "size": 60
+    },
+    {
+        "name": "CameraTrack",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "IsUnusedFlag"
+            },
+            {
+                "name": "control points",
+                "type": "TagReflexive",
+                "struct": "CameraTrackControlPoint",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "size": 48
+    }
+]

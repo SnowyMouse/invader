@@ -1,0 +1,186 @@
+[
+    {
+        "name": "FogFlags",
+        "type": "bitfield",
+        "fields": [
+            "is water",
+            "atmosphere dominant",
+            "fog screen only"
+        ],
+        "width": 32
+    },
+    {
+        "name": "FogScreenFlags",
+        "type": "bitfield",
+        "fields": [
+            "no environment multipass",
+            "no model multipass",
+            "no texture based falloff"
+        ],
+        "width": 16
+    },
+    {
+        "name": "Fog",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "FogFlags"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 76
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "maximum density",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "opaque distance",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "opaque depth",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "distance to water plane",
+                "type": "float"
+            },
+            {
+                "name": "color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "flags 1",
+                "type": "FogScreenFlags"
+            },
+            {
+                "name": "layer count",
+                "type": "uint16"
+            },
+            {
+                "name": "distance gradient",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "density gradient",
+                "bounds": true,
+                "type": "Fraction"
+            },
+            {
+                "name": "start distance from fog plane",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "screen layers color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "rotation multiplier",
+                "type": "Fraction"
+            },
+            {
+                "name": "strafing multiplier",
+                "type": "Fraction"
+            },
+            {
+                "name": "zoom multiplier",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "map scale",
+                "type": "float"
+            },
+            {
+                "name": "map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "animation period",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "wind velocity",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "wind period",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "wind acceleration weight",
+                "type": "Fraction"
+            },
+            {
+                "name": "wind perpendicular weight",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "background sound",
+                "type": "TagDependency",
+                "classes": [
+                    "sound_looping"
+                ],
+                "compound": true
+            },
+            {
+                "name": "sound environment",
+                "type": "TagDependency",
+                "classes": [
+                    "sound_environment"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 120
+            }
+        ],
+        "type": "struct",
+        "size": 396
+    }
+]

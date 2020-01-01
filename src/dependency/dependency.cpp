@@ -3,57 +3,51 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-#include "../version.hpp"
-#include "../eprintf.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "found_tag_dependency.hpp"
-#include "../build/build_workload.hpp"
-#include "../map/map.hpp"
-#include "../command_line_option.hpp"
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/dependency/found_tag_dependency.hpp>
+#include <invader/build/build_workload.hpp>
+#include <invader/map/map.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("reverse", 'r', 0);
-    options.emplace_back("recursive", 'R', 0);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("reverse", 'R', 0, "Find all tags that depend on the tag, instead.");
+    options.emplace_back("recursive", 'r', 0, "Recursively get all depended tags.");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+
+    static constexpr char DESCRIPTION[] = "Check dependencies for a tag.";
+    static constexpr char USAGE[] = "[options] <tag.class>";
 
     struct DependencyOption {
-        const char *path;
         bool reverse = false;
         bool recursive = false;
         std::vector<std::string> tags;
         std::string output;
+        bool use_filesystem_path = false;
     } dependency_options;
 
-    dependency_options.path = argv[0];
-
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, 'h', dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<DependencyOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, dependency_options, [](char opt, const auto &arguments, auto &dependency_options) {
         switch(opt) {
             case 't':
                 dependency_options.tags.push_back(arguments[0]);
                 break;
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
-            case 'r':
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
+            case 'R':
                 dependency_options.reverse = true;
                 break;
-            case 'R':
+            case 'r':
                 dependency_options.recursive = true;
                 break;
-            default:
-                eprintf("Usage: %s [options] <tag.class>\n\n", dependency_options.path);
-                eprintf("Check dependencies for a tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --recursive, -R              Recursively get all depended tags.\n");
-                eprintf("  --reverse, -r                Find all tags that depend on the tag, instead.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                std::exit(EXIT_FAILURE);
+            case 'P':
+                dependency_options.use_filesystem_path = true;
+                break;
         }
     });
 
@@ -64,17 +58,24 @@ int main(int argc, char * const *argv) {
 
     // Require a tag
     std::vector<char> tag_path_to_find_data;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A scenario tag path is required. Use -h for help.\n");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
+    if(dependency_options.use_filesystem_path) {
+        auto tag_path_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], dependency_options.tags, true);
+
+        if(tag_path_maybe.has_value()) {
+            auto &file_path = tag_path_maybe.value();
+            tag_path_to_find_data = std::vector<char>(file_path.begin(), file_path.end());
+        }
+        else {
+            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
     else {
-        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
+        tag_path_to_find_data = std::vector<char>(remaining_arguments[0], remaining_arguments[0] + strlen(remaining_arguments[0]));
     }
+
+    // Add a null terminator
+    tag_path_to_find_data.emplace_back(0);
 
     char *tag_path_to_find = tag_path_to_find_data.data();
 
@@ -88,11 +89,11 @@ int main(int argc, char * const *argv) {
 
     auto tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
     if(c == nullptr) {
-        eprintf("Invalid tag path %s. Missing extension.\n", tag_path_to_find);
+        eprintf_error("Invalid tag path %s. Missing extension.", tag_path_to_find);
         return EXIT_FAILURE;
     }
     else if(tag_int_to_find == Invader::HEK::TAG_CLASS_NULL) {
-        eprintf("Invalid tag path %s. Unknown tag class %s.\n", tag_path_to_find, c);
+        eprintf_error("Invalid tag path %s. Unknown tag class %s.", tag_path_to_find, c);
         return EXIT_FAILURE;
     }
 
@@ -109,6 +110,6 @@ int main(int argc, char * const *argv) {
 
     // See what depended on it or what depends on this
     for(auto &tag : found_tags) {
-        std::printf("%s.%s%s\n", tag.path.data(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
+        oprintf("%s.%s%s\n", Invader::File::halo_path_to_preferred_path(tag.path).c_str(), Invader::HEK::tag_class_to_extension(tag.class_int), tag.broken ? " [BROKEN]" : "");
     }
 }

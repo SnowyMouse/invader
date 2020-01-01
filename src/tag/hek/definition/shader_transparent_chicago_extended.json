@@ -1,0 +1,78 @@
+[
+    {
+        "name": "ShaderTransparentChicagoExtended",
+        "fields": [
+            {
+                "name": "numeric counter limit",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "shader transparent chicago extended flags",
+                "type": "ShaderTransparentGenericFlags",
+                "endian": null
+            },
+            {
+                "name": "first map type",
+                "type": "ShaderFirstMapType"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "framebuffer fade source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "lens flare spacing",
+                "type": "float"
+            },
+            {
+                "name": "lens flare",
+                "type": "TagDependency",
+                "classes": [
+                    "lens_flare"
+                ],
+                "compound": true
+            },
+            {
+                "name": "extra layers",
+                "type": "TagReflexive",
+                "struct": "ShaderTransparentExtraLayer",
+                "compound": true
+            },
+            {
+                "name": "maps 4 stage",
+                "type": "TagReflexive",
+                "struct": "ShaderTransparentChicagoMap",
+                "compound": true
+            },
+            {
+                "name": "maps 2 stage",
+                "type": "TagReflexive",
+                "struct": "ShaderTransparentChicagoMap",
+                "compound": true
+            },
+            {
+                "name": "extra flags",
+                "type": "ShaderTransparentChicagoExtraFlags"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 120
+    }
+]

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <tiffio.h>
-#include "image_loader.hpp"
-#include "../eprintf.hpp"
+#include <invader/bitmap/image_loader.hpp>
+#include <invader/printf.hpp>
 #include "stb/stb_image.h"
 
 namespace Invader {
@@ -29,7 +29,7 @@ namespace Invader {
         int x = 0, y = 0, channels = 0;
         auto *image_buffer = stbi_load(path, &x, &y, &channels, 4);
         if(!image_buffer) {
-            eprintf("Failed to load %s. Error was: %s\n", path, stbi_failure_reason());
+            eprintf_error("Failed to load %s. Error was: %s", path, stbi_failure_reason());
             exit(EXIT_FAILURE);
         }
 
@@ -50,7 +50,7 @@ namespace Invader {
     Invader::ColorPlatePixel *load_tiff(const char *path, std::uint32_t &image_width, std::uint32_t &image_height, std::size_t &image_size) {
         TIFF *image_tiff = TIFFOpen(path, "r");
         if(!image_tiff) {
-            eprintf("Cannot open %s\n", path);
+            eprintf_error("Cannot open %s", path);
             exit(EXIT_FAILURE);
         }
         TIFFGetField(image_tiff, TIFFTAG_IMAGEWIDTH, &image_width);

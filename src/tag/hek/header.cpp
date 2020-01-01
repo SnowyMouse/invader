@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cstring>
-#include "header.hpp"
+#include <invader/tag/hek/header.hpp>
 
 namespace Invader::HEK {
     std::uint16_t TagFileHeader::version_for_tag(TagClassInt tag_class_int) {
@@ -40,8 +40,6 @@ namespace Invader::HEK {
                 return 4;
             case TAG_CLASS_MODEL_COLLISION_GEOMETRY:
                 return 10;
-            case TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION:
-                return 2;
             case TAG_CLASS_PARTICLE:
                 return 2;
             case TAG_CLASS_PARTICLE_SYSTEM:
@@ -64,6 +62,8 @@ namespace Invader::HEK {
                 return 2;
             case TAG_CLASS_SHADER_TRANSPARENT_WATER:
                 return 2;
+            case TAG_CLASS_CAMERA_TRACK:
+                return 2;
             case TAG_CLASS_UNIT:
                 return 2;
             case TAG_CLASS_VIRTUAL_KEYBOARD:
@@ -79,13 +79,15 @@ namespace Invader::HEK {
 
     TagFileHeader::TagFileHeader(TagClassInt tag_class_int) {
         // Clear everything
-        std::memset(this, 0, sizeof(*this));
+        std::fill(reinterpret_cast<std::byte *>(this), reinterpret_cast<std::byte *>(this + 1), std::byte());
 
         // Set values
+        #ifndef INVADER_EXTRACT_HIDDEN_VALUES
         this->tag_class_int = tag_class_int;
         this->blam = BLAM;
         this->header_size = sizeof(*this);
         this->something_255 = 255;
         this->version = TagFileHeader::version_for_tag(tag_class_int);
+        #endif
     }
 }

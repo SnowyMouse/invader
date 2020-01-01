@@ -3,8 +3,9 @@
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
 
-#include "bitmap_data_writer.hpp"
-#include "../eprintf.hpp"
+#include <invader/bitmap/bitmap_data_writer.hpp>
+#include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/printf.hpp>
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<HEK::BitmapData<HEK::BigEndian>> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
@@ -34,8 +35,7 @@ namespace Invader {
                     bitmap.depth = 1;
                     break;
             }
-            bitmap.flags = BigEndian<BitmapDataFlags> {};
-            bitmap.pixels_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
+            bitmap.pixel_data_offset = static_cast<std::uint32_t>(bitmap_data_pixels.size());
             std::uint32_t mipmap_count = bitmap_color_plate.mipmaps.size();
 
             // Get the data
@@ -102,53 +102,56 @@ namespace Invader {
                 compressed = false;
             }
 
+            // Set palettized
+            bool palettized = false;
+
             switch(format) {
                 case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
-                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
+                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
                     break;
                 case BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR:
                     switch(alpha_present) {
                         case ALPHA_TYPE_NONE:
-                            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_R5G6B5;
+                            bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5;
                             break;
                         case ALPHA_TYPE_ONE_BIT:
-                            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5;
+                            bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5;
                             break;
                         case ALPHA_TYPE_MULTI_BIT:
-                            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4;
+                            bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4;
                             break;
                     }
                     break;
                 case BitmapFormat::BITMAP_FORMAT_MONOCHROME:
                     if(alpha_equals_luminosity) {
-                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_AY8;
+                        bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_AY8;
                     }
                     else if(alpha_present == ALPHA_TYPE_MULTI_BIT) {
                         if(luminosity_set) {
-                            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8Y8;
+                            bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8;
                         }
                         else {
-                            bitmap.format = BitmapDataFormat::BITMAP_FORMAT_A8;
+                            bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_A8;
                         }
                     }
                     else {
-                        bitmap.format = BitmapDataFormat::BITMAP_FORMAT_Y8;
+                        bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_Y8;
                     }
                     break;
 
                 case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY:
-                    bitmap.format = BitmapDataFormat::BITMAP_FORMAT_DXT1;
+                    bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
                     break;
                 case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA:
-                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT3;
+                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 : BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
                     break;
                 case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA:
-                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_DXT1 : BitmapDataFormat::BITMAP_FORMAT_DXT5;
+                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 : BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
                     break;
 
                 default:
-                    eprintf("Unsupported bitmap format.\n");
-                    std::exit(EXIT_FAILURE);
+                    eprintf_error("Unsupported bitmap format.");
+                    throw InvalidBitmapFormatException();
             }
 
             // Do dithering based on https://en.wikipedia.org/wiki/Floyd–Steinberg_dithering
@@ -237,35 +240,35 @@ namespace Invader {
             bool should_p8 = usage == BitmapUsage::BITMAP_USAGE_HEIGHT_MAP && palettize;
             if(should_p8) {
                 compressed = false;
-                bitmap.format = BitmapDataFormat::BITMAP_FORMAT_P8_BUMP;
+                bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP;
             }
 
             // Depending on the format, do something
             auto bitmap_format = bitmap.format.read();
             switch(bitmap_format) {
                 // If it's 32-bit, this is a no-op.
-                case BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8:
-                case BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
                     break;
 
                 // If it's 16-bit, there is stuff we will need to do
-                case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
-                case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
-                case BitmapDataFormat::BITMAP_FORMAT_R5G6B5: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5: {
                     // Figure out what we'll be doing
                     std::uint16_t (ColorPlatePixel::*conversion_function)();
                     ColorPlatePixel (*deconversion_function)(std::uint16_t);
 
                     switch(bitmap_format) {
-                        case BitmapDataFormat::BITMAP_FORMAT_A1R5G5B5:
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
                             conversion_function = &ColorPlatePixel::convert_to_16_bit<1,5,5,5>;
                             deconversion_function = ColorPlatePixel::convert_from_16_bit<1,5,5,5>;
                             break;
-                        case BitmapDataFormat::BITMAP_FORMAT_A4R4G4B4:
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
                             conversion_function = &ColorPlatePixel::convert_to_16_bit<4,4,4,4>;
                             deconversion_function = ColorPlatePixel::convert_from_16_bit<4,4,4,4>;
                             break;
-                        case BitmapDataFormat::BITMAP_FORMAT_R5G6B5:
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
                             conversion_function = &ColorPlatePixel::convert_to_16_bit<0,5,6,5>;
                             deconversion_function = ColorPlatePixel::convert_from_16_bit<0,5,6,5>;
                             break;
@@ -296,8 +299,8 @@ namespace Invader {
                 }
 
                 // If it's monochrome, it depends
-                case BitmapDataFormat::BITMAP_FORMAT_A8:
-                case BitmapDataFormat::BITMAP_FORMAT_AY8: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_AY8: {
                     std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                     auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
@@ -307,7 +310,7 @@ namespace Invader {
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
                     break;
                 }
-                case BitmapDataFormat::BITMAP_FORMAT_Y8: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_Y8: {
                     std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                     auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {
@@ -317,7 +320,7 @@ namespace Invader {
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
                     break;
                 }
-                case BitmapDataFormat::BITMAP_FORMAT_A8Y8: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8: {
                     std::vector<LittleEndian<std::uint16_t>> new_bitmap_pixels(pixel_count);
                     auto *pixel_16_bit = reinterpret_cast<std::uint16_t *>(new_bitmap_pixels.data());
                     for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_16_bit++) {
@@ -327,7 +330,7 @@ namespace Invader {
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
                     break;
                 }
-                case BitmapDataFormat::BITMAP_FORMAT_P8_BUMP: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP: {
                     std::vector<LittleEndian<std::uint8_t>> new_bitmap_pixels(pixel_count);
                     auto *pixel_8_bit = reinterpret_cast<std::uint8_t *>(new_bitmap_pixels.data());
 
@@ -343,17 +346,18 @@ namespace Invader {
 
                     current_bitmap_pixels.clear();
                     current_bitmap_pixels.insert(current_bitmap_pixels.end(), reinterpret_cast<std::byte *>(new_bitmap_pixels.begin().base()), reinterpret_cast<std::byte *>(new_bitmap_pixels.end().base()));
+                    palettized = true;
                     break;
                 }
 
                 // Do DisguXTing compression
-                case BitmapDataFormat::BITMAP_FORMAT_DXT1:
-                case BitmapDataFormat::BITMAP_FORMAT_DXT3:
-                case BitmapDataFormat::BITMAP_FORMAT_DXT5: {
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
                     // Begin
-                    bool use_dxt1 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT1;
-                    bool use_dxt3 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT3;
-                    bool use_dxt5 = bitmap.format == BitmapDataFormat::BITMAP_FORMAT_DXT5;
+                    bool use_dxt1 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
+                    bool use_dxt3 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
+                    bool use_dxt5 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
                     std::size_t pixel_size = (!use_dxt1) ? 2 : 1;
                     std::vector<std::byte> new_bitmap_pixels(pixel_count * pixel_size / 2);
                     auto *compressed_pixel = new_bitmap_pixels.data();
@@ -438,7 +442,7 @@ namespace Invader {
                 }
 
                 default:
-                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_FORMAT_A8R8G8B8;
+                    bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
                     break;
             }
 
@@ -446,11 +450,11 @@ namespace Invader {
             bitmap_data_pixels.insert(bitmap_data_pixels.end(), current_bitmap_pixels.begin(), current_bitmap_pixels.end());
 
             bitmap.mipmap_count = mipmap_count;
-            bitmap.pixels_count = current_bitmap_pixels.size();
 
             BitmapDataFlags flags = {};
             flags.compressed = compressed;
             flags.power_of_two_dimensions = 1;
+            flags.palettized = palettized;
             bitmap.flags = flags;
 
             bitmap.registration_point.x = bitmap_color_plate.registration_point_x;
@@ -458,7 +462,7 @@ namespace Invader {
 
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-            std::printf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
+            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), BYTES_TO_MIB(current_bitmap_pixels.size()));
         }
     }
 }

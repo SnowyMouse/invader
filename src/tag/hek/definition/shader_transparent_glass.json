@@ -1,0 +1,177 @@
+[
+    {
+        "name": "ShaderTransparentGlassReflectionType",
+        "options": [
+            "bumped cube map",
+            "flat cube map",
+            "dynamic mirror"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ShaderTransparentGlassFlags",
+        "type": "bitfield",
+        "fields": [
+            "alpha tested",
+            "decal",
+            "two sided",
+            "bump map is specular mask"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ShaderTransparentGlass",
+        "fields": [
+            {
+                "name": "shader transparent glass flags",
+                "type": "ShaderTransparentGlassFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "background tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "background tint map scale",
+                "type": "float"
+            },
+            {
+                "name": "background tint map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "reflection type",
+                "type": "ShaderTransparentGlassReflectionType"
+            },
+            {
+                "name": "perpendicular brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "perpendicular tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "parallel brightness",
+                "type": "Fraction"
+            },
+            {
+                "name": "parallel tint color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "reflection map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "bump map scale",
+                "type": "float"
+            },
+            {
+                "name": "bump map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 128
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "diffuse map scale",
+                "type": "float"
+            },
+            {
+                "name": "diffuse map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "diffuse detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "diffuse detail map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "specular map scale",
+                "type": "float"
+            },
+            {
+                "name": "specular map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "specular detail map scale",
+                "type": "float"
+            },
+            {
+                "name": "specular detail map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 28
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 480
+    }
+]

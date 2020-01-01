@@ -5,31 +5,33 @@
 #include <filesystem>
 #include <archive.h>
 #include <archive_entry.h>
-#include "../version.hpp"
-#include "../eprintf.hpp"
-
-#include "../build/build_workload.hpp"
-#include "../map/map.hpp"
-#include "../dependency/found_tag_dependency.hpp"
-#include "../command_line_option.hpp"
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include <invader/build/build_workload.hpp>
+#include <invader/map/map.hpp>
+#include <invader/dependency/found_tag_dependency.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
     struct ArchiveOptions {
-        const char *path;
         bool single_tag = false;
         std::vector<std::string> tags;
         std::string output;
+        bool use_filesystem_path = false;
     } archive_options;
-    archive_options.path = argv[0];
+
+    static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
+    static constexpr char USAGE[] = "[options] <scenario | -s tag.class>";
 
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("single-tag", 's', 0);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("output", 'o', 1);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz.", "<file>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, 'h', archive_options, [](char opt, const auto &arguments, auto &archive_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
@@ -38,23 +40,14 @@ int main(int argc, const char **argv) {
                 archive_options.output = arguments[0];
                 break;
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
             case 's':
                 archive_options.single_tag = true;
                 break;
-            default:
-                eprintf("Usage: %s [options] <scenario | -s tag.class>\n\n", archive_options.path);
-                eprintf("Generate .tar.xz archives of the tags required to build a cache file.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --output,-o <file>           Output to a specific file. Extension must be\n");
-                eprintf("                               .tar.xz.\n");
-                eprintf("  --single-tag,-s              Archive a tag tree instead of a cache file.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                std::exit(EXIT_FAILURE);
+            case 'P':
+                archive_options.use_filesystem_path = true;
+                break;
         }
     });
 
@@ -64,18 +57,32 @@ int main(int argc, const char **argv) {
     }
 
     // Require a tag
-    std::string base_tag;
-    if(remaining_arguments.size() == 0) {
-        eprintf("A %stag path is required. Use -h for help.\n", archive_options.single_tag ? "" : "scenario ");
-        return EXIT_FAILURE;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
+    std::vector<char> base_tag;
+    if(archive_options.use_filesystem_path) {
+        // See if the tag path is valid
+        std::optional<std::string> base_tag_maybe;
+        if(archive_options.single_tag) {
+            base_tag_maybe = Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true);
+        }
+        else {
+            base_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], archive_options.tags, std::string(".scenario"));
+        }
+        if(base_tag_maybe.has_value()) {
+            const char *str = (*base_tag_maybe).c_str();
+            base_tag.insert(base_tag.end(), str, str + (*base_tag_maybe).size());
+        }
+        else {
+            eprintf_error("Failed to find a valid%stag %s in the tags directory", archive_options.single_tag ? " " : " scenario ", remaining_arguments[0]);
+            if(!archive_options.single_tag && Invader::File::file_path_to_tag_path(remaining_arguments[0], archive_options.tags, true).has_value()) {
+                eprintf_error("A file was detected there, but it isn't a .scenario tag, so you need to use -s");
+            }
+            return EXIT_FAILURE;
+        }
     }
     else {
-        base_tag = remaining_arguments[0];
+        base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
+    std::string base_tag_cpp_str = base_tag.data();
 
     // Variables to hold this
     std::vector<std::pair<std::string, std::string>> archive_list;
@@ -83,49 +90,50 @@ int main(int argc, const char **argv) {
     // If no output filename was given, make one
     static const char extension[] = ".tar.xz";
     if(archive_options.output.size() == 0) {
-        const char *base_name = base_tag.data();
-        for(const char *c = base_name; *c; c++) {
-            if(*c == '\\' || *c == '/') {
-                base_name = c + 1;
-            }
-        }
-
         // Set output
-        archive_options.output = std::string(base_name) + extension;
+        archive_options.output = Invader::File::base_name(base_tag.data()) + extension;
     }
     else {
         bool fail = true;
         if(archive_options.output.size() > sizeof(extension)) {
-            fail = std::strcmp(archive_options.output.data() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
+            fail = std::strcmp(archive_options.output.c_str() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
         }
 
         if(fail) {
-            eprintf("Invalid output file %s. This should end with .tar.xz.\n", archive_options.output.data());
+            eprintf_error("Invalid output file %s. This should end with .tar.xz.\n", archive_options.output.c_str());
             return EXIT_FAILURE;
         }
     }
 
     if(!archive_options.single_tag) {
         // Build the map
-        auto map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+        std::vector<std::byte> map;
+
+        try {
+            map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+        }
+        catch(std::exception &e) {
+            eprintf_error("Failed to compile scenario %s into a map\n", base_tag.data());
+            return EXIT_FAILURE;
+        }
 
         // Parse the map
-        auto parsed_map = Invader::Map::map_with_pointer(map.data(), map.size());
-        auto tag_count = parsed_map.tag_count();
+        std::unique_ptr<Invader::Map> parsed_map;
+        try {
+            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_pointer(map.data(), map.size()));
+        }
+        catch(std::exception &e) {
+            eprintf_error("Failed to parse the map file generated with scenario %s\n", base_tag.data());
+            return EXIT_FAILURE;
+        }
+        auto tag_count = parsed_map->get_tag_count();
 
         // Go through each tag and see if we can find everything.
         archive_list.reserve(tag_count);
         for(std::size_t i = 0; i < tag_count; i++) {
             // Get the tag path information
-            auto &tag = parsed_map.get_tag(i);
-            std::string full_tag_path = std::string(tag.path()) + "." + tag_class_to_extension(tag.tag_class_int());
-
-            // Replace all backslashes with forward slashes if needed
-            #ifndef _WIN32
-            for(char &c : full_tag_path) {
-                if(c == '\\') c = '/';
-            }
-            #endif
+            auto &tag = parsed_map->get_tag(i);
+            std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_class_to_extension(tag.get_tag_class_int()));
 
             // Check each tag directory if it exists. If so, archive it
             bool exists = false;
@@ -139,20 +147,14 @@ int main(int argc, const char **argv) {
             }
 
             if(!exists) {
-                eprintf("Failed to find %s. Archive could not be made.\n", full_tag_path.data());
+                eprintf_error("Failed to find %s. Archive could not be made.\n", full_tag_path.c_str());
                 return EXIT_FAILURE;
             }
         }
     }
     else {
         // Turn it into something the filesystem can understand
-        #ifndef _WIN32
-        for(char *c = base_tag.data(); *c; c++) {
-            if(*c == '\\') {
-                *c = '/';
-            }
-        }
-        #endif
+        Invader::File::halo_path_to_preferred_path_chars(base_tag.data());
 
         // Split the extension
         char *tag_path_to_find = base_tag.data();
@@ -163,50 +165,41 @@ int main(int argc, const char **argv) {
             }
         }
         if(!c) {
-            eprintf("No extension for %s. Archive could not be made.\n", tag_path_to_find);
+            eprintf_error("No extension for %s. Archive could not be made.\n", tag_path_to_find);
             return EXIT_FAILURE;
         }
-        *(c - 1) = 0;
-        Invader::HEK::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
+        Invader::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            auto name_with_extension = std::string(base_tag) + "." + c;
-            std::filesystem::path tag_path = std::filesystem::path(dir) / name_with_extension;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag_cpp_str;
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), name_with_extension);
+                archive_list.emplace_back(tag_path.string(), base_tag_cpp_str);
                 break;
             }
         }
 
         if(!exists) {
-            eprintf("Failed to find %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            eprintf_error("Failed to find %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
         }
 
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(tag_path_to_find, tag_int_to_find, archive_options.tags, false, true, success);
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_cpp_str.substr(0, c - tag_path_to_find - 1).c_str(), tag_int_to_find, archive_options.tags, false, true, success);
         if(!success) {
-            eprintf("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            eprintf_error("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
             return EXIT_FAILURE;
         }
 
         // Make sure there aren't any broken dependencies
         for(auto &dependency : dependencies) {
             if(dependency.broken) {
-                eprintf("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.data(), tag_class_to_extension(dependency.class_int));
+                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
                 return EXIT_FAILURE;
             }
 
-            std::string path_copy = dependency.path + "." + tag_class_to_extension(dependency.class_int);
-            #ifndef _WIN32
-            for(char &c : path_copy) {
-                if(c == '\\') {
-                    c = '/';
-                }
-            }
-            #endif
+            std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
             archive_list.emplace_back(dependency.file_path, path_copy);
         }
     }
@@ -215,35 +208,43 @@ int main(int argc, const char **argv) {
     auto *archive = archive_write_new();
     archive_write_add_filter_xz(archive);
     archive_write_set_format_pax_restricted(archive);
-    archive_write_open_filename(archive, archive_options.output.data());
+    archive_write_open_filename(archive, archive_options.output.c_str());
 
     // Go through each tag path we got
     for(std::size_t i = 0; i < archive_list.size(); i++) {
+        const char *path = archive_list[i].first.c_str();
+
         // Begin
         auto *entry = archive_entry_new();
-        archive_entry_set_pathname(entry, archive_list[i].second.data());
+        archive_entry_set_pathname(entry, archive_list[i].second.c_str());
         archive_entry_set_perm(entry, 0644);
         archive_entry_set_filetype(entry, AE_IFREG);
 
-        // Open the tag
-        std::FILE *t = std::fopen(archive_list[i].first.data(), "rb");
-        if(!t) {
-            eprintf("Failed to open %s for reading.\n", archive_list[i].first.data());
+        auto data_maybe = Invader::File::open_file(path);
+        if(!data_maybe.has_value()) {
+            eprintf_error("Failed to open %s\n", path);
             return EXIT_FAILURE;
         }
-        std::fseek(t, 0, SEEK_END);
-        long size = std::ftell(t);
-        archive_entry_set_size(entry, size);
-        std::fseek(t, 0, SEEK_SET);
+        auto &data = data_maybe.value();
 
-        // Make a pointer and read the data
-        std::unique_ptr<std::byte[]> data = std::make_unique<std::byte[]>(size);
-        std::fread(data.get(), size, 1, t);
-        std::fclose(t);
+        // Get the filesystem path and write time
+        std::filesystem::path path_path = path;
+
+        // Get the modified time
+        struct stat s;
+        stat(path, &s);
+
+        // Windows uses mtime which is a time_t rather than a struct with nanoseconds
+        #ifdef _WIN32
+        archive_entry_set_mtime(entry, s.st_mtime, 0);
+        #else
+        archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
+        #endif
 
         // Archive that bastard
+        archive_entry_set_size(entry, data.size());
         archive_write_header(archive, entry);
-        archive_write_data(archive, data.get(), size);
+        archive_write_data(archive, data.data(), data.size());
 
         // Close it
         archive_entry_free(entry);

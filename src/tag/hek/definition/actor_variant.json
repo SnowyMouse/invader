@@ -1,0 +1,510 @@
+[
+    {
+        "name": "ActorVariantMovementType",
+        "options": [
+            "always run",
+            "always crouch",
+            "switch types"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantSpecialFireMode",
+        "options": [
+            "none",
+            "overcharge",
+            "secondary trigger"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantSpecialFireSituation",
+        "options": [
+            "never",
+            "enemy visible",
+            "enemy out of sight",
+            "strafing"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantGrenadeType",
+        "options": [
+            "human fragmentation",
+            "covenant plasma",
+            "custom 2",
+            "custom 3"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantTrajectoryType",
+        "options": [
+            "toss",
+            "lob",
+            "bounce"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantGrenadeStimulus",
+        "options": [
+            "never",
+            "visible target",
+            "seek cover"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ActorVariantFlags",
+        "type": "bitfield",
+        "fields": [
+            "can shoot while flying",
+            "interpolate color in hsv",
+            "has unlimited grenades",
+            "moveswitch stay w friends",
+            "active camouflage",
+            "super active camouflage",
+            "cannot use ranged weapons",
+            "prefer passenger seat"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ActorVariantChangeColors",
+        "fields": [
+            {
+                "name": "color lower bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "color upper bound",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ActorVariant",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ActorVariantFlags"
+            },
+            {
+                "name": "actor definition",
+                "type": "TagDependency",
+                "classes": [
+                    "actor"
+                ],
+                "compound": true
+            },
+            {
+                "name": "unit",
+                "type": "TagDependency",
+                "classes": [
+                    "unit"
+                ],
+                "compound": true
+            },
+            {
+                "name": "major variant",
+                "type": "TagDependency",
+                "classes": [
+                    "actor_variant"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "movement type",
+                "type": "ActorVariantMovementType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "initial crouch chance",
+                "type": "float"
+            },
+            {
+                "name": "crouch time",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "run time",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "weapon",
+                "type": "TagDependency",
+                "classes": [
+                    "weapon"
+                ],
+                "compound": true
+            },
+            {
+                "name": "maximum firing distance",
+                "type": "float"
+            },
+            {
+                "name": "rate of fire",
+                "type": "float"
+            },
+            {
+                "name": "projectile error",
+                "type": "Angle"
+            },
+            {
+                "name": "first burst delay time",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "new target firing pattern time",
+                "type": "float"
+            },
+            {
+                "name": "surprise delay time",
+                "type": "float"
+            },
+            {
+                "name": "surprise fire wildly time",
+                "type": "float"
+            },
+            {
+                "name": "death fire wildly chance",
+                "type": "float"
+            },
+            {
+                "name": "death fire wildly time",
+                "type": "float"
+            },
+            {
+                "name": "desired combat range",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "custom stand gun offset",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "custom crouch gun offset",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "target tracking",
+                "type": "float"
+            },
+            {
+                "name": "target leading",
+                "type": "float"
+            },
+            {
+                "name": "weapon damage modifier",
+                "type": "float"
+            },
+            {
+                "name": "damage per second",
+                "type": "float"
+            },
+            {
+                "name": "burst origin radius",
+                "type": "float"
+            },
+            {
+                "name": "burst origin angle",
+                "type": "Angle"
+            },
+            {
+                "name": "burst return length",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "burst return angle",
+                "type": "Angle"
+            },
+            {
+                "name": "burst duration",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "burst separation",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "burst angular velocity",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "special damage modifier",
+                "type": "float"
+            },
+            {
+                "name": "special projectile error",
+                "type": "Angle"
+            },
+            {
+                "name": "new target burst duration",
+                "type": "float"
+            },
+            {
+                "name": "new target burst separation",
+                "type": "float"
+            },
+            {
+                "name": "new target rate of fire",
+                "type": "float"
+            },
+            {
+                "name": "new target projectile error",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "moving burst duration",
+                "type": "float"
+            },
+            {
+                "name": "moving burst separation",
+                "type": "float"
+            },
+            {
+                "name": "moving rate of fire",
+                "type": "float"
+            },
+            {
+                "name": "moving projectile error",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "berserk burst duration",
+                "type": "float"
+            },
+            {
+                "name": "berserk burst separation",
+                "type": "float"
+            },
+            {
+                "name": "berserk rate of fire",
+                "type": "float"
+            },
+            {
+                "name": "berserk projectile error",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "super ballistic range",
+                "type": "float"
+            },
+            {
+                "name": "bombardment range",
+                "type": "float"
+            },
+            {
+                "name": "modified vision range",
+                "type": "float"
+            },
+            {
+                "name": "special fire mode",
+                "type": "ActorVariantSpecialFireMode"
+            },
+            {
+                "name": "special fire situation",
+                "type": "ActorVariantSpecialFireSituation"
+            },
+            {
+                "name": "special fire chance",
+                "type": "float"
+            },
+            {
+                "name": "special fire delay",
+                "type": "float"
+            },
+            {
+                "name": "melee range",
+                "type": "float"
+            },
+            {
+                "name": "melee abort range",
+                "type": "float"
+            },
+            {
+                "name": "berserk firing ranges",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "berserk melee range",
+                "type": "float"
+            },
+            {
+                "name": "berserk melee abort range",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "grenade type",
+                "type": "ActorVariantGrenadeType"
+            },
+            {
+                "name": "trajectory type",
+                "type": "ActorVariantTrajectoryType"
+            },
+            {
+                "name": "grenade stimulus",
+                "type": "ActorVariantGrenadeStimulus"
+            },
+            {
+                "name": "minimum enemy count",
+                "type": "uint16"
+            },
+            {
+                "name": "enemy radius",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "grenade velocity",
+                "type": "float"
+            },
+            {
+                "name": "grenade ranges",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "collateral damage radius",
+                "type": "float"
+            },
+            {
+                "name": "grenade chance",
+                "type": "Fraction"
+            },
+            {
+                "name": "grenade check time",
+                "type": "float"
+            },
+            {
+                "name": "encounter grenade timeout",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "name": "equipment",
+                "type": "TagDependency",
+                "classes": [
+                    "equipment"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade count",
+                "bounds": true,
+                "type": "uint16"
+            },
+            {
+                "name": "don't drop grenades chance",
+                "type": "float"
+            },
+            {
+                "name": "drop weapon loaded",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "drop weapon ammo",
+                "bounds": true,
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "body vitality",
+                "type": "float"
+            },
+            {
+                "name": "shield vitality",
+                "type": "float"
+            },
+            {
+                "name": "shield sapping radius",
+                "type": "float"
+            },
+            {
+                "name": "forced shader permutation",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "change colors",
+                "type": "TagReflexive",
+                "struct": "ActorVariantChangeColors",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "post_cache_deformat": true,
+        "size": 568
+    }
+]

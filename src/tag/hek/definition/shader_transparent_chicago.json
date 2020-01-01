@@ -1,0 +1,224 @@
+[
+    {
+        "name": "ShaderTransparentChicagoMapFlags",
+        "type": "bitfield",
+        "fields": [
+            "unfiltered",
+            "alpha replicate",
+            "u clamped",
+            "v clamped"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ShaderTransparentChicagoExtraFlags",
+        "type": "bitfield",
+        "fields": [
+            "don't fade active camouflage",
+            "numeric countdown timer"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ShaderTransparentChicagoMap",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ShaderTransparentChicagoMapFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "color function",
+                "type": "ShaderColorFunctionType"
+            },
+            {
+                "name": "alpha function",
+                "type": "ShaderColorFunctionType"
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "map u scale",
+                "type": "float"
+            },
+            {
+                "name": "map v scale",
+                "type": "float"
+            },
+            {
+                "name": "map u offset",
+                "type": "float"
+            },
+            {
+                "name": "map v offset",
+                "type": "float"
+            },
+            {
+                "name": "map rotation",
+                "type": "float"
+            },
+            {
+                "name": "mipmap bias",
+                "type": "Fraction"
+            },
+            {
+                "name": "map",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "u animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "u animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "u animation period",
+                "type": "float"
+            },
+            {
+                "name": "u animation phase",
+                "type": "float"
+            },
+            {
+                "name": "u animation scale",
+                "type": "float"
+            },
+            {
+                "name": "v animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "v animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "v animation period",
+                "type": "float"
+            },
+            {
+                "name": "v animation phase",
+                "type": "float"
+            },
+            {
+                "name": "v animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation source",
+                "type": "FunctionOut"
+            },
+            {
+                "name": "rotation animation function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "rotation animation period",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation phase",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation scale",
+                "type": "float"
+            },
+            {
+                "name": "rotation animation center",
+                "type": "Point2D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 220
+    },
+    {
+        "name": "ShaderTransparentChicago",
+        "fields": [
+            {
+                "name": "numeric counter limit",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "shader transparent chicago flags",
+                "type": "ShaderTransparentGenericFlags",
+                "endian": null
+            },
+            {
+                "name": "first map type",
+                "type": "ShaderFirstMapType"
+            },
+            {
+                "name": "framebuffer blend function",
+                "type": "FramebufferBlendFunction"
+            },
+            {
+                "name": "framebuffer fade mode",
+                "type": "FramebufferFadeMode"
+            },
+            {
+                "name": "framebuffer fade source",
+                "type": "FunctionOut"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "lens flare spacing",
+                "type": "float"
+            },
+            {
+                "name": "lens flare",
+                "type": "TagDependency",
+                "classes": [
+                    "lens_flare"
+                ],
+                "compound": true
+            },
+            {
+                "name": "extra layers",
+                "type": "TagReflexive",
+                "struct": "ShaderTransparentExtraLayer",
+                "compound": true
+            },
+            {
+                "name": "maps",
+                "type": "TagReflexive",
+                "struct": "ShaderTransparentChicagoMap",
+                "compound": true
+            },
+            {
+                "name": "extra flags",
+                "type": "ShaderTransparentChicagoExtraFlags"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "inherits": "Shader",
+        "size": 108
+    }
+]

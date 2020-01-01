@@ -1,0 +1,1525 @@
+[
+    {
+        "name": "Dialogue",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "idle noncombat",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "idle combat",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "idle flee",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "pain body minor",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "pain body major",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "pain shield",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "pain falling",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "scream fear",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "scream pain",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "maimed limb",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "maimed head",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death quiet",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death violent",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death falling",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death agonizing",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death instant",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "death flying",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "damaged friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "damaged friend player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "damaged enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "damaged enemy cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "hurt friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt friend re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt friend player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy bullet",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy needler",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy plasma",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy sniper",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy grenade",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy explosion",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy melee",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy flame",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy shotgun",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy vehicle",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hurt enemy mountedweapon",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "killed friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed friend cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed friend player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed friend player cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy player cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy covenant",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy covenant cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy floodcombat",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy floodcombat cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy floodcarrier",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy floodcarrier cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy sentinel",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy sentinel cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy bullet",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy needler",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy plasma",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy sniper",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy grenade",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy explosion",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy melee",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy flame",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy shotgun",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy vehicle",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killed enemy mountedweapon",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "killing spree",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "player kill cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill bullet cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill needler cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill plasma cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill sniper cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "anyone kill grenade cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill explosion cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill melee cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill flame cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill shotgun cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill vehicle cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player kill mountedweapon cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "player killling spree cm",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "friend died",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend player died",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by friendly player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by enemy player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by covenant",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by flood",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend killed by sentinel",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "friend betrayed",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "new combat alone",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "new enemy recent combat",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "old enemy sighted",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "unexpected enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "dead friend found",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alliance broken",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alliance reformed",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade throwing",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade sighted",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade startle",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade danger enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade danger self",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "grenade danger friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "new combat group re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "new combat nearby re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alert friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alert friend re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alert lost contact",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "alert lost contact re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "blocked",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "blocked re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search start",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search query",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search query re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search report",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search abandon",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "search group abandon",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "group uncover",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "group uncover re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "advance",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "advance re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "retreat",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "retreat re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "cover",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "sighted friend player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting vehicle",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting berserk",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting group",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting traitor",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "taunt",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "taunt re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flee",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flee re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "flee leader died",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "attempted flee",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "attempted flee re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "lost contact",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hiding finished",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "vehicle entry",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "vehicle exit",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "vehicle woohoo",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "vehicle scared",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "vehicle collision",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "partially sighted",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "nothing there",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "pleading",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "surprise",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "berserk",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "melee attack",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "dive",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "uncover exclamation",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "leap attack",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "resurrection",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "celebration",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "check body enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "check body friend",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting dead enemy",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "shooting dead enemy player",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "alone",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "unscathed",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "seriously wounded",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "seriously wounded re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "massacre",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "massacre re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "rout",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "rout re",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 752
+            }
+        ],
+        "type": "struct",
+        "size": 4112
+    }
+]

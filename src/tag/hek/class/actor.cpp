@@ -2,10 +2,9 @@
 
 #include <cmath>
 
-#include "../../../hek/constants.hpp"
-#include "../compile.hpp"
-
-#include "actor.hpp"
+#include <invader/hek/constants.hpp>
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_actor_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {

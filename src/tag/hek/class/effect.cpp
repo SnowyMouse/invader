@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "effect.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_effect_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -15,10 +15,10 @@ namespace Invader::HEK {
                 if(reflexive.type.path_size != 0) {
                     auto r = reflexive.type.tag_class_int.read();
                     if(IS_OBJECT_TAG(r)) {
-                        reflexive.type_type = TagClassInt::TAG_CLASS_OBJECT;
+                        reflexive.type_class = TagClassInt::TAG_CLASS_OBJECT;
                     }
                     else {
-                        reflexive.type_type = r;
+                        reflexive.type_class = r;
 
                         if(r == TagClassInt::TAG_CLASS_DAMAGE_EFFECT) {
                             has_damage_effect = true;

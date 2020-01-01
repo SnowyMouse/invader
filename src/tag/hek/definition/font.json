@@ -1,0 +1,150 @@
+[
+    {
+        "name": "FontCharacterIndex",
+        "fields": [
+            {
+                "name": "character index",
+                "type": "Index"
+            }
+        ],
+        "type": "struct",
+        "size": 2
+    },
+    {
+        "name": "FontCharacterTables",
+        "fields": [
+            {
+                "name": "character table",
+                "type": "TagReflexive",
+                "struct": "FontCharacterIndex",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    },
+    {
+        "name": "FontCharacter",
+        "fields": [
+            {
+                "name": "character",
+                "type": "Index"
+            },
+            {
+                "name": "character width",
+                "type": "int16"
+            },
+            {
+                "name": "bitmap width",
+                "type": "int16"
+            },
+            {
+                "name": "bitmap height",
+                "type": "int16"
+            },
+            {
+                "name": "bitmap origin x",
+                "type": "int16"
+            },
+            {
+                "name": "bitmap origin y",
+                "type": "int16"
+            },
+            {
+                "name": "hardware character index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "pixels offset",
+                "type": "int32"
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "Font",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "int32"
+            },
+            {
+                "name": "ascending height",
+                "type": "int16"
+            },
+            {
+                "name": "descending height",
+                "type": "int16"
+            },
+            {
+                "name": "leading height",
+                "type": "int16"
+            },
+            {
+                "name": "leading width",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "character tables",
+                "type": "TagReflexive",
+                "struct": "FontCharacterTables",
+                "compound": true,
+                "cache_only": true
+            },
+            {
+                "name": "bold",
+                "type": "TagDependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "italic",
+                "type": "TagDependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "condense",
+                "type": "TagDependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "underline",
+                "type": "TagDependency",
+                "classes": [
+                    "font"
+                ],
+                "compound": true
+            },
+            {
+                "name": "characters",
+                "type": "TagReflexive",
+                "struct": "FontCharacter",
+                "compound": true
+            },
+            {
+                "name": "pixels",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 156
+    }
+]

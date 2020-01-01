@@ -1,0 +1,27 @@
+[
+    {
+        "name": "StringListString",
+        "fields": [
+            {
+                "name": "string",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "StringList",
+        "fields": [
+            {
+                "name": "strings",
+                "type": "TagReflexive",
+                "struct": "StringListString",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    }
+]

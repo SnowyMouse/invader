@@ -1,0 +1,571 @@
+[
+    {
+        "name": "UnitFunctionIn",
+        "options": [
+            "none",
+            "driver seat power",
+            "gunner seat power",
+            "aiming change",
+            "mouth aperture",
+            "integrated light power",
+            "can blink",
+            "shield sapping"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "UnitDefaultTeam",
+        "options": [
+            "none",
+            "player",
+            "human",
+            "covenant",
+            "flood",
+            "sentinel",
+            "unused 6",
+            "unused 7",
+            "unused 8",
+            "unused 9"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "UnitMotionSensorBlipSize",
+        "options": [
+            "medium",
+            "small",
+            "large"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "UnitFlags",
+        "type": "bitfield",
+        "fields": [
+            "circular aiming",
+            "destroyed after dying",
+            "half speed interpolation",
+            "fires from camera",
+            "entrance inside bounding sphere",
+            "unused",
+            "causes passenger dialogue",
+            "resists pings",
+            "melee attack is fatal",
+            "don't reface during pings",
+            "has no aiming",
+            "simple creature",
+            "impact melee attaches to unit",
+            "impact melee dies on shields",
+            "cannot open doors automatically",
+            "melee attackers cannot attach",
+            "not instantly killed by melee",
+            "shield sapping",
+            "runs around flaming",
+            "inconsequential",
+            "special cinematic unit",
+            "ignored by autoaiming",
+            "shields fry infection forms",
+            "integrated light cntrls weapon",
+            "integrated light lasts forever"
+        ],
+        "width": 32
+    },
+    {
+        "name": "UnitSeatFlags",
+        "type": "bitfield",
+        "fields": [
+            "invisible",
+            "locked",
+            "driver",
+            "gunner",
+            "third person camera",
+            "allows weapons",
+            "third person on enter",
+            "first person camera slaved to gun",
+            "allow vehicle communication animations",
+            "not valid without driver",
+            "allow ai noncombatants",
+            "reserved",
+            "reserved 1",
+            "reserved 2",
+            "reserved 3",
+            "reserved 4",
+            "reserved 5",
+            "reserved 6",
+            "reserved 7",
+            "reserved 8",
+            "allows melee"
+        ],
+        "width": 32
+    },
+    {
+        "name": "UnitPoweredSeat",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "driver powerup time",
+                "type": "float"
+            },
+            {
+                "name": "driver powerdown time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 56
+            }
+        ],
+        "type": "struct",
+        "size": 68
+    },
+    {
+        "name": "UnitCameraTrack",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "track",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "camera_track"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "size": 28
+    },
+    {
+        "name": "UnitUnitHudInterface",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "hud",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "unit_hud_interface"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "UnitSeat",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "UnitSeatFlags"
+            },
+            {
+                "name": "label",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "acceleration scale",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "yaw rate",
+                "type": "float"
+            },
+            {
+                "name": "pitch rate",
+                "type": "float"
+            },
+            {
+                "name": "camera marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "camera submerged marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "pitch auto level",
+                "type": "Angle"
+            },
+            {
+                "name": "pitch range",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "camera tracks",
+                "type": "TagReflexive",
+                "struct": "UnitCameraTrack",
+                "compound": true
+            },
+            {
+                "name": "unit hud interface",
+                "type": "TagReflexive",
+                "struct": "UnitUnitHudInterface",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "hud text message index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "yaw minimum",
+                "type": "Angle"
+            },
+            {
+                "name": "yaw maximum",
+                "type": "Angle"
+            },
+            {
+                "name": "built in gunner",
+                "type": "TagDependency",
+                "classes": [
+                    "actor_variant"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 20
+            }
+        ],
+        "type": "struct",
+        "size": 284
+    },
+    {
+        "name": "UnitWeapon",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "weapon",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "weapon"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 20
+            }
+        ],
+        "size": 36
+    },
+    {
+        "name": "UnitDialogueVariant",
+        "fields": [
+            {
+                "name": "variant number",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "dialogue",
+                "type": "TagDependency",
+                "classes": [
+                    "unit_dialogue"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 24
+    },
+    {
+        "name": "Unit",
+        "fields": [
+            {
+                "name": "unit flags",
+                "type": "UnitFlags"
+            },
+            {
+                "name": "default team",
+                "type": "UnitDefaultTeam"
+            },
+            {
+                "name": "constant sound volume",
+                "type": "ObjectNoise"
+            },
+            {
+                "name": "rider damage fraction",
+                "type": "float"
+            },
+            {
+                "name": "integrated light toggle",
+                "type": "TagDependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "unit a in",
+                "type": "UnitFunctionIn"
+            },
+            {
+                "name": "unit b in",
+                "type": "UnitFunctionIn"
+            },
+            {
+                "name": "unit c in",
+                "type": "UnitFunctionIn"
+            },
+            {
+                "name": "unit d in",
+                "type": "UnitFunctionIn"
+            },
+            {
+                "name": "camera field of view",
+                "type": "Angle"
+            },
+            {
+                "name": "camera stiffness",
+                "type": "float"
+            },
+            {
+                "name": "camera marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "camera submerged marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "pitch auto level",
+                "type": "Angle"
+            },
+            {
+                "name": "pitch range",
+                "bounds": true,
+                "type": "Angle"
+            },
+            {
+                "name": "camera tracks",
+                "type": "TagReflexive",
+                "struct": "UnitCameraTrack",
+                "compound": true
+            },
+            {
+                "name": "seat acceleration scale",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "soft ping threshold",
+                "type": "float"
+            },
+            {
+                "name": "soft ping interrupt time",
+                "type": "float"
+            },
+            {
+                "name": "hard ping threshold",
+                "type": "float"
+            },
+            {
+                "name": "hard ping interrupt time",
+                "type": "float"
+            },
+            {
+                "name": "hard death threshold",
+                "type": "float"
+            },
+            {
+                "name": "feign death threshold",
+                "type": "float"
+            },
+            {
+                "name": "feign death time",
+                "type": "float"
+            },
+            {
+                "name": "distance of evade anim",
+                "type": "float"
+            },
+            {
+                "name": "distance of dive anim",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "stunned movement threshold",
+                "type": "float"
+            },
+            {
+                "name": "feign death chance",
+                "type": "float"
+            },
+            {
+                "name": "feign repeat chance",
+                "type": "float"
+            },
+            {
+                "name": "spawned actor",
+                "type": "TagDependency",
+                "classes": [
+                    "actor_variant"
+                ],
+                "compound": true
+            },
+            {
+                "name": "spawned actor count",
+                "bounds": true,
+                "type": "uint16"
+            },
+            {
+                "name": "spawned velocity",
+                "type": "float"
+            },
+            {
+                "name": "aiming velocity maximum",
+                "type": "Angle"
+            },
+            {
+                "name": "aiming acceleration maximum",
+                "type": "Angle"
+            },
+            {
+                "name": "casual aiming modifier",
+                "type": "Fraction"
+            },
+            {
+                "name": "looking velocity maximum",
+                "type": "Angle"
+            },
+            {
+                "name": "looking acceleration maximum",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "ai vehicle radius",
+                "type": "float"
+            },
+            {
+                "name": "ai danger radius",
+                "type": "float"
+            },
+            {
+                "name": "melee damage",
+                "type": "TagDependency",
+                "classes": [
+                    "damage_effect"
+                ],
+                "compound": true
+            },
+            {
+                "name": "motion sensor blip size",
+                "type": "UnitMotionSensorBlipSize"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "new hud interfaces",
+                "type": "TagReflexive",
+                "struct": "UnitUnitHudInterface",
+                "compound": true
+            },
+            {
+                "name": "dialogue variants",
+                "type": "TagReflexive",
+                "struct": "UnitDialogueVariant",
+                "compound": true
+            },
+            {
+                "name": "grenade velocity",
+                "type": "float"
+            },
+            {
+                "name": "grenade type",
+                "type": "GrenadeType"
+            },
+            {
+                "name": "grenade count",
+                "type": "uint16"
+            },
+            {
+                "name": "unknown shorts",
+                "type": "int16",
+                "count": 2
+            },
+            {
+                "name": "powered seats",
+                "type": "TagReflexive",
+                "struct": "UnitPoweredSeat",
+                "compound": true
+            },
+            {
+                "name": "weapons",
+                "type": "TagReflexive",
+                "struct": "UnitWeapon",
+                "compound": true
+            },
+            {
+                "name": "seats",
+                "type": "TagReflexive",
+                "struct": "UnitSeat",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Object",
+        "size": 752
+    }
+]

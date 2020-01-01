@@ -1,0 +1,113 @@
+[
+    {
+        "name": "AntennaVertex",
+        "fields": [
+            {
+                "name": "spring strength coefficient",
+                "type": "Fraction"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "angles",
+                "type": "Euler2D",
+                "compound": true
+            },
+            {
+                "name": "length",
+                "type": "float"
+            },
+            {
+                "name": "sequence index",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "name": "lod color",
+                "type": "ColorARGB",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 40
+            },
+            {
+                "name": "offset",
+                "type": "Point3D",
+                "endian": "little",
+                "compound": true,
+                "cache_only": true
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    },
+    {
+        "name": "Antenna",
+        "fields": [
+            {
+                "name": "attachment marker name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "bitmaps",
+                "type": "TagDependency",
+                "classes": [
+                    "bitmap"
+                ],
+                "compound": true
+            },
+            {
+                "name": "physics",
+                "type": "TagDependency",
+                "classes": [
+                    "point_physics"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 80
+            },
+            {
+                "name": "spring strength coefficient",
+                "type": "Fraction"
+            },
+            {
+                "name": "falloff pixels",
+                "type": "float"
+            },
+            {
+                "name": "cutoff pixels",
+                "type": "float"
+            },
+            {
+                "name": "length",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "vertices",
+                "type": "TagReflexive",
+                "struct": "AntennaVertex",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 208
+    }
+]

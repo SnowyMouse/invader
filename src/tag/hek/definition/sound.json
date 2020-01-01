@@ -1,0 +1,362 @@
+[
+    {
+        "name": "SoundFormat",
+        "options": [
+            "16-bit PCM",
+            "Xbox ADPCM",
+            "IMA ADPCM",
+            "Ogg Vorbis"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "SoundClass",
+        "options": [
+            "projectile impact",
+            "projectile detonation",
+            "unused",
+            "unused 1",
+            "weapon fire",
+            "weapon ready",
+            "weapon reload",
+            "weapon empty",
+            "weapon charge",
+            "weapon overheat",
+            "weapon idle",
+            "unused 2",
+            "unused 3",
+            "object impacts",
+            "particle impacts",
+            "slow particle impacts",
+            "unused 4",
+            "unused 5",
+            "unit footsteps",
+            "unit dialog",
+            "unused 6",
+            "unused 7",
+            "vehicle collision",
+            "vehicle engine",
+            "unused 8",
+            "unused 9",
+            "device door",
+            "device force field",
+            "device machinery",
+            "device nature",
+            "device computers",
+            "unused 10",
+            "music",
+            "ambient nature",
+            "ambient machinery",
+            "ambient computers",
+            "unused 11",
+            "unused 12",
+            "unused 13",
+            "first person damage",
+            "unused 14",
+            "unused 15",
+            "unused 16",
+            "unused 17",
+            "scripted dialog player",
+            "scripted effect",
+            "scripted dialog other",
+            "scripted dialog force unspatialized",
+            "unused 18",
+            "unused 19",
+            "game event"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "SoundSampleRate",
+        "options": [
+            "22050 Hz",
+            "44100 Hz"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "SoundChannelCount",
+        "options": [
+            "mono",
+            "stereo"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "SoundFlags",
+        "type": "bitfield",
+        "fields": [
+            "fit to adpcm blocksize",
+            "split long sound into permutations"
+        ],
+        "width": 32
+    },
+    {
+        "name": "SoundPermutation",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "skip fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "gain",
+                "type": "Fraction"
+            },
+            {
+                "name": "format",
+                "type": "SoundFormat"
+            },
+            {
+                "name": "next permutation index",
+                "type": "Index"
+            },
+            {
+                "name": "samples pointer",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "tag id 0",
+                "comment": "Set to the sound tag's tag ID",
+                "type": "TagID"
+            },
+            {
+                "name": "buffer size",
+                "type": "uint32",
+                "comment": "this is the buffer size used to encode (and, for Ogg, decompress) the permutation data (unused in Xbox ADPCM)",
+                "endian": "little"
+            },
+            {
+                "name": "tag id 1",
+                "comment": "Set to the sound tag's tag ID",
+                "type": "TagID"
+            },
+            {
+                "name": "samples",
+                "type": "TagDataOffset",
+                "compound": true,
+                "file_offset": true,
+                "external_file_offset": "sounds.map"
+            },
+            {
+                "name": "mouth data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "subtitle data",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "post_cache_deformat": true,
+        "size": 124
+    },
+    {
+        "name": "SoundPitchRange",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "natural pitch",
+                "type": "float"
+            },
+            {
+                "name": "bend bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "actual permutation count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "playback rate",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown ffffffff 0",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown ffffffff 1",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "permutations",
+                "type": "TagReflexive",
+                "struct": "SoundPermutation",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 72
+    },
+    {
+        "name": "Sound",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "SoundFlags"
+            },
+            {
+                "name": "sound class",
+                "type": "SoundClass"
+            },
+            {
+                "name": "sample rate",
+                "type": "SoundSampleRate"
+            },
+            {
+                "name": "minimum distance",
+                "type": "float"
+            },
+            {
+                "name": "maximum distance",
+                "type": "float"
+            },
+            {
+                "name": "skip fraction",
+                "type": "Fraction"
+            },
+            {
+                "name": "random pitch bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "inner cone angle",
+                "type": "Angle"
+            },
+            {
+                "name": "outer cone angle",
+                "type": "Angle"
+            },
+            {
+                "name": "outer cone gain",
+                "type": "Fraction"
+            },
+            {
+                "name": "random gain modifier",
+                "type": "float"
+            },
+            {
+                "name": "maximum bend per second",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "zero skip fraction modifier",
+                "type": "float"
+            },
+            {
+                "name": "zero gain modifier",
+                "type": "float"
+            },
+            {
+                "name": "zero pitch modifier",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "one skip fraction modifier",
+                "type": "float"
+            },
+            {
+                "name": "one gain modifier",
+                "type": "float"
+            },
+            {
+                "name": "one pitch modifier",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "channel count",
+                "type": "SoundChannelCount"
+            },
+            {
+                "name": "format",
+                "type": "SoundFormat"
+            },
+            {
+                "name": "promotion sound",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "promotion count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "unknown int",
+                "type": "uint32"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "unknown ffffffff 0",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown ffffffff 1",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "pitch ranges",
+                "type": "TagReflexive",
+                "struct": "SoundPitchRange",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "post_cache_parse": true,
+        "size": 164
+    }
+]

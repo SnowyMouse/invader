@@ -4,30 +4,30 @@
 #include <cstdlib>
 #include <cassert>
 #include <filesystem>
-#include "../tag/compiled_tag.hpp"
-#include "../version.hpp"
-#include "../tag/hek/class/bitmap.hpp"
-#include "../tag/hek/class/sound.hpp"
-#include "resource_map.hpp"
-#include "hek/resource_map.hpp"
-#include "list/resource_list.hpp"
-#include "../command_line_option.hpp"
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/resource/resource_map.hpp>
+#include <invader/resource/hek/resource_map.hpp>
+#include <invader/resource/list/resource_list.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/printf.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
     using namespace Invader;
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("type", 'T', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("maps", 'm', 1);
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("type", 'T', 1, "Set the resource map. This option is required for creating maps. Can be: bitmaps, sounds, or loc.", "<type>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
+    options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
+
+    static constexpr char DESCRIPTION[] = "Create resource maps.";
+    static constexpr char USAGE[] = "<options>";
 
     struct ResourceOption {
-        // Program path
-        const char *path;
-
         // Tags directory
         std::vector<const char *> tags;
 
@@ -38,14 +38,15 @@ int main(int argc, const char **argv) {
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
         const char **(*default_fn)() = get_default_bitmap_resources;
         bool resource_map_set = false;
-    } resource_options;
-    resource_options.path = argv[0];
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, 'h', resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
+        bool retail = false;
+    } resource_options;
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
         switch(opt) {
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
+                show_version_info();
+                std::exit(EXIT_SUCCESS);
 
             case 't':
                 resource_options.tags.push_back(arguments[0]);
@@ -53,6 +54,10 @@ int main(int argc, const char **argv) {
 
             case 'm':
                 resource_options.maps = arguments[0];
+                break;
+
+            case 'R':
+                resource_options.retail = true;
                 break;
 
             case 'T':
@@ -69,42 +74,27 @@ int main(int argc, const char **argv) {
                     resource_options.default_fn = get_default_loc_resources;
                 }
                 else {
-                    eprintf("Invalid type %s. Use --help for more information.\n", arguments[0]);
+                    eprintf_error("Invalid type %s. Use --help for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 resource_options.resource_map_set = true;
                 break;
-
-            default:
-                eprintf("Usage: %s <options>\n\n", resource_options.path);
-                eprintf("Create or modify a bitmap tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --maps,-m <path>           Set the maps directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory. Use multiple times to use\n");
-                eprintf("                               multiple directories in order of precedence.\n\n");
-                eprintf("Resource options:\n");
-                eprintf("    --type,-T <type>           Set the resource map. This option is required for\n");
-                eprintf("                               creating maps. Can be: bitmaps, sounds, or loc.\n\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 
-    if(remaining_arguments.size() > 0) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[0]);
+    if(!resource_options.resource_map_set) {
+        eprintf_error("No resource map type was given. Use -h for more information.");
         return EXIT_FAILURE;
     }
 
-    if(!resource_options.resource_map_set) {
-        eprintf("No resource map type was given. Use --help for more information.\n");
+    if(resource_options.retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
+        eprintf_error("Only bitmaps.map and sounds.map can be made for retail.");
         return EXIT_FAILURE;
     }
 
     // If we don't have any tags directories, use a default one
     if(resource_options.tags.size() == 0) {
-        resource_options.tags.push_back("tags/");
+        resource_options.tags.push_back("tags");
     }
 
     // Get all the tags
@@ -125,7 +115,7 @@ int main(int argc, const char **argv) {
 
     for(const std::string &tag : tags_list) {
         // First let's open it
-        TagClassInt tag_class_int;
+        TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
 
         // Convert backslashes if needed
@@ -140,7 +130,7 @@ int main(int argc, const char **argv) {
         auto open_tag = [&resource_options, &tag_path](const char *extension) -> std::FILE * {
             for(auto &tags_folder : resource_options.tags) {
                 auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string() + extension;
-                std::FILE *f = std::fopen(tag_path_str.data(), "rb");
+                std::FILE *f = std::fopen(tag_path_str.c_str(), "rb");
                 if(f) {
                     return f;
                 }
@@ -151,14 +141,14 @@ int main(int argc, const char **argv) {
         #define ATTEMPT_TO_OPEN(extension) { \
             std::FILE *f = open_tag(extension); \
             if(!f) { \
-                eprintf("Failed to open %s" extension "\n", tag_path.data()); \
+                eprintf_error("Failed to open %s" extension, tag_path.c_str()); \
                 return EXIT_FAILURE; \
             } \
             std::fseek(f, 0, SEEK_END); \
             tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
             std::fseek(f, 0, SEEK_SET); \
             if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                eprintf("Failed to read %s" extension "\n", tag_path.data()); \
+                eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
                 return EXIT_FAILURE; \
             } \
             std::fclose(f); \
@@ -183,7 +173,7 @@ int main(int argc, const char **argv) {
                         tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
                         std::fseek(f, 0, SEEK_SET); \
                         if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                            eprintf("Failed to read %s" extension "\n", tag_path.data()); \
+                            eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
                             return EXIT_FAILURE; \
                         } \
                         std::fclose(f); \
@@ -195,7 +185,7 @@ int main(int argc, const char **argv) {
                 #undef DO_THIS_FOR_ME_PLEASE
 
                 if(tag_data.size() == 0) {
-                    eprintf("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.\n", tag_path.data());
+                    eprintf_error("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.", tag_path.c_str());
                 }
 
                 break;
@@ -209,6 +199,7 @@ int main(int argc, const char **argv) {
         // Compile the tags
         try {
             CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
+            char path_temp[256];
 
             // Now, adjust stuff for pointers
             switch(resource_options.type) {
@@ -218,36 +209,56 @@ int main(int argc, const char **argv) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
                     }
 
-                    // Push the asset data first
-                    std::size_t bitmap_data_offset = resource_data.size();
-                    offsets.push_back(bitmap_data_offset);
-                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
-                    paths.push_back(tag + "__pixels");
-                    sizes.push_back(compiled_tag.asset_data.size());
-
-                    PAD_RESOURCES_32_BIT
-
                     // Do stuff to the tag data
                     auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag.data.data());
                     std::size_t bitmap_count = bitmap.bitmap_data.count;
                     if(bitmap_count) {
                         auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&bitmap.bitmap_data.pointer));
-                        auto *bitmaps_end = bitmaps + bitmap_count;
-                        for(auto *bitmap = bitmaps; bitmap < bitmaps_end; bitmap++) {
-                            auto flags = bitmap->flags.read();
-                            flags.external = 1;
-                            bitmap->flags = flags;
-                            bitmap->pixels_offset = bitmap_data_offset + bitmap->pixels_offset;
+                        for(std::size_t b = 0; b < bitmap_count; b++) {
+                            auto *bitmap = bitmaps + b;
+
+                            // If we're on retail, push the pixel data
+                            if(resource_options.retail) {
+                                // Generate the path to add
+                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", tag.c_str(), b);
+
+                                // Push it good
+                                paths.push_back(path_temp);
+                                std::size_t size = bitmap->pixel_data_size.read();
+                                std::size_t offset = bitmap->pixel_data_offset.read();
+                                sizes.push_back(size);
+                                offsets.push_back(resource_data.size());
+                                resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+
+                                PAD_RESOURCES_32_BIT
+                            }
+                            // Otherwise set the sizes
+                            else {
+                                bitmap->pixel_data_offset = resource_data.size() + bitmap->pixel_data_offset;
+                                auto flags = bitmap->flags.read();
+                                flags.external = 1;
+                                bitmap->flags = flags;
+                            }
                         }
                     }
 
-                    // Push the tag data
-                    offsets.push_back(resource_data.size());
-                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
-                    paths.push_back(tag);
-                    sizes.push_back(compiled_tag.data.size());
+                    // Push the asset data and tag data if we aren't on retail
+                    if(!resource_options.retail) {
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        paths.push_back(tag + "__pixels");
+                        sizes.push_back(compiled_tag.asset_data.size());
 
-                    PAD_RESOURCES_32_BIT
+                        PAD_RESOURCES_32_BIT
+
+                        // Push the tag data
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        paths.push_back(tag);
+                        sizes.push_back(compiled_tag.data.size());
+
+                        PAD_RESOURCES_32_BIT
+                    }
 
                     break;
                 }
@@ -257,41 +268,59 @@ int main(int argc, const char **argv) {
                         *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
                     }
 
-                    // Push the asset data first
-                    std::size_t bitmap_data_offset = resource_data.size();
-                    offsets.push_back(bitmap_data_offset);
-                    resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
-                    paths.push_back(tag + "__permutations");
-                    sizes.push_back(compiled_tag.asset_data.size());
-
-                    PAD_RESOURCES_32_BIT
-
                     // Do stuff to the tag data
                     auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag.data.data());
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     if(pitch_range_count) {
                         auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&sound.pitch_ranges.pointer));
-                        auto *pitch_ranges_end = pitch_ranges + pitch_range_count;
-                        for(auto *pitch_range = pitch_ranges; pitch_range < pitch_ranges_end; pitch_range++) {
+                        for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                            auto *pitch_range = pitch_ranges + pr;
                             std::size_t permutation_count = pitch_range->permutations.count;
                             if(permutation_count) {
                                 auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&pitch_range->permutations.pointer));
-                                auto *permutations_end = permutations + permutation_count;
-                                for(auto *permutation = permutations; permutation < permutations_end; permutation++) {
-                                    permutation->samples.external = 1;
-                                    permutation->samples.file_offset = bitmap_data_offset + permutation->samples.file_offset;
+                                for(std::size_t p = 0; p < permutation_count; p++) {
+                                    auto *permutation = permutations + p;
+                                    if(resource_options.retail) {
+                                        // Generate the path to add
+                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", tag.c_str(), pr, p);
+
+                                        // Push it REAL good
+                                        paths.push_back(path_temp);
+                                        std::size_t size = permutation->samples.size.read();
+                                        sizes.push_back(size);
+                                        offsets.push_back(resource_data.size());
+                                        std::size_t offset = permutation->samples.file_offset.read();
+                                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+
+                                        PAD_RESOURCES_32_BIT
+                                    }
+                                    else {
+                                        permutation->samples.external = 1;
+                                        permutation->samples.file_offset = resource_data.size() + permutation->samples.file_offset;
+                                    }
                                 }
                             }
                         }
                     }
 
-                    // Push the tag data
-                    offsets.push_back(resource_data.size());
-                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
-                    paths.push_back(tag);
-                    sizes.push_back(compiled_tag.data.size());
+                    // If we're not on retail, push asset and tag data
+                    if(!resource_options.retail) {
+                        // Push the asset data first
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        paths.push_back(tag + "__permutations");
+                        sizes.push_back(compiled_tag.asset_data.size());
 
-                    PAD_RESOURCES_32_BIT
+                        PAD_RESOURCES_32_BIT
+
+                        // Push the tag data
+                        offsets.push_back(resource_data.size());
+                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        paths.push_back(tag);
+                        sizes.push_back(compiled_tag.data.size());
+
+                        PAD_RESOURCES_32_BIT
+                    }
 
                     break;
                 }
@@ -311,7 +340,7 @@ int main(int argc, const char **argv) {
             }
         }
         catch(std::exception &e) {
-            eprintf("Failed to compile %s.%s due to an exception: %s\n", tag_path.data(), tag_class_to_extension(tag_class_int), e.what());
+            eprintf_error("Failed to compile %s.%s due to an exception: %s", tag_path.c_str(), tag_class_to_extension(tag_class_int), e.what());
             return EXIT_FAILURE;
         }
 
@@ -346,22 +375,22 @@ int main(int argc, const char **argv) {
         index.size = sizes[i];
         index.data_offset = offsets[i];
         index.path_offset = resource_names_arr.size();
-        resource_names_arr.insert(resource_names_arr.end(), reinterpret_cast<std::byte *>(paths[i].data()), reinterpret_cast<std::byte *>(paths[i].data()) + paths[i].size() + 1);
+        resource_names_arr.insert(resource_names_arr.end(), reinterpret_cast<const std::byte *>(paths[i].c_str()), reinterpret_cast<const std::byte *>(paths[i].c_str()) + paths[i].size() + 1);
     }
     header.resource_count = resource_count;
     header.paths = resource_data.size();
     header.resources = resource_names_arr.size() + resource_data.size();
     *reinterpret_cast<ResourceMapHeader *>(resource_data.data()) = header;
 
-    if(resource_data.size() >= 0x100000000) {
-        eprintf("Resource map exceeds 4 GiB.\n");
+    if(resource_data.size() >= 0xFFFFFFFF) {
+        eprintf_error("Resource map exceeds 4 GiB.");
         return EXIT_FAILURE;
     }
 
     // Open the file
-    std::FILE *f = std::fopen(map_path.string().data(), "wb");
+    std::FILE *f = std::fopen(map_path.string().c_str(), "wb");
     if(!f) {
-        eprintf("Failed to open %s for writing.\n", map_path.string().data());
+        eprintf_error("Failed to open %s for writing.", map_path.string().c_str());
         return EXIT_FAILURE;
     }
 

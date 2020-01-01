@@ -1,36 +1,26 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # Check if we can build invader-bitmap
-if(${TIFF_FOUND} AND ${ZLIB_FOUND})
-    # Bitmap executable
+if(NOT DEFINED ${INVADER_BITMAP})
+    if(${ZLIB_FOUND})
+        set(INVADER_BITMAP true)
+    else()
+        set(INVADER_BITMAP false)
+        message(WARNING "Unable to automatically find zlib; invader-bitmap will be disabled")
+    endif()
+    set(INVADER_BITMAP ${INVADER_BITMAP} CACHE BOOL "Build invader-bitmap (creates bitmap tags; requires zlib)")
+endif()
+
+if(${INVADER_BITMAP})
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
-        src/bitmap/color_plate_scanner.cpp
-        src/bitmap/stb/stb_impl.c
-        src/bitmap/image_loader.cpp
-        src/bitmap/bitmap_data_writer.cpp
     )
-
-    # P8 palette library (separate for slightly faster building)
-    add_library(invader-bitmap-p8-palette STATIC
-        "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
-    )
-
-    # Include version script
-    add_custom_command(
-        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
-        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette" "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette"
-    )
-
-    set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 
     target_include_directories(invader-bitmap
-        PUBLIC ${ZLIB_INCLUDE_DIRS} ${TIFF_INCLUDE_DIRS}
+        PUBLIC ${ZLIB_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap invader-bitmap-p8-palette invader ${ZLIB_LIBRARIES} ${TIFF_LIBRARIES})
-else()
-    message("A dependency is missing. invader-bitmap will not compile.")
+    target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES})
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-bitmap)
 endif()

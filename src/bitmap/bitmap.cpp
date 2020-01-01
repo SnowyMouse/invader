@@ -4,15 +4,17 @@
 #include <filesystem>
 #include <optional>
 
-#include "../eprintf.hpp"
-#include "../version.hpp"
-#include "../tag/hek/class/bitmap.hpp"
-#include "image_loader.hpp"
-#include "color_plate_scanner.hpp"
-#include "bitmap_data_writer.hpp"
-#include "../command_line_option.hpp"
+#include <invader/printf.hpp>
+#include <invader/version.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include <invader/tag/hek/header.hpp>
+#include <invader/bitmap/image_loader.hpp>
+#include <invader/bitmap/color_plate_scanner.hpp>
+#include <invader/bitmap/bitmap_data_writer.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
-enum SUPPORTED_FORMATS_INT {
+enum SupportedFormatsInt {
     SUPPORTED_FORMATS_TIF = 0,
     SUPPORTED_FORMATS_TIFF,
     SUPPORTED_FORMATS_PNG,
@@ -37,9 +39,6 @@ int main(int argc, char *argv[]) {
     using namespace Invader;
 
     struct BitmapOptions {
-        // Program path
-        const char *path;
-
         // Data directory
         const char *data = "data/";
 
@@ -85,29 +84,33 @@ int main(int argc, char *argv[]) {
 
         // Ignore the tag data?
         bool ignore_tag_data = false;
+
+        // Use a filesystem path?
+        bool filesystem_path = false;
     } bitmap_options;
-    bitmap_options.path = argv[0];
 
     std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("ignore-tag", 'I', 0);
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("dithering", 'D', 1);
-    options.emplace_back("data", 'd', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("format", 'F', 1);
-    options.emplace_back("type", 'T', 1);
-    options.emplace_back("mipmap-count", 'm', 1);
-    options.emplace_back("mipmap-scale", 's', 1);
-    options.emplace_back("detail-fade", 'f', 1);
-    options.emplace_back("budget", 'B', 1);
-    options.emplace_back("budget-count", 'C', 1);
-    options.emplace_back("bump-palettize", 'p', 1);
-    options.emplace_back("bump-palettise", 'p', 1);
-    options.emplace_back("bump-height", 'H', 1);
+    options.emplace_back("info", 'i', 0, "Show license and credits.");
+    options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
+    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. Specify channels with letters (i.e. argb).", "<channels>");
+    options.emplace_back("data <path>", 'd', 1, "Set the data directory.", "<path>");
+    options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
+    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit" "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
+    options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
+    options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
+    options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
+    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
+    options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
+    options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. This will not work with stock Halo. Can be: off or on. Default (new tag): off", "<val>");
+    options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+
+    static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
+    static constexpr char USAGE[] = "[options] <bitmap-tag>";
 
     // Go through each argument
-    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, 'h', bitmap_options, [](char opt, const std::vector<const char *> &arguments, BitmapOptions &bitmap_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<BitmapOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, bitmap_options, [](char opt, const std::vector<const char *> &arguments, auto &bitmap_options) {
         switch(opt) {
             case 'd':
                 bitmap_options.data = arguments[0];
@@ -118,8 +121,8 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
+                show_version_info();
+                std::exit(EXIT_SUCCESS);
 
             case 'I':
                 bitmap_options.ignore_tag_data = true;
@@ -128,7 +131,7 @@ int main(int argc, char *argv[]) {
             case 'f':
                 bitmap_options.mipmap_fade = std::strtof(arguments[0], nullptr);
                 if(bitmap_options.mipmap_fade < 0.0F || bitmap_options.mipmap_fade > 1.0F) {
-                    eprintf("Mipmap fade must be between 0-1\n");
+                    eprintf_error("Mipmap fade must be between 0-1");
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -144,7 +147,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.mipmap_scale_type = ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_NEAREST_ALPHA;
                 }
                 else {
-                    eprintf("Unknown mipmap scale type %s\n", arguments[0]);
+                    eprintf_error("Unknown mipmap scale type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -169,7 +172,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
                 }
                 else {
-                    eprintf("Unknown format %s\n", arguments[0]);
+                    eprintf_error("Unknown format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -191,7 +194,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
                 }
                 else {
-                    eprintf("Unknown type %s\n", arguments[0]);
+                    eprintf_error("Unknown type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -217,7 +220,7 @@ int main(int argc, char *argv[]) {
                             bitmap_options.dither_blue = true;
                             break;
                         default:
-                            printf("Unknown channel %c.\n", *c);
+                            eprintf_error("Unknown channel %c.", *c);
                             std::exit(EXIT_FAILURE);
                     }
                 }
@@ -231,7 +234,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.palettize = false;
                 }
                 else {
-                    eprintf("Unknown palettize setting %s\n", arguments[0]);
+                    eprintf_error("Unknown palettize setting %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -247,7 +250,7 @@ int main(int argc, char *argv[]) {
                     bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
                 }
                 else {
-                    eprintf("Unknown usage %s\n", arguments[0]);
+                    eprintf_error("Unknown usage %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -256,8 +259,8 @@ int main(int argc, char *argv[]) {
                 bitmap_options.bump_height = static_cast<float>(std::strtof(arguments[0], nullptr));
                 break;
 
-            case 'm':
-                bitmap_options.max_mipmap_count = static_cast<std::int32_t>(std::strtol(arguments[0], nullptr, 10));
+            case 'M':
+                bitmap_options.max_mipmap_count = static_cast<std::uint32_t>(std::strtol(arguments[0], nullptr, 10));
                 break;
 
             case 'C':
@@ -274,85 +277,70 @@ int main(int argc, char *argv[]) {
                     case 512:
                         break;
                     default:
-                        eprintf("Invalid sprite budget %u.\n", bitmap_options.sprite_budget.value());
+                        eprintf_error("Invalid sprite budget %u.", bitmap_options.sprite_budget.value());
                         std::exit(EXIT_FAILURE);
                 }
 
                 break;
 
-            default:
-                eprintf("Usage: %s [options] <bitmap-tag>\n\n", bitmap_options.path);
-                eprintf("Create or modify a bitmap tag.\n\n");
-                eprintf("Options:\n");
-                eprintf("    --info,-i                  Show license and credits.\n");
-                eprintf("    --help,-h                  Show help\n\n");
-                eprintf("Directory options:\n");
-                eprintf("    --data,-d <path>           Set the data directory.\n");
-                eprintf("    --tags,-t <path>           Set the tags directory.\n\n");
-                eprintf("Bitmap options:\n");
-                eprintf("    --type,-T <type>           Set the type of bitmap. Can be: 2d, 3d, cubemap,\n");
-                eprintf("                               interface, or sprite. Default (new tag): 2d\n");
-                eprintf("    --usage,-u <usage>         Set the bitmap usage. Can be: default, bumpmap,\n");
-                eprintf("                               or detail. Default (new tag): default\n");
-                eprintf("    --dithering,-D <channels>  Apply dithering to 16-bit, dxtn, or p8 bitmaps.\n");
-                eprintf("                               Specify channels with letters (i.e. argb).\n");
-                eprintf("    --ignore-tag,-I            Ignore the tag data if the tag exists.\n");
-                eprintf("    --format,-F <type>         Pixel format. Can be: 32-bit, 16-bit, monochrome,\n");
-                eprintf("                               dxt5, dxt3, or dxt1. Default (new tag): 32-bit\n\n");
-                eprintf("Mipmap options:\n");
-                eprintf("    --mipmap-count,-m <count>  Set maximum mipmaps. Default (new tag): 32767\n");
-                eprintf("    --mipmap-scale,-s <type>   Mipmap scale type. Can be: linear, nearest-alpha,\n");
-                eprintf("                               nearest. Default (new tag): linear\n\n");
-                eprintf("Bumpmap options (only applies to bumpmap bitmaps):\n");
-                eprintf("    --bump-height,-H <height>  Set the apparent bumpmap height from 0 to 1.\n");
-                eprintf("                               Default (new tag): 0.02\n");
-                eprintf("    --bump-palettize,-p <type> Set the bumpmap palettization setting. This will\n");
-                eprintf("                               not work with stock Halo. Can be: off or on.\n");
-                eprintf("                               Default (new tag): off\n\n");
-                eprintf("Detail map options (only applies to detail bitmaps):\n");
-                eprintf("    --detail-fade,-f <factor>  Set detail fade factor. Default (new tag): 0.0\n\n");
-                eprintf("Sprite options (only applies to sprite bitmaps):\n");
-                eprintf("    --budget-count,-C <count>  Set maximum number of sprite sheets. Setting this\n");
-                eprintf("                               to 0 disables budgeting. Default (new tag): 0\n");
-                eprintf("    --budget,-B <length>       Set max length of sprite sheet. Can be 32, 64,\n");
-                eprintf("                               128, 256, or 512. Default (new tag): 32\n\n");
-
-                std::exit(EXIT_FAILURE);
+            case 'P':
+                bitmap_options.filesystem_path = true;
+                break;
         }
     });
 
-    // Make sure we have the bitmap tag path
-    if(remaining_arguments.size() == 0) {
-        eprintf("Expected a bitmap tag path. Use -h for help.\n");
-        return EXIT_FAILURE;
+    // See if we can figure out the bitmap tag using extensions
+    std::string bitmap_tag = remaining_arguments[0];
+    SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
+
+    if(bitmap_options.filesystem_path) {
+        std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
+        SupportedFormatsInt i;
+        for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+            auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
+            if(bitmap_tag_maybe.has_value()) {
+                bitmap_tag = bitmap_tag_maybe.value();
+                found_format = i;
+                break;
+            }
+        }
+        if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
+            eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
+            return EXIT_FAILURE;
+        }
     }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return EXIT_FAILURE;
-    }
-    std::string bitmap_tag = argv[argc - 1];
 
     // Ensure it's lowercase
     for(char &c : bitmap_tag) {
         if(c >= 'A' && c <= 'Z') {
-            eprintf("Invalid tag path %s. Tag paths must be lowercase.\n", bitmap_tag.data());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", bitmap_tag.c_str());
             return EXIT_FAILURE;
         }
     }
 
     std::filesystem::path data_path = bitmap_options.data;
 
-    // Get the path
+    // Check if the tags directory exists
     std::filesystem::path tags_path(bitmap_options.tags);
+    if(!std::filesystem::is_directory(tags_path)) {
+        if(std::strcmp(bitmap_options.tags, "tags") == 0) {
+            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
+        }
+        else {
+            eprintf_error("Directory %s was not found or is not a directory", bitmap_options.tags);
+        }
+        return EXIT_FAILURE;
+    }
+
     auto tag_path = tags_path / bitmap_tag;
     auto final_path = tag_path.string() + ".bitmap";
 
     // See if we can get anything out of this
     std::FILE *tag_read;
-    if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.data(), "rb"))) {
+    if(!bitmap_options.ignore_tag_data && (tag_read = std::fopen(final_path.c_str(), "rb"))) {
         // Here's in case we do fail. It cleans up and exits.
         auto exit_on_failure = [&tag_read, &final_path]() {
-            eprintf("%s could not be read.\n", final_path.data());
+            eprintf_error("%s could not be read.", final_path.c_str());
             eprintf("Use --ignore-tag or -I to override.\n");
             std::fclose(tag_read);
             exit(EXIT_FAILURE);
@@ -454,7 +442,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
     DEFAULT_VALUE(bitmap_options.palettize,false);
-    DEFAULT_VALUE(bitmap_options.bump_height,0.02F);
+    DEFAULT_VALUE(bitmap_options.bump_height,0.026F);
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
     DEFAULT_VALUE(bitmap_options.dither_red,false);
@@ -468,21 +456,22 @@ int main(int argc, char *argv[]) {
     std::size_t image_size = 0;
     ColorPlatePixel *image_pixels = nullptr;
 
-    // Load the bitmap file
-    for(auto i = SUPPORTED_FORMATS_TIF; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SUPPORTED_FORMATS_INT>(i + 1)) {
-        std::string image_path = (data_path / (bitmap_tag + SUPPORTED_FORMATS[i])).string();
+    // Try to figure out the extension
+    auto bitmap_data_path = (data_path / bitmap_tag).string();
+    for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+        std::string image_path = bitmap_data_path + SUPPORTED_FORMATS[i];
         if(std::filesystem::exists(image_path)) {
             switch(i) {
                 case SUPPORTED_FORMATS_TIF:
                 case SUPPORTED_FORMATS_TIFF:
-                    image_pixels = load_tiff(image_path.data(), image_width, image_height, image_size);
+                    image_pixels = load_tiff(image_path.c_str(), image_width, image_height, image_size);
                     break;
                 case SUPPORTED_FORMATS_PNG:
                 case SUPPORTED_FORMATS_TGA:
                 case SUPPORTED_FORMATS_BMP:
-                    image_pixels = load_image(image_path.data(), image_width, image_height, image_size);
+                    image_pixels = load_image(image_path.c_str(), image_width, image_height, image_size);
                     break;
-                case SUPPORTED_FORMATS_INT_COUNT:
+                default:
                     std::terminate();
                     break;
             }
@@ -491,7 +480,8 @@ int main(int argc, char *argv[]) {
     }
 
     if(image_pixels == nullptr) {
-        eprintf("Failed to find %s in %s\nValid formats are:\n", bitmap_tag.data(), bitmap_options.data);
+        eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
+        eprintf("Valid formats are:\n");
         for(auto *format : SUPPORTED_FORMATS) {
             eprintf("    %s\n", format);
         }
@@ -509,7 +499,17 @@ int main(int argc, char *argv[]) {
     }
 
     // Do it!
-    auto scanned_color_plate = ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+    auto try_to_scan_color_plate = [&image_pixels, &image_width, &image_height, &bitmap_options, &sprite_parameters]() {
+        try {
+            return ColorPlateScanner::scan_color_plate(reinterpret_cast<const ColorPlatePixel *>(image_pixels), image_width, image_height, bitmap_options.bitmap_type.value(), bitmap_options.usage.value(), bitmap_options.bump_height.value(), sprite_parameters, bitmap_options.max_mipmap_count.value(), bitmap_options.mipmap_scale_type.value(), bitmap_options.usage == BitmapUsage::BITMAP_USAGE_DETAIL_MAP ? bitmap_options.mipmap_fade : std::nullopt, bitmap_options.sharpen, bitmap_options.blur);
+        }
+        catch (std::exception &e) {
+            eprintf_error("Failed to process the image: %s", e.what());
+            std::exit(1);
+        };
+    };
+
+    auto scanned_color_plate = try_to_scan_color_plate();
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
@@ -557,9 +557,15 @@ int main(int argc, char *argv[]) {
     #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
     // Add our bitmap data
-    printf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
-    write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
-    std::printf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
+    oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
+    try {
+        write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
+    }
+    catch (std::exception &e) {
+        eprintf_error("Failed to generate bitmap data: %s", e.what());
+        std::exit(1);
+    }
+    oprintf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
 
     // Add the bitmap pixel data
     bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());
@@ -663,14 +669,14 @@ int main(int argc, char *argv[]) {
 
     // Write it all
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *tag_write = std::fopen(final_path.data(), "wb");
+    std::FILE *tag_write = std::fopen(final_path.c_str(), "wb");
     if(!tag_write) {
-        eprintf("Error: Failed to open %s for writing.\n", final_path.data());;
+        eprintf_error("Error: Failed to open %s for writing.", final_path.c_str());
         return EXIT_FAILURE;
     }
 
     if(std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, tag_write) != 1) {
-        eprintf("Error: Failed to write to %s.\n", final_path.data());
+        eprintf_error("Error: Failed to write to %s.", final_path.c_str());
         std::fclose(tag_write);
         return EXIT_FAILURE;
     }

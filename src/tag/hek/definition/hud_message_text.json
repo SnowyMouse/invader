@@ -1,0 +1,80 @@
+[
+    {
+        "name": "HUDMessageTextElement",
+        "fields": [
+            {
+                "name": "type",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "data",
+                "type": "int8",
+                "endian": null
+            }
+        ],
+        "type": "struct",
+        "size": 2
+    },
+    {
+        "name": "HUDMessageTextMessage",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "start index into text blob",
+                "type": "Index"
+            },
+            {
+                "name": "start index of message block",
+                "type": "Index"
+            },
+            {
+                "name": "panel count",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 3
+            },
+            {
+                "type": "pad",
+                "size": 24
+            }
+        ],
+        "type": "struct",
+        "size": 64
+    },
+    {
+        "name": "HUDMessageText",
+        "fields": [
+            {
+                "name": "text data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "message elements",
+                "type": "TagReflexive",
+                "struct": "HUDMessageTextElement",
+                "compound": true
+            },
+            {
+                "name": "messages",
+                "type": "TagReflexive",
+                "struct": "HUDMessageTextMessage",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 84
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    }
+]

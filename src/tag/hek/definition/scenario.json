@@ -1,0 +1,3293 @@
+[
+    {
+        "name": "ScenarioSpawnType",
+        "options": [
+            "none",
+            "ctf",
+            "slayer",
+            "oddball",
+            "king of the hill",
+            "race",
+            "terminator",
+            "stub",
+            "ignored1",
+            "ignored2",
+            "ignored3",
+            "ignored4",
+            "all games",
+            "all except ctf",
+            "all except race ctf"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioNetgameFlagType",
+        "options": [
+            "ctf flag",
+            "ctf vehicle",
+            "oddball ball spawn",
+            "race track",
+            "race vehicle",
+            "vegas bank",
+            "teleport from",
+            "teleport to",
+            "hill flag"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioReturnState",
+        "options": [
+            "none",
+            "sleeping",
+            "alert",
+            "moving repeat same position",
+            "moving loop",
+            "moving loop back and forth",
+            "moving loop randomly",
+            "moving randomly",
+            "guarding",
+            "guarding at guard position",
+            "searching",
+            "fleeing"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioUniqueLeaderType",
+        "options": [
+            "normal",
+            "none",
+            "random",
+            "sgt johnson",
+            "sgt lehto"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioMajorUpgrade",
+        "options": [
+            "normal",
+            "few",
+            "many",
+            "none",
+            "all"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioChangeAttackingDefendingStateWhen",
+        "options": [
+            "never",
+            "75 strength",
+            "50 strength",
+            "25 strength",
+            "anybody dead",
+            "25 dead",
+            "50 dead",
+            "75 dead",
+            "all but one dead",
+            "all dead"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioGroupIndex",
+        "options": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioTeamIndex",
+        "options": [
+            "0 default by unit",
+            "1 player",
+            "2 human",
+            "3 covenant",
+            "4 flood",
+            "5 sentinel",
+            "6 unused6",
+            "7 unused7",
+            "8 unused8",
+            "9 unused9"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioSearchBehavior",
+        "options": [
+            "normal",
+            "never",
+            "tenacious"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioAtomType",
+        "options": [
+            "pause",
+            "go to",
+            "go to and face",
+            "move in direction",
+            "look",
+            "animation mode",
+            "crouch",
+            "shoot",
+            "grenade",
+            "vehicle",
+            "running jump",
+            "targeted jump",
+            "script",
+            "animate",
+            "recording",
+            "action",
+            "vocalize",
+            "targeting",
+            "initiative",
+            "wait",
+            "loop",
+            "die",
+            "move immediate",
+            "look random",
+            "look player",
+            "look object",
+            "set radius",
+            "teleport"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioSelectionType",
+        "options": [
+            "friendly actor",
+            "disembodied",
+            "in player s vehicle",
+            "not in a vehicle",
+            "prefer sergeant",
+            "any actor",
+            "radio unit",
+            "radio sergeant"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioAddressee",
+        "options": [
+            "none",
+            "player",
+            "participant"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioScriptType",
+        "options": [
+            "startup",
+            "dormant",
+            "continuous",
+            "static",
+            "stub"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioScriptValueType",
+        "options": [
+            "unparsed",
+            "special form",
+            "function name",
+            "passthrough",
+            "void",
+            "boolean",
+            "real",
+            "short",
+            "long",
+            "string",
+            "script",
+            "trigger volume",
+            "cutscene flag",
+            "cutscene camera point",
+            "cutscene title",
+            "cutscene recording",
+            "device group",
+            "ai",
+            "ai command list",
+            "starting profile",
+            "conversation",
+            "navpoint",
+            "hud message",
+            "object list",
+            "sound",
+            "effect",
+            "damage",
+            "looping sound",
+            "animation graph",
+            "actor variant",
+            "damage effect",
+            "object definition",
+            "game difficulty",
+            "team",
+            "ai default state",
+            "actor type",
+            "hud corner",
+            "object",
+            "unit",
+            "vehicle",
+            "weapon",
+            "device",
+            "scenery",
+            "object name",
+            "unit name",
+            "vehicle name",
+            "weapon name",
+            "device name",
+            "scenery name"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioTextStyle",
+        "options": [
+            "plain",
+            "bold",
+            "italic",
+            "condense",
+            "underline"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioJustification",
+        "options": [
+            "left",
+            "right",
+            "center"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ScenarioFunctionFlags",
+        "type": "bitfield",
+        "fields": [
+            "scripted",
+            "invert",
+            "additive",
+            "always active"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioSpawnNotPlaced",
+        "type": "bitfield",
+        "fields": [
+            "automatically",
+            "on easy",
+            "on normal",
+            "on hard"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioUnitFlags",
+        "type": "bitfield",
+        "fields": [
+            "dead"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioVehicleMultiplayerSpawnFlags",
+        "type": "bitfield",
+        "fields": [
+            "slayer default",
+            "ctf default",
+            "king default",
+            "oddball default",
+            "unused",
+            "unused 1",
+            "unused 2",
+            "unused 3",
+            "slayer allowed",
+            "ctf allowed",
+            "king allowed",
+            "oddball allowed",
+            "unused 4",
+            "unused 5",
+            "unused 6",
+            "unused 7"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioItemFlags",
+        "type": "bitfield",
+        "fields": [
+            "initially at rest",
+            "obsolete",
+            "does accelerate"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioDeviceGroupFlags",
+        "type": "bitfield",
+        "fields": [
+            "can change only once"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioDeviceFlags",
+        "type": "bitfield",
+        "fields": [
+            "initially open",
+            "initially off",
+            "can change only once",
+            "position reversed",
+            "not usable from any side"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioMachineFlags",
+        "type": "bitfield",
+        "fields": [
+            "does not operate automatically",
+            "one sided",
+            "never appears locked",
+            "opened by melee attack"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioControlFlags",
+        "type": "bitfield",
+        "fields": [
+            "usable from both sides"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioNetgameEquipmentFlags",
+        "type": "bitfield",
+        "fields": [
+            "levitate"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioStartingEquipmentFlags",
+        "type": "bitfield",
+        "fields": [
+            "no grenades",
+            "plasma grenades"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioActorStartingLocationFlags",
+        "type": "bitfield",
+        "fields": [
+            "required"
+        ],
+        "width": 8
+    },
+    {
+        "name": "ScenarioSquadFlags",
+        "type": "bitfield",
+        "fields": [
+            "unused",
+            "never search",
+            "start timer immediately",
+            "no timer delay forever",
+            "magic sight after timer",
+            "automatic migration"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioSquadAttacking",
+        "type": "bitfield",
+        "fields": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioPlatoonFlags",
+        "type": "bitfield",
+        "fields": [
+            "flee when maneuvering",
+            "say advancing when maneuver",
+            "start in defending state"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioEncounterFlags",
+        "type": "bitfield",
+        "fields": [
+            "not initially created",
+            "respawn enabled",
+            "initially blind",
+            "initially deaf",
+            "initially braindead",
+            "3d firing positions",
+            "manual bsp index specified"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioCommandListFlags",
+        "type": "bitfield",
+        "fields": [
+            "allow initiative",
+            "allow targeting",
+            "disable looking",
+            "disable communication",
+            "disable falling damage",
+            "manual bsp index"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ScenarioAIConversationParticipantFlags",
+        "type": "bitfield",
+        "fields": [
+            "optional",
+            "has alternate",
+            "is alternate"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioAIConversationLineFlags",
+        "type": "bitfield",
+        "fields": [
+            "addressee look at speaker",
+            "everyone look at speaker",
+            "everyone look at addressee",
+            "wait after until told to advance",
+            "wait until speaker nearby",
+            "wait until everyone nearby"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioAIConversationFlags",
+        "type": "bitfield",
+        "fields": [
+            "stop if death",
+            "stop if damaged",
+            "stop if visible enemy",
+            "stop if alerted to enemy",
+            "player must be visible",
+            "stop other actions",
+            "keep trying to play",
+            "player must be looking"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioFlags",
+        "type": "bitfield",
+        "fields": [
+            "cortana hack",
+            "use demo ui"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioScriptNodeFlags",
+        "type": "bitfield",
+        "fields": [
+            "is primitive",
+            "is script call",
+            "is global",
+            "is garbage collectable"
+        ],
+        "width": 16
+    },
+    {
+        "name": "ScenarioSky",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "sky",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "sky"
+                ]
+            }
+        ],
+        "size": 16
+    },
+    {
+        "name": "ScenarioChildScenario",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "child_scenario",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "scenario"
+                ]
+            }
+        ],
+        "size": 16
+    },
+    {
+        "name": "ScenarioFunction",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ScenarioFunctionFlags"
+            },
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "period",
+                "type": "float"
+            },
+            {
+                "name": "scale period by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "scale function by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "wobble function",
+                "type": "WaveFunction"
+            },
+            {
+                "name": "wobble period",
+                "type": "float"
+            },
+            {
+                "name": "wobble magnitude",
+                "type": "float"
+            },
+            {
+                "name": "square wave threshold",
+                "type": "Fraction"
+            },
+            {
+                "name": "step count",
+                "type": "uint16"
+            },
+            {
+                "name": "map to",
+                "type": "FunctionType"
+            },
+            {
+                "name": "sawtooth count",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "scale result by",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "name": "bounds mode",
+                "type": "FunctionBoundsMode"
+            },
+            {
+                "name": "bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "turn off with",
+                "type": "FunctionScaleBy"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "size": 120
+    },
+    {
+        "name": "ScenarioEditorComment",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "comment",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 48
+    },
+    {
+        "name": "ScenarioObjectName",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "object type",
+                "type": "ObjectType",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "object index",
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
+            }
+        ],
+        "type": "struct",
+        "size": 36
+    },
+    {
+        "name": "SpawnPrelude",
+        "fields": [
+            {
+                "name": "type",
+                "type": "Index"
+            },
+            {
+                "name": "name",
+                "type": "Index"
+            },
+            {
+                "name": "not placed",
+                "type": "ScenarioSpawnNotPlaced"
+            },
+            {
+                "name": "desired permutation",
+                "type": "Index"
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "rotation",
+                "type": "Euler3D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ScenarioScenery",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 72
+    },
+    {
+        "name": "ScenarioSceneryPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "scenery"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioBiped",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "body vitality",
+                "type": "float"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioUnitFlags"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 120
+    },
+    {
+        "name": "ScenarioBipedPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "biped"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioVehicle",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "body vitality",
+                "type": "float"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioUnitFlags"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "multiplayer team index",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 1
+            },
+            {
+                "name": "multiplayer spawn flags",
+                "type": "ScenarioVehicleMultiplayerSpawnFlags"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 120
+    },
+    {
+        "name": "ScenarioVehiclePalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "vehicle"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioEquipment",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioItemFlags"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 40
+    },
+    {
+        "name": "ScenarioEquipmentPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "equipment"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioWeapon",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "rounds left",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds loaded",
+                "type": "uint16"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioItemFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 92
+    },
+    {
+        "name": "ScenarioWeaponPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "weapon"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioDeviceGroup",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "initial value",
+                "type": "float"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioDeviceGroupFlags"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "size": 52
+    },
+    {
+        "name": "ScenarioMachine",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "power group",
+                "type": "Index"
+            },
+            {
+                "name": "position group",
+                "type": "Index"
+            },
+            {
+                "name": "device flags",
+                "type": "ScenarioDeviceFlags"
+            },
+            {
+                "name": "machine flags",
+                "type": "ScenarioMachineFlags"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 64
+    },
+    {
+        "name": "ScenarioMachinePalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "device_machine"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioControl",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "power group",
+                "type": "Index"
+            },
+            {
+                "name": "position group",
+                "type": "Index"
+            },
+            {
+                "name": "device flags",
+                "type": "ScenarioDeviceFlags"
+            },
+            {
+                "name": "control flags",
+                "type": "ScenarioControlFlags"
+            },
+            {
+                "name": "no name",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 64
+    },
+    {
+        "name": "ScenarioControlPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "device_control"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioLightFixture",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "power group",
+                "type": "Index"
+            },
+            {
+                "name": "position group",
+                "type": "Index"
+            },
+            {
+                "name": "device flags",
+                "type": "ScenarioDeviceFlags"
+            },
+            {
+                "name": "color",
+                "type": "ColorRGB",
+                "compound": true
+            },
+            {
+                "name": "intensity",
+                "type": "float"
+            },
+            {
+                "name": "falloff angle",
+                "type": "Angle"
+            },
+            {
+                "name": "cutoff angle",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 88
+    },
+    {
+        "name": "ScenarioLightFixturePalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "device_light_fixture"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioSoundScenery",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "inherits": "SpawnPrelude",
+        "size": 40
+    },
+    {
+        "name": "ScenarioSoundSceneryPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "sound_scenery"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioPlayerStartingProfile",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "starting health modifier",
+                "type": "Fraction"
+            },
+            {
+                "name": "starting shield modifier",
+                "type": "Fraction"
+            },
+            {
+                "name": "primary weapon",
+                "type": "TagDependency",
+                "classes": [
+                    "weapon"
+                ],
+                "compound": true
+            },
+            {
+                "name": "rounds loaded",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds total",
+                "type": "uint16"
+            },
+            {
+                "name": "secondary weapon",
+                "type": "TagDependency",
+                "classes": [
+                    "weapon"
+                ],
+                "compound": true
+            },
+            {
+                "name": "rounds loaded 1",
+                "type": "uint16"
+            },
+            {
+                "name": "rounds total 1",
+                "type": "uint16"
+            },
+            {
+                "name": "starting fragmentation grenade count",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "starting plasma grenade count",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "starting custom 2 grenade count",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "starting custom 3 grenade count",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 20
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "ScenarioPlayerStartingLocation",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Angle"
+            },
+            {
+                "name": "team index",
+                "type": "Index"
+            },
+            {
+                "name": "bsp index",
+                "type": "Index"
+            },
+            {
+                "name": "type 0",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 1",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 2",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 3",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            }
+        ],
+        "type": "struct",
+        "size": 52
+    },
+    {
+        "name": "ScenarioTriggerVolume",
+        "fields": [
+            {
+                "name": "unknown",
+                "type": "uint16",
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "unknown values",
+                "type": "float",
+                "count": 9
+            },
+            {
+                "name": "corners",
+                "type": "Point3D",
+                "compound": true,
+                "count": 2
+            }
+        ],
+        "type": "struct",
+        "size": 96
+    },
+    {
+        "name": "ScenarioRecordedAnimation",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "version",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "raw animation data",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "unit control data version",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 1
+            },
+            {
+                "name": "length of animation",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "recorded animation event stream",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 64
+    },
+    {
+        "name": "ScenarioNetgameFlags",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Angle"
+            },
+            {
+                "name": "type",
+                "type": "ScenarioNetgameFlagType"
+            },
+            {
+                "name": "team index",
+                "type": "Index"
+            },
+            {
+                "name": "weapon group",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 112
+            }
+        ],
+        "type": "struct",
+        "size": 148
+    },
+    {
+        "name": "ScenarioNetgameEquipment",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ScenarioNetgameEquipmentFlags"
+            },
+            {
+                "name": "type 0",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 1",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 2",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 3",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "team index",
+                "type": "Index"
+            },
+            {
+                "name": "spawn time",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 48
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Angle"
+            },
+            {
+                "name": "item collection",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 48
+            }
+        ],
+        "type": "struct",
+        "size": 144
+    },
+    {
+        "name": "ScenarioStartingEquipment",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ScenarioStartingEquipmentFlags"
+            },
+            {
+                "name": "type 0",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 1",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 2",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "name": "type 3",
+                "type": "ScenarioSpawnType"
+            },
+            {
+                "type": "pad",
+                "size": 48
+            },
+            {
+                "name": "item collection 1",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "name": "item collection 2",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "name": "item collection 3",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "name": "item collection 4",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "name": "item collection 5",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "name": "item collection 6",
+                "type": "TagDependency",
+                "classes": [
+                    "item_collection"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 48
+            }
+        ],
+        "type": "struct",
+        "size": 204
+    },
+    {
+        "name": "ScenarioBSPSwitchTriggerVolume",
+        "fields": [
+            {
+                "name": "trigger volume",
+                "type": "Index"
+            },
+            {
+                "name": "source",
+                "type": "Index"
+            },
+            {
+                "name": "destination",
+                "type": "Index"
+            },
+            {
+                "name": "unknown",
+                "type": "uint16",
+                "endian": "little"
+            }
+        ],
+        "type": "struct",
+        "size": 8
+    },
+    {
+        "name": "ScenarioDecal",
+        "fields": [
+            {
+                "name": "decal type",
+                "type": "Index"
+            },
+            {
+                "name": "yaw",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "pitch",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 16
+    },
+    {
+        "name": "ScenarioDecalPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "reference",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "decal"
+                ]
+            }
+        ],
+        "size": 16
+    },
+    {
+        "name": "ScenarioDetailObjectCollectionPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "reference",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "detail_object_collection"
+                ]
+            },
+            {
+                "type": "pad",
+                "size": 32
+            }
+        ],
+        "size": 48
+    },
+    {
+        "name": "ScenarioActorPalette",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "reference",
+                "type": "TagDependency",
+                "compound": true,
+                "classes": [
+                    "actor_variant"
+                ]
+            }
+        ],
+        "size": 16
+    },
+    {
+        "name": "ScenarioMovePosition",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Angle"
+            },
+            {
+                "name": "weight",
+                "type": "float"
+            },
+            {
+                "name": "time",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "animation",
+                "type": "Index"
+            },
+            {
+                "name": "sequence id",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 1
+            },
+            {
+                "type": "pad",
+                "size": 44
+            },
+            {
+                "name": "surface index",
+                "type": "uint32"
+            }
+        ],
+        "type": "struct",
+        "size": 80
+    },
+    {
+        "name": "ScenarioActorStartingLocation",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Angle"
+            },
+            {
+                "name": "unknown",
+                "type": "uint16"
+            },
+            {
+                "name": "sequence id",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioActorStartingLocationFlags"
+            },
+            {
+                "name": "return state",
+                "type": "ScenarioReturnState"
+            },
+            {
+                "name": "initial state",
+                "type": "ScenarioReturnState"
+            },
+            {
+                "name": "actor type",
+                "type": "Index"
+            },
+            {
+                "name": "command list",
+                "type": "Index"
+            }
+        ],
+        "type": "struct",
+        "size": 28
+    },
+    {
+        "name": "ScenarioSquad",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "actor type",
+                "type": "Index"
+            },
+            {
+                "name": "platoon",
+                "type": "Index"
+            },
+            {
+                "name": "Tinitial state",
+                "type": "ScenarioReturnState"
+            },
+            {
+                "name": "Treturn state",
+                "type": "ScenarioReturnState"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioSquadFlags"
+            },
+            {
+                "name": "unique leader type",
+                "type": "ScenarioUniqueLeaderType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 28
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "maneuver to squad",
+                "type": "Index"
+            },
+            {
+                "name": "squad delay time",
+                "type": "float"
+            },
+            {
+                "name": "attacking",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "attacking search",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "attacking guard",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "defending",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "defending search",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "defending guard",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "name": "pursuing",
+                "type": "ScenarioSquadAttacking"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "normal diff count",
+                "type": "uint16"
+            },
+            {
+                "name": "insane diff count",
+                "type": "uint16"
+            },
+            {
+                "name": "major upgrade",
+                "type": "ScenarioMajorUpgrade"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "respawn min actors",
+                "type": "uint16"
+            },
+            {
+                "name": "respawn max actors",
+                "type": "uint16"
+            },
+            {
+                "name": "respawn total",
+                "type": "uint16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "respawn delay",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 48
+            },
+            {
+                "name": "move positions",
+                "type": "TagReflexive",
+                "struct": "ScenarioMovePosition",
+                "compound": true
+            },
+            {
+                "name": "starting locations",
+                "type": "TagReflexive",
+                "struct": "ScenarioActorStartingLocation",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "size": 232
+    },
+    {
+        "name": "ScenarioPlatoon",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioPlatoonFlags"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "change attacking defending state when",
+                "type": "ScenarioChangeAttackingDefendingStateWhen"
+            },
+            {
+                "name": "happens to",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "maneuver when",
+                "type": "ScenarioChangeAttackingDefendingStateWhen"
+            },
+            {
+                "name": "happens to 1",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 64
+            },
+            {
+                "type": "pad",
+                "size": 36
+            }
+        ],
+        "type": "struct",
+        "size": 172
+    },
+    {
+        "name": "ScenarioFiringPosition",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "group index",
+                "type": "ScenarioGroupIndex"
+            },
+            {
+                "name": "cluster index",
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "surface index",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            }
+        ],
+        "type": "struct",
+        "size": 24
+    },
+    {
+        "name": "ScenarioEncounter",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioEncounterFlags"
+            },
+            {
+                "name": "team index",
+                "type": "ScenarioTeamIndex"
+            },
+            {
+                "name": "one",
+                "type": "int16",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "search behavior",
+                "type": "ScenarioSearchBehavior"
+            },
+            {
+                "name": "manual bsp index",
+                "type": "Index"
+            },
+            {
+                "name": "respawn delay",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 74
+            },
+            {
+                "name": "precomputed bsp index",
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "squads",
+                "type": "TagReflexive",
+                "struct": "ScenarioSquad",
+                "compound": true
+            },
+            {
+                "name": "platoons",
+                "type": "TagReflexive",
+                "struct": "ScenarioPlatoon",
+                "compound": true
+            },
+            {
+                "name": "firing positions",
+                "type": "TagReflexive",
+                "struct": "ScenarioFiringPosition",
+                "compound": true
+            },
+            {
+                "name": "player starting locations",
+                "type": "TagReflexive",
+                "struct": "ScenarioPlayerStartingLocation",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 176
+    },
+    {
+        "name": "ScenarioCommand",
+        "fields": [
+            {
+                "name": "atom type",
+                "type": "ScenarioAtomType"
+            },
+            {
+                "name": "atom modifier",
+                "type": "int16"
+            },
+            {
+                "name": "parameter1",
+                "type": "float"
+            },
+            {
+                "name": "parameter2",
+                "type": "float"
+            },
+            {
+                "name": "point 1",
+                "type": "Index"
+            },
+            {
+                "name": "point 2",
+                "type": "Index"
+            },
+            {
+                "name": "animation",
+                "type": "Index"
+            },
+            {
+                "name": "script",
+                "type": "Index"
+            },
+            {
+                "name": "recording",
+                "type": "Index"
+            },
+            {
+                "name": "command",
+                "type": "Index"
+            },
+            {
+                "name": "object name",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 6
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ScenarioCommandPoint",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "ScenarioCommandList",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioCommandListFlags"
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "name": "manual bsp index",
+                "type": "Index"
+            },
+            {
+                "name": "precomputed bsp index",
+                "type": "Index"
+            },
+            {
+                "name": "commands",
+                "type": "TagReflexive",
+                "struct": "ScenarioCommand",
+                "compound": true
+            },
+            {
+                "name": "points",
+                "type": "TagReflexive",
+                "struct": "ScenarioCommandPoint",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            }
+        ],
+        "type": "struct",
+        "size": 96
+    },
+    {
+        "name": "ScenarioAIAnimationReference",
+        "fields": [
+            {
+                "name": "animation name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "animation graph",
+                "type": "TagDependency",
+                "classes": [
+                    "model_animations"
+                ],
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "size": 60
+    },
+    {
+        "name": "ScenarioAIScriptReference",
+        "fields": [
+            {
+                "name": "script name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 40
+    },
+    {
+        "name": "ScenarioAIRecordingReference",
+        "fields": [
+            {
+                "name": "recording name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 8
+            }
+        ],
+        "type": "struct",
+        "size": 40
+    },
+    {
+        "name": "ScenarioAIConversationParticipant",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioAIConversationParticipantFlags"
+            },
+            {
+                "name": "selection type",
+                "type": "ScenarioSelectionType"
+            },
+            {
+                "name": "actor type",
+                "type": "ActorType"
+            },
+            {
+                "name": "use this object",
+                "type": "int16"
+            },
+            {
+                "name": "set new name",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "encounter name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "size": 84
+    },
+    {
+        "name": "ScenarioAIConversationLine",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ScenarioAIConversationLineFlags"
+            },
+            {
+                "name": "participant",
+                "type": "Index"
+            },
+            {
+                "name": "addressee",
+                "type": "ScenarioAddressee"
+            },
+            {
+                "name": "addressee participant",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "line delay time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "variant 1",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "variant 2",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "variant 3",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "variant 4",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "variant 5",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "variant 6",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 124
+    },
+    {
+        "name": "ScenarioAIConversation",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioAIConversationFlags"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "trigger distance",
+                "type": "float"
+            },
+            {
+                "name": "run to player dist",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 36
+            },
+            {
+                "name": "participants",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIConversationParticipant",
+                "compound": true
+            },
+            {
+                "name": "lines",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIConversationLine",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "size": 116
+    },
+    {
+        "name": "ScenarioScript",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "script type",
+                "type": "ScenarioScriptType"
+            },
+            {
+                "name": "return type",
+                "type": "ScenarioScriptValueType"
+            },
+            {
+                "name": "root expression index",
+                "type": "int32"
+            },
+            {
+                "type": "pad",
+                "size": 52
+            }
+        ],
+        "type": "struct",
+        "size": 92
+    },
+    {
+        "name": "ScenarioGlobal",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "type",
+                "type": "ScenarioScriptValueType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "initialization expression index",
+                "type": "int32"
+            },
+            {
+                "type": "pad",
+                "size": 48
+            }
+        ],
+        "type": "struct",
+        "size": 92
+    },
+    {
+        "name": "ScenarioReference",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "reference",
+                "type": "TagDependency",
+                "classes": [],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 40
+    },
+    {
+        "name": "ScenarioSourceFile",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "source",
+                "type": "TagDataOffset",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 52
+    },
+    {
+        "name": "ScenarioCutsceneFlag",
+        "fields": [
+            {
+                "name": "unknown",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "facing",
+                "type": "Euler2D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 36
+            }
+        ],
+        "type": "struct",
+        "size": 92
+    },
+    {
+        "name": "ScenarioCutsceneCameraPoint",
+        "fields": [
+            {
+                "name": "unknown",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "orientation",
+                "type": "Euler3D",
+                "compound": true
+            },
+            {
+                "name": "field of view",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 36
+            }
+        ],
+        "type": "struct",
+        "size": 104
+    },
+    {
+        "name": "ScenarioCutsceneTitle",
+        "fields": [
+            {
+                "name": "unknown",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "text bounds",
+                "type": "Rectangle2D",
+                "compound": true
+            },
+            {
+                "name": "string index",
+                "type": "Index"
+            },
+            {
+                "name": "text style",
+                "type": "ScenarioTextStyle"
+            },
+            {
+                "name": "justification",
+                "type": "ScenarioJustification"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "text color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "shadow color",
+                "type": "ColorARGBInt"
+            },
+            {
+                "name": "fade in time",
+                "type": "float"
+            },
+            {
+                "name": "up time",
+                "type": "float"
+            },
+            {
+                "name": "fade out time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "post_cache_deformat": true,
+        "size": 96
+    },
+    {
+        "name": "ScenarioBSP",
+        "fields": [
+            {
+                "name": "bsp start",
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
+            },
+            {
+                "name": "bsp size",
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
+            },
+            {
+                "name": "bsp address",
+                "endian": "little",
+                "cache_only": true,
+                "type": "uint32"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "structure bsp",
+                "type": "TagDependency",
+                "classes": [
+                    "scenario_structure_bsp"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 32
+    },
+    {
+        "name": "ScenarioScriptNode",
+        "fields": [
+            {
+                "name": "salt",
+                "type": "uint16"
+            },
+            {
+                "name": "index union",
+                "type": "uint16"
+            },
+            {
+                "name": "type",
+                "type": "ScenarioScriptValueType"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioScriptNodeFlags"
+            },
+            {
+                "name": "next node",
+                "type": "uint32"
+            },
+            {
+                "name": "string offset",
+                "type": "uint32"
+            },
+            {
+                "name": "data",
+                "type": "ScenarioScriptNodeValue"
+            }
+        ],
+        "type": "struct",
+        "size": 20
+    },
+    {
+        "name": "ScenarioScriptNodeTable",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "maximum count",
+                "type": "uint16"
+            },
+            {
+                "name": "element size",
+                "type": "uint16"
+            },
+            {
+                "name": "one",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 3
+            },
+            {
+                "name": "data",
+                "type": "uint32"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "size",
+                "type": "uint16"
+            },
+            {
+                "name": "count",
+                "type": "uint16"
+            },
+            {
+                "name": "next id",
+                "type": "uint16"
+            },
+            {
+                "name": "first element ptr",
+                "type": "uint32"
+            }
+        ],
+        "type": "struct",
+        "size": 56
+    },
+    {
+        "name": "Scenario",
+        "fields": [
+            {
+                "name": "don't use",
+                "type": "TagDependency",
+                "classes": [
+                    "scenario_structure_bsp"
+                ],
+                "compound": true
+            },
+            {
+                "name": "won't use",
+                "type": "TagDependency",
+                "classes": [
+                    "scenario_structure_bsp"
+                ],
+                "compound": true
+            },
+            {
+                "name": "can't use",
+                "type": "TagDependency",
+                "classes": [
+                    "sky"
+                ],
+                "compound": true
+            },
+            {
+                "name": "skies",
+                "type": "TagReflexive",
+                "struct": "ScenarioSky",
+                "compound": true
+            },
+            {
+                "name": "type",
+                "type": "ScenarioType"
+            },
+            {
+                "name": "flags",
+                "type": "ScenarioFlags"
+            },
+            {
+                "name": "child scenarios",
+                "type": "TagReflexive",
+                "struct": "ScenarioChildScenario",
+                "compound": true,
+                "ignore_cached": true
+            },
+            {
+                "name": "local north",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "type": "pad",
+                "size": 136
+            },
+            {
+                "name": "predicted resources",
+                "type": "TagReflexive",
+                "struct": "PredictedResource",
+                "compound": true
+            },
+            {
+                "name": "functions",
+                "type": "TagReflexive",
+                "struct": "ScenarioFunction",
+                "compound": true
+            },
+            {
+                "name": "editor scenario data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "comments",
+                "type": "TagReflexive",
+                "struct": "ScenarioEditorComment",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 224
+            },
+            {
+                "name": "object names",
+                "type": "TagReflexive",
+                "struct": "ScenarioObjectName",
+                "compound": true
+            },
+            {
+                "name": "scenery",
+                "type": "TagReflexive",
+                "struct": "ScenarioScenery",
+                "compound": true
+            },
+            {
+                "name": "scenery palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioSceneryPalette",
+                "compound": true
+            },
+            {
+                "name": "bipeds",
+                "type": "TagReflexive",
+                "struct": "ScenarioBiped",
+                "compound": true
+            },
+            {
+                "name": "biped palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioBipedPalette",
+                "compound": true
+            },
+            {
+                "name": "vehicles",
+                "type": "TagReflexive",
+                "struct": "ScenarioVehicle",
+                "compound": true
+            },
+            {
+                "name": "vehicle palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioVehiclePalette",
+                "compound": true
+            },
+            {
+                "name": "equipment",
+                "type": "TagReflexive",
+                "struct": "ScenarioEquipment",
+                "compound": true
+            },
+            {
+                "name": "equipment palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioEquipmentPalette",
+                "compound": true
+            },
+            {
+                "name": "weapons",
+                "type": "TagReflexive",
+                "struct": "ScenarioWeapon",
+                "compound": true
+            },
+            {
+                "name": "weapon palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioWeaponPalette",
+                "compound": true
+            },
+            {
+                "name": "device groups",
+                "type": "TagReflexive",
+                "struct": "ScenarioDeviceGroup",
+                "compound": true
+            },
+            {
+                "name": "machines",
+                "type": "TagReflexive",
+                "struct": "ScenarioMachine",
+                "compound": true
+            },
+            {
+                "name": "machine palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioMachinePalette",
+                "compound": true
+            },
+            {
+                "name": "controls",
+                "type": "TagReflexive",
+                "struct": "ScenarioControl",
+                "compound": true
+            },
+            {
+                "name": "control palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioControlPalette",
+                "compound": true
+            },
+            {
+                "name": "light fixtures",
+                "type": "TagReflexive",
+                "struct": "ScenarioLightFixture",
+                "compound": true
+            },
+            {
+                "name": "light fixture palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioLightFixturePalette",
+                "compound": true
+            },
+            {
+                "name": "sound scenery",
+                "type": "TagReflexive",
+                "struct": "ScenarioSoundScenery",
+                "compound": true
+            },
+            {
+                "name": "sound scenery palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioSoundSceneryPalette",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 84
+            },
+            {
+                "name": "player starting profile",
+                "type": "TagReflexive",
+                "struct": "ScenarioPlayerStartingProfile",
+                "compound": true
+            },
+            {
+                "name": "player starting locations",
+                "type": "TagReflexive",
+                "struct": "ScenarioPlayerStartingLocation",
+                "compound": true
+            },
+            {
+                "name": "trigger volumes",
+                "type": "TagReflexive",
+                "struct": "ScenarioTriggerVolume",
+                "compound": true
+            },
+            {
+                "name": "recorded animations",
+                "type": "TagReflexive",
+                "struct": "ScenarioRecordedAnimation",
+                "compound": true
+            },
+            {
+                "name": "netgame flags",
+                "type": "TagReflexive",
+                "struct": "ScenarioNetgameFlags",
+                "compound": true
+            },
+            {
+                "name": "netgame equipment",
+                "type": "TagReflexive",
+                "struct": "ScenarioNetgameEquipment",
+                "compound": true
+            },
+            {
+                "name": "starting equipment",
+                "type": "TagReflexive",
+                "struct": "ScenarioStartingEquipment",
+                "compound": true
+            },
+            {
+                "name": "bsp switch trigger volumes",
+                "type": "TagReflexive",
+                "struct": "ScenarioBSPSwitchTriggerVolume",
+                "compound": true,
+                "cache_only": true
+            },
+            {
+                "name": "decals",
+                "type": "TagReflexive",
+                "struct": "ScenarioDecal",
+                "compound": true
+            },
+            {
+                "name": "decal palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioDecalPalette",
+                "compound": true
+            },
+            {
+                "name": "detail object collection palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioDetailObjectCollectionPalette",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 84
+            },
+            {
+                "name": "actor palette",
+                "type": "TagReflexive",
+                "struct": "ScenarioActorPalette",
+                "compound": true
+            },
+            {
+                "name": "encounters",
+                "type": "TagReflexive",
+                "struct": "ScenarioEncounter",
+                "compound": true
+            },
+            {
+                "name": "command lists",
+                "type": "TagReflexive",
+                "struct": "ScenarioCommandList",
+                "compound": true
+            },
+            {
+                "name": "ai animation references",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIAnimationReference",
+                "compound": true
+            },
+            {
+                "name": "ai script references",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIScriptReference",
+                "compound": true
+            },
+            {
+                "name": "ai recording references",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIRecordingReference",
+                "compound": true
+            },
+            {
+                "name": "ai conversations",
+                "type": "TagReflexive",
+                "struct": "ScenarioAIConversation",
+                "compound": true
+            },
+            {
+                "name": "script syntax data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "script string data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "name": "scripts",
+                "type": "TagReflexive",
+                "struct": "ScenarioScript",
+                "compound": true
+            },
+            {
+                "name": "globals",
+                "type": "TagReflexive",
+                "struct": "ScenarioGlobal",
+                "compound": true
+            },
+            {
+                "name": "references",
+                "type": "TagReflexive",
+                "struct": "ScenarioReference",
+                "compound": true,
+                "cache_only": true
+            },
+            {
+                "name": "source files",
+                "type": "TagReflexive",
+                "struct": "ScenarioSourceFile",
+                "compound": true,
+                "non_cached": true
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "cutscene flags",
+                "type": "TagReflexive",
+                "struct": "ScenarioCutsceneFlag",
+                "compound": true
+            },
+            {
+                "name": "cutscene camera points",
+                "type": "TagReflexive",
+                "struct": "ScenarioCutsceneCameraPoint",
+                "compound": true
+            },
+            {
+                "name": "cutscene titles",
+                "type": "TagReflexive",
+                "struct": "ScenarioCutsceneTitle",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 108
+            },
+            {
+                "name": "custom object names",
+                "type": "TagDependency",
+                "classes": [
+                    "unicode_string"
+                ],
+                "compound": true
+            },
+            {
+                "name": "ingame help text",
+                "type": "TagDependency",
+                "classes": [
+                    "unicode_string"
+                ],
+                "compound": true
+            },
+            {
+                "name": "hud messages",
+                "type": "TagDependency",
+                "classes": [
+                    "hud_messages"
+                ],
+                "compound": true
+            },
+            {
+                "name": "structure bsps",
+                "type": "TagReflexive",
+                "struct": "ScenarioBSP",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "post_cache_deformat": true,
+        "size": 1456
+    }
+]

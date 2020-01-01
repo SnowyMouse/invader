@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "font.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_font_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -66,6 +66,8 @@ namespace Invader::HEK {
         std::size_t pixels_size = tag.pixels.size;
         compiled.data.insert(compiled.data.end(), data, data + pixels_size);
         INCREMENT_DATA_PTR(pixels_size);
+        tag.pixels.external = 0;
+        tag.pixels.file_offset = 0;
 
         PAD_32_BIT
 

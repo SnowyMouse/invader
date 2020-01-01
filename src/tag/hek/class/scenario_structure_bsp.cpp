@@ -1,37 +1,38 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-#include "scenario_structure_bsp.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
+#include "compile.hpp"
 
 namespace Invader::HEK {
     void compile_scenario_structure_bsp_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         // Allocate data for the header
-        compiled.data.insert(compiled.data.end(), sizeof(ScenarioStructureBSPCompiledHeader), std::byte());
+        compiled.data.insert(compiled.data.end(), sizeof(ScenarioStructureBSPCompiledHeader<LittleEndian>), std::byte());
 
         // Initialize the header
-        ScenarioStructureBSPCompiledHeader header = {};
+        ScenarioStructureBSPCompiledHeader<LittleEndian> header = {};
         header.signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
 
-        compiled.pointers.emplace_back(CompiledTagPointer { 0x0, sizeof(ScenarioStructureBSPCompiledHeader) });
+        compiled.pointers.emplace_back(CompiledTagPointer { 0x0, sizeof(ScenarioStructureBSPCompiledHeader<LittleEndian>) });
 
         BEGIN_COMPILE(ScenarioStructureBSP)
 
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps);
+        ADD_DEPENDENCY_ADJUST_SIZES(tag.lightmaps_bitmap);
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.collision_materials, shader);
         ADD_MODEL_COLLISION_BSP(tag.collision_bsp); // Add collision BSP (same as the model_collision_geometry collsion BSP)
         ADD_REFLEXIVE(tag.nodes);
         ADD_REFLEXIVE(tag.leaves);
         ADD_REFLEXIVE(tag.leaf_surfaces);
         ADD_REFLEXIVE(tag.surfaces);
-        ADD_REFLEXIVE_START(tag.lightmaps_1) {
+        ADD_REFLEXIVE_START(tag.lightmaps) {
             ADD_REFLEXIVE_START(reflexive.materials) {
                 ADD_DEPENDENCY_ADJUST_SIZES(reflexive.shader);
 
                 std::size_t uncompressed_vertices_size = reflexive.uncompressed_vertices.size;
                 ASSERT_SIZE(uncompressed_vertices_size);
 
-                std::size_t rendered_vertex_count = reflexive.rendered_vertices.count;
-                std::size_t lightmap_vertex_count = reflexive.lightmap_vertices.count;
+                std::size_t rendered_vertex_count = reflexive.rendered_vertices_count;
+                std::size_t lightmap_vertex_count = reflexive.lightmap_vertices_count;
 
                 std::size_t total_uncompressed_vertex_size = rendered_vertex_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex<LittleEndian>) + lightmap_vertex_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex<LittleEndian>);
                 ASSERT_SIZE(total_uncompressed_vertex_size);
@@ -53,6 +54,10 @@ namespace Invader::HEK {
 
                 INCREMENT_DATA_PTR(uncompressed_vertices_size);
                 INCREMENT_DATA_PTR(reflexive.compressed_vertices.size);
+
+                reflexive.uncompressed_vertices.external = 0;
+                reflexive.uncompressed_vertices.file_offset = 0;
+                reflexive.compressed_vertices = {};
             } ADD_REFLEXIVE_END
         } ADD_REFLEXIVE_END
         ADD_BASIC_DEPENDENCY_REFLEXIVE(tag.lens_flares, lens);
@@ -77,6 +82,12 @@ namespace Invader::HEK {
         ASSERT_SIZE(cluster_data_size);
         compiled.data.insert(compiled.data.end(), data, data + cluster_data_size);
         INCREMENT_DATA_PTR(cluster_data_size);
+
+        tag.cluster_data.external = 0;
+        tag.cluster_data.file_offset = 0;
+        tag.sound_pas_data.external = 0;
+        tag.sound_pas_data.file_offset = 0;
+        
         PAD_32_BIT
 
         ADD_REFLEXIVE_START(tag.cluster_portals) {
@@ -84,7 +95,7 @@ namespace Invader::HEK {
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.breakable_surfaces);
         ADD_REFLEXIVE_START(tag.fog_planes) {
-            DEFAULT_VALUE(reflexive.material_type, -1);
+            DEFAULT_VALUE(reflexive.material_type, static_cast<MaterialType>(NULL_INDEX));
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
         ADD_REFLEXIVE(tag.fog_regions);
@@ -132,7 +143,7 @@ namespace Invader::HEK {
             ADD_REFLEXIVE(reflexive.vertices);
         } ADD_REFLEXIVE_END
 
-        *reinterpret_cast<ScenarioStructureBSPCompiledHeader *>(compiled.data.data()) = header;
+        *reinterpret_cast<ScenarioStructureBSPCompiledHeader<LittleEndian> *>(compiled.data.data()) = header;
 
         FINISH_COMPILE
     }

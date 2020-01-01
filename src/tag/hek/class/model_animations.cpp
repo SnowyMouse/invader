@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-
-#include "model_animations.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     struct DedupingAnimationData {
@@ -60,6 +59,30 @@ namespace Invader::HEK {
 
             if(no_sounds) {
                 reflexive.sound = -1;
+            }
+
+            if(reflexive.default_data.size == 0) {
+                reflexive.default_data = {};
+            }
+            else {
+                reflexive.default_data.file_offset = 0;
+                reflexive.default_data.external = 0;
+            }
+
+            if(reflexive.frame_data.size == 0) {
+                reflexive.frame_data = {};
+            }
+            else {
+                reflexive.frame_data.file_offset = 0;
+                reflexive.frame_data.external = 0;
+            }
+
+            if(reflexive.frame_info.size == 0) {
+                reflexive.frame_info = {};
+            }
+            else {
+                reflexive.frame_info.file_offset = 0;
+                reflexive.frame_info.external = 0;
             }
 
             std::size_t required_frame_info_size;
@@ -127,12 +150,12 @@ namespace Invader::HEK {
             std::size_t rotation_count = 0;
             std::size_t scale_count = 0;
             std::size_t transform_count = 0;
-            std::uint32_t rotation_flag_0 = reflexive.node_rotation_flag_data[0].no_name;
-            std::uint32_t rotation_flag_1 = reflexive.node_rotation_flag_data[1].no_name;
-            std::uint32_t scale_flag_0 = reflexive.node_scale_flag_data[0].no_name;
-            std::uint32_t scale_flag_1 = reflexive.node_scale_flag_data[1].no_name;
-            std::uint32_t transform_flag_0 = reflexive.node_transform_flag_data[0].no_name;
-            std::uint32_t transform_flag_1 = reflexive.node_transform_flag_data[1].no_name;
+            std::uint32_t rotation_flag_0 = reflexive.node_rotation_flag_data[0];
+            std::uint32_t rotation_flag_1 = reflexive.node_rotation_flag_data[1];
+            std::uint32_t scale_flag_0 = reflexive.node_scale_flag_data[0];
+            std::uint32_t scale_flag_1 = reflexive.node_scale_flag_data[1];
+            std::uint32_t transform_flag_0 = reflexive.node_transform_flag_data[0];
+            std::uint32_t transform_flag_1 = reflexive.node_transform_flag_data[1];
             bool rotate[64];
             bool scale[64];
             bool transform[64];
@@ -180,7 +203,7 @@ namespace Invader::HEK {
 
             // Let's do default_data. Basically just add what isn't in frame_data, and only for one frame
             const auto *default_data_big = data;
-            if(reflexive.default_data.size > 0) {
+            if(reflexive.default_data.size > 0 && reflexive.flags.read().compressed_data == 0) {
                 std::size_t default_data_size = reflexive.default_data.size;
                 std::vector<std::byte> default_data(default_data_size);
                 auto *default_data_little = default_data.data();
@@ -222,7 +245,7 @@ namespace Invader::HEK {
             if(compressed) {
                 INCREMENT_DATA_PTR(compressed_data_offset);
                 ADD_POINTER_FROM_INT32(reflexive.frame_data.pointer, compiled.data.size());
-                reflexive.frame_data.size = static_cast<std::int32_t>(reflexive.frame_data.size - compressed_data_offset);
+                reflexive.frame_data.size = static_cast<std::uint32_t>(reflexive.frame_data.size - compressed_data_offset);
                 std::size_t frame_size = reflexive.frame_data.size;
                 compiled.data.insert(compiled.data.end(), data, data + frame_size);
                 INCREMENT_DATA_PTR(frame_size);
@@ -288,7 +311,7 @@ namespace Invader::HEK {
             // Go through each animation. Make sure the weights are all correct.
             while(true) {
                 // Set the main animation index
-                animation->main_animation_index = static_cast<std::int32_t>(i);
+                animation->main_animation_index = static_cast<std::uint32_t>(i);
 
                 // Set weight to a default value
                 animation->relative_weight = 1.0F;

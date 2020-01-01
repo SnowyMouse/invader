@@ -1,0 +1,32 @@
+[
+    {
+        "name": "ColorTableColor",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "color",
+                "type": "ColorARGB",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 48
+    },
+    {
+        "name": "ColorTable",
+        "fields": [
+            {
+                "name": "colors",
+                "type": "TagReflexive",
+                "struct": "ColorTableColor",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "size": 12
+    }
+]

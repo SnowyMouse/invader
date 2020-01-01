@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-add_executable(invader-resource
-    src/resource/resource.cpp
-)
+if(NOT DEFINED ${INVADER_RESOURCE})
+    set(INVADER_RESOURCE true CACHE BOOL "Build invader-resource (builds resource map files)")
+endif()
 
-target_link_libraries(invader-resource invader)
+if(${INVADER_RESOURCE})
+    add_executable(invader-resource
+        src/resource/resource.cpp
+    )
+    target_link_libraries(invader-resource invader)
+
+    set(TARGETS_LIST ${TARGETS_LIST} invader-resource)
+endif()

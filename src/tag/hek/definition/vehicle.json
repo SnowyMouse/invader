@@ -1,0 +1,273 @@
+[
+    {
+        "name": "VehicleType",
+        "options": [
+            "human tank",
+            "human jeep",
+            "human boat",
+            "human plane",
+            "alien scout",
+            "alien fighter",
+            "turret"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "VehicleFunctionIn",
+        "options": [
+            "none",
+            "speed absolute",
+            "speed forward",
+            "speed backward",
+            "slide absolute",
+            "slide left",
+            "slide right",
+            "speed slide maximum",
+            "turn absolute",
+            "turn left",
+            "turn right",
+            "crouch",
+            "jump",
+            "walk",
+            "velocity air",
+            "velocity water",
+            "velocity ground",
+            "velocity forward",
+            "velocity left",
+            "velocity up",
+            "left tread position",
+            "right tread position",
+            "left tread velocity",
+            "right tread velocity",
+            "front left tire position",
+            "front right tire position",
+            "back left tire position",
+            "back right tire position",
+            "front left tire velocity",
+            "front right tire velocity",
+            "back left tire velocity",
+            "back right tire velocity",
+            "wingtip contrail",
+            "hover",
+            "thrust",
+            "engine hack",
+            "wingtip contrail new"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "VehicleFlags",
+        "type": "bitfield",
+        "fields": [
+            "speed wakes physics",
+            "turn wakes physics",
+            "driver power wakes physics",
+            "gunner power wakes physics",
+            "control opposite speed sets brake",
+            "slide wakes physics",
+            "kills riders at terminal velocity",
+            "causes collision damage",
+            "ai weapon cannot rotate",
+            "ai does not require driver",
+            "ai unused",
+            "ai driver enable",
+            "ai driver flying",
+            "ai driver can sidestep",
+            "ai driver hovering"
+        ],
+        "width": 32
+    },
+    {
+        "name": "Vehicle",
+        "fields": [
+            {
+                "name": "vehicle flags",
+                "type": "VehicleFlags"
+            },
+            {
+                "name": "vehicle type",
+                "type": "VehicleType"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "maximum forward speed",
+                "type": "float"
+            },
+            {
+                "name": "maximum reverse speed",
+                "type": "float"
+            },
+            {
+                "name": "speed acceleration",
+                "type": "float"
+            },
+            {
+                "name": "speed deceleration",
+                "type": "float"
+            },
+            {
+                "name": "maximum left turn",
+                "type": "float"
+            },
+            {
+                "name": "maximum right turn",
+                "type": "float"
+            },
+            {
+                "name": "wheel circumference",
+                "type": "float"
+            },
+            {
+                "name": "turn rate",
+                "type": "float"
+            },
+            {
+                "name": "blur speed",
+                "type": "float"
+            },
+            {
+                "name": "vehicle a in",
+                "type": "VehicleFunctionIn"
+            },
+            {
+                "name": "vehicle b in",
+                "type": "VehicleFunctionIn"
+            },
+            {
+                "name": "vehicle c in",
+                "type": "VehicleFunctionIn"
+            },
+            {
+                "name": "vehicle d in",
+                "type": "VehicleFunctionIn"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "maximum left slide",
+                "type": "float"
+            },
+            {
+                "name": "maximum right slide",
+                "type": "float"
+            },
+            {
+                "name": "slide acceleration",
+                "type": "float"
+            },
+            {
+                "name": "slide deceleration",
+                "type": "float"
+            },
+            {
+                "name": "minimum flipping angular velocity",
+                "type": "float"
+            },
+            {
+                "name": "maximum flipping angular velocity",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "fixed gun yaw",
+                "type": "float"
+            },
+            {
+                "name": "fixed gun pitch",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "ai sideslip distance",
+                "type": "float"
+            },
+            {
+                "name": "ai destination radius",
+                "type": "float"
+            },
+            {
+                "name": "ai avoidance distance",
+                "type": "float"
+            },
+            {
+                "name": "ai pathfinding radius",
+                "type": "float"
+            },
+            {
+                "name": "ai charge repeat timeout",
+                "type": "float"
+            },
+            {
+                "name": "ai strafing abort range",
+                "type": "float"
+            },
+            {
+                "name": "ai oversteering bounds",
+                "bounds": true,
+                "type": "float"
+            },
+            {
+                "name": "ai steering maximum",
+                "type": "Angle"
+            },
+            {
+                "name": "ai throttle maximum",
+                "type": "float"
+            },
+            {
+                "name": "ai move position time",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "suspension sound",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "crash sound",
+                "type": "TagDependency",
+                "classes": [
+                    "sound"
+                ],
+                "compound": true
+            },
+            {
+                "name": "material effects",
+                "type": "TagDependency",
+                "classes": [
+                    "material_effects"
+                ],
+                "compound": true
+            },
+            {
+                "name": "effect",
+                "type": "TagDependency",
+                "classes": [
+                    "effect"
+                ],
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "inherits": "Unit",
+        "size": 1008
+    }
+]

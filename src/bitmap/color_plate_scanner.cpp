@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include "../hek/data_type.hpp"
-#include "color_plate_scanner.hpp"
-#include "../eprintf.hpp"
+#include <invader/hek/data_type.hpp>
+#include <invader/bitmap/color_plate_scanner.hpp>
+#include <invader/printf.hpp>
 
 namespace Invader {
     static constexpr char ERROR_INVALID_BITMAP_WIDTH[] = "Error: Found a bitmap with an invalid width: %u\n";
@@ -132,7 +132,7 @@ namespace Invader {
                             // Otherwise, bad!
                             else {
                                 eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, 1);
-                                std::exit(1);
+                                throw InvalidInputBitmapException();
                             }
                         }
                     }
@@ -163,7 +163,7 @@ namespace Invader {
                                 // Otherwise we only got part of a sequence divider and that's not fine
                                 else {
                                     eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, y);
-                                    std::exit(1);
+                                    throw InvalidInputBitmapException();
                                 }
                             }
                         }
@@ -206,8 +206,8 @@ namespace Invader {
                         scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
                     }
                     else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-                        eprintf("Error: Sprites must have blue borders or a valid color plate.\n");
-                        std::exit(1);
+                        eprintf_error("Error: Sprites must have blue borders or a valid color plate.\n");
+                        throw InvalidInputBitmapException();
                     }
                     else {
                         scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
@@ -286,6 +286,11 @@ namespace Invader {
             consolidate_stacked_bitmaps(generated_bitmap);
         }
 
+        // 3D textures also halve in depth, too
+        if(type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+            merge_3d_texture_mipmaps(generated_bitmap);
+        }
+
         return generated_bitmap;
     }
 
@@ -302,113 +307,145 @@ namespace Invader {
             // This is used for the registration point
             const std::int32_t MID_Y = divide_by_two_round(static_cast<std::int32_t>(Y_START + Y_END));
 
-            std::optional<std::uint32_t> bitmap_x_start;
-
+            // Go through each pixel
             for(std::uint32_t x = 0; x < X_END; x++) {
                 for(std::uint32_t y = Y_START; y < Y_END; y++) {
                     auto &pixel = GET_PIXEL(x,y);
-                    // Basically, if it's not blue and not magenta, it's the start of a bitmap. Otherwise, it's the end of one if there is a bitmap
+
+                    // Ignore? Okay.
                     if(this->is_blue(pixel) || this->is_magenta(pixel)) {
-                        // If we're in a bitmap, let's add it
-                        if(y + 1 == Y_END && bitmap_x_start.has_value()) {
-                            std::optional<std::uint32_t> min_x;
-                            std::optional<std::uint32_t> max_x;
-                            std::optional<std::uint32_t> min_y;
-                            std::optional<std::uint32_t> max_y;
-
-                            // Find the minimum x, y, max x, and max y stuff
-                            std::uint32_t xb;
-                            for(xb = bitmap_x_start.value(); xb < x; xb++) {
-                                for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
-                                    auto &pixel = GET_PIXEL(xb, yb);
-
-                                    // This is for anything that's not a cyan/magenta/blue pixel
-                                    if(!this->is_ignored(pixel)) {
-                                        if(min_x.has_value()) {
-                                            if(min_x.value() > xb) {
-                                                min_x = xb;
-                                            }
-                                            if(min_y.value() > yb) {
-                                                min_y = yb;
-                                            }
-                                            if(max_x.value() < xb) {
-                                                max_x = xb;
-                                            }
-                                            if(max_y.value() < yb) {
-                                                max_y = yb;
-                                            }
-                                        }
-                                        else {
-                                            min_x = xb;
-                                            min_y = yb;
-                                            max_x = xb;
-                                            max_y = yb;
-                                        }
-                                    }
-                                }
-                            }
-
-                            // If we never got a minimum x, then give up on life
-                            if(!min_x.has_value()) {
-                                eprintf("Error: Found a 0x0 bitmap.\n");
-                                std::terminate();
-                            }
-
-                            // Get the width and height
-                            std::uint32_t bitmap_width = max_x.value() - min_x.value() + 1;
-                            std::uint32_t bitmap_height = max_y.value() - min_y.value() + 1;
-
-                            // If we require power-of-two, check
-                            if(power_of_two) {
-                                if(!is_power_of_two(bitmap_width)) {
-                                    eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
-                                    std::terminate();
-                                }
-                                if(!is_power_of_two(bitmap_height)) {
-                                    eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
-                                    std::terminate();
-                                }
-                            }
-
-                            // Add the bitmap
-                            auto &bitmap = generated_bitmap.bitmaps.emplace_back();
-                            bitmap.width = bitmap_width;
-                            bitmap.height = bitmap_height;
-                            bitmap.color_plate_x = min_x.value();
-                            bitmap.color_plate_y = min_y.value();
-
-                            // Calculate registration point.
-                            const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(xb + bitmap_x_start.value()));
-
-                            // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
-                            bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
-
-                            // The x point is the midpoint of the height of the entire sequence relative to the top
-                            bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
-
-                            // Load the pixels
-                            for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
-                                for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
-                                    auto &pixel = GET_PIXEL(bx, by);
-                                    if(this->is_ignored(pixel)) {
-                                        bitmap.pixels.push_back(ColorPlatePixel {});
-                                    }
-                                    else {
-                                        bitmap.pixels.push_back(pixel);
-                                    }
-                                }
-                            }
-
-                            bitmap_x_start.reset();
-                            sequence.bitmap_count++;
-                        }
-
                         continue;
                     }
 
-                    if(!bitmap_x_start.has_value()) {
-                        bitmap_x_start = x;
+                    // Begin.
+                    std::optional<std::uint32_t> min_x;
+                    std::optional<std::uint32_t> max_x;
+                    std::optional<std::uint32_t> min_y;
+                    std::optional<std::uint32_t> max_y;
+
+                    std::optional<std::uint32_t> virtual_min_x;
+                    std::optional<std::uint32_t> virtual_max_x;
+                    std::optional<std::uint32_t> virtual_min_y;
+                    std::optional<std::uint32_t> virtual_max_y;
+
+                    // Find the minimum x, y, max x, and max y stuff
+                    for(std::uint32_t xb = x; xb < X_END; xb++) {
+                        // Set this to false if we got something this column
+                        bool ignored_this_x = true;
+
+                        for(std::uint32_t yb = Y_START; yb < Y_END; yb++) {
+                            auto &pixel = GET_PIXEL(xb, yb);
+
+                            // This is for anything that's not a cyan/magenta/blue pixel
+                            if(!this->is_ignored(pixel)) {
+                                if(min_x.has_value()) {
+                                    if(min_x.value() > xb) {
+                                        min_x = xb;
+                                    }
+                                    if(min_y.value() > yb) {
+                                        min_y = yb;
+                                    }
+                                    if(max_x.value() < xb) {
+                                        max_x = xb;
+                                    }
+                                    if(max_y.value() < yb) {
+                                        max_y = yb;
+                                    }
+                                }
+                                else {
+                                    min_x = xb;
+                                    min_y = yb;
+                                    max_x = xb;
+                                    max_y = yb;
+                                }
+                            }
+
+                            // Anything that's not a magenta/blue pixel then
+                            if(!this->is_blue(pixel) && !this->is_magenta(pixel)) {
+                                ignored_this_x = false;
+
+                                if(virtual_min_x.has_value()) {
+                                    if(virtual_min_x.value() > xb) {
+                                        virtual_min_x = xb;
+                                    }
+                                    if(virtual_min_y.value() > yb) {
+                                        virtual_min_y = yb;
+                                    }
+                                    if(virtual_max_x.value() < xb) {
+                                        virtual_max_x = xb;
+                                    }
+                                    if(virtual_max_y.value() < yb) {
+                                        virtual_max_y = yb;
+                                    }
+                                }
+                                else {
+                                    virtual_min_x = xb;
+                                    virtual_min_y = yb;
+                                    virtual_max_x = xb;
+                                    virtual_max_y = yb;
+                                }
+                            }
+                        }
+
+                        if(ignored_this_x) {
+                            break;
+                        }
                     }
+
+                    // If we never got a minimum x, then continue on
+                    if(!min_x.has_value()) {
+                        continue;
+                    }
+
+                    // Get the width and height
+                    std::uint32_t bitmap_width = max_x.value() - min_x.value() + 1;
+                    std::uint32_t bitmap_height = max_y.value() - min_y.value() + 1;
+
+                    // If we require power-of-two, check
+                    if(power_of_two) {
+                        if(!is_power_of_two(bitmap_width)) {
+                            eprintf(ERROR_INVALID_BITMAP_WIDTH, bitmap_width);
+                            throw InvalidInputBitmapException();
+                        }
+                        if(!is_power_of_two(bitmap_height)) {
+                            eprintf(ERROR_INVALID_BITMAP_HEIGHT, bitmap_height);
+                            throw InvalidInputBitmapException();
+                        }
+                    }
+
+                    // Add the bitmap
+                    auto &bitmap = generated_bitmap.bitmaps.emplace_back();
+                    bitmap.width = bitmap_width;
+                    bitmap.height = bitmap_height;
+                    bitmap.color_plate_x = min_x.value();
+                    bitmap.color_plate_y = min_y.value();
+
+                    // Calculate registration point.
+                    const std::int32_t MID_X = divide_by_two_round(static_cast<std::int32_t>(1 + virtual_max_x.value() + virtual_min_x.value()));
+
+                    // The x point is the midpoint of the width of the bitmap and cyan stuff relative to the left
+                    bitmap.registration_point_x = MID_X - static_cast<std::int32_t>(min_x.value());
+
+                    // The x point is the midpoint of the height of the entire sequence relative to the top
+                    bitmap.registration_point_y = MID_Y - static_cast<std::int32_t>(min_y.value());
+
+                    // Load the pixels
+                    for(std::uint32_t by = min_y.value(); by <= max_y.value(); by++) {
+                        for(std::uint32_t bx = min_x.value(); bx <= max_x.value(); bx++) {
+                            auto &pixel = GET_PIXEL(bx, by);
+                            if(this->is_ignored(pixel)) {
+                                bitmap.pixels.push_back(ColorPlatePixel {});
+                            }
+                            else {
+                                bitmap.pixels.push_back(pixel);
+                            }
+                        }
+                    }
+
+                    sequence.bitmap_count++;
+
+                    // Set it to the max value. Add 1 since sprites can't possibly be adjacent to each other. Then, the for loop will add 1 again to get to the minimum possible x value.
+                    x = virtual_max_x.value() + 1;
                     break;
                 }
             }
@@ -421,8 +458,8 @@ namespace Invader {
         std::uint32_t face_height = height / 3;
 
         if(face_height != face_width || !is_power_of_two(face_width) || face_width < 1 || face_width * 4 != width || face_height * 3 != height) {
-            eprintf("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
-            std::terminate();
+            eprintf_error("Error: Invalid cubemap input dimensions %ux%u.\n", face_width, face_height);
+            throw InvalidInputBitmapException();
         }
 
         auto get_pixel_transformed = [&pixels, &width, &face_width](std::uint32_t left, std::uint32_t top, std::uint32_t relative_x, std::uint32_t relative_y, std::uint32_t rotation) {
@@ -481,11 +518,11 @@ namespace Invader {
         if(generated_bitmap.type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
             if(!is_power_of_two(width)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, width);
-                std::terminate();
+                throw InvalidInputBitmapException();
             }
             if(!is_power_of_two(height)) {
                 eprintf(ERROR_INVALID_BITMAP_WIDTH, height);
-                std::terminate();
+                throw InvalidInputBitmapException();
             }
         }
 
@@ -580,6 +617,7 @@ namespace Invader {
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, ScannedColorMipmapType mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
+
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
             std::uint32_t mipmap_height = bitmap.height;
@@ -767,8 +805,8 @@ namespace Invader {
             // Do fade-to-gray for each mipmap
             if(mipmap_fade_factor.has_value()) {
                 std::size_t mipmap_count = bitmap.mipmaps.size();
-                std::size_t mipmap_count_plus_one = mipmap_count + 1; // although Guerilla only mentions mipmaps in the fade-to-gray stuff, it includes the first bitmap in the calculation
-                float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(fade) * mipmap_count_plus_one;
+                float mipmap_count_plus_one = mipmap_count + 1.0F; // although Guerilla only mentions mipmaps in the fade-to-gray stuff, it includes the first bitmap in the calculation
+                float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(fade) * (mipmap_count_plus_one - 1.0F + (1.0F - fade)); // excuse me what the fuck
 
                 for(std::size_t m = 0; m < mipmap_count; m++) {
                     auto &mipmap = bitmap.mipmaps[m];
@@ -782,7 +820,7 @@ namespace Invader {
 
                         // If we're fading to gray instantly, do that so we don't divide by 0
                         if(fade >= 1.0F) {
-                            alpha_delta = 0xFF;
+                            alpha_delta = UINT8_MAX;
                         }
                         else {
                             // Basically, a higher mipmap fade factor scales faster
@@ -794,8 +832,14 @@ namespace Invader {
                             }
 
                             // Round
-                            float gray_multiplied = std::floor(0xFF * gray_multiplier + 0.5F);
-                            alpha_delta = static_cast<std::uint32_t>(gray_multiplied);
+                            float gray_multiplied = std::floor(UINT8_MAX * gray_multiplier + 0.5F);
+                            auto new_gray = static_cast<std::uint32_t>(gray_multiplied);
+                            if(new_gray > UINT8_MAX) {
+                                alpha_delta = UINT8_MAX;
+                            }
+                            else {
+                                alpha_delta = static_cast<std::uint8_t>(new_gray);
+                            }
                         }
 
                         ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
@@ -820,8 +864,8 @@ namespace Invader {
             const std::uint32_t FACES = sequence.bitmap_count;
 
             if(FACES == 0) {
-                eprintf("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
-                std::terminate();
+                eprintf_error("Error: Stacked bitmaps must have at least one bitmap. %u found.\n", FACES);
+                throw InvalidInputBitmapException();
             }
 
             auto *bitmaps = generated_bitmap.bitmaps.data() + sequence.first_bitmap;
@@ -840,12 +884,18 @@ namespace Invader {
 
             if(generated_bitmap.type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
                 if(FACES != 6) {
-                    eprintf("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
-                    std::terminate();
+                    eprintf_error("Error: Cubemaps must have six bitmaps per cubemap. %u found.\n", FACES);
+                    throw InvalidInputBitmapException();
                 }
                 if(BITMAP_WIDTH != BITMAP_HEIGHT) {
-                    eprintf("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
-                    std::terminate();
+                    eprintf_error("Error: Cubemap length must equal width and height. %ux%u found.\n", BITMAP_WIDTH, BITMAP_HEIGHT);
+                    throw InvalidInputBitmapException();
+                }
+            }
+            else if(generated_bitmap.type == BitmapType::BITMAP_TYPE_3D_TEXTURES) {
+                if(!FACES || !is_power_of_two(FACES)) {
+                    eprintf_error("Error: 3D texture depth must be a power of two. Got %u\n", FACES);
+                    throw InvalidInputBitmapException();
                 }
             }
 
@@ -863,6 +913,7 @@ namespace Invader {
                     mipmap.pixel_count = mipmap_size;
                     mipmap.mipmap_height = mipmap_height;
                     mipmap.mipmap_width = mipmap_width;
+                    mipmap.mipmap_depth = FACES;
                 }
 
                 new_bitmap.pixels.insert(new_bitmap.pixels.end(), mipmap_size, ColorPlatePixel {});
@@ -877,14 +928,14 @@ namespace Invader {
 
                 // Ensure it's the same dimensions
                 if(bitmap.height != BITMAP_HEIGHT || bitmap.width != BITMAP_WIDTH) {
-                    eprintf("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
-                    std::terminate();
+                    eprintf_error("Error: Stacked bitmaps must be the same dimensions. Expected %ux%u. %ux%u found\n", BITMAP_WIDTH, BITMAP_WIDTH, bitmap.width, bitmap.height);
+                    throw InvalidInputBitmapException();
                 }
 
                 // Also ensure it has the same # of mipmaps. I don't know how it wouldn't, but you never know
                 if(bitmap.mipmaps.size() != MIPMAP_COUNT) {
-                    eprintf("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
-                    std::terminate();
+                    eprintf_error("Error: Stacked bitmaps must have the same number of mipmaps. Expected %u. %zu found\n", MIPMAP_COUNT, bitmap.mipmaps.size());
+                    throw InvalidInputBitmapException();
                 }
 
                 // One of the only do/while loops I will ever do in Invader while writing it.
@@ -918,6 +969,56 @@ namespace Invader {
 
         generated_bitmap.bitmaps = std::move(new_bitmaps);
         generated_bitmap.sequences = std::move(new_sequences);
+    }
+
+    void ColorPlateScanner::merge_3d_texture_mipmaps(GeneratedBitmapData &generated_bitmap) {
+        for(auto &bitmap : generated_bitmap.bitmaps) {
+            std::uint32_t bitmaps_to_merge = 2;
+            std::uint32_t bitmap_pixel_count = bitmap.height * bitmap.width;
+            std::vector<ColorPlatePixel> new_pixels(bitmap.pixels.data(), bitmap.pixels.data() + bitmap_pixel_count * bitmap.depth);
+            std::vector<GeneratedBitmapDataBitmapMipmap> new_mipmaps;
+            for(auto &mipmap : bitmap.mipmaps) {
+                if(bitmaps_to_merge > bitmap.depth) {
+                    break;
+                }
+
+                // Make the new mipmap metadata
+                auto &new_mipmap = new_mipmaps.emplace_back();
+                new_mipmap.first_pixel = new_pixels.size();
+                std::size_t layer_size = mipmap.mipmap_height * mipmap.mipmap_width;
+                new_mipmap.mipmap_height = mipmap.mipmap_height;
+                new_mipmap.mipmap_width = mipmap.mipmap_width;
+                new_mipmap.mipmap_depth = mipmap.mipmap_depth / bitmaps_to_merge;
+                new_mipmap.pixel_count = static_cast<std::uint32_t>(layer_size * new_mipmap.mipmap_depth);
+
+                // Go through each pixel and average
+                for(std::uint32_t d = 0; d < new_mipmap.mipmap_depth; d++) {
+                    for(std::uint32_t y = 0; y < new_mipmap.mipmap_height; y++) {
+                        for(std::uint32_t x = 0; x < new_mipmap.mipmap_width; x++) {
+                                std::size_t alpha = 0, red = 0, green = 0, blue = 0;
+                                for(std::uint32_t d_inner = d * bitmaps_to_merge; d_inner < (d + 1) * bitmaps_to_merge; d_inner++) {
+                                    auto &pixel = *(bitmap.pixels.data() + (x + y * new_mipmap.mipmap_height) + layer_size * d_inner + mipmap.first_pixel);
+                                    alpha += pixel.alpha;
+                                    red += pixel.red;
+                                    green += pixel.green;
+                                    blue += pixel.blue;
+                                }
+
+                                auto &new_pixel = new_pixels.emplace_back();
+                                new_pixel.alpha = static_cast<std::uint8_t>(alpha / bitmaps_to_merge);
+                                new_pixel.red = static_cast<std::uint8_t>(red / bitmaps_to_merge);
+                                new_pixel.green = static_cast<std::uint8_t>(green / bitmaps_to_merge);
+                                new_pixel.blue = static_cast<std::uint8_t>(blue / bitmaps_to_merge);
+                            }
+                        }
+                }
+
+                bitmaps_to_merge *= 2;
+            }
+
+            bitmap.mipmaps = new_mipmaps;
+            bitmap.pixels = new_pixels;
+        }
     }
 
     static std::uint32_t number_of_sprite_sheets(const std::vector<GeneratedBitmapDataSequence> &sequences) {
@@ -1286,8 +1387,8 @@ namespace Invader {
         // First see if we can even fit things into this
         auto fit_sprites = fit_sprites_into_maximum_sprite_sheet(max_budget, generated_bitmap, half_spacing, max_sheet_count);
         if(!fit_sprites.has_value()) {
-            eprintf("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
-            std::terminate();
+            eprintf_error("Error: Unable to fit sprites into %u %ux%u sprite sheet%s.\n", max_sheet_count, max_budget, max_budget, max_sheet_count == 1 ? "" : "s");
+            throw InvalidInputBitmapException();
         }
         parameters.sprite_spacing = half_spacing;
 
@@ -1316,8 +1417,8 @@ namespace Invader {
                 auto &sprite_sequence = sprites_fit[sequence_index];
 
                 if(color_plate_sequence.bitmap_count != sprite_sequence.sprites.size()) {
-                    eprintf("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
-                    std::terminate();
+                    eprintf_error("Error: Color plate sequence bitmap count (%u) doesn't match up with sprite sequence (%zu).\n", color_plate_sequence.bitmap_count, sprite_sequence.sprites.size());
+                    throw InvalidInputBitmapException();
                 }
 
                 // Go through each sprite and bake it in

@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef NO_OUTPUT
 #include <iostream>
 #include <chrono>
 #include <fstream>
 using clock_type = std::chrono::steady_clock;
-#endif
 
 #include <vector>
 #include <cstring>
+#include <filesystem>
 
-#include "build_workload.hpp"
-#include "../map/map.hpp"
-#include "../tag/compiled_tag.hpp"
-#include "../version.hpp"
-#include "../eprintf.hpp"
-#include "../command_line_option.hpp"
+#include <invader/build/build_workload.hpp>
+#include <invader/map/map.hpp>
+#include <invader/compress/compression.hpp>
+#include <invader/tag/compiled_tag.hpp>
+#include <invader/version.hpp>
+#include <invader/printf.hpp>
+#include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -32,39 +33,44 @@ int main(int argc, const char **argv) {
 
     // Parameters
     struct BuildOptions {
-        const char *path;
         std::string maps = "maps";
         std::vector<std::string> tags;
         std::string output;
         std::string last_argument;
         std::string index;
         HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
-        bool no_indexed_tags = false;
+        bool no_external_tags = false;
         bool handled = true;
         bool quiet = false;
         bool always_index_tags = false;
         const char *forged_crc = nullptr;
+        bool use_filesystem_path = false;
+        const char *rename_scenario = nullptr;
+        bool compress = false;
     } build_options;
 
-    build_options.path = argv[0];
-
     std::vector<CommandLineOption> options;
-    options.emplace_back("help", 'h', 0);
-    options.emplace_back("no-indexed-tags", 'n', 0);
-    options.emplace_back("always-index-tags", 'a', 0);
-    options.emplace_back("quiet", 'q', 0);
-    options.emplace_back("info", 'i', 0);
-    options.emplace_back("game-engine", 'g', 1);
-    options.emplace_back("with-index", 'w', 1);
-    options.emplace_back("maps", 'm', 1);
-    options.emplace_back("tags", 't', 1);
-    options.emplace_back("output", 'o', 1);
-    options.emplace_back("forge-crc", 'c', 1);
+    options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
+    options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
+    options.emplace_back("quiet", 'q', 0, "Only output error messages.");
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. Valid engines are: custom (default), retail, demo, dark", "<id>");
+    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
+    options.emplace_back("maps", 'm', 1, "Use a specific maps directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
+    options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
+    options.emplace_back("compress", 'c', 0, "Compress the cache file.");
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, 'h', build_options, [](char opt, const auto &arguments, BuildOptions &build_options) {
+    static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
+    static constexpr char USAGE[] = "[options] <scenario>";
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
             case 'n':
-                build_options.no_indexed_tags = true;
+                build_options.no_external_tags = true;
                 break;
             case 'q':
                 build_options.quiet = true;
@@ -91,127 +97,167 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(arguments[0], "retail") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 }
+                else if(std::strcmp(arguments[0], "demo") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                }
                 else if(std::strcmp(arguments[0], "dark") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                 }
+                else {
+                    eprintf_error("Unknown engine type %s.", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
-            case 'c':
+            case 'C':
                 build_options.forged_crc = arguments[0];
                 break;
+            case 'c':
+                build_options.compress = true;
+                break;
+            case 'P':
+                build_options.use_filesystem_path = true;
+                break;
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
-            default:
-                eprintf("Usage: %s [options] <scenario>\n\n", build_options.path);
-                eprintf("Build cache files for Halo Custom Edition.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --game-engine,-g <id>        Specify the game engine. Valid engines are:\n");
-                eprintf("                               custom (default), retail, dark\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --maps,-m <dir>              Use a specific maps directory.\n");
-                eprintf("  --no-indexed-tags,-n         Do not index tags. This can speed up build time\n");
-                eprintf("                               at the cost of a much larger file size.\n");
-                eprintf("  --always-index-tags,-a       Always index tags when possible. This can speed\n");
-                eprintf("                               up build time, but stock tags can't be modified.\n");
-                eprintf("  --forge-crc,-c <crc>         Forge the CRC32 value of a map. This is useful\n");
-                eprintf("                               for multiplayer.\n");
-                eprintf("  --output,-o <file>           Output to a specific file.\n");
-                eprintf("  --quiet,-q                   Only output error messages.\n");
-                eprintf("  --tags,-t <dir>              Use the specified tags directory. Use multiple\n");
-                eprintf("                               times to add more directories, ordered by\n");
-                eprintf("                               precedence.\n");
-                eprintf("  --with-index,-w <file>       Use an index file for the tags, ensuring the\n");
-                eprintf("                               map's tags are ordered in the same way.\n\n");
-                std::exit(EXIT_FAILURE);
+                show_version_info();
+                std::exit(EXIT_SUCCESS);
+                break;
+            case 'N':
+                build_options.rename_scenario = arguments[0];
+                break;
         }
     });
 
-    if(build_options.always_index_tags && build_options.no_indexed_tags) {
-        eprintf("%s: --no-index-tags conflicts with --always-index-tags.\n", argv[0]);
+    if(build_options.forged_crc && ON_COLOR_TERM) {
+        if(std::strcmp(build_options.forged_crc, "21706156") == 0) {
+            std::fprintf(stdout, "\x1B[38;5;51m");
+        }
+        else if(std::strcmp(build_options.forged_crc, "21756843") == 0) {
+            std::fprintf(stdout, "\x1B[38;5;204m");
+        }
+    }
+
+    if(build_options.always_index_tags && build_options.no_external_tags) {
+        eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
         return EXIT_FAILURE;
     }
 
     std::string scenario;
-
-    // Check if there's a scenario tag
-    if(remaining_arguments.size() == 0) {
-        eprintf("A scenario tag path is required. Use -h for help.\n");
-        return RETURN_FAILED_NOTHING_TO_DO;
-    }
-    else if(remaining_arguments.size() > 1) {
-        eprintf("Unexpected argument %s\n", remaining_arguments[1]);
-        return RETURN_FAILED_UNHANDLED_ARGUMENT;
-    }
-    else {
-        scenario = remaining_arguments[0];
-    }
 
     // By default, just use tags
     if(build_options.tags.size() == 0) {
         build_options.tags.emplace_back("tags");
     }
 
+    if(build_options.use_filesystem_path) {
+        auto scenario_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], build_options.tags, ".scenario");
+        if(scenario_maybe.has_value()) {
+            scenario = scenario_maybe.value();
+        }
+        else {
+            eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
+            return RETURN_FAILED_UNHANDLED_ARGUMENT;
+        }
+    }
+    else {
+        scenario = File::halo_path_to_preferred_path(remaining_arguments[0]);
+    }
+
     try {
         // Start benchmark
-        #ifndef NO_OUTPUT
         auto start = clock_type::now();
-        #endif
 
         // Get the index
-        std::vector<std::tuple<HEK::TagClassInt, std::string>> with_index;
+        std::vector<std::tuple<TagClassInt, std::string>> with_index;
         if(build_options.index.size()) {
             std::fstream index_file(build_options.index, std::ios_base::in);
-            std::size_t tag_count;
+            std::string tag;
+            while(std::getline(index_file, tag)) {
+                // Check if empty
+                if(tag.size() == 0) {
+                    break;
+                }
 
-            // Get the tag count
-            index_file >> tag_count;
+                // Get the extension
+                const char *extension = nullptr;
+                for(char &c : tag) {
+                    if(c == '.') {
+                        extension = &c + 1;
+                    }
+                }
 
-            // Go through and do stuff
-            with_index.reserve(tag_count);
-            for(std::size_t i = 0; i < tag_count; i++) {
-                std::size_t tag_class;
-                std::string tag_path;
+                if(!extension) {
+                    eprintf_error("Invalid index given. \"%s\" is missing an extension.", tag.c_str());
+                    return EXIT_FAILURE;
+                }
 
-                index_file >> tag_class;
-                index_file.ignore();
-                std::getline(index_file, tag_path);
+                auto substr = tag.substr(0, extension - tag.data() - 1);
+                File::preferred_path_to_halo_path_chars(substr.data());
 
-                with_index.emplace_back(static_cast<HEK::TagClassInt>(tag_class), tag_path);
+                // Lowercase everything
+                for(char &c : substr) {
+                    c = std::tolower(c);
+                }
+
+                with_index.emplace_back(extension_to_tag_class(extension), substr);
             }
         }
 
         std::uint32_t forged_crc_value = 0;
-        std::uint32_t *forged_crc_ptr = nullptr;
+        std::optional<std::uint32_t> forged_crc;
         if(build_options.forged_crc) {
             std::size_t given_crc32_length = std::strlen(build_options.forged_crc);
             if(given_crc32_length > 8 || given_crc32_length < 1) {
-                eprintf("Invalid CRC32 %s (must be 1-8 digits)\n", argv[2]);
+                eprintf_error("Invalid CRC32 %s (must be 1-8 digits)", argv[2]);
                 return 1;
             }
             for(std::size_t i = 0; i < given_crc32_length; i++) {
                 char c = std::tolower(build_options.forged_crc[i]);
                 if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
-                    eprintf("Invalid CRC32 %s (must be hexadecimal)\n", argv[2]);
+                    eprintf_error("Invalid CRC32 %s (must be hexadecimal)", argv[2]);
                     return 1;
                 }
             }
             forged_crc_value = std::strtoul(build_options.forged_crc, nullptr, 16);
-            forged_crc_ptr = &forged_crc_value;
+            forged_crc = forged_crc_value;
         }
 
-        auto map = Invader::BuildWorkload::compile_map(scenario.data(), build_options.tags, build_options.engine, build_options.maps, with_index, build_options.no_indexed_tags, build_options.always_index_tags, !build_options.quiet, forged_crc_ptr);
+        // Build!
+        auto map = Invader::BuildWorkload::compile_map(
+            scenario.data(),
+            build_options.tags,
+            build_options.engine,
+            build_options.maps,
+            build_options.no_external_tags,
+            build_options.always_index_tags,
+            !build_options.quiet,
+            with_index,
+            forged_crc,
+            std::nullopt,
+            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))
+        );
 
-        char *map_name = reinterpret_cast<char *>(map.data()) + 0x20;
-        #ifdef _WIN32
-        const char *separator = "\\";
-        #else
-        const char *separator = "/";
-        #endif
+        if(build_options.compress) {
+            std::size_t size_before = map.size();
+            oprintf("Compressing...");
+            oflush();
+            map = Compression::compress_map_data(map.data(), map.size());
+            std::size_t new_size = map.size();
+            oprintf("\rCompressed size:   %.02f MiB (%.02f %%)\n", new_size / 1024.0F / 1024.0F, 100.0F * new_size / size_before);
+        }
+
+        // Set the map name
+        const char *map_name;
+        if(build_options.rename_scenario) {
+            map_name = build_options.rename_scenario;
+        }
+        else {
+            map_name = File::base_name_chars(scenario.data());
+        }
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
         if(!build_options.output.size()) {
-            final_file = std::string(build_options.maps) + (build_options.maps[build_options.maps.size() - 1] != *separator ? separator : "") + map_name + ".map";
+            final_file = (std::filesystem::path(build_options.maps) / (std::string(map_name) + ".map")).string();
         }
         else {
             final_file = build_options.output;
@@ -221,29 +267,33 @@ int main(int argc, const char **argv) {
 
         // Check if file is open
         if(!file) {
-            eprintf("Failed to open %s for writing.\n", final_file.data());
+            eprintf_error("Failed to open %s for writing.", final_file.data());
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
         // Write to file
         if(std::fwrite(map.data(), map.size(), 1, file) == 0) {
-            eprintf("Failed to save.\n");
+            eprintf_error("Failed to save.");
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
         std::fclose(file);
 
-        #ifndef NO_OUTPUT
         if(!build_options.quiet) {
-            std::printf("Time:              %.03f ms\n", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
+            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
+            if(ON_COLOR_TERM) {
+                oprintf("\x1B[m\n");
+            }
+            else {
+                oprintf("\n");
+            }
         }
-        #endif
 
         return RETURN_OK;
     }
     catch(std::exception &exception) {
-        eprintf("Failed to compile the map.\n");
-        eprintf("%s\n", exception.what());
+        eprintf_error("Failed to compile the map.");
+        eprintf_error("%s", exception.what());
         return RETURN_FAILED_EXCEPTION_ERROR;
     }
 }

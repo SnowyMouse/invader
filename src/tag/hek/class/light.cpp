@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../compile.hpp"
-
-#include "light.hpp"
+#include <invader/tag/hek/compile.hpp>
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
     void compile_light_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
@@ -21,6 +20,7 @@ namespace Invader::HEK {
         tag.cos_falloff_angle = std::cos(tag.falloff_angle);
         DEFAULT_VALUE(tag.unknown_two, 2.0f);
         tag.sin_cutoff_angle = std::sin(tag.cutoff_angle);
+        tag.duration = tag.duration * TICK_RATE;
 
         ADD_DEPENDENCY_ADJUST_SIZES(tag.primary_cube_map);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.secondary_cube_map);
