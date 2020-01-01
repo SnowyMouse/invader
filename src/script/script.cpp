@@ -2,12 +2,11 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include "../eprintf.hpp"
-#include "../command_line_option.hpp"
-#include "../version.hpp"
+#include <invader/command_line_option.hpp>
+#include <invader/version.hpp>
 #include "script_tree.hpp"
 #include "tokenizer.hpp"
-#include "../file/file.hpp"
+#include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
     using namespace Invader;
@@ -27,13 +26,15 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1);
     options.emplace_back("tags", 't', 1);
 
+    static constexpr char DESCRIPTION[] = "Compile scripts.";
+    static constexpr char USAGE[] = "[options] <scenario>";
+
     // Parse arguments
-    auto remaining_options = CommandLineOption::parse_arguments<ScriptOption &>(argc, argv, options, 'h', script_options, [](char opt, const auto &arguments, ScriptOption &script_options) {
+    auto remaining_options = CommandLineOption::parse_arguments<ScriptOption &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, script_options, [](char opt, const auto &arguments, ScriptOption &script_options) {
         switch(opt) {
             case 'i':
-                INVADER_SHOW_INFO
-                std::exit(EXIT_FAILURE);
-                break;
+                Invader::show_version_info();
+                std::exit(EXIT_SUCCESS);
 
             case 'd':
                 script_options.data = arguments[0];
@@ -42,16 +43,6 @@ int main(int argc, const char **argv) {
             case 't':
                 script_options.tags = arguments[0];
                 break;
-
-            default:
-                eprintf("Usage: %s <options> <scenario>\n", script_options.path);
-                eprintf("Compile scripts for scenario tags.\n\n");
-                eprintf("Options:\n");
-                eprintf("  --help,-h                    Show this help directory.\n");
-                eprintf("  --info,-i                    Show credits, source info, and other info.\n");
-                eprintf("  --data,-d <dir>              Use a specific data directory.\n");
-                eprintf("  --tags,-t <dir>              Use a specific tags directory.\n\n");
-                std::exit(EXIT_FAILURE);
         }
     });
 

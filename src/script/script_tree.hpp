@@ -4,7 +4,7 @@
 #define INVADER__SCRIPT__SCRIPT_TREE_HPP
 
 #include "tokenizer.hpp"
-#include "../tag/hek/class/scenario.hpp"
+#include <invader/tag/parser/parser.hpp>
 
 namespace Invader::ScriptTree {
     /**

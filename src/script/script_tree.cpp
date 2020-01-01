@@ -128,8 +128,16 @@ namespace Invader::ScriptTree {
             }
 
             // Make sure it's valid
-            script.script_return_type = HEK::string_to_value_type(std::get<std::string>(script_return_type.value).data());
-            if(script.script_return_type < HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID) {
+            try {
+                std::string return_type_value = std::get<std::string>(script_return_type.value);
+                for(char &c : return_type_value) {
+                    if(c == ' ') {
+                        c = '-';
+                    }
+                }
+                script.script_return_type = HEK::ScenarioScriptValueType_from_string(return_type_value.c_str());
+            }
+            catch(std::exception &) {
                 RETURN_ERROR_TOKEN(first_token[3], "Invalid script return type");
             }
             script.script_type = HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC;
@@ -197,8 +205,16 @@ namespace Invader::ScriptTree {
         if(global_type.type != Token::TYPE_STRING) {
             RETURN_ERROR_TOKEN(first_token[2], "Expected a string");
         }
-        global.global_type = HEK::string_to_value_type(std::get<std::string>(global_type.value).data());
-        if(global.global_type <= HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID) {
+        try {
+            std::string global_type_value = std::get<std::string>(global_type.value);
+            for(char &c : global_type_value) {
+                if(c == ' ') {
+                    c = '-';
+                }
+            }
+            global.global_type = HEK::ScenarioScriptValueType_from_string(global_type_value.data());
+        }
+        catch(std::exception &) {
             RETURN_ERROR_TOKEN(first_token[2], "Invalid global type");
         }
 
