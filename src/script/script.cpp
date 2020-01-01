@@ -6,6 +6,7 @@
 #include <invader/version.hpp>
 #include "script_tree.hpp"
 #include "tokenizer.hpp"
+#include "compiler.hpp"
 #include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
@@ -82,7 +83,8 @@ int main(int argc, const char **argv) {
     std::filesystem::path tags(script_options.tags);
     std::filesystem::path data(script_options.data);
 
-    std::filesystem::path tag_path = (tags / scenario).append(".scenario");
+    std::filesystem::path tag_path = (tags / scenario);
+    tag_path += std::string(".scenario");
     std::filesystem::path script_directory_path = (data / scenario).parent_path() / "scripts";
 
     // Make sure we have a scripts directory
@@ -92,10 +94,7 @@ int main(int argc, const char **argv) {
     }
 
     // Put our nodes, scripts, and globals here
-    std::vector<HEK::ScenarioScriptNode<HEK::BigEndian>> nodes;
-    std::vector<HEK::ScenarioScript<HEK::BigEndian>> scripts;
-    std::vector<HEK::ScenarioGlobal<HEK::BigEndian>> globals;
-    std::vector<char> string_data;
+    std::vector<ScriptTree::Object> all_scripts;
 
     // Go through each script in the scripts directory
     for(auto &file : std::filesystem::directory_iterator(script_directory_path)) {
@@ -135,9 +134,32 @@ int main(int argc, const char **argv) {
                 eprintf("The error was: %s\n", error_message.c_str());
                 return EXIT_FAILURE;
             }
+
+            all_scripts.insert(all_scripts.begin(), tree.begin(), tree.end());
         }
     }
 
-    // Open the scenario tag=
-    std::vector<std::byte> scenario_tag_data;
+    // Open the scenario tag
+    auto tag_path_str = tag_path.string();
+    auto scenario_file_data = Invader::File::open_file(tag_path_str.c_str());
+    if(!scenario_file_data.has_value()) {
+        eprintf("Failed to open %s\n", tag_path_str.c_str());
+        return EXIT_FAILURE;
+    }
+
+    // Parse it
+    Parser::Scenario s;
+    try {
+        s = Parser::Scenario::parse_hek_tag_file((*scenario_file_data).data(), (*scenario_file_data).size());
+    }
+    catch(std::exception &e) {
+        eprintf("Failed to parse %s\n", tag_path_str.c_str());
+        eprintf("The error was: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
+
+    bool error;
+    std::string error_message;
+    auto new_s = Compiler::decompile_scenario(s, error, error_message);
+    oprintf("%s\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
 }
