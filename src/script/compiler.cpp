@@ -114,11 +114,11 @@ namespace Invader::Compiler {
                             t.type = Tokenizer::Token::Type::TYPE_DECIMAL;
                             t.value = n.data.read().real;
                             break;
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
                             t.type = Tokenizer::Token::Type::TYPE_INTEGER;
                             t.value = n.data.read().short_int;
                             break;
-                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_SHORT:
+                        case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_LONG:
                             t.type = Tokenizer::Token::Type::TYPE_INTEGER;
                             t.value = n.data.read().long_int;
                             break;
