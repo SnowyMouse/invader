@@ -3,8 +3,8 @@
 #ifndef INVADER__SCRIPT__SCRIPT_TREE_HPP
 #define INVADER__SCRIPT__SCRIPT_TREE_HPP
 
+#include "../tag/parser/parser.hpp"
 #include "tokenizer.hpp"
-#include <invader/tag/parser/parser.hpp>
 
 namespace Invader::ScriptTree {
     /**

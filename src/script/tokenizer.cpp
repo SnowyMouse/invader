@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "tokenizer.hpp"
+#include <invader/script/tokenizer.hpp>
 #include <optional>
 #include <sstream>
 
@@ -254,7 +254,7 @@ namespace Invader::Tokenizer {
                         if(tokens[q].type == Token::Type::TYPE_PARENTHESIS_CLOSE) {
                             open--;
                             if(open == 0) {
-                                bool should_indent = (q - i) > 8;
+                                bool should_indent = (q - i) > 10;
                                 found = true;
 
                                 if(should_indent) {

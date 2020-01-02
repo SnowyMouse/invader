@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <optional>
-#include "script_tree.hpp"
+#include <invader/script/script_tree.hpp>
 
 namespace Invader::ScriptTree {
     using namespace Tokenizer;

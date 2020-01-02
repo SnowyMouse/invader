@@ -4,9 +4,9 @@
 #include <filesystem>
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
-#include "script_tree.hpp"
-#include "tokenizer.hpp"
-#include "compiler.hpp"
+#include <invader/script/script_tree.hpp>
+#include <invader/script/tokenizer.hpp>
+#include <invader/script/compiler.hpp>
 #include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
@@ -61,7 +61,8 @@ int main(int argc, const char **argv) {
     }
 
     // A simple function to clean tokens
-    auto clean_token = [](const char *token) -> std::string {
+    /*
+        auto clean_token = [](const char *token) -> std::string {
         std::string s;
         for(const char *c = token; *c; c++) {
             if(*c == '\r') {
@@ -79,6 +80,7 @@ int main(int argc, const char **argv) {
         }
         return s;
     };
+    */
 
     std::filesystem::path tags(script_options.tags);
     std::filesystem::path data(script_options.data);
@@ -161,5 +163,6 @@ int main(int argc, const char **argv) {
     bool error;
     std::string error_message;
     auto new_s = Compiler::decompile_scenario(s, error, error_message);
+
     oprintf("%s\n\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
 }
