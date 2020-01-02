@@ -191,15 +191,16 @@ namespace Invader::Tokenizer {
                     }
 
                     bool contains_space = false;
-                    for(const char &c : std::get<std::string>(t.value)) {
+                    const auto &string_value = std::get<std::string>(t.value);
+                    for(const char &c : string_value) {
                         if(c == ' ') {
                             contains_space = true;
                             break;
                         }
                     }
 
-                    // If the string contains spaces, include those, escaping any and all quotes
-                    if(contains_space) {
+                    // If the string contains space or is empty, use quotes
+                    if(contains_space || string_value.size() == 0) {
                         string_data += "\"";
                         for(const char &c : std::get<std::string>(t.value)) {
                             char b[2] = {};

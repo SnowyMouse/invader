@@ -8,15 +8,13 @@ namespace Invader::Compiler {
         error_message = "unimplemented";
     }
 
-    static ScriptTree::Object decompile_node(std::size_t index, const Parser::ScenarioScriptNode::struct_big *nodes, std::size_t node_count, const char *string_data, std::size_t string_data_length);
+    static ScriptTree::Object decompile_node(std::size_t index, const Parser::ScenarioScriptNode::struct_big *nodes, std::size_t node_count, const Parser::Scenario &scenario);
 
     std::vector<ScriptTree::Object> decompile_scenario(const Parser::Scenario &scenario, bool &error, std::string &error_message) {
         std::vector<ScriptTree::Object> return_value;
 
         const auto *script_syntax_data_data = scenario.script_syntax_data.data();
         std::size_t script_syntax_data_size = scenario.script_syntax_data.size();
-        const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
-        std::size_t string_data_size = scenario.script_string_data.size();
 
         const auto *table = reinterpret_cast<const Parser::ScenarioScriptNodeTable::struct_big *>(script_syntax_data_data);
         const auto *nodes = reinterpret_cast<const Parser::ScenarioScriptNode::struct_big *>(table + 1);
@@ -148,23 +146,23 @@ namespace Invader::Compiler {
                     o.value = t;
                     return o;
             }
-        };
+        };*/
 
         // Go through each global
         for(auto &g : scenario.globals) {
-            auto value = decompile_node(g.initialization_expression_index, decompile_node);
+            oprintf("Decompiling global %s...\n", g.name.string);
+            auto value = decompile_node(g.initialization_expression_index, nodes, max_index, scenario);
 
             ScriptTree::Object script_call = {};
             script_call.type = ScriptTree::Object::Type::TYPE_GLOBAL;
             ScriptTree::Object::Global global = {};
-            auto &value_value = value.value();
 
-            if(value_value.type == ScriptTree::Object::Type::TYPE_BLOCK) {
-                global.block = std::get<ScriptTree::Object::Block>(value_value.value);
+            if(value.type == ScriptTree::Object::Type::TYPE_BLOCK) {
+                global.block = std::get<ScriptTree::Object::Block>(value.value);
             }
             else {
                 ScriptTree::Object::Block b;
-                b.emplace_back(value_value);
+                b.emplace_back(value);
                 global.block = b;
             }
 
@@ -173,12 +171,12 @@ namespace Invader::Compiler {
             script_call.value = global;
 
             return_value.emplace_back(script_call);
-        }*/
+        }
 
         // Go through each script
         for(auto &s : scenario.scripts) {
-            oprintf("Decompiling %s...\n", s.name.string);
-            auto value = decompile_node(s.root_expression_index, nodes, max_index, string_data, string_data_size);
+            oprintf("Decompiling script %s...\n", s.name.string);
+            auto value = decompile_node(s.root_expression_index, nodes, max_index, scenario);
 
             ScriptTree::Object script_call = {};
             script_call.type = ScriptTree::Object::Type::TYPE_SCRIPT;
@@ -213,16 +211,18 @@ namespace Invader::Compiler {
         }
     }
 
-    static ScriptTree::Object decompile_node(std::size_t index, const Parser::ScenarioScriptNode::struct_big *nodes, std::size_t node_count, const char *string_data, std::size_t string_data_length) {
+    static ScriptTree::Object decompile_node(std::size_t index, const Parser::ScenarioScriptNode::struct_big *nodes, std::size_t node_count, const Parser::Scenario &scenario) {
         auto node_index_to_check = node_for_index(index);
         if(!node_index_to_check.has_value() || *node_index_to_check >= node_count) {
             eprintf_error("Node index is out of bounds");
             throw InvalidTagDataException();
         }
         auto &n = nodes[*node_index_to_check];
-        auto flags = n.flags.read();
 
-        auto sanitary_get_string = [&string_data, &string_data_length](std::size_t offset) -> const char * {
+        // Get the string, returning nullptr if it's not null terminated or is out of bounds
+        auto sanitary_get_string = [&scenario](std::size_t offset) -> const char * {
+            std::size_t string_data_length = scenario.script_string_data.size();
+            const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
             for(std::size_t i = offset; i < string_data_length; i++) {
                 if(string_data[i] == 0) {
                     return string_data + offset;
@@ -231,12 +231,35 @@ namespace Invader::Compiler {
             return nullptr;
         };
 
+        // Get the type and flags
         auto type = n.type.read();
+        auto flags = n.flags.read();
+
+        if(flags.is_global) {
+            ScriptTree::Object o = {};
+            Tokenizer::Token t = {};
+            t.type = Tokenizer::Token::Type::TYPE_STRING;
+            o.type = ScriptTree::Object::Type::TYPE_TOKEN;
+            std::size_t global_index = static_cast<std::size_t>(n.data.read().long_int);
+
+            // Check it
+            if(global_index >= scenario.globals.size()) {
+                eprintf_error("Global index is out of bounds (%zu >= %zu)", global_index, scenario.globals.size());
+                throw InvalidTagDataException();
+            }
+
+            t.value = scenario.globals[global_index].name.string;
+            o.value = t;
+
+            return o;
+        }
+        else if(flags.is_script_call || !flags.is_primitive) {
+            return decompile_node(static_cast<std::size_t>(n.data.read().long_int), nodes, node_count, scenario);
+        }
 
         switch(type) {
-            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID: {
-                return decompile_node(n.data.read().long_int, nodes, node_count, string_data, string_data_length);
-            }
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_VOID:
+                return decompile_node(n.data.read().long_int, nodes, node_count, scenario);
             case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_FUNCTION_NAME: {
                 ScriptTree::Object object = {};
                 ScriptTree::Object::FunctionCall function_call = {};
@@ -255,7 +278,7 @@ namespace Invader::Compiler {
                 auto next_node_index = node_for_index(n.next_node);
                 while(next_node_index.has_value()) {
                     auto &nn = nodes[*next_node_index];
-                    block.emplace_back(decompile_node(*next_node_index, nodes, node_count, string_data, string_data_length));
+                    block.emplace_back(decompile_node(*next_node_index, nodes, node_count, scenario));
                     next_node_index = node_for_index(nn.next_node);
                 }
 
@@ -302,10 +325,21 @@ namespace Invader::Compiler {
                 o.value = t;
                 return o;
             }
+
+            default: {
+                ScriptTree::Object o = {};
+                o.type = ScriptTree::Object::Type::TYPE_TOKEN;
+                Tokenizer::Token t = {};
+                t.type = Tokenizer::Token::Type::TYPE_STRING;
+                auto *str = sanitary_get_string(n.string_offset.read());
+                if(!str) {
+                    eprintf("String out of bounds (%zu >= %zu, %s)\n", static_cast<std::size_t>(n.string_offset.read()), scenario.script_string_data.size(), reinterpret_cast<const char *>(scenario.script_string_data.data()) + static_cast<std::size_t>(n.string_offset.read()));
+                    throw InvalidTagDataException();
+                }
+                t.value = std::string(str);
+                o.value = t;
+                return o;
+            }
         }
-
-        oprintf("Unhandled type: %u\n", type);
-
-        throw std::exception();
     }
 }
