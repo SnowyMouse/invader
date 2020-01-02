@@ -88,7 +88,7 @@ int main(int argc, const char **argv) {
     std::filesystem::path script_directory_path = (data / scenario).parent_path() / "scripts";
 
     // Make sure we have a scripts directory
-    if(!std::filesystem::exists(script_directory_path)) {
+    /*if(!std::filesystem::exists(script_directory_path)) {
         eprintf("Missing a scripts directory at %s\n", script_directory_path.string().c_str());
         return EXIT_FAILURE;
     }
@@ -137,7 +137,7 @@ int main(int argc, const char **argv) {
 
             all_scripts.insert(all_scripts.begin(), tree.begin(), tree.end());
         }
-    }
+    }*/
 
     // Open the scenario tag
     auto tag_path_str = tag_path.string();
@@ -162,5 +162,4 @@ int main(int argc, const char **argv) {
     std::string error_message;
     auto new_s = Compiler::decompile_scenario(s, error, error_message);
     oprintf("%s\n\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
-    oprintf("%s\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(all_scripts)).c_str());
 }

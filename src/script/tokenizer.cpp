@@ -235,7 +235,7 @@ namespace Invader::Tokenizer {
                     // Print a decimal
                     std::ostringstream ss;
                     ss << std::get<float>(t.value);
-                    std::string s(ss.str());
+                    string_data += ss.str();
                     add_spacing = true;
                     break;
                 }
