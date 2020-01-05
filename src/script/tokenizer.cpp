@@ -322,9 +322,6 @@ namespace Invader::Tokenizer {
                     string_data += ")";
                     if(indent_stack_size == 1) {
                         string_data += "\n";
-                        if(indentation != " ") {
-                            string_data += "\n";
-                        }
                         add_spacing = false;
                     }
                     break;
