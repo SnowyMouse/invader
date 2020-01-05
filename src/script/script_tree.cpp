@@ -398,7 +398,7 @@ namespace Invader::ScriptTree {
                     script_type.type = Tokenizer::Token::Type::TYPE_STRING;
                     script_type.value = script_type.raw_value;
 
-                    if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC) {
+                    if(script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STATIC || script.script_type == HEK::ScenarioScriptType::SCENARIO_SCRIPT_TYPE_STUB) {
                         auto &script_return_type = r.emplace_back();
                         script_return_type.column = 0;
                         script_return_type.line = 0;
