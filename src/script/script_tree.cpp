@@ -119,7 +119,7 @@ namespace Invader::ScriptTree {
 
         std::size_t name_index = 3;
 
-        if(script_type_value == "static") {
+        if(script_type_value == "static" || script_type_value == "stub") {
             name_index++;
             // Get the script return type
             auto &script_return_type = first_token[3];
