@@ -2,12 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.21.4] - 2020-01-04
 ### Changed
 - invader-extract: Tag IDs are now set to FFFFFFFF when extracted. This will
   make extracted tags more reproducible independent of the map being extracted.
 - invader-extract: The maps folder the map is in is used if no maps folder is
   supplied
+
+### Fixed
+- All programs: Fixed an easy-to-reproduce segmentation fault crash on Windows.
 
 ## [0.21.3] - 2019-12-26
 ### Fixed
