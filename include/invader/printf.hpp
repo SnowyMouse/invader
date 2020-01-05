@@ -10,7 +10,7 @@
 
 // If NO_OUTPUT is not enabled, then we have eprintf and oprintf as a macro for, basically, printf
 #include <cstdio>
-#define ON_COLOR_TERM (std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)
+#define ON_COLOR_TERM (std::getenv("TERM") && ((std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)))
 #define eprintf(...) std::fprintf(stderr, __VA_ARGS__)
 #define eprintf_error(...) if(ON_COLOR_TERM) {\
     eprintf("\x1B[1;38;5;1m"); \
