@@ -3,6 +3,7 @@
 #include <invader/map/map.hpp>
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/script/compiler.hpp>
 
 namespace Invader::Parser {
     void Invader::Parser::ActorVariant::post_cache_deformat() {
@@ -49,6 +50,16 @@ namespace Invader::Parser {
         for(std::size_t i = 0; i < table_size; i++) {
             ScenarioScriptNode::struct_big big = script_nodes[i];
             *reinterpret_cast<ScenarioScriptNode::struct_big *>(script_nodes + i) = big;
+        }
+
+        // Put scripts in if need be
+        this->source_files.clear();
+        if(this->scripts.size() != 0) {
+            auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
+            const auto *script_data = reinterpret_cast<const std::byte *>(script.c_str());
+            auto &source_file = this->source_files.emplace_back();
+            std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
+            source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
         }
     }
 

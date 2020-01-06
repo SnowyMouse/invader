@@ -121,83 +121,75 @@ namespace Invader::Compiler {
         }
     }
 
-    std::vector<ScriptTree::Object> decompile_scenario(const Parser::Scenario &scenario, bool &error, std::string &error_message) {
+    std::vector<ScriptTree::Object> decompile_scenario(const Parser::Scenario &scenario) {
         std::vector<ScriptTree::Object> return_value;
 
         std::vector<std::string> resolved_tokens;
 
-        // Go through each global
-        try {
-            auto add_sorted = [&resolved_tokens, &return_value](const ScriptTree::Object &what, const std::vector<std::string> &required, const std::string &token) {
-                // First, find what we already have
-                std::vector<std::string> present;
-                for(auto &r : required) {
-                    if(r == token) {
-                        present.emplace_back(r); // also make sure it's placed after all previous calls if need be
-                    }
-                    else {
-                        for(auto &t : resolved_tokens) {
-                            if(t == r) {
-                                present.emplace_back(r);
-                                break;
-                            }
+        auto add_sorted = [&resolved_tokens, &return_value](const ScriptTree::Object &what, const std::vector<std::string> &required, const std::string &token) {
+            // First, find what we already have
+            std::vector<std::string> present;
+            for(auto &r : required) {
+                if(r == token) {
+                    present.emplace_back(r); // also make sure it's placed after all previous calls if need be
+                }
+                else {
+                    for(auto &t : resolved_tokens) {
+                        if(t == r) {
+                            present.emplace_back(r);
+                            break;
                         }
                     }
                 }
+            }
 
-                // Add this
-                resolved_tokens.emplace_back(token);
+            // Add this
+            resolved_tokens.emplace_back(token);
 
-                // Now, until present is clear, go through everything
-                for(std::size_t i = 0; i < return_value.size(); i++) {
-                    if(present.size() == 0) {
-                        return_value.insert(return_value.begin() + i, what);
-                        return;
+            // Now, until present is clear, go through everything
+            for(std::size_t i = 0; i < return_value.size(); i++) {
+                if(present.size() == 0) {
+                    return_value.insert(return_value.begin() + i, what);
+                    return;
+                }
+                else {
+                    const std::string *function = nullptr;
+                    if(return_value[i].type == ScriptTree::Object::Type::TYPE_SCRIPT) {
+                        function = &std::get<ScriptTree::Object::Script>(return_value[i].value).script_name;
+                    }
+                    else if(return_value[i].type == ScriptTree::Object::Type::TYPE_GLOBAL) {
+                        function = &std::get<ScriptTree::Object::Global>(return_value[i].value).global_name;
                     }
                     else {
-                        const std::string *function = nullptr;
-                        if(return_value[i].type == ScriptTree::Object::Type::TYPE_SCRIPT) {
-                            function = &std::get<ScriptTree::Object::Script>(return_value[i].value).script_name;
-                        }
-                        else if(return_value[i].type == ScriptTree::Object::Type::TYPE_GLOBAL) {
-                            function = &std::get<ScriptTree::Object::Global>(return_value[i].value).global_name;
-                        }
-                        else {
-                            std::terminate();
-                        }
+                        std::terminate();
+                    }
 
-                        // Find it!
-                        for(std::size_t q = 0; q < present.size(); q++) {
-                            if(present[q] == *function) {
-                                present.erase(present.begin() + q);
-                                break;
-                            }
+                    // Find it!
+                    for(std::size_t q = 0; q < present.size(); q++) {
+                        if(present[q] == *function) {
+                            present.erase(present.begin() + q);
+                            break;
                         }
                     }
                 }
-
-                return_value.emplace_back(what);
-            };
-
-            for(auto &g : scenario.globals) {
-                auto value = decompile_scenario_global(scenario, g.name.string);
-                std::vector<std::string> required;
-                find_all_required(std::get<ScriptTree::Object::Global>(value.value).block, required);
-                add_sorted(value, required, g.name.string);
             }
 
-            // Go through each script
-            for(auto &s : scenario.scripts) {
-                auto value = decompile_scenario_script(scenario, s.name.string);
-                std::vector<std::string> required;
-                find_all_required(std::get<ScriptTree::Object::Script>(value.value).block, required);
-                add_sorted(value, required, s.name.string);
-            }
+            return_value.emplace_back(what);
+        };
+
+        for(auto &g : scenario.globals) {
+            auto value = decompile_scenario_global(scenario, g.name.string);
+            std::vector<std::string> required;
+            find_all_required(std::get<ScriptTree::Object::Global>(value.value).block, required);
+            add_sorted(value, required, g.name.string);
         }
-        catch(std::exception &e) {
-            error = true;
-            error_message = "Script data is invalid";
-            return {};
+
+        // Go through each script
+        for(auto &s : scenario.scripts) {
+            auto value = decompile_scenario_script(scenario, s.name.string);
+            std::vector<std::string> required;
+            find_all_required(std::get<ScriptTree::Object::Script>(value.value).block, required);
+            add_sorted(value, required, s.name.string);
         }
 
         return return_value;
