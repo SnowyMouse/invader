@@ -777,9 +777,9 @@ namespace Invader::HEK {
      * Node value; can hold a variety of different value types
      */
     union ScenarioScriptNodeValue {
-        std::uint8_t bool_int;
-        std::uint16_t short_int;
-        std::uint32_t long_int;
+        std::int8_t bool_int;
+        std::int16_t short_int;
+        std::int32_t long_int;
         float real;
         TagID tag_id;
 
