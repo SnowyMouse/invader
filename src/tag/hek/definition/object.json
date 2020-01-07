@@ -153,7 +153,8 @@
             },
             {
                 "name": "period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scale period by",
