@@ -20,7 +20,9 @@ set(INVADER_SOURCE_FILES
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
-    src/build/build_workload.cpp
+    src/script/compiler.cpp
+    src/script/script_tree.cpp
+    src/script/tokenizer.cpp
     src/bitmap/color_plate_scanner.cpp
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
