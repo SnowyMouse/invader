@@ -286,8 +286,7 @@
             },
             {
                 "name": "zero skip fraction modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "zero gain modifier",
@@ -295,8 +294,7 @@
             },
             {
                 "name": "zero pitch modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "type": "pad",
@@ -304,18 +302,15 @@
             },
             {
                 "name": "one skip fraction modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "one gain modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "one pitch modifier",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "type": "pad",

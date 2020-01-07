@@ -150,6 +150,22 @@ namespace Invader::Parser {
                 }
             }
         }
+
+        // Default these if need be
+        if(this->one_skip_fraction_modifier == 0.0f && this->zero_skip_fraction_modifier == 0.0f) {
+            this->one_skip_fraction_modifier = 1.0f;
+            this->zero_skip_fraction_modifier = 1.0f;
+        }
+
+        if(this->one_gain_modifier == 0.0f && this->zero_gain_modifier == 0.0f) {
+            this->one_gain_modifier = 1.0f;
+            this->zero_gain_modifier = 1.0f;
+        }
+
+        if(this->zero_pitch_modifier == 0.0f && this->one_pitch_modifier == 0.0f) {
+            this->one_pitch_modifier = 1.0f;
+            this->zero_pitch_modifier = 1.0f;
+        }
     }
 
     void SoundLooping::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
