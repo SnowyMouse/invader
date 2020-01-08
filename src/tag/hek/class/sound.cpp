@@ -36,6 +36,9 @@ namespace Invader::HEK {
         tag.unknown_ffffffff_0 = 0xFFFFFFFF;
         tag.unknown_ffffffff_1 = 0xFFFFFFFF;
 
+        // Get whether we should force all next permutation indices to be -1
+        bool no_next_permutation = tag.flags.read().split_long_sound_into_permutations == 0;
+
         ADD_DEPENDENCY_ADJUST_SIZES(tag.promotion_sound);
         ADD_REFLEXIVE_START(tag.pitch_ranges) {
             DEFAULT_VALUE(reflexive.natural_pitch, 1.0f);
@@ -48,6 +51,10 @@ namespace Invader::HEK {
 
             ADD_REFLEXIVE_START(reflexive.permutations) {
                 reflexive.samples.pointer = static_cast<std::uint32_t>(compiled.data.size());
+
+                if(no_next_permutation) {
+                    reflexive.next_permutation_index = NULL_INDEX;
+                }
 
                 std::size_t samples_size = reflexive.samples.size;
                 std::size_t asset_offset = compiled.asset_data.size();
