@@ -313,6 +313,7 @@ namespace Invader::Parser {
                 bsp_switch_trigger_volume.trigger_volume = static_cast<HEK::Index>(tv);
                 bsp_switch_trigger_volume.source = static_cast<HEK::Index>(bsp_from);
                 bsp_switch_trigger_volume.destination = static_cast<HEK::Index>(bsp_to);
+                bsp_switch_trigger_volume.unknown = 0xFFFF;
             }
         }
     }
