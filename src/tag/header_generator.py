@@ -148,7 +148,9 @@ with open(sys.argv[1], "w") as f:
             return value.replace("_", "-")
 
         for n in range(0,len(e["options"])):
-            f.write("        {}{}\n".format(format_enum(e["options"][n]), "," if n + 1 < len(e["options"]) else ""))
+            f.write("        {},\n".format(format_enum(e["options"][n])))
+
+        f.write("        {}\n".format(format_enum("enum_count")))
 
         f.write("    };\n")
 

@@ -156,11 +156,14 @@ namespace Invader::Parser {
                     std::copy(big, big + frame_count, little);
                     break;
                 }
-                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW:
+                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_DX_DY_DZ_DYAW: {
                     const auto *big = reinterpret_cast<const ModelAnimationsFrameInfoDxDyDzDyaw::struct_big *>(frame_info_big);
                     auto *little = reinterpret_cast<ModelAnimationsFrameInfoDxDyDzDyaw::struct_little *>(frame_info_little);
                     std::copy(big, big + frame_count, little);
                     break;
+                }
+                case HEK::AnimationFrameInfoType::ANIMATION_FRAME_INFO_TYPE_ENUM_COUNT:
+                    std::terminate();
             }
 
             this->frame_info = frame_info_little_v;

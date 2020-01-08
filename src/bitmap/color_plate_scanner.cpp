@@ -1354,6 +1354,8 @@ namespace Invader {
                 background_color.green = 255;
                 background_color.blue = 255;
                 break;
+            case BitmapSpriteUsage::BITMAP_SPRITE_USAGE_ENUM_COUNT:
+                std::terminate();
         }
 
         // Get the max budget of the sprite sheet. If none is given, automatically choose a large budget
