@@ -2,6 +2,20 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.22.0] - 2020-01-08
+### Added
+- invader-build: Added `-O` which can reduce tag space usage
+- invader-build: Added numerous warning and error checks which can be used to
+  spot and report problems with maps
+- invader-build: Added more helpful text output
+
+### Changed
+- invader-build: Improved the accuracy of encounter firing position location
+
+### Fixed
+- invader-build: Fixed various light tags not working correctly
+- invader-build: Fixed sound_looping gain not being defaulted to 1
+
 ## [0.21.4] - 2020-01-04
 ### Changed
 - invader-extract: Tag IDs are now set to FFFFFFFF when extracted. This will
