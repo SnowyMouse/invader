@@ -49,6 +49,10 @@ namespace Invader::HEK {
             reflexive.unknown_ffffffff_0 = 0xFFFFFFFF;
             reflexive.unknown_ffffffff_1 = 0xFFFFFFFF;
 
+            if(no_next_permutation) {
+                reflexive.actual_permutation_count = static_cast<Index>(reflexive.permutations.count.read());
+            }
+
             ADD_REFLEXIVE_START(reflexive.permutations) {
                 reflexive.samples.pointer = static_cast<std::uint32_t>(compiled.data.size());
 
