@@ -2120,7 +2120,7 @@
             },
             {
                 "name": "precomputed bsp index",
-                "type": "uint16",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
@@ -2245,7 +2245,9 @@
             },
             {
                 "name": "precomputed bsp index",
-                "type": "Index"
+                "type": "Index",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "commands",
