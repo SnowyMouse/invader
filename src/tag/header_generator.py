@@ -13,7 +13,7 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[8].lower() == "on" else False
+extract_hidden = True if sys.argv[9].lower() == "on" else False
 
 for i in range(10, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
