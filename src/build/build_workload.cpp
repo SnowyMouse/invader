@@ -357,7 +357,11 @@ namespace Invader {
             oprintf("Scenario:          %s\n", this->scenario_name.string);
             oprintf("Engine:            %s\n", HEK::engine_name(this->engine_target));
             oprintf("Map type:          %s\n", HEK::type_name(*this->cache_file_type));
-            oprintf("Tags:              %zu / %zu (%.02f MiB)\n", this->tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(this->map_data_structs[0].size()));
+            oprintf("Tags:              %zu / %zu (%.02f MiB)", this->tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(this->map_data_structs[0].size()));
+            if(this->stubbed_tag_count) {
+                oprintf(", %zu stubbed", this->stubbed_tag_count);
+            }
+            oprintf("\n");
             oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
             if(bsp_size > 0) {
                 auto &scenario_tag_struct = this->structs[*this->tags[this->scenario_index].base_struct];
@@ -662,6 +666,7 @@ namespace Invader {
             if(tag.stubbed) {
                 tag.path = "MISSINGNO.";
                 tag.tag_class_int = TagClassInt::TAG_CLASS_NONE;
+                this->stubbed_tag_count++;
             }
         }
     }

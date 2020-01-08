@@ -295,6 +295,7 @@ namespace Invader {
         void april_fools() const noexcept;
         void externalize_tags() noexcept;
         void delete_raw_data(std::size_t index);
+        std::size_t stubbed_tag_count = 0;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
