@@ -547,8 +547,8 @@ namespace Invader::Parser {
 
         // Determine which BSP the command lists fall in
         std::size_t command_list_count = this->command_lists.size();
-        if(command_list_count != 0 && false) {
-            auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)].data.data());
+        if(command_list_count != 0) {
+            auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(workload.structs[*scenario_struct.resolve_pointer(&scenario_data.command_lists.pointer)].data.data());
             for(std::size_t i = 0; i < command_list_count; i++) {
                 auto &command_list = this->command_lists[i];
                 auto &command_list_data = command_list_array[i];
