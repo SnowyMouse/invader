@@ -427,38 +427,40 @@ namespace Invader::Parser {
                 firing_positions_indices.reserve(firing_position_count);
 
                 bool raycast = encounter.flags._3d_firing_positions == 0;
+
+                auto intersects_directly_below = [&bsp_data](HEK::Point3D<HEK::LittleEndian> &position, std::uint32_t &surface_index, float distance, std::size_t bsp_index) -> bool {
+                    auto &bsp = bsp_data[bsp_index];
+                    auto position_below = position;
+                    position_below.z = position_below.z - distance;
+
+                    std::uint32_t leaf_index;
+                    HEK::Point3D<HEK::LittleEndian> intersection_point;
+                    return check_for_intersection(
+                        position, position_below,
+                        bsp.bsp3d_nodes,
+                        bsp.bsp3d_node_count,
+                        bsp.planes,
+                        bsp.plane_count,
+                        bsp.leaves,
+                        bsp.leaf_count,
+                        bsp.bsp2d_nodes,
+                        bsp.bsp2d_node_count,
+                        bsp.bsp2d_references,
+                        bsp.bsp2d_reference_count,
+                        bsp.surfaces,
+                        bsp.surface_count,
+                        bsp.edges,
+                        bsp.edge_count,
+                        bsp.vertices,
+                        bsp.vertex_count,
+                        intersection_point,
+                        surface_index,
+                        leaf_index
+                    );
+                };
+
                 for(std::size_t b = 0; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
-
-                    auto intersects_directly_below = [&bsp](HEK::Point3D<HEK::LittleEndian> &position, std::uint32_t &surface_index, float distance) -> bool {
-                        auto position_below = position;
-                        position_below.z = position_below.z - distance;
-
-                        std::uint32_t leaf_index;
-                        HEK::Point3D<HEK::LittleEndian> intersection_point;
-                        return check_for_intersection(
-                            position, position_below,
-                            bsp.bsp3d_nodes,
-                            bsp.bsp3d_node_count,
-                            bsp.planes,
-                            bsp.plane_count,
-                            bsp.leaves,
-                            bsp.leaf_count,
-                            bsp.bsp2d_nodes,
-                            bsp.bsp2d_node_count,
-                            bsp.bsp2d_references,
-                            bsp.bsp2d_reference_count,
-                            bsp.surfaces,
-                            bsp.surface_count,
-                            bsp.edges,
-                            bsp.edge_count,
-                            bsp.vertices,
-                            bsp.vertex_count,
-                            intersection_point,
-                            surface_index,
-                            leaf_index
-                        );
-                    };
 
                     std::size_t hits = 0;
                     std::size_t total_hits = 0;
@@ -473,7 +475,7 @@ namespace Invader::Parser {
                                 // If raycasting check for a surface that is 0.5 world units below it
                                 if(raycast) {
                                     std::uint32_t surface_index;
-                                    in_bsp = intersects_directly_below(p.position, surface_index, 2.0F);
+                                    in_bsp = intersects_directly_below(p.position, surface_index, 2.0F, b);
                                 }
 
                                 // Add 1 if still in BSP
@@ -492,7 +494,7 @@ namespace Invader::Parser {
                             // If raycasting check for a surface that is 0.5 world units below it
                             std::uint32_t surface_index = NULL_INDEX;
                             if(raycast) {
-                                in_bsp = intersects_directly_below(f.position, surface_index, 0.5F);
+                                in_bsp = intersects_directly_below(f.position, surface_index, 0.5F, b);
                             }
 
                             // Add 1 if still in BSP and set cluster index
@@ -537,11 +539,20 @@ namespace Invader::Parser {
                 if(encounter_data.precomputed_bsp_index != NULL_INDEX && firing_position_count > 0) {
                     auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
                     auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
-                    for(std::size_t f = 0; f < firing_position_count; f++) {
-                        auto &position = firing_positions_data[f];
-                        auto &position_index = firing_positions_indices[f];
-                        position.cluster_index = position_index.first;
-                        position.surface_index = position_index.second;
+
+                    auto &bsp = bsp_data[best_bsp];
+                    for(std::size_t fp = 0; fp < firing_position_count; fp++) {
+                        // Get leaf and surface index
+                        auto &f = firing_positions_data[fp];
+                        auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
+                        if(!leaf.is_null()) {
+                            f.cluster_index = bsp.render_leaves[leaf.int_value()].cluster;
+                            std::uint32_t surface_index = NULL_INDEX;
+                            if(raycast) {
+                                intersects_directly_below(f.position, surface_index, 0.5F, best_bsp);
+                            }
+                            f.surface_index = surface_index;
+                        }
                     }
                 }
             }
