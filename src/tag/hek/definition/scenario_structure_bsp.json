@@ -1466,7 +1466,8 @@
                 "name": "fog palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "type": "pad",
