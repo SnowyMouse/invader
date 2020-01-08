@@ -291,6 +291,7 @@ namespace Invader::Parser {
 
         // BSP transitions
         std::size_t trigger_volume_count = this->trigger_volumes.size();
+        this->bsp_switch_trigger_volumes.clear();
         for(std::size_t tv = 0; tv < trigger_volume_count; tv++) {
             auto &trigger_volume = this->trigger_volumes[tv];
             if(std::strncmp(trigger_volume.name.string, "bsp", 3) != 0) {
