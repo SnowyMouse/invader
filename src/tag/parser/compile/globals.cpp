@@ -47,4 +47,16 @@ namespace Invader::Parser {
             }
         }
     }
+    void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
+        float ting_volume = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
+        const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
+        const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
+
+        if(globals_multiplayer_information_data.sounds.count > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
+            const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
+            if(!sound_id.is_null()) {
+                reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = ting_volume;
+            }
+        }
+    }
 }

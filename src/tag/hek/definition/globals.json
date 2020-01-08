@@ -1,5 +1,55 @@
 [
     {
+        "name": "MultiplayerInformationSound",
+        "options": [
+            "play ball",
+            "game over",
+            "one minute to win",
+            "30 seconds to win",
+            "red team minute to win",
+            "red team 30 to win",
+            "blue team minute to win",
+            "blue team 30 to win",
+            "blue team has the flag",
+            "blue team flag returned",
+            "blue team score",
+            "red team has the flag",
+            "red team flag returned",
+            "red team score",
+            "double kill",
+            "triple kill",
+            "killtacular",
+            "running riot",
+            "killing spree",
+            "oddball",
+            "race",
+            "slayer",
+            "capture the flag",
+            "warthog",
+            "ghost",
+            "scorpion",
+            "countdown timer",
+            "teleporter activate",
+            "flag failure",
+            "countdown for respawn",
+            "hill move",
+            "player respawn",
+            "team king of the hill",
+            "team oddball",
+            "team race",
+            "team slayer",
+            "king of the hill",
+            "blue team ctf",
+            "red team ctf",
+            "hill contested",
+            "hill controlled",
+            "hill occupied",
+            "countdown timer end",
+            "ting"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "GlobalsRasterizerDataFlags",
         "type": "bitfield",
         "fields": [
@@ -1006,21 +1056,6 @@
         "size": 16
     },
     {
-        "name": "GlobalsMultiplayerSound",
-        "type": "struct",
-        "fields": [
-            {
-                "name": "sound",
-                "type": "TagDependency",
-                "compound": true,
-                "classes": [
-                    "sound"
-                ]
-            }
-        ],
-        "size": 16
-    },
-    {
         "name": "GlobalsMultiplayerInformation",
         "fields": [
             {
@@ -1072,7 +1107,7 @@
             {
                 "name": "sounds",
                 "type": "TagReflexive",
-                "struct": "GlobalsMultiplayerSound",
+                "struct": "GlobalsSound",
                 "compound": true
             },
             {
@@ -1081,6 +1116,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 160
     },
     {
@@ -1679,8 +1715,7 @@
                 "name": "playlist members",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlaylistMember",
-                "compound": true,
-                "minimum": 1
+                "compound": true
             }
         ],
         "type": "struct",
