@@ -8,14 +8,8 @@ namespace Invader::Parser {
         this->water_friction = this->water_friction * 10000.0f;
 
         this->unknown_constant = density * 118613.3333333f;
-        if(!this->flags.no_gravity) {
-            auto density = this->density;
-            this->water_gravity_scale = -1.0f * (density / WATER_DENSITY - 1.0f) / (density / WATER_DENSITY + 1.0f);
-            this->air_gravity_scale = -1.0f * (density / AIR_DENSITY - 1.0f) / (density / AIR_DENSITY + 1.0f);
-        }
-        else {
-            this->air_gravity_scale = 1.0F;
-            this->water_gravity_scale = 1.0F;
-        }
+        auto density = this->density;
+        this->water_gravity_scale = -1.0f * (density / WATER_DENSITY - 1.0f) / (density / WATER_DENSITY + 1.0f);
+        this->air_gravity_scale = -1.0f * (density / AIR_DENSITY - 1.0f) / (density / AIR_DENSITY + 1.0f);
     }
 }
