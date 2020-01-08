@@ -47,16 +47,23 @@ namespace Invader::Parser {
             }
         }
     }
-    void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
-        float ting_volume = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
+    void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
 
-        if(globals_multiplayer_information_data.sounds.count > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
+        // See if we have the thing sound
+        const std::size_t SOUND_COUNT = globals_multiplayer_information_data.sounds.count;
+        if(SOUND_COUNT > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
+            const float TING_VOLUME = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
             const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
             if(!sound_id.is_null()) {
-                reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = ting_volume;
+                reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
             }
+        }
+
+        // See if we have all sounds, too
+        if(SOUND_COUNT < HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT && !workload.hide_pedantic_warnings) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", SOUND_COUNT, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT), offset / sizeof(struct_little));
         }
     }
 }
