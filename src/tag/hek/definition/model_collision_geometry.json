@@ -25,7 +25,7 @@
         "width": 32
     },
     {
-        "name": "ModelCollisionGeometryLeafFlags",
+        "name": "ModelCollisionGeometryBSPLeafFlags",
         "type": "bitfield",
         "fields": [
             "contains double sided surfaces"
@@ -33,7 +33,7 @@
         "width": 16
     },
     {
-        "name": "ModelCollisionGeometrySurfaceFlags",
+        "name": "ModelCollisionGeometryBSPSurfaceFlags",
         "type": "bitfield",
         "fields": [
             "two sided",
@@ -199,16 +199,18 @@
         "fields": [
             {
                 "name": "plane",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "back child",
                 "flagged": true,
+                "comment": "refers to a BSP3D node if not signed and a leaf if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             },
             {
                 "name": "front child",
                 "flagged": true,
+                "comment": "refers to a BSP3D node if not signed and a leaf if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -216,7 +218,7 @@
         "size": 12
     },
     {
-        "name": "ModelCollisionGeometryPlane",
+        "name": "ModelCollisionGeometryBSPPlane",
         "fields": [
             {
                 "name": "plane",
@@ -228,11 +230,11 @@
         "size": 16
     },
     {
-        "name": "ModelCollisionGeometryLeaf",
+        "name": "ModelCollisionGeometryBSPLeaf",
         "fields": [
             {
                 "name": "flags",
-                "type": "ModelCollisionGeometryLeafFlags"
+                "type": "ModelCollisionGeometryBSPLeafFlags"
             },
             {
                 "name": "bsp2d reference count",
@@ -240,7 +242,7 @@
             },
             {
                 "name": "first bsp2d reference",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
@@ -251,12 +253,13 @@
         "fields": [
             {
                 "name": "plane",
-                "flagged": true,
-                "type": "uint32"
+                "type": "uint32",
+                "flagged": true
             },
             {
                 "name": "bsp2d node",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -274,11 +277,13 @@
             {
                 "name": "left child",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             },
             {
                 "name": "right child",
                 "flagged": true,
+                "comment": "refers to a BSP2D node if not signed and a surface if sign bit is set; null if 0xFFFFFFFF",
                 "type": "uint32"
             }
         ],
@@ -286,20 +291,20 @@
         "size": 20
     },
     {
-        "name": "ModelCollisionGeometrySurface",
+        "name": "ModelCollisionGeometryBSPSurface",
         "fields": [
             {
                 "name": "plane",
-                "flagged": true,
-                "type": "uint32"
+                "type": "uint32",
+                "flagged": true
             },
             {
                 "name": "first edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "flags",
-                "type": "ModelCollisionGeometrySurfaceFlags",
+                "type": "ModelCollisionGeometryBSPSurfaceFlags",
                 "endian": null
             },
             {
@@ -316,38 +321,38 @@
         "size": 12
     },
     {
-        "name": "ModelCollisionGeometryEdge",
+        "name": "ModelCollisionGeometryBSPEdge",
         "fields": [
             {
                 "name": "start vertex",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "end vertex",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "forward edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "reverse edge",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "left surface",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "right surface",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
         "size": 24
     },
     {
-        "name": "ModelCollisionGeometryVertex",
+        "name": "ModelCollisionGeometryBSPVertex",
         "fields": [
             {
                 "name": "point",
@@ -356,7 +361,7 @@
             },
             {
                 "name": "first edge",
-                "type": "int32"
+                "type": "uint32"
             }
         ],
         "type": "struct",
@@ -374,13 +379,13 @@
             {
                 "name": "planes",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryPlane",
+                "struct": "ModelCollisionGeometryBSPPlane",
                 "compound": true
             },
             {
                 "name": "leaves",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryLeaf",
+                "struct": "ModelCollisionGeometryBSPLeaf",
                 "compound": true
             },
             {
@@ -398,23 +403,24 @@
             {
                 "name": "surfaces",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometrySurface",
+                "struct": "ModelCollisionGeometryBSPSurface",
                 "compound": true
             },
             {
                 "name": "edges",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryEdge",
+                "struct": "ModelCollisionGeometryBSPEdge",
                 "compound": true
             },
             {
                 "name": "vertices",
                 "type": "TagReflexive",
-                "struct": "ModelCollisionGeometryVertex",
+                "struct": "ModelCollisionGeometryBSPVertex",
                 "compound": true
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 96
     },
     {
@@ -699,6 +705,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 664
     }
 ]

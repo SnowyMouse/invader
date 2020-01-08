@@ -277,7 +277,7 @@
                 "name": "firing damage",
                 "type": "TagDependency",
                 "classes": [
-                    "damage"
+                    "damage_effect"
                 ],
                 "compound": true
             },
@@ -285,7 +285,7 @@
                 "name": "misfire damage",
                 "type": "TagDependency",
                 "classes": [
-                    "damage"
+                    "damage_effect"
                 ],
                 "compound": true
             },
@@ -293,7 +293,7 @@
                 "name": "empty damage",
                 "type": "TagDependency",
                 "classes": [
-                    "damage"
+                    "damage_effect"
                 ],
                 "compound": true
             }
@@ -513,6 +513,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 276
     },
     {
@@ -769,7 +770,8 @@
                 "name": "first person model",
                 "type": "TagDependency",
                 "classes": [
-                    "gbxmodel"
+                    "gbxmodel",
+                    "model"
                 ],
                 "compound": true
             },
@@ -862,6 +864,8 @@
         ],
         "type": "struct",
         "inherits": "Item",
+        "pre_compile": true,
+        "post_compile": true,
         "size": 1288
     }
 ]

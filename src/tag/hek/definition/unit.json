@@ -302,7 +302,7 @@
                 "name": "dialogue",
                 "type": "TagDependency",
                 "classes": [
-                    "unit_dialogue"
+                    "dialogue"
                 ],
                 "compound": true
             }

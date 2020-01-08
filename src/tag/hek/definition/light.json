@@ -26,15 +26,18 @@
             {
                 "name": "radius modifer",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [1.0, 1.0]
             },
             {
                 "name": "falloff angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 3.14159274101257
             },
             {
                 "name": "cutoff angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 3.14159274101257
             },
             {
                 "name": "lens flare only radius",
@@ -50,7 +53,10 @@
             },
             {
                 "name": "unknown two",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little",
+                "comment": "Not setting this to 2 breaks the first person flashlight."
             },
             {
                 "name": "sin cutoff angle",
@@ -116,7 +122,8 @@
             },
             {
                 "name": "yaw period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -128,7 +135,8 @@
             },
             {
                 "name": "roll period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -140,7 +148,8 @@
             },
             {
                 "name": "pitch period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -194,6 +203,7 @@
         ],
         "type": "struct",
         "post_cache_deformat": "true",
+        "pre_compile": true,
         "size": 352
     }
 ]

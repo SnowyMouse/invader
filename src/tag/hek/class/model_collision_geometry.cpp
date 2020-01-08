@@ -1,39 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/hek/constants.hpp>
-#include <invader/tag/hek/compile.hpp>
 #include <invader/tag/hek/definition.hpp>
-#include "compile.hpp"
 
 namespace Invader::HEK {
-    void compile_model_collision_geometry_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
-        BEGIN_COMPILE(ModelCollisionGeometry);
-
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.localized_damage_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.area_damage_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.body_damaged_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.body_depleted_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.body_destroyed_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.shield_damaged_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.shield_depleted_effect);
-        ADD_DEPENDENCY_ADJUST_SIZES(tag.shield_recharging_effect);
-        tag.shield_recharge_rate = 1.0f / tag.recharge_time / TICK_RATE;
-
-        ADD_REFLEXIVE(tag.materials);
-        ADD_REFLEXIVE_START(tag.regions) {
-            ADD_DEPENDENCY_ADJUST_SIZES(reflexive.destroyed_effect);
-            ADD_REFLEXIVE(reflexive.permutations);
-        } ADD_REFLEXIVE_END;
-        ADD_REFLEXIVE(tag.modifiers);
-        ADD_REFLEXIVE(tag.pathfinding_spheres);
-        ADD_REFLEXIVE_START(tag.nodes) {
-            ADD_MODEL_COLLISION_BSP(reflexive.bsps)
-        } ADD_REFLEXIVE_END
-
-        FINISH_COMPILE
-    }
-
-    static inline bool point_in_front_of_plane(const Point3D<LittleEndian> &point, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count, std::uint32_t plane_index) {
+    static inline bool point_in_front_of_plane(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSPPlane<LittleEndian> *planes, std::uint32_t plane_count, std::uint32_t plane_index) {
         if(plane_index >= plane_count) {
             eprintf_error("Invalid plane index %u / %u in BSP.\n", plane_index, plane_count);
             throw OutOfBoundsException();
@@ -41,7 +11,7 @@ namespace Invader::HEK {
         return point.distance_from_plane(planes[plane_index].plane) >= 0;
     }
 
-    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryPlane<LittleEndian> *planes, std::uint32_t plane_count) {
+    FlaggedInt<std::uint32_t> leaf_for_point_of_bsp_tree(const Point3D<LittleEndian> &point, const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes, std::uint32_t bsp3d_node_count, const ModelCollisionGeometryBSPPlane<LittleEndian> *planes, std::uint32_t plane_count) {
         // Start with an initial index of 0
         FlaggedInt<std::uint32_t> node_index = {0};
 
@@ -68,19 +38,19 @@ namespace Invader::HEK {
             const Point3D<LittleEndian> &point_b,
             const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
             std::uint32_t bsp3d_node_count,
-            const ModelCollisionGeometryPlane<LittleEndian> *planes,
+            const ModelCollisionGeometryBSPPlane<LittleEndian> *planes,
             std::uint32_t plane_count,
-            const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+            const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves,
             std::uint32_t leaf_count,
             const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
             std::uint32_t bsp2d_node_count,
             const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
             std::uint32_t bsp2d_reference_count,
-            const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+            const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces,
             std::uint32_t surface_count,
-            const ModelCollisionGeometryEdge<LittleEndian> *edges,
+            const ModelCollisionGeometryBSPEdge<LittleEndian> *edges,
             std::uint32_t edge_count,
-            const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+            const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices,
             std::uint32_t vertex_count,
             Point3D<LittleEndian> &intersection_point,
             std::uint32_t &surface_index,
@@ -95,19 +65,19 @@ namespace Invader::HEK {
         const Point3D<LittleEndian> &original_point_b;
         const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes;
         std::uint32_t bsp3d_node_count;
-        const ModelCollisionGeometryPlane<LittleEndian> *planes;
+        const ModelCollisionGeometryBSPPlane<LittleEndian> *planes;
         std::uint32_t plane_count;
-        const ModelCollisionGeometryLeaf<LittleEndian> *leaves;
+        const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves;
         std::uint32_t leaf_count;
         const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes;
         std::uint32_t bsp2d_node_count;
         const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references;
         std::uint32_t bsp2d_reference_count;
-        const ModelCollisionGeometrySurface<LittleEndian> *surfaces;
+        const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces;
         std::uint32_t surface_count;
-        const ModelCollisionGeometryEdge<LittleEndian> *edges;
+        const ModelCollisionGeometryBSPEdge<LittleEndian> *edges;
         std::uint32_t edge_count;
-        const ModelCollisionGeometryVertex<LittleEndian> *vertices;
+        const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices;
         std::uint32_t vertex_count;
 
         bool check_for_intersection_bsp2d_node (
@@ -287,9 +257,9 @@ namespace Invader::HEK {
                 auto node_index = reference.bsp2d_node.read();
 
                 // Make sure the plane is valid
-                auto plane = reference.plane.read().int_value();
+                auto plane = reference.plane.read();
                 if(plane >= this->plane_count) {
-                    eprintf_error("invalid plane range for BSP #%u / %u\n", plane, this->plane_count);
+                    eprintf_error("invalid plane range for BSP #%u / %u\n", plane.int_value(), this->plane_count);
                     throw OutOfBoundsException();
                 }
 
@@ -369,19 +339,19 @@ namespace Invader::HEK {
             const Point3D<LittleEndian> &original_point_b,
             const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
             std::uint32_t bsp3d_node_count,
-            const ModelCollisionGeometryPlane<LittleEndian> *planes,
+            const ModelCollisionGeometryBSPPlane<LittleEndian> *planes,
             std::uint32_t plane_count,
-            const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+            const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves,
             std::uint32_t leaf_count,
             const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
             std::uint32_t bsp2d_node_count,
             const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
             std::uint32_t bsp2d_reference_count,
-            const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+            const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces,
             std::uint32_t surface_count,
-            const ModelCollisionGeometryEdge<LittleEndian> *edges,
+            const ModelCollisionGeometryBSPEdge<LittleEndian> *edges,
             std::uint32_t edge_count,
-            const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+            const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices,
             std::uint32_t vertex_count
         ) :
         original_point_a(original_point_a),
@@ -409,19 +379,19 @@ namespace Invader::HEK {
         const Point3D<LittleEndian> &point_b,
         const ModelCollisionGeometryBSP3DNode<LittleEndian> *bsp3d_nodes,
         std::uint32_t bsp3d_node_count,
-        const ModelCollisionGeometryPlane<LittleEndian> *planes,
+        const ModelCollisionGeometryBSPPlane<LittleEndian> *planes,
         std::uint32_t plane_count,
-        const ModelCollisionGeometryLeaf<LittleEndian> *leaves,
+        const ModelCollisionGeometryBSPLeaf<LittleEndian> *leaves,
         std::uint32_t leaf_count,
         const ModelCollisionGeometryBSP2DNode<LittleEndian> *bsp2d_nodes,
         std::uint32_t bsp2d_node_count,
         const ModelCollisionGeometryBSP2DReference<LittleEndian> *bsp2d_references,
         std::uint32_t bsp2d_reference_count,
-        const ModelCollisionGeometrySurface<LittleEndian> *surfaces,
+        const ModelCollisionGeometryBSPSurface<LittleEndian> *surfaces,
         std::uint32_t surface_count,
-        const ModelCollisionGeometryEdge<LittleEndian> *edges,
+        const ModelCollisionGeometryBSPEdge<LittleEndian> *edges,
         std::uint32_t edge_count,
-        const ModelCollisionGeometryVertex<LittleEndian> *vertices,
+        const ModelCollisionGeometryBSPVertex<LittleEndian> *vertices,
         std::uint32_t vertex_count,
         Point3D<LittleEndian> &intersection_point,
         std::uint32_t &surface_index,

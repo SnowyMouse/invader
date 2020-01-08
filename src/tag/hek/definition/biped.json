@@ -170,7 +170,7 @@
                 "name": "footsteps",
                 "type": "TagDependency",
                 "classes": [
-                    "footsteps"
+                    "material_effects"
                 ],
                 "compound": true
             },
@@ -302,7 +302,7 @@
             },
             {
                 "name": "head model node index",
-                "type": "uint16",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
@@ -315,6 +315,8 @@
         ],
         "type": "struct",
         "inherits": "Unit",
+        "pre_compile": true,
+        "post_compile": true,
         "size": 1268
     }
 ]

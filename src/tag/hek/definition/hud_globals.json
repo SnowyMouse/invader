@@ -249,7 +249,7 @@
                 "name": "hud messages",
                 "type": "TagDependency",
                 "classes": [
-                    "hud_message"
+                    "hud_message_text"
                 ],
                 "compound": true
             },

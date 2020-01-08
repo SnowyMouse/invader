@@ -25,7 +25,8 @@
                 "classes": [
                     "shader"
                 ],
-                "compound": true
+                "compound": true,
+                "non_null": true
             },
             {
                 "type": "pad",
@@ -39,6 +40,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 20
     },
     {
@@ -366,6 +368,7 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
+        "pre_compile": true,
         "size": 256
     },
     {
@@ -810,7 +813,7 @@
                 "name": "particle system",
                 "type": "TagDependency",
                 "classes": [
-                    "weather_system"
+                    "weather_particle_system"
                 ],
                 "compound": true
             },
@@ -1463,7 +1466,8 @@
                 "name": "fog palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "type": "pad",
@@ -1559,6 +1563,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 648
     },
     {

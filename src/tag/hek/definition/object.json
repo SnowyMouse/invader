@@ -133,7 +133,8 @@
                     "antenna",
                     "glow",
                     "light_volume",
-                    "lightning"
+                    "lightning",
+                    "flag"
                 ]
             },
             {
@@ -152,7 +153,8 @@
             },
             {
                 "name": "period",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scale period by",
@@ -209,7 +211,8 @@
             {
                 "name": "bounds",
                 "bounds": true,
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": [0.0, 1.0]
             },
             {
                 "type": "pad",
@@ -262,6 +265,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 360
     },
     {
@@ -269,7 +273,8 @@
         "fields": [
             {
                 "name": "weight",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "color lower bound",
@@ -360,7 +365,8 @@
                 "name": "model",
                 "type": "TagDependency",
                 "classes": [
-                    "gbxmodel"
+                    "gbxmodel",
+                    "model"
                 ],
                 "compound": true
             },
@@ -368,7 +374,7 @@
                 "name": "animation graph",
                 "type": "TagDependency",
                 "classes": [
-                    "animation"
+                    "model_animations"
                 ],
                 "compound": true
             },

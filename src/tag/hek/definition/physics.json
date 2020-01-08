@@ -258,7 +258,9 @@
                 "name": "inertial matrix and inverse",
                 "type": "TagReflexive",
                 "struct": "PhysicsInertialMatrix",
-                "compound": true
+                "compound": true,
+                "minimum": 2,
+                "maximum": 2
             },
             {
                 "name": "powered mass points",
@@ -274,6 +276,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 128
     }
 ]

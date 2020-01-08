@@ -44,7 +44,8 @@
             },
             {
                 "name": "map repeats",
-                "type": "int16"
+                "type": "uint16",
+                "default": 1
             },
             {
                 "name": "map index",
@@ -96,7 +97,8 @@
             },
             {
                 "name": "view parallel brightness",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "view parallel tint color",
@@ -129,7 +131,8 @@
             },
             {
                 "name": "ripple scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "ripple maps",
@@ -172,6 +175,7 @@
         ],
         "type": "struct",
         "inherits": "Shader",
+        "pre_compile": true,
         "size": 320
     }
 ]

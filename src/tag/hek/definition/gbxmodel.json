@@ -207,7 +207,7 @@
             {
                 "name": "permutation number",
                 "type": "uint16",
-                "endian": "little",
+                "endian": "Index",
                 "cache_only": true
             },
             {
@@ -246,10 +246,12 @@
                 "name": "markers",
                 "type": "TagReflexive",
                 "struct": "GBXModelRegionPermutationMarker",
-                "compound": true
+                "compound": true,
+                "compile_ignore": true
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 88
     },
     {
@@ -401,12 +403,14 @@
             {
                 "name": "prev filthy part index",
                 "type": "int8",
-                "endian": null
+                "endian": null,
+                "cache_only": true
             },
             {
                 "name": "next filthy part index",
                 "type": "int8",
-                "endian": null
+                "endian": null,
+                "cache_only": true
             },
             {
                 "name": "centroid primary node",
@@ -418,7 +422,8 @@
             },
             {
                 "name": "centroid primary weight",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "centroid secondary weight",
@@ -452,7 +457,9 @@
             },
             {
                 "name": "do not crash the game",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "triangle count",
@@ -463,18 +470,23 @@
             {
                 "name": "triangle offset",
                 "endian": "little",
+                "type": "uint32",
                 "cache_only": true,
-                "type": "uint32"
+                "drop_on_extract_hidden": true
             },
             {
                 "name": "triangle offset 2",
                 "endian": "little",
+                "type": "uint32",
                 "cache_only": true,
-                "type": "uint32"
+                "drop_on_extract_hidden": true
             },
             {
                 "name": "do not screw up the model",
-                "type": "uint32"
+                "type": "uint32",
+                "drop_on_extract_hidden": true,
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "vertex count",
@@ -494,7 +506,8 @@
             },
             {
                 "name": "vertex offset",
-                "type": "uint32"
+                "type": "uint32",
+                "drop_on_extract_hidden": true
             },
             {
                 "type": "pad",
@@ -522,6 +535,8 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
+        "unsafe_to_dedupe": true,
+        "pre_compile": true,
         "size": 132
     },
     {
@@ -633,11 +648,13 @@
             },
             {
                 "name": "base map u scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "base map v scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -648,13 +665,14 @@
                 "type": "TagReflexive",
                 "struct": "GBXModelMarker",
                 "compound": true,
-                "cache_only": true
+                "non_cached_deprecated": true
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "GBXModelNode",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "name": "regions",
@@ -677,6 +695,7 @@
         ],
         "type": "struct",
         "post_cache_deformat": true,
+        "pre_compile": true,
         "size": 232
     }
 ]

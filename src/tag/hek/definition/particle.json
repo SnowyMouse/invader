@@ -59,7 +59,8 @@
                 "classes": [
                     "bitmap"
                 ],
-                "compound": true
+                "compound": true,
+                "non_null": true
             },
             {
                 "name": "physics",
@@ -73,7 +74,7 @@
                 "name": "sir marty exchanged his children for thine",
                 "type": "TagDependency",
                 "classes": [
-                    "material_effect"
+                    "material_effects"
                 ],
                 "compound": true
             },
@@ -131,7 +132,8 @@
             {
                 "name": "radius animation",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "type": "pad",
@@ -144,15 +146,20 @@
             },
             {
                 "name": "contact deterioration",
-                "type": "float"
+                "type": "float",
+                "non_cached": true,
+                "comment": "this value is totally broken and locks the game up if it's non-zero; even tool.exe sets it to zero",
+                "hidden": true
             },
             {
                 "name": "fade start size",
-                "type": "float"
+                "type": "float",
+                "default": 5.0
             },
             {
                 "name": "fade end size",
-                "type": "float"
+                "type": "float",
+                "default": 4.0
             },
             {
                 "type": "pad",
@@ -179,8 +186,10 @@
                 "size": 8
             },
             {
-                "name": "unknown",
-                "type": "float"
+                "name": "sprite size",
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "orientation",
@@ -195,7 +204,7 @@
                 "size": 36
             },
             {
-                "name": "one",
+                "name": "make it actually work",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
@@ -315,6 +324,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 356
     }
 ]

@@ -9,6 +9,8 @@
         ],
         "type": "struct",
         "inherits": "Device",
+        "pre_compile": true,
+        "post_compile": true,
         "size": 720
     }
 ]

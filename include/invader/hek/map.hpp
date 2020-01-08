@@ -110,7 +110,7 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileDemoHeader) == 0x800);
 
     struct CacheFileTagDataHeader {
-        LittleEndian<std::uint32_t> tag_array_address;
+        LittleEndian<HEK::Pointer> tag_array_address;
         LittleEndian<TagID> scenario_tag;
         LittleEndian<std::uint32_t> random_number;
         LittleEndian<std::uint32_t> tag_count;
@@ -132,8 +132,8 @@ namespace Invader::HEK {
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
         LittleEndian<TagID> tag_id;
-        LittleEndian<std::uint32_t> tag_path;
-        LittleEndian<std::uint32_t> tag_data;
+        LittleEndian<HEK::Pointer> tag_path;
+        LittleEndian<HEK::Pointer> tag_data;
         LittleEndian<std::uint32_t> indexed;
         PAD(0x4);
     };

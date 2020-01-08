@@ -66,7 +66,8 @@
             {
                 "name": "radius",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [0.125, 0.125]
             },
             {
                 "type": "pad",
@@ -75,17 +76,20 @@
             {
                 "name": "intensity",
                 "bounds": true,
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": [1.0, 1.0]
             },
             {
                 "name": "color lower bounds",
                 "type": "ColorRGB",
-                "compound": true
+                "compound": true,
+                "default": [1.0, 1.0, 1.0]
             },
             {
                 "name": "color upper bounds",
                 "type": "ColorRGB",
-                "compound": true
+                "compound": true,
+                "default": [1.0, 1.0, 1.0]
             },
             {
                 "type": "pad",
@@ -97,7 +101,8 @@
             },
             {
                 "name": "animation speed",
-                "type": "uint16"
+                "type": "uint16",
+                "default": 1
             },
             {
                 "type": "pad",

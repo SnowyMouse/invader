@@ -133,6 +133,11 @@ namespace Invader {
     DEFINE_EXCEPTION(InvalidTagDataException, "tag data is invalid");
 
     /**
+     * This is thrown when a HEK tag data header is invalid
+     */
+    DEFINE_EXCEPTION(InvalidTagDataHeaderException, "tag data header is invalid");
+
+    /**
      * This is thrown when a resource map was not supplied when it should have
      */
     DEFINE_EXCEPTION(ResourceMapRequiredException, "no resource map was supplied");

@@ -68,6 +68,7 @@
         ],
         "type": "struct",
         "post_cache_deformat": true,
+        "pre_compile": true,
         "size": 64
     }
 ]

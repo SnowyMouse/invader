@@ -105,7 +105,8 @@
             },
             {
                 "name": "gain",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "format",
@@ -146,7 +147,8 @@
                 "type": "TagDataOffset",
                 "compound": true,
                 "file_offset": true,
-                "external_file_offset": "sounds.map"
+                "external_file_offset": "sounds.map",
+                "compile_ignore": true
             },
             {
                 "name": "mouth data",
@@ -161,6 +163,8 @@
         ],
         "type": "struct",
         "post_cache_deformat": true,
+        "unsafe_to_dedupe": true,
+        "pre_compile": true,
         "size": 124
     },
     {
@@ -173,12 +177,14 @@
             },
             {
                 "name": "natural pitch",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "bend bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 0.0, 1.0 ]
             },
             {
                 "name": "actual permutation count",
@@ -214,6 +220,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 72
     },
     {
@@ -246,23 +253,28 @@
             {
                 "name": "random pitch bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "default": [ 1.0, 1.0 ]
             },
             {
                 "name": "inner cone angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 6.28318548202515
             },
             {
                 "name": "outer cone angle",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 6.28318548202515
             },
             {
                 "name": "outer cone gain",
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "random gain modifier",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "maximum bend per second",
@@ -357,6 +369,8 @@
         ],
         "type": "struct",
         "post_cache_parse": true,
+        "unsafe_to_dedupe": true,
+        "pre_compile": true,
         "size": 164
     }
 ]

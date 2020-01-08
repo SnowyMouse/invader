@@ -7,6 +7,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
@@ -29,81 +30,35 @@ set(INVADER_SOURCE_FILES
     src/sound/sound_encoder.cpp
     src/sound/sound_reader.cpp
     src/sound/adpcm_xq/adpcm-lib.c
-    src/tag/hek/compile.cpp
     src/tag/hek/header.cpp
-    src/tag/hek/class/actor.cpp
-    src/tag/hek/class/actor_variant.cpp
-    src/tag/hek/class/antenna.cpp
-    src/tag/hek/class/biped.cpp
     src/tag/hek/class/bitmap.cpp
-    src/tag/hek/class/camera_track.cpp
-    src/tag/hek/class/color_table.cpp
-    src/tag/hek/class/contrail.cpp
-    src/tag/hek/class/damage_effect.cpp
-    src/tag/hek/class/decal.cpp
-    src/tag/hek/class/detail_object_collection.cpp
-    src/tag/hek/class/device_control.cpp
-    src/tag/hek/class/device_light_fixture.cpp
-    src/tag/hek/class/device_machine.cpp
-    src/tag/hek/class/dialogue.cpp
-    src/tag/hek/class/effect.cpp
-    src/tag/hek/class/equipment.cpp
-    src/tag/hek/class/flag.cpp
-    src/tag/hek/class/fog.cpp
-    src/tag/hek/class/font.cpp
-    src/tag/hek/class/garbage.cpp
-    src/tag/hek/class/gbxmodel.cpp
-    src/tag/hek/class/globals.cpp
-    src/tag/hek/class/glow.cpp
-    src/tag/hek/class/grenade_hud_interface.cpp
-    src/tag/hek/class/hud_globals.cpp
-    src/tag/hek/class/hud_message_text.cpp
-    src/tag/hek/class/hud_number.cpp
-    src/tag/hek/class/input_device_defaults.cpp
-    src/tag/hek/class/item_collection.cpp
-    src/tag/hek/class/lens_flare.cpp
-    src/tag/hek/class/light.cpp
-    src/tag/hek/class/lightning.cpp
-    src/tag/hek/class/light_volume.cpp
-    src/tag/hek/class/material_effects.cpp
-    src/tag/hek/class/meter.cpp
-    src/tag/hek/class/model_animations.cpp
     src/tag/hek/class/model_collision_geometry.cpp
-    src/tag/hek/class/multiplayer_scenario_description.cpp
-    src/tag/hek/class/object.cpp
-    src/tag/hek/class/particle.cpp
-    src/tag/hek/class/particle_system.cpp
-    src/tag/hek/class/point_physics.cpp
-    src/tag/hek/class/physics.cpp
-    src/tag/hek/class/projectile.cpp
-    src/tag/hek/class/scenario.cpp
-    src/tag/hek/class/scenario_structure_bsp.cpp
-    src/tag/hek/class/shader_environment.cpp
-    src/tag/hek/class/shader_model.cpp
-    src/tag/hek/class/shader_transparent_chicago.cpp
-    src/tag/hek/class/shader_transparent_chicago_extended.cpp
-    src/tag/hek/class/shader_transparent_generic.cpp
-    src/tag/hek/class/shader_transparent_glass.cpp
-    src/tag/hek/class/shader_transparent_meter.cpp
-    src/tag/hek/class/shader_transparent_plasma.cpp
-    src/tag/hek/class/shader_transparent_water.cpp
-    src/tag/hek/class/sky.cpp
-    src/tag/hek/class/sound.cpp
-    src/tag/hek/class/sound_environment.cpp
-    src/tag/hek/class/sound_looping.cpp
-    src/tag/hek/class/string_list.cpp
-    src/tag/hek/class/tag_collection.cpp
-    src/tag/hek/class/ui_widget_definition.cpp
-    src/tag/hek/class/unit_hud_interface.cpp
-    src/tag/hek/class/vehicle.cpp
-    src/tag/hek/class/weapon.cpp
-    src/tag/hek/class/weapon_hud_interface.cpp
-    src/tag/hek/class/weather_particle_system.cpp
-    src/tag/hek/class/wind.cpp
-    src/tag/hek/class/virtual_keyboard.cpp
-    src/tag/compiled_tag.cpp
     src/extract/extraction.cpp
     src/tag/parser/post_cache_deformat.cpp
+    src/tag/parser/compile/actor.cpp
+    src/tag/parser/compile/antenna.cpp
+    src/tag/parser/compile/bitmap.cpp
+    src/tag/parser/compile/contrail.cpp
+    src/tag/parser/compile/damage_effect.cpp
+    src/tag/parser/compile/effect.cpp
+    src/tag/parser/compile/font.cpp
+    src/tag/parser/compile/gbxmodel.cpp
+    src/tag/parser/compile/globals.cpp
+    src/tag/parser/compile/glow.cpp
+    src/tag/parser/compile/hud_interface.cpp
+    src/tag/parser/compile/item_collection.cpp
+    src/tag/parser/compile/lens_flare.cpp
+    src/tag/parser/compile/light.cpp
+    src/tag/parser/compile/model_animations.cpp
+    src/tag/parser/compile/model_collision_geometry.cpp
+    src/tag/parser/compile/object.cpp
+    src/tag/parser/compile/particle.cpp
+    src/tag/parser/compile/point_physics.cpp
+    src/tag/parser/compile/physics.cpp
+    src/tag/parser/compile/scenario.cpp
+    src/tag/parser/compile/scenario_structure_bsp.cpp
+    src/tag/parser/compile/shader.cpp
+    src/tag/parser/compile/sound.cpp
     src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
@@ -143,8 +98,8 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for deb
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"  "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )

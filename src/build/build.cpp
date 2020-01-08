@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <iostream>
-#include <chrono>
 #include <fstream>
-using clock_type = std::chrono::steady_clock;
-
 #include <vector>
 #include <cstring>
 #include <filesystem>
 
 #include <invader/build/build_workload.hpp>
 #include <invader/map/map.hpp>
-#include <invader/compress/compression.hpp>
-#include <invader/tag/compiled_tag.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
@@ -47,6 +42,7 @@ int main(int argc, const char **argv) {
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
+        bool optimize_space = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -63,6 +59,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
+    options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -124,17 +121,11 @@ int main(int argc, const char **argv) {
             case 'N':
                 build_options.rename_scenario = arguments[0];
                 break;
+            case 'O':
+                build_options.optimize_space = true;
+                break;
         }
     });
-
-    if(build_options.forged_crc && ON_COLOR_TERM) {
-        if(std::strcmp(build_options.forged_crc, "21706156") == 0) {
-            std::fprintf(stdout, "\x1B[38;5;51m");
-        }
-        else if(std::strcmp(build_options.forged_crc, "21756843") == 0) {
-            std::fprintf(stdout, "\x1B[38;5;204m");
-        }
-    }
 
     if(build_options.always_index_tags && build_options.no_external_tags) {
         eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
@@ -163,11 +154,8 @@ int main(int argc, const char **argv) {
     }
 
     try {
-        // Start benchmark
-        auto start = clock_type::now();
-
         // Get the index
-        std::vector<std::tuple<TagClassInt, std::string>> with_index;
+        std::vector<std::pair<TagClassInt, std::string>> with_index;
         if(build_options.index.size()) {
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
@@ -190,15 +178,17 @@ int main(int argc, const char **argv) {
                     return EXIT_FAILURE;
                 }
 
-                auto substr = tag.substr(0, extension - tag.data() - 1);
-                File::preferred_path_to_halo_path_chars(substr.data());
+                auto substr = tag.substr(0, extension - tag.c_str() - 1);
+                const char *substr_c = substr.c_str();
+                std::vector<char> substr_v(substr_c, substr_c + substr.size() + 1);
+                File::preferred_path_to_halo_path_chars(substr_v.data());
 
                 // Lowercase everything
                 for(char &c : substr) {
                     c = std::tolower(c);
                 }
 
-                with_index.emplace_back(extension_to_tag_class(extension), substr);
+                with_index.emplace_back(extension_to_tag_class(extension), substr_v.data());
             }
         }
 
@@ -223,7 +213,7 @@ int main(int argc, const char **argv) {
 
         // Build!
         auto map = Invader::BuildWorkload::compile_map(
-            scenario.data(),
+            scenario.c_str(),
             build_options.tags,
             build_options.engine,
             build_options.maps,
@@ -233,17 +223,10 @@ int main(int argc, const char **argv) {
             with_index,
             forged_crc,
             std::nullopt,
-            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario))
+            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
+            build_options.optimize_space,
+            build_options.compress
         );
-
-        if(build_options.compress) {
-            std::size_t size_before = map.size();
-            oprintf("Compressing...");
-            oflush();
-            map = Compression::compress_map_data(map.data(), map.size());
-            std::size_t new_size = map.size();
-            oprintf("\rCompressed size:   %.02f MiB (%.02f %%)\n", new_size / 1024.0F / 1024.0F, 100.0F * new_size / size_before);
-        }
 
         // Set the map name
         const char *map_name;
@@ -251,7 +234,7 @@ int main(int argc, const char **argv) {
             map_name = build_options.rename_scenario;
         }
         else {
-            map_name = File::base_name_chars(scenario.data());
+            map_name = File::base_name_chars(scenario.c_str());
         }
 
         // Format path to maps/map_name.map if output not specified
@@ -263,11 +246,11 @@ int main(int argc, const char **argv) {
             final_file = build_options.output;
         }
 
-        std::FILE *file = std::fopen(final_file.data(), "wb");
+        std::FILE *file = std::fopen(final_file.c_str(), "wb");
 
         // Check if file is open
         if(!file) {
-            eprintf_error("Failed to open %s for writing.", final_file.data());
+            eprintf_error("Failed to open %s for writing.", final_file.c_str());
             return RETURN_FAILED_FILE_SAVE_ERROR;
         }
 
@@ -278,16 +261,6 @@ int main(int argc, const char **argv) {
         }
 
         std::fclose(file);
-
-        if(!build_options.quiet) {
-            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(clock_type::now() - start).count() / 1000.0);
-            if(ON_COLOR_TERM) {
-                oprintf("\x1B[m\n");
-            }
-            else {
-                oprintf("\n");
-            }
-        }
 
         return RETURN_OK;
     }

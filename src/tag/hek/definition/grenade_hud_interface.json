@@ -30,11 +30,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -162,11 +164,13 @@
             },
             {
                 "name": "background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "background scaling flags",
@@ -249,11 +253,13 @@
             },
             {
                 "name": "total grenades background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "total grenades background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "total grenades background scaling flags",
@@ -336,11 +342,13 @@
             },
             {
                 "name": "total grenades numbers width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "total grenades numbers height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "total grenades numbers scaling flags",

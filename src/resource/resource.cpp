@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <cassert>
 #include <filesystem>
-#include <invader/tag/compiled_tag.hpp>
 #include <invader/version.hpp>
+#include <invader/build/build_workload.hpp>
 #include <invader/tag/hek/definition.hpp>
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
@@ -29,7 +29,7 @@ int main(int argc, const char **argv) {
 
     struct ResourceOption {
         // Tags directory
-        std::vector<const char *> tags;
+        std::vector<std::string> tags;
 
         // Maps directory
         const char *maps = "maps/";
@@ -198,22 +198,35 @@ int main(int argc, const char **argv) {
 
         // Compile the tags
         try {
-            CompiledTag compiled_tag(tag, tag_class_int, tag_data.data(), tag_data.size());
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag.data(), tag_class_int, resource_options.tags);
+            auto &compiled_tag_tag = compiled_tag.tags[0];
+            auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
+            auto *compiled_tag_data = compiled_tag_struct.data.data();
             char path_temp[256];
+
+            std::vector<std::byte> data;
+            std::vector<std::size_t> structs;
+            for(auto &s : compiled_tag.structs) {
+                structs.push_back(data.size());
+                data.insert(data.end(), s.data.begin(), s.data.end());
+            }
+
+            // Pointers are stored as offsets here
+            std::size_t sound_offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
+            for(auto &s : compiled_tag.structs) {
+                for(auto &ptr : compiled_tag_struct.pointers) {
+                    *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - sound_offset;
+                }
+            }
 
             // Now, adjust stuff for pointers
             switch(resource_options.type) {
                 case ResourceMapType::RESOURCE_MAP_BITMAP: {
-                    // Pointers are stored as offsets here
-                    for(auto &ptr : compiled_tag.pointers) {
-                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
-                    }
-
                     // Do stuff to the tag data
-                    auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag.data.data());
+                    auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag_data);
                     std::size_t bitmap_count = bitmap.bitmap_data.count;
                     if(bitmap_count) {
-                        auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&bitmap.bitmap_data.pointer));
+                        auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&bitmap.bitmap_data.pointer)].data.data());
                         for(std::size_t b = 0; b < bitmap_count; b++) {
                             auto *bitmap = bitmaps + b;
 
@@ -225,10 +238,9 @@ int main(int argc, const char **argv) {
                                 // Push it good
                                 paths.push_back(path_temp);
                                 std::size_t size = bitmap->pixel_data_size.read();
-                                std::size_t offset = bitmap->pixel_data_offset.read();
                                 sizes.push_back(size);
                                 offsets.push_back(resource_data.size());
-                                resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+                                resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
 
                                 PAD_RESOURCES_32_BIT
                             }
@@ -245,17 +257,21 @@ int main(int argc, const char **argv) {
                     // Push the asset data and tag data if we aren't on retail
                     if(!resource_options.retail) {
                         offsets.push_back(resource_data.size());
-                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        std::size_t total_size = 0;
+                        for(auto &r : compiled_tag.raw_data) {
+                            total_size += r.size();
+                            resource_data.insert(resource_data.end(), r.begin(), r.end());
+                        }
                         paths.push_back(tag + "__pixels");
-                        sizes.push_back(compiled_tag.asset_data.size());
+                        sizes.push_back(total_size);
 
                         PAD_RESOURCES_32_BIT
 
                         // Push the tag data
                         offsets.push_back(resource_data.size());
-                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        resource_data.insert(resource_data.end(), data.begin(), data.end());
                         paths.push_back(tag);
-                        sizes.push_back(compiled_tag.data.size());
+                        sizes.push_back(data.size());
 
                         PAD_RESOURCES_32_BIT
                     }
@@ -263,21 +279,18 @@ int main(int argc, const char **argv) {
                     break;
                 }
                 case ResourceMapType::RESOURCE_MAP_SOUND: {
-                    // Sounds subtract the size of the header from the offset
-                    for(auto &ptr : compiled_tag.pointers) {
-                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed - sizeof(Sound<LittleEndian>));
-                    }
-
                     // Do stuff to the tag data
-                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag.data.data());
+                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(data.data());
+                    auto *the_real_battle_begins = reinterpret_cast<std::byte *>(&sound + 1);
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
+                    std::size_t b = 0;
                     if(pitch_range_count) {
-                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&sound.pitch_ranges.pointer));
+                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(the_real_battle_begins);
                         for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
                             auto *pitch_range = pitch_ranges + pr;
                             std::size_t permutation_count = pitch_range->permutations.count;
                             if(permutation_count) {
-                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.data.data() + compiled_tag.resolve_pointer(&pitch_range->permutations.pointer));
+                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(the_real_battle_begins + pitch_range->permutations.pointer);
                                 for(std::size_t p = 0; p < permutation_count; p++) {
                                     auto *permutation = permutations + p;
                                     if(resource_options.retail) {
@@ -289,8 +302,9 @@ int main(int argc, const char **argv) {
                                         std::size_t size = permutation->samples.size.read();
                                         sizes.push_back(size);
                                         offsets.push_back(resource_data.size());
-                                        std::size_t offset = permutation->samples.file_offset.read();
-                                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.data() + offset, compiled_tag.asset_data.data() + offset + size);
+                                        resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
+
+                                        b++;
 
                                         PAD_RESOURCES_32_BIT
                                     }
@@ -307,17 +321,21 @@ int main(int argc, const char **argv) {
                     if(!resource_options.retail) {
                         // Push the asset data first
                         offsets.push_back(resource_data.size());
-                        resource_data.insert(resource_data.end(), compiled_tag.asset_data.begin(), compiled_tag.asset_data.end());
+                        std::size_t total_size = 0;
+                        for(auto &r : compiled_tag.raw_data) {
+                            total_size += r.size();
+                            resource_data.insert(resource_data.end(), r.begin(), r.end());
+                        }
                         paths.push_back(tag + "__permutations");
-                        sizes.push_back(compiled_tag.asset_data.size());
+                        sizes.push_back(total_size);
 
                         PAD_RESOURCES_32_BIT
 
                         // Push the tag data
                         offsets.push_back(resource_data.size());
-                        resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                        resource_data.insert(resource_data.end(), data.begin(), data.end());
                         paths.push_back(tag);
-                        sizes.push_back(compiled_tag.data.size());
+                        sizes.push_back(data.size());
 
                         PAD_RESOURCES_32_BIT
                     }
@@ -325,14 +343,10 @@ int main(int argc, const char **argv) {
                     break;
                 }
                 case ResourceMapType::RESOURCE_MAP_LOC:
-                    // Pointers are stored as offsets here
-                    for(auto &ptr : compiled_tag.pointers) {
-                        *reinterpret_cast<LittleEndian<Pointer> *>(compiled_tag.data.data() + ptr.offset) = static_cast<Pointer>(ptr.offset_pointed);
-                    }
                     offsets.push_back(resource_data.size());
-                    resource_data.insert(resource_data.end(), compiled_tag.data.begin(), compiled_tag.data.end());
+                    resource_data.insert(resource_data.end(), data.begin(), data.end());
                     paths.push_back(tag);
-                    sizes.push_back(compiled_tag.data.size());
+                    sizes.push_back(data.size());
 
                     PAD_RESOURCES_32_BIT
 

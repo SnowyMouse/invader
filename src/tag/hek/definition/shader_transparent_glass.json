@@ -41,7 +41,8 @@
             },
             {
                 "name": "background tint map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "background tint map",
@@ -91,7 +92,8 @@
             },
             {
                 "name": "bump map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "bump map",
@@ -111,7 +113,8 @@
             },
             {
                 "name": "diffuse map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "diffuse map",
@@ -123,7 +126,8 @@
             },
             {
                 "name": "diffuse detail map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "diffuse detail map",
@@ -143,7 +147,8 @@
             },
             {
                 "name": "specular map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "specular map",
@@ -155,7 +160,8 @@
             },
             {
                 "name": "specular detail map scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "specular detail map",
@@ -172,6 +178,7 @@
         ],
         "type": "struct",
         "inherits": "Shader",
+        "pre_compile": true,
         "size": 480
     }
 ]

@@ -679,6 +679,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 1272
     }
 ]

@@ -1,5 +1,55 @@
 [
     {
+        "name": "MultiplayerInformationSound",
+        "options": [
+            "play ball",
+            "game over",
+            "one minute to win",
+            "30 seconds to win",
+            "red team minute to win",
+            "red team 30 to win",
+            "blue team minute to win",
+            "blue team 30 to win",
+            "blue team has the flag",
+            "blue team flag returned",
+            "blue team score",
+            "red team has the flag",
+            "red team flag returned",
+            "red team score",
+            "double kill",
+            "triple kill",
+            "killtacular",
+            "running riot",
+            "killing spree",
+            "oddball",
+            "race",
+            "slayer",
+            "capture the flag",
+            "warthog",
+            "ghost",
+            "scorpion",
+            "countdown timer",
+            "teleporter activate",
+            "flag failure",
+            "countdown for respawn",
+            "hill move",
+            "player respawn",
+            "team king of the hill",
+            "team oddball",
+            "team race",
+            "team slayer",
+            "king of the hill",
+            "blue team ctf",
+            "red team ctf",
+            "hill contested",
+            "hill controlled",
+            "hill occupied",
+            "countdown timer end",
+            "ting"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "GlobalsRasterizerDataFlags",
         "type": "bitfield",
         "fields": [
@@ -916,7 +966,7 @@
                 "name": "hud digits definition",
                 "type": "TagDependency",
                 "classes": [
-                    "hud_numbers"
+                    "hud_number"
                 ],
                 "compound": true
             },
@@ -1006,28 +1056,13 @@
         "size": 16
     },
     {
-        "name": "GlobalsMultiplayerSound",
-        "type": "struct",
-        "fields": [
-            {
-                "name": "sound",
-                "type": "TagDependency",
-                "compound": true,
-                "classes": [
-                    "sound"
-                ]
-            }
-        ],
-        "size": 16
-    },
-    {
         "name": "GlobalsMultiplayerInformation",
         "fields": [
             {
                 "name": "flag",
                 "type": "TagDependency",
                 "classes": [
-                    "item"
+                    "weapon"
                 ],
                 "compound": true
             },
@@ -1065,14 +1100,14 @@
                 "name": "ball",
                 "type": "TagDependency",
                 "classes": [
-                    "item"
+                    "weapon"
                 ],
                 "compound": true
             },
             {
                 "name": "sounds",
                 "type": "TagReflexive",
-                "struct": "GlobalsMultiplayerSound",
+                "struct": "GlobalsSound",
                 "compound": true
             },
             {
@@ -1081,6 +1116,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 160
     },
     {
@@ -1210,6 +1246,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 244
     },
     {
@@ -1218,7 +1255,10 @@
             {
                 "name": "first person hands",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "gbxmodel",
+                    "model"
+                ],
                 "compound": true
             },
             {
@@ -1232,7 +1272,9 @@
             {
                 "name": "shield meter",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "meter"
+                ],
                 "compound": true
             },
             {
@@ -1243,7 +1285,9 @@
             {
                 "name": "body meter",
                 "type": "TagDependency",
-                "classes": [],
+                "classes": [
+                    "meter"
+                ],
                 "compound": true
             },
             {
@@ -1362,6 +1406,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 152
     },
     {
@@ -1536,23 +1581,27 @@
             },
             {
                 "name": "minimum experience",
-                "type": "int32"
+                "type": "uint32"
             },
             {
                 "name": "maximum experience",
-                "type": "int32"
+                "type": "uint32",
+                "default": 10
             },
             {
                 "name": "minimum player count",
-                "type": "int32"
+                "type": "uint32",
+                "default": 1
             },
             {
                 "name": "maximum player count",
-                "type": "int32"
+                "type": "uint32",
+                "default": 16
             },
             {
                 "name": "rating",
-                "type": "int32"
+                "type": "uint32",
+                "default": 100
             },
             {
                 "type": "pad",
@@ -1573,43 +1622,50 @@
                 "name": "sounds",
                 "type": "TagReflexive",
                 "struct": "GlobalsSound",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "camera",
                 "type": "TagReflexive",
                 "struct": "GlobalsCamera",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "player control",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerControl",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "difficulty",
                 "type": "TagReflexive",
                 "struct": "GlobalsDifficulty",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "grenades",
                 "type": "TagReflexive",
                 "struct": "GlobalsGrenade",
-                "compound": true
+                "compound": true,
+                "minimum": 2
             },
             {
                 "name": "rasterizer data",
                 "type": "TagReflexive",
                 "struct": "GlobalsRasterizerData",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "interface bitmaps",
                 "type": "TagReflexive",
                 "struct": "GlobalsInterfaceBitmaps",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "weapon list",
@@ -1633,13 +1689,15 @@
                 "name": "player information",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerInformation",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "first person interface",
                 "type": "TagReflexive",
                 "struct": "GlobalsFirstPersonInterface",
-                "compound": true
+                "compound": true,
+                "minimum": 1
             },
             {
                 "name": "falling damage",
@@ -1661,6 +1719,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 428
     }
 ]

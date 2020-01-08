@@ -48,11 +48,13 @@
             },
             {
                 "name": "width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "scaling flags",
@@ -194,11 +196,13 @@
             },
             {
                 "name": "background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "background scaling flags",
@@ -281,11 +285,13 @@
             },
             {
                 "name": "meter width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "meter height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "meter scaling flags",
@@ -408,11 +414,13 @@
             },
             {
                 "name": "hud background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "hud background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "hud background scaling flags",
@@ -495,11 +503,13 @@
             },
             {
                 "name": "shield panel background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "shield panel background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "shield panel background scaling flags",
@@ -582,11 +592,13 @@
             },
             {
                 "name": "shield panel meter width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "shield panel meter height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "shield panel meter scaling flags",
@@ -694,11 +706,13 @@
             },
             {
                 "name": "health panel background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "health panel background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "health panel background scaling flags",
@@ -781,11 +795,13 @@
             },
             {
                 "name": "health panel meter width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "health panel meter height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "health panel meter scaling flags",
@@ -889,11 +905,13 @@
             },
             {
                 "name": "motion sensor background width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor background height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor background scaling flags",
@@ -976,11 +994,13 @@
             },
             {
                 "name": "motion sensor foreground width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor foreground height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor foreground scaling flags",
@@ -1067,11 +1087,13 @@
             },
             {
                 "name": "motion sensor center width scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor center height scale",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "motion sensor center scaling flags",

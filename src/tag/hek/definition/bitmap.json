@@ -185,7 +185,8 @@
                 "name": "sprites",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSprite",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             }
         ],
         "type": "struct",
@@ -251,7 +252,9 @@
             },
             {
                 "name": "pointer",
-                "type": "Pointer"
+                "type": "Pointer",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
@@ -263,7 +266,9 @@
             }
         ],
         "type": "struct",
-        "size": 48
+        "size": 48,
+        "pre_compile": true,
+        "unsafe_to_dedupe": true
     },
     {
         "name": "Bitmap",
@@ -306,11 +311,13 @@
             },
             {
                 "name": "color plate width",
-                "type": "int16"
+                "type": "uint16",
+                "non_cached": true
             },
             {
                 "name": "color plate height",
-                "type": "int16"
+                "type": "uint16",
+                "non_cached": true
             },
             {
                 "name": "compressed color plate data",
@@ -352,16 +359,19 @@
                 "name": "bitmap group sequence",
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             },
             {
                 "name": "bitmap data",
                 "type": "TagReflexive",
                 "struct": "BitmapData",
-                "compound": true
+                "compound": true,
+                "maximum": 65534
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "post_cache_parse": true,
         "size": 108
     }

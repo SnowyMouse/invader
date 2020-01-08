@@ -1,13 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/dependency/found_tag_dependency.hpp>
-#include <invader/tag/compiled_tag.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
+#include <invader/build/build_workload.hpp>
 
 #include <filesystem>
 
 namespace Invader {
+    static std::vector<std::pair<std::string, TagClassInt>> get_dependencies(const BuildWorkload &tag_compiled) {
+        std::vector<std::pair<std::string, TagClassInt>> dependencies;
+        for(auto &s : tag_compiled.structs) {
+            for(auto &d : s.dependencies) {
+                auto &tag = tag_compiled.tags[d.tag_index];
+                dependencies.emplace_back(tag.path, tag.tag_class_int);
+            }
+        }
+        return dependencies;
+    }
+
     std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
@@ -32,12 +43,12 @@ namespace Invader {
                     std::fclose(f);
 
                     try {
-                        Invader::CompiledTag tag(tag_path.string(), tag_int_to_find, tag_data.get(), static_cast<std::size_t>(file_size));
-                        for(auto &dependency : tag.dependencies) {
+                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                        for(auto &dependency : dependencies) {
                             // Make sure it's not in found_tags
                             bool dupe = false;
                             for(auto &tag : found_tags) {
-                                if(tag.path == dependency.path && tag.class_int == dependency.tag_class_int) {
+                                if(tag.path == dependency.first && tag.class_int == dependency.second) {
                                     dupe = true;
                                     break;
                                 }
@@ -47,28 +58,28 @@ namespace Invader {
                             }
 
                             // Fix .model dependencies so they're .gbxmodel (this is only an issue with HEK stock tags)
-                            auto class_to_use = dependency.tag_class_int;
+                            auto class_to_use = dependency.second;
                             if(class_to_use == TagClassInt::TAG_CLASS_MODEL) {
                                 class_to_use = TagClassInt::TAG_CLASS_GBXMODEL;
                             }
 
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.first + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.path, class_to_use, false, complete_tag_path.string());
+                                    found_tags.emplace_back(dependency.first, class_to_use, false, complete_tag_path.string());
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.path, class_to_use, true, "");
+                                found_tags.emplace_back(dependency.first, class_to_use, true, "");
                             }
                             else if(recursive) {
-                                recursion(dependency.path.c_str(), class_to_use, recursion);
+                                recursion(dependency.first.c_str(), class_to_use, recursion);
                             }
                         }
                         found = true;
@@ -147,9 +158,9 @@ namespace Invader {
 
                             // Attempt to parse
                             try {
-                                Invader::CompiledTag tag(dir_tag_path, class_int, tag_data.get(), static_cast<std::size_t>(file_size));
-                                for(auto &dependency : tag.dependencies) {
-                                    if(dependency.path == tag_path_to_find && dependency.tag_class_int == tag_int_to_find) {
+                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                                for(auto &dependency : dependencies) {
+                                    if(dependency.first == tag_path_to_find && dependency.second == tag_int_to_find) {
                                         found_tags.emplace_back(dir_tag_path, class_int, false, file.path().string());
                                         break;
                                     }

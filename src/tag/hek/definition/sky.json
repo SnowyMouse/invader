@@ -108,7 +108,8 @@
                 "name": "model",
                 "type": "TagDependency",
                 "classes": [
-                    "model"
+                    "model",
+                    "gbxmodel"
                 ],
                 "compound": true
             },

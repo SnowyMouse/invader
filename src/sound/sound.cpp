@@ -453,6 +453,8 @@ int main(int argc, const char **argv) {
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
             break;
+        case SoundFormat::SOUND_FORMAT_ENUM_COUNT:
+            std::terminate();
     }
     oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
