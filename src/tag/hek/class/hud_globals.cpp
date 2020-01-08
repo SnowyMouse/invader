@@ -6,8 +6,6 @@
 namespace Invader::HEK {
     void compile_hud_globals_tag(CompiledTag &compiled, const std::byte *data, std::size_t size) {
         BEGIN_COMPILE(HUDGlobals)
-        DEFAULT_VALUE(tag.width_scale, 1.0f);
-        DEFAULT_VALUE(tag.height_scale, 1.0f);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.single_player_font);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.multi_player_font);
         ADD_DEPENDENCY_ADJUST_SIZES(tag.item_message_text);
