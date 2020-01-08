@@ -167,8 +167,7 @@
             },
             {
                 "name": "one detail sound period",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "one detail unknown floats",

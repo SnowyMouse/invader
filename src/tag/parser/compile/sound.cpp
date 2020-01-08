@@ -169,6 +169,11 @@ namespace Invader::Parser {
     }
 
     void SoundLooping::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        if(this->zero_detail_sound_period == 0.0f && this->one_detail_sound_period == 0.0f) {
+            this->zero_detail_sound_period = 1.0f;
+            this->one_detail_sound_period = 1.0f;
+        }
+
         this->unknown_int = 0xFFFFFFFF; // this is probably a pointer, but we should check to make sure it isn't something important
         this->unknown_float = 15.0F; // TODO: Figure this out
     }
