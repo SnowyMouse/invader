@@ -305,11 +305,14 @@ namespace Invader::Parser {
                 last_hyphen = &c + 1;
             }
         }
-        this->permutation_number = NULL_INDEX;
+        this->permutation_number = 0;
         if(last_hyphen && *last_hyphen) {
-            unsigned long permutation_number;
+            unsigned long permutation_number = ~0;
             try {
                 permutation_number = std::stoul(last_hyphen, nullptr, 10);
+                if(permutation_number < static_cast<std::size_t>(NULL_INDEX)) {
+                    this->permutation_number = static_cast<HEK::Index>(permutation_number);
+                }
             }
             catch(std::out_of_range &) {
                 permutation_number = ~0;
@@ -319,9 +322,6 @@ namespace Invader::Parser {
             }
             if(permutation_number >= NULL_INDEX) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation %s has an index that is out of range (%lu >= %zu)", this->name.string, permutation_number, static_cast<std::size_t>(NULL_INDEX));
-            }
-            else {
-                this->permutation_number = static_cast<HEK::Index>(permutation_number);
             }
         }
     }
