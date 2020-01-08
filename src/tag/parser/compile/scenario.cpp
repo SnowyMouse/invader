@@ -560,7 +560,7 @@ namespace Invader::Parser {
 
                 // If there are no points, set to a null BSP
                 if(command_list.points.size() == 0) {
-                    command_list_data.precomputed_bsp_index = ~static_cast<std::uint16_t>(0);
+                    command_list_data.precomputed_bsp_index = NULL_INDEX;
                     continue;
                 }
 
