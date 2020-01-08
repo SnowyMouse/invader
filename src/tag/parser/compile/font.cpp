@@ -37,4 +37,8 @@ namespace Invader::Parser {
             this->character_tables[table].character_table[index].character_index = i;
         }
     }
+
+    void FontCharacter::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->hardware_character_index = NULL_INDEX;
+    }
 }
