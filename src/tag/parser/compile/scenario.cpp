@@ -506,22 +506,12 @@ namespace Invader::Parser {
                         }
                     }
 
+                    // If this is the next best BSP, write data
                     if(hits > best_bsp_hits) {
                         best_bsp_hits = hits;
                         best_bsp = b;
                         total_best_bsps = 1;
                         max_hits = total_hits;
-
-                        if(firing_position_count > 0) {
-                            auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
-                            auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
-                            for(std::size_t f = 0; f < firing_position_count; f++) {
-                                auto &position = firing_positions_data[f];
-                                auto &position_index = firing_positions_indices[f];
-                                position.cluster_index = position_index.first;
-                                position.surface_index = position_index.second;
-                            }
-                        }
                     }
                     else if(hits == best_bsp_hits) {
                         total_best_bsps++;
@@ -541,6 +531,18 @@ namespace Invader::Parser {
                 else if(total_best_bsps > 1) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
                     bsp_find_warnings++;
+                }
+
+                // If we have a BSP, set alll the cluster and surface indices
+                if(encounter_data.precomputed_bsp_index != NULL_INDEX && firing_position_count > 0) {
+                    auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
+                    auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
+                    for(std::size_t f = 0; f < firing_position_count; f++) {
+                        auto &position = firing_positions_data[f];
+                        auto &position_index = firing_positions_indices[f];
+                        position.cluster_index = position_index.first;
+                        position.surface_index = position_index.second;
+                    }
                 }
             }
         }
