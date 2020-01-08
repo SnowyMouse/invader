@@ -590,6 +590,7 @@ namespace Invader {
                         }
                         return_value = i;
                         found = true;
+                        tag.stubbed = false;
                         break;
                     }
                 }
