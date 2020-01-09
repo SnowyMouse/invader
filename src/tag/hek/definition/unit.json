@@ -355,7 +355,8 @@
             },
             {
                 "name": "camera field of view",
-                "type": "Angle"
+                "type": "Angle",
+                "default": 1.22173
             },
             {
                 "name": "camera stiffness",
