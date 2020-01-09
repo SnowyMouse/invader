@@ -7,7 +7,13 @@
 
 namespace Invader::Parser {
     template <typename T> void compile_object(T &tag) {
-        tag.has_change_colors = tag.change_colors.size() > 0;
+        tag.scales_change_colors = 0;
+        for(auto &c : tag.change_colors) {
+            if(c.scale_by != HEK::FunctionScaleBy::FUNCTION_SCALE_BY_NONE) {
+                tag.scales_change_colors = 1;
+                break;
+            }
+        }
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 

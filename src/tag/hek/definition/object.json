@@ -356,7 +356,7 @@
                 "type": "float"
             },
             {
-                "name": "has change colors",
+                "name": "scales change colors",
                 "type": "uint32",
                 "endian": "little",
                 "cache_only": true
