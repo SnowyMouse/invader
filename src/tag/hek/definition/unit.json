@@ -542,9 +542,12 @@
                 "type": "uint16"
             },
             {
-                "name": "unknown shorts",
-                "type": "int16",
-                "count": 2
+                "name": "soft ping interrupt ticks",
+                "type": "int16"
+            },
+            {
+                "name": "hard ping interrupt ticks",
+                "type": "int16"
             },
             {
                 "name": "powered seats",

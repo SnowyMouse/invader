@@ -17,9 +17,15 @@ namespace Invader::Parser {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 
+    template <typename T> void compile_unit(T &tag) {
+        tag.soft_ping_interrupt_ticks = static_cast<std::int16_t>(tag.soft_ping_interrupt_time * TICK_RATE);
+        tag.hard_ping_interrupt_ticks = static_cast<std::int16_t>(tag.hard_ping_interrupt_time * TICK_RATE);
+    }
+
     void Biped::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_BIPED;
         compile_object(*this);
+        compile_unit(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
         this->crouch_camera_velocity = 1.0f / this->crouch_transition_time / TICK_RATE;
         this->cosine_maximum_slope_angle = static_cast<float>(std::cos(this->maximum_slope_angle));
@@ -31,6 +37,7 @@ namespace Invader::Parser {
     void Vehicle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_VEHICLE;
         compile_object(*this);
+        compile_unit(*this);
     }
     void Weapon::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
