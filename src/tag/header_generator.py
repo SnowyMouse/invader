@@ -597,8 +597,9 @@ for s in all_structs_arranged:
                 cpp_save_hek_data.write("        }\n")
             elif extract_hidden and struct["type"] == "float" and "bounds" not in struct and "count" not in struct:
                 cpp_save_hek_data.write("        union {{ float f; std::uint32_t i; }} {}_discarded;\n".format(name))
-                cpp_save_hek_data.write("        {}_discarded.f = this->{};\n".format(name, name))
-                cpp_save_hek_data.write("        {}_discarded.i &= 0xFFFFFFF0;\n".format(name)) # discard the last few bits for rounding errors
+                cpp_save_hek_data.write("        {}_discarded.f = static_cast<std::int32_t>(this->{} * 1000.0F) / 1000.0F;\n".format(name, name)) # first, round to the nearest 0.0001 for rounding errors
+                cpp_save_hek_data.write("        {}_discarded.i &= 0xFFFFFF00;\n".format(name)) # next, discard the last eight bits for rounding errors
+                cpp_save_hek_data.write("        if({}_discarded.i == 0x80000000) {{ {}_discarded.i = 0; }}\n".format(name, name)) # last, if negative 0, set to 0
                 cpp_save_hek_data.write("        b.{} = {}_discarded.f;\n".format(name, name))
             elif "bounds" in struct and struct["bounds"]:
                 cpp_save_hek_data.write("        b.{}.from = this->{}.from;\n".format(name, name))
