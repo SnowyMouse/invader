@@ -90,8 +90,8 @@ namespace Invader::Parser {
     }
 
     void WeaponTrigger::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
-        this->illumination_recovery_rate = 1.0f / TICK_RATE / this->illumination_recovery_time;
-        this->ejection_port_recovery_rate = 1.0f / TICK_RATE / this->ejection_port_recovery_time;
+        this->illumination_recovery_rate = this->illumination_recovery_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->illumination_recovery_time;
+        this->ejection_port_recovery_rate = this->ejection_port_recovery_rate <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->ejection_port_recovery_time;
 
         this->firing_acceleration_rate = 1.0f / TICK_RATE / this->acceleration_time;
         this->firing_deceleration_rate = 1.0f / TICK_RATE / this->deceleration_time;

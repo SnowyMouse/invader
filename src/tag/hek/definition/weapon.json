@@ -482,11 +482,11 @@
                 "size": 32
             },
             {
-                "name": "ejection port recovery rate",
+                "name": "illumination recovery rate",
                 "type": "float"
             },
             {
-                "name": "illumination recovery rate",
+                "name": "ejection port recovery rate",
                 "type": "float"
             },
             {
