@@ -100,7 +100,7 @@
         "fields": [
             "deleted when attachment deactivates",
             "required for gameplay cannot optimize out",
-            "use in dedicated servers"
+            "do not cull"
         ],
         "width": 32
     },
