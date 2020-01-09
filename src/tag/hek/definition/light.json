@@ -45,11 +45,15 @@
             },
             {
                 "name": "cos falloff angle",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "cos cutoff angle",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "unknown two",
@@ -60,7 +64,9 @@
             },
             {
                 "name": "sin cutoff angle",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
