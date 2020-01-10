@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.22.2] - 2020-01-10
+### Fixed
+- invader-extract: Fixed recursive extraction causing segmentation faults with
+  some tags
+
 ## [0.22.1] - 2020-01-10
 ### Added
 - Added color support for Windows
