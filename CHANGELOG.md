@@ -2,6 +2,20 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.22.1] - 2020-01-10
+### Added
+- Added color support for Windows
+
+### Changed
+- invader-build: Improved the accuracy of building
+- invader-bitmap: Now uses the new parser
+- invader-font: Now uses the new parser
+- invader-string: Now uses the new parser
+- invader-string: Changed "utf-16" to "unicode"
+
+### Fixed
+- invader-build: Fixed an out-of-bounds issue resulting in undefined behavior
+
 ## [0.22.0] - 2020-01-08
 ### Added
 - invader-build: Added `-O` which can reduce tag space usage
