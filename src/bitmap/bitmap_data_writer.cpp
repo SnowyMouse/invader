@@ -8,7 +8,7 @@
 #include <invader/printf.hpp>
 
 namespace Invader {
-    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<HEK::BitmapData<HEK::BigEndian>> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
+    void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         using namespace Invader::HEK;
 
         bool dithering = dither_alpha || dither_red || dither_green || dither_blue;
@@ -16,7 +16,7 @@ namespace Invader {
         auto bitmap_count = scanned_color_plate.bitmaps.size();
         for(std::size_t i = 0; i < bitmap_count; i++) {
             // Write all of the fields here
-            auto &bitmap = bitmap_data[i];
+            auto &bitmap = bitmap_data.emplace_back();
             auto &bitmap_color_plate = scanned_color_plate.bitmaps[i];
             bitmap.bitmap_class = TagClassInt::TAG_CLASS_BITMAP;
             bitmap.width = bitmap_color_plate.width;
@@ -97,7 +97,7 @@ namespace Invader {
             bool compressed = (format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY || format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA || format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA);
 
             // If the bitmap length or height isn't divisible by 4, use 32-bit color
-            if(compressed && ((bitmap.height.read() % 4) != 0 || (bitmap.width.read() % 4) != 0)) {
+            if(compressed && ((bitmap.height % 4) != 0 || (bitmap.width % 4) != 0)) {
                 format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
                 compressed = false;
             }
@@ -244,7 +244,7 @@ namespace Invader {
             }
 
             // Depending on the format, do something
-            auto bitmap_format = bitmap.format.read();
+            auto bitmap_format = bitmap.format;
             switch(bitmap_format) {
                 // If it's 32-bit, this is a no-op.
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:

@@ -13,6 +13,7 @@
 #include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/parser/parser.hpp>
 #include <invader/version.hpp>
 #include FT_FREETYPE_H
 
@@ -41,6 +42,8 @@ enum FontExtension {
 static_assert(FONT_EXTENSION_COUNT == sizeof(FONT_EXTENSION_STR) / sizeof(*FONT_EXTENSION_STR));
 
 int main(int argc, char *argv[]) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
     // Options struct
     struct FontOptions {
         const char *data = "data/";
@@ -195,17 +198,16 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Invader::HEK::TagFileHeader header(Invader::TagClassInt::TAG_CLASS_FONT);
-    Invader::HEK::Font<Invader::HEK::BigEndian> font = {};
+    Invader::Parser::Font font= {};
     std::vector<Invader::HEK::FontCharacter<Invader::HEK::BigEndian>> tag_characters;
-    std::vector<std::byte> pixels;
+    auto &pixels = font.pixels;
 
     // Set up the character stuff
     int max_descending_height = 1;
     int max_ascending_height = 1;
     for(std::size_t i = ' '; i < characters.size(); i++) {
         auto &character = characters[i];
-        Invader::HEK::FontCharacter<Invader::HEK::BigEndian> tag_character = {};
+        auto &tag_character = font.characters.emplace_back();
 
         // Dot
         if(i == 127) {
@@ -270,13 +272,11 @@ int main(int argc, char *argv[]) {
         else {
             continue;
         }
-        tag_characters.emplace_back(tag_character);
     }
 
+    // Set these values
     font.ascending_height = max_ascending_height;
     font.descending_height = max_descending_height;
-    font.pixels.size = pixels.size();
-    font.characters.count = tag_characters.size();
 
     // Write
     try {
@@ -289,15 +289,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    std::FILE *f = std::fopen(final_tag_path.c_str(), "wb");
-    if(!f) {
-        eprintf_error("Failed to open %s for writing.", final_tag_path.c_str());
+    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_FONT, true))) {
+        eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }
-
-    std::fwrite(&header, sizeof(header), 1, f);
-    std::fwrite(&font, sizeof(font), 1, f);
-    std::fwrite(tag_characters.data(), tag_characters.size() * sizeof(tag_characters[0]), 1, f);
-    std::fwrite(pixels.data(), pixels.size(), 1, f);
-    std::fclose(f);
 }
