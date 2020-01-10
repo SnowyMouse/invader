@@ -16,7 +16,7 @@ namespace Invader {
         auto bitmap_count = scanned_color_plate.bitmaps.size();
         for(std::size_t i = 0; i < bitmap_count; i++) {
             // Write all of the fields here
-            auto &bitmap = bitmap_data[i];
+            auto &bitmap = bitmap_data.emplace_back();
             auto &bitmap_color_plate = scanned_color_plate.bitmaps[i];
             bitmap.bitmap_class = TagClassInt::TAG_CLASS_BITMAP;
             bitmap.width = bitmap_color_plate.width;
