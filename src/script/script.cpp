@@ -10,6 +10,8 @@
 #include <invader/file/file.hpp>
 
 int main(int argc, const char **argv) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
     using namespace Invader;
     //using namespace Invader::HEK;
 
@@ -160,9 +162,6 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    bool error;
-    std::string error_message;
-    auto new_s = Compiler::decompile_scenario(s, error, error_message);
-
+    auto new_s = Compiler::decompile_scenario(s);
     oprintf("%s\n\n", Tokenizer::detokenize(ScriptTree::decompile_script_tree(new_s)).c_str());
 }
