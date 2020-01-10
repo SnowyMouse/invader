@@ -8,6 +8,7 @@
 #include <invader/tag/hek/header.hpp>
 #include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
+#include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
 enum Format {
@@ -16,12 +17,11 @@ enum Format {
     STRING_LIST_FORMAT_LATIN1
 };
 
-template <typename T, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+template <typename T, typename G, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
     using namespace Invader::HEK;
 
     // Make the file header
-    std::vector<std::byte> tag_data(sizeof(TagFileHeader));
-    *reinterpret_cast<TagFileHeader *>(tag_data.data()) = TagFileHeader(static_cast<TagClassInt>(C));
+    G tag_data = {};
 
     // Start building a list of strings
     std::vector<std::string> strings;
@@ -54,36 +54,21 @@ template <typename T, Invader::TagClassInt C> static std::vector<std::byte> gene
         }
     }
 
-    // Make the tag header
-    std::size_t header_offset = tag_data.size();
-    tag_data.insert(tag_data.end(), sizeof(StringList<BigEndian>), std::byte());
-    reinterpret_cast<StringList<BigEndian> *>(tag_data.data() + header_offset)->strings.count = static_cast<std::uint32_t>(strings.size());
-
-    // Append all the tag string blocks
-    std::size_t string_list_string_offset = tag_data.size();
-    static constexpr std::size_t STRING_LIST_STRING_SIZE = sizeof(StringListString<BigEndian>);
-    tag_data.insert(tag_data.end(), strings.size() * STRING_LIST_STRING_SIZE, std::byte());
-
     // Add each string
     for(auto &str : strings) {
-        std::size_t string_size;
+        auto &new_string = tag_data.strings.emplace_back();
+        auto &new_string_data = new_string.string;
 
         if(sizeof(T) == sizeof(char16_t)) {
-            auto string_data = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(reinterpret_cast<char *>(str.data()));
-            string_size = string_data.size() * sizeof(T);
-            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(string_data.c_str()), reinterpret_cast<const std::byte *>(string_data.c_str() + string_data.size() + 1));
+            auto string_data = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(reinterpret_cast<const char *>(str.c_str()));
+            new_string_data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(string_data.c_str()), reinterpret_cast<const std::byte *>(string_data.c_str() + string_data.size() + 1));
         }
         else {
-            string_size = str.size();
-            tag_data.insert(tag_data.end(), reinterpret_cast<const std::byte *>(str.c_str()), reinterpret_cast<const std::byte *>(str.c_str() + str.size() + 1));
+            new_string_data = std::vector<std::byte>(reinterpret_cast<const std::byte *>(str.c_str()), reinterpret_cast<const std::byte *>(str.c_str() + str.size() + 1));
         }
-
-        auto &data_str = reinterpret_cast<StringListString<BigEndian> *>(tag_data.data() + string_list_string_offset)->string;
-        data_str.size = static_cast<std::uint32_t>(string_size + sizeof(T));
-        string_list_string_offset += STRING_LIST_STRING_SIZE;
     }
 
-    return tag_data;
+    return tag_data.generate_hek_tag_data(C, true);
 }
 
 static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
@@ -228,10 +213,10 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(string_options.format) {
         case STRING_LIST_FORMAT_UTF_16:
-            final_data = generate_string_list_tag<char16_t, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
-            final_data = generate_string_list_tag<char, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_LATIN1:
             final_data = generate_hud_message_text_tag(text);
