@@ -12,6 +12,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-font: Now uses the new parser
 - invader-string: Now uses the new parser
 - invader-string: Changed "utf-16" to "unicode"
+- Compiling with `-DINVADER_EXTRACT_HIDDEN_VALUES` now disables some programs
 
 ### Fixed
 - invader-build: Fixed an out-of-bounds issue resulting in undefined behavior
