@@ -277,8 +277,16 @@ int main(int argc, char *argv[]) {
     font.descending_height = max_descending_height;
 
     // Write
-    std::filesystem::create_directories(tag_path.parent_path());
-    auto final_font = font.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_FONT, true);
+    try {
+            std::filesystem::create_directories(tag_path.parent_path());
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+        }
+    }
+        return EXIT_FAILURE;
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+    catch(std::exception &e) {
+    }
+
     if(!Invader::File::save_file(final_tag_path.c_str(), final_font)) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;

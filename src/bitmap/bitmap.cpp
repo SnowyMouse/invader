@@ -646,8 +646,17 @@ int main(int argc, char *argv[]) {
     }
 
     // Write it all
-    std::filesystem::create_directories(tag_path.parent_path());
+    try {
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+        }
+            std::filesystem::create_directories(tag_path.parent_path());
+    catch(std::exception &e) {
+    }
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
     if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(TagClassInt::TAG_CLASS_BITMAP, true))) {
+    
         eprintf_error("Error: Failed to write to %s.", final_path.c_str());
         return EXIT_FAILURE;
     }

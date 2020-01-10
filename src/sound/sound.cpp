@@ -642,7 +642,15 @@ int main(int argc, const char **argv) {
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0);
 
     // Create missing directories if needed
-    std::filesystem::create_directories(tag_path.parent_path());
+    try {
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+            std::filesystem::create_directories(tag_path.parent_path());
+        }
+    }
+    catch(std::exception &e) {
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
 
     // Save
     if(!Invader::File::save_file(tag_path.string().c_str(), sound_tag_data)) {
