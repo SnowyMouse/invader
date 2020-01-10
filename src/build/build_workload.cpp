@@ -756,7 +756,7 @@ namespace Invader {
     }
 
     BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::string> &tags_directories, bool recursion) {
-        BuildWorkload workload;
+        BuildWorkload workload = {};
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
@@ -766,7 +766,7 @@ namespace Invader {
     }
 
     BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::string> &tags_directories, bool recursion) {
-        BuildWorkload workload;
+        BuildWorkload workload = {};
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;

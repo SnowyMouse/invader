@@ -60,7 +60,7 @@ namespace Invader::Parser {
         std::size_t overlay_count = this->crosshair_overlays.size();
         for(std::size_t i = 0; i < overlay_count; i++) {
             auto &overlay = this->crosshair_overlays[i];
-            if(overlay.sequence_index != NULL_INDEX) {
+            if(overlay.sequence_index != NULL_INDEX && !workload.disable_recursion) {
                 if(overlay.sequence_index >= sequence_count) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
                 }
@@ -83,7 +83,7 @@ namespace Invader::Parser {
 
     void WeaponHUDInterfaceMeter::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Make sure it's valid
-        if(this->sequence_index != NULL_INDEX) {
+        if(this->sequence_index != NULL_INDEX && !workload.disable_recursion) {
             // Figure out what we're getting into
             std::size_t sequence_count;
             const BitmapGroupSequence::struct_little *sequences;
@@ -104,7 +104,7 @@ namespace Invader::Parser {
 
     void WeaponHUDInterfaceStaticElement::post_compile(Invader::BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         // Make sure it's valid
-        if(this->sequence_index != NULL_INDEX) {
+        if(this->sequence_index != NULL_INDEX && !workload.disable_recursion) {
             // Figure out what we're getting into
             std::size_t sequence_count;
             const BitmapGroupSequence::struct_little *sequences;
@@ -135,7 +135,7 @@ namespace Invader::Parser {
         std::size_t overlay_count = this->overlays.size();
         for(std::size_t i = 0; i < overlay_count; i++) {
             auto &overlay = this->overlays[i];
-            if(overlay.sequence_index != NULL_INDEX) {
+            if(overlay.sequence_index != NULL_INDEX && !workload.disable_recursion) {
                 if(overlay.sequence_index >= sequence_count) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of element #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
                 }

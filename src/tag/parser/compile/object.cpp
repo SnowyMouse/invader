@@ -128,6 +128,10 @@ namespace Invader::Parser {
     }
 
     static void recursively_get_all_predicted_resources_from_struct(const BuildWorkload &workload, std::size_t struct_index, std::vector<std::size_t> &resources, bool ignore_shader_resources) {
+        if(workload.disable_recursion) {
+            return;
+        }
+
         auto &s = workload.structs[struct_index];
         for(auto &d : s.dependencies) {
             std::size_t tag_index = d.tag_index;
@@ -208,6 +212,10 @@ namespace Invader::Parser {
     }
 
     void Biped::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        if(workload.disable_recursion) {
+            return; // if recursion is disabled, doing any of this will be a meme
+        }
+
         auto &head_index = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset)->head_model_node_index;
         auto &model_id = this->model.tag_id;
 

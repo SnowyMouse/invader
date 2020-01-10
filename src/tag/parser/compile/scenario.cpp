@@ -7,6 +7,10 @@
 
 namespace Invader::Parser {
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        if(workload.disable_recursion) {
+            return; // if recursion is disabled, doing any of this will be a meme
+        }
+
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
         }
@@ -341,6 +345,10 @@ namespace Invader::Parser {
     };
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
+        if(workload.disable_recursion) {
+            return; // if recursion is disabled, doing any of this will be a meme
+        }
+
         auto &scenario_struct = workload.structs[struct_index];
         const auto &scenario_data = *reinterpret_cast<const struct_little *>(scenario_struct.data.data() + struct_offset);
 
