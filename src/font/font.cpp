@@ -278,16 +278,16 @@ int main(int argc, char *argv[]) {
 
     // Write
     try {
-            std::filesystem::create_directories(tag_path.parent_path());
         if(!std::filesystem::exists(tag_path.parent_path())) {
+            std::filesystem::create_directories(tag_path.parent_path());
         }
     }
-        return EXIT_FAILURE;
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
     catch(std::exception &e) {
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
     }
 
-    if(!Invader::File::save_file(final_tag_path.c_str(), final_font)) {
+    if(!Invader::File::save_file(final_tag_path.c_str(), font.generate_hek_tag_data(Invader::TagClassInt::TAG_CLASS_FONT, true))) {
         eprintf_error("Failed to save %s.", final_tag_path.c_str());
         return EXIT_FAILURE;
     }
