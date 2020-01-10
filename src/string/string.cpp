@@ -18,6 +18,8 @@ enum Format {
 };
 
 template <typename T, typename G, Invader::TagClassInt C> static std::vector<std::byte> generate_string_list_tag(const std::string &input_string) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
     using namespace Invader::HEK;
 
     // Make the file header
@@ -225,7 +227,7 @@ int main(int argc, char * const *argv) {
 
     // Write it all
     std::filesystem::path tag_path(output_path);
-    
+
     // Create missing directories if needed
     try {
         if(!std::filesystem::exists(tag_path.parent_path())) {
@@ -237,18 +239,10 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
 
-    std::FILE *tag_write = std::fopen(output_path.c_str(), "wb");
-    if(!tag_write) {
-        eprintf_error("Error: Failed to open %s for writing.\n", output_path.c_str());;
-        return EXIT_FAILURE;
-    }
-
-    if(std::fwrite(final_data.data(), final_data.size(), 1, tag_write) != 1) {
+    if(!Invader::File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.\n", output_path.c_str());
-        std::fclose(tag_write);
         return EXIT_FAILURE;
     }
 
-    std::fclose(tag_write);
     return EXIT_SUCCESS;
 }

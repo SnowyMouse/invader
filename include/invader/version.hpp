@@ -19,4 +19,10 @@ namespace Invader {
     const char *full_version();
 }
 
+#ifdef INVADER_EXTRACT_HIDDEN_VALUES
+#define EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES eprintf_error("Error: Invader was compiled with INVADER_EXTRACT_HIDDEN_VALUES."); eprintf_error("This program cannot be used."); std::exit(EXIT_FAILURE);
+#else
+#define EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+#endif
+
 #endif

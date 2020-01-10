@@ -142,9 +142,7 @@ set_source_files_properties(src/version.cpp
 
 # Set a constant if we're extracting hidden values
 if(${INVADER_EXTRACT_HIDDEN_VALUES})
-    set_source_files_properties(src/tag/hek/header.cpp
-        PROPERTIES COMPILE_DEFINITIONS "INVADER_EXTRACT_HIDDEN_VALUES"
-    )
+    add_definitions(-DINVADER_EXTRACT_HIDDEN_VALUES)
 endif()
 
 # Remove warnings from this

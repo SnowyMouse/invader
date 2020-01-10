@@ -12,6 +12,8 @@
 #include <samplerate.h>
 
 int main(int argc, const char **argv) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
     using namespace Invader;
     using namespace Invader::HEK;
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;

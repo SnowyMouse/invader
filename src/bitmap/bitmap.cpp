@@ -36,6 +36,8 @@ static const char *SUPPORTED_FORMATS[] = {
 static_assert(sizeof(SUPPORTED_FORMATS) / sizeof(*SUPPORTED_FORMATS) == SUPPORTED_FORMATS_INT_COUNT);
 
 int main(int argc, char *argv[]) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
     using namespace Invader::HEK;
     using namespace Invader;
 
