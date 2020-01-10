@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
     FT_Done_FreeType(library);
 
     // Create
-    Invader::Parser::Font font;
+    Invader::Parser::Font font= {};
     std::vector<Invader::HEK::FontCharacter<Invader::HEK::BigEndian>> tag_characters;
     auto &pixels = font.pixels;
 

@@ -514,7 +514,7 @@ int main(int argc, char *argv[]) {
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
-    Parser::Bitmap bitmap_tag_data;
+    Parser::Bitmap bitmap_tag_data = {};
 
     // Compress the original input blob
     {
