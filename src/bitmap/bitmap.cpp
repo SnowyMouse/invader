@@ -13,6 +13,7 @@
 #include <invader/bitmap/bitmap_data_writer.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/parser/parser.hpp>
 
 enum SupportedFormatsInt {
     SUPPORTED_FORMATS_TIF = 0,
@@ -513,9 +514,7 @@ int main(int argc, char *argv[]) {
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Start building the bitmap tag
-    std::vector<std::byte> bitmap_tag_data(sizeof(TagFileHeader) + sizeof(Bitmap<BigEndian>));
-    *reinterpret_cast<TagFileHeader *>(bitmap_tag_data.data()) = TagFileHeader(TagClassInt::TAG_CLASS_BITMAP);
-    Bitmap<BigEndian> new_tag_header = {};
+    Parser::Bitmap bitmap_tag_data;
 
     // Compress the original input blob
     {
@@ -535,52 +534,45 @@ int main(int argc, char *argv[]) {
         deflateEnd(&deflate_stream);
 
         // Set fields
-        new_tag_header.color_plate_width = image_width;
-        new_tag_header.color_plate_height = image_height;
+        bitmap_tag_data.color_plate_width = image_width;
+        bitmap_tag_data.color_plate_height = image_height;
 
         // Set decompressed sizeblue_dither_alphadithering
         BigEndian<std::uint32_t> decompressed_size;
         decompressed_size = static_cast<std::uint32_t>(image_size);
 
         // Set compressed size
-        new_tag_header.compressed_color_plate_data.size = sizeof(decompressed_size) + deflate_stream.total_out;
+        bitmap_tag_data.compressed_color_plate_data.resize(sizeof(decompressed_size));
+        *reinterpret_cast<BigEndian<std::uint32_t> *>(bitmap_tag_data.compressed_color_plate_data.data()) = decompressed_size;
 
         // Add it to the end now
-        bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<std::byte *>(&decompressed_size), reinterpret_cast<std::byte *>(&decompressed_size + 1));
-        bitmap_tag_data.insert(bitmap_tag_data.end(), compressed_data.data(), compressed_data.data() + deflate_stream.total_out);
+        bitmap_tag_data.compressed_color_plate_data.insert(bitmap_tag_data.compressed_color_plate_data.end(), compressed_data.data(), compressed_data.data() + deflate_stream.total_out);
     }
 
     // Now let's add the actual bitmap data
-    std::vector<std::byte> bitmap_data_pixels;
-    std::vector<BitmapData<BigEndian>> bitmap_data(bitmap_count);
-
     #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
     // Add our bitmap data
     oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
     try {
-        write_bitmap_data(scanned_color_plate, bitmap_data_pixels, bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
+        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
     }
     catch (std::exception &e) {
         eprintf_error("Failed to generate bitmap data: %s", e.what());
         std::exit(1);
     }
-    oprintf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_data_pixels.size()));
-
-    // Add the bitmap pixel data
-    bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_pixels.begin(), bitmap_data_pixels.end());
-    new_tag_header.processed_pixel_data.size = bitmap_data_pixels.size();
+    oprintf("Total: %.03f MiB\n", BYTES_TO_MIB(bitmap_tag_data.processed_pixel_data.size()));
 
     // Add all sequences
-    std::vector<std::byte> sprite_data;
     for(auto &sequence : scanned_color_plate.sequences) {
-        BitmapGroupSequence<BigEndian> bgs = {};
+        auto &bgs = bitmap_tag_data.bitmap_group_sequence.emplace_back();
+
         bgs.first_bitmap_index = sequence.first_bitmap;
         bgs.bitmap_count = sequence.bitmap_count;
 
-        bgs.sprites.count = static_cast<std::uint32_t>(sequence.sprites.size());
+        // Add the sprites in the sequence
         for(auto &sprite : sequence.sprites) {
-            BitmapGroupSprite<BigEndian> bgss = {};
+            auto &bgss = bgs.sprites.emplace_back();
             auto &bitmap = scanned_color_plate.bitmaps[sprite.bitmap_index];
             bgss.bitmap_index = sprite.bitmap_index;
 
@@ -591,37 +583,26 @@ int main(int argc, char *argv[]) {
             bgss.left = static_cast<float>(sprite.left) / bitmap.width;
             bgss.right = static_cast<float>(sprite.right) / bitmap.width;
             bgss.registration_point.x = static_cast<float>(sprite.registration_point_x) / bitmap.width;
-
-            sprite_data.insert(sprite_data.end(), reinterpret_cast<const std::byte *>(&bgss), reinterpret_cast<const std::byte *>(&bgss + 1));
         }
-
-        bitmap_tag_data.insert(bitmap_tag_data.end(), reinterpret_cast<const std::byte *>(&bgs), reinterpret_cast<const std::byte *>(&bgs + 1));
     }
-    new_tag_header.bitmap_group_sequence.count = scanned_color_plate.sequences.size();
-    bitmap_tag_data.insert(bitmap_tag_data.end(), sprite_data.begin(), sprite_data.end());
-
-    // Add the bitmap tag data
-    const auto *bitmap_data_start = reinterpret_cast<const std::byte *>(bitmap_data.data());
-    const auto *bitmap_data_end = reinterpret_cast<const std::byte *>(bitmap_data.data() + bitmap_data.size());
-    bitmap_tag_data.insert(bitmap_tag_data.end(), bitmap_data_start, bitmap_data_end);
-    new_tag_header.bitmap_data.count = bitmap_data.size();
 
     // Set more parameters
-    new_tag_header.type = bitmap_options.bitmap_type.value();
-    new_tag_header.usage = bitmap_options.usage.value();
-    new_tag_header.bump_height = bitmap_options.bump_height.value();
-    new_tag_header.detail_fade_factor = bitmap_options.mipmap_fade.value();
-    new_tag_header.format = bitmap_options.format.value();
-    new_tag_header.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
-    new_tag_header.blur_filter_size = bitmap_options.blur.value_or(0.0F);
+    bitmap_tag_data.type = bitmap_options.bitmap_type.value();
+    bitmap_tag_data.usage = bitmap_options.usage.value();
+    bitmap_tag_data.bump_height = bitmap_options.bump_height.value();
+    bitmap_tag_data.detail_fade_factor = bitmap_options.mipmap_fade.value();
+    bitmap_tag_data.format = bitmap_options.format.value();
+    bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
+    bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
-        new_tag_header.mipmap_count = 0;
+        bitmap_tag_data.mipmap_count = 0;
     }
     else {
-        new_tag_header.mipmap_count = bitmap_options.max_mipmap_count.value() + 1;
+        bitmap_tag_data.mipmap_count = bitmap_options.max_mipmap_count.value() + 1;
     }
 
-    BitmapFlags flags = {};
+    // Set flags
+    auto &flags = bitmap_tag_data.flags;
     flags.disable_height_map_compression = !bitmap_options.palettize.value();
     switch(bitmap_options.mipmap_scale_type.value()) {
         case ScannedColorMipmapType::SCANNED_COLOR_MIPMAP_LINEAR:
@@ -637,51 +618,37 @@ int main(int argc, char *argv[]) {
     flags.invader_dither_red = bitmap_options.dither_red.value();
     flags.invader_dither_green = bitmap_options.dither_green.value();
     flags.invader_dither_blue = bitmap_options.dither_blue.value();
-    new_tag_header.flags = flags;
 
-    new_tag_header.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
-    new_tag_header.sprite_budget_count = bitmap_options.sprite_budget_count.value();
-    new_tag_header.sprite_usage = bitmap_options.sprite_usage.value();
+    // Set sprite stuff
+    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
+    bitmap_tag_data.sprite_budget_count = bitmap_options.sprite_budget_count.value();
+    bitmap_tag_data.sprite_usage = bitmap_options.sprite_usage.value();
     auto &sprite_budget_value = bitmap_options.sprite_budget.value();
     switch(sprite_budget_value) {
         case 32:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
             break;
         case 64:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_64X64;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_64X64;
             break;
         case 128:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_128X128;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_128X128;
             break;
         case 256:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_256X256;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_256X256;
             break;
         case 512:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_512X512;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_512X512;
             break;
         default:
-            new_tag_header.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
             break;
     }
-
-    // Add the struct in
-    *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
 
     // Write it all
     std::filesystem::create_directories(tag_path.parent_path());
-    std::FILE *tag_write = std::fopen(final_path.c_str(), "wb");
-    if(!tag_write) {
-        eprintf_error("Error: Failed to open %s for writing.", final_path.c_str());
-        return EXIT_FAILURE;
-    }
-
-    if(std::fwrite(bitmap_tag_data.data(), bitmap_tag_data.size(), 1, tag_write) != 1) {
+    if(!File::save_file(final_path.c_str(), bitmap_tag_data.generate_hek_tag_data(TagClassInt::TAG_CLASS_BITMAP, true))) {
         eprintf_error("Error: Failed to write to %s.", final_path.c_str());
-        std::fclose(tag_write);
         return EXIT_FAILURE;
     }
-
-    std::fclose(tag_write);
-
-    return 0;
 }
