@@ -240,7 +240,18 @@ int main(int argc, char * const *argv) {
 
     // Write it all
     std::filesystem::path tag_path(output_path);
-    std::filesystem::create_directories(tag_path.parent_path());
+    
+    // Create missing directories if needed
+    try {
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+            std::filesystem::create_directories(tag_path.parent_path());
+        }
+    }
+    catch(std::exception &e) {
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
+
     std::FILE *tag_write = std::fopen(output_path.c_str(), "wb");
     if(!tag_write) {
         eprintf_error("Error: Failed to open %s for writing.\n", output_path.c_str());;

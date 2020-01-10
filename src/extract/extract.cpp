@@ -289,7 +289,15 @@ int main(int argc, const char **argv) {
         }
 
         // Create directories along the way
-        std::filesystem::create_directories(tag_path_to_write_to.parent_path());
+        try {
+            if(!std::filesystem::exists(tag_path_to_write_to.parent_path())) {
+                std::filesystem::create_directories(tag_path_to_write_to.parent_path());
+            }
+        }
+        catch(std::exception &e) {
+            eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+            return false;
+        }
 
         // Save it
         auto tag_path_str = tag_path_to_write_to.string();

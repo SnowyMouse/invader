@@ -279,7 +279,16 @@ int main(int argc, char *argv[]) {
     font.characters.count = tag_characters.size();
 
     // Write
-    std::filesystem::create_directories(tag_path.parent_path());
+    try {
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+            std::filesystem::create_directories(tag_path.parent_path());
+        }
+    }
+    catch(std::exception &e) {
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
+
     std::FILE *f = std::fopen(final_tag_path.c_str(), "wb");
     if(!f) {
         eprintf_error("Failed to open %s for writing.", final_tag_path.c_str());

@@ -668,7 +668,16 @@ int main(int argc, char *argv[]) {
     *reinterpret_cast<Bitmap<BigEndian> *>(bitmap_tag_data.data() + sizeof(TagFileHeader)) = new_tag_header;
 
     // Write it all
-    std::filesystem::create_directories(tag_path.parent_path());
+    try {
+        if(!std::filesystem::exists(tag_path.parent_path())) {
+            std::filesystem::create_directories(tag_path.parent_path());
+        }
+    }
+    catch(std::exception &e) {
+        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        return EXIT_FAILURE;
+    }
+    
     std::FILE *tag_write = std::fopen(final_path.c_str(), "wb");
     if(!tag_write) {
         eprintf_error("Error: Failed to open %s for writing.", final_path.c_str());
