@@ -96,7 +96,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode, hmt, or latin-1. Default: unicode");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Default: unicode");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
