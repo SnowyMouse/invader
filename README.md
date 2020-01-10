@@ -304,6 +304,9 @@ Options:
                                build time at a cost of a much larger file size.
   -N --rename-scenario <name>  Rename the scenario.
   -o --output <file>           Output to a specific file.
+  -O --optimize                Optimize tag space. This will drastically
+                               increase the amount of time required to build
+                               the cache file.
   -P --fs-path                 Use a filesystem path for the tag.
   -q --quiet                   Only output error messages.
   -t --tags <dir>              Use the specified tags directory. Use multiple
@@ -538,6 +541,26 @@ and this also gives you lower bitrate and better quality than Xbox ADPCM.
 Xbox ADPCM does not compress as efficiently as Ogg Vorbis, but it decodes
 considerably faster, so this may be beneficial for firing effects. However, we
 instead recommend using uncompressed 16-bit PCM if possible.
+
+### invader-string
+This program generates font tags. If building a unicode or latin-1 tag, strings
+are stored in a .txt file, with each string ending with a line,
+`###END-STRING###`.
+
+```
+Usage: invader-string [options] <tag>
+
+Generate string list tags.
+
+Options:
+  -d --data <dir>              Use the specified data directory.
+  -f --format                  Set string list format. Can be unicode or
+                               latin-1. Default: unicode
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -P --fs-path                 Use a filesystem path for the text file.
+  -t --tags <dir>              Use the specified tags directory.
+```
 
 ## Frequently asked questions
 These are a selection of questions that have been asked over the course of
