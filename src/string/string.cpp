@@ -11,7 +11,7 @@
 #include <invader/file/file.hpp>
 
 enum Format {
-    STRING_LIST_FORMAT_UTF_16,
+    STRING_LIST_FORMAT_UNICODE,
     STRING_LIST_FORMAT_HMT,
     STRING_LIST_FORMAT_LATIN1
 };
@@ -96,7 +96,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("format", 'f', 1, "Set string list format. Can be utf-16, hmt, or latin-1. Default: utf-16");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode, hmt, or latin-1. Default: unicode");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
@@ -105,7 +105,7 @@ int main(int argc, char * const *argv) {
     struct StringOptions {
         const char *data = "data";
         const char *tags = "tags";
-        Format format = Format::STRING_LIST_FORMAT_UTF_16;
+        Format format = Format::STRING_LIST_FORMAT_UNICODE;
         const char *output_extension = ".unicode_string_list";
         bool use_filesystem_path = false;
     } string_options;
@@ -126,7 +126,7 @@ int main(int argc, char * const *argv) {
                 break;
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
-                    string_options.format = Format::STRING_LIST_FORMAT_UTF_16;
+                    string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
                     string_options.output_extension = ".unicode_string_list";
                 }
                 else if(std::strcmp(arguments[0], "latin-1") == 0) {
@@ -227,7 +227,7 @@ int main(int argc, char * const *argv) {
     // Generate the data
     std::vector<std::byte> final_data;
     switch(string_options.format) {
-        case STRING_LIST_FORMAT_UTF_16:
+        case STRING_LIST_FORMAT_UNICODE:
             final_data = generate_string_list_tag<char16_t, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
@@ -240,7 +240,7 @@ int main(int argc, char * const *argv) {
 
     // Write it all
     std::filesystem::path tag_path(output_path);
-    
+
     // Create missing directories if needed
     try {
         if(!std::filesystem::exists(tag_path.parent_path())) {
