@@ -215,7 +215,7 @@ int main(int argc, char * const *argv) {
     std::vector<std::byte> final_data;
     switch(string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
-            final_data = generate_string_list_tag<char16_t, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
+            final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
         case STRING_LIST_FORMAT_HMT:
             final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
