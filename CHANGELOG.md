@@ -32,6 +32,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: If a value is changed automatically due to the map being a
   singleplayer or stock map, a warning is now displayed.
 
+### Fixed
+- invader-build: Warning for non-power-of-two was fixed (it warned only if it
+  was an interface bitmap, not only if it was NOT an interface bitmap)
+
 ## [0.22.2] - 2020-01-10
 ### Fixed
 - invader-extract: Fixed recursive extraction causing segmentation faults with
