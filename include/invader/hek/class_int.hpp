@@ -290,9 +290,10 @@ namespace Invader::HEK {
              return "wind";
          case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
              return "weapon_hud_interface";
-         default:
-             return "unknown";
+         case TagClassInt::TAG_CLASS_NULL:
+             break;
          }
+         return "unknown";
      }
 
     /**
