@@ -17,19 +17,20 @@ namespace Invader {
     public:
         /**
          * Compile a map
-         * @param scenario          scenario tag to use
-         * @param tags_directories  tags directories to use
-         * @param engine_target     target a specific engine
-         * @param maps_directory    maps directory to use; ignored if building a Dark Circlet map
-         * @param with_index        tag index to use
-         * @param no_external_tags  do not use cached tags; ignored if building a Dark Circlet map
-         * @param always_index_tags always use cached tags; ignored if building a Dark Circlet map
-         * @param verbose           output non-error messages to console
-         * @param forge_crc         forge the CRC32 of the map
-         * @param tag_data_address  address the tag data will be loaded to
-         * @param rename_scenario   rename the scenario's base name (preserving the root path)
-         * @param optimize_space    should dedupe structs
-         * @param compress          Zstd-compress the resulting map file
+         * @param scenario               scenario tag to use
+         * @param tags_directories       tags directories to use
+         * @param engine_target          target a specific engine
+         * @param maps_directory         maps directory to use; ignored if building a Dark Circlet map
+         * @param with_index             tag index to use
+         * @param no_external_tags       do not use cached tags; ignored if building a Dark Circlet map
+         * @param always_index_tags      always use cached tags; ignored if building a Dark Circlet map
+         * @param verbose                output non-error messages to console
+         * @param forge_crc              forge the CRC32 of the map
+         * @param tag_data_address       address the tag data will be loaded to
+         * @param rename_scenario        rename the scenario's base name (preserving the root path)
+         * @param optimize_space         should dedupe structs
+         * @param compress               Zstd-compress the resulting map file
+         * @param hide_pedantic_warnings hide pedantic warnings
          */
         static std::vector<std::byte> compile_map (
             const char *scenario,
@@ -44,7 +45,8 @@ namespace Invader {
             const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
             const std::optional<std::string> &rename_scenario = std::nullopt,
             bool optimize_space = false,
-            bool compress = false
+            bool compress = false,
+            bool hide_pedantic_warnings = false
         );
 
         /**

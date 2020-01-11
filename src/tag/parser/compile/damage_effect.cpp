@@ -9,7 +9,7 @@ namespace Invader::Parser {
             this->elite_energy_shield = 0.8F;
         }
 
-        if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\banshee\\banshee bolt" || workload.tags[tag_index].path == "vehicles\\ghost\\ghost bolt")) {
+        if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\ghost\\ghost bolt" || workload.tags[tag_index].path == "vehicles\\banshee\\banshee bolt")) {
             bool custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
 
             float new_damage_stun = custom_edition ? 0.0F : 1.0F;

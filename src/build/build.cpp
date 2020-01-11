@@ -43,6 +43,7 @@ int main(int argc, const char **argv) {
         const char *rename_scenario = nullptr;
         bool compress = false;
         bool optimize_space = false;
+        bool hide_pedantic_warnings = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -60,6 +61,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
+    options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
     static constexpr char USAGE[] = "[options] <scenario>";
@@ -123,6 +125,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'O':
                 build_options.optimize_space = true;
+                break;
+            case 'H':
+                build_options.hide_pedantic_warnings = true;
                 break;
         }
     });
@@ -225,7 +230,8 @@ int main(int argc, const char **argv) {
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
             build_options.optimize_space,
-            build_options.compress
+            build_options.compress,
+            build_options.hide_pedantic_warnings
         );
 
         // Set the map name

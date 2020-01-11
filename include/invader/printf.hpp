@@ -28,6 +28,7 @@
 
 #define eprintf_error(...) output_colored(0xC, eprintf, __VA_ARGS__);
 #define eprintf_warn(...) output_colored(0xE, eprintf, __VA_ARGS__);
+#define eprintf_warn_lesser(...) output_colored(0xD, eprintf, __VA_ARGS__);
 #define oprintf_success(...) output_colored(0xA, oprintf, __VA_ARGS__);
 #define oprintf_success_warn(...) output_colored(0xE, oprintf, __VA_ARGS__);
 #define oprintf_success_lesser_warn(...) output_colored(0xD, oprintf, __VA_ARGS__);
@@ -49,6 +50,16 @@ else {\
 
 #define eprintf_warn(...) if(ON_COLOR_TERM) {\
     eprintf("\x1B[1;38;5;3m"); \
+    eprintf(__VA_ARGS__); \
+    eprintf("\x1B[m\n"); \
+} \
+else {\
+    eprintf(__VA_ARGS__); \
+    eprintf("\n"); \
+}
+
+#define eprintf_warn_lesser(...) if(ON_COLOR_TERM) {\
+    eprintf("\x1B[1;38;5;5m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
 } \

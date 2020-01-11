@@ -3,6 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-build: Minor warnings are now considered "pedantic" and can be hidden
+  with `-H`. You should probably still fix these warnings, as you may be
+  getting an undesirable result.
+
 ### Changed
 - invader-build: If building a Custom Edition map with a stock scenario name,
   the following values are set:

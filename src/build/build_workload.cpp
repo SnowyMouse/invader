@@ -45,12 +45,16 @@ namespace Invader {
         const std::optional<std::uint32_t> &tag_data_address,
         const std::optional<std::string> &rename_scenario,
         bool optimize_space,
-        bool compress
+        bool compress,
+        bool hide_pedantic_warnings
     ) {
         BuildWorkload workload;
 
         // Start benchmark
         workload.start = std::chrono::steady_clock::now();
+
+        // Hide these?
+        workload.hide_pedantic_warnings = hide_pedantic_warnings;
 
         // Don't allow two things to be used at once
         if(no_external_tags && always_index_tags) {
@@ -99,8 +103,12 @@ namespace Invader {
             }
         };
 
+        // Set the scenario name too
         if(rename_scenario.has_value()) {
             workload.set_scenario_name((*rename_scenario).c_str());
+        }
+        else {
+            workload.set_scenario_name(scenario_name_fixed.c_str());
         }
 
         // Set the tag data address
@@ -634,9 +642,6 @@ namespace Invader {
     }
 
     void BuildWorkload::add_tags() {
-        this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
-        this->set_scenario_name(this->scenario);
-
         this->building_stock_map = std::strcmp(this->scenario_name.string, "a10") == 0 ||
                                    std::strcmp(this->scenario_name.string, "a30") == 0 ||
                                    std::strcmp(this->scenario_name.string, "a50") == 0 ||
@@ -667,6 +672,17 @@ namespace Invader {
                                    std::strcmp(this->scenario_name.string, "timberland") == 0 ||
                                    std::strcmp(this->scenario_name.string, "ui") == 0 ||
                                    std::strcmp(this->scenario_name.string, "wizard") == 0;
+
+        this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
+        std::string full_scenario_path = this->tags[this->scenario_index].path;
+        const char *first_char = full_scenario_path.c_str();
+        const char *last_slash = first_char;
+        for(const char *i = first_char; *i; i++) {
+            if(*i == '\\') {
+                last_slash = i + 1;
+            }
+        }
+        this->tags[this->scenario_index].path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
 
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
@@ -766,7 +782,9 @@ namespace Invader {
                 if(this->hide_pedantic_warnings) {
                     return;
                 }
-                // fallthrough
+                eprintf_warn_lesser("WARNING (minor): %s", error);
+                this->warnings++;
+                break;
             case ErrorType::ERROR_TYPE_WARNING:
                 eprintf_warn("WARNING: %s", error);
                 this->warnings++;
@@ -1111,17 +1129,6 @@ namespace Invader {
     }
 
     void BuildWorkload::set_scenario_name(const char *name) {
-        if(this->scenario_name.string[0]) {
-            auto &scenario_tag = this->tags[this->scenario_index];
-            const char *last_slash = scenario_tag.path.c_str();
-            for(const char *c = last_slash; *c; c++) {
-                if(*c == '\\') {
-                    last_slash = c + 1;
-                }
-            }
-            scenario_tag.path = scenario_tag.path.substr(0, last_slash - scenario_tag.path.c_str()) + name;
-            return;
-        }
         const char *last_slash = name;
         for(const char *c = name; *c; c++) {
             if(*c == '\\') {
