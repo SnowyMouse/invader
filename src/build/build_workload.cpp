@@ -637,6 +637,37 @@ namespace Invader {
         this->scenario_index = this->compile_tag_recursively(this->scenario, TagClassInt::TAG_CLASS_SCENARIO);
         this->set_scenario_name(this->scenario);
 
+        this->building_stock_map = std::strcmp(this->scenario_name.string, "a10") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "a30") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "a50") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "b30") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "b40") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "beavercreek") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "bloodgulch") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "boardingaction") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "c10") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "c20") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "c40") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "carousel") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "chillout") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "d20") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "d40") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "damnation") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "dangercanyon") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "deathisland") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "gephyrophobia") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "hangemhigh") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "icefields") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "infinity") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "longest") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "prisoner") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "putput") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "ratrace") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "sidewinder") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "timberland") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "ui") == 0 ||
+                                   std::strcmp(this->scenario_name.string, "wizard") == 0;
+
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
         this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
 

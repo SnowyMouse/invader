@@ -211,6 +211,9 @@ namespace Invader {
         /** Hide pedantic warnings */
         bool hide_pedantic_warnings = false;
 
+        /** Are we building a stock map? */
+        bool building_stock_map = false;
+
         /** Engine target */
         HEK::CacheFileEngine engine_target;
 

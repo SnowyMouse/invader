@@ -39,9 +39,16 @@ namespace Invader::Parser {
         compile_object(*this);
         compile_unit(*this);
     }
-    void Weapon::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this);
+
+        // Jason jones autoaim for the rocket warthog
+        if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {
+            bool custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+            this->autoaim_angle = custom_edition ? RADIANS_TO_DEGREES(6.0F) : RADIANS_TO_DEGREES(1.0F);
+            this->deviation_angle = custom_edition ? RADIANS_TO_DEGREES(12.0F) : RADIANS_TO_DEGREES(1.0F);
+        }
     }
     void Equipment::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_EQUIPMENT;
