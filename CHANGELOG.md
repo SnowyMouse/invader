@@ -9,6 +9,12 @@ This is used for recording Invader's changes. This changelog is based on
   getting an undesirable result.
 - invader-build: Added warnings for non-power-of-two bitmaps being incorrectly
   set as power-of-two and vice versa.
+- invader-build: Stock multiplayer maps for demo, retail, and custom edition
+  are now automatically indexed to prevent crashing when joining with modified
+  maps.
+- invader-build: Stock multiplayer maps for custom edition now have their CRC32
+  automatically forged to whatever the stock CRC32 is to allow users to join
+  other servers with modified maps.
 
 ### Changed
 - invader-build: If building a Custom Edition map with a stock scenario name,

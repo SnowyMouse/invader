@@ -10,6 +10,9 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -110,6 +113,26 @@ add_custom_command(
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette" "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/palette.py"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/p8/p8_palette"
+)
+
+# Include version getters
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp" "retail" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*"
+)
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp" "demo" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*"
+)
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp" "custom_edition" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
 )
 
 # Include version script

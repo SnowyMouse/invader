@@ -10,6 +10,7 @@
 #include <invader/version.hpp>
 #include <invader/crc/hek/crc.hpp>
 #include <invader/compress/compression.hpp>
+#include <invader/tag/index/index.hpp>
 
 namespace Invader {
     using namespace HEK;
@@ -61,22 +62,10 @@ namespace Invader {
             throw std::exception();
         }
 
-        // Use indexing
-        if(with_index.has_value()) {
-            auto &index = *with_index;
-            for(auto &tag : index) {
-                auto &new_tag = workload.tags.emplace_back();
-                new_tag.path = tag.second;
-                new_tag.tag_class_int = tag.first;
-                new_tag.stubbed = true;
-            }
-        }
-
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
         workload.scenario = scenario_name_fixed.c_str();
         workload.tags_directories = &tags_directories;
         workload.engine_target = engine_target;
-        workload.forge_crc = forge_crc;
         workload.optimize_space = optimize_space;
         workload.verbose = verbose;
         workload.compress = compress;
@@ -109,6 +98,100 @@ namespace Invader {
         }
         else {
             workload.set_scenario_name(scenario_name_fixed.c_str());
+        }
+
+        // Use indexing
+        auto use_index = with_index.value_or(std::vector<std::pair<TagClassInt, std::string>>());
+
+        // If no index was provided, see if we can get one
+        if(use_index.size() == 0) {
+            switch(engine_target) {
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    use_index = custom_edition_indices(workload.scenario_name.string);
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                    use_index = retail_indices(workload.scenario_name.string);
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                    use_index = demo_indices(workload.scenario_name.string);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // If we have one, continue on
+        if(use_index.size() > 0) {
+            for(auto &tag : use_index) {
+                auto &new_tag = workload.tags.emplace_back();
+                new_tag.path = tag.second;
+                new_tag.tag_class_int = tag.first;
+                new_tag.stubbed = true;
+            }
+        }
+
+        // Next, if no CRC is passed and we need a CRC, press on
+        if(!forge_crc.has_value() && engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            if(std::strcmp(workload.scenario_name.string, "beavercreek") == 0) {
+                workload.forge_crc = 0x07B3876A;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "bloodgulch") == 0) {
+                workload.forge_crc = 0x7B309554;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "boardingaction") == 0) {
+                workload.forge_crc = 0xF4DEEF94;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "carousel") == 0) {
+                workload.forge_crc = 0x9C301A08;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "chillout") == 0) {
+                workload.forge_crc = 0x93C53C27;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "damnation") == 0) {
+                workload.forge_crc = 0x0FBA059D;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "dangercanyon") == 0) {
+                workload.forge_crc = 0xC410CD74;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "deathisland") == 0) {
+                workload.forge_crc = 0x1DF8C97F;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "gephyrophobia") == 0) {
+                workload.forge_crc = 0xD2872165;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "hangemhigh") == 0) {
+                workload.forge_crc = 0xA7C8B9C6;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "icefields") == 0) {
+                workload.forge_crc = 0x5EC1DEB7;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "infinity") == 0) {
+                workload.forge_crc = 0x0E7F7FE7;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "longest") == 0) {
+                workload.forge_crc = 0xC8F48FF6;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "prisoner") == 0) {
+                workload.forge_crc = 0x43B81A8B;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "putput") == 0) {
+                workload.forge_crc = 0xAF2F0B84;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "ratrace") == 0) {
+                workload.forge_crc = 0xF7F8E14C;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "sidewinder") == 0) {
+                workload.forge_crc = 0xBD95CF55;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "timberland") == 0) {
+                workload.forge_crc = 0x54446470;
+            }
+            else if(std::strcmp(workload.scenario_name.string, "wizard") == 0) {
+                workload.forge_crc = 0xCF3359B1;
+            }
+        }
+        else {
+            workload.forge_crc = forge_crc;
         }
 
         // Set the tag data address
