@@ -14,16 +14,18 @@ This is used for recording Invader's changes. This changelog is based on
     - `vehicles\ghost\ghost bolt` stun: 0
     - `vehicles\ghost\ghost bolt` max stun: 0
     - `vehicles\ghost\ghost bolt` stun time: 0
-- invader-build: If building a retail map with a stock scenario name, the
-  following values are set:
-    - `vehicles\rwarthog\rwarthog_gun` autoaim angle: 1 degree
-    - `vehicles\rwarthog\rwarthog_gun` deviation angle: 1 degree
+- invader-build: If building a retail or `dark` map with a stock scenario name,
+  the following values are set:
+    - `vehicles\rwarthog\rwarthog_gun` autoaim angle: 1 degree (6 if `dark`)
+    - `vehicles\rwarthog\rwarthog_gun` deviation angle: 1 degree (12 if `dark`)
     - `vehicles\banshee\banshee bolt` stun: 1
     - `vehicles\banshee\banshee bolt` max stun: 1
     - `vehicles\banshee\banshee bolt` stun time: 0.15
     - `vehicles\ghost\ghost bolt` stun: 1
     - `vehicles\ghost\ghost bolt` max stun: 1
     - `vehicles\ghost\ghost bolt` stun time: 0.15
+- invader-build: If a value is changed automatically due to the map being a
+  singleplayer or stock map, a warning is now displayed.
 
 ## [0.22.2] - 2020-01-10
 ### Fixed
