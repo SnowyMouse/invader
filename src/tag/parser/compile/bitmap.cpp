@@ -61,9 +61,18 @@ namespace Invader::Parser {
                 };
 
                 bool exceeded = false;
-                if(this->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth))) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
+                bool non_power_of_two = (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth));
+                if(this->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
                     exceeded = true;
+                }
+
+                if(data.flags.power_of_two_dimensions && non_power_of_two) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu) but that flag is set", data_index, width, height, depth);
+                }
+
+                if(!data.flags.power_of_two_dimensions && !non_power_of_two) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
                 }
 
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && !workload.hide_pedantic_warnings) {

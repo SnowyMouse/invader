@@ -7,6 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Minor warnings are now considered "pedantic" and can be hidden
   with `-H`. You should probably still fix these warnings, as you may be
   getting an undesirable result.
+- invader-build: Added warnings for non-power-of-two bitmaps being incorrectly
+  set as power-of-two and vice versa.
 
 ### Changed
 - invader-build: If building a Custom Edition map with a stock scenario name,
