@@ -50,7 +50,7 @@ namespace Invader::Parser {
             float new_deviation_angle = dark_circlet_or_custom_edition ? DEGREES_TO_RADIANS(12.0F) : DEGREES_TO_RADIANS(1.0F);
 
             if(new_autoaim_angle != this->autoaim_angle || new_deviation_angle != this->deviation_angle) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Autoaim and/or deviation angles were changed due to building a stock scenario", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Autoaim angles were changed due to building a stock scenario", tag_index);
 
                 this->deviation_angle = new_deviation_angle;
                 this->autoaim_angle = new_autoaim_angle;
