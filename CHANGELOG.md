@@ -2,6 +2,29 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-build: If building a Custom Edition map with a stock scenario name,
+  the following values are set:
+    - `vehicles\rwarthog\rwarthog_gun` autoaim angle: 6 degrees
+    - `vehicles\rwarthog\rwarthog_gun` deviation angle: 12 degrees
+    - `vehicles\banshee\banshee bolt` stun: 0
+    - `vehicles\banshee\banshee bolt` max stun: 0
+    - `vehicles\banshee\banshee bolt` stun time: 0
+    - `vehicles\ghost\ghost bolt` stun: 0
+    - `vehicles\ghost\ghost bolt` max stun: 0
+    - `vehicles\ghost\ghost bolt` stun time: 0
+- invader-build: If building a retail map with a stock scenario name, the
+  following values are set:
+    - `vehicles\rwarthog\rwarthog_gun` autoaim angle: 1 degree
+    - `vehicles\rwarthog\rwarthog_gun` deviation angle: 1 degree
+    - `vehicles\banshee\banshee bolt` stun: 1
+    - `vehicles\banshee\banshee bolt` max stun: 1
+    - `vehicles\banshee\banshee bolt` stun time: 0.15
+    - `vehicles\ghost\ghost bolt` stun: 1
+    - `vehicles\ghost\ghost bolt` max stun: 1
+    - `vehicles\ghost\ghost bolt` stun time: 0.15
+
 ## [0.22.2] - 2020-01-10
 ### Fixed
 - invader-extract: Fixed recursive extraction causing segmentation faults with
