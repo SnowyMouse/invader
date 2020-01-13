@@ -17,6 +17,8 @@ This is used for recording Invader's changes. This changelog is based on
   other servers with modified maps.
 
 ### Changed
+- invader-build: Specifying the target engine is now required when building a
+  map.
 - invader-build: If building a Custom Edition map with a stock scenario name,
   the following values are set:
     - `vehicles\rwarthog\rwarthog_gun` autoaim angle: 6 degrees
