@@ -38,7 +38,7 @@ int main(int argc, const char **argv) {
         bool handled = true;
         bool quiet = false;
         bool always_index_tags = false;
-        const char *forged_crc = nullptr;
+        std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
@@ -107,9 +107,22 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 break;
-            case 'C':
-                build_options.forged_crc = arguments[0];
+            case 'C': {
+                std::size_t given_crc32_length = std::strlen(arguments[0]);
+                if(given_crc32_length > 8 || given_crc32_length < 1) {
+                    eprintf_error("Invalid CRC32 %s (must be 1-8 digits)", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                for(std::size_t i = 0; i < given_crc32_length; i++) {
+                    char c = std::tolower(arguments[0][i]);
+                    if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
+                        eprintf_error("Invalid CRC32 %s (must be hexadecimal)", arguments[0]);
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                build_options.forged_crc = static_cast<std::uint32_t>(std::strtoul(arguments[0], nullptr, 16));
                 break;
+            }
             case 'c':
                 build_options.compress = true;
                 break;
@@ -197,26 +210,6 @@ int main(int argc, const char **argv) {
             }
         }
 
-        // Figure out our CRC
-        std::uint32_t forged_crc_value = 0;
-        std::optional<std::uint32_t> forged_crc;
-        if(build_options.forged_crc) {
-            std::size_t given_crc32_length = std::strlen(build_options.forged_crc);
-            if(given_crc32_length > 8 || given_crc32_length < 1) {
-                eprintf_error("Invalid CRC32 %s (must be 1-8 digits)", argv[2]);
-                return 1;
-            }
-            for(std::size_t i = 0; i < given_crc32_length; i++) {
-                char c = std::tolower(build_options.forged_crc[i]);
-                if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
-                    eprintf_error("Invalid CRC32 %s (must be hexadecimal)", argv[2]);
-                    return 1;
-                }
-            }
-            forged_crc_value = std::strtoul(build_options.forged_crc, nullptr, 16);
-            forged_crc = forged_crc_value;
-        }
-
         // Figure out our engine target
         if(!build_options.engine.has_value()) {
             eprintf_error("No engine target specified. Use -h for more information.");
@@ -233,7 +226,7 @@ int main(int argc, const char **argv) {
             build_options.always_index_tags,
             !build_options.quiet,
             with_index,
-            forged_crc,
+            build_options.forged_crc,
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
             build_options.optimize_space,
