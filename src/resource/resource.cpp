@@ -19,13 +19,13 @@ int main(int argc, const char **argv) {
 
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("type", 'T', 1, "Set the resource map. This option is required for creating maps. Can be: bitmaps, sounds, or loc.", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
     options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
-    static constexpr char USAGE[] = "<options>";
+    static constexpr char USAGE[] = "[options] -T <type>";
 
     struct ResourceOption {
         // Tags directory

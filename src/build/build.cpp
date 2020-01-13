@@ -33,7 +33,7 @@ int main(int argc, const char **argv) {
         std::string output;
         std::string last_argument;
         std::string index;
-        HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+        std::optional<HEK::CacheFileEngine> engine;
         bool no_external_tags = false;
         bool handled = true;
         bool quiet = false;
@@ -51,7 +51,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. Valid engines are: custom (default), retail, demo, dark", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom (default), retail, demo, dark", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use a specific maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -64,7 +64,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
 
     static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
-    static constexpr char USAGE[] = "[options] <scenario>";
+    static constexpr char USAGE[] = "[options] -g <target> <scenario>";
 
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
@@ -197,6 +197,7 @@ int main(int argc, const char **argv) {
             }
         }
 
+        // Figure out our CRC
         std::uint32_t forged_crc_value = 0;
         std::optional<std::uint32_t> forged_crc;
         if(build_options.forged_crc) {
@@ -216,11 +217,17 @@ int main(int argc, const char **argv) {
             forged_crc = forged_crc_value;
         }
 
+        // Figure out our engine target
+        if(!build_options.engine.has_value()) {
+            eprintf_error("No engine target specified. Use -h for more information.");
+            return 1;
+        }
+
         // Build!
         auto map = Invader::BuildWorkload::compile_map(
             scenario.c_str(),
             build_options.tags,
-            build_options.engine,
+            build_options.engine.value(),
             build_options.maps,
             build_options.no_external_tags,
             build_options.always_index_tags,
