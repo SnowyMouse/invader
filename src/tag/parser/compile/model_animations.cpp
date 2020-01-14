@@ -37,13 +37,13 @@ namespace Invader::Parser {
             }
 
             std::size_t key_frame_index = animation->key_frame_index;
-            if(key_frame_index >= animation->frame_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid key frame index (%zu >= %zu)", i, key_frame_index, frame_count);
+            if(key_frame_index > animation->frame_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid key frame index (%zu > %zu)", i, key_frame_index, frame_count);
             }
 
             std::size_t second_key_frame_index = animation->second_key_frame_index;
-            if(second_key_frame_index >= animation->frame_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid second key frame index (%zu >= %zu)", i, second_key_frame_index, frame_count);
+            if(second_key_frame_index > animation->frame_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Animation #%zu has an invalid second key frame index (%zu > %zu)", i, second_key_frame_index, frame_count);
             }
 
             // Check if we already did things to this
