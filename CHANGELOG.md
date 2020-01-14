@@ -19,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-sound: Fixed std::terminate being called on an invalid WAV being
   used.
+- invader-sound: Fixed not loading .wav files with fmt subchunks that are
+  larger than standard.
 
 ### Changed
 - invader-build: Specifying the target engine is now required when building a

@@ -6,6 +6,7 @@
 #include <invader/sound/sound_reader.hpp>
 #include <invader/sound/sound_encoder.hpp>
 #include <FLAC/stream_decoder.h>
+#include <climits>
 
 namespace Invader::SoundReader {
     using namespace HEK;
@@ -71,12 +72,24 @@ namespace Invader::SoundReader {
                 eprintf_error("First subchunk is not a fmt subchunk");
                 throw InvalidInputSoundException();
             }
-            if(fmt_subchunk.subchunk_size != sizeof(WAVFmtSubchunk) - sizeof(WAVSubchunkHeader)) {
+            std::size_t fmt_subchunk_size = fmt_subchunk.subchunk_size;
+            std::size_t expected_fmt_subchunk_size = sizeof(WAVFmtSubchunk) - sizeof(WAVSubchunkHeader);
+            if(fmt_subchunk_size < expected_fmt_subchunk_size) {
                 eprintf_error("Fmt subchunk size is wrong");
                 throw InvalidInputSoundException();
             }
+
+            // Handle WAV files that are too big
+            std::size_t excess_data_ignored = fmt_subchunk_size - expected_fmt_subchunk_size;
+            while(excess_data_ignored) {
+                long data_we_can_ignore = excess_data_ignored > LONG_MAX ? LONG_MAX : static_cast<long>(excess_data_ignored);
+                std::fseek(file, data_we_can_ignore, SEEK_CUR);
+                excess_data_ignored -= data_we_can_ignore;
+            }
+
+            // Make sure it's something we can handle
             if(fmt_subchunk.audio_format != 1 && fmt_subchunk.audio_format != 3) {
-                eprintf_error("WAV data type (%u) is not PCM", static_cast<unsigned int>(fmt_subchunk.audio_format));
+                eprintf_error("WAV data type (%u) is not integer or floating point PCM", static_cast<unsigned int>(fmt_subchunk.audio_format));
                 throw InvalidInputSoundException();
             }
 
