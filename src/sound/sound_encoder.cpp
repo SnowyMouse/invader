@@ -155,7 +155,7 @@ namespace Invader::SoundEncoder {
         const std::int16_t *pcm_stream;
         std::size_t bytes_per_sample = bits_per_sample / 8;
         std::size_t sample_count = pcm.size() / bytes_per_sample / channel_count;
-        if(true) {
+        if(bits_per_sample != 16) {
             pcm_16_bit_data_ptr = std::make_unique<std::vector<std::byte>>(convert_int_to_int(pcm, bits_per_sample, 16));
             bytes_per_sample = 2;
             bits_per_sample = 16;
