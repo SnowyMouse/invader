@@ -1336,6 +1336,9 @@ namespace Invader {
                                         }
                                     }
                                 }
+                                else {
+                                    match = false;
+                                }
 
                                 if(match) {
                                     t.resource_index = index;
@@ -1442,6 +1445,9 @@ namespace Invader {
                                                 }
                                             }
                                         }
+                                    }
+                                    else {
+                                        match = false;
                                     }
                                 }
 
