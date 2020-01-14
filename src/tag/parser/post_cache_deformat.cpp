@@ -54,12 +54,17 @@ namespace Invader::Parser {
 
         // Put scripts in if need be
         this->source_files.clear();
-        if(this->scripts.size() != 0) {
-            auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
-            const auto *script_data = reinterpret_cast<const std::byte *>(script.c_str());
-            auto &source_file = this->source_files.emplace_back();
-            std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
-            source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
+        try {
+            if(this->scripts.size() != 0) {
+                auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
+                const auto *script_data = reinterpret_cast<const std::byte *>(script.c_str());
+                auto &source_file = this->source_files.emplace_back();
+                std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
+                source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
+            }
+        }
+        catch(std::exception &e) {
+            eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
         }
     }
 
