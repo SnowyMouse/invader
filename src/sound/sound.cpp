@@ -221,22 +221,29 @@ int main(int argc, const char **argv) {
         // Skip directories
         auto path = wav.path();
         auto path_str = path.string();
+        auto *path_str_cstr = path_str.c_str();
         if(wav.is_directory()) {
-            eprintf_error("Unexpected directory %s", path_str.c_str());
+            eprintf_error("Unexpected directory %s", path_str_cstr);
             return EXIT_FAILURE;
         }
         auto extension = path.extension().string();
 
         // Get the sound
         auto &sound = permutations.emplace_back();
-        if(extension == ".wav") {
-            sound = SoundReader::sound_from_wav(path_str.data());
+        try {
+            if(extension == ".wav") {
+                sound = SoundReader::sound_from_wav(path_str_cstr);
+            }
+            else if(extension == ".flac") {
+                sound = SoundReader::sound_from_flac(path_str_cstr);
+            }
+            else {
+                eprintf_error("Unknown file format for %s", path_str_cstr);
+                return EXIT_FAILURE;
+            }
         }
-        else if(extension == ".flac") {
-            sound = SoundReader::sound_from_flac(path_str.data());
-        }
-        else {
-            eprintf_error("Unknown file format for %s", path_str.c_str());
+        catch(std::exception &e) {
+            eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
             return EXIT_FAILURE;
         }
 
