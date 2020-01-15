@@ -291,6 +291,15 @@ namespace Invader::SoundEncoder {
 
         for(std::size_t i = 0; i < sample_count; i++) {
             std::int64_t sample = pcm[i] * multiply_by_arr[pcm[i] < 0];
+
+            // Clamp
+            if(sample >= multiply_by_minus_one) {
+                sample = multiply_by_minus_one;
+            }
+            else if(sample <= -multiply_by) {
+                sample = -multiply_by;
+            }
+
             write_sample(static_cast<std::int32_t>(sample), sample_data, new_bits_per_sample);
             sample_data += bytes_per_sample;
         }
