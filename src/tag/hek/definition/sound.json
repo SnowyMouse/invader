@@ -134,7 +134,7 @@
             {
                 "name": "buffer size",
                 "type": "uint32",
-                "comment": "this is the buffer size used to encode (and, for Ogg, decompress) the permutation data (unused in Xbox ADPCM)",
+                "comment": "this is the buffer size used to hold (and, for Vorbis, decompress) the 16-bit PCM data (unused in Xbox ADPCM)",
                 "endian": "little"
             },
             {
