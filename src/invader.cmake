@@ -32,6 +32,7 @@ set(INVADER_SOURCE_FILES
     src/compress/compression.cpp
     src/sound/sound_encoder.cpp
     src/sound/sound_reader_flac.cpp
+    src/sound/sound_reader_ogg.cpp
     src/sound/sound_reader_wav.cpp
     src/sound/adpcm_xq/adpcm-lib.c
     src/tag/hek/header.cpp

@@ -54,6 +54,21 @@ namespace Invader::SoundReader {
     Sound sound_from_wav(const std::byte *data, std::size_t data_length);
 
     /**
+     * Get the sound from a Ogg file
+     * @param  path path to the file
+     * @return      sound
+     */
+    Sound sound_from_ogg_file(const char *path);
+
+    /**
+     * Get the sound from Ogg data
+     * @param  data        pointer to data
+     * @param  data_length data size
+     * @return             sound
+     */
+    Sound sound_from_ogg(const std::byte *data, std::size_t data_length);
+
+    /**
      * Get the sound from a FLAC file
      * @param  path path to the file
      * @return      sound
