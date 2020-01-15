@@ -28,7 +28,7 @@ namespace Invader::SoundEncoder {
         return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
     }
 
-    static FLAC__StreamEncoderTellStatus tell_flac_data(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data) noexcept {
+    static FLAC__StreamEncoderTellStatus tell_flac_data(const FLAC__StreamEncoder *, FLAC__uint64 *absolute_byte_offset, void *client_data) noexcept {
         *absolute_byte_offset = static_cast<FLAC__uint64>(reinterpret_cast<FLACHolder *>(client_data)->offset);
         return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
     }
