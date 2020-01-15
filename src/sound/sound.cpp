@@ -176,6 +176,12 @@ int main(int argc, const char **argv) {
     else {
         sound_tag.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
         sound_tag.flags.split_long_sound_into_permutations = 0;
+        sound_tag.random_pitch_bounds.from = 1.0F;
+        sound_tag.random_pitch_bounds.to = 1.0F;
+        sound_tag.outer_cone_gain = 1.0F;
+        sound_tag.random_gain_modifier = 1.0F;
+        sound_tag.inner_cone_angle = 2 * HALO_PI;
+        sound_tag.outer_cone_angle = 2 * HALO_PI;
 
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
@@ -191,24 +197,45 @@ int main(int argc, const char **argv) {
     if(sound_options.format.has_value()) {
         sound_tag.format = *sound_options.format;
     }
-    // Same with whether to split
-    if(sound_options.split.has_value()) {
-        sound_tag.flags.split_long_sound_into_permutations = *sound_options.split;
-    }
 
     auto &format = sound_tag.format;
-    bool split = sound_tag.flags.split_long_sound_into_permutations;
 
     // If we don't have pitch ranges, add one
-    if(sound_tag.pitch_ranges.size() == 0) {
-        sound_tag.pitch_ranges.resize(1);
+    bool is_new_pitch_range = sound_tag.pitch_ranges.size() == 0;
+    if(is_new_pitch_range) {
+        sound_tag.pitch_ranges.resize(1, {});
     }
 
     // Initialize a pitch range
-    auto &old_pitch_range = sound_tag.pitch_ranges[0];
-    Parser::SoundPitchRange pitch_range = old_pitch_range;
-    pitch_range.permutations.clear();
-    pitch_range.actual_permutation_count = 0;
+    const auto &old_pitch_range = sound_tag.pitch_ranges[0];
+    Parser::SoundPitchRange pitch_range = {};
+    if(is_new_pitch_range) {
+        pitch_range.natural_pitch = 1.0F;
+        pitch_range.bend_bounds.to = 1.0F;
+    }
+    else {
+        pitch_range.natural_pitch = old_pitch_range.natural_pitch;
+        pitch_range.bend_bounds.from = old_pitch_range.bend_bounds.from;
+        pitch_range.bend_bounds.to = old_pitch_range.bend_bounds.to;
+    }
+    std::size_t old_actual_permutation_count;
+    if(sound_tag.flags.split_long_sound_into_permutations) {
+        old_actual_permutation_count = old_pitch_range.actual_permutation_count;
+        if(old_actual_permutation_count > old_pitch_range.permutations.size()) {
+            eprintf_error("Existing sound tag has an invalid actual permutation count");
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        old_actual_permutation_count = old_pitch_range.permutations.size();
+    }
+
+    // Same with whether to split
+    bool old_split = sound_tag.flags.split_long_sound_into_permutations;
+    if(sound_options.split.has_value()) {
+        sound_tag.flags.split_long_sound_into_permutations = *sound_options.split;
+    }
+    bool split = sound_tag.flags.split_long_sound_into_permutations;
 
     auto wav_iterator = std::filesystem::directory_iterator(data_path);
 
@@ -567,6 +594,9 @@ int main(int argc, const char **argv) {
 
         // Encode a permutation
         auto encode_permutation = [&permutation, &format, &sound_options, &generate_mouth_data, &is_dialogue](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
+            // Set the default stuff
+            p.gain = 1.0F;
+
             // Generate mouth data if needed
             if(is_dialogue) {
                 // Convert samples to 8-bit unsigned so we can use it to generate mouth data
@@ -646,6 +676,35 @@ int main(int argc, const char **argv) {
             p.next_permutation_index = NULL_INDEX;
             encode_permutation(p, permutation.pcm);
             p.samples.shrink_to_fit();
+        }
+
+        // Write the old actual permutation stuff if needed
+        for(std::size_t o = 0; o < old_actual_permutation_count; o++) {
+            if(std::strcmp(old_pitch_range.permutations[o].name.string, permutation.name.c_str()) == 0) {
+                std::size_t new_permutation = i;
+                std::size_t old_permutation = o;
+                while(new_permutation != NULL_INDEX && old_permutation != NULL_INDEX) {
+                    if(old_permutation > old_pitch_range.permutations.size()) {
+                        eprintf_error("Existing sound tag has an invalid next permutation index");
+                        return EXIT_FAILURE;
+                    }
+
+                    auto &old_pr = old_pitch_range.permutations[old_permutation];
+                    auto &new_pr = pitch_range.permutations[new_permutation];
+
+                    new_pr.gain = old_pr.gain;
+                    new_pr.skip_fraction = old_pr.skip_fraction;
+
+                    new_permutation = new_pr.next_permutation_index;
+                    old_permutation = old_pr.next_permutation_index;
+
+                    if(!old_split || !split) {
+                        break;
+                    }
+                }
+
+                break;
+            }
         }
 
         // Print sound info
