@@ -31,14 +31,15 @@ namespace Invader::SoundReader {
         result.sample_rate = sample_rate;
         result.input_sample_rate = result.sample_rate;
 
-        std::size_t block_count = static_cast<int>(data_length / (channel_count * XBOX_ADPCM_ENCODED_BLOCKSIZE));
+        // Make sure it's all complete blocks
         if(data_length % XBOX_ADPCM_ENCODED_BLOCKSIZE != 0) {
             eprintf_error("Data length is not divisible by Xbox ADPCM block size");
             throw InvalidInputSoundException();
         }
 
         // Do it!
-        result.pcm = std::vector<std::byte>(block_count * XBOX_ADPCM_DECODED_BLOCKSIZE);
+        std::size_t block_count = static_cast<std::size_t>(data_length / (channel_count * XBOX_ADPCM_ENCODED_BLOCKSIZE));
+        result.pcm = std::vector<std::byte>(block_count * XBOX_ADPCM_DECODED_BLOCKSIZE * channel_count);
         decode_xbadpcm_stream(result.pcm.data(), data, data_length, static_cast<std::uint8_t>(channel_count), 8);
 
         // Return the result
@@ -83,6 +84,10 @@ namespace Invader::SoundReader {
     single 32bit register, and should be more efficient than passing a pointer to a struct.
     */
     static AdpcmState decode_adpcm_sample(AdpcmState state) {
+        if(static_cast<std::size_t>(state.index) > sizeof(step_table) / sizeof(*step_table)) {
+            throw InvalidInputSoundException();
+        }
+
         int delta, step_size = step_table[state.index];
         int result = state.pcm_sample;  /* pcm_sample could over/underflow in the code below,
         **                                 so we keep the result as an int for clamping.*/
@@ -101,6 +106,10 @@ namespace Invader::SoundReader {
             state.pcm_sample = -32768;
         else
             state.pcm_sample = static_cast<std::int16_t>(result);
+
+        if(static_cast<std::size_t>(state.code) > sizeof(step_table) / sizeof(*step_table)) {
+            throw InvalidInputSoundException();
+        }
 
         state.index += index_table[state.code];
         if (state.index < 0)
