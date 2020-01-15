@@ -35,6 +35,7 @@ set(INVADER_SOURCE_FILES
     src/sound/sound_reader_flac.cpp
     src/sound/sound_reader_ogg.cpp
     src/sound/sound_reader_wav.cpp
+    src/sound/sound_reader_xbox_adpcm.cpp
     src/sound/adpcm_xq/adpcm-lib.c
     src/tag/hek/header.cpp
     src/tag/hek/class/bitmap.cpp
