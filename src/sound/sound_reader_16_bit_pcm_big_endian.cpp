@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/hek/endian.hpp>
 #include <invader/printf.hpp>
 #include <invader/error.hpp>
 #include <invader/sound/sound_reader.hpp>
-#include <invader/sound/sound_encoder.hpp>
-#include <memory>
-#include <invader/file/file.hpp>
 
 namespace Invader::SoundReader {
     Sound sound_from_16_bit_pcm_big_endian(const std::byte *data, std::size_t data_length, std::size_t channel_count, std::size_t sample_rate) {
