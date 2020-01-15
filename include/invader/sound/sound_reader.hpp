@@ -33,6 +33,9 @@ namespace Invader::SoundReader {
 
         /** Name */
         std::string name;
+
+        /** Ignore this */
+        void *internal;
     };
 
     /**
@@ -48,6 +51,14 @@ namespace Invader::SoundReader {
      * @return      sound
      */
     Sound sound_from_flac_file(const char *path);
+
+    /**
+     * Get the sound from FLAC data
+     * @param  data        pointer to data
+     * @param  data_length data size
+     * @return             sound
+     */
+    Sound sound_from_flac(const std::byte *data, std::size_t data_length);
 }
 
 #endif
