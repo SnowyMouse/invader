@@ -33,7 +33,7 @@ namespace Invader::SoundEncoder {
         return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
     }
 
-    std::vector<std::byte> encode_to_flac(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate) {
+    std::vector<std::byte> encode_to_flac(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, std::uint32_t compression_level) {
         // First make our buffer
         std::vector<FLAC__int32> buffer;
         const auto *pcm_data = pcm.data();
@@ -58,6 +58,7 @@ namespace Invader::SoundEncoder {
         FLAC__stream_encoder_set_bits_per_sample(encoder, bits_per_sample);
         FLAC__stream_encoder_set_channels(encoder, channel_count);
         FLAC__stream_encoder_set_sample_rate(encoder, sample_rate);
+        FLAC__stream_encoder_set_compression_level(encoder, compression_level);
 
         try {
             if(FLAC__stream_encoder_init_stream(encoder, write_flac_data, seek_flac_data, tell_flac_data, NULL, &holder) != FLAC__STREAM_ENCODER_INIT_STATUS_OK) {
