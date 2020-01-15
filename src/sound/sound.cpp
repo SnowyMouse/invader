@@ -466,6 +466,25 @@ int main(int argc, const char **argv) {
             std::terminate();
     }
     oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
+
+    // Check if this is dialogue
+    bool is_dialogue;
+    switch(sound_class) {
+        case SoundClass::SOUND_CLASS_UNIT_DIALOG:
+        case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+        case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+        case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+            is_dialogue = true;
+            break;
+        default:
+            is_dialogue = false;
+    }
+
+    if(is_dialogue && split) {
+        eprintf_error("Split dialogue is unsupported.");
+        return EXIT_FAILURE;
+    }
+
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
         auto &permutation = permutations[i];
 
@@ -547,30 +566,22 @@ int main(int argc, const char **argv) {
         };
 
         // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &sound_class, &generate_mouth_data](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
+        auto encode_permutation = [&permutation, &format, &sound_options, &generate_mouth_data, &is_dialogue](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
             // Generate mouth data if needed
-            switch(sound_class) {
-                case SoundClass::SOUND_CLASS_UNIT_DIALOG:
-                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
-                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
-                case SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED: {
-                    // Convert samples to 8-bit unsigned so we can use it to generate mouth data
-                    auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
-                    std::vector<std::uint8_t> pcm_8_bit;
-                    pcm_8_bit.reserve(samples_float.size());
-                    for(auto &f : samples_float) {
-                        float ff = f;
-                        if(ff < 0.0F) {
-                            ff *= -1.0F;
-                        }
-                        pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
+            if(is_dialogue) {
+                // Convert samples to 8-bit unsigned so we can use it to generate mouth data
+                auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
+                std::vector<std::uint8_t> pcm_8_bit;
+                pcm_8_bit.reserve(samples_float.size());
+                for(auto &f : samples_float) {
+                    float ff = f;
+                    if(ff < 0.0F) {
+                        ff *= -1.0F;
                     }
-                    samples_float = {};
-
-                    generate_mouth_data(p, pcm_8_bit);
+                    pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
                 }
-                default:
-                    break;
+                samples_float = {};
+                generate_mouth_data(p, pcm_8_bit);
             }
 
             switch(format) {

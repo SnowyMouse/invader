@@ -16,6 +16,10 @@ This is used for recording Invader's changes. This changelog is based on
   automatically forged to whatever the stock CRC32 is to allow users to join
   other servers with modified maps.
 
+### Changed
+- invader-sound: Disabled the creation of split dialogue. This does not work
+  well with the game, anyway.
+
 ### Fixed
 - invader-sound: Fixed std::terminate being called on an invalid WAV being
   used.
