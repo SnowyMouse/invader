@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.22.3] - 2020-01-15
 ### Added
 - invader-build: Minor warnings are now considered "pedantic" and can be hidden
   with `-H`. You should probably still fix these warnings, as you may be
@@ -15,18 +15,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Stock multiplayer maps for Custom Edition now have their CRC32
   automatically forged to whatever the stock CRC32 is to allow users to join
   other servers with modified maps.
+- Added Ogg Vorbis and FLAC encoding (to be used for other things)
 
 ### Changed
 - invader-sound: Disabled the creation of split dialogue. This does not work
   well with the game, anyway.
-
-### Fixed
-- invader-sound: Fixed std::terminate being called on an invalid WAV being
-  used.
-- invader-sound: Fixed not loading .wav files with fmt subchunks that are
-  larger than standard.
-
-### Changed
+- invader-sound: Older sound tag data is now copied over.
 - invader-build: Specifying the target engine is now required when building a
   map.
 - invader-build: If building a Custom Edition map with a stock scenario name,
@@ -55,6 +49,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Warning for non-power-of-two was fixed (it warned only if it
   was an interface bitmap, not only if it was NOT an interface bitmap)
+- invader-sound: Fixed std::terminate being called on an invalid WAV being
+  used.
+- invader-sound: Fixed not loading .wav files with fmt subchunks that are
+  larger than standard.
 
 ## [0.22.2] - 2020-01-10
 ### Fixed
