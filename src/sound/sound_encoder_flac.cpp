@@ -15,8 +15,9 @@ namespace Invader::SoundEncoder {
 
     static FLAC__StreamEncoderWriteStatus write_flac_data(const FLAC__StreamEncoder *, const FLAC__byte buffer[], size_t bytes, uint32_t, uint32_t, void *client_data) noexcept {
         auto *holder = reinterpret_cast<FLACHolder *>(client_data);
-        if(holder->offset + bytes > holder->flac.size()) {
-            holder->flac.resize(holder->offset + bytes);
+        std::size_t end = holder->offset + bytes;
+        if(end > holder->flac.size()) {
+            holder->flac.resize(end);
         }
         std::memcpy(holder->flac.data() + holder->offset, buffer, bytes);
         holder->offset += bytes;
@@ -70,6 +71,8 @@ namespace Invader::SoundEncoder {
                 eprintf_error("Failed to encode PCM stream");
                 throw InvalidInputSoundException();
             }
+
+            FLAC__stream_encoder_finish(encoder);
             FLAC__stream_encoder_delete(encoder);
         }
         catch(std::exception &) {
