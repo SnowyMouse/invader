@@ -65,7 +65,7 @@ namespace Invader::SoundEncoder {
                 throw InvalidInputSoundException();
             }
 
-            if(!FLAC__stream_encoder_process_interleaved(encoder, buffer.data(), static_cast<std::size_t>(buffer.size()))) {
+            if(!FLAC__stream_encoder_process_interleaved(encoder, buffer.data(), static_cast<std::size_t>(buffer.size()) / channel_count)) {
                 eprintf_error("Failed to encode PCM stream");
                 throw InvalidInputSoundException();
             }
