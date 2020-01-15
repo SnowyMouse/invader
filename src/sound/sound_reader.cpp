@@ -34,7 +34,7 @@ namespace Invader::SoundReader {
     };
     static_assert(sizeof(WAVFmtSubchunk) == 0x10 + sizeof(WAVSubchunkHeader));
 
-    Sound sound_from_wav(const char *path) {
+    Sound sound_from_wav_file(const char *path) {
         Sound result = {};
 
         #define READ_OR_BAIL(to_what) if(std::fread(&to_what, sizeof(to_what), 1, file) != 1) { \
@@ -192,7 +192,7 @@ namespace Invader::SoundReader {
         reinterpret_cast<SoundReader::Sound *>(client_data)->pcm.clear();
     }
 
-    Sound sound_from_flac(const char *path) {
+    Sound sound_from_flac_file(const char *path) {
         Sound result = {};
 
         FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();

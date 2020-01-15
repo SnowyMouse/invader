@@ -232,10 +232,10 @@ int main(int argc, const char **argv) {
         auto &sound = permutations.emplace_back();
         try {
             if(extension == ".wav") {
-                sound = SoundReader::sound_from_wav(path_str_cstr);
+                sound = SoundReader::sound_from_wav_file(path_str_cstr);
             }
             else if(extension == ".flac") {
-                sound = SoundReader::sound_from_flac(path_str_cstr);
+                sound = SoundReader::sound_from_flac_file(path_str_cstr);
             }
             else {
                 eprintf_error("Unknown file format for %s", path_str_cstr);

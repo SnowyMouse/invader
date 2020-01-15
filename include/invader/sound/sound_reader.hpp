@@ -40,14 +40,14 @@ namespace Invader::SoundReader {
      * @param  path path to the file
      * @return      sound
      */
-    Sound sound_from_wav(const char *file);
+    Sound sound_from_wav_file(const char *path);
 
     /**
      * Get the sound from a FLAC file
      * @param  path path to the file
      * @return      sound
      */
-    Sound sound_from_flac(const char *file);
+    Sound sound_from_flac_file(const char *path);
 }
 
 #endif
