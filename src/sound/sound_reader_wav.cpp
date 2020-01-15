@@ -1,38 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <invader/hek/endian.hpp>
 #include <invader/printf.hpp>
 #include <invader/error.hpp>
 #include <invader/sound/sound_reader.hpp>
 #include <invader/sound/sound_encoder.hpp>
 #include <memory>
 #include <invader/file/file.hpp>
+#include "wav.hpp"
 
 namespace Invader::SoundReader {
     using namespace HEK;
-
-    struct WAVChunk {
-        BigEndian<std::uint32_t> chunk_id; // must be 'RIFF'
-        LittleEndian<std::uint32_t> chunk_size; // size of the chunk (not including chunk_id and chunk_size)
-        BigEndian<std::uint32_t> format; // Must be 'WAVE'
-    };
-    static_assert(sizeof(WAVChunk) == 0xC);
-
-    struct WAVSubchunkHeader {
-        BigEndian<std::uint32_t> subchunk_id;
-        LittleEndian<std::uint32_t> subchunk_size; // size of the subchunk not including subchunk_id and subchunk_size
-    };
-    static_assert(sizeof(WAVSubchunkHeader) == 0x8);
-
-    struct WAVFmtSubchunk : WAVSubchunkHeader {
-        LittleEndian<std::uint16_t> audio_format; // 1 = PCM
-        LittleEndian<std::uint16_t> channel_count; // 1 = mono, 2 = stereo
-        LittleEndian<std::uint32_t> sample_rate; // Hz
-        LittleEndian<std::uint32_t> byte_rate; // don't care
-        LittleEndian<std::uint16_t> block_align;
-        LittleEndian<std::uint16_t> bits_per_sample; // bits
-    };
-    static_assert(sizeof(WAVFmtSubchunk) == 0x10 + sizeof(WAVSubchunkHeader));
 
     Sound sound_from_wav(const std::byte *data, std::size_t data_length) {
         Sound result = {};

@@ -30,6 +30,8 @@ set(INVADER_SOURCE_FILES
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
     src/compress/compression.cpp
+    src/sound/sound_encoder_ogg_vorbis.cpp
+    src/sound/sound_encoder_xbox_adpcm.cpp
     src/sound/sound_encoder.cpp
     src/sound/sound_reader_16_bit_pcm_big_endian.cpp
     src/sound/sound_reader_flac.cpp
