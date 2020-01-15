@@ -82,6 +82,26 @@ namespace Invader::SoundReader {
      * @return             sound
      */
     Sound sound_from_flac(const std::byte *data, std::size_t data_length);
+
+    /**
+     * Get the sound from Xbox ADPCM data
+     * @param  data          pointer to data
+     * @param  data_length   data size
+     * @param  channel_count number of channels
+     * @param  sample_rate   sample rate in Hz
+     * @return               sound
+     */
+    Sound sound_from_xbox_adpcm(const std::byte *data, std::size_t data_length, std::size_t channel_count, std::size_t sample_rate);
+
+    /**
+     * Get the sound from 16-bit big endian PCM
+     * @param  data          pointer to data
+     * @param  data_length   data size
+     * @param  channel_count number of channels
+     * @param  sample_rate   sample rate in Hz
+     * @return               sound
+     */
+    Sound sound_from_16_bit_pcm_big_endian(const std::byte *data, std::size_t data_length, std::size_t channel_count, std::size_t sample_rate);
 }
 
 #endif
