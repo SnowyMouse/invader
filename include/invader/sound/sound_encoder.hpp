@@ -20,14 +20,14 @@ namespace Invader::SoundEncoder {
     std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality);
 
     /**
-     * Generate a WAV file with the sound file. This is lossless.
+     * Generate a WAV container with the PCM data. This is lossless.
      * @param pcm             PCM data
      * @param bits_per_sample bits per sample of the PCM data
      * @param channel_count   channel count
      * @param sample_rate     sample rate
      * @return                WAV data
      */
-    std::vector<std::byte> generate_wav(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate);
+    std::vector<std::byte> convert_to_pcm_wav(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate);
 
     /**
      * Encode the PCM data to Xbox ADPCM. This is lossy.
