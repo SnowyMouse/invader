@@ -42,6 +42,8 @@ namespace Invader::Parser {
          * @return cache file data
          */
         virtual std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) = 0;
+
+        virtual ~ParserStruct() = default;
     protected:
         bool cache_formatted = false;
     };

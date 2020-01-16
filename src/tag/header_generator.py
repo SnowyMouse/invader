@@ -862,8 +862,8 @@ for s in all_structs_arranged:
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 
+    hpp.write("        ~{}() override = default;\n".format(struct_name))
     hpp.write("    private:\n")
-    hpp.write("    bool cache_formatted = false;\n")
 
     if post_cache_deformat:
         hpp.write("    void post_cache_deformat();\n")
