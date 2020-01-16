@@ -391,7 +391,8 @@ Options:
 ```
 
 ### invader-indexer
-This program builds index files for usage with `--with-index` with invader-build.
+This program builds index files for usage with `--with-index` with
+invader-build.
 
 ```
 Usage: invader-indexer [options] <input-map> <output-txt>
