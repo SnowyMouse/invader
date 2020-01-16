@@ -305,7 +305,7 @@ hpp.write("#define {}\n\n".format(header_name))
 hpp.write("#include <string>\n")
 hpp.write("#include <optional>\n")
 hpp.write("#include \"../../map/map.hpp\"\n")
-hpp.write("#include \"../hek/definition.hpp\"\n\n")
+hpp.write("#include \"parser_struct.hpp\"\n\n")
 hpp.write("namespace Invader {\n")
 hpp.write("    class BuildWorkload;\n")
 hpp.write("}\n")
@@ -334,7 +334,7 @@ for s in all_structs_arranged:
     post_compile = "post_compile" in s and s["post_compile"]
     private_functions = post_cache_deformat
 
-    hpp.write("    struct {} {{\n".format(struct_name))
+    hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
     hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
     hpp.write("        using struct_little = HEK::{}<HEK::LittleEndian>;\n".format(struct_name))
     all_used_structs = []
@@ -380,18 +380,9 @@ for s in all_structs_arranged:
     add_structs_from_struct(s)
 
     hpp.write("\n        /**\n")
-    hpp.write("         * Get whether or not the data is formatted for cache files.\n")
-    hpp.write("         * @return true if data is formatted for cache files\n")
-    hpp.write("         */\n")
-    hpp.write("        bool is_cache_formatted() const noexcept;\n")
-    cpp_cache_deformat_data.write("    bool {}::is_cache_formatted() const noexcept {{\n".format(struct_name))
-    cpp_cache_deformat_data.write("        return this->cache_formatted;\n")
-    cpp_cache_deformat_data.write("    }\n")
-
-    hpp.write("\n        /**\n")
     hpp.write("         * Format the tag to be used in HEK tags.\n")
     hpp.write("         */\n")
-    hpp.write("        void cache_deformat();\n")
+    hpp.write("        void cache_deformat() override;\n")
     cpp_cache_deformat_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
     cpp_cache_deformat_data.write("        if(this->cache_formatted) {\n")
     for struct in all_used_structs:
@@ -414,7 +405,7 @@ for s in all_structs_arranged:
     hpp.write("         * @param bsp          BSP index to use\n")
     hpp.write("         * @param offset       struct offset\n")
     hpp.write("         */\n")
-    hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0);\n")
+    hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0) override;\n")
     cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
@@ -543,7 +534,7 @@ for s in all_structs_arranged:
     hpp.write("         * @param  clear_on_save         clear data as it's being saved (reduces memory usage but you can't work on the tag anymore)\n")
     hpp.write("         * @return cache file data\n")
     hpp.write("         */\n")
-    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false);\n")
+    hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
     cpp_save_hek_data.write("        std::vector<std::byte> converted_data(sizeof(struct_big));\n")
