@@ -793,12 +793,25 @@ namespace Invader {
         this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
 
         // Mark stubs
+        std::size_t warned = 0;
         for(auto &tag : this->tags) {
             if(tag.stubbed) {
+                // Object tags and damage effects are referenced directly over the netcode
+                if(*this->cache_file_type == HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_class_int) || tag.tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
+                    warned++;
+                }
+
                 tag.path = "MISSINGNO.";
                 tag.tag_class_int = TagClassInt::TAG_CLASS_NONE;
                 this->stubbed_tag_count++;
             }
+        }
+
+        // If we stubbed, explain why
+        if(warned) {
+            eprintf_warn("An exception error will occur if %s used by the server.", warned == 1 ? "this tag is" : "these tags are");
+            eprintf_warn("You can fix this by referencing %s in some already referenced tag in the map.", warned == 1 ? "it" : "them");
         }
     }
 

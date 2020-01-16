@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-sound: Warns if indexed damage effect or object tags are stubbed out
+
 ## [0.22.3] - 2020-01-15
 ### Added
 - invader-build: Minor warnings are now considered "pedantic" and can be hidden
