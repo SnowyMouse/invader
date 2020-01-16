@@ -653,7 +653,7 @@ int main(int argc, const char **argv) {
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
 
-                // Encode to Vorbis in an FLAC container
+                // Encode to FLAC
                 case SoundFormat::SOUND_FORMAT_FLAC:
                     p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.flac_compression);
                     break;
