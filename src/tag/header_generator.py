@@ -866,16 +866,16 @@ for s in all_structs_arranged:
     hpp.write("    private:\n")
 
     if post_cache_deformat:
-        hpp.write("    void post_cache_deformat();\n")
+        hpp.write("        void post_cache_deformat();\n")
 
     if post_cache_parse:
-        hpp.write("    void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
+        hpp.write("        void post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>);\n")
 
     if pre_compile:
-        hpp.write("    void pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("        void pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     if post_compile:
-        hpp.write("    void post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
+        hpp.write("        void post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset);\n")
 
     hpp.write("    };\n")
 hpp.write("}\n")
