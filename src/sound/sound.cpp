@@ -26,6 +26,7 @@ int main(int argc, const char **argv) {
         std::optional<SoundFormat> format;
         bool fs_path = false;
         float vorbis_quality = 1.0F;
+        std::uint32_t flac_compression = 5;
         std::optional<std::size_t> channel_count;
         std::optional<SoundClass> sound_class;
         std::optional<std::uint32_t> sample_rate;
@@ -35,14 +36,15 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks.");
+    options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm. Default (new tag): 16-bit-pcm");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm. Default (new tag): 16-bit-pcm", "<fmt>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
-    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.");
-    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.");
-    options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0");
-    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload");
+    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
+    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
+    options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0", "<qlty>");
+    options.emplace_back("flac-level", 'f', 1, "Set the FLAC compression level. This can be between 0 and 8, with higher levels taking longer but offering slightly better ratios. Default: 5", "<lvl>");
+    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
@@ -101,8 +103,31 @@ int main(int argc, const char **argv) {
                 sound_options.fs_path = true;
                 break;
 
+            case 'f': {
+                long level;
+                try {
+                    level = std::stol(arguments[0]);
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid sample rate: %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                if(level < 0 || level > 8) {
+                    eprintf_error("Compression level must be between 0 and 8");
+                    std::exit(EXIT_FAILURE);
+                }
+                sound_options.flac_compression = static_cast<std::uint32_t>(level);
+                break;
+            }
+
             case 'r':
-                sound_options.sample_rate = static_cast<std::uint32_t>(std::atol(arguments[0]));
+                try {
+                    sound_options.sample_rate = static_cast<std::uint32_t>(std::stol(arguments[0]));
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid sample rate: %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 if(sound_options.sample_rate != 22050 && sound_options.sample_rate != 44100) {
                     eprintf_error("Only 22050 Hz and 44100 Hz sample rates are allowed");
                     std::exit(EXIT_FAILURE);
@@ -202,9 +227,7 @@ int main(int argc, const char **argv) {
 
     // If we don't have pitch ranges, add one
     bool is_new_pitch_range = sound_tag.pitch_ranges.size() == 0;
-    if(is_new_pitch_range) {
-        sound_tag.pitch_ranges.resize(1, {});
-    }
+    sound_tag.pitch_ranges.resize(1, {});
 
     // Initialize a pitch range
     const auto &old_pitch_range = sound_tag.pitch_ranges[0];
@@ -489,6 +512,9 @@ int main(int argc, const char **argv) {
         case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
             output_name = "Ogg Vorbis";
             break;
+        case SoundFormat::SOUND_FORMAT_FLAC:
+            output_name = "Free Lossless Audio Codec";
+            break;
         case SoundFormat::SOUND_FORMAT_ENUM_COUNT:
             std::terminate();
     }
@@ -625,6 +651,11 @@ int main(int argc, const char **argv) {
                 case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                     p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
+                    break;
+
+                // Encode to Vorbis in an FLAC container
+                case SoundFormat::SOUND_FORMAT_FLAC:
+                    p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.flac_compression);
                     break;
 
                 // Encode to Xbox ADPCMeme
