@@ -36,6 +36,10 @@ namespace Invader::Parser {
         }
     }
 
+    void ScenarioStructureBSP::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->runtime_decals.clear(); // delete these in case this tag was extracted by a Meme Editing Kit and they weren't cleared
+    }
+
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         // Check lightmaps
         bool lightmaps_present = false;
