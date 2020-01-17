@@ -640,12 +640,12 @@ namespace Invader::Parser {
         // Decals
         std::size_t decal_count = decals.size();
         if(decal_count > 0) {
-            for(auto &b : this->structure_bsps) {
+            for(std::size_t bsp = 0; bsp < this->structure_bsps.size(); bsp++) {
+                auto &b = this->structure_bsps[bsp];
                 auto &bsp_id = b.structure_bsp.tag_id;
                 if(!bsp_id.is_null()) {
                     auto &bsp_tag_struct = workload.structs[*workload.structs[*(workload.tags[bsp_id.index].base_struct)].resolve_pointer(static_cast<std::size_t>(0))];
                     auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
-                    std::vector<ScenarioStructureBSPRuntimeDecal::struct_little> runtime_decals;
                     std::size_t bsp_cluster_count = bsp_tag_data.clusters.count.read();
 
                     if(bsp_cluster_count == 0) {
@@ -659,61 +659,45 @@ namespace Invader::Parser {
                     auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.clusters.pointer)];
                     auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(bsp_cluster_struct.data.data());
 
-                    // Get clusters
-                    for(std::size_t c = 0; c < bsp_cluster_count; c++) {
-                        auto &cluster = clusters[c];
-                        std::vector possible(decal_count, false);
-                        std::size_t subcluster_count = cluster.subclusters.count.read();
-                        if(subcluster_count == 0) {
+                    // Go through each decal; see what we can come up with
+                    std::vector<std::pair<std::size_t, std::size_t>> cluster_decals;
+                    for(std::size_t d = 0; d < decal_count; d++) {
+                        auto &decal = this->decals[d];
+                        auto &bd = bsp_data[bsp];
+                        auto leaf = leaf_for_point_of_bsp_tree(decal.position, bd.bsp3d_nodes, bd.bsp3d_node_count, bd.planes, bd.plane_count);
+                        if(leaf.is_null()) {
                             continue;
                         }
+                        cluster_decals.emplace_back(bd.render_leaves[leaf.int_value()].cluster, d);
+                    }
 
-                        auto &subcluster_struct = workload.structs[*bsp_cluster_struct.resolve_pointer(&cluster.subclusters.pointer)];
-                        auto *subclusters = reinterpret_cast<ScenarioStructureBSPSubcluster::struct_little *>(subcluster_struct.data.data());
+                    // Get clusters
+                    std::vector<ScenarioStructureBSPRuntimeDecal::struct_little> runtime_decals;
 
-                        // Go through subclusters to see which one can hold a decal
-                        for(std::size_t s = 0; s < subcluster_count; s++) {
-                            auto &subcluster = subclusters[s];
-                            for(std::size_t d = 0; d < decal_count; d++) {
-                                if(used[d]) {
-                                    continue;
-                                }
-                                auto &decal = decals[d];
-                                float x = decal.position.x;
-                                float y = decal.position.y;
-                                float z = decal.position.z;
-                                if(x >= subcluster.world_bounds_x.from && x <= subcluster.world_bounds_x.to &&
-                                   y >= subcluster.world_bounds_y.from && y <= subcluster.world_bounds_y.to &&
-                                   z >= subcluster.world_bounds_z.from && z <= subcluster.world_bounds_z.to) {
-                                    possible[d] = decal.decal_type != NULL_INDEX;
-                                }
+                    for(std::size_t c = 0; c < bsp_cluster_count; c++) {
+                        auto &cluster = clusters[c];
+
+                        // Put stuff together
+                        std::size_t first_decal = runtime_decals.size();
+                        for(auto &cd : cluster_decals) {
+                            if(cd.first == c) {
+                                auto &decal = this->decals[cd.second];
+                                auto &d = runtime_decals.emplace_back();
+                                d.decal_type = static_cast<HEK::Index>(cd.second);
+                                d.pitch = decal.pitch;
+                                d.yaw = decal.yaw;
+                                d.position = decal.position;
                             }
                         }
-
-                        // Now add all of the decals that we found
-                        std::size_t runtime_decal_count_first = runtime_decals.size();
-                        std::size_t cluster_decal_count = 0;
-
-                        for(std::size_t p = 0; p < decal_count; p++) {
-                            if(possible[p]) {
-                                auto &decal_to_copy = this->decals[p];
-                                auto &decal = runtime_decals.emplace_back();
-                                decal.decal_type = decal_to_copy.decal_type;
-                                decal.pitch = decal_to_copy.pitch;
-                                decal.yaw = decal_to_copy.yaw;
-                                decal.position = decal_to_copy.position;
-                                cluster_decal_count++;
-                                used[p] = true;
-                            }
-                        }
+                        std::size_t decal_end = runtime_decals.size();
 
                         // Set the decal count
-                        if(cluster_decal_count != 0) {
-                            cluster.first_decal_index = static_cast<std::int16_t>(runtime_decal_count_first);
-                            cluster.decal_count = static_cast<std::int16_t>(cluster_decal_count);
+                        if(first_decal != decal_end) {
+                            cluster.first_decal_index = static_cast<std::int16_t>(first_decal);
+                            cluster.decal_count = static_cast<std::int16_t>(decal_end - first_decal);
                         }
                         else {
-                            cluster.first_decal_index = -1;
+                            cluster.first_decal_index = NULL_INDEX;
                             cluster.decal_count = 0;
                         }
                     }
