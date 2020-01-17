@@ -414,20 +414,23 @@
             },
             {
                 "name": "centroid primary node",
-                "type": "Index"
+                "type": "Index",
+                "cache_only": true
             },
             {
                 "name": "centroid secondary node",
-                "type": "Index"
+                "type": "Index",
+                "cache_only": true
             },
             {
                 "name": "centroid primary weight",
                 "type": "Fraction",
-                "default": 1.0
+                "cache_only": true
             },
             {
                 "name": "centroid secondary weight",
-                "type": "Fraction"
+                "type": "Fraction",
+                "cache_only": true
             },
             {
                 "name": "centroid",
