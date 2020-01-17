@@ -176,5 +176,8 @@ namespace Invader::Parser {
 
         this->unknown_int = 0xFFFFFFFF; // this is probably a pointer, but we should check to make sure it isn't something important
         this->unknown_float = 15.0F; // TODO: Figure this out
+
+        std::fill(this->one_detail_unknown_floats, this->one_detail_unknown_floats + 2, 1.0F);
+        std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);
     }
 }

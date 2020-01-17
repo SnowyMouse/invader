@@ -162,8 +162,8 @@
             {
                 "name": "zero detail unknown floats",
                 "type": "float",
-                "count": 2,
-                "default": [ 1.0, 1.0 ]
+                "endian": "little",
+                "count": 2
             },
             {
                 "name": "one detail sound period",
@@ -172,8 +172,8 @@
             {
                 "name": "one detail unknown floats",
                 "type": "float",
-                "count": 2,
-                "default": [ 1.0, 1.0 ]
+                "endian": "little",
+                "count": 2
             },
             {
                 "name": "unknown int",
