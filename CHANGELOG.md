@@ -8,6 +8,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Fixed decals not being put in the correct cluster on some maps
+- invader-build: Fixed camera shake wobble period not being converted to ticks
+- invader-extract: Fixed camera shake wobble period not being converted from
+  ticks
 
 ## [0.22.3] - 2020-01-15
 ### Added
