@@ -6,6 +6,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-sound: Warns if indexed damage effect or object tags are stubbed out
 
+### Fixed
+- invader-build: Fixed decals not being put in the correct cluster on some maps
+
 ## [0.22.3] - 2020-01-15
 ### Added
 - invader-build: Minor warnings are now considered "pedantic" and can be hidden
