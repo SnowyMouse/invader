@@ -696,7 +696,7 @@ namespace Invader {
         }
 
         // And we're done! Maybe?
-        if(this->disable_recursion) {
+        if(this->disable_recursion && return_value > 0) {
             return return_value;
         }
 

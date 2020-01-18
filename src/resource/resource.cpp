@@ -198,7 +198,7 @@ int main(int argc, const char **argv) {
 
         // Compile the tags
         try {
-            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag.data(), tag_class_int, resource_options.tags);
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag.c_str(), tag_class_int, resource_options.tags);
             auto &compiled_tag_tag = compiled_tag.tags[0];
             auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
             auto *compiled_tag_data = compiled_tag_struct.data.data();
