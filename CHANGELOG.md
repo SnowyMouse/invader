@@ -19,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed decals not being put in the correct cluster on some maps
 - invader-build: Fixed camera shake wobble period not being converted to ticks
+- invader-build: Fixed resource bitmap tags with different bitmap data count
+  matching when they shouldn't when building for Halo Custom Edition
 - invader-extract: Fixed camera shake wobble period not being converted from
   ticks
 - invader-resource: Fixed a segmentation fault when building resource maps

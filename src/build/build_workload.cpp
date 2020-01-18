@@ -1348,6 +1348,9 @@ namespace Invader {
                                             }
                                         }
                                     }
+                                    else {
+                                        match = false;
+                                    }
                                 }
                                 else {
                                     match = false;
