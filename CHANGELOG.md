@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.22.4] - 2020-01-17
 ### Added
 - invader-info: Added `-T tags-external-bitmap-indices` which lists all bitmap
   tags in a Custom Edition map that use an external index
