@@ -42,7 +42,11 @@ int main(int argc, const char **argv) {
         DISPLAY_TAG_COUNT,
         DISPLAY_STUB_COUNT,
         DISPLAY_TAGS,
-        DISPLAY_TAGS_EXTERNAL_POINTERS
+        DISPLAY_TAGS_EXTERNAL_BITMAP_INDICES,
+        DISPLAY_TAGS_EXTERNAL_LOC_INDICES,
+        DISPLAY_TAGS_EXTERNAL_POINTERS,
+        DISPLAY_TAGS_EXTERNAL_SOUND_INDICES,
+        DISPLAY_TAGS_EXTERNAL_INDICES,
     };
 
     // Options struct
@@ -52,7 +56,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-pointers", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-bitmap-indices, tags-external-indices, tags-external-loc-indices, tags-external-pointers, tags-external-sound-indices", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -140,6 +144,18 @@ int main(int argc, const char **argv) {
                 else if(std::strcmp(args[0], "tags-external-pointers") == 0) {
                     map_info_options.type = DISPLAY_TAGS_EXTERNAL_POINTERS;
                 }
+                else if(std::strcmp(args[0], "tags-external-bitmap-indices") == 0) {
+                    map_info_options.type = DISPLAY_TAGS_EXTERNAL_BITMAP_INDICES;
+                }
+                else if(std::strcmp(args[0], "tags-external-loc-indices") == 0) {
+                    map_info_options.type = DISPLAY_TAGS_EXTERNAL_LOC_INDICES;
+                }
+                else if(std::strcmp(args[0], "tags-external-sound-indices") == 0) {
+                    map_info_options.type = DISPLAY_TAGS_EXTERNAL_SOUND_INDICES;
+                }
+                else if(std::strcmp(args[0], "tags-external-indices") == 0) {
+                    map_info_options.type = DISPLAY_TAGS_EXTERNAL_INDICES;
+                }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
                     std::exit(EXIT_FAILURE);
@@ -185,7 +201,7 @@ int main(int argc, const char **argv) {
     std::size_t bitmaps, sounds, loc, bitmap_indices, sound_indices, loc_indices, total_indices, total_tags;
     std::vector<std::string> languages;
     bool all_languages, no_external_pointers;
-    auto uses_external_data = [&tag_count, &map, &no_external_pointers, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &all_languages, &languages](bool list_tags_with_external_pointers = false) -> bool {
+    auto uses_external_data = [&tag_count, &map, &no_external_pointers, &bitmaps, &sounds, &loc, &bitmap_indices, &sound_indices, &loc_indices, &total_indices, &total_tags, &all_languages, &languages](bool list_tags_with_external_pointers = false, bool list_bitmaps_with_external_indices = false, bool list_sounds_with_external_indices = false, bool list_loc_with_external_indices = false) -> bool {
         bitmaps = 0;
         sounds = 0;
         loc = 0;
@@ -202,19 +218,27 @@ int main(int argc, const char **argv) {
         for(std::size_t i = 0; i < tag_count; i++) {
             auto &tag = map->get_tag(i);
             if(tag.is_indexed()) {
-                switch(tag.get_tag_class_int()) {
+                bool do_list = false;
+                auto tag_class_int = tag.get_tag_class_int();
+                switch(tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
                         bitmaps++;
                         bitmap_indices++;
+                        do_list = list_bitmaps_with_external_indices;
                         break;
                     case TagClassInt::TAG_CLASS_SOUND:
                         sounds++;
                         sound_indices++;
+                        do_list = list_sounds_with_external_indices;
                         break;
                     default:
                         loc++;
                         loc_indices++;
+                        do_list = list_loc_with_external_indices;
                         break;
+                }
+                if(do_list) {
+                    oprintf("%s.%s\n", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag_class_int));
                 }
                 continue;
             }
@@ -475,6 +499,18 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_TAGS_EXTERNAL_POINTERS:
             uses_external_data(true);
+            break;
+        case DISPLAY_TAGS_EXTERNAL_BITMAP_INDICES:
+            uses_external_data(false, true, false, false);
+            break;
+        case DISPLAY_TAGS_EXTERNAL_SOUND_INDICES:
+            uses_external_data(false, false, true, false);
+            break;
+        case DISPLAY_TAGS_EXTERNAL_LOC_INDICES:
+            uses_external_data(false, false, false, true);
+            break;
+        case DISPLAY_TAGS_EXTERNAL_INDICES:
+            uses_external_data(false, true, true, true);
             break;
         case DISPLAY_LANGUAGES:
             uses_external_data();

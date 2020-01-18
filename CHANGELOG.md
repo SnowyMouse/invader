@@ -3,6 +3,16 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-info: Added `-T tags-external-bitmap-indices` which lists all bitmap
+  tags in a Custom Edition map that use an external index
+- invader-info: Added `-T tags-external-indices` which lists all tags in a
+  Custom Edition map that use an external index
+- invader-info: Added `-T tags-external-loc-indices` which lists all tags in a
+  Custom Edition map that aren't sounds or bitmaps but use an external index
+- invader-info: Added `-T tags-external-sound-indices` which lists all sound
+  tags in a Custom Edition map that use an external index
+
 ### Changed
 - invader-sound: Warns if indexed damage effect or object tags are stubbed out
 
