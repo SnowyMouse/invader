@@ -1751,7 +1751,7 @@ namespace Invader {
 
                                     // Find bitmaps
                                     for(auto &ab : this->bitmaps) {
-                                        if(ab.data.size() == raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                        if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
                                             this->delete_raw_data(raw_data_index);
                                             bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
                                             auto flags = bitmap_data.flags.read();
@@ -1788,7 +1788,7 @@ namespace Invader {
 
                                             // Find sounds
                                             for(auto &ab : this->sounds) {
-                                                if(ab.data.size() == raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                                if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
                                                     this->delete_raw_data(raw_data_index);
                                                     permutation.samples.file_offset = static_cast<std::uint32_t>(ab.data_offset);
                                                     permutation.samples.external = 1;
