@@ -60,6 +60,9 @@ namespace Invader::Parser {
         return pixel_size;
     }
 
+    void Particle::post_hek_parse() {
+        this->contact_deterioration = 0.0F;
+    }
     void Particle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->bitmap.tag_id.index);

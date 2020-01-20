@@ -325,6 +325,7 @@
         ],
         "type": "struct",
         "post_compile": true,
+        "post_hek_parse": true,
         "size": 356
     }
 ]
