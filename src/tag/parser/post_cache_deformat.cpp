@@ -70,6 +70,10 @@ namespace Invader::Parser {
         }
     }
 
+    void Invader::Parser::Effect::post_cache_deformat() {
+        this->flags.do_not_cull = 0;
+    }
+
     void Invader::Parser::DamageEffect::post_cache_deformat() {
         this->camera_shaking_wobble_period /= TICK_RATE;
     }
