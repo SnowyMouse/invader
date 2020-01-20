@@ -332,6 +332,7 @@ for s in all_structs_arranged:
     post_cache_parse = "post_cache_parse" in s and s["post_cache_parse"]
     pre_compile = "pre_compile" in s and s["pre_compile"]
     post_compile = "post_compile" in s and s["post_compile"]
+    post_hek_parse = "post_hek_parse" in s and s["post_hek_parse"]
     private_functions = post_cache_deformat
 
     hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
@@ -839,6 +840,8 @@ for s in all_structs_arranged:
                     cpp_read_hek_data.write("        if(r.{} == 0) {{\n".format(name))
                     cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
                     cpp_read_hek_data.write("        }\n")
+    if post_hek_parse:
+        cpp_read_hek_data.write("        post_hek_parse();\n")
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 
@@ -864,6 +867,9 @@ for s in all_structs_arranged:
 
     hpp.write("        ~{}() override = default;\n".format(struct_name))
     hpp.write("    private:\n")
+
+    if post_hek_parse:
+        hpp.write("        void post_hek_parse();\n")
 
     if post_cache_deformat:
         hpp.write("        void post_cache_deformat();\n")
