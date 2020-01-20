@@ -71,6 +71,7 @@ include(src/compress/compress.cmake)
 include(src/info/info.cmake)
 include(src/extract/extract.cmake)
 include(src/sound/sound.cmake)
+include(src/strip/strip.cmake)
 
 # Install stuff
 install(
