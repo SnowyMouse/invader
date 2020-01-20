@@ -543,11 +543,15 @@
             },
             {
                 "name": "soft ping interrupt ticks",
-                "type": "int16"
+                "type": "int16",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "hard ping interrupt ticks",
-                "type": "int16"
+                "type": "int16",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "powered seats",
