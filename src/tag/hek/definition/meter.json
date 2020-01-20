@@ -32,6 +32,7 @@
                     "bitmap"
                 ],
                 "compound": true,
+                "hidden": true,
                 "non_cached": true
             },
             {
@@ -41,6 +42,7 @@
                     "bitmap"
                 ],
                 "compound": true,
+                "hidden": true,
                 "non_cached": true
             },
             {
@@ -104,6 +106,8 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
+        "post_hek_parse": true,
         "size": 172
     }
 ]
