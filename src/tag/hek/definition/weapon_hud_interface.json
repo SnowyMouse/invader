@@ -422,13 +422,11 @@
             },
             {
                 "name": "width scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "height scale",
-                "type": "float",
-                "default": 1.0
+                "type": "float"
             },
             {
                 "name": "scaling flags",
