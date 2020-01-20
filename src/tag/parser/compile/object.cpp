@@ -6,6 +6,10 @@
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
+    template <typename T> void fix_render_bounding_radius(T &tag) {
+        tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
+    }
+
     template <typename T> void compile_object(T &tag) {
         tag.scales_change_colors = 0;
         for(auto &c : tag.change_colors) {
@@ -14,7 +18,51 @@ namespace Invader::Parser {
                 break;
             }
         }
-        tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
+        fix_render_bounding_radius(tag);
+    }
+
+    void Biped::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Vehicle::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Weapon::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Equipment::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Garbage::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void DeviceControl::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void DeviceLightFixture::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void DeviceMachine::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Scenery::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Placeholder::post_hek_parse() {
+        fix_render_bounding_radius(*this);
+    }
+
+    void Projectile::post_hek_parse() {
+        fix_render_bounding_radius(*this);
     }
 
     template <typename T> void compile_unit(T &tag) {

@@ -272,6 +272,7 @@
         "inherits": "Unit",
         "pre_compile": true,
         "post_compile": true,
+        "post_hek_parse": true,
         "size": 1008
     }
 ]

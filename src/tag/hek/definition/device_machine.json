@@ -68,6 +68,7 @@
         "inherits": "Device",
         "pre_compile": true,
         "post_compile": true,
+        "post_hek_parse": true,
         "size": 804
     }
 ]

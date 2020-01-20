@@ -841,7 +841,7 @@ for s in all_structs_arranged:
                     cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
                     cpp_read_hek_data.write("        }\n")
     if post_hek_parse:
-        cpp_read_hek_data.write("        post_hek_parse();\n")
+        cpp_read_hek_data.write("        r.post_hek_parse();\n")
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 
