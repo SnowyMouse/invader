@@ -157,8 +157,8 @@ int main(int argc, char * const *argv) {
             return EXIT_FAILURE;
     }
 
-    if(!Invader::File::save_file(file_path.c_str(), file_data)) {
-        eprintf_error("Error: Failed to write to %s.", file_path.c_str());
+    if(!Invader::File::save_file(file_path_str.c_str(), file_data)) {
+        eprintf_error("Error: Failed to write to %s.", file_path_str.c_str());
         return EXIT_FAILURE;
     }
 

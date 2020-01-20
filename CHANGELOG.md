@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.23.1] - 2020-01-20
+### Fixed
+- invader-strip: Fixed an issue with not compiling on Windows due to a
+  difference in the standard library implementation.
+
 ## [0.23.0] - 2020-01-19
 ### Added
 - New tool: invader-strip - Strips extra hidden data from tags.
