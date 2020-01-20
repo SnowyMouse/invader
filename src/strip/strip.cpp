@@ -19,7 +19,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
-    static constexpr char DESCRIPTION[] = "Generate string list tags.";
+    static constexpr char DESCRIPTION[] = "Strips extra hidden data from tags.";
     static constexpr char USAGE[] = "[options] <tag.class>";
 
     struct StripOptions {

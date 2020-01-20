@@ -2,12 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.23.0] - 2020-01-19
 ### Added
+- New tool: invader-strip - Strips extra hidden data from tags.
 - invader-build: Added a CRC32 check on tag load. This will drastically
   increase build time, but it will still be somewhat faster than tool.exe. You
-  can turn this off by turning off pedantic warnings (`-H`) or by extracting
-  the tags with invader-extract after building.
+  can turn this off by turning off pedantic warnings (`-H`) or reset the CRC32
+  with invader-strip.
 
 ## [0.22.4] - 2020-01-17
 ### Added
