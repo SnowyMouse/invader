@@ -139,7 +139,7 @@ int main(int argc, char * const *argv) {
             string_tag = string_tag_maybe.value();
         }
         else {
-            eprintf_error("Failed to find a valid %s file %s in the data directory\n", valid_extension, remaining_arguments[0]);
+            eprintf_error("Failed to find a valid %s file %s in the data directory", valid_extension, remaining_arguments[0]);
             return EXIT_FAILURE;
         }
     }
@@ -150,7 +150,7 @@ int main(int argc, char * const *argv) {
     // Ensure it's lowercase
     for(const char *c = string_tag.c_str(); *c; c++) {
         if(*c >= 'A' && *c <= 'Z') {
-            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.\n", string_tag.c_str());
+            eprintf_error("Invalid tag path %s. Tag paths must be lowercase.", string_tag.c_str());
             return EXIT_FAILURE;
         }
     }
@@ -161,7 +161,7 @@ int main(int argc, char * const *argv) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory\n", string_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", string_options.tags);
         }
         return EXIT_FAILURE;
     }
@@ -235,12 +235,12 @@ int main(int argc, char * const *argv) {
         }
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
+        eprintf_error("Error: Failed to create a directory: %s", e.what());
         return EXIT_FAILURE;
     }
 
     if(!Invader::File::save_file(output_path.c_str(), final_data)) {
-        eprintf_error("Error: Failed to write to %s.\n", output_path.c_str());
+        eprintf_error("Error: Failed to write to %s.", output_path.c_str());
         return EXIT_FAILURE;
     }
 
