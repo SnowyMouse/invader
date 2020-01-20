@@ -2,6 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-build: Added a CRC32 check on tag load. This will drastically
+  increase build time, but it will still be somewhat faster than tool.exe. You
+  can turn this off by turning off pedantic warnings (`-H`) or by extracting
+  the tags with invader-extract after building.
+
 ## [0.22.4] - 2020-01-17
 ### Added
 - invader-info: Added `-T tags-external-bitmap-indices` which lists all bitmap
