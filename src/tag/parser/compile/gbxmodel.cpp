@@ -8,17 +8,84 @@ namespace Invader::Parser {
         bool model_part_warned = false;
         for(auto &g : this->geometries) {
             for(auto &p : g.parts) {
+                // Check this stuff!
                 std::size_t compressed_vertex_count = p.compressed_vertices.size();
                 std::size_t uncompressed_vertex_count = p.uncompressed_vertices.size();
-                if(uncompressed_vertex_count != compressed_vertex_count && compressed_vertex_count != 0) {
+                if(!model_part_warned && uncompressed_vertex_count != compressed_vertex_count && compressed_vertex_count != 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Compressed vertex count (%zu) is not equal to uncompressed (%zu)", compressed_vertex_count, uncompressed_vertex_count)
                     eprintf_warn("To fix this, rebuild the model tag");
                     model_part_warned = true;
-                    break;
                 }
-            }
-            if(model_part_warned) {
-                break;
+
+                // Set these
+                p.centroid_primary_node = 0;
+                p.centroid_secondary_node = 0;
+                p.centroid_primary_weight = 1.0F;
+                p.centroid_secondary_weight = 0.0F;
+
+                // Calculate weight
+                std::size_t node_count = this->nodes.size();
+                std::vector<float> node_weight(node_count, 0.0F);
+                for(auto &v : p.uncompressed_vertices) {
+                    std::size_t node0_index = static_cast<std::size_t>(v.node0_index);
+                    if(node0_index != NULL_INDEX) {
+                        if(node0_index > node_count) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Vertex has an incorrect node0 (%zu > %zu)", node0_index, node_count);
+                            eprintf_warn("To fix this, rebuild the model tag");
+                            throw InvalidTagDataException();
+                        }
+                        node_weight[node0_index] += v.node0_weight;
+                    }
+
+                    std::size_t node1_index = static_cast<std::size_t>(v.node1_index);
+                    if(node1_index != NULL_INDEX) {
+                        if(node1_index > node_count) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Vertex has an incorrect node1 (%zu > %zu)", node1_index, node_count);
+                            eprintf_warn("To fix this, rebuild the model tag");
+                            throw InvalidTagDataException();
+                        }
+                        node_weight[node1_index] += v.node1_weight;
+                    }
+                }
+
+                // Sort nodes from highest to lowest if we have more than one node
+                if(node_count > 1) {
+                    std::vector<std::size_t> highest_nodes;
+                    highest_nodes.reserve(node_count);
+                    for(std::size_t n = 0; n < node_count; n++) {
+                        bool added = false;
+                        for(std::size_t n2 = 0; n2 < highest_nodes.size(); n2++) {
+                            if(node_weight[n] > node_weight[highest_nodes[n2]]) {
+                                highest_nodes.insert(highest_nodes.begin() + n2, n);
+                                added = true;
+                                break;
+                            }
+                        }
+                        if(!added) {
+                            highest_nodes.emplace_back(n);
+                        }
+                    }
+
+                    // Check the top two
+                    std::size_t first_highest = highest_nodes[0];
+                    std::size_t second_highest = highest_nodes[1];
+                    float first_highest_weight = node_weight[first_highest];
+                    float second_highest_weight = node_weight[second_highest];
+
+                    // If we have a centroid primary node, let's hear it
+                    if(first_highest_weight > 0.0F) {
+                        // Set the centroid primary node
+                        p.centroid_primary_node = static_cast<HEK::Index>(first_highest);
+
+                        // Next, do we have a secondary node? If so, divide the weight between the two and set the secondary node
+                        if(second_highest_weight > 0.0F) {
+                            p.centroid_secondary_node = static_cast<HEK::Index>(second_highest);
+                            float total_weight = first_highest_weight + second_highest_weight;
+                            p.centroid_primary_weight = first_highest_weight / total_weight;
+                            p.centroid_secondary_weight = second_highest_weight / total_weight;
+                        }
+                    }
+                }
             }
         }
 
