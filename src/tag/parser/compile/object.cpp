@@ -168,11 +168,11 @@ namespace Invader::Parser {
         this->illumination_recovery_rate = this->illumination_recovery_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->illumination_recovery_time;
         this->ejection_port_recovery_rate = this->ejection_port_recovery_rate <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->ejection_port_recovery_time;
 
-        this->firing_acceleration_rate = 1.0f / TICK_RATE / this->acceleration_time;
-        this->firing_deceleration_rate = 1.0f / TICK_RATE / this->deceleration_time;
+        this->firing_acceleration_rate = this->acceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->acceleration_time;
+        this->firing_deceleration_rate = this->deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->deceleration_time;
 
-        this->error_acceleration_rate = 1.0f / TICK_RATE / this->error_acceleration_time;
-        this->error_deceleration_rate = 1.0f / TICK_RATE / this->error_deceleration_time;
+        this->error_acceleration_rate = this->error_acceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_acceleration_time;
+        this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_deceleration_time;
 
         // Jason Jones the accuracy of the weapon
         if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
