@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.23.3] - 2020-01-21
 ### Changed
 - invader-build: Detail node counts for gbxmodels are now calculated.
 - invader-sound: Permutations are now alphabetized. For split sounds, only the
