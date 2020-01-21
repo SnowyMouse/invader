@@ -279,7 +279,7 @@ int main(int argc, const char **argv) {
         auto extension = path.extension().string();
 
         // Get the sound
-        auto &sound = permutations.emplace_back();
+        SoundReader::Sound sound;
         try {
             if(extension == ".wav") {
                 sound = SoundReader::sound_from_wav_file(path_str_cstr);
@@ -316,26 +316,33 @@ int main(int argc, const char **argv) {
         }
         auto filename = path.filename().string();
 
+        // Get the permutation name
         sound.name = filename.substr(0, filename.size() - extension.size());
         if(sound.name.size() >= sizeof(TagString)) {
             eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(TagString));
             std::exit(EXIT_FAILURE);
         }
 
-        // Check for duplicates
-        std::size_t times_appeared = 0;
-        for(auto &p : permutations) {
-            if(p.name == sound.name) {
-                times_appeared++;
-            }
-        }
-        if(times_appeared != 1) {
-            eprintf_error("Multiple permutations with the same name (%s) cannot be added", sound.name.c_str());
-            return EXIT_FAILURE;
+        // Lowercase it
+        for(char &c : sound.name) {
+            c = std::tolower(c);
         }
 
         // Make it small
         sound.pcm.shrink_to_fit();
+
+        // Add it
+        std::size_t i;
+        for(i = 0; i < permutations.size(); i++) {
+            if(sound.name < permutations[i].name) {
+                break;
+            }
+            else if(sound.name == permutations[i].name) {
+                eprintf_error("Multiple permutations with the same name (%s) cannot be added", permutations[i].name.c_str());
+                return EXIT_FAILURE;
+            }
+        }
+        permutations.insert(permutations.begin() + i, std::move(sound));
     }
 
     // Force channel count
