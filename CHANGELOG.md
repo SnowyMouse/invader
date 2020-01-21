@@ -2,6 +2,21 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.23.2] - 2020-01-21
+### Changed
+- invader-strip: Now defaults render bounding radius
+- invader-strip: Now strips out dependencies from meter tags since they're not
+  used
+
+### Fixed
+- invader-extract: Fixed an issue where certain singleplayer tags' values were
+  not restored to the original HEK values such as pistol.weapon's error angle
+- invader-extract: Fixed not clearing do_not_cull flag
+- invader-build: Fixed defaulting height/width scales for interface numbers in
+  weapon HUD interfaces to 1
+- invader-strip: Fixed defaulting height/width scales for interface numbers in
+  weapon HUD interfaces to 1
+
 ## [0.23.1] - 2020-01-20
 ### Fixed
 - invader-strip: Fixed an issue with not compiling on Windows due to a
