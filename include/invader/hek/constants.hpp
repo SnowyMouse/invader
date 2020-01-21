@@ -6,29 +6,28 @@
 /**
  * Number of times the game performs most of its logic (physics, etc.)
  */
-#define TICK_RATE 30.0F
+#define TICK_RATE 30.0
 
 /**
  * Number of world units per meter (1 world unit = 10 feet = 3.048 meters)
  */
-#define WORLD_UNITS_PER_METER 3.048F
+#define WORLD_UNITS_PER_METER 3.048
 
 /**
  * Halo's gravity is equal to 9.78 meters per second squared, or approximately
  * 0.997 g (0.997 times Earth's gravity).
  */
-#define GRAVITY ((9.78F / WORLD_UNITS_PER_METER) / TICK_RATE / TICK_RATE)
+#define GRAVITY ((9.78 / WORLD_UNITS_PER_METER) / TICK_RATE / TICK_RATE)
 
 /**
  * From Guerilla's self-documentation, measured in grams per milliliter
  */
-#define AIR_DENSITY 0.0011F
-#define WATER_DENSITY 1.0F
+#define AIR_DENSITY 0.0011
+#define WATER_DENSITY 1.0
 
 /**
- * I know M_PI is an option, but from looking at tool's output, this is
- * approximately the constant Halo uses
+ * Pi to 100 digits
  */
-#define HALO_PI 3.14159274101257F
+#define HALO_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
 
 #endif
