@@ -3256,8 +3256,7 @@
                 "name": "references",
                 "type": "TagReflexive",
                 "struct": "ScenarioReference",
-                "compound": true,
-                "hidden": true
+                "compound": true
             },
             {
                 "name": "source files",
