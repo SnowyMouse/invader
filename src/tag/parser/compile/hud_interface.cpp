@@ -32,7 +32,7 @@ namespace Invader::Parser {
         }
     }
 
-    void get_sequence_data(const Invader::BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size) {
+    void get_sequence_data(const Invader::BuildWorkload &workload, const HEK::TagID &tag_id, std::size_t &sequence_count, const BitmapGroupSequence::struct_little *&sequences, char *bitmap_tag_path, std::size_t bitmap_tag_path_size, HEK::BitmapType &bitmap_type) {
         if(tag_id.is_null()) {
             sequence_count = 0;
             sequences = nullptr;
@@ -44,6 +44,7 @@ namespace Invader::Parser {
             Invader::File::halo_path_to_preferred_path_chars(bitmap_tag_path);
             const auto &bitmap_struct = workload.structs[*bitmap_tag.base_struct];
             const auto &bitmap = *reinterpret_cast<const Bitmap::struct_little *>(bitmap_struct.data.data());
+            bitmap_type = bitmap.type;
             sequence_count = bitmap.bitmap_group_sequence.count;
             sequences = sequence_count > 0 ? reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(workload.structs[*bitmap_struct.resolve_pointer(&bitmap.bitmap_group_sequence.pointer)].data.data()) : nullptr;
         }
@@ -54,12 +55,21 @@ namespace Invader::Parser {
         std::size_t sequence_count;
         const BitmapGroupSequence::struct_little *sequences;
         char bitmap_tag_path[256];
-        get_sequence_data(workload, this->crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+        HEK::BitmapType bitmap_type;
+        get_sequence_data(workload, this->crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
 
         // Make sure it's valid
         std::size_t overlay_count = this->crosshair_overlays.size();
         for(std::size_t i = 0; i < overlay_count; i++) {
             auto &overlay = this->crosshair_overlays[i];
+
+            if(overlay.flags.not_a_sprite && bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is marked as not a sprite, but %s is a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
+            }
+            else if(!overlay.flags.not_a_sprite && bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is not marked as not a sprite, but %s is not a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
+            }
+
             if(overlay.sequence_index != NULL_INDEX && !workload.disable_recursion) {
                 if(overlay.sequence_index >= sequence_count) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
@@ -88,15 +98,19 @@ namespace Invader::Parser {
             std::size_t sequence_count;
             const BitmapGroupSequence::struct_little *sequences;
             char bitmap_tag_path[256];
-            get_sequence_data(workload, this->meter_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+            HEK::BitmapType bitmap_type;
+            get_sequence_data(workload, this->meter_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
 
             if(this->sequence_index >= sequence_count) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
             }
             else {
                 auto &sequence = sequences[this->sequence_index];
-                if(sequence.sprites.count == 0) {
+                if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 sprites", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                }
+                else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
                 }
             }
         }
@@ -109,16 +123,19 @@ namespace Invader::Parser {
             std::size_t sequence_count;
             const BitmapGroupSequence::struct_little *sequences;
             char bitmap_tag_path[256];
-            get_sequence_data(workload, this->interface_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+            HEK::BitmapType bitmap_type;
+            get_sequence_data(workload, this->interface_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
 
             if(this->sequence_index >= sequence_count) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
             }
             else {
                 auto &sequence = sequences[this->sequence_index];
-                // TODO: Determine when sprites or bitmaps are chosen. Does Halo do it automatically based on bitmap count/sprite count or does it use the bitmap tag thing? I can't see any other way of it knowing.
-                if(sequence.bitmap_count == 0 && sequence.sprites.count == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in static element #%zu has 0 sprites/bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 sprites", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                }
+                else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 bitmaps", static_cast<std::size_t>(this->sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
                 }
             }
         }
@@ -129,7 +146,8 @@ namespace Invader::Parser {
         std::size_t sequence_count;
         const BitmapGroupSequence::struct_little *sequences;
         char bitmap_tag_path[256];
-        get_sequence_data(workload, this->overlay_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+        HEK::BitmapType bitmap_type;
+        get_sequence_data(workload, this->overlay_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
 
         // Make sure it's valid
         std::size_t overlay_count = this->overlays.size();
@@ -141,8 +159,11 @@ namespace Invader::Parser {
                 }
                 else {
                     auto &sequence = sequences[overlay.sequence_index];
-                    if(sequence.bitmap_count == 0) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of element #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                    if(bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.sprites.count == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 sprites", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                    }
+                    else if(bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES && sequence.bitmap_count == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in meter #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
                     }
                 }
             }

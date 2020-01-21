@@ -8,6 +8,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-sound: Permutations are now alphabetized. For split sounds, only the
   "actual" permutations are alphabetized.
 
+### Fixed
+- invader-build: Fixed some weapon HUD interface tags not compiling due to
+  finding an error when there was none
+
 ## [0.23.2] - 2020-01-21
 ### Changed
 - invader-strip: Now defaults render bounding radius

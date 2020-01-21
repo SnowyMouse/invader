@@ -337,7 +337,8 @@ namespace Invader::Parser {
                         const BitmapGroupSequence::struct_little *sequences;
                         std::size_t sequence_count;
                         char bitmap_tag_path[512];
-                        get_sequence_data(workload, crosshair.crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path));
+                        HEK::BitmapType bitmap_type;
+                        get_sequence_data(workload, crosshair.crosshair_bitmap.tag_id, sequence_count, sequences, bitmap_tag_path, sizeof(bitmap_tag_path), bitmap_type);
                         auto &crosshair_overlays_struct = workload.structs[*crosshairs_struct.resolve_pointer(&crosshair.crosshair_overlays.pointer)];
                         auto *crosshair_overlays = reinterpret_cast<const WeaponHUDInterfaceCrosshairOverlay::struct_little *>(crosshair_overlays_struct.data.data());
 
