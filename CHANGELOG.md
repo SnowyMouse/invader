@@ -11,6 +11,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed some weapon HUD interface tags not compiling due to
   finding an error when there was none
+- invader-build: Fixed some various division-by-zero issues
+- invader-extract: Fixed some values being extracted when unnecessary
+- invader-strip: Fixed some values not being stripped
 
 ## [0.23.2] - 2020-01-21
 ### Changed
