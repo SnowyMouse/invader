@@ -483,27 +483,39 @@
             },
             {
                 "name": "illumination recovery rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "ejection port recovery rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "firing acceleration rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "firing deceleration rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "error acceleration rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "error deceleration rate",
-                "type": "float"
+                "type": "float",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "firing effects",
