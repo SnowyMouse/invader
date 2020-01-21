@@ -60,30 +60,32 @@ namespace Invader::Parser {
 
         // Make sure it's valid
         std::size_t overlay_count = this->crosshair_overlays.size();
-        for(std::size_t i = 0; i < overlay_count; i++) {
-            auto &overlay = this->crosshair_overlays[i];
+        if(!workload.disable_recursion) {
+            for(std::size_t i = 0; i < overlay_count; i++) {
+                auto &overlay = this->crosshair_overlays[i];
 
-            if(overlay.flags.not_a_sprite && bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is marked as not a sprite, but %s is a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
-            }
-            else if(!overlay.flags.not_a_sprite && bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is not marked as not a sprite, but %s is not a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
-            }
-
-            if(overlay.sequence_index != NULL_INDEX && !workload.disable_recursion) {
-                if(overlay.sequence_index >= sequence_count) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
+                if(overlay.flags.not_a_sprite && bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is marked as not a sprite, but %s is a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
                 }
-                else {
-                    auto &sequence = sequences[overlay.sequence_index];
-                    if(overlay.flags.not_a_sprite) {
-                        if(sequence.bitmap_count == 0) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
-                        }
+                else if(!overlay.flags.not_a_sprite && bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is not marked as not a sprite, but %s is not a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
+                }
+
+                if(overlay.sequence_index != NULL_INDEX) {
+                    if(overlay.sequence_index >= sequence_count) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu is out of bounds (>= %zu)", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), sequence_count);
                     }
                     else {
-                        if(sequence.sprites.count == 0) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu has 0 sprites", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                        auto &sequence = sequences[overlay.sequence_index];
+                        if(overlay.flags.not_a_sprite) {
+                            if(sequence.bitmap_count == 0) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                            }
+                        }
+                        else {
+                            if(sequence.sprites.count == 0) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu has 0 sprites", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
+                            }
                         }
                     }
                 }
