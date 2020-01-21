@@ -331,7 +331,8 @@
             {
                 "name": "object type",
                 "type": "ObjectType",
-                "endian": "little"
+                "endian": "little",
+                "hidden": true
             },
             {
                 "name": "flags",

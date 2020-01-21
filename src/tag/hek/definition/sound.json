@@ -343,7 +343,8 @@
             },
             {
                 "name": "unknown int",
-                "type": "uint32"
+                "type": "uint32",
+                "hidden": true
             },
             {
                 "type": "pad",
