@@ -4,7 +4,66 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
+    void GBXModel::post_hek_parse() {
+        this->super_high_detail_node_count = 0;
+        this->high_detail_node_count = 0;
+        this->medium_detail_node_count = 0;
+        this->low_detail_node_count = 0;
+        this->super_low_detail_node_count = 0;
+
+        auto &geometries = this->geometries;
+        auto find_highest = [&geometries](std::uint16_t &c, HEK::Index what) {
+            if(what >= geometries.size()) {
+                c = 0;
+            }
+            else {
+                for(auto &p : geometries[what].parts) {
+                    for(auto &v : p.uncompressed_vertices) {
+                        if(v.node0_index != NULL_INDEX && c < v.node0_index) {
+                            c = v.node0_index;
+                        }
+                        if(v.node1_index != NULL_INDEX && c < v.node1_index) {
+                            c = v.node1_index;
+                        }
+                    }
+                }
+            }
+        };
+
+        for(auto &r : this->regions) {
+            for(auto &p : r.permutations) {
+                find_highest(this->super_high_detail_node_count, p.super_high);
+                find_highest(this->high_detail_node_count, p.high);
+                find_highest(this->medium_detail_node_count, p.medium);
+                find_highest(this->low_detail_node_count, p.low);
+                find_highest(this->super_low_detail_node_count, p.super_low);
+            }
+        }
+    }
+
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        std::size_t region_count = this->regions.size();
+        std::size_t geometries_count = this->geometries.size();
+        for(std::size_t ri = 0; ri < region_count; ri++) {
+            auto &r = this->regions[ri];
+            std::size_t permutation_count = r.permutations.size();
+            for(std::size_t pi = 0; pi < permutation_count; pi++) {
+                auto &p = r.permutations[pi];
+
+                #define DO_GEO_CHECK(what, what_str) \
+                if(p.what >= geometries_count) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, what_str " geometry of permutation %zu of region %zu is incorrect (%zu >= %zu)", pi, ri, static_cast<std::size_t>(p.what), geometries_count); \
+                    throw InvalidTagDataException(); \
+                }
+                DO_GEO_CHECK(super_high, "Super high");
+                DO_GEO_CHECK(high, "High");
+                DO_GEO_CHECK(medium, "Medium");
+                DO_GEO_CHECK(low, "Low");
+                DO_GEO_CHECK(super_low, "Super low");
+                #undef DO_GEO_CHECK
+            }
+        }
+
         bool model_part_warned = false;
         for(auto &g : this->geometries) {
             for(auto &p : g.parts) {

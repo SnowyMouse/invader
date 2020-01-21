@@ -622,15 +622,7 @@
                 "type": "float"
             },
             {
-                "name": "super high detail node count",
-                "type": "uint16"
-            },
-            {
-                "name": "high detail node count",
-                "type": "uint16"
-            },
-            {
-                "name": "medium detail node count",
+                "name": "super low detail node count",
                 "type": "uint16"
             },
             {
@@ -638,7 +630,15 @@
                 "type": "uint16"
             },
             {
-                "name": "super low detail node count",
+                "name": "medium detail node count",
+                "type": "uint16"
+            },
+            {
+                "name": "high detail node count",
+                "type": "uint16"
+            },
+            {
+                "name": "super high detail node count",
                 "type": "uint16"
             },
             {
@@ -687,7 +687,8 @@
                 "name": "geometries",
                 "type": "TagReflexive",
                 "struct": "GBXModelGeometry",
-                "compound": true
+                "compound": true,
+                "maximum": 65535
             },
             {
                 "name": "shaders",
@@ -699,6 +700,7 @@
         "type": "struct",
         "post_cache_deformat": true,
         "pre_compile": true,
+        "post_hek_parse": true,
         "size": 232
     }
 ]

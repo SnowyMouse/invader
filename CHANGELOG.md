@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-build: Now calculates detail node counts for gbxmodels
+
 ## [0.23.2] - 2020-01-21
 ### Changed
 - invader-strip: Now defaults render bounding radius
