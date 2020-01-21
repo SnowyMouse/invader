@@ -253,9 +253,10 @@ int main(int argc, const char **argv) {
 
         // Jason Jones the tag
         if(header.map_type == Invader::HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+            auto tag_path = tag.get_path();
             switch(tag_class_int) {
                 case Invader::TagClassInt::TAG_CLASS_WEAPON: {
-                    if(path == "weapons\\pistol\\pistol") {
+                    if(tag_path == "weapons\\pistol\\pistol") {
                         auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                         if(parsed.triggers.size() >= 1) {
                             auto &first_trigger = parsed.triggers[0];
@@ -265,7 +266,7 @@ int main(int argc, const char **argv) {
                         }
                         new_tag = parsed.generate_hek_tag_data(TagClassInt::TAG_CLASS_WEAPON);
                     }
-                    else if(path == "weapons\\plasma rifle\\plasma rifle") {
+                    else if(tag_path == "weapons\\plasma rifle\\plasma rifle") {
                         auto parsed = Invader::Parser::Weapon::parse_hek_tag_file(new_tag.data(), new_tag.size());
                         if(parsed.triggers.size() >= 1) {
                             auto &first_trigger = parsed.triggers[0];
@@ -277,7 +278,7 @@ int main(int argc, const char **argv) {
                     break;
                 }
                 case Invader::TagClassInt::TAG_CLASS_DAMAGE_EFFECT:
-                    if(path == "weapons\\pistol\\bullet") {
+                    if(tag_path == "weapons\\pistol\\bullet") {
                         auto parsed = Invader::Parser::DamageEffect::parse_hek_tag_file(new_tag.data(), new_tag.size());
                         parsed.elite_energy_shield = 1.0F;
                         new_tag = parsed.generate_hek_tag_data(TagClassInt::TAG_CLASS_DAMAGE_EFFECT);
