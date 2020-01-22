@@ -923,6 +923,7 @@ namespace Invader {
         workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
         workload.tags.emplace_back();
+        workload.hide_pedantic_warnings = true;
         workload.compile_tag_data_recursively(tag_data, tag_data_size, 0);
         return workload;
     }
@@ -932,6 +933,7 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
+        workload.hide_pedantic_warnings = true;
         workload.compile_tag_recursively(tag, tag_class_int);
         return workload;
     }
