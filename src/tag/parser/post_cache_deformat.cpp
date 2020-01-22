@@ -10,18 +10,6 @@ namespace Invader::Parser {
         this->grenade_velocity *= TICK_RATE;
     }
 
-    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        this->color_plate_height = 0;
-        this->color_plate_width = 0;
-        for(auto &bitmap_data : this->bitmap_data) {
-            const std::byte *bitmap_data_ptr;
-            bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
-            bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
-            this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
-            bitmap_data.flags.external = 0;
-        }
-    }
-
     void Invader::Parser::Scenario::post_cache_deformat() {
         auto *script_data = this->script_syntax_data.data();
         auto script_data_size = this->script_syntax_data.size();

@@ -18,6 +18,24 @@ namespace Invader::Parser {
         this->flags.make_it_actually_work = 1;
     }
 
+    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        this->post_hek_parse();
+        for(auto &bitmap_data : this->bitmap_data) {
+            const std::byte *bitmap_data_ptr;
+            bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
+            bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
+            this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+            bitmap_data.flags.external = 0;
+        }
+    }
+
+    void Invader::Parser::Bitmap::post_hek_parse() {
+        if(this->compressed_color_plate_data.size() == 0) {
+            this->color_plate_height = 0;
+            this->color_plate_width = 0;
+        }
+    }
+
     void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         for(auto &sequence : this->bitmap_group_sequence) {
             for(auto &sprite : sequence.sprites) {
