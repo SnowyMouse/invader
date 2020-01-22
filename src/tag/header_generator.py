@@ -855,7 +855,7 @@ for s in all_structs_arranged:
     hpp.write("         */\n")
     hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size);\n".format(struct_name))
     cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size) {{\n".format(struct_name, struct_name))
-    cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size, true);\n")
+    cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size);\n")
     cpp_read_hek_data.write("        std::size_t data_read = 0;\n")
     cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
     cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read);\n")

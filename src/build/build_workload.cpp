@@ -512,7 +512,7 @@ namespace Invader {
 
         // Check CRC32
         if(!this->hide_pedantic_warnings) {
-            HEK::TagFileHeader::validate_header(header, tag_data_size, true, tag_class_int);
+            HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
             std::uint32_t expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
             if(expected_crc != header->crc32) {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));

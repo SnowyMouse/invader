@@ -55,11 +55,10 @@ namespace Invader::HEK {
          * Validate the header, throwing an exception if not valid
          * @param header             pointer to the header to validate
          * @param tag_file_size      size of the tag file
-         * @param verbose            output diagnostic messages to standard output
          * @param expected_tag_class tag class expected
          * @throws                   std::exception if not valid
          */
-        static void validate_header(const TagFileHeader *header, std::size_t tag_file_size, bool verbose = false, std::optional<TagClassInt> expected_tag_class = std::nullopt);
+        static void validate_header(const TagFileHeader *header, std::size_t tag_file_size, std::optional<TagClassInt> expected_tag_class = std::nullopt);
 
         /** Make a blank tag file header. No values will be initialized. */
         TagFileHeader() = default;
