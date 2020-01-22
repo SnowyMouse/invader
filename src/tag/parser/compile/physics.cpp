@@ -4,13 +4,11 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
-    void Physics::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        // Make sure we have exactly two matrices
-        if(this->inertial_matrix_and_inverse.size() != 2) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Physics tag does not have exactly have 2 matrices");
-            throw InvalidTagDataException();
-        }
+    void Physics::post_cache_deformat() {
+        this->post_hek_parse(); // do this to mitigate precision issues
+    }
 
+    void Physics::post_hek_parse() {
         // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://bitbucket.org/Moses_of_Egypt/reclaimer/src/5d710221979fecbb8e71fa57c768f17f42f0010d/hek/defs/objs/phys.py?at=default&fileviewer=file-view-default
         // I added this stuff because it is actually recalculated when the physics tag is run through tool.exe when building a cache file.
         float total_relative_mass = 0.0f;
@@ -96,6 +94,7 @@ namespace Invader::Parser {
         this->xx_moment = m.matrix[0][0];
         this->yy_moment = m.matrix[1][1];
         this->zz_moment = m.matrix[2][2];
+        this->inertial_matrix_and_inverse.resize(2);
         this->inertial_matrix_and_inverse[0].matrix = m;
         this->inertial_matrix_and_inverse[1].matrix = invert_matrix(m);
     }
