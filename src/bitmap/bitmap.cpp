@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. Specify channels with letters (i.e. argb).", "<channels>");
     options.emplace_back("data <path>", 'd', 1, "Set the data directory.", "<path>");
     options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
-    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit" "<type>");
+    options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
     options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
