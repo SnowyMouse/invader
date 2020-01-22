@@ -175,12 +175,14 @@
             {
                 "name": "width scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "height scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "scaling flags",
@@ -296,12 +298,14 @@
             {
                 "name": "width scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "height scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "scaling flags",
@@ -525,12 +529,14 @@
             {
                 "name": "width scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "height scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "scaling flags",
@@ -657,12 +663,14 @@
             {
                 "name": "width scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "height scale",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "scaling flags",

@@ -735,6 +735,7 @@ for s in all_structs_arranged:
         cpp_read_hek_data.write("        const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
             name = struct["name"]
+            default_sign = "<=" if "default_sign" in struct and struct["default_sign"] else "=="
             if struct["type"] == "TagDependency":
                 cpp_read_hek_data.write("        std::size_t h_{}_expected_length = h.{}.path_size;\n".format(name,name))
                 cpp_read_hek_data.write("        r.{}.tag_class_int = h.{}.tag_class_int;\n".format(name, name))
@@ -795,7 +796,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.red == 0 && r.{}.green == 0 && r.{}.blue == 0) {{\n".format(name,name,name))
+                    cpp_read_hek_data.write("        if(r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign))
                     cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("            r.{}.blue = {}{};\n".format(name, default[2], suffix))
@@ -805,7 +806,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.alpha == 0 && r.{}.red == 0 && r.{}.green == 0 && r.{}.blue == 0) {{\n".format(name,name,name,name))
+                    cpp_read_hek_data.write("        if(r.{}.alpha {} 0 && r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign,name,default_sign))
                     cpp_read_hek_data.write("            r.{}.alpha = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[2], suffix))
@@ -819,7 +820,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.from == 0 && r.{}.to == 0) {{\n".format(name, name))
+                    cpp_read_hek_data.write("        if(r.{}.from {} 0 && r.{}.to {} 0) {{\n".format(name, default_sign, name, default_sign))
                     cpp_read_hek_data.write("            r.{}.from = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.to = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("        }\n")
@@ -829,7 +830,7 @@ for s in all_structs_arranged:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
                     for q in range(struct["count"]):
-                        cpp_read_hek_data.write("        if(r.{}[{}] == 0) {{\n".format(name, q))
+                        cpp_read_hek_data.write("        if(r.{}[{}] {} 0) {{\n".format(name, q, default_sign))
                         cpp_read_hek_data.write("            r.{}[{}] = {}{};\n".format(name, q, default[q], suffix))
                         cpp_read_hek_data.write("        }\n")
             else:
@@ -837,7 +838,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default, float) else ""
-                    cpp_read_hek_data.write("        if(r.{} == 0) {{\n".format(name))
+                    cpp_read_hek_data.write("        if(r.{} {} 0) {{\n".format(name, default_sign))
                     cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
                     cpp_read_hek_data.write("        }\n")
     if post_hek_parse:

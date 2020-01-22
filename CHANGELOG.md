@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.23.5] - 2019-01-22
+### Fixed
+- invader-build: Fixed a bug where negative-scale weapon HUD interface values
+  were NOT defaulted to 1
+
 ## [0.23.4] - 2020-01-22
 ### Fixed
 - invader-build: Fixed various maps with decals crashing
