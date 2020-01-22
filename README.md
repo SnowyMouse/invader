@@ -132,6 +132,8 @@ this project is split into different programs.
     - [What is splitting?]
     - [Audio formats]
     - [Which audio format should I use?]
+- [invader-string]
+- [invader-strip]
 
 ### invader-archive
 This program generates a .tar.xz archive containing all of the tags used to
@@ -174,9 +176,9 @@ Options:
   -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
                                Specify channels with letters (i.e. argb).
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
-  -F --format                  Pixel format. Can be: 32-bit, 16-bit,
+  -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
-                               tag): 32-bit<type>
+                               tag): 32-bit
   -h --help                    Show this list of options.
   -H --bump-height <height>    Set the apparent bumpmap height from 0 to 1.
                                Default (new tag): 0.026
@@ -285,7 +287,7 @@ more things than dxt3.
 This program builds cache files.
 
 ```
-Usage: invader-build [options] <scenario>
+Usage: invader-build [options] -g <target> <scenario>
 
 Build cache files for Halo Combat Evolved on the PC.
 
@@ -295,9 +297,11 @@ Options:
   -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
-  -g --game-engine <id>        Specify the game engine. Valid engines are:
-                               custom (default), retail, demo, dark
+  -g --game-engine <id>        Specify the game engine. This option is
+                               required. Valid engines are: custom, demo,
+                               retail
   -h --help                    Show this list of options.
+  -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Use a specific maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
@@ -414,11 +418,21 @@ Display map metadata.
 
 Options:
   -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
   -T --type <type>             Set the type of data to show. Can be overview
                                (default), build, compressed, compression-ratio,
                                crc32, crc32-mismatched, dirty, engine,
-                               protected, map-type, scenario, scenario-path,
-                               tag-count, tags
+                               external-bitmap-indices, external-bitmaps,
+                               external-indices, external-loc,
+                               external-loc-indices, external-pointers,
+                               external-sound-indices, external-sounds,
+                               external-tags, language, map-types, protected,
+                               scenario, scenario-path, stub-count, tag-count,
+                               tags, tags-external-bitmap-indices,
+                               tags-external-indices,
+                               tags-external-loc-indices,
+                               tags-external-pointers,
+                               tags-external-sound-indices
 ```
 
 ### invader-resource
@@ -426,7 +440,7 @@ This program builds resource maps. Only maps with stock tags can be built.
 These files are not guaranteed to work with existing cache files.
 
 ```
-Usage: invader-resource <options>
+Usage: invader-resource [options] -T <type>
 
 Create resource maps.
 
@@ -439,9 +453,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -T --type <type>             Set the resource map. This option is required
-                               for creating maps. Can be: bitmaps, sounds, or
-                               loc.
+  -T --type <type>             Set the resource map. This option is required.
+                               Can be: bitmaps, sounds, or loc.
 ```
 
 
@@ -467,7 +480,7 @@ Usage: invader-sound [options] <sound-tag>
 Create or modify a sound tag.
 
 Options:
-  -c --class                   Set the class. This is required when generating
+  -c --class <class>           Set the class. This is required when generating
                                new sounds. Can be: ambient-computers,
                                ambient-machinery, ambient-nature,
                                device-computers, device-door,
@@ -482,21 +495,27 @@ Options:
                                vehicle-engine, weapon-charge, weapon-empty,
                                weapon-fire, weapon-idle, weapon-overheat,
                                weapon-ready, weapon-reload
-  -C --channel-count           Set the channel count. Can be: mono, stereo. By
+  -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
                                default, this is determined based on the input
                                audio.
   -d --data <dir>              Use the specified data directory.
-  -F --format                  Set the format. Can be: 16-bit-pcm, ogg-vorbis,
+  -f --flac-level <lvl>        Set the FLAC compression level. This can be
+                               between 0 and 8, with higher levels taking
+                               longer but offering slightly better ratios.
+                               Default: 5
+  -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
                                xbox-adpcm. Default (new tag): 16-bit-pcm
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the data.
-  -q --vorbis-quality          Set the Vorbis quality. This can be between -0.1
+  -q --vorbis-quality <qlty>   Set the Vorbis quality. This can be between -0.1
                                and 1.0. Default: 1.0
-  -r --sample-rate             Set the sample rate in Hz. Halo supports 22050
+  -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
                                and 44100. By default, this is determined based
                                on the input audio.
-  -s --split                   Split permutations into 227.5 KiB chunks.
+  -s --split                   Split permutations into 227.5 KiB chunks. This
+                               is necessary for longer sounds (e.g. music) when
+                               being played in the original Halo engine.
   -S --no-split                Do not split permutations.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
@@ -560,6 +579,23 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -P --fs-path                 Use a filesystem path for the text file.
+  -t --tags <dir>              Use the specified tags directory.
+```
+
+### invader-strip
+This program strips hidden data from tags and recalculates their CRC32 values.
+
+```
+Usage: invader-strip [options] <-a | tag.class>
+
+Strips extra hidden data from tags.
+
+Options:
+  -a --all                     Strip all tags in the tags directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
 ```
 
@@ -745,6 +781,8 @@ for multiplayer maps.
 [invader-info]: #invader-info
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound
+[invader-string]: #invader-string
+[invader-strip]: #invader-strip
 
 [Uncompressed bitmap formats]: #uncompressed-bitmap-formats
 [Block-compressed bitmap formats]: #block-compressed-bitmap-formats
