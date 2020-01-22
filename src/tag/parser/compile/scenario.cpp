@@ -6,6 +6,12 @@
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
 
 namespace Invader::Parser {
+    void Invader::Parser::Scenario::post_hek_parse() {
+        if(this->script_syntax_data.size() >= sizeof(ScenarioScriptNodeTable::struct_little)) {
+            reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(this->script_syntax_data.data())->first_element_ptr = 0;
+        }
+    }
+
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         if(workload.disable_recursion) {
             return; // if recursion is disabled, doing any of this will be a meme
