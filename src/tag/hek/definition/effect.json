@@ -235,7 +235,9 @@
             {
                 "name": "relative direction vector",
                 "type": "Vector3D",
-                "compound": true
+                "compound": true,
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
