@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-dependency: `-r` and `-R` no longer show tag errors
+- invader-extract: `-r` no longer shows tag errors
+
 ## [0.23.5] - 2019-01-22
 ### Fixed
 - invader-build: Fixed a bug where negative-scale weapon HUD interface values

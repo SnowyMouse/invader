@@ -207,7 +207,7 @@ namespace Invader {
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
 
-        /** Recursion is disabled */
+        /** Recursion is disabled - also disables showing most errors as well as various tags using other tags' data */
         bool disable_recursion = false;
 
         /** Hide pedantic warnings */

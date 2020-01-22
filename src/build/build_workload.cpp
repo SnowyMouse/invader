@@ -883,21 +883,30 @@ namespace Invader {
     void BuildWorkload::report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index) {
         switch(type) {
             case ErrorType::ERROR_TYPE_WARNING_PEDANTIC:
-                if(this->hide_pedantic_warnings) {
+                if(this->hide_pedantic_warnings || this->disable_recursion) {
                     return;
                 }
                 eprintf_warn_lesser("WARNING (minor): %s", error);
                 this->warnings++;
                 break;
             case ErrorType::ERROR_TYPE_WARNING:
+                if(this->disable_recursion) {
+                    return;
+                }
                 eprintf_warn("WARNING: %s", error);
                 this->warnings++;
                 break;
             case ErrorType::ERROR_TYPE_ERROR:
+                if(this->disable_recursion) {
+                    return;
+                }
                 eprintf_error("ERROR: %s", error);
                 this->errors++;
                 break;
             case ErrorType::ERROR_TYPE_FATAL_ERROR:
+                if(this->disable_recursion) {
+                    return;
+                }
                 eprintf_error("FATAL ERROR: %s", error);
                 this->errors++;
                 break;
