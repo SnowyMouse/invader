@@ -57,11 +57,11 @@ int main(int argc, char * const *argv) {
     }
 
     // Get the header
-    const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
-    Invader::HEK::TagFileHeader::validate_header(header, tag->size());
     std::vector<std::byte> file_data;
-
     try {
+        const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
+        Invader::HEK::TagFileHeader::validate_header(header, tag->size());
+
         #define TOUCH_TAG_CLASS(class_struct, class_int) case Invader::TagClassInt::class_int: { \
             file_data = Invader::Parser::class_struct::parse_hek_tag_file(tag->data(), tag->size()).generate_hek_tag_data(Invader::TagClassInt::class_int); \
             break; \
