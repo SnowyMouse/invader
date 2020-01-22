@@ -5,6 +5,10 @@
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
+    void ScenarioStructureBSP::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->runtime_decals.clear(); // delete these in case this tag was extracted improperly
+    }
+
     void ScenarioStructureBSPCollisionMaterial::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto *data = workload.structs[struct_index].data.data();
         auto &material = *reinterpret_cast<struct_little *>(data + offset);
@@ -34,10 +38,6 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
             throw InvalidTagDataException();
         }
-    }
-
-    void ScenarioStructureBSP::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        this->runtime_decals.clear(); // delete these in case this tag was extracted by a Meme Editing Kit and they weren't cleared
     }
 
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {

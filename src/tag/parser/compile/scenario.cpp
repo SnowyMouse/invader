@@ -689,7 +689,7 @@ namespace Invader::Parser {
                             if(cd.first == c) {
                                 auto &decal = this->decals[cd.second];
                                 auto &d = runtime_decals.emplace_back();
-                                d.decal_type = static_cast<HEK::Index>(cd.second);
+                                d.decal_type = decal.decal_type;
                                 d.pitch = decal.pitch;
                                 d.yaw = decal.yaw;
                                 d.position = decal.position;
