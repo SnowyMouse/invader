@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-build: Now shows tag space usage on map build and errors if exceeded
+
 ## [0.24.0] - 2019-01-22
 ### Added
 - invader-strip: Added `-a` which strips the entire tags directory

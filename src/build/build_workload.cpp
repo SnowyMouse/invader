@@ -398,10 +398,18 @@ namespace Invader {
             oprintf(" done\n");
         }
 
-        // Compress if needed
+        // Check to make sure we aren't too big
         std::size_t uncompressed_size = final_data.size();
         if(static_cast<std::uint64_t>(uncompressed_size) > UINT32_MAX) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed %zu > %zu", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed (%zu bytes > %zu)", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
+            throw MaximumFileSizeException();
+        }
+
+        // Make sure we don't go beyond the maximum tag space usage
+        std::size_t tag_space_usage = this->indexed_data_amount + largest_bsp_size + tag_data_size;
+        std::size_t tag_space_max = this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+        if(tag_space_usage > tag_space_max) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%zu bytes > %zu)", tag_space_usage, tag_space_max);
             throw MaximumFileSizeException();
         }
 
@@ -474,6 +482,7 @@ namespace Invader {
                     oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
                 }
             }
+            oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(tag_space_max), 100.0 * tag_space_usage / tag_space_max);
             oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
             oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(this->all_raw_data.size()), BYTES_TO_MiB(this->raw_bitmap_size), BYTES_TO_MiB(this->raw_sound_size));
             oprintf("CRC32 checksum:    0x%08X\n", new_crc);
@@ -1377,6 +1386,7 @@ namespace Invader {
 
                                 if(match) {
                                     t.resource_index = index;
+                                    this->indexed_data_amount += this->bitmaps[*index].data.size();
                                     t.base_struct = std::nullopt;
                                     break;
                                 }
@@ -1488,6 +1498,7 @@ namespace Invader {
 
                                 if(match) {
                                     t.resource_index = index;
+                                    this->indexed_data_amount += this->sounds[*index].data.size() - sizeof(Sound<LittleEndian>);
                                     this->structs[*t.base_struct].pointers.clear(); // clear the pointers rather than null out the base struct since Halo still requires it for sounds
                                     break;
                                 }
@@ -1735,6 +1746,7 @@ namespace Invader {
                                 }
                                 if(match) {
                                     t.resource_index = index;
+                                    this->indexed_data_amount += this->loc[*index].data.size();
                                     t.base_struct = std::nullopt;
                                     break;
                                 }
