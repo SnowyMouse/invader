@@ -22,7 +22,6 @@ namespace Invader::Parser {
 
         // Copy the table header
         ScenarioScriptNodeTable::struct_big table = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(script_data);
-        table.first_element_ptr = 0; // for consistency since this can be anything
         *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(script_data) = table;
 
         // Make sure it's not bullshit
@@ -56,6 +55,9 @@ namespace Invader::Parser {
         catch(std::exception &e) {
             eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
         }
+
+        // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
+        this->post_hek_parse();
     }
 
     void Invader::Parser::Effect::post_cache_deformat() {
