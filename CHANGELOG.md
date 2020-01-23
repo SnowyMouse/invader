@@ -6,6 +6,13 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
+### Changed
+- invader-extract: Now recalculates detail node count on extraction
+
+### Fixed
+- invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node
+  counts
+
 ## [0.24.0] - 2019-01-22
 ### Added
 - invader-strip: Added `-a` which strips the entire tags directory

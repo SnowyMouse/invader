@@ -19,11 +19,22 @@ namespace Invader::Parser {
             else {
                 for(auto &p : geometries[what].parts) {
                     for(auto &v : p.uncompressed_vertices) {
-                        if(v.node0_index != NULL_INDEX && c < v.node0_index) {
-                            c = v.node0_index;
+                        std::uint16_t node0 = v.node0_index;
+                        std::uint16_t node1 = v.node1_index;
+
+                        // If zoner, use local nodes
+                        if(p.flags.zoner) {
+                            constexpr const std::size_t LOCAL_NODE_COUNT = sizeof(p.local_node_indices) / sizeof(p.local_node_indices[0]);
+                            node0 = (node0 < LOCAL_NODE_COUNT) ? p.local_node_indices[node0] : NULL_INDEX;
+                            node1 = (node1 < LOCAL_NODE_COUNT) ? p.local_node_indices[node1] : NULL_INDEX;
                         }
-                        if(v.node1_index != NULL_INDEX && c < v.node1_index) {
-                            c = v.node1_index;
+
+                        if(node0 != NULL_INDEX && c < node0) {
+                            c = node0;
+                        }
+
+                        if(node1 != NULL_INDEX && c < node1) {
+                            c = node1;
                         }
                     }
                 }
@@ -87,7 +98,29 @@ namespace Invader::Parser {
                 std::vector<float> node_weight(node_count, 0.0F);
                 for(auto &v : p.uncompressed_vertices) {
                     std::size_t node0_index = static_cast<std::size_t>(v.node0_index);
-                    if(node0_index != NULL_INDEX) {
+                    std::size_t node1_index = static_cast<std::size_t>(v.node1_index);
+
+                    if(p.flags.zoner) {
+                        auto get_local_node = [&workload, &tag_index, &p](std::size_t index) -> std::size_t {
+                            if(index != NULL_INDEX) {
+                                constexpr const std::size_t LOCAL_NODE_COUNT = sizeof(p.local_node_indices) / sizeof(p.local_node_indices[0]);
+                                if(index > LOCAL_NODE_COUNT) {
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Vertex has an incorrect local node (%zu > %zu)", index, LOCAL_NODE_COUNT);
+                                    eprintf_warn("To fix this, rebuild the model tag");
+                                    throw InvalidTagDataException();
+                                }
+                                return p.local_node_indices[index];
+                            }
+                            else {
+                                return NULL_INDEX;
+                            }
+                        };
+
+                        node0_index = get_local_node(node0_index);
+                        node1_index = get_local_node(node1_index);
+                    }
+
+                    if(v.node0_index != NULL_INDEX) {
                         if(node0_index > node_count) {
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Vertex has an incorrect node0 (%zu > %zu)", node0_index, node_count);
                             eprintf_warn("To fix this, rebuild the model tag");
@@ -96,8 +129,7 @@ namespace Invader::Parser {
                         node_weight[node0_index] += v.node0_weight;
                     }
 
-                    std::size_t node1_index = static_cast<std::size_t>(v.node1_index);
-                    if(node1_index != NULL_INDEX) {
+                    if(v.node1_index != NULL_INDEX) {
                         if(node1_index > node_count) {
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Vertex has an incorrect node1 (%zu > %zu)", node1_index, node_count);
                             eprintf_warn("To fix this, rebuild the model tag");

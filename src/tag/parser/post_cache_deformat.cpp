@@ -105,6 +105,8 @@ namespace Invader::Parser {
         this->low_detail_cutoff = high;
         this->high_detail_cutoff = low;
         this->super_high_detail_cutoff = super_low;
+
+        this->post_hek_parse();
     }
 
     void Invader::Parser::Glow::post_cache_deformat() {
