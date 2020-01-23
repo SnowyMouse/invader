@@ -401,7 +401,7 @@ namespace Invader {
         // Check to make sure we aren't too big
         std::size_t uncompressed_size = final_data.size();
         if(static_cast<std::uint64_t>(uncompressed_size) > UINT32_MAX) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed (%zu bytes > %zu)", uncompressed_size, static_cast<std::size_t>(UINT32_MAX));
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(static_cast<std::size_t>(UINT32_MAX)));
             throw MaximumFileSizeException();
         }
 
@@ -409,7 +409,7 @@ namespace Invader {
         std::size_t tag_space_usage = this->indexed_data_amount + largest_bsp_size + tag_data_size;
         std::size_t tag_space_max = this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
         if(tag_space_usage > tag_space_max) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%zu bytes > %zu)", tag_space_usage, tag_space_max);
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(tag_space_max));
             throw MaximumFileSizeException();
         }
 
