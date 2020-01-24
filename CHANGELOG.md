@@ -12,6 +12,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node
   counts
+- invader-extract: Fixed change color permutation weights being extracted
+  incorrectly. **You will need to re-extract your tags!!!**
+- invader-build: Fixed change color permutation weights not being converted to
+  cutoffs.
 
 ## [0.24.0] - 2019-01-22
 ### Added

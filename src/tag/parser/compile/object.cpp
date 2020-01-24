@@ -21,6 +21,82 @@ namespace Invader::Parser {
         fix_render_bounding_radius(tag);
     }
 
+    void ObjectChangeColors::post_hek_parse() {
+        // Get permutation count
+        std::size_t permutation_count = this->permutations.size();
+        if(permutation_count == 0) {
+            return;
+        }
+
+        // Get the total
+        double total = 0.0;
+        for(auto &p : this->permutations) {
+            total += p.weight;
+        }
+
+        // Default everything to 1/total if the total is 0
+        if(total == 0.0) {
+            total = static_cast<double>(this->permutations.size());
+            for(auto &p : this->permutations) {
+                p.weight = static_cast<float>(1.0 / total);
+            }
+        }
+        // Normalize everything to 0-1 otherwise
+        else {
+            for(auto &p : this->permutations) {
+                p.weight = p.weight / total;
+            }
+        }
+    }
+
+    void ObjectChangeColors::post_cache_deformat() {
+        // Get permutation count
+        std::size_t permutation_count = this->permutations.size();
+        if(permutation_count == 0) {
+            return;
+        }
+
+        // Get back something now
+        double progress = 0.0;
+        for(auto &p : this->permutations) {
+            double difference = p.weight - progress;
+            progress = p.weight;
+            p.weight = static_cast<float>(difference);
+        }
+    }
+
+    void ObjectChangeColors::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        // Get permutation count
+        std::size_t permutation_count = this->permutations.size();
+        if(permutation_count == 0) {
+            return;
+        }
+
+        // Get the total
+        double total = 0.0;
+        for(auto &p : this->permutations) {
+            total += p.weight;
+        }
+
+        // If the total is zero, even them out. This will likely already be done in post_hek_parse() anyway
+        if(total == 0.0) {
+            total = static_cast<double>(this->permutations.size());
+            for(auto &p : this->permutations) {
+                p.weight = static_cast<float>(1.0 / total);
+            }
+        }
+
+        // Now write this stuff
+        double progress = 0.0;
+        for(auto &p : this->permutations) {
+            p.weight = p.weight / total + progress;
+            progress = p.weight;
+        }
+
+        // Set the last one to 1.0
+        this->permutations[permutation_count - 1].weight = 1.0F;
+    }
+
     void Biped::post_hek_parse() {
         fix_render_bounding_radius(*this);
     }

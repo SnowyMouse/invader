@@ -323,6 +323,9 @@
             }
         ],
         "type": "struct",
+        "post_cache_deformat": true,
+        "pre_compile": true,
+        "post_hek_parse": true,
         "size": 44
     },
     {
