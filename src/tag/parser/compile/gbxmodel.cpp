@@ -55,6 +55,7 @@ namespace Invader::Parser {
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t region_count = this->regions.size();
         std::size_t geometries_count = this->geometries.size();
+        std::size_t node_count = this->nodes.size();
         for(std::size_t ri = 0; ri < region_count; ri++) {
             auto &r = this->regions[ri];
             std::size_t permutation_count = r.permutations.size();
@@ -204,7 +205,7 @@ namespace Invader::Parser {
             for(std::size_t pi = 0; pi < permutation_count; pi++) {
                 auto &p = r.permutations[pi];
 
-                // Add in reverse order
+                // Add the markers
                 while(p.markers.size()) {
                     auto add_marker = [&p, &ri, &pi, &markers](std::size_t index) {
                         // Pop
@@ -267,8 +268,30 @@ namespace Invader::Parser {
             }
         }
 
+        // Make sure the node indices in the markers we added are valid
+        std::size_t errors_given = 0;
+        for(auto &m : this->markers) {
+            for(auto &i : m.instances) {
+                if(i.node_index >= node_count) {
+                    if(++errors_given == 5) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - this->markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
+                        errors_given++;
+                    }
+                    else {
+                        eprintf_error("... and more errors. Suffice it to say, the model needs recompiled");
+                        break;
+                    }
+                }
+            }
+            if(errors_given == 5) {
+                break;
+            }
+        }
+        if(errors_given > 0 && errors_given < 5) {
+            eprintf("This can be fixed by recompiling the model");
+        }
+
         // Set node stuff
-        std::size_t node_count = this->nodes.size();
         std::vector<bool> node_done(node_count);
         auto *nodes = this->nodes.data();
 
