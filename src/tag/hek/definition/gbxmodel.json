@@ -403,13 +403,13 @@
             },
             {
                 "name": "prev filthy part index",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null,
                 "cache_only": true
             },
             {
                 "name": "next filthy part index",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null,
                 "cache_only": true
             },
@@ -527,12 +527,12 @@
             },
             {
                 "name": "num nodes",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null
             },
             {
                 "name": "local node indices",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null,
                 "count": 24
             }
