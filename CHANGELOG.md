@@ -13,6 +13,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-extract: Now recalculates detail node count on extraction
 - invader-extract: Extracts markers in the reverse order that tool.exe adds
   them
+- invader-extract: Removes the `blend_shared_normals` flag on extraction to
+  prevent generational loss (since tool.exe may change the normals again!)
 
 ### Fixed
 - invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node

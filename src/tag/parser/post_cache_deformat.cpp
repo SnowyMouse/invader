@@ -69,6 +69,8 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::GBXModel::post_cache_deformat() {
+        this->flags.blend_shared_normals = 0; // prevent generational loss
+
         auto &regions = this->regions;
         for(auto &marker : this->markers) {
             auto add_marker_instance = [&marker, &regions](std::size_t instance_index) {
