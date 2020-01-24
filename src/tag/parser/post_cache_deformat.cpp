@@ -88,12 +88,14 @@ namespace Invader::Parser {
                     throw OutOfBoundsException();
                 }
 
-                // Lastly
-                auto &new_marker = region.permutations[permutation_index].markers.emplace_back();
-                new_marker.name = marker.name;
+                // Lastly, add it to the beginning
+                auto &markers_array = region.permutations[permutation_index].markers;
+                GBXModelRegionPermutationMarker new_marker = {};
                 new_marker.node_index = instance.node_index;
                 new_marker.rotation = instance.rotation;
                 new_marker.translation = instance.translation;
+                new_marker.name = marker.name;
+                markers_array.insert(markers_array.begin(), new_marker);
             }
         }
         this->markers.clear();

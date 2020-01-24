@@ -199,7 +199,13 @@ namespace Invader::Parser {
         // Put all of the markers in the marker array
         for(auto &r : this->regions) {
             for(auto &p : r.permutations) {
-                for(auto &m : p.markers) {
+                while(p.markers.size()) {
+                    // Pop
+                    std::size_t index = p.markers.size() - 1;
+                    auto m = p.markers[index];
+                    p.markers.erase(p.markers.begin() + index);
+
+                    // Make the instance
                     GBXModelMarkerInstance instance;
                     instance.node_index = m.node_index;
                     instance.permutation_index = &p - r.permutations.data();
