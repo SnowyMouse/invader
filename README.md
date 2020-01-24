@@ -534,8 +534,11 @@ more likely to occur with the higher chunk size. Therefore, all splitting is
 done on 227.5 KiB with invader-sound.
 
 For sounds that are more than 2.5 seconds long if 44100 Hz stereo, 5 seconds if
-22050 Hz stereo, or 10 seconds long if 22050 Hz mono, such as music or extended
-dialogue, we recommend enabling splitting.
+22050 Hz stereo, or 10 seconds long if 22050 Hz mono, such as music, we
+recommend enabling splitting.
+
+Note that you cannot use splitting for dialogue. The original Halo engine has
+issues playing back this type of dialogue.
 
 #### Audio formats
 These are the different audio formats that invader-sound supports.
