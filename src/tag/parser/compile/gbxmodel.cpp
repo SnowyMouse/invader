@@ -270,10 +270,11 @@ namespace Invader::Parser {
 
         // Make sure the node indices in the markers we added are valid
         std::size_t errors_given = 0;
+        static constexpr std::size_t MAX_ERRORS = 5;
         for(auto &m : this->markers) {
             for(auto &i : m.instances) {
                 if(i.node_index >= node_count) {
-                    if(++errors_given == 5) {
+                    if(++errors_given != MAX_ERRORS) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - this->markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
                         errors_given++;
                     }
@@ -283,11 +284,11 @@ namespace Invader::Parser {
                     }
                 }
             }
-            if(errors_given == 5) {
+            if(errors_given == MAX_ERRORS) {
                 break;
             }
         }
-        if(errors_given > 0 && errors_given < 5) {
+        if(errors_given > 0 && errors_given < MAX_ERRORS) {
             eprintf("This can be fixed by recompiling the model");
         }
 
