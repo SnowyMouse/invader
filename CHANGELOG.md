@@ -7,10 +7,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
 ### Changed
+- invader: Node count is now capped to a maximum of 255
+- invader-build: Adds markers in the same order as tool.exe
+- invader-build: Node indices are now checked
 - invader-extract: Now recalculates detail node count on extraction
 - invader-extract: Extracts markers in the reverse order that tool.exe adds
   them
-- invader-build: Adds markers in the same order as tool.exe
 
 ### Fixed
 - invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node
