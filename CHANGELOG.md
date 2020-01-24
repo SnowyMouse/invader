@@ -8,10 +8,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-extract: Now recalculates detail node count on extraction
-- invader-extract: Extracts and stores markers in the reverse order to order
-  them the same when built (and optimize building slightly)
-- invader-build: Iterates through markers in the reverse order to match
-  tool.exe ordering of same-name markers
+- invader-extract: Extracts markers in the reverse order that tool.exe adds
+  them
+- invader-build: Adds markers in the same order as tool.exe
 
 ### Fixed
 - invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node

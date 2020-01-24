@@ -197,51 +197,72 @@ namespace Invader::Parser {
         }
 
         // Put all of the markers in the marker array
-        for(auto &r : this->regions) {
-            for(auto &p : r.permutations) {
+        auto &markers = this->markers;
+        for(std::size_t ri = 0; ri < region_count; ri++) {
+            auto &r = this->regions[ri];
+            std::size_t permutation_count = r.permutations.size();
+            for(std::size_t pi = 0; pi < permutation_count; pi++) {
+                auto &p = r.permutations[pi];
+
+                // Add in reverse order
                 while(p.markers.size()) {
-                    // Pop
-                    std::size_t index = p.markers.size() - 1;
-                    auto m = p.markers[index];
-                    p.markers.erase(p.markers.begin() + index);
+                    auto add_marker = [&p, &ri, &pi, &markers](std::size_t index) {
+                        // Pop
+                        auto m = p.markers[index];
+                        p.markers.erase(p.markers.begin() + index);
 
-                    // Make the instance
-                    GBXModelMarkerInstance instance;
-                    instance.node_index = m.node_index;
-                    instance.permutation_index = &p - r.permutations.data();
-                    instance.region_index = &r - this->regions.data();
-                    instance.rotation = m.rotation;
-                    instance.translation = m.translation;
+                        // Make the instance
+                        GBXModelMarkerInstance instance;
+                        instance.node_index = m.node_index;
+                        instance.permutation_index = pi;
+                        instance.region_index = ri;
+                        instance.rotation = m.rotation;
+                        instance.translation = m.translation;
 
-                    // Add it!
-                    bool found = false;
-                    for(auto &ma : this->markers) {
-                        if(m.name == ma.name) {
-                            ma.instances.push_back(instance);
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    // Add the marker and then add it!
-                    if(!found) {
-                        GBXModelMarker ma = {};
-
-                        ma.name = m.name;
-                        ma.instances.push_back(instance);
-
-                        for(auto &marker_group : this->markers) {
-                            if(std::strcmp(marker_group.name.string, m.name.string) > 0) {
-                                this->markers.insert(this->markers.begin() + (&marker_group - this->markers.data()), ma);
+                        // Add it!
+                        bool found = false;
+                        for(auto &ma : markers) {
+                            if(m.name == ma.name) {
+                                ma.instances.push_back(instance);
                                 found = true;
                                 break;
                             }
                         }
 
+                        // Add the marker and then add it!
                         if(!found) {
-                            this->markers.push_back(ma);
+                            GBXModelMarker ma = {};
+
+                            ma.name = m.name;
+                            ma.instances.push_back(instance);
+
+                            for(auto &marker_group : markers) {
+                                if(std::strcmp(marker_group.name.string, m.name.string) > 0) {
+                                    markers.insert(markers.begin() + (&marker_group - markers.data()), ma);
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(!found) {
+                                markers.push_back(ma);
+                            }
+                        }
+                    };
+
+                    // Get the first instance
+                    auto first_instance_name = p.markers[0].name;
+
+                    // Add all of the instances after it, first
+                    for(std::size_t f = 1; f < p.markers.size(); f++) {
+                        if(p.markers[f].name == first_instance_name) {
+                            add_marker(f);
+                            f--;
                         }
                     }
+
+                    // Lastly, add this one
+                    add_marker(0);
                 }
             }
         }

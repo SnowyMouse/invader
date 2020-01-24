@@ -31,17 +31,17 @@
         "fields": [
             {
                 "name": "region index",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null
             },
             {
                 "name": "permutation index",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null
             },
             {
                 "name": "node index",
-                "type": "int8",
+                "type": "uint8",
                 "endian": null
             },
             {
@@ -270,7 +270,8 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "GBXModelRegionPermutation",
-                "compound": true
+                "compound": true,
+                "maximum": 255
             }
         ],
         "type": "struct",
@@ -681,7 +682,8 @@
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "GBXModelRegion",
-                "compound": true
+                "compound": true,
+                "maximum": 255
             },
             {
                 "name": "geometries",
