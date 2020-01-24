@@ -11,6 +11,10 @@ GPL.
 
 See COPYING for a copy of version 3 of the GNU General Public License.
 
+The ADPCM encoder as well as MosesofEgypt's Xbox ADPCM modifications are MIT.
+The license can be found in `src/sound/adpcm_xq/license.txt` and
+`src/sound/reclaimer-license.txt` respectively.
+
 ## Getting started
 This readme addresses a few topics:
 - [Contributing]
