@@ -9,6 +9,7 @@ if(${INVADER_EDIT_QT})
 
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
+        src/edit/qt/tag_tree_widget.cpp
         src/edit/qt/tag_window.cpp
     )
     target_link_libraries(invader-edit-qt invader Qt5::Widgets)
