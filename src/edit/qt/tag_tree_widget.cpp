@@ -130,6 +130,7 @@ namespace Invader::EditQt {
                     if(less_than(item_i, item_j)) {
                         sorted = false;
                         this->insertTopLevelItem(j, this->takeTopLevelItem(i));
+                        break;
                     }
                 }
             }
@@ -151,6 +152,7 @@ namespace Invader::EditQt {
                         if(less_than(item_i, item_j)) {
                             sorted = false;
                             item->insertChild(j, item->takeChild(i));
+                            break;
                         }
                     }
                 }
