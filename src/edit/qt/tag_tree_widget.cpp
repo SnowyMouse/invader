@@ -4,6 +4,7 @@
 
 #include <invader/file/file.hpp>
 #include <QFileIconProvider>
+#include <invader/printf.hpp>
 
 namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent) : QTreeWidget(parent) {
@@ -100,7 +101,60 @@ namespace Invader::EditQt {
             }
         }
 
-        this->sortItems(0, Qt::SortOrder::AscendingOrder);
+        auto less_than = [](QTreeWidgetItem *item_i, QTreeWidgetItem *item_j) {
+            bool i_is_dir = item_i->childCount() != 0;
+            bool j_is_dir = item_j->childCount() != 0;
+
+            return !(j_is_dir && !i_is_dir) && ((i_is_dir && !j_is_dir) || (item_i->text(0).compare(item_j->text(0), Qt::CaseInsensitive) < 0));
+        };
+
+        // First, sort the top level
+        int top_level_count = this->topLevelItemCount();
+        bool sorted;
+        do {
+            sorted = true;
+            for(int i = 1; i < top_level_count; i++) {
+                auto *item_i = this->topLevelItem(i);
+                for(int j = 0; j < i; j++) {
+                    auto *item_j = this->topLevelItem(j);
+                    if(less_than(item_i, item_j)) {
+                        sorted = false;
+                        this->insertTopLevelItem(j, this->takeTopLevelItem(i));
+                    }
+                }
+            }
+        }
+        while(!sorted);
+
+        // Next, sort all elements in element
+        auto sort_elements = [&less_than](QTreeWidgetItem *item, auto &sort_elements) -> void {
+            int children_count = item->childCount();
+
+            // Sort this
+            bool sorted;
+            do {
+                sorted = true;
+                for(int i = 1; i < children_count; i++) {
+                    auto *item_i = item->child(i);
+                    for(int j = 0; j < i; j++) {
+                        auto *item_j = item->child(j);
+                        if(less_than(item_i, item_j)) {
+                            sorted = false;
+                            item->insertChild(j, item->takeChild(i));
+                        }
+                    }
+                }
+            }
+            while(!sorted);
+
+            // Then sort the elements of this
+            for(int i = 0; i < children_count; i++) {
+                sort_elements(item->child(i), sort_elements);
+            }
+        };
+        for(int i = 0; i < top_level_count; i++) {
+            sort_elements(this->topLevelItem(i), sort_elements);
+        }
     }
 
     void TagTreeWidget::refresh_view(std::filesystem::path &directory) {
