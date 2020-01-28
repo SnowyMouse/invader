@@ -36,6 +36,7 @@ namespace Invader::EditQt {
         auto *vbox_layout = new QVBoxLayout(central_widget);
         this->tag_view = new TagTreeWidget(this);
         vbox_layout->addWidget(this->tag_view);
+        vbox_layout->setMargin(0);
         central_widget->setLayout(vbox_layout);
         this->setCentralWidget(central_widget);
 
