@@ -9,6 +9,7 @@
 namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent) : QTreeWidget(parent) {
         this->setHeaderHidden(true);
+        this->setAlternatingRowColors(true);
     }
 
     void TagTreeWidget::refresh_view(const std::vector<std::filesystem::path> &directories) {
