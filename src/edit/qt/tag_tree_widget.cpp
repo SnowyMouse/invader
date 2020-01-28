@@ -6,6 +6,7 @@
 #include <QFileIconProvider>
 #include <invader/printf.hpp>
 #include <QHeaderView>
+#include <QMessageBox>
 
 namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent) : QTreeWidget(parent) {
@@ -46,7 +47,15 @@ namespace Invader::EditQt {
         };
         for(auto &d : directories) {
             auto dir_str = d.string();
-            iterate_directories(std::vector<std::string>(), d, iterate_directories, 0);
+            try {
+                iterate_directories(std::vector<std::string>(), d, iterate_directories, 0);
+            }
+            catch (std::filesystem::filesystem_error &e) {
+                char formatted_error[512];
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to list tags due to an exception error:\n\n%s\n\nMake sure your tag directories are correct and that you have permission.", e.what());
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                return;
+            }
         }
 
         // Add the tags to the view
