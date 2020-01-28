@@ -1,5 +1,6 @@
-#include <chrono>
+// SPDX-License-Identifier: GPL-3.0-only
 
+#include <chrono>
 #include <zstd.h>
 #include <invader/command_line_option.hpp>
 #include <invader/printf.hpp>
