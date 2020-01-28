@@ -55,13 +55,18 @@ namespace Invader::EditQt {
     }
 
     void TagWindow::refresh_view() {
+        auto start = std::chrono::steady_clock::now();
         this->reload_tags();
+        auto mid = std::chrono::steady_clock::now();
+        std::printf("Took %zu milliseconds to find tags\n", std::chrono::duration_cast<std::chrono::milliseconds>(mid - start).count());
         if(current_tag_index == SHOW_ALL_MERGED) {
             this->tag_view->refresh_view();
         }
         else {
             this->tag_view->refresh_view(std::vector<std::size_t>(&current_tag_index, &current_tag_index + 1));
         }
+        auto end = std::chrono::steady_clock::now();
+        std::printf("Took %zu milliseconds to sort and present tags\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count());
 
         char tag_count_str[256];
         auto tag_count = this->tag_view->get_total_tags();
