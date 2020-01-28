@@ -28,29 +28,33 @@ static_assert(sizeof(INVADER_FULL_VERSION_STRING) < sizeof(Invader::HEK::TagStri
 
 namespace Invader {
     void show_version_info() {
-        oprintf(INVADER_FULL_VERSION_STRING "\n\n");
-        oprintf("This program is licensed under the GNU General Public License v3.0.\n");
-        oprintf("\n");
-        oprintf("Credits:\n");
-        oprintf("  Kavawuvi                       - Lead Developer, Project owner\n");
-        oprintf("  Vaporeon                       - Testing & QA, AUR maintainer, Development\n");
-        oprintf("  MosesofEgypt                   - Tag data & model data research and code,\n");
-        oprintf("                                   mouth data generation, ADPCM-XQ Xbox ADPCM\n");
-        oprintf("                                   conversion\n");
-        oprintf("\n");
-        oprintf("Special thanks:\n");
-        oprintf("  Tucker933                      - Hosting @ https://invader.opencarnage.net\n");
-        oprintf("\n");
-        oprintf("Software used in this program:\n");
-        oprintf("  FreeType                       - https://www.freetype.org/\n");
-        oprintf("  STB library                    - https://github.com/nothings/stb\n");
-        oprintf("\n");
-        oprintf("Other links:\n");
-        oprintf("  Invader source code            - https://github.com/Kavawuvi/invader\n");
-        oprintf("  Mo's Editing Kit               - https://github.com/MosesofEgypt/mek/\n");
+        oprintf("%s", full_version_and_credits());
     }
 
     const char *full_version() {
         return INVADER_FULL_VERSION_STRING;
+    }
+
+    const char *full_version_and_credits() {
+        return INVADER_FULL_VERSION_STRING "\n\n"
+               "This program is licensed under the GNU General Public License v3.0.\n"
+               "\n"
+               "Credits:\n"
+               "  Kavawuvi                       - Lead Developer, Project owner\n"
+               "  Vaporeon                       - Testing & QA, AUR maintainer, Development\n"
+               "  MosesofEgypt                   - Tag data & model data research and code,\n"
+               "                                   mouth data generation, ADPCM-XQ Xbox ADPCM\n"
+               "                                   conversion\n"
+               "\n"
+               "Special thanks:\n"
+               "  Tucker933                      - Hosting @ https://invader.opencarnage.net\n"
+               "\n"
+               "Software used in this program:\n"
+               "  FreeType                       - https://www.freetype.org/\n"
+               "  STB library                    - https://github.com/nothings/stb\n"
+               "\n"
+               "Other links:\n"
+               "  Invader source code            - https://github.com/Kavawuvi/invader\n"
+               "  Mo's Editing Kit               - https://github.com/MosesofEgypt/mek/\n";
     }
 }

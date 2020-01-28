@@ -72,6 +72,7 @@ include(src/info/info.cmake)
 include(src/extract/extract.cmake)
 include(src/sound/sound.cmake)
 include(src/strip/strip.cmake)
+include(src/edit/qt/qt.cmake)
 
 # Install stuff
 install(
