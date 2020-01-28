@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QTreeWidget>
 #include <QFontDatabase>
+#include <QStatusBar>
 #include "tag_window.hpp"
 #include "tag_tree_widget.hpp"
 #include <invader/version.hpp>
@@ -40,6 +41,14 @@ namespace Invader::EditQt {
         central_widget->setLayout(vbox_layout);
         this->setCentralWidget(central_widget);
 
+        // Next, set up the status bar
+        QStatusBar *status_bar = new QStatusBar();
+        this->tag_count_label = new QLabel();
+        this->tag_location_label = new QLabel();
+        status_bar->addWidget(this->tag_location_label, 1);
+        status_bar->addWidget(this->tag_count_label, 0);
+        this->setStatusBar(status_bar);
+
         // Default: Try to see if tags is in the current directory
         paths.emplace_back("tags");
         this->refresh_view();
@@ -52,6 +61,11 @@ namespace Invader::EditQt {
         else {
             this->tag_view->refresh_view(paths[current_tag_index]);
         }
+
+        char tag_count_str[256];
+        auto tag_count = this->tag_view->get_total_tags();
+        std::snprintf(tag_count_str, sizeof(tag_count_str), "%zu tag%s", tag_count, tag_count == 1 ? "" : "s");
+        this->tag_count_label->setText(tag_count_str);
     }
 
     void TagWindow::show_about_window() {

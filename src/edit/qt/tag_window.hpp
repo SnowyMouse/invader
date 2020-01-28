@@ -9,6 +9,7 @@
 
 class QTreeWidget;
 class QMenu;
+class QLabel;
 
 namespace Invader::EditQt {
     class TagTreeWidget;
@@ -29,6 +30,8 @@ namespace Invader::EditQt {
         std::size_t current_tag_index = SHOW_ALL_MERGED;
 
         QMenu *pick_tag_array;
+        QLabel *tag_count_label;
+        QLabel *tag_location_label;
     };
 }
 

@@ -5,11 +5,12 @@
 #include <invader/file/file.hpp>
 #include <QFileIconProvider>
 #include <invader/printf.hpp>
+#include <QHeaderView>
 
 namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent) : QTreeWidget(parent) {
-        this->setHeaderHidden(true);
         this->setAlternatingRowColors(true);
+        this->setHeaderHidden(true);
     }
 
     void TagTreeWidget::refresh_view(const std::vector<std::filesystem::path> &directories) {
@@ -49,6 +50,7 @@ namespace Invader::EditQt {
         }
 
         // Add the tags to the view
+        this->total_tags = all_tags.size();
         QIcon dir_icon = QFileIconProvider().icon(QFileIconProvider::Folder);
         QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
 
@@ -86,6 +88,7 @@ namespace Invader::EditQt {
                 // If we don't have it, make it
                 if(!found) {
                     auto *new_dir_item = new QTreeWidgetItem(QStringList(element.data()));
+                    this->setContentsMargins(0, 0, 0, 0);
                     if(dir_item == nullptr) {
                         this->addTopLevelItem(new_dir_item);
                     }
@@ -166,5 +169,9 @@ namespace Invader::EditQt {
 
     void TagTreeWidget::refresh_view(std::filesystem::path &directory) {
         refresh_view(std::vector<std::filesystem::path>(&directory, &directory + 1));
+    }
+
+    std::size_t TagTreeWidget::get_total_tags() {
+        return this->total_tags;
     }
 }

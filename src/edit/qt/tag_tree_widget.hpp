@@ -13,6 +13,10 @@ namespace Invader::EditQt {
 
         void refresh_view(const std::vector<std::filesystem::path> &directories);
         void refresh_view(std::filesystem::path &directory);
+
+        std::size_t get_total_tags();
+    private:
+        std::size_t total_tags = 0;
     };
 }
 
