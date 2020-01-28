@@ -45,6 +45,8 @@ namespace Invader::EditQt {
         QStatusBar *status_bar = new QStatusBar();
         this->tag_count_label = new QLabel();
         this->tag_location_label = new QLabel();
+        this->tag_count_label->setAlignment(Qt::AlignRight | Qt::AlignTop);
+        this->tag_location_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         status_bar->addWidget(this->tag_location_label, 1);
         status_bar->addWidget(this->tag_count_label, 0);
         this->setStatusBar(status_bar);
@@ -72,7 +74,7 @@ namespace Invader::EditQt {
         // Instantiate it
         QDialog dialog;
         dialog.setWindowTitle("About");
-        dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint);
+        dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
         // Make a layout
         auto *vbox_layout = new QVBoxLayout(&dialog);
