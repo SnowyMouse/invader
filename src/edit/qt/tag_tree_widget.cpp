@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "tag_tree_widget.hpp"
+#include "tag_window.hpp"
 
 #include <invader/file/file.hpp>
 #include <QFileIconProvider>
@@ -9,76 +10,73 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes) {
+    TagTreeWidget::TagTreeWidget(TagWindow *parent, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes), parent_window(parent) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
     }
 
-    void TagTreeWidget::refresh_view(const std::vector<std::filesystem::path> &directories) {
+    void TagTreeWidget::refresh_view(const std::optional<std::vector<std::size_t>> &tags) {
         this->clear();
 
-        // Build our tags directory
-        std::vector<std::pair<std::filesystem::path, std::vector<std::string>>> all_tags;
-        const auto &filter = this->filter;
-        auto iterate_directories = [&all_tags, &filter](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth) -> void {
-            if(++depth == 256) {
-                return;
+        // Get the tags we have
+        auto *parent = reinterpret_cast<TagWindow *>(this->parent_window);
+        auto all_tags = parent->get_all_tags();
+        std::size_t all_tags_size = all_tags.size();
+
+        // Next, go through each tag and filter out anything we don't need (i.e. lower-priority tags, non-matching extensions)
+        for(std::size_t i = 0; i < all_tags_size; i++) {
+            bool remove = false;
+            auto &tag = all_tags[i];
+
+            // First, can we drop it simply because it's out of our current scope?
+            if(tags.has_value()) {
+                remove = true;
+                for(auto t : *tags) {
+                    if(tag.tag_directory == t) {
+                        remove = false;
+                        break;
+                    }
+                }
             }
 
-            for(auto &d : std::filesystem::directory_iterator(dir)) {
-                std::vector<std::string> add_dir = the_story_thus_far;
-                auto file_path = d.path();
-                add_dir.emplace_back(file_path.filename().string());
-                if(d.is_directory()) {
-                    iterate_directories(add_dir, d, iterate_directories, depth);
+            // Next, can we filter it out based on tag class alone?
+            if(!remove && this->filter.has_value()) {
+                remove = true;
+                for(auto f : *this->filter) {
+                    if(tag.tag_class_int == f) {
+                        remove = false;
+                        break;
+                    }
                 }
-                else if(file_path.has_extension()) {
-                    auto extension = file_path.extension().string().substr(1);
-                    auto tag_class_int = HEK::extension_to_tag_class(extension.data());
+            }
 
-                    // First, make sure it's valid
-                    if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+            // Lastly, is this superceded by anything?
+            if(!remove && tag.tag_directory > 0) {
+                for(std::size_t j = 0; j < all_tags_size; j++) {
+                    // If we're the same, continue
+                    if(j == i) {
                         continue;
                     }
 
-                    // Next, if we have any filters, make sure they match.
-                    if(filter.has_value()) {
-                        bool filtered_out = true;
-                        for(auto &f : *filter) {
-                            if(tag_class_int == f) {
-                                filtered_out = false;
-                                break;
-                            }
-                        }
-                        if(filtered_out) {
-                            continue;
-                        }
+                    // If we're a lower priority, or the class isn't the same, continue too
+                    auto &other_tag = all_tags[j];
+                    if(other_tag.tag_directory > tag.tag_directory || other_tag.tag_class_int != tag.tag_class_int) {
+                        continue;
                     }
 
-                    bool found = false;
-                    for(auto &t : all_tags) {
-                        if(t.second == add_dir) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found) {
-                        all_tags.emplace_back(file_path, add_dir);
+                    // It all comes down to this. Do we have the same tag path?
+                    if(other_tag.tag_path == tag.tag_path) {
+                        remove = true;
+                        break;
                     }
                 }
             }
-        };
-        for(auto &d : directories) {
-            auto dir_str = d.string();
-            try {
-                iterate_directories(std::vector<std::string>(), d, iterate_directories, 0);
-            }
-            catch (std::filesystem::filesystem_error &e) {
-                char formatted_error[512];
-                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to list tags due to an exception error:\n\n%s\n\nMake sure your tag directories are correct and that you have permission.", e.what());
-                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
-                return;
+
+            if(remove) {
+                all_tags.erase(all_tags.begin() + i);
+                i--;
+                all_tags_size--;
             }
         }
 
@@ -89,9 +87,9 @@ namespace Invader::EditQt {
 
         for(auto &t : all_tags) {
             QTreeWidgetItem *dir_item = nullptr;
-            std::size_t element_count = t.second.size();
+            std::size_t element_count = t.tag_path_separated.size();
             for(std::size_t e = 0; e < element_count; e++) {
-                auto &element = t.second[e];
+                auto &element = t.tag_path_separated[e];
                 bool found = false;
 
                 // See if we have it
@@ -133,7 +131,7 @@ namespace Invader::EditQt {
 
                 // If it's the last one, all is well then
                 if(e + 1 == element_count) {
-                    dir_item->setData(0, Qt::UserRole, QVariant(t.first.string().data()));
+                    dir_item->setData(0, Qt::UserRole, QVariant(t.full_path.string().data()));
                     if(!found) {
                         dir_item->setIcon(0, file_icon);
                     }
@@ -200,10 +198,6 @@ namespace Invader::EditQt {
         for(int i = 0; i < top_level_count; i++) {
             sort_elements(this->topLevelItem(i), sort_elements);
         }
-    }
-
-    void TagTreeWidget::refresh_view(std::filesystem::path &directory) {
-        refresh_view(std::vector<std::filesystem::path>(&directory, &directory + 1));
     }
 
     std::size_t TagTreeWidget::get_total_tags() {
