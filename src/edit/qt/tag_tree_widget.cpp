@@ -48,6 +48,9 @@ namespace Invader::EditQt {
         }
 
         // Add the tags to the view
+        QIcon dir_icon = QFileIconProvider().icon(QFileIconProvider::Folder);
+        QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
+
         for(auto &t : all_tags) {
             QTreeWidgetItem *dir_item = nullptr;
             std::size_t element_count = t.second.size();
@@ -94,9 +97,12 @@ namespace Invader::EditQt {
                 // If it's the last one, all is well then
                 if(e + 1 == element_count) {
                     dir_item->setData(0, Qt::UserRole, QVariant(t.first.string().data()));
+                    if(!found) {
+                        dir_item->setIcon(0, file_icon);
+                    }
                 }
                 else if(!found) {
-                    dir_item->setIcon(0, QFileIconProvider().icon(QFileIconProvider::Folder));
+                    dir_item->setIcon(0, dir_icon);
                 }
             }
         }
