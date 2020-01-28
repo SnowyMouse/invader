@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
+#include <invader/printf.hpp>
 #include "tag_window.hpp"
 
 int main(int argc, char **argv) {
@@ -34,6 +35,13 @@ int main(int argc, char **argv) {
 
     if(edit_qt_options.tags.size() == 0) {
         edit_qt_options.tags.push_back("tags");
+    }
+
+    for(auto &t : edit_qt_options.tags) {
+        if(!std::filesystem::is_directory(t)) {
+            eprintf_error("Error: %s does not exist or is not a valid directory", t.string().data());
+            return EXIT_FAILURE;
+        }
     }
 
     QApplication a(argc, argv);
