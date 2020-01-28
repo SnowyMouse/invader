@@ -50,10 +50,6 @@ namespace Invader::EditQt {
         status_bar->addWidget(this->tag_location_label, 1);
         status_bar->addWidget(this->tag_count_label, 0);
         this->setStatusBar(status_bar);
-
-        // Default: Try to see if tags is in the current directory
-        paths.emplace_back("tags");
-        this->refresh_view();
     }
 
     void TagWindow::refresh_view() {
@@ -91,5 +87,11 @@ namespace Invader::EditQt {
 
         // Done. Show it!
         dialog.exec();
+    }
+
+    void TagWindow::set_tag_directories(const std::vector<std::filesystem::path> &directories) {
+        this->paths = directories;
+        this->current_tag_index = SHOW_ALL_MERGED;
+        this->refresh_view();
     }
 }

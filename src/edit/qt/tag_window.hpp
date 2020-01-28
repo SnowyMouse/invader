@@ -17,6 +17,12 @@ namespace Invader::EditQt {
     class TagWindow : public QMainWindow {
     public:
         TagWindow();
+        
+        /**
+         * Set all the tag directories
+         * @param directories tag directories
+         */
+        void set_tag_directories(const std::vector<std::filesystem::path> &directories);
     private:
         void show_about_window();
         void refresh_view();
