@@ -9,7 +9,7 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent) : QTreeWidget(parent) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
     }
