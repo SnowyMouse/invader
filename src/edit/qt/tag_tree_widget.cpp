@@ -19,7 +19,8 @@ namespace Invader::EditQt {
 
         // Build our tags directory
         std::vector<std::pair<std::filesystem::path, std::vector<std::string>>> all_tags;
-        auto iterate_directories = [&all_tags](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth) -> void {
+        const auto &filter = this->filter;
+        auto iterate_directories = [&all_tags, &filter](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth) -> void {
             if(++depth == 256) {
                 return;
             }
@@ -31,7 +32,29 @@ namespace Invader::EditQt {
                 if(d.is_directory()) {
                     iterate_directories(add_dir, d, iterate_directories, depth);
                 }
-                else {
+                else if(file_path.has_extension()) {
+                    auto extension = file_path.extension().string().substr(1);
+                    auto tag_class_int = HEK::extension_to_tag_class(extension.data());
+
+                    // First, make sure it's valid
+                    if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+                        continue;
+                    }
+
+                    // Next, if we have any filters, make sure they match.
+                    if(filter.has_value()) {
+                        bool filtered_out = true;
+                        for(auto &f : *filter) {
+                            if(tag_class_int == f) {
+                                filtered_out = false;
+                                break;
+                            }
+                        }
+                        if(filtered_out) {
+                            continue;
+                        }
+                    }
+
                     bool found = false;
                     for(auto &t : all_tags) {
                         if(t.second == add_dir) {
@@ -146,7 +169,7 @@ namespace Invader::EditQt {
         }
         while(!sorted);
 
-        // Next, sort all elements in element
+        // Lastly, sort all elements in element
         auto sort_elements = [&less_than](QTreeWidgetItem *item, auto &sort_elements) -> void {
             int children_count = item->childCount();
 
@@ -184,5 +207,9 @@ namespace Invader::EditQt {
 
     std::size_t TagTreeWidget::get_total_tags() {
         return this->total_tags;
+    }
+
+    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes) {
+        this->filter = classes;
     }
 }
