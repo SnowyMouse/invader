@@ -12,6 +12,7 @@ namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
+        this->setAnimated(false);
     }
 
     void TagTreeWidget::refresh_view(const std::vector<std::filesystem::path> &directories) {
