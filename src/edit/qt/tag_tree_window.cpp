@@ -158,9 +158,6 @@ namespace Invader::EditQt {
 
     void TagTreeWindow::test_dependency_dialog() {
         std::vector<HEK::TagClassInt> filter;
-        filter.emplace_back(HEK::TagClassInt::TAG_CLASS_BIPED);
-        filter.emplace_back(HEK::TagClassInt::TAG_CLASS_VEHICLE);
-
         TagTreeDialog d(nullptr, this, filter);
         d.exec();
         auto &tag = d.get_tag();

@@ -35,13 +35,17 @@ namespace Invader::EditQt {
          */
         const std::vector<TagFile> &get_all_tags() const noexcept;
 
+        /**
+         * Refresh the view, reloading the tags
+         */
+        void refresh_view();
+
     signals:
         void tags_reloaded(TagTreeWindow *window);
 
     private:
-        void show_about_window();
-        void refresh_view();
         void reload_tags();
+        void show_about_window();
         void test_dependency_dialog();
 
         enum : std::size_t {

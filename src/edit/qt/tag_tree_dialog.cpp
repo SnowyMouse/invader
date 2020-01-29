@@ -10,11 +10,13 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QVBoxLayout>
+#include <QAction>
 
 namespace Invader::EditQt {
     TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QDialog(parent) {
         // Make a layout and set our flags
         auto *vbox_layout = new QVBoxLayout(this);
+        vbox_layout->setMargin(0);
         this->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
         // Add the widget
@@ -27,6 +29,11 @@ namespace Invader::EditQt {
         this->change_title(classes);
 
         connect(this->tree_widget, &TagTreeWidget::itemDoubleClicked, this, &TagTreeDialog::on_double_click);
+
+        auto *refresh = new QAction();
+        refresh->setShortcut(QKeySequence::Refresh);
+        connect(refresh, &QAction::triggered, parent_window, &TagTreeWindow::refresh_view);
+        this->addAction(refresh);
     }
 
     const std::optional<TagFile> &TagTreeDialog::get_tag() const noexcept {
