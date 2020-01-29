@@ -40,6 +40,8 @@ namespace Invader::EditQt {
         void make_dirty(bool dirty);
 
         bool perform_save();
+        bool perform_save_as();
+        bool perform_refactor_as();
         TagFile file;
     };
 }

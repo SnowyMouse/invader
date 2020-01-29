@@ -64,6 +64,12 @@ namespace Invader::EditQt {
         /** Close all open tags and then cleanup */
         bool close_all_open_tags();
 
+        /** Make a new document */
+        bool perform_new();
+
+        /** Delete a tag */
+        bool perform_delete();
+
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)
         };

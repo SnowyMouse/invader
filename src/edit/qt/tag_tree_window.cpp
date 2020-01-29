@@ -28,10 +28,20 @@ namespace Invader::EditQt {
 
         // File menu
         auto *file_menu = bar->addMenu("File");
+
+        auto *new_document = file_menu->addAction("New...");
+        new_document->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
+        new_document->setShortcut(QKeySequence::New);
+        connect(new_document, &QAction::triggered, this, &TagTreeWindow::perform_new);
+
+        file_menu->addSeparator();
+
         auto *close_all_open = file_menu->addAction("Close all");
         close_all_open->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close_all_open, &QAction::triggered, this, &TagTreeWindow::close_all_open_tags);
+
         file_menu->addSeparator();
+
         auto *exit = file_menu->addAction("Quit");
         exit->setIcon(QIcon::fromTheme(QStringLiteral("application-exit")));
         exit->setShortcut(QKeySequence::Quit);
@@ -215,5 +225,15 @@ namespace Invader::EditQt {
         }
         this->cleanup_windows();
         return true;
+    }
+
+    bool TagTreeWindow::perform_new() {
+        std::fprintf(stderr, "TODO: perform_new()\n");
+        return false;
+    }
+
+    bool TagTreeWindow::perform_delete() {
+        std::fprintf(stderr, "TODO: perform_delete()\n");
+        return false;
     }
 }

@@ -9,8 +9,7 @@
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
-        // Make dirty if we're making a new tag
-        this->make_dirty(tag_file.full_path.empty());
+        this->make_dirty(false);
 
         // Make and set our menu bar
         QMenuBar *bar = new QMenuBar(this);
@@ -18,7 +17,26 @@ namespace Invader::EditQt {
 
         // File menu
         auto *file_menu = bar->addMenu("File");
+
+        auto *save = file_menu->addAction("Save");
+        save->setIcon(QIcon::fromTheme(QStringLiteral("document-save")));
+        save->setShortcut(QKeySequence::Save);
+        connect(save, &QAction::triggered, this, &TagEditorWindow::perform_save);
+
+        auto *save_as = file_menu->addAction("Save as...");
+        save_as->setIcon(QIcon::fromTheme(QStringLiteral("document-save-as")));
+        save_as->setShortcut(QKeySequence::SaveAs);
+        connect(save_as, &QAction::triggered, this, &TagEditorWindow::perform_save_as);
+
+        file_menu->addSeparator();
+
+        auto *refactor_as = file_menu->addAction("Refactor as...");
+        connect(refactor_as, &QAction::triggered, this, &TagEditorWindow::perform_refactor_as);
+
+        file_menu->addSeparator();
+
         auto *close = file_menu->addAction("Close");
+        close->setShortcut(QKeySequence::Close);
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
     }
@@ -51,7 +69,17 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save() {
-        std::fprintf(stderr, "TODO: perform_save()");
+        std::fprintf(stderr, "TODO: perform_save()\n");
+        return false;
+    }
+
+    bool TagEditorWindow::perform_save_as() {
+        std::fprintf(stderr, "TODO: perform_save_as()\n");
+        return false;
+    }
+
+    bool TagEditorWindow::perform_refactor_as() {
+        std::fprintf(stderr, "TODO: perform_refactor_as()\n");
         return false;
     }
 
