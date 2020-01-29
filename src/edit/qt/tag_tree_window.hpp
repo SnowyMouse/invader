@@ -10,6 +10,7 @@
 #include <QObject>
 
 #include "tag_file.hpp"
+#include "tag_editor_window.hpp"
 
 class QTreeWidget;
 class QMenu;
@@ -19,6 +20,7 @@ namespace Invader::EditQt {
     class TagTreeWidget;
 
     class TagTreeWindow : public QMainWindow {
+        friend class TagEditorWindow;
         Q_OBJECT
     public:
         TagTreeWindow();
@@ -40,6 +42,12 @@ namespace Invader::EditQt {
          */
         void refresh_view();
 
+        /**
+         * Close event
+         * @param event event pointer
+         */
+        virtual void closeEvent(QCloseEvent *event);
+
     signals:
         void tags_reloaded(TagTreeWindow *window);
 
@@ -47,6 +55,7 @@ namespace Invader::EditQt {
         void reload_tags();
         void show_about_window();
         void test_dependency_dialog();
+        void cleanup_windows();
 
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)
@@ -60,6 +69,9 @@ namespace Invader::EditQt {
 
         QLabel *tag_count_label;
         QLabel *tag_location_label;
+
+        std::vector<std::unique_ptr<TagEditorWindow>> open_documents;
+        void on_double_click(QTreeWidgetItem *item, int column);
     };
 }
 

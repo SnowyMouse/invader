@@ -7,7 +7,9 @@
 #include <QTreeWidget>
 #include <QFontDatabase>
 #include <QMessageBox>
+#include <QApplication>
 #include <QStatusBar>
+#include <QCloseEvent>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
 #include "tag_tree_dialog.hpp"
@@ -45,6 +47,7 @@ namespace Invader::EditQt {
         vbox_layout->setMargin(0);
         central_widget->setLayout(vbox_layout);
         this->setCentralWidget(central_widget);
+        connect(this->tag_view, &TagTreeWidget::itemDoubleClicked, this, &TagTreeWindow::on_double_click);
 
         // Next, set up the status bar
         QStatusBar *status_bar = new QStatusBar();
@@ -167,5 +170,47 @@ namespace Invader::EditQt {
         else {
             std::printf("No tag selected.\n");
         }
+    }
+
+    void TagTreeWindow::closeEvent(QCloseEvent *event) {
+        for(auto &w : this->open_documents) {
+            if(!w->isHidden()) {
+                w->close();
+            }
+        }
+        this->cleanup_windows();
+        event->setAccepted(this->open_documents.size() == 0);
+    }
+
+    void TagTreeWindow::on_double_click(QTreeWidgetItem *, int) {
+        this->cleanup_windows();
+
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(tag) {
+            for(auto &doc : this->open_documents) {
+                if(doc->get_file().full_path == tag->full_path) {
+                    doc->raise();
+                    QApplication::setActiveWindow(doc.get());
+                    return;
+                }
+            }
+            this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag))->show();
+        }
+    }
+
+    void TagTreeWindow::cleanup_windows() {
+        bool window_closed;
+        do {
+            window_closed = true;
+            for(auto &w : this->open_documents) {
+                if(w->isHidden()) {
+                    this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
+                    window_closed = true;
+                    break;
+                }
+            }
+        }
+        while(!window_closed);
+
     }
 }
