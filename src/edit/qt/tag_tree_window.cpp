@@ -42,8 +42,7 @@ namespace Invader::EditQt {
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
-        auto *about = help_menu->addAction("About");
-        refresh->setShortcut(QKeySequence::WhatsThis);
+        auto *about = help_menu->addAction("About invader-edit-qt");
         connect(about, &QAction::triggered, this, &TagTreeWindow::show_about_window);
 
         // Now, set up the layout
