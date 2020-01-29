@@ -7,6 +7,7 @@
 #include <QTreeWidgetItem>
 #include <vector>
 #include <filesystem>
+#include <QObject>
 
 #include "tag_file.hpp"
 
@@ -18,6 +19,7 @@ namespace Invader::EditQt {
     class TagTreeWidget;
 
     class TagTreeWindow : public QMainWindow {
+        Q_OBJECT
     public:
         TagTreeWindow();
 
@@ -32,6 +34,9 @@ namespace Invader::EditQt {
          * @return all tags available
          */
         const std::vector<TagFile> &get_all_tags() const noexcept;
+
+    signals:
+        void tags_reloaded(TagTreeWindow *window);
 
     private:
         void show_about_window();

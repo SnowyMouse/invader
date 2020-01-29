@@ -19,19 +19,13 @@ namespace Invader::EditQt {
          * @param parent_window  parent window
          * @param classes        optional array of classes to filter in
          */
-        TagTreeWidget(QWidget *widget, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
+        TagTreeWidget(QWidget *widget, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
          * @param classes an optional array of classes; if none is given, then the filter is cleared
          */
-        void set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
-
-        /**
-         * Refresh the view
-         * @param an optional array of path indices to only include
-         */
-        void refresh_view(const std::optional<std::vector<std::size_t>> &tags = std::nullopt);
+        void set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt);
 
         /**
          * Get the total tags found
@@ -41,7 +35,9 @@ namespace Invader::EditQt {
     private:
         std::size_t total_tags = 0;
         std::optional<std::vector<HEK::TagClassInt>> filter;
+        std::optional<std::vector<std::size_t>> tag_arrays_to_show;
         TagTreeWindow *parent_window;
+        void refresh_view(TagTreeWindow *window);
     };
 }
 

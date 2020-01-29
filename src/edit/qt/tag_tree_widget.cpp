@@ -10,18 +10,18 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes), parent_window(parent_window) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), parent_window(parent_window) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
+        connect(parent_window, &TagTreeWindow::tags_reloaded, this, &TagTreeWidget::refresh_view);
     }
 
-    void TagTreeWidget::refresh_view(const std::optional<std::vector<std::size_t>> &tags) {
+    void TagTreeWidget::refresh_view(TagTreeWindow *window) {
         this->clear();
 
         // Get the tags we have
-        auto *parent = reinterpret_cast<TagTreeWindow *>(this->parent_window);
-        auto all_tags = parent->get_all_tags();
+        auto all_tags = window->get_all_tags();
         std::size_t all_tags_size = all_tags.size();
 
         // Next, go through each tag and filter out anything we don't need (i.e. lower-priority tags, non-matching extensions)
@@ -30,9 +30,9 @@ namespace Invader::EditQt {
             auto &tag = all_tags[i];
 
             // First, can we drop it simply because it's out of our current scope?
-            if(tags.has_value()) {
+            if(this->tag_arrays_to_show.has_value()) {
                 remove = true;
-                for(auto t : *tags) {
+                for(auto t : *this->tag_arrays_to_show) {
                     if(tag.tag_directory == t) {
                         remove = false;
                         break;
@@ -204,7 +204,8 @@ namespace Invader::EditQt {
         return this->total_tags;
     }
 
-    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes) {
+    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) {
         this->filter = classes;
+        this->tag_arrays_to_show = tags_directories;
     }
 }

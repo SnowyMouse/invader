@@ -7,6 +7,8 @@ endif()
 if(${INVADER_EDIT_QT})
     find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
+    set(CMAKE_AUTOMOC ON)
+
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
         src/edit/qt/tag_tree_widget.cpp
