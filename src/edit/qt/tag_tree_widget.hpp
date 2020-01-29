@@ -15,10 +15,11 @@ namespace Invader::EditQt {
     public:
         /**
          * Instantiate a TagTreeWidget
-         * @param parent  parent widget
-         * @param classes optional array of classes to filter in
+         * @param parent         parent widget
+         * @param parent_window  parent window
+         * @param classes        optional array of classes to filter in
          */
-        TagTreeWidget(TagWindow *parent, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
+        TagTreeWidget(QWidget *widget, TagWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
