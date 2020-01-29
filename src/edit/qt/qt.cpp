@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
     for(auto &t : edit_qt_options.tags) {
         if(!std::filesystem::is_directory(t)) {
-            eprintf_error("Error: %s does not exist or is not a valid directory", t.string().data());
+            eprintf_error("Error: %s does not exist or is not a valid directory", t.string().c_str());
             return EXIT_FAILURE;
         }
     }

@@ -97,7 +97,7 @@ namespace Invader::EditQt {
                     int count = this->topLevelItemCount();
                     for(int i = 0; i < count; i++) {
                         auto *item = this->topLevelItem(i);
-                        if(item->text(0) == element.data()) {
+                        if(item->text(0) == element.c_str()) {
                             found = true;
                             dir_item = item;
                             break;
@@ -108,7 +108,7 @@ namespace Invader::EditQt {
                     int count = dir_item->childCount();
                     for(int i = 0; i < count; i++) {
                         auto *item = dir_item->child(i);
-                        if(item->text(0) == element.data()) {
+                        if(item->text(0) == element.c_str()) {
                             found = true;
                             dir_item = item;
                             break;
@@ -118,7 +118,7 @@ namespace Invader::EditQt {
 
                 // If we don't have it, make it
                 if(!found) {
-                    auto *new_dir_item = new QTreeWidgetItem(QStringList(element.data()));
+                    auto *new_dir_item = new QTreeWidgetItem(QStringList(element.c_str()));
                     this->setContentsMargins(0, 0, 0, 0);
                     if(dir_item == nullptr) {
                         this->addTopLevelItem(new_dir_item);
@@ -131,7 +131,7 @@ namespace Invader::EditQt {
 
                 // If it's the last one, all is well then
                 if(e + 1 == element_count) {
-                    dir_item->setData(0, Qt::UserRole, QVariant(t.full_path.string().data()));
+                    dir_item->setData(0, Qt::UserRole, QVariant(t.full_path.string().c_str()));
                     if(!found) {
                         dir_item->setIcon(0, file_icon);
                     }

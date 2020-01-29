@@ -110,8 +110,8 @@ namespace Invader::EditQt {
                     iterate_directories(add_dir, d, iterate_directories, depth, priority, main_dir);
                 }
                 else if(file_path.has_extension()) {
-                    auto extension = file_path.extension().string().substr(1);
-                    auto tag_class_int = HEK::extension_to_tag_class(extension.data());
+                    auto extension = file_path.extension().string();
+                    auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
 
                     // First, make sure it's valid
                     if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
