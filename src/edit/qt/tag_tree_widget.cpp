@@ -22,8 +22,9 @@ namespace Invader::EditQt {
         this->clear();
 
         // Get the tags we have
-        auto all_tags = window->get_all_tags();
+        const auto &all_tags = window->get_all_tags();
         std::size_t all_tags_size = all_tags.size();
+        std::vector<bool> all_tags_ignored(all_tags_size, false);
 
         // Next, go through each tag and filter out anything we don't need (i.e. lower-priority tags, non-matching extensions)
         for(std::size_t i = 0; i < all_tags_size; i++) {
@@ -75,7 +76,7 @@ namespace Invader::EditQt {
             }
 
             if(remove) {
-                tag.ignored = true;
+                all_tags_ignored[i] = true;
             }
         }
 
@@ -84,11 +85,12 @@ namespace Invader::EditQt {
         QIcon dir_icon = QFileIconProvider().icon(QFileIconProvider::Folder);
         QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
 
-        for(auto &t : all_tags) {
-            if(t.ignored) {
+        for(std::size_t i = 0; i < all_tags_size; i++) {
+            if(all_tags_ignored[i]) {
                 continue;
             }
 
+            auto &t = all_tags[i];
             QTreeWidgetItem *dir_item = nullptr;
             std::size_t element_count = t.tag_path_separated.size();
             for(std::size_t e = 0; e < element_count; e++) {
@@ -134,7 +136,7 @@ namespace Invader::EditQt {
 
                 // If it's the last one, all is well then
                 if(e + 1 == element_count) {
-                    dir_item->setData(0, Qt::UserRole, QVariant(t.full_path.string().c_str()));
+                    dir_item->setData(0, Qt::UserRole, QVariant::fromValue(reinterpret_cast<std::uintptr_t>(&t)));
                     if(!found) {
                         dir_item->setIcon(0, file_icon);
                     }
@@ -210,5 +212,16 @@ namespace Invader::EditQt {
     void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) {
         this->filter = classes;
         this->tag_arrays_to_show = tags_directories;
+    }
+
+    const TagFile *TagTreeWidget::get_selected_tag() const noexcept {
+        auto selected_items = this->selectedItems();
+        if(selected_items.size()) {
+            auto data = selected_items[0]->data(0, Qt::UserRole);
+            return reinterpret_cast<const TagFile *>(data.value<std::uintptr_t>());
+        }
+        else {
+            return nullptr;
+        }
     }
 }

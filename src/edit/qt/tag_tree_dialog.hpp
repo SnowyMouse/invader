@@ -36,6 +36,8 @@ namespace Invader::EditQt {
         std::optional<TagFile> tag;
         TagTreeWidget *tree_widget;
         void change_title(const std::optional<std::vector<HEK::TagClassInt>> &classes);
+        void done(int r);
+        void on_double_click(QTreeWidgetItem *item, int column);
     };
 }
 

@@ -25,6 +25,8 @@ namespace Invader::EditQt {
         // Set our layout
         this->setLayout(vbox_layout);
         this->change_title(classes);
+
+        connect(this->tree_widget, &TagTreeWidget::itemDoubleClicked, this, &TagTreeDialog::on_double_click);
     }
 
     const std::optional<TagFile> &TagTreeDialog::get_tag() const noexcept {
@@ -68,6 +70,28 @@ namespace Invader::EditQt {
         }
         else {
             this->setWindowTitle("Select a tag");
+        }
+    }
+
+    void TagTreeDialog::done(int r) {
+        if(r == QDialog::Accepted) {
+            auto *tag = this->tree_widget->get_selected_tag();
+            if(tag) {
+                this->tag = *tag;
+            }
+            else {
+                this->tag = std::nullopt;
+            }
+        }
+        else {
+            this->tag = std::nullopt;
+        }
+        QDialog::done(r);
+    }
+
+    void TagTreeDialog::on_double_click(QTreeWidgetItem *, int) {
+        if(this->tree_widget->get_selected_tag()) {
+            this->done(QDialog::Accepted);
         }
     }
 }

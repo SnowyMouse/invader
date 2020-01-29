@@ -24,9 +24,6 @@ namespace Invader::EditQt {
 
         /** Tag class of this tag */
         HEK::TagClassInt tag_class_int = {};
-
-        /** The tag is marked as ignored */
-        bool ignored = false;
     };
 }
 
