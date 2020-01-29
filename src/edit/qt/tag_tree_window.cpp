@@ -29,8 +29,10 @@ namespace Invader::EditQt {
         // File menu
         auto *file_menu = bar->addMenu("File");
         auto *close_all_open = file_menu->addAction("Close all open tags");
+        close_all_open->setIcon(QIcon::fromTheme(QStringLiteral("window-close")));
         connect(close_all_open, &QAction::triggered, this, &TagTreeWindow::close_all_open_tags);
-        auto *exit = file_menu->addAction("Exit");
+        auto *exit = file_menu->addAction("Quit");
+        exit->setIcon(QIcon::fromTheme(QStringLiteral("application-exit")));
         exit->setShortcut(QKeySequence::Quit);
         connect(exit, &QAction::triggered, this, &TagTreeWindow::close);
 
@@ -38,11 +40,13 @@ namespace Invader::EditQt {
         auto *view_menu = bar->addMenu("View");
         auto *refresh = view_menu->addAction("Refresh");
         refresh->setShortcut(QKeySequence::Refresh);
+        refresh->setIcon(QIcon::fromTheme(QStringLiteral("view-refresh")));
         connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
         auto *about = help_menu->addAction("About invader-edit-qt");
+        about->setIcon(QIcon::fromTheme(QStringLiteral("help-about")));
         connect(about, &QAction::triggered, this, &TagTreeWindow::show_about_window);
 
         // Now, set up the layout
