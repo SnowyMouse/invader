@@ -26,6 +26,11 @@ namespace Invader::EditQt {
         QMenuBar *bar = new QMenuBar(this);
         this->setMenuBar(bar);
 
+        // File menu
+        auto *file_menu = bar->addMenu("File");
+        auto *exit = file_menu->addAction("Exit");
+        exit->setShortcut(QKeySequence::Quit);
+        connect(exit, &QAction::triggered, this, &TagTreeWindow::close);
         // View menu
         auto *view_menu = bar->addMenu("View");
         auto *refresh = view_menu->addAction("Refresh");
