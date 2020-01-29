@@ -42,6 +42,7 @@ namespace Invader::EditQt {
         void show_about_window();
         void refresh_view();
         void reload_tags();
+        void test_dependency_dialog();
 
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)

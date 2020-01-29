@@ -36,7 +36,6 @@ namespace Invader::EditQt {
         std::size_t total_tags = 0;
         std::optional<std::vector<HEK::TagClassInt>> filter;
         std::optional<std::vector<std::size_t>> tag_arrays_to_show;
-        TagTreeWindow *parent_window;
         void refresh_view(TagTreeWindow *window);
     };
 }

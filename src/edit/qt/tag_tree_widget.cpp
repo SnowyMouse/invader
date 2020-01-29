@@ -10,10 +10,11 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), parent_window(parent_window) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
+        this->refresh_view(parent_window);
         connect(parent_window, &TagTreeWindow::tags_reloaded, this, &TagTreeWidget::refresh_view);
     }
 
