@@ -28,9 +28,10 @@ namespace Invader::EditQt {
 
         // File menu
         auto *file_menu = bar->addMenu("File");
-        auto *close_all_open = file_menu->addAction("Close all open tags");
-        close_all_open->setIcon(QIcon::fromTheme(QStringLiteral("window-close")));
+        auto *close_all_open = file_menu->addAction("Close all");
+        close_all_open->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close_all_open, &QAction::triggered, this, &TagTreeWindow::close_all_open_tags);
+        file_menu->addSeparator();
         auto *exit = file_menu->addAction("Quit");
         exit->setIcon(QIcon::fromTheme(QStringLiteral("application-exit")));
         exit->setShortcut(QKeySequence::Quit);
