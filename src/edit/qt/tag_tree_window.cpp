@@ -36,8 +36,6 @@ namespace Invader::EditQt {
         auto *refresh = view_menu->addAction("Refresh");
         refresh->setShortcut(QKeySequence::Refresh);
         connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
-        auto *test_dialog = view_menu->addAction("Test TagTreeDialog");
-        connect(test_dialog, &QAction::triggered, this, &TagTreeWindow::test_dependency_dialog);
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
@@ -162,19 +160,6 @@ namespace Invader::EditQt {
 
     const std::vector<TagFile> &TagTreeWindow::get_all_tags() const noexcept {
         return this->all_tags;
-    }
-
-    void TagTreeWindow::test_dependency_dialog() {
-        std::vector<HEK::TagClassInt> filter;
-        TagTreeDialog d(nullptr, this, filter);
-        d.exec();
-        auto &tag = d.get_tag();
-        if(tag.has_value()) {
-            std::printf("Tag selected was %s (%s).\n", tag->tag_path.c_str(), tag->full_path.string().c_str());
-        }
-        else {
-            std::printf("No tag selected.\n");
-        }
     }
 
     void TagTreeWindow::closeEvent(QCloseEvent *event) {

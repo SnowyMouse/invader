@@ -54,7 +54,7 @@ namespace Invader::EditQt {
     private:
         void reload_tags();
         void show_about_window();
-        void test_dependency_dialog();
+
         void cleanup_windows();
 
         enum : std::size_t {
