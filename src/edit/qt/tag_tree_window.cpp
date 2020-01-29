@@ -64,6 +64,8 @@ namespace Invader::EditQt {
         auto *central_widget = new QWidget(this);
         auto *vbox_layout = new QVBoxLayout(central_widget);
         this->tag_view = new TagTreeWidget(this, this);
+        this->tag_view->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(this->tag_view, &TagTreeWidget::customContextMenuRequested, this, &TagTreeWindow::show_context_menu);
         vbox_layout->addWidget(this->tag_view);
         vbox_layout->setMargin(0);
         central_widget->setLayout(vbox_layout);
@@ -186,19 +188,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::on_double_click(QTreeWidgetItem *, int) {
-        this->cleanup_windows();
-
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
-            for(auto &doc : this->open_documents) {
-                if(doc->get_file().full_path == tag->full_path) {
-                    doc->raise();
-                    QApplication::setActiveWindow(doc.get());
-                    return;
-                }
-            }
-            this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag))->show();
-        }
+        this->perform_open();
     }
 
     void TagTreeWindow::cleanup_windows() {
@@ -227,6 +217,22 @@ namespace Invader::EditQt {
         return true;
     }
 
+    void TagTreeWindow::perform_open() {
+        this->cleanup_windows();
+
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(tag) {
+            for(auto &doc : this->open_documents) {
+                if(doc->get_file().full_path == tag->full_path) {
+                    doc->raise();
+                    QApplication::setActiveWindow(doc.get());
+                    return;
+                }
+            }
+            this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag))->show();
+        }
+    }
+
     bool TagTreeWindow::perform_new() {
         std::fprintf(stderr, "TODO: perform_new()\n");
         return false;
@@ -235,5 +241,46 @@ namespace Invader::EditQt {
     bool TagTreeWindow::perform_delete() {
         std::fprintf(stderr, "TODO: perform_delete()\n");
         return false;
+    }
+
+    bool TagTreeWindow::perform_refactor() {
+        std::fprintf(stderr, "TODO: perform_refactor()\n");
+        return false;
+    }
+
+    bool TagTreeWindow::show_properties() {
+        std::fprintf(stderr, "TODO: show_properties()\n");
+        return false;
+    }
+
+    void TagTreeWindow::show_context_menu(const QPoint &point) {
+        if(this->tag_view->get_selected_tag()) {
+            QMenu right_click_menu(this);
+
+            auto *open = right_click_menu.addAction("Open...");
+            open->setIcon(QIcon::fromTheme(QStringLiteral("document-open")));
+            connect(open, &QAction::triggered, this, &TagTreeWindow::perform_open);
+
+            right_click_menu.addSeparator();
+
+            auto *refactor = right_click_menu.addAction("Refactor...");
+            refactor->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
+            connect(refactor, &QAction::triggered, this, &TagTreeWindow::perform_refactor);
+
+            right_click_menu.addSeparator();
+
+            auto *delete_tag = right_click_menu.addAction("Delete...");
+            delete_tag->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
+            delete_tag->setShortcut(QKeySequence::Delete);
+            connect(delete_tag, &QAction::triggered, this, &TagTreeWindow::perform_delete);
+
+            right_click_menu.addSeparator();
+
+            auto *properties = right_click_menu.addAction("Properties...");
+            properties->setIcon(QIcon::fromTheme(QStringLiteral("document-properties")));
+            connect(properties, &QAction::triggered, this, &TagTreeWindow::show_properties);
+
+            right_click_menu.exec(this->tag_view->mapToGlobal(point));
+        }
     }
 }

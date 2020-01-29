@@ -30,8 +30,9 @@ namespace Invader::EditQt {
 
         file_menu->addSeparator();
 
-        auto *refactor_as = file_menu->addAction("Refactor as...");
-        connect(refactor_as, &QAction::triggered, this, &TagEditorWindow::perform_refactor_as);
+        auto *refactor = file_menu->addAction("Refactor...");
+        refactor->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
+        connect(refactor, &QAction::triggered, this, &TagEditorWindow::perform_refactor);
 
         file_menu->addSeparator();
 
@@ -78,8 +79,8 @@ namespace Invader::EditQt {
         return false;
     }
 
-    bool TagEditorWindow::perform_refactor_as() {
-        std::fprintf(stderr, "TODO: perform_refactor_as()\n");
+    bool TagEditorWindow::perform_refactor() {
+        std::fprintf(stderr, "TODO: perform_refactor()\n");
         return false;
     }
 
