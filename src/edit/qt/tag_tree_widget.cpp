@@ -74,9 +74,7 @@ namespace Invader::EditQt {
             }
 
             if(remove) {
-                all_tags.erase(all_tags.begin() + i);
-                i--;
-                all_tags_size--;
+                tag.ignored = true;
             }
         }
 
@@ -86,6 +84,10 @@ namespace Invader::EditQt {
         QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
 
         for(auto &t : all_tags) {
+            if(t.ignored) {
+                continue;
+            }
+
             QTreeWidgetItem *dir_item = nullptr;
             std::size_t element_count = t.tag_path_separated.size();
             for(std::size_t e = 0; e < element_count; e++) {
