@@ -29,7 +29,7 @@ namespace Invader::EditQt {
         auto *refresh = view_menu->addAction("Refresh");
         refresh->setShortcut(QKeySequence::Refresh);
         connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
-        auto *test_dialog = view_menu->addAction("Test Dependency Dialog");
+        auto *test_dialog = view_menu->addAction("Test TagTreeDialog");
         connect(test_dialog, &QAction::triggered, this, &TagTreeWindow::test_dependency_dialog);
 
         // Help menu
