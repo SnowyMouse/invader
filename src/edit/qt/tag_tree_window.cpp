@@ -165,7 +165,7 @@ namespace Invader::EditQt {
         d.exec();
         auto &tag = d.get_tag();
         if(tag.has_value()) {
-            std::printf("Tag selected was %s.%s (%s).\n", tag->tag_path.c_str(), tag_class_to_extension(tag->tag_class_int), tag->full_path.string().c_str());
+            std::printf("Tag selected was %s (%s).\n", tag->tag_path.c_str(), tag->full_path.string().c_str());
         }
         else {
             std::printf("No tag selected.\n");
