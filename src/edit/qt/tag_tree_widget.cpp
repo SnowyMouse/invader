@@ -43,7 +43,7 @@ namespace Invader::EditQt {
             }
 
             // Next, can we filter it out based on tag class alone?
-            if(!remove && this->filter.has_value()) {
+            if(!remove && this->filter.has_value() && this->filter->size() > 0) {
                 remove = true;
                 for(auto f : *this->filter) {
                     if(tag.tag_class_int == f) {
