@@ -4,7 +4,7 @@
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
-#include "tag_window.hpp"
+#include "tag_tree_window.hpp"
 
 int main(int argc, char **argv) {
     using namespace Invader;
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
     QApplication a(argc, argv);
 
-    Invader::EditQt::TagWindow w;
+    Invader::EditQt::TagTreeWindow w;
     w.set_tag_directories(edit_qt_options.tags);
     w.show();
 

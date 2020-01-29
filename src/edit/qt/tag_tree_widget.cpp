@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "tag_tree_widget.hpp"
-#include "tag_window.hpp"
+#include "tag_tree_window.hpp"
 
 #include <invader/file/file.hpp>
 #include <QFileIconProvider>
@@ -10,7 +10,7 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes), parent_window(parent_window) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes) : QTreeWidget(parent), filter(classes), parent_window(parent_window) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
@@ -20,7 +20,7 @@ namespace Invader::EditQt {
         this->clear();
 
         // Get the tags we have
-        auto *parent = reinterpret_cast<TagWindow *>(this->parent_window);
+        auto *parent = reinterpret_cast<TagTreeWindow *>(this->parent_window);
         auto all_tags = parent->get_all_tags();
         std::size_t all_tags_size = all_tags.size();
 

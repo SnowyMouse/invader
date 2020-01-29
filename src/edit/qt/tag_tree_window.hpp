@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef INVADER__EDIT__QT__TAG_WINDOW_HPP
-#define INVADER__EDIT__QT__TAG_WINDOW_HPP
+#ifndef INVADER__EDIT__QT__TagTreeWindow_HPP
+#define INVADER__EDIT__QT__TagTreeWindow_HPP
 
 #include <QMainWindow>
 #include <QTreeWidgetItem>
@@ -17,9 +17,9 @@ class QLabel;
 namespace Invader::EditQt {
     class TagTreeWidget;
 
-    class TagWindow : public QMainWindow {
+    class TagTreeWindow : public QMainWindow {
     public:
-        TagWindow();
+        TagTreeWindow();
 
         /**
          * Set all the tag directories

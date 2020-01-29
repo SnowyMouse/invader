@@ -9,7 +9,7 @@
 #include <invader/hek/class_int.hpp>
 
 namespace Invader::EditQt {
-    class TagWindow;
+    class TagTreeWindow;
 
     class TagTreeWidget : public QTreeWidget {
     public:
@@ -19,7 +19,7 @@ namespace Invader::EditQt {
          * @param parent_window  parent window
          * @param classes        optional array of classes to filter in
          */
-        TagTreeWidget(QWidget *widget, TagWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
+        TagTreeWidget(QWidget *widget, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt);
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
@@ -41,7 +41,7 @@ namespace Invader::EditQt {
     private:
         std::size_t total_tags = 0;
         std::optional<std::vector<HEK::TagClassInt>> filter;
-        TagWindow *parent_window;
+        TagTreeWindow *parent_window;
     };
 }
 

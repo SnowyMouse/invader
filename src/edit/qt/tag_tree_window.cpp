@@ -8,13 +8,13 @@
 #include <QFontDatabase>
 #include <QMessageBox>
 #include <QStatusBar>
-#include "tag_window.hpp"
+#include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
 #include <invader/version.hpp>
 #include <invader/file/file.hpp>
 
 namespace Invader::EditQt {
-    TagWindow::TagWindow() {
+    TagTreeWindow::TagTreeWindow() {
         // Set some window stuff
         this->setWindowTitle("invader-edit-qt");
         this->setMinimumSize(800, 600);
@@ -27,12 +27,12 @@ namespace Invader::EditQt {
         auto *view_menu = bar->addMenu("View");
         auto *refresh = view_menu->addAction("Refresh");
         refresh->setShortcut(QKeySequence::Refresh);
-        connect(refresh, &QAction::triggered, this, &TagWindow::refresh_view);
+        connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
         auto *about = help_menu->addAction("About");
-        connect(about, &QAction::triggered, this, &TagWindow::show_about_window);
+        connect(about, &QAction::triggered, this, &TagTreeWindow::show_about_window);
 
         // Now, set up the layout
         auto *central_widget = new QWidget(this);
@@ -54,7 +54,7 @@ namespace Invader::EditQt {
         this->setStatusBar(status_bar);
     }
 
-    void TagWindow::refresh_view() {
+    void TagTreeWindow::refresh_view() {
         auto start = std::chrono::steady_clock::now();
         this->reload_tags();
         auto mid = std::chrono::steady_clock::now();
@@ -74,7 +74,7 @@ namespace Invader::EditQt {
         this->tag_count_label->setText(tag_count_str);
     }
 
-    void TagWindow::show_about_window() {
+    void TagTreeWindow::show_about_window() {
         // Instantiate it
         QDialog dialog;
         dialog.setWindowTitle("About");
@@ -97,13 +97,13 @@ namespace Invader::EditQt {
         dialog.exec();
     }
 
-    void TagWindow::set_tag_directories(const std::vector<std::filesystem::path> &directories) {
+    void TagTreeWindow::set_tag_directories(const std::vector<std::filesystem::path> &directories) {
         this->paths = directories;
         this->current_tag_index = SHOW_ALL_MERGED;
         this->refresh_view();
     }
 
-    void TagWindow::reload_tags() {
+    void TagTreeWindow::reload_tags() {
         // Clear all tags
         auto &all_tags = this->all_tags;
         all_tags.clear();
@@ -159,7 +159,7 @@ namespace Invader::EditQt {
         }
     }
 
-    const std::vector<TagFile> &TagWindow::get_all_tags() const noexcept {
+    const std::vector<TagFile> &TagTreeWindow::get_all_tags() const noexcept {
         return this->all_tags;
     }
 }
