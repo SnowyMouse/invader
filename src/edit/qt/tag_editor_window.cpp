@@ -2,13 +2,25 @@
 
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QMessageBox>
+#include <QMenuBar>
+#include <filesystem>
 #include "tag_file.hpp"
 #include "tag_tree_window.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
-        this->make_dirty(true);
+        // Make dirty if we're making a new tag
+        this->make_dirty(tag_file.full_path.empty());
+
+        // Make and set our menu bar
+        QMenuBar *bar = new QMenuBar(this);
+        this->setMenuBar(bar);
+
+        // File menu
+        auto *file_menu = bar->addMenu("File");
+        auto *close = file_menu->addAction("Close");
+        close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
+        connect(close, &QAction::triggered, this, &TagEditorWindow::close);
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {
