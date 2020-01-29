@@ -52,10 +52,17 @@ namespace Invader::EditQt {
         void tags_reloaded(TagTreeWindow *window);
 
     private:
+        /** Reload the tags in the tag array */
         void reload_tags();
+
+        /** Show the about window */
         void show_about_window();
 
+        /** Free all closed tags */
         void cleanup_windows();
+
+        /** Close all open tags and then cleanup */
+        bool close_all_open_tags();
 
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)

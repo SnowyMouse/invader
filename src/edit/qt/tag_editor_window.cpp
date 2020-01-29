@@ -2,13 +2,13 @@
 
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QMessageBox>
 #include "tag_file.hpp"
 #include "tag_tree_window.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
         this->make_dirty(true);
-        this->setMinimumSize(400, 200);
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {

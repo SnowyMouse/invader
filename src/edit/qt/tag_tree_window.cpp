@@ -28,9 +28,12 @@ namespace Invader::EditQt {
 
         // File menu
         auto *file_menu = bar->addMenu("File");
+        auto *close_all_open = file_menu->addAction("Close all open tags");
+        connect(close_all_open, &QAction::triggered, this, &TagTreeWindow::close_all_open_tags);
         auto *exit = file_menu->addAction("Exit");
         exit->setShortcut(QKeySequence::Quit);
         connect(exit, &QAction::triggered, this, &TagTreeWindow::close);
+
         // View menu
         auto *view_menu = bar->addMenu("View");
         auto *refresh = view_menu->addAction("Refresh");
@@ -40,6 +43,7 @@ namespace Invader::EditQt {
         // Help menu
         auto *help_menu = bar->addMenu("Help");
         auto *about = help_menu->addAction("About");
+        refresh->setShortcut(QKeySequence::WhatsThis);
         connect(about, &QAction::triggered, this, &TagTreeWindow::show_about_window);
 
         // Now, set up the layout
@@ -163,12 +167,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::closeEvent(QCloseEvent *event) {
-        for(auto &w : this->open_documents) {
-            if(!w->isHidden()) {
-                w->close();
-            }
-        }
-        this->cleanup_windows();
+        this->close_all_open_tags();
         event->setAccepted(this->open_documents.size() == 0);
     }
 
