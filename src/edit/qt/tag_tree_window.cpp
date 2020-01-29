@@ -206,7 +206,7 @@ namespace Invader::EditQt {
     void TagTreeWindow::cleanup_windows() {
         bool window_closed;
         do {
-            window_closed = true;
+            window_closed = false;
             for(auto &w : this->open_documents) {
                 if(w->isHidden()) {
                     this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
@@ -215,7 +215,17 @@ namespace Invader::EditQt {
                 }
             }
         }
-        while(!window_closed);
+        while(window_closed);
+    }
 
+    bool TagTreeWindow::close_all_open_tags() {
+        for(auto &w : this->open_documents) {
+            if(!w->isHidden() && !w->close()) {
+                this->cleanup_windows();
+                return false;
+            }
+        }
+        this->cleanup_windows();
+        return true;
     }
 }
