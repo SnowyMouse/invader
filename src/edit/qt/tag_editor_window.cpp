@@ -3,9 +3,14 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QMenuBar>
+#include <QScrollArea>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QSpacerItem>
 #include <filesystem>
 #include "tag_file.hpp"
 #include "tag_tree_window.hpp"
+#include "tag_editor_textbox_widget.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -40,6 +45,25 @@ namespace Invader::EditQt {
         close->setShortcut(QKeySequence::Close);
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
+
+        // Set up the scroll area
+        auto *scroll_view = new QScrollArea(this);
+        this->setCentralWidget(scroll_view);
+        auto *vbox_layout = new QVBoxLayout(scroll_view);
+        auto *full_widget = new QWidget(this);
+
+        for(std::size_t i = 0; i < 16; i++) {
+            char widget_name[256];
+            std::snprintf(widget_name, sizeof(widget_name), "Test #%zu", i);
+            TagEditorTextboxWidget *textbox = new TagEditorTextboxWidget(full_widget, widget_name, static_cast<TagEditorTextboxWidget::TextboxSize>(i % (TagEditorTextboxWidget::TextboxSize::LARGE + 1)));
+            vbox_layout->addWidget(textbox);
+        }
+
+        auto *spacer = new QSpacerItem(0 ,0);
+        vbox_layout->addItem(spacer);
+        vbox_layout->setSpacing(2);
+        full_widget->setLayout(vbox_layout);
+        scroll_view->setWidget(full_widget);
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {
