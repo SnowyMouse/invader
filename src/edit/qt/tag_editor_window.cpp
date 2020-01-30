@@ -52,10 +52,15 @@ namespace Invader::EditQt {
         auto *vbox_layout = new QVBoxLayout(scroll_view);
         auto *full_widget = new QWidget(this);
 
+        // TEST: Add widgets
+        std::vector<std::string> xyz;
+        xyz.emplace_back("x");
+        xyz.emplace_back("y");
+        xyz.emplace_back("z");
         for(std::size_t i = 0; i < 16; i++) {
             char widget_name[256];
             std::snprintf(widget_name, sizeof(widget_name), "Test #%zu", i);
-            TagEditorTextboxWidget *textbox = new TagEditorTextboxWidget(full_widget, widget_name, static_cast<TagEditorTextboxWidget::TextboxSize>(i % (TagEditorTextboxWidget::TextboxSize::LARGE + 1)));
+            TagEditorTextboxWidget *textbox = new TagEditorTextboxWidget(full_widget, widget_name, static_cast<TagEditorTextboxWidget::TextboxSize>(i % (TagEditorTextboxWidget::TextboxSize::LARGE + 1)), 3, xyz);
             vbox_layout->addWidget(textbox);
         }
 
