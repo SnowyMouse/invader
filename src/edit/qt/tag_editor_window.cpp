@@ -5,6 +5,7 @@
 #include <QMenuBar>
 #include <QScrollArea>
 #include <QLabel>
+#include <QApplication>
 #include <QVBoxLayout>
 #include <QSpacerItem>
 #include <filesystem>
@@ -64,11 +65,20 @@ namespace Invader::EditQt {
             vbox_layout->addWidget(textbox);
         }
 
+        // Add a spacer so it doesn't try to evenly space everything if we're too big
         auto *spacer = new QSpacerItem(0 ,0);
-        vbox_layout->addItem(spacer);
+        vbox_layout->addSpacerItem(spacer);
         vbox_layout->setSpacing(2);
         full_widget->setLayout(vbox_layout);
         scroll_view->setWidget(full_widget);
+
+        // Lock the scroll view and window to a set width
+        int max_width = full_widget->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+        scroll_view->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Preferred);
+        scroll_view->setMinimumWidth(max_width);
+        scroll_view->setMaximumWidth(max_width);
+        scroll_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        this->setMaximumWidth(scroll_view->width());
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {
