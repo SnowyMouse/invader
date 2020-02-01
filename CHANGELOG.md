@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.24.1] - 2019-01-31
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
   them
 - invader-extract: Removes the `blend_shared_normals` flag on extraction to
   prevent generational loss (since tool.exe may change the normals again!)
+- invader-strip: Default values are no longer automatically set
 
 ### Fixed
 - invader-build: Fixed "zoner" gbxmodel tags not having the correct detail node
