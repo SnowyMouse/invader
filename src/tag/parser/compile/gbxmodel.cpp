@@ -4,7 +4,7 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
-    void GBXModel::post_hek_parse() {
+    void GBXModel::postprocess_hek_data() {
         this->super_high_detail_node_count = 0;
         this->high_detail_node_count = 0;
         this->medium_detail_node_count = 0;

@@ -702,7 +702,7 @@
         "type": "struct",
         "post_cache_deformat": true,
         "pre_compile": true,
-        "post_hek_parse": true,
+        "postprocess_hek_data": true,
         "size": 232
     }
 ]

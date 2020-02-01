@@ -6,7 +6,7 @@
 #include <invader/tag/hek/class/model_collision_geometry.hpp>
 
 namespace Invader::Parser {
-    void Invader::Parser::Scenario::post_hek_parse() {
+    void Invader::Parser::Scenario::postprocess_hek_data() {
         if(this->script_syntax_data.size() >= sizeof(ScenarioScriptNodeTable::struct_little)) {
             auto *table = reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(this->script_syntax_data.data());
             table->first_element_ptr = 0;

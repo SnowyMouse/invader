@@ -332,7 +332,7 @@ for s in all_structs_arranged:
     post_cache_parse = "post_cache_parse" in s and s["post_cache_parse"]
     pre_compile = "pre_compile" in s and s["pre_compile"]
     post_compile = "post_compile" in s and s["post_compile"]
-    post_hek_parse = "post_hek_parse" in s and s["post_hek_parse"]
+    postprocess_hek_data = "postprocess_hek_data" in s and s["postprocess_hek_data"]
     private_functions = post_cache_deformat
 
     hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
@@ -711,14 +711,15 @@ for s in all_structs_arranged:
     # parse_hek_tag_data()
     hpp.write("\n        /**\n")
     hpp.write("         * Parse the HEK tag data.\n")
-    hpp.write("         * @param data      Data to read from for structs, tag references, and reflexives; if data_this is nullptr, this must point to the struct\n")
-    hpp.write("         * @param data_size Size of the buffer\n")
-    hpp.write("         * @param data_read This will be set to the amount of data read. If data_this is null, then the initial struct will also be added\n")
-    hpp.write("         * @param data_this Pointer to the struct; if this is null, then data will be used instead\n")
+    hpp.write("         * @param data        Data to read from for structs, tag references, and reflexives; if data_this is nullptr, this must point to the struct\n")
+    hpp.write("         * @param data_size   Size of the buffer\n")
+    hpp.write("         * @param data_read   This will be set to the amount of data read. If data_this is null, then the initial struct will also be added\n")
+    hpp.write("         * @param postprocess Do post-processing on data, such as default values\n")
+    hpp.write("         * @param data_this   Pointer to the struct; if this is null, then data will be used instead\n")
     hpp.write("         * @return parsed tag data\n")
     hpp.write("         */\n")
-    hpp.write("        static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this = nullptr);\n".format(struct_name))
-    cpp_read_hek_data.write("    {} {}::parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, const std::byte *data_this) {{\n".format(struct_name, struct_name))
+    hpp.write("        static {} parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, bool postprocess = false, const std::byte *data_this = nullptr);\n".format(struct_name))
+    cpp_read_hek_data.write("    {} {}::parse_hek_tag_data(const std::byte *data, std::size_t data_size, std::size_t &data_read, [[maybe_unused]] bool postprocess, const std::byte *data_this) {{\n".format(struct_name, struct_name))
     cpp_read_hek_data.write("        {} r = {{}};\n".format(struct_name))
     cpp_read_hek_data.write("        data_read = 0;\n")
     cpp_read_hek_data.write("        if(data_this == nullptr) {\n")
@@ -775,7 +776,7 @@ for s in all_structs_arranged:
                 cpp_read_hek_data.write("            r.{}.reserve(h_{}_count);\n".format(name, name))
                 cpp_read_hek_data.write("            for(std::size_t ref = 0; ref < h_{}_count; ref++) {{\n".format(name))
                 cpp_read_hek_data.write("                std::size_t ref_data_read = 0;\n")
-                cpp_read_hek_data.write("                r.{}.emplace_back({}::parse_hek_tag_data(data, data_size, ref_data_read, reinterpret_cast<const std::byte *>(array + ref)));\n".format(name, struct["struct"]))
+                cpp_read_hek_data.write("                r.{}.emplace_back({}::parse_hek_tag_data(data, data_size, ref_data_read, postprocess, reinterpret_cast<const std::byte *>(array + ref)));\n".format(name, struct["struct"]))
                 cpp_read_hek_data.write("                data += ref_data_read;\n")
                 cpp_read_hek_data.write("                data_read += ref_data_read;\n")
                 cpp_read_hek_data.write("                data_size -= ref_data_read;\n")
@@ -796,7 +797,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign))
+                    cpp_read_hek_data.write("        if(postprocess && r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign))
                     cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("            r.{}.blue = {}{};\n".format(name, default[2], suffix))
@@ -806,7 +807,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.alpha {} 0 && r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign,name,default_sign))
+                    cpp_read_hek_data.write("        if(postprocess && r.{}.alpha {} 0 && r.{}.red {} 0 && r.{}.green {} 0 && r.{}.blue {} 0) {{\n".format(name,default_sign,name,default_sign,name,default_sign,name,default_sign))
                     cpp_read_hek_data.write("            r.{}.alpha = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.red = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("            r.{}.green = {}{};\n".format(name, default[2], suffix))
@@ -820,7 +821,7 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
-                    cpp_read_hek_data.write("        if(r.{}.from {} 0 && r.{}.to {} 0) {{\n".format(name, default_sign, name, default_sign))
+                    cpp_read_hek_data.write("        if(postprocess && r.{}.from {} 0 && r.{}.to {} 0) {{\n".format(name, default_sign, name, default_sign))
                     cpp_read_hek_data.write("            r.{}.from = {}{};\n".format(name, default[0], suffix))
                     cpp_read_hek_data.write("            r.{}.to = {}{};\n".format(name, default[1], suffix))
                     cpp_read_hek_data.write("        }\n")
@@ -830,7 +831,7 @@ for s in all_structs_arranged:
                     default = struct["default"]
                     suffix = "F" if isinstance(default[0], float) else ""
                     for q in range(struct["count"]):
-                        cpp_read_hek_data.write("        if(r.{}[{}] {} 0) {{\n".format(name, q, default_sign))
+                        cpp_read_hek_data.write("        if(postprocess && r.{}[{}] {} 0) {{\n".format(name, q, default_sign))
                         cpp_read_hek_data.write("            r.{}[{}] = {}{};\n".format(name, q, default[q], suffix))
                         cpp_read_hek_data.write("        }\n")
             else:
@@ -838,27 +839,30 @@ for s in all_structs_arranged:
                 if "default" in struct:
                     default = struct["default"]
                     suffix = "F" if isinstance(default, float) else ""
-                    cpp_read_hek_data.write("        if(r.{} {} 0) {{\n".format(name, default_sign))
+                    cpp_read_hek_data.write("        if(postprocess && r.{} {} 0) {{\n".format(name, default_sign))
                     cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
                     cpp_read_hek_data.write("        }\n")
-    if post_hek_parse:
-        cpp_read_hek_data.write("        r.post_hek_parse();\n")
+    if postprocess_hek_data:
+        cpp_read_hek_data.write("        if(postprocess) {\n")
+        cpp_read_hek_data.write("            r.postprocess_hek_data();\n")
+        cpp_read_hek_data.write("        }\n")
     cpp_read_hek_data.write("        return r;\n")
     cpp_read_hek_data.write("    }\n")
 
     # parse_hek_tag_file()
     hpp.write("\n        /**\n")
     hpp.write("         * Parse the HEK tag file.\n")
-    hpp.write("         * @param data      Tag file data to read from\n")
-    hpp.write("         * @param data_size Size of the tag file\n")
+    hpp.write("         * @param data        Tag file data to read from\n")
+    hpp.write("         * @param data_size   Size of the tag file\n")
+    hpp.write("         * @param postprocess Do post-processing on data, such as default values\n")
     hpp.write("         * @return parsed tag data\n")
     hpp.write("         */\n")
-    hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size);\n".format(struct_name))
-    cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size) {{\n".format(struct_name, struct_name))
+    hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);\n".format(struct_name))
+    cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess) {{\n".format(struct_name, struct_name))
     cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size);\n")
     cpp_read_hek_data.write("        std::size_t data_read = 0;\n")
     cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
-    cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read);\n")
+    cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read, postprocess);\n")
     cpp_read_hek_data.write("        if(data_read != expected_data_read) {\n")
     cpp_read_hek_data.write("            eprintf_error(\"invalid tag file; tag data was left over\");")
     cpp_read_hek_data.write("            throw InvalidTagDataException();\n")
@@ -869,8 +873,8 @@ for s in all_structs_arranged:
     hpp.write("        ~{}() override = default;\n".format(struct_name))
     hpp.write("    private:\n")
 
-    if post_hek_parse:
-        hpp.write("        void post_hek_parse();\n")
+    if postprocess_hek_data:
+        hpp.write("        void postprocess_hek_data();\n")
 
     if post_cache_deformat:
         hpp.write("        void post_cache_deformat();\n")

@@ -21,7 +21,7 @@ namespace Invader::Parser {
         fix_render_bounding_radius(tag);
     }
 
-    void ObjectChangeColors::post_hek_parse() {
+    void ObjectChangeColors::postprocess_hek_data() {
         // Get permutation count
         std::size_t permutation_count = this->permutations.size();
         if(permutation_count == 0) {
@@ -78,7 +78,7 @@ namespace Invader::Parser {
             total += p.weight;
         }
 
-        // If the total is zero, even them out. This will likely already be done in post_hek_parse() anyway
+        // If the total is zero, even them out. This will likely already be done in postprocess_hek_data() anyway
         if(total == 0.0) {
             total = static_cast<double>(this->permutations.size());
             for(auto &p : this->permutations) {
@@ -97,47 +97,47 @@ namespace Invader::Parser {
         this->permutations[permutation_count - 1].weight = 1.0F;
     }
 
-    void Biped::post_hek_parse() {
+    void Biped::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Vehicle::post_hek_parse() {
+    void Vehicle::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Weapon::post_hek_parse() {
+    void Weapon::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Equipment::post_hek_parse() {
+    void Equipment::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Garbage::post_hek_parse() {
+    void Garbage::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void DeviceControl::post_hek_parse() {
+    void DeviceControl::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void DeviceLightFixture::post_hek_parse() {
+    void DeviceLightFixture::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void DeviceMachine::post_hek_parse() {
+    void DeviceMachine::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Scenery::post_hek_parse() {
+    void Scenery::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Placeholder::post_hek_parse() {
+    void Placeholder::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 
-    void Projectile::post_hek_parse() {
+    void Projectile::postprocess_hek_data() {
         fix_render_bounding_radius(*this);
     }
 

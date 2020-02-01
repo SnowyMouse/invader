@@ -4,9 +4,9 @@
 
 namespace Invader::Parser {
     void Meter::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        this->post_hek_parse();
+        this->postprocess_hek_data();
     }
-    void Meter::post_hek_parse() {
+    void Meter::postprocess_hek_data() {
         this->source_bitmap = {};
         this->stencil_bitmaps = {};
     }
