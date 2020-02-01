@@ -60,7 +60,7 @@ namespace Invader::Parser {
         return pixel_size;
     }
 
-    void Particle::post_hek_parse() {
+    void Particle::postprocess_hek_data() {
         this->contact_deterioration = 0.0F;
     }
     void Particle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {

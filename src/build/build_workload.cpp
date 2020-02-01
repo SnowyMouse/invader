@@ -505,7 +505,7 @@ namespace Invader {
 
     void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
         #define COMPILE_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
-            auto tag_data_parsed = Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size); \
+            auto tag_data_parsed = Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size, true); \
             auto &new_struct = this->structs.emplace_back(); \
             this->tags[tag_index].base_struct = &new_struct - this->structs.data(); \
             new_struct.data.resize(sizeof(Parser::class_struct::struct_little), std::byte()); \
@@ -609,7 +609,7 @@ namespace Invader {
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
-                auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size);
+                auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
                 auto &new_bsp_header_struct = this->structs.emplace_back();
                 std::size_t bsp = this->bsp_count++;
                 new_bsp_header_struct.bsp = bsp;

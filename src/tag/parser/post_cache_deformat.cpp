@@ -57,7 +57,7 @@ namespace Invader::Parser {
         }
 
         // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
-        this->post_hek_parse();
+        this->postprocess_hek_data();
     }
 
     void Invader::Parser::Effect::post_cache_deformat() {
@@ -134,7 +134,7 @@ namespace Invader::Parser {
         this->high_detail_cutoff = low;
         this->super_high_detail_cutoff = super_low;
 
-        this->post_hek_parse();
+        this->postprocess_hek_data();
     }
 
     void Invader::Parser::Glow::post_cache_deformat() {
@@ -230,8 +230,8 @@ namespace Invader::Parser {
             GBXModelVertexCompressed::struct_big vertex_compressed = HEK::compress_model_vertex(vertex_uncompressed);
 
             std::size_t data_read;
-            this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read));
-            this->compressed_vertices.emplace_back(GBXModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read));
+            this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
+            this->compressed_vertices.emplace_back(GBXModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read, true));
         }
 
         // Get model indices

@@ -5,10 +5,10 @@
 
 namespace Invader::Parser {
     void Physics::post_cache_deformat() {
-        this->post_hek_parse(); // do this to mitigate precision issues
+        this->postprocess_hek_data(); // do this to mitigate precision issues
     }
 
-    void Physics::post_hek_parse() {
+    void Physics::postprocess_hek_data() {
         // Some of these calculations are from MosesofEgypt's reclaimer source. You can get it at https://bitbucket.org/Moses_of_Egypt/reclaimer/src/5d710221979fecbb8e71fa57c768f17f42f0010d/hek/defs/objs/phys.py?at=default&fileviewer=file-view-default
         // I added this stuff because it is actually recalculated when the physics tag is run through tool.exe when building a cache file.
         float total_relative_mass = 0.0f;
