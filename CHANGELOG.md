@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed ejection port recovery rate being calculated as 1 for
+  some tags
+
 ## [0.24.1] - 2019-01-31
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
