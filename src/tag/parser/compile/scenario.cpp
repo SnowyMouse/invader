@@ -489,6 +489,8 @@ namespace Invader::Parser {
                     continue;
                 }
 
+                encounter.one = 1;
+
                 std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
