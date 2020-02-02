@@ -70,6 +70,11 @@ namespace Invader::Parser {
         }
     }
 
+    void ScenarioFiringPosition::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->cluster_index = NULL_INDEX;
+        this->surface_index = NULL_INDEX;
+    }
+
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         if(workload.disable_recursion) {
             return; // if recursion is disabled, doing any of this will be a meme
@@ -611,7 +616,7 @@ namespace Invader::Parser {
                     bsp_find_warnings++;
                 }
 
-                // If we have a BSP, set alll the cluster and surface indices
+                // If we have a BSP, set all the cluster and surface indices
                 if(encounter_data.precomputed_bsp_index != NULL_INDEX && firing_position_count > 0) {
                     auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
                     auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
