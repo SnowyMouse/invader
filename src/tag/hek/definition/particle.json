@@ -118,16 +118,9 @@
                 "type": "float"
             },
             {
-                "name": "unknown float a",
-                "type": "float",
-                "endian": "little",
-                "cache_only": true
-            },
-            {
-                "name": "unknown float b",
-                "type": "float",
-                "endian": "little",
-                "cache_only": true
+                "type": "pad",
+                "size": 8,
+                "comment": "on some (probably older) tags like effects/particles/energy/smoke c generic.particle, this is floats 2.0 and 1.0, but these tags can't be replicated in the HEK"
             },
             {
                 "name": "radius animation",
