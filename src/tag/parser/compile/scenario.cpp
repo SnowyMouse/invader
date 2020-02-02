@@ -484,12 +484,14 @@ namespace Invader::Parser {
             for(std::size_t i = 0; i < encounter_list_count; i++) {
                 auto &encounter = this->encounters[i];
                 auto &encounter_data = encounter_array[i];
+
+                // Set this to 1 because memes
+                encounter_data.one = 1;
+
                 if(encounter.flags.manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     continue;
                 }
-
-                encounter.one = 1;
 
                 std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_hits = 0;
