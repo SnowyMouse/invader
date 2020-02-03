@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-strip: Added `-p` which runs the tag through Invader's preprocessor
+  (used in invader-build). This is to make tags easier to compare.
+
 ## [0.24.2] - 2019-02-01
 ### Fixed
 - invader-build: Fixed ejection port recovery rate being calculated as 1 for
