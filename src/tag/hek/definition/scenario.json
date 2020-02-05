@@ -2077,7 +2077,8 @@
             }
         ],
         "type": "struct",
-        "size": 24
+        "size": 24,
+        "pre_compile": true
     },
     {
         "name": "ScenarioEncounter",

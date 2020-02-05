@@ -2,12 +2,22 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-strip: Added `-p` which runs the tag through Invader's preprocessor
+  (used in invader-build). This is to make tags easier to compare.
+
+## [0.24.2] - 2019-02-01
+### Fixed
+- invader-build: Fixed ejection port recovery rate being calculated as 1 for
+  some tags
+
 ## [0.24.1] - 2019-01-31
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
 ### Changed
-- invader: Node count is now capped to a maximum of 255
+- Node count is now capped to a maximum of 255
 - invader-build: Adds markers in the same order as tool.exe
 - invader-build: Node indices are now checked
 - invader-extract: Now recalculates detail node count on extraction
@@ -119,7 +129,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Stock multiplayer maps for Custom Edition now have their CRC32
   automatically forged to whatever the stock CRC32 is to allow users to join
   other servers with modified maps.
-- Added Ogg Vorbis and FLAC encoding (to be used for other things)
+- Added library-wide Ogg Vorbis and FLAC decoding and encoding
 
 ### Changed
 - invader-sound: Disabled the creation of split dialogue. This does not work
