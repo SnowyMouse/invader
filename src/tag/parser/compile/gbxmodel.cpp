@@ -192,11 +192,6 @@ namespace Invader::Parser {
         this->high_detail_cutoff = low;
         this->super_high_detail_cutoff = super_low;
 
-        if(!workload.disable_recursion && this->markers.size() > 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Markers array is populated, but this array should be empty", tag_index);
-            eprintf_warn("To fix this, rebuild the model tag");
-        }
-
         // Put all of the markers in the marker array
         auto &markers = this->markers;
         for(std::size_t ri = 0; ri < region_count; ri++) {

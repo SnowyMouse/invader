@@ -669,7 +669,7 @@
                 "type": "TagReflexive",
                 "struct": "GBXModelMarker",
                 "compound": true,
-                "non_cached_deprecated": true
+                "maximum": 0
             },
             {
                 "name": "nodes",

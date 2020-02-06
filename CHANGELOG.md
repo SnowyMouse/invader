@@ -7,6 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-strip: Added `-p` which runs the tag through Invader's preprocessor
   (used in invader-build). This is to make tags easier to compare.
 
+### Changed
+- invader: gbxmodel tags that have markers located in the main model struct are
+  now considered invalid
+
 ## [0.24.2] - 2019-02-01
 ### Fixed
 - invader-build: Fixed ejection port recovery rate being calculated as 1 for
