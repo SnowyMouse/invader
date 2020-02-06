@@ -450,7 +450,7 @@ for s in all_structs_arranged:
                         error_line = error_line + " {}".format(classes[c])
 
                 cpp_cache_format_data.write("            if({}) {{\n".format(test_line))
-                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{} must be{}, found %s, instead\", tag_class_to_extension(this->{}.tag_class_int));\n".format(name, error_line, name))
+                cpp_cache_format_data.write("                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} must be{}, found %s, instead\", tag_class_to_extension(this->{}.tag_class_int));\n".format(struct_name, name, error_line, name))
                 cpp_cache_format_data.write("                throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("            }\n")
 
@@ -463,7 +463,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        else {\n")
             if "non_null" in struct and struct["non_null"]:
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must not be null\", tag_index);\n".format(name))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must not be null\", tag_index);\n".format(struct_name, name))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
             else:
                 cpp_cache_format_data.write("            r.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
@@ -473,13 +473,13 @@ for s in all_structs_arranged:
             if "minimum" in struct:
                 minimum = struct["minimum"]
                 cpp_cache_format_data.write("        if(t_{}_count < {}) {{\n".format(name, minimum))
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have at least {} block{}\", tag_index);\n".format(name, minimum, "" if minimum == 1 else "s"))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have at least {} block{}\", tag_index);\n".format(struct_name, name, minimum, "" if minimum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             if "maximum" in struct:
                 maximum = struct["maximum"]
                 cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, maximum))
-                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} must have no more than {} block{}\", tag_index);\n".format(name, maximum, "" if maximum == 1 else "s"))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have no more than {} block{}\", tag_index);\n".format(struct_name, name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
@@ -518,7 +518,7 @@ for s in all_structs_arranged:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
         elif struct["type"] == "enum":
             cpp_cache_format_data.write("        if(static_cast<std::uint16_t>(r.{}) >= {}) {{\n".format(name, len(struct["options"])))
-            cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{} exceeds maximum value of {}\", tag_index);\n".format(name, len(struct["options"])))
+            cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} exceeds maximum value of {}\", tag_index);\n".format(struct_name, name, len(struct["options"])))
             cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
