@@ -52,6 +52,131 @@ namespace Invader::Parser {
         }
     }
 
+    void GBXModel::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
+        // Put all of the markers in the marker array
+        auto &markers = this->markers;
+        auto region_count = regions.size();
+        for(std::size_t ri = 0; ri < region_count; ri++) {
+            auto &r = this->regions[ri];
+            std::size_t permutation_count = r.permutations.size();
+            for(std::size_t pi = 0; pi < permutation_count; pi++) {
+                auto &p = r.permutations[pi];
+
+                // Add the markers
+                while(p.markers.size()) {
+                    auto add_marker = [&p, &ri, &pi, &markers](std::size_t index) {
+                        // Pop
+                        auto m = p.markers[index];
+                        p.markers.erase(p.markers.begin() + index);
+
+                        // Make the instance
+                        GBXModelMarkerInstance instance;
+                        instance.node_index = m.node_index;
+                        instance.permutation_index = pi;
+                        instance.region_index = ri;
+                        instance.rotation = m.rotation;
+                        instance.translation = m.translation;
+
+                        // Add it!
+                        bool found = false;
+                        for(auto &ma : markers) {
+                            if(m.name == ma.name) {
+                                ma.instances.push_back(instance);
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        // Add the marker and then add it!
+                        if(!found) {
+                            GBXModelMarker ma = {};
+
+                            ma.name = m.name;
+                            ma.instances.push_back(instance);
+
+                            for(auto &marker_group : markers) {
+                                if(std::strcmp(marker_group.name.string, m.name.string) > 0) {
+                                    markers.insert(markers.begin() + (&marker_group - markers.data()), ma);
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(!found) {
+                                markers.push_back(ma);
+                            }
+                        }
+                    };
+
+                    // Get the first instance
+                    auto first_instance_name = p.markers[0].name;
+
+                    // Add all of the instances after it, first
+                    for(std::size_t f = 1; f < p.markers.size(); f++) {
+                        if(p.markers[f].name == first_instance_name) {
+                            add_marker(f);
+                            f--;
+                        }
+                    }
+
+                    // Lastly, add this one
+                    add_marker(0);
+                }
+            }
+        }
+
+        // Generate it
+        auto marker_count = this->markers.size();
+        auto &gbxmodel_data = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        gbxmodel_data.markers.count = static_cast<std::uint32_t>(marker_count);
+
+        if(marker_count > 0) {
+            // Make the pointer
+            auto &marker_ptr = workload.structs[struct_index].pointers.emplace_back();
+            marker_ptr.offset = static_cast<std::uint32_t>(reinterpret_cast<std::byte *>(&gbxmodel_data.markers.pointer) - reinterpret_cast<std::byte *>(&gbxmodel_data));
+            std::size_t marker_struct_index = workload.structs.size();
+            marker_ptr.struct_index = marker_struct_index;
+
+            // Make the struct
+            auto &markers_struct = workload.structs.emplace_back();
+            GBXModelMarker::struct_little *markers_struct_arr;
+            markers_struct.data = std::vector<std::byte>(marker_count * sizeof(*markers_struct_arr));
+            markers_struct_arr = reinterpret_cast<decltype(markers_struct_arr)>(markers_struct.data.data());
+
+            // Go through each marker
+            for(std::size_t m = 0; m < marker_count; m++) {
+                auto &marker_c = this->markers[m];
+                auto &marker_l = markers_struct_arr[m];
+
+                // Copy this stuff
+                marker_l.name = marker_c.name;
+                marker_l.magic_identifier = marker_c.magic_identifier;
+
+                // Generate instances
+                auto instance_count = static_cast<std::uint32_t>(marker_c.instances.size());
+                marker_l.instances.count = instance_count;
+
+                // Make the pointer
+                auto &marker_ptr = workload.structs[marker_struct_index].pointers.emplace_back();
+                marker_ptr.offset = static_cast<std::uint32_t>(reinterpret_cast<std::byte *>(&marker_l.instances.pointer) - reinterpret_cast<std::byte *>(markers_struct_arr));
+                marker_ptr.struct_index = workload.structs.size();
+
+                // Make the instances
+                auto &instance_struct = workload.structs.emplace_back();
+                GBXModelMarkerInstance::struct_little *instances_struct_arr;
+                instance_struct.data = std::vector<std::byte>(sizeof(*instances_struct_arr) * instance_count);
+                instances_struct_arr = reinterpret_cast<decltype(instances_struct_arr)>(instance_struct.data.data());
+                for(std::size_t i = 0; i < instance_count; i++) {
+                    instances_struct_arr[i].node_index = marker_c.instances[i].node_index;
+                    instances_struct_arr[i].permutation_index = marker_c.instances[i].permutation_index;
+                    instances_struct_arr[i].region_index = marker_c.instances[i].region_index;
+                    instances_struct_arr[i].rotation = marker_c.instances[i].rotation;
+                    instances_struct_arr[i].translation = marker_c.instances[i].translation;
+                }
+            }
+        }
+    }
+
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t region_count = this->regions.size();
         std::size_t geometries_count = this->geometries.size();
@@ -191,77 +316,6 @@ namespace Invader::Parser {
         this->low_detail_cutoff = high;
         this->high_detail_cutoff = low;
         this->super_high_detail_cutoff = super_low;
-
-        // Put all of the markers in the marker array
-        auto &markers = this->markers;
-        for(std::size_t ri = 0; ri < region_count; ri++) {
-            auto &r = this->regions[ri];
-            std::size_t permutation_count = r.permutations.size();
-            for(std::size_t pi = 0; pi < permutation_count; pi++) {
-                auto &p = r.permutations[pi];
-
-                // Add the markers
-                while(p.markers.size()) {
-                    auto add_marker = [&p, &ri, &pi, &markers](std::size_t index) {
-                        // Pop
-                        auto m = p.markers[index];
-                        p.markers.erase(p.markers.begin() + index);
-
-                        // Make the instance
-                        GBXModelMarkerInstance instance;
-                        instance.node_index = m.node_index;
-                        instance.permutation_index = pi;
-                        instance.region_index = ri;
-                        instance.rotation = m.rotation;
-                        instance.translation = m.translation;
-
-                        // Add it!
-                        bool found = false;
-                        for(auto &ma : markers) {
-                            if(m.name == ma.name) {
-                                ma.instances.push_back(instance);
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        // Add the marker and then add it!
-                        if(!found) {
-                            GBXModelMarker ma = {};
-
-                            ma.name = m.name;
-                            ma.instances.push_back(instance);
-
-                            for(auto &marker_group : markers) {
-                                if(std::strcmp(marker_group.name.string, m.name.string) > 0) {
-                                    markers.insert(markers.begin() + (&marker_group - markers.data()), ma);
-                                    found = true;
-                                    break;
-                                }
-                            }
-
-                            if(!found) {
-                                markers.push_back(ma);
-                            }
-                        }
-                    };
-
-                    // Get the first instance
-                    auto first_instance_name = p.markers[0].name;
-
-                    // Add all of the instances after it, first
-                    for(std::size_t f = 1; f < p.markers.size(); f++) {
-                        if(p.markers[f].name == first_instance_name) {
-                            add_marker(f);
-                            f--;
-                        }
-                    }
-
-                    // Lastly, add this one
-                    add_marker(0);
-                }
-            }
-        }
 
         // Make sure the node indices in the markers we added are valid
         std::size_t errors_given = 0;
