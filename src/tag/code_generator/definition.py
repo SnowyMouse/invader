@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
     f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
