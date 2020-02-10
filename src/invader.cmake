@@ -1,18 +1,26 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Invader library
-set(INVADER_SOURCE_FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+# Parser files
+set(INVADER_PARSER_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+)
+
+# Invader library
+set(INVADER_SOURCE_FILES
+    ${INVADER_PARSER_FILES}
+
+    "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -110,15 +118,8 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for deb
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"  "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    OUTPUT ${INVADER_PARSER_FILES}
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
@@ -169,8 +170,8 @@ add_custom_command(
 
 # Build the resource list
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices" "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices" "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices"
 )
 
