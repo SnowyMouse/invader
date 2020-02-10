@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, truct_name, hpp, cpp_read_hek_data):
+def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data):
     hpp.write("\n        /**\n")
     hpp.write("         * Parse the HEK tag data.\n")
     hpp.write("         * @param data        Data to read from for structs, tag references, and reflexives; if data_this is nullptr, this must point to the struct\n")

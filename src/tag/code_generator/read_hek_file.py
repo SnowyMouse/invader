@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
+def make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data):
+    hpp.write("\n        /**\n")
+    hpp.write("         * Parse the HEK tag file.\n")
+    hpp.write("         * @param data        Tag file data to read from\n")
+    hpp.write("         * @param data_size   Size of the tag file\n")
+    hpp.write("         * @param postprocess Do post-processing on data, such as default values\n")
+    hpp.write("         * @return parsed tag data\n")
+    hpp.write("         */\n")
+    hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);\n".format(struct_name))
+    cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess) {{\n".format(struct_name, struct_name))
+    cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size);\n")
+    cpp_read_hek_data.write("        std::size_t data_read = 0;\n")
+    cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
+    cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read, postprocess);\n")
+    cpp_read_hek_data.write("        if(data_read != expected_data_read) {\n")
+    cpp_read_hek_data.write("            eprintf_error(\"invalid tag file; tag data was left over\");")
+    cpp_read_hek_data.write("            throw InvalidTagDataException();\n")
+    cpp_read_hek_data.write("        }\n")
+    cpp_read_hek_data.write("        return r;\n")
+    cpp_read_hek_data.write("    }\n")

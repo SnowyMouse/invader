@@ -4,6 +4,7 @@ from compile import make_cache_format_data
 from generate_hek_tag_data import make_cpp_save_hek_data
 from read_cache_file_data import make_parse_cache_file_data
 from read_hek_data import make_parse_hek_tag_data
+from read_hek_file import make_parse_hek_tag_file
 
 def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data):
     def write_for_all_cpps(what):
@@ -116,28 +117,8 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data)
         make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, cpp_save_hek_data)
         make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
-        make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, struct_name, hpp, cpp_read_hek_data)
-
-        # parse_hek_tag_file()
-        hpp.write("\n        /**\n")
-        hpp.write("         * Parse the HEK tag file.\n")
-        hpp.write("         * @param data        Tag file data to read from\n")
-        hpp.write("         * @param data_size   Size of the tag file\n")
-        hpp.write("         * @param postprocess Do post-processing on data, such as default values\n")
-        hpp.write("         * @return parsed tag data\n")
-        hpp.write("         */\n")
-        hpp.write("        static {} parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);\n".format(struct_name))
-        cpp_read_hek_data.write("    {} {}::parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess) {{\n".format(struct_name, struct_name))
-        cpp_read_hek_data.write("        HEK::TagFileHeader::validate_header(reinterpret_cast<const HEK::TagFileHeader *>(data), data_size);\n")
-        cpp_read_hek_data.write("        std::size_t data_read = 0;\n")
-        cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
-        cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read, postprocess);\n")
-        cpp_read_hek_data.write("        if(data_read != expected_data_read) {\n")
-        cpp_read_hek_data.write("            eprintf_error(\"invalid tag file; tag data was left over\");")
-        cpp_read_hek_data.write("            throw InvalidTagDataException();\n")
-        cpp_read_hek_data.write("        }\n")
-        cpp_read_hek_data.write("        return r;\n")
-        cpp_read_hek_data.write("    }\n")
+        make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
+        make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
         hpp.write("    private:\n")
