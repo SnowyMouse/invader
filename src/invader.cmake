@@ -110,9 +110,16 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for deb
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"  "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
+    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"  "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
 
