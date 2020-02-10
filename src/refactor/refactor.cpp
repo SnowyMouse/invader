@@ -183,7 +183,7 @@ int main(int argc, char * const *argv) {
     };
 
     auto from = unmaybe(from_maybe, remaining_arguments[0]);
-    auto to = unmaybe(from_maybe, remaining_arguments[1]);
+    auto to = unmaybe(to_maybe, remaining_arguments[1]);
 
     // Go through all the tags
     std::size_t total_tags = 0;
