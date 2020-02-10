@@ -2,14 +2,6 @@
 
 def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data):
     # compile()
-    hpp.write("\n        /**\n")
-    hpp.write("         * Compile the tag to be used in cache files.\n")
-    hpp.write("         * @param workload     workload struct to use\n")
-    hpp.write("         * @param tag_index    tag index to use in the workload\n")
-    hpp.write("         * @param struct_index struct index to use in the workload\n")
-    hpp.write("         * @param bsp          BSP index to use\n")
-    hpp.write("         * @param offset       struct offset\n")
-    hpp.write("         */\n")
     hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0) override;\n")
     cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")

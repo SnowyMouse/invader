@@ -1,12 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, cpp_save_hek_data):
-    hpp.write("\n        /**\n")
-    hpp.write("         * Convert the struct into HEK tag data to be built into a cache file.\n")
-    hpp.write("         * @param  generate_header_class generate a cache file header with the class, too\n")
-    hpp.write("         * @param  clear_on_save         clear data as it's being saved (reduces memory usage but you can't work on the tag anymore)\n")
-    hpp.write("         * @return cache file data\n")
-    hpp.write("         */\n")
     hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")

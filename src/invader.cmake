@@ -9,6 +9,7 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
 

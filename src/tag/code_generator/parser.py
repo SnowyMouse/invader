@@ -6,8 +6,9 @@ from read_cache_file_data import make_parse_cache_file_data
 from read_hek_data import make_parse_hek_tag_data
 from read_hek_file import make_parse_hek_tag_file
 from cache_deformat_data import make_cache_deformat
+from refactor_reference import make_refactor_reference
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -104,6 +105,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
         make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
+        make_refactor_reference(all_used_structs, struct_name, hpp, cpp_read_hek_data)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
         hpp.write("    private:\n")

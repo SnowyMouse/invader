@@ -7,8 +7,8 @@ import os
 from definition import make_definitions
 from parser import make_parser
 
-if len(sys.argv) < 11:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 12:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -18,7 +18,7 @@ all_structs = []
 
 extract_hidden = True if sys.argv[9].lower() == "on" else False
 
-for i in range(10, len(sys.argv)):
+for i in range(11, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -118,4 +118,5 @@ with open(sys.argv[2], "w") as hpp:
             with open(sys.argv[5], "w") as cpp_read_hek_data:
                 with open(sys.argv[6], "w") as cpp_cache_format_data:
                     with open(sys.argv[7], "w") as cpp_cache_deformat_data:
-                        make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data)
+                        with open(sys.argv[8], "w") as cpp_refactor_reference:
+                            make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference)

@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data):
-    hpp.write("\n        /**\n")
-    hpp.write("         * Format the tag to be used in HEK tags.\n")
-    hpp.write("         */\n")
     hpp.write("        void cache_deformat() override;\n")
     cpp_cache_deformat_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
     cpp_cache_deformat_data.write("        if(this->cache_formatted) {\n")

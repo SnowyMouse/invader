@@ -43,6 +43,16 @@ namespace Invader::Parser {
          */
         virtual std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) = 0;
 
+        /**
+         * Refactor the tag reference, replacing all references with the given reference. Paths must use Halo path separators.\n")
+         * @param from_path  Path to look for\n")
+         * @param from_class Class to look for\n")
+         * @param to_path    Path to replace with\n")
+         * @param to_class   Class to replace with\n")
+         * @return           number of references replaced\n")
+         */
+        virtual std::size_t refactor_reference(const char *from_path, TagClassInt from_class, const char *to_path, TagClassInt to_class) = 0;
+
         virtual ~ParserStruct() = default;
     protected:
         bool cache_formatted = false;
