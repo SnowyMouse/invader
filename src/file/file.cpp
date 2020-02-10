@@ -226,4 +226,28 @@ namespace Invader::File {
             }
         }
     }
+
+    std::optional<std::pair<std::string, TagClassInt>> split_tag_class_extension(const std::string &tag_path) {
+        return split_tag_class_extension_chars(tag_path.c_str());
+    }
+
+    std::optional<std::pair<std::string, TagClassInt>> split_tag_class_extension_chars(const char *tag_path) {
+        const char *extension = nullptr;
+        for(const char *c = tag_path; *c; c++) {
+            if(*c == '.') {
+                extension = c + 1;
+            }
+        }
+        if(!extension) {
+            return std::nullopt;
+        }
+
+        auto tag_class = HEK::extension_to_tag_class(extension);
+        if(tag_class == TagClassInt::TAG_CLASS_NONE || tag_class == TagClassInt::TAG_CLASS_NULL) {
+            return std::nullopt;
+        }
+        else {
+            return std::pair<std::string, TagClassInt>(std::string(tag_path, (extension - 1) - tag_path), HEK::extension_to_tag_class(extension));
+        }
+    }
 }

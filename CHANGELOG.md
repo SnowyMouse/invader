@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- New tool: invader-refactor - Find and replace tag references.
 - invader-strip: Added `-p` which runs the tag through Invader's preprocessor
   (used in invader-build). This is to make tags easier to compare.
 

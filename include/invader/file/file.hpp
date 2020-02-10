@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <optional>
 
+#include "../hek/class_int.hpp"
+
 namespace Invader::File {
     /**
      * Attempt to open the file and read it all into a buffer
@@ -48,6 +50,20 @@ namespace Invader::File {
      * @param expected_extension extension to use and remove from the path, if found
      */
     std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension);
+
+    /**
+     * Attempt to split the tag class extension from a path
+     * @param tag_path path to split
+     * @return         path followed by extension or nullptr if failed
+     */
+    std::optional<std::pair<std::string, TagClassInt>> split_tag_class_extension(const std::string &tag_path);
+
+    /**
+     * Attempt to split the tag class extension from a path
+     * @param tag_path path to split
+     * @return         path followed by extension or nullptr if failed
+     */
+    std::optional<std::pair<std::string, TagClassInt>> split_tag_class_extension_chars(const char *tag_path);
 
     /**
      * Convert the tag path to a path using the system's preferred separators
