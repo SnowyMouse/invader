@@ -5,6 +5,7 @@ from generate_hek_tag_data import make_cpp_save_hek_data
 from read_cache_file_data import make_parse_cache_file_data
 from read_hek_data import make_parse_hek_tag_data
 from read_hek_file import make_parse_hek_tag_file
+from cache_deformat_data import make_cache_deformat
 
 def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data):
     def write_for_all_cpps(what):
@@ -97,23 +98,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                 continue
         add_structs_from_struct(s)
 
-        hpp.write("\n        /**\n")
-        hpp.write("         * Format the tag to be used in HEK tags.\n")
-        hpp.write("         */\n")
-        hpp.write("        void cache_deformat() override;\n")
-        cpp_cache_deformat_data.write("    void {}::cache_deformat() {{\n".format(struct_name))
-        cpp_cache_deformat_data.write("        if(this->cache_formatted) {\n")
-        for struct in all_used_structs:
-            if struct["type"] == "TagReflexive":
-                cpp_cache_deformat_data.write("            for(auto &i : {}) {{\n".format(struct["name"]))
-                cpp_cache_deformat_data.write("                i.cache_deformat();\n")
-                cpp_cache_deformat_data.write("            }\n")
-        cpp_cache_deformat_data.write("            this->cache_formatted = false;\n")
-        if post_cache_deformat:
-            cpp_cache_deformat_data.write("            this->post_cache_deformat();\n")
-        cpp_cache_deformat_data.write("        }\n")
-        cpp_cache_deformat_data.write("    }\n")
-
+        make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)
         make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data)
         make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, cpp_save_hek_data)
         make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
