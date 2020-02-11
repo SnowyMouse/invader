@@ -48,7 +48,7 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
                 cpp_read_hek_data.write("                eprintf_error(\"Failed to read dependency {}.{}: missing null terminator\");\n".format(struct_name, name))
                 cpp_read_hek_data.write("                throw InvalidTagDataException();\n")
                 cpp_read_hek_data.write("            }\n")
-                cpp_read_hek_data.write("            r.{}.path = std::string(reinterpret_cast<const char *>(data));\n".format(name))
+                cpp_read_hek_data.write("            r.{}.path = Invader::File::remove_duplicate_slashes(std::string(reinterpret_cast<const char *>(data)));\n".format(name))
                 cpp_read_hek_data.write("            data_size -= h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("            data_read += h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("            data += h_{}_expected_length + 1;\n".format(name))

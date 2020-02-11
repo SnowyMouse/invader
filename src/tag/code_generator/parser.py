@@ -42,6 +42,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
     write_for_all_cpps("#include <invader/printf.hpp>\n")
     cpp_cache_format_data.write("#include <invader/build/build_workload.hpp>\n")
     cpp_read_cache_file_data.write("#include <invader/file/file.hpp>\n")
+    cpp_read_hek_data.write("#include <invader/file/file.hpp>\n")
     cpp_save_hek_data.write("extern \"C\" std::uint32_t crc32(std::uint32_t crc, const void *buf, std::size_t size) noexcept;\n")
     write_for_all_cpps("namespace Invader::Parser {\n")
 
