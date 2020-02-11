@@ -182,7 +182,7 @@ int main(int argc, char * const *argv) {
                 if(refactor_options.set_move_or_no_move) {
                     // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
                     SPAGHETTI_CODE_VELOCIRAPTOR:
-                    eprintf_error("Error: Either -M or -N were already set");
+                    eprintf_error("Error: -M or -N can only be set once.");
                     std::exit(EXIT_FAILURE);
                 }
                 refactor_options.no_move = true;
@@ -255,9 +255,9 @@ int main(int argc, char * const *argv) {
 
         auto &from = unmaybe(from_maybe, remaining_arguments[0]);
         auto &to = unmaybe(to_maybe, remaining_arguments[1]);
+        replacements.emplace_back(from, to);
 
         if(!refactor_options.no_move) {
-            replacements.emplace_back(from, to);
             bool added = false;
             for(auto &t : all_tags) {
                 if(preferred_path_to_halo_path(t.tag_path) == from_halo_path) {
@@ -272,7 +272,6 @@ int main(int argc, char * const *argv) {
                 return EXIT_FAILURE;
             }
         }
-
 
         // If we're moving tags, we can't change tag classes
         if(!refactor_options.no_move && to.class_int != from.class_int) {
