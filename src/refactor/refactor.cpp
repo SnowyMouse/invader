@@ -151,25 +151,44 @@ int main(int argc, char * const *argv) {
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("no-move", 'n', 0, "Do not move any files; just change the references in the tags (dangerous).");
+    options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <from.class> <to.class>";
+    static constexpr char USAGE[] = "[options] <<from.class> <to.class> | -r <from-dir> <to-dir>>";
 
     struct RefactorOptions {
-        const char *tags = "tags";
+        std::vector<std::string> tags;
+        bool no_move = false;
+        bool recursive = false;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
         switch(opt) {
             case 't':
-                refactor_options.tags = arguments[0];
+                refactor_options.tags.emplace_back(arguments[0]);
                 break;
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
+            case 'n':
+                refactor_options.no_move = true;
+                break;
+            case 'r':
+                refactor_options.recursive = true;
+                break;
         }
     });
+
+    if(refactor_options.no_move && refactor_options.recursive) {
+        eprintf_error("Error: --no-move and --recursive cannot be used at the same time");
+        return EXIT_FAILURE;
+    }
+
+    if(refactor_options.tags.size() == 0) {
+        refactor_options.tags.emplace_back("tags");
+    }
 
     // Parse the stuff
     auto from_maybe = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(remaining_arguments[0]));
@@ -230,7 +249,7 @@ int main(int argc, char * const *argv) {
 
     // Test run
     try {
-        recursively_refactor_dir(std::filesystem::path(refactor_options.tags), recursively_refactor_dir);
+        recursively_refactor_dir(std::filesystem::path(refactor_options.tags[0]), recursively_refactor_dir);
     }
     catch(std::exception &) {
         return EXIT_FAILURE;
