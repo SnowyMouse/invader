@@ -161,7 +161,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <-M | -N> <<from.class> <to.class> | -r <from-dir> <to-dir>>";
+    static constexpr char USAGE[] = "[options] <-M | -N> < <from.class> <to.class> | -r <from-dir> <to-dir> >";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
