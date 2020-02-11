@@ -156,16 +156,18 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("no-move", 'n', 0, "Do not move any files; just change the references in the tags.");
+    options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move.");
+    options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move.");
     options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <<from.class> <to.class> | -r <from-dir> <to-dir>>";
+    static constexpr char USAGE[] = "[options] <-M | -N> <<from.class> <to.class> | -r <from-dir> <to-dir>>";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
         bool no_move = false;
         bool recursive = false;
+        bool set_move_or_no_move = false;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
@@ -176,8 +178,21 @@ int main(int argc, char * const *argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
-            case 'n':
+            case 'N':
+                if(refactor_options.set_move_or_no_move) {
+                    // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
+                    SPAGHETTI_CODE_VELOCIRAPTOR:
+                    eprintf_error("Error: Either -M or -N were already set");
+                    std::exit(EXIT_FAILURE);
+                }
                 refactor_options.no_move = true;
+                refactor_options.set_move_or_no_move = true;
+                break;
+            case 'M':
+                if(refactor_options.set_move_or_no_move) {
+                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
+                }
+                refactor_options.set_move_or_no_move = true;
                 break;
             case 'r':
                 refactor_options.recursive = true;
@@ -190,15 +205,20 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
 
+    if(!refactor_options.set_move_or_no_move) {
+        eprintf_error("Error: Either --no-move or --move need must be set");
+        return EXIT_FAILURE;
+    }
+
     if(refactor_options.tags.size() == 0) {
         refactor_options.tags.emplace_back("tags");
     }
 
     // Figure out what we need to do
     std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
+    auto all_tags = load_virtual_tag_folder(refactor_options.tags);
     if(refactor_options.recursive) {
-        eprintf_error("Unimplemented");
-        return EXIT_FAILURE;
+        throw;
     }
     else {
         auto from_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[0]));
@@ -216,13 +236,17 @@ int main(int argc, char * const *argv) {
         auto to = unmaybe(to_maybe, remaining_arguments[1]);
 
         replacements.emplace_back(from, to);
+
+        // If we're moving tags, we can't change tag classes
+        if(!refactor_options.no_move && to.class_int != from.class_int) {
+            eprintf_error("Tag class cannot be changed if moving tags.")
+        }
     }
 
     // Go through all the tags and see what needs edited
     std::size_t total_tags = 0;
     std::size_t total_replaced = 0;
     std::vector<TagFile *> tags_to_do;
-    auto all_tags = load_virtual_tag_folder(refactor_options.tags);
     for(auto &tag : all_tags) {
         if(refactor_tags(tag.full_path.c_str(), replacements, true)) {
             tags_to_do.emplace_back(&tag);
