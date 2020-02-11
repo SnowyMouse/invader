@@ -102,8 +102,9 @@ else()
 endif()
 
 # Generate headers separately (this is to guarantee build order)
-add_custom_target(invader-header-gen
-    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+add_library(invader-header-gen STATIC
+    "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
+    ${INVADER_PARSER_FILES}
 )
 add_dependencies(invader invader-header-gen)
 

@@ -109,7 +109,7 @@ def to_hex(number):
     return "0x{:X}".format(number)
 
 with open(sys.argv[1], "w") as f:
-    with open(sys.argv[8], "w") as ecpp:
+    with open(sys.argv[9], "w") as ecpp:
         make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged)
 
 with open(sys.argv[2], "w") as hpp:
