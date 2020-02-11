@@ -2,6 +2,7 @@
 
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader {
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size) {
@@ -45,7 +46,7 @@ namespace Invader {
             }
 
             Resource resource;
-            resource.path = resource_path;
+            resource.path = Invader::File::remove_duplicate_slashes(resource_path);
             resource.data = std::vector<std::byte>(resource_data, resource_data + resource_data_size);
             resource.path_offset = resource_path_offset;
             resource.data_offset = resource_data_offset;

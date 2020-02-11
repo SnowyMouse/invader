@@ -5,6 +5,7 @@
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader {
     Map Map::map_with_copy(const std::byte *data, std::size_t data_size,
@@ -306,7 +307,7 @@ namespace Invader {
 
                 // If it was null terminated, use it. Otherwise, don't.
                 if(zeroed) {
-                    tag.path = path;
+                    tag.path = Invader::File::remove_duplicate_slashes(path);
                 }
             }
             catch (Invader::OutOfBoundsException &) {}
