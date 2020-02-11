@@ -286,14 +286,14 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile *> tags_to_do;
 
     for(auto &tag : all_tags) {
-        if(refactor_tags(tag.full_path.c_str(), replacements, true)) {
+        if(refactor_tags(tag.full_path.string().c_str(), replacements, true)) {
             tags_to_do.emplace_back(&tag);
         }
     }
 
     // Now actually do it
     for(auto *tag : tags_to_do) {
-        std::size_t count = refactor_tags(tag->full_path.c_str(), replacements, false);
+        std::size_t count = refactor_tags(tag->full_path.string().c_str(), replacements, false);
         if(count) {
             total_replaced += count;
             total_tags++;
