@@ -95,18 +95,19 @@ if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
         ${INVADER_SOURCE_FILES}
     )
+    add_library(invader-header-gen STATIC
+        "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
+        ${INVADER_PARSER_FILES}
+    )
 else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
     )
+    add_library(invader-header-gen SHARED
+        "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
+        ${INVADER_PARSER_FILES}
+    )
 endif()
-
-# Generate headers separately (this is to guarantee build order)
-add_library(invader-header-gen STATIC
-    "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-    ${INVADER_PARSER_FILES}
-)
-add_dependencies(invader invader-header-gen)
 
 # P8 palette library (separate for slightly faster building)
 add_library(invader-bitmap-p8-palette STATIC
@@ -192,4 +193,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+target_link_libraries(invader invader-bitmap-p8-palette invader-header-gen zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
