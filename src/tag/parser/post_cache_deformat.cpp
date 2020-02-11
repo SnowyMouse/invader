@@ -82,7 +82,7 @@ namespace Invader::Parser {
                 std::size_t region_index = instance.region_index;
                 std::size_t region_count = regions.size();
                 if(region_index >= region_count) {
-                    eprintf_error("invalid region index %zu / %zu", region_index, region_count);
+                    eprintf_error("invalid region index (%zu >= %zu) in marker %s #%zu", region_index, region_count, marker.name.string, instance_index);
                     throw OutOfBoundsException();
                 }
 
@@ -91,7 +91,7 @@ namespace Invader::Parser {
                 std::size_t permutation_count = region.permutations.size();
                 std::size_t permutation_index = instance.permutation_index;
                 if(permutation_index >= permutation_count) {
-                    eprintf_error("invalid permutation index %zu / %zu for region #%zu", permutation_index, permutation_count, region_index);
+                    eprintf_error("invalid permutation index (%zu >= %zu) for region #%zu in marker %s #%zu", permutation_index, permutation_count, region_index, marker.name.string, instance_index);
                     throw OutOfBoundsException();
                 }
 
