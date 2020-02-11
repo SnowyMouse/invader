@@ -189,7 +189,7 @@ namespace Invader::Parser {
             auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(this->script_syntax_data.data() + sizeof(t));
             for(std::size_t i = 0; i < DEFAULT_SCRIPT_NODE_COUNT; i++) {
                 auto &node = first_node[i];
-                std::memset(&node, 0xCA, sizeof(node));
+                std::memset(reinterpret_cast<std::uint8_t *>(&node), 0xCA, sizeof(node));
                 node.salt = 0;
             }
 
