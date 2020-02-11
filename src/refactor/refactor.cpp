@@ -11,7 +11,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
-std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::TagClassInt from_class, const char *to_path, Invader::TagClassInt to_class) {
+std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::TagClassInt from_class, const char *to_path, Invader::TagClassInt to_class, bool check_only) {
     // Open the tag
     auto tag = Invader::File::open_file(file_path);
     if(!tag.has_value()) {
@@ -131,16 +131,17 @@ std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::
         }
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to refactor %s: %s", file_path, e.what());
-        return EXIT_FAILURE;
+        eprintf_error("Error: Failed to refactor in %s", file_path);
+        throw;
     }
 
-    if(!Invader::File::save_file(file_path, file_data)) {
-        eprintf_error("Error: Failed to write to %s.", file_path);
-        return EXIT_FAILURE;
+    if(!check_only) {
+        if(!Invader::File::save_file(file_path, file_data)) {
+            eprintf_error("Error: Failed to write to %s.", file_path);
+            throw std::exception();
+        }
+        oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
     }
-
-    oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
 
     return count;
 }
@@ -188,7 +189,9 @@ int main(int argc, char * const *argv) {
     // Go through all the tags
     std::size_t total_tags = 0;
     std::size_t total_replaced = 0;
-    auto recursively_refactor_dir = [&total_tags, &total_replaced, &from, &to](const std::filesystem::path &dir, auto &recursively_refactor_dir) -> void {
+    std::vector<std::string> tags_to_do;
+
+    auto recursively_refactor_dir = [&from, &to, &tags_to_do](const std::filesystem::path &dir, auto &recursively_refactor_dir) -> void {
         for(auto i : std::filesystem::directory_iterator(dir)) {
             if(i.is_directory()) {
                 recursively_refactor_dir(i, recursively_refactor_dir);
@@ -215,22 +218,39 @@ int main(int argc, char * const *argv) {
                         break;
 
                     default: {
-                        std::size_t count = refactor_tag(path.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second);
+                        std::size_t count = refactor_tag(path.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second, true);
                         if(count) {
-                            total_tags++;
-                            total_replaced += count;
+                            tags_to_do.emplace_back(path);
                         }
                     }
                 }
-
-
             }
         }
     };
 
-    // Go!
-    recursively_refactor_dir(std::filesystem::path(refactor_options.tags), recursively_refactor_dir);
-    oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
+    // Test run
+    try {
+        recursively_refactor_dir(std::filesystem::path(refactor_options.tags), recursively_refactor_dir);
+    }
+    catch(std::exception &) {
+        return EXIT_FAILURE;
+    }
 
-    return EXIT_SUCCESS;
+    // Now actually do it
+    if(tags_to_do.size()) {
+        for(auto &tag : tags_to_do) {
+            std::size_t count = refactor_tag(tag.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second, false);
+            if(count) {
+                total_replaced += count;
+                total_tags++;
+            }
+        }
+
+        oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
+        return EXIT_SUCCESS;
+    }
+    else {
+        eprintf_error("Error: No tags reference %s.%s", from.first.c_str(), tag_class_to_extension(from.second));
+        return EXIT_FAILURE;
+    }
 }
