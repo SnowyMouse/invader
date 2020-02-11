@@ -21,6 +21,14 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
 
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+
     src/hek/class_int.cpp
     src/hek/data_type.cpp
     src/hek/map.cpp
@@ -95,19 +103,17 @@ if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
         ${INVADER_SOURCE_FILES}
     )
-    add_library(invader-header-gen STATIC
-        "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-        ${INVADER_PARSER_FILES}
-    )
 else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
     )
-    add_library(invader-header-gen SHARED
-        "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
-        ${INVADER_PARSER_FILES}
-    )
 endif()
+
+# Do this
+add_custom_target(invader-header-gen
+    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+)
+add_dependencies(invader invader-header-gen)
 
 # P8 palette library (separate for slightly faster building)
 add_library(invader-bitmap-p8-palette STATIC
@@ -193,4 +199,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette invader-header-gen zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
