@@ -216,7 +216,17 @@ int main(int argc, char * const *argv) {
 
     // Figure out what we need to do
     std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
+    std::vector<TagFile *> replacements_files;
     auto all_tags = load_virtual_tag_folder(refactor_options.tags);
+
+    auto unmaybe = [](const auto &value, const char *arg) -> const auto & {
+        if(!value.has_value()) {
+            eprintf_error("Error: %s is not a valid reference", arg);
+            std::exit(EXIT_FAILURE);
+        }
+        return value.value();
+    };
+
     if(refactor_options.recursive) {
         auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[0]));
         auto from_halo_size = from_halo.size();
@@ -226,9 +236,10 @@ int main(int argc, char * const *argv) {
         for(auto &t : all_tags) {
             auto halo_path = preferred_path_to_halo_path(t.tag_path);
             if(halo_path.find(from_halo) == 0 && halo_path[from_halo_size] == '\\') {
-                TagFilePath from = {t.tag_path, t.tag_class_int};
-                TagFilePath to = {to_halo + '\\' + t.tag_path.substr(from_halo_size), t.tag_class_int};
+                TagFilePath from = unmaybe(split_tag_class_extension(halo_path), t.tag_path.c_str());
+                TagFilePath to = {to_halo + '\\' + from.path.substr(from_halo.size()), t.tag_class_int};
                 replacements.emplace_back(std::move(from), std::move(to));
+                replacements_files.emplace_back(&t);
             }
         }
 
@@ -238,25 +249,35 @@ int main(int argc, char * const *argv) {
         }
     }
     else {
-        auto from_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[0]));
+        auto from_halo_path = preferred_path_to_halo_path(remaining_arguments[0]);
+        auto from_maybe = split_tag_class_extension(from_halo_path);
         auto to_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[1]));
 
-        auto unmaybe = [](auto &value, const char *arg) {
-            if(!value.has_value()) {
-                eprintf_error("%s is not a valid reference", arg);
-                std::exit(EXIT_FAILURE);
+        auto &from = unmaybe(from_maybe, remaining_arguments[0]);
+        auto &to = unmaybe(to_maybe, remaining_arguments[1]);
+
+        if(!refactor_options.no_move) {
+            replacements.emplace_back(from, to);
+            bool added = false;
+            for(auto &t : all_tags) {
+                if(preferred_path_to_halo_path(t.tag_path) == from_halo_path) {
+                    replacements_files.emplace_back(&t);
+                    added = true;
+                    break;
+                }
             }
-            return value.value();
-        };
 
-        auto from = unmaybe(from_maybe, remaining_arguments[0]);
-        auto to = unmaybe(to_maybe, remaining_arguments[1]);
+            if(!added) {
+                eprintf_error("Error: %s was not found.", remaining_arguments[0]);
+                return EXIT_FAILURE;
+            }
+        }
 
-        replacements.emplace_back(from, to);
 
         // If we're moving tags, we can't change tag classes
         if(!refactor_options.no_move && to.class_int != from.class_int) {
-            eprintf_error("Tag class cannot be changed if moving tags.");
+            eprintf_error("Error: Tag class cannot be changed if moving tags.");
+            return EXIT_FAILURE;
         }
     }
 
@@ -264,6 +285,7 @@ int main(int argc, char * const *argv) {
     std::size_t total_tags = 0;
     std::size_t total_replaced = 0;
     std::vector<TagFile *> tags_to_do;
+
     for(auto &tag : all_tags) {
         if(refactor_tags(tag.full_path.c_str(), replacements, true)) {
             tags_to_do.emplace_back(&tag);
@@ -283,6 +305,63 @@ int main(int argc, char * const *argv) {
 
     // Move everything
     if(!refactor_options.no_move) {
+        auto replacement_count = replacements.size();
+        bool deleted_error_shown = false;
+        for(std::size_t i = 0; i < replacement_count; i++) {
+            auto *file = replacements_files[i];
+            auto &replacement = replacements[i];
 
+            auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
+
+            // Create directories. If this fails, it probably matters, but it's not critical in and of itself
+            try {
+                std::filesystem::create_directories(new_path.parent_path());
+            }
+            catch(std::exception &) {}
+
+            // Rename, copying as a last resort
+            bool renamed = false;
+            try {
+                std::filesystem::rename(file->full_path, new_path);
+                renamed = true;
+            }
+            catch(std::exception &e) {
+                try {
+                    std::filesystem::copy(file->full_path, new_path);
+                    eprintf_error("Error: Failed to move %s to %s, thus it was copied instead: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
+                }
+                catch(std::exception &e) {
+                    eprintf_error("Error: Failed to move or copy %s to %s: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
+                }
+            }
+
+            // Lastly, delete empty directories if possible, obviously doing that only if renamed
+            if(renamed) {
+                auto delete_directory_if_empty = [](std::filesystem::path directory, auto &delete_directory_if_empty, int depth) -> bool {
+                    if(++depth == 256) {
+                        return false;
+                    }
+                    for(auto &i : std::filesystem::directory_iterator(directory)) {
+                        if(!i.is_directory() || !delete_directory_if_empty(i.path(), delete_directory_if_empty, depth)) {
+                            return false;
+                        }
+                    }
+                    std::filesystem::remove_all(directory);
+                    return true;
+                };
+                try {
+                    auto parent = file->full_path.parent_path();
+                    while(delete_directory_if_empty(parent, delete_directory_if_empty, 0)) {
+                        parent = parent.parent_path();
+                    }
+                }
+                catch(std::exception &) {
+                    deleted_error_shown = true;
+                }
+            }
+        }
+        if(deleted_error_shown) {
+            eprintf_error("Error: Failed to delete some empty directories");
+        }
     }
 }
