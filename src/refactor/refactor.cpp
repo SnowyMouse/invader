@@ -237,7 +237,7 @@ int main(int argc, char * const *argv) {
             auto halo_path = preferred_path_to_halo_path(t.tag_path);
             if(halo_path.find(from_halo) == 0 && halo_path[from_halo_size] == '\\') {
                 TagFilePath from = unmaybe(split_tag_class_extension(halo_path), t.tag_path.c_str());
-                TagFilePath to = {to_halo + '\\' + from.path.substr(from_halo.size()), t.tag_class_int};
+                TagFilePath to = {to_halo + from.path.substr(from_halo_size), t.tag_class_int};
                 replacements.emplace_back(std::move(from), std::move(to));
                 replacements_files.emplace_back(&t);
             }
