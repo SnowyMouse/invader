@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.25.0] - 2020-02-11
 ### Added
 - New tool: invader-refactor - Find and replace tag references.
 - invader-strip: Added `-p` which runs the tag through Invader's preprocessor
@@ -11,13 +11,15 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader: gbxmodel tags that have markers located in the main model struct are
   now considered invalid
+- invader: Tags with multiple consecutive path separators are now fixed when
+  run through the tag or map parser
 
-## [0.24.2] - 2019-02-01
+## [0.24.2] - 2020-02-01
 ### Fixed
 - invader-build: Fixed ejection port recovery rate being calculated as 1 for
   some tags
 
-## [0.24.1] - 2019-01-31
+## [0.24.1] - 2020-01-31
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
@@ -40,7 +42,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed change color permutation weights not being converted to
   cutoffs.
 
-## [0.24.0] - 2019-01-22
+## [0.24.0] - 2020-01-22
 ### Added
 - invader-strip: Added `-a` which strips the entire tags directory
 
@@ -48,7 +50,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-dependency: `-r` and `-R` no longer show tag errors
 - invader-extract: `-r` no longer shows tag errors
 
-## [0.23.5] - 2019-01-22
+## [0.23.5] - 2020-01-22
 ### Fixed
 - invader-build: Fixed a bug where negative-scale weapon HUD interface values
   were NOT defaulted to 1
