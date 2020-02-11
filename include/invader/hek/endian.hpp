@@ -18,7 +18,7 @@ namespace Invader::HEK {
      */
     template <typename T> class SwappedEndian {
     public:
-        std::byte value[sizeof(T)];
+        std::byte value[sizeof(T)] = {};
 
         /**
          * Convert the value to host endian.
@@ -55,6 +55,14 @@ namespace Invader::HEK {
         void operator =(const T &new_value) noexcept {
             return this->write(new_value);
         }
+
+        SwappedEndian(const T &new_value) noexcept {
+            this->write(new_value);
+        }
+
+        SwappedEndian() noexcept {
+
+        }
     };
 
     /**
@@ -62,7 +70,7 @@ namespace Invader::HEK {
      */
     template <typename T> class NativeEndian {
     public:
-        std::byte value[sizeof(T)];
+        std::byte value[sizeof(T)] = {};
 
         /**
          * Convert the value to host endian.
@@ -94,6 +102,14 @@ namespace Invader::HEK {
          */
         void operator =(const T &new_value) noexcept {
             return this->write(new_value);
+        }
+
+        NativeEndian(const T &new_value) noexcept {
+            this->write(new_value);
+        }
+
+        NativeEndian() noexcept {
+
         }
     };
 

@@ -253,7 +253,7 @@ namespace Invader::Parser {
             auto &straggler_triangle = this->triangles.emplace_back();
             auto *triangle_indices = indices + triangle_count * 3;
             straggler_triangle.vertex0_index = triangle_indices[0];
-            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1] : NULL_INDEX;
+            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1].read() : NULL_INDEX;
             straggler_triangle.vertex2_index = NULL_INDEX;
         }
     }

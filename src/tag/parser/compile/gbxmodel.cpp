@@ -436,9 +436,9 @@ namespace Invader::Parser {
         // Add it all
         triangle_indices.reserve(this->triangles.size() * 3);
         for(auto &t : this->triangles) {
-            triangle_indices.push_back(t.vertex0_index);
-            triangle_indices.push_back(t.vertex1_index);
-            triangle_indices.push_back(t.vertex2_index);
+            triangle_indices.emplace_back(t.vertex0_index);
+            triangle_indices.emplace_back(t.vertex1_index);
+            triangle_indices.emplace_back(t.vertex2_index);
         }
 
         // Remove excess NULL_INDEX values
