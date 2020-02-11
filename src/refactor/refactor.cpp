@@ -218,7 +218,24 @@ int main(int argc, char * const *argv) {
     std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
     auto all_tags = load_virtual_tag_folder(refactor_options.tags);
     if(refactor_options.recursive) {
-        throw;
+        auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[0]));
+        auto from_halo_size = from_halo.size();
+        auto to_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[1]));
+
+        // Go through each tag to find a match
+        for(auto &t : all_tags) {
+            auto halo_path = preferred_path_to_halo_path(t.tag_path);
+            if(halo_path.find(from_halo) == 0 && halo_path[from_halo_size] == '\\') {
+                TagFilePath from = {t.tag_path, t.tag_class_int};
+                TagFilePath to = {to_halo + '\\' + t.tag_path.substr(from_halo_size), t.tag_class_int};
+                replacements.emplace_back(std::move(from), std::move(to));
+            }
+        }
+
+        if(replacements.size() == 0) {
+            eprintf_error("No tags were found in %s", halo_path_to_preferred_path(from_halo).c_str());
+            return EXIT_FAILURE;
+        }
     }
     else {
         auto from_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[0]));
@@ -239,7 +256,7 @@ int main(int argc, char * const *argv) {
 
         // If we're moving tags, we can't change tag classes
         if(!refactor_options.no_move && to.class_int != from.class_int) {
-            eprintf_error("Tag class cannot be changed if moving tags.")
+            eprintf_error("Tag class cannot be changed if moving tags.");
         }
     }
 
