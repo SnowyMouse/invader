@@ -15,8 +15,6 @@ set(INVADER_PARSER_FILES
 
 # Invader library
 set(INVADER_SOURCE_FILES
-    ${INVADER_PARSER_FILES}
-
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
