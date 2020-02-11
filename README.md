@@ -131,6 +131,7 @@ this project is split into different programs.
 - [invader-font]
 - [invader-indexer]
 - [invader-info]
+- [invader-refactor]
 - [invader-resource]
 - [invader-sound]
     - [What is splitting?]
@@ -437,6 +438,32 @@ Options:
                                tags-external-loc-indices,
                                tags-external-pointers,
                                tags-external-sound-indices
+```
+
+### invader-refactor
+This program renames and moves tag references.
+
+```
+Usage: invader-refactor [options] <-M | -N> < <from.class> <to.class> | -r <from-dir> <to-dir> >
+
+Find and replace tag references.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -M --move                    Move files that are being refactored. This can
+                               only be set once and cannot be set with
+                               --no-move.
+  -N --no-move                 Do not move any files; just change the
+                               references in the tags. This can only be set
+                               once and cannot be set with --move.
+  -r --recursive               Recursively move all tags in a directory. This
+                               will fail if a tag is present in both the old
+                               and new directories, and it cannot be used with
+                               --no-move.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
 ```
 
 ### invader-resource
@@ -786,6 +813,7 @@ for multiplayer maps.
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer
 [invader-info]: #invader-info
+[invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound
 [invader-string]: #invader-string
