@@ -64,8 +64,7 @@ int main(int argc, const char **argv) {
                     auto &tag = map[i];
 
                     // Replace double slashes (or more) with one slash
-                    std::string path = std::regex_replace(tag.path, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-
+                    std::string path = Invader::File::remove_duplicate_slashes(tag.path);
                     std::fprintf(f, "%s\n", path.c_str());
                 }
             }
@@ -99,7 +98,7 @@ int main(int argc, const char **argv) {
                     auto &tag = map.get_tag(i);
 
                     // Replace double slashes (or more) with one slash
-                    std::string path = std::regex_replace(tag.get_path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
+                    std::string path = Invader::File::remove_duplicate_slashes(tag.get_path());
                     std::fprintf(f, "%s.%s\n", path.c_str(), tag_class_to_extension(tag.get_tag_class_int()));
                 }
             }

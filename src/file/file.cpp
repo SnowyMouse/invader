@@ -322,4 +322,24 @@ namespace Invader::File {
 
         return elements;
     }
+
+
+   std::string remove_duplicate_slashes(const std::string &path) {
+       const char *tag_path_c = path.c_str();
+       std::vector<char> tag_path_cv(tag_path_c, tag_path_c + path.size() + 1);
+       remove_duplicate_slashes_chars(tag_path_cv.data());
+       return tag_path_cv.data();
+   }
+
+   void remove_duplicate_slashes_chars(char *path) {
+       for(char *i = path; *i; i++) {
+           char this_i = i[0];
+           char next_i = i[1];
+           if((this_i == '\\' || this_i == '/' || this_i == std::filesystem::path::preferred_separator) && (next_i == '\\' || next_i == '/' || next_i == std::filesystem::path::preferred_separator)) {
+               for(char *j = i + 1; *j; j++) {
+                   j[0] = j[1];
+               }
+           }
+       }
+   }
 }

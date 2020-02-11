@@ -143,6 +143,19 @@ namespace Invader::File {
     void remove_trailing_slashes_chars(char *path);
 
     /**
+     * Remove duplicate slashes from the path
+     * @param  path path to remove duplicate slashes from
+     * @return      path with removed duplicate slashes
+     */
+    std::string remove_duplicate_slashes(const std::string &path);
+
+    /**
+     * Remove duplicate slashes from the path
+     * @param  path path to remove duplicate slashes from
+     */
+    void remove_duplicate_slashes_chars(char *path);
+
+    /**
      * Get the base name of the tag path
      * @param  tag_path tag path to get
      * @return          base name
