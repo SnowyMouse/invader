@@ -194,11 +194,36 @@ int main(int argc, char * const *argv) {
                 recursively_refactor_dir(i, recursively_refactor_dir);
             }
             else if(i.is_regular_file()) {
-                std::size_t count = refactor_tag(i.path().string().c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second);
-                if(count) {
-                    total_tags++;
-                    total_replaced += count;
+                // See what we've got
+                auto path = i.path().string();
+                auto file_split = Invader::File::split_tag_class_extension(path);
+                if(!file_split.has_value()) {
+                    continue;
                 }
+
+                // Discard anything that can't have a reference
+                switch(file_split->second) {
+                    case Invader::TagClassInt::TAG_CLASS_BITMAP:
+                    case Invader::TagClassInt::TAG_CLASS_STRING_LIST:
+                    case Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                    case Invader::TagClassInt::TAG_CLASS_CAMERA_TRACK:
+                    case Invader::TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS:
+                    case Invader::TagClassInt::TAG_CLASS_PHYSICS:
+                    case Invader::TagClassInt::TAG_CLASS_POINT_PHYSICS:
+                    case Invader::TagClassInt::TAG_CLASS_WIND:
+                    case Invader::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT:
+                        break;
+
+                    default: {
+                        std::size_t count = refactor_tag(path.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second);
+                        if(count) {
+                            total_tags++;
+                            total_replaced += count;
+                        }
+                    }
+                }
+
+
             }
         }
     };
