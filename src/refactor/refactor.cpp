@@ -11,9 +11,11 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/file/file.hpp>
 
-std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::TagClassInt from_class, const char *to_path, Invader::TagClassInt to_class, bool check_only) {
+using namespace Invader::File;
+
+std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePath, TagFilePath>> replacements, bool check_only) {
     // Open the tag
-    auto tag = Invader::File::open_file(file_path);
+    auto tag = open_file(file_path);
     if(!tag.has_value()) {
         eprintf_error("Failed to open %s", file_path);
         return EXIT_FAILURE;
@@ -21,17 +23,19 @@ std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::
 
     // Get the header
     std::vector<std::byte> file_data;
-    std::size_t count;
+    std::size_t count = 0;
 
     try {
         const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
         Invader::HEK::TagFileHeader::validate_header(header, tag->size());
 
-        #define REFACTOR_TAG_CLASS(class_struct, class_int) case Invader::TagClassInt::class_int: { \
+        #define REFACTOR_TAG_CLASS(class_struct, tag_class_int) case Invader::TagClassInt::tag_class_int: { \
             auto tag_data = Invader::Parser::class_struct::parse_hek_tag_file(tag->data(), tag->size()); \
-            count = tag_data.refactor_reference(from_path, from_class, to_path, to_class); \
+            for (auto &r : replacements) { \
+                count += tag_data.refactor_reference(r.first.path.c_str(), r.first.class_int, r.second.path.c_str(), r.second.class_int); \
+            } \
             if(count) { \
-                file_data = tag_data.generate_hek_tag_data(Invader::TagClassInt::class_int); \
+                file_data = tag_data.generate_hek_tag_data(Invader::TagClassInt::tag_class_int); \
             } \
             else { \
                 return count; \
@@ -136,8 +140,8 @@ std::size_t refactor_tag(const char *file_path, const char *from_path, Invader::
     }
 
     if(!check_only) {
-        if(!Invader::File::save_file(file_path, file_data)) {
-            eprintf_error("Error: Failed to write to %s.", file_path);
+        if(!save_file(file_path, file_data)) {
+            eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path);
             throw std::exception();
         }
         oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
@@ -152,7 +156,7 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("no-move", 'n', 0, "Do not move any files; just change the references in the tags (dangerous).");
+    options.emplace_back("no-move", 'n', 0, "Do not move any files; just change the references in the tags.");
     options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
@@ -190,86 +194,54 @@ int main(int argc, char * const *argv) {
         refactor_options.tags.emplace_back("tags");
     }
 
-    // Parse the stuff
-    auto from_maybe = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(remaining_arguments[0]));
-    auto to_maybe = Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(remaining_arguments[1]));
+    // Figure out what we need to do
+    std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
+    if(refactor_options.recursive) {
+        eprintf_error("Unimplemented");
+        return EXIT_FAILURE;
+    }
+    else {
+        auto from_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[0]));
+        auto to_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[1]));
 
-    auto unmaybe = [](auto &value, const char *arg) {
-        if(!value.has_value()) {
-            eprintf_error("%s is not a valid reference", arg);
-            std::exit(EXIT_FAILURE);
-        }
-        return value.value();
-    };
+        auto unmaybe = [](auto &value, const char *arg) {
+            if(!value.has_value()) {
+                eprintf_error("%s is not a valid reference", arg);
+                std::exit(EXIT_FAILURE);
+            }
+            return value.value();
+        };
 
-    auto from = unmaybe(from_maybe, remaining_arguments[0]);
-    auto to = unmaybe(to_maybe, remaining_arguments[1]);
+        auto from = unmaybe(from_maybe, remaining_arguments[0]);
+        auto to = unmaybe(to_maybe, remaining_arguments[1]);
 
-    // Go through all the tags
+        replacements.emplace_back(from, to);
+    }
+
+    // Go through all the tags and see what needs edited
     std::size_t total_tags = 0;
     std::size_t total_replaced = 0;
-    std::vector<std::string> tags_to_do;
-
-    auto recursively_refactor_dir = [&from, &to, &tags_to_do](const std::filesystem::path &dir, auto &recursively_refactor_dir) -> void {
-        for(auto i : std::filesystem::directory_iterator(dir)) {
-            if(i.is_directory()) {
-                recursively_refactor_dir(i, recursively_refactor_dir);
-            }
-            else if(i.is_regular_file()) {
-                // See what we've got
-                auto path = i.path().string();
-                auto file_split = Invader::File::split_tag_class_extension(path);
-                if(!file_split.has_value()) {
-                    continue;
-                }
-
-                // Discard anything that can't have a reference
-                switch(file_split->second) {
-                    case Invader::TagClassInt::TAG_CLASS_BITMAP:
-                    case Invader::TagClassInt::TAG_CLASS_STRING_LIST:
-                    case Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
-                    case Invader::TagClassInt::TAG_CLASS_CAMERA_TRACK:
-                    case Invader::TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS:
-                    case Invader::TagClassInt::TAG_CLASS_PHYSICS:
-                    case Invader::TagClassInt::TAG_CLASS_POINT_PHYSICS:
-                    case Invader::TagClassInt::TAG_CLASS_WIND:
-                    case Invader::TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT:
-                        break;
-
-                    default: {
-                        std::size_t count = refactor_tag(path.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second, true);
-                        if(count) {
-                            tags_to_do.emplace_back(path);
-                        }
-                    }
-                }
-            }
+    std::vector<TagFile *> tags_to_do;
+    auto all_tags = load_virtual_tag_folder(refactor_options.tags);
+    for(auto &tag : all_tags) {
+        if(refactor_tags(tag.full_path.c_str(), replacements, true)) {
+            tags_to_do.emplace_back(&tag);
         }
-    };
-
-    // Test run
-    try {
-        recursively_refactor_dir(std::filesystem::path(refactor_options.tags[0]), recursively_refactor_dir);
-    }
-    catch(std::exception &) {
-        return EXIT_FAILURE;
     }
 
     // Now actually do it
-    if(tags_to_do.size()) {
-        for(auto &tag : tags_to_do) {
-            std::size_t count = refactor_tag(tag.c_str(), from.first.c_str(), from.second, to.first.c_str(), to.second, false);
-            if(count) {
-                total_replaced += count;
-                total_tags++;
-            }
+    for(auto *tag : tags_to_do) {
+        std::size_t count = refactor_tags(tag->full_path.c_str(), replacements, false);
+        if(count) {
+            total_replaced += count;
+            total_tags++;
         }
-
-        oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
-        return EXIT_SUCCESS;
     }
-    else {
-        eprintf_error("Error: No tags reference %s.%s", from.first.c_str(), tag_class_to_extension(from.second));
-        return EXIT_FAILURE;
+
+    oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
+
+    // Move everything
+    if(!refactor_options.no_move) {
+
     }
 }
