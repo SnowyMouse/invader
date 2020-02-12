@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.25.2] - 2020-02-12
 ### Added
 - invader-refactor: Added `-D` which performs the operation without making any
   actual changes
@@ -16,6 +16,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-archive: Fixed an issue with single tag archival when archiving
   bitmaps or sounds
+- invader-extract: Fixed an issue where some hidden values were being stripped
+  unnecessarily
+- invader-strip: Fixed an issue where some hidden values were being stripped
+  unnecessarily
 
 ## [0.25.1] - 2020-02-12
 ### Changed
