@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed a typo in an error message for weapon_hud_interface tags
 - invader-build: Fixed showing the wrong indices in weapon_hud_interface errors
+- invader-build: Fixed non-power-of-two check giving incorrect results when
+  compiling bitmaps
 
 ## [0.25.0] - 2020-02-11
 ### Added

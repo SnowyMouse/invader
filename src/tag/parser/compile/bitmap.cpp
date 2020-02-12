@@ -70,10 +70,10 @@ namespace Invader::Parser {
             if(!workload.hide_pedantic_warnings) {
                 auto power_of_two = [](auto value) -> bool {
                     while(value > 1) {
-                        value <<= 1;
                         if(value & 1) {
                             return false;
                         }
+                        value >>= 1;
                     }
                     return true;
                 };
