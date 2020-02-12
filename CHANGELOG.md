@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unchanged]
+### Fixed
+- invader-build: Fixed a typo in an error message for weapon_hud_interface tags
+
 ## [0.25.0] - 2020-02-11
 ### Added
 - New tool: invader-refactor - Find and replace tag references.
