@@ -2,7 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unchanged]
+## [0.25.1] - 2020-02-12
+### Changed
+- invader-build: Now warns if a biped or vehicle is missing an animation graph,
+  and, if not, errors if the tag is missing a model
+
 ### Fixed
 - invader-build: Fixed a typo in an error message for weapon_hud_interface tags
 - invader-build: Fixed showing the wrong indices in weapon_hud_interface errors
