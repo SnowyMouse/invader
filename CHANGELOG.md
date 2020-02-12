@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-refactor: Added `-D` which performs the operation without making any
+  actual changes
+
 ### Changed
 - invader-build: Now errors if any tag has an animation graph but no model
 

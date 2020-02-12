@@ -13,7 +13,7 @@
 
 using namespace Invader::File;
 
-std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePath, TagFilePath>> replacements, bool check_only) {
+std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePath, TagFilePath>> replacements, bool check_only, bool dry_run) {
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
@@ -140,7 +140,7 @@ std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePa
     }
 
     if(!check_only) {
-        if(!save_file(file_path, file_data)) {
+        if(!dry_run && !save_file(file_path, file_data)) {
             eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path);
             throw std::exception();
         }
@@ -156,18 +156,20 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move.");
-    options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move.");
+    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This cannot be set with --move or --no-move.");
+    options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move or --dry-run.");
+    options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
     options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <-M | -N> < <from.class> <to.class> | -r <from-dir> <to-dir> >";
+    static constexpr char USAGE[] = "[options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
         bool no_move = false;
         bool recursive = false;
         bool set_move_or_no_move = false;
+        bool dry_run = false;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
@@ -182,7 +184,7 @@ int main(int argc, char * const *argv) {
                 if(refactor_options.set_move_or_no_move) {
                     // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
                     SPAGHETTI_CODE_VELOCIRAPTOR:
-                    eprintf_error("Error: -M or -N can only be set once.");
+                    eprintf_error("Error: -D, -M, or -N can only be set once.");
                     std::exit(EXIT_FAILURE);
                 }
                 refactor_options.no_move = true;
@@ -197,6 +199,13 @@ int main(int argc, char * const *argv) {
             case 'r':
                 refactor_options.recursive = true;
                 break;
+            case 'D':
+                if(refactor_options.set_move_or_no_move) {
+                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
+                }
+                refactor_options.dry_run = true;
+                refactor_options.set_move_or_no_move = true;
+                break;
         }
     });
 
@@ -206,7 +215,7 @@ int main(int argc, char * const *argv) {
     }
 
     if(!refactor_options.set_move_or_no_move) {
-        eprintf_error("Error: Either --no-move or --move need must be set");
+        eprintf_error("Error: Either --dry-run, --no-move, or --move need must be set");
         return EXIT_FAILURE;
     }
 
@@ -227,6 +236,7 @@ int main(int argc, char * const *argv) {
         return value.value();
     };
 
+    // If recursive, we need to go through each tag in the tag directory for a match
     if(refactor_options.recursive) {
         auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[0]));
         auto from_halo_size = from_halo.size();
@@ -286,14 +296,14 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile *> tags_to_do;
 
     for(auto &tag : all_tags) {
-        if(refactor_tags(tag.full_path.string().c_str(), replacements, true)) {
+        if(refactor_tags(tag.full_path.string().c_str(), replacements, true, refactor_options.dry_run)) {
             tags_to_do.emplace_back(&tag);
         }
     }
 
     // Now actually do it
     for(auto *tag : tags_to_do) {
-        std::size_t count = refactor_tags(tag->full_path.string().c_str(), replacements, false);
+        std::size_t count = refactor_tags(tag->full_path.string().c_str(), replacements, false, refactor_options.dry_run);
         if(count) {
             total_replaced += count;
             total_tags++;
@@ -303,7 +313,7 @@ int main(int argc, char * const *argv) {
     oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
 
     // Move everything
-    if(!refactor_options.no_move) {
+    if(!refactor_options.dry_run && !refactor_options.no_move) {
         auto replacement_count = replacements.size();
         bool deleted_error_shown = false;
         for(std::size_t i = 0; i < replacement_count; i++) {
