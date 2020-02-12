@@ -110,10 +110,13 @@ else()
 endif()
 
 # Do this
-add_custom_target(invader-header-gen
-    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+add_custom_target(invader-header-version
+    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
 )
-add_dependencies(invader invader-header-gen)
+add_custom_target(invader-header-gen
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+)
+add_dependencies(invader invader-header-gen invader-header-version)
 
 # P8 palette library (separate for slightly faster building)
 add_library(invader-bitmap-p8-palette STATIC
