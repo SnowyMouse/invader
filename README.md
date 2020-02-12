@@ -464,6 +464,8 @@ Options:
                                will fail if a tag is present in both the old
                                and new directories, and it cannot be used with
                                --no-move.
+  -s --single-tag <path>       Make changes to a single tag, only, rather than
+                               the whole tag directory.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.

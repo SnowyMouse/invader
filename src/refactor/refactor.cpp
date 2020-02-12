@@ -18,7 +18,7 @@ std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePa
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
         eprintf_error("Failed to open %s", file_path);
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // Get the header
@@ -160,6 +160,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move or --dry-run.");
     options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
     options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
+    options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "[options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >";
@@ -170,6 +171,7 @@ int main(int argc, char * const *argv) {
         bool recursive = false;
         bool set_move_or_no_move = false;
         bool dry_run = false;
+        const char *single_tag = nullptr;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
@@ -206,6 +208,9 @@ int main(int argc, char * const *argv) {
                 refactor_options.dry_run = true;
                 refactor_options.set_move_or_no_move = true;
                 break;
+            case 's':
+                refactor_options.single_tag = arguments[0];
+                break;
         }
     });
 
@@ -226,7 +231,38 @@ int main(int argc, char * const *argv) {
     // Figure out what we need to do
     std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
     std::vector<TagFile *> replacements_files;
-    auto all_tags = load_virtual_tag_folder(refactor_options.tags);
+    std::vector<TagFile> all_tags = load_virtual_tag_folder(refactor_options.tags);
+    std::vector<TagFile> single_tag;
+    std::vector<TagFile> *tag_to_modify;
+
+    // Do we only need to go through one tag?
+    if(refactor_options.single_tag) {
+        tag_to_modify = &single_tag;
+
+        // Add this tag to the end
+        auto &tag = single_tag.emplace_back();
+        auto single_tag_maybe = split_tag_class_extension(halo_path_to_preferred_path(refactor_options.single_tag));
+        if(!single_tag_maybe.has_value()) {
+            eprintf_error("Error: %s is not a valid tag path", refactor_options.single_tag);
+            return EXIT_FAILURE;
+        }
+
+        // Get the path together
+        tag.tag_class_int = single_tag_maybe->class_int;
+        tag.tag_path = single_tag_maybe->path + "." + tag_class_to_extension(single_tag_maybe->class_int);
+
+        // Find it
+        auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags, true);
+        if(!file_path_maybe.has_value()) {
+            eprintf_error("Error: %s was not found in any tag directory", refactor_options.single_tag);
+            return EXIT_FAILURE;
+        }
+
+        tag.full_path = *file_path_maybe;
+    }
+    else {
+        tag_to_modify = &all_tags;
+    }
 
     auto unmaybe = [](const auto &value, const char *arg) -> const auto & {
         if(!value.has_value()) {
@@ -295,7 +331,7 @@ int main(int argc, char * const *argv) {
     std::size_t total_replaced = 0;
     std::vector<TagFile *> tags_to_do;
 
-    for(auto &tag : all_tags) {
+    for(auto &tag : *tag_to_modify) {
         if(refactor_tags(tag.full_path.string().c_str(), replacements, true, refactor_options.dry_run)) {
             tags_to_do.emplace_back(&tag);
         }
