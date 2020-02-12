@@ -6,11 +6,11 @@
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
-    template <typename T> void fix_render_bounding_radius(T &tag) {
+    template <typename T> static void fix_render_bounding_radius(T &tag) {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 
-    template <typename T> void compile_object(T &tag, BuildWorkload &workload, std::size_t tag_index) {
+    template <typename T> static void compile_object(T &tag, BuildWorkload &workload, std::size_t tag_index) {
         tag.scales_change_colors = 0;
         for(auto &c : tag.change_colors) {
             if(c.scale_by != HEK::FunctionScaleBy::FUNCTION_SCALE_BY_NONE) {
