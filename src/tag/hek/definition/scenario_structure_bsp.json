@@ -50,8 +50,7 @@
                 "name": "node stuff",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3,
-                "cache_only": true
+                "count": 3
             }
         ],
         "type": "struct",
@@ -64,8 +63,7 @@
                 "name": "vertices",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3,
-                "cache_only": true
+                "count": 3
             },
             {
                 "type": "pad",
