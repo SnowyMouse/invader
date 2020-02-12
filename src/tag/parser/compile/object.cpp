@@ -354,11 +354,15 @@ namespace Invader::Parser {
             return; // if recursion is disabled, doing any of this will be a meme
         }
 
-        auto &head_index = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset)->head_model_node_index;
+        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &head_index = struct_val.head_model_node_index;
         auto &model_id = this->model.tag_id;
 
         this->head_model_node_index = NULL_INDEX;
+
+        bool wont_spawn = false;
         if(model_id.is_null()) {
+            wont_spawn = true;
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped is missing a model tag, so it will not spawn", tag_index);
         }
         else {
@@ -374,14 +378,16 @@ namespace Invader::Parser {
                         this->head_model_node_index = static_cast<HEK::Index>(n);
                     }
                 }
-
-                if(this->head_model_node_index == NULL_INDEX) {
-                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no \"bip01 head\" node, so the biped will not spawn", tag_index);
-                }
             }
             else {
+                wont_spawn = true;
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no nodes, so the biped will not spawn", tag_index);
             }
+        }
+
+        if(!wont_spawn && struct_val.animation_graph.tag_id.read().is_null()) {
+            wont_spawn = true;
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
         }
 
         head_index = this->head_model_node_index;
