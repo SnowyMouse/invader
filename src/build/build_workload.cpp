@@ -519,6 +519,9 @@ namespace Invader {
             tag_class_int = header->tag_class_int;
         }
 
+        // Set this in case it's not set yet
+        this->tags[tag_index].tag_class_int = *tag_class_int;
+
         // Check CRC32
         if(!this->hide_pedantic_warnings) {
             HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);

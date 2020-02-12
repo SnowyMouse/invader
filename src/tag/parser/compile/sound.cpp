@@ -46,11 +46,13 @@ namespace Invader::Parser {
         auto &this_struct = *reinterpret_cast<struct_little *>(data + offset);
         this_struct.samples.size = static_cast<std::uint32_t>(this->samples.size());
 
+        // Who am I??
         auto &new_id_1 = workload.structs[struct_index].dependencies.emplace_back();
         new_id_1.tag_index = tag_index;
         new_id_1.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_0) - data;
         new_id_1.tag_id_only = true;
 
+        // 24601!!!!!!!
         auto &new_id_2 = workload.structs[struct_index].dependencies.emplace_back();
         new_id_2.tag_index = tag_index;
         new_id_2.offset = reinterpret_cast<std::byte *>(&this_struct.tag_id_1) - data;

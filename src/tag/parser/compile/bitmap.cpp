@@ -9,13 +9,15 @@ namespace Invader::Parser {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
+        this->pointer = 0xFFFFFFFF;
+        this->flags.external = 0;
+        this->flags.make_it_actually_work = 1;
+
+        // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
         auto &d = s.dependencies.emplace_back();
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
         d.tag_id_only = true;
-        this->pointer = 0xFFFFFFFF;
-        this->flags.external = 0;
-        this->flags.make_it_actually_work = 1;
     }
 
     void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
