@@ -361,7 +361,7 @@ namespace Invader::Parser {
         this->head_model_node_index = NULL_INDEX;
 
         if(model_id.is_null()) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Biped is missing a model tag", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Biped is missing a model", tag_index);
         }
         else {
             auto &model_tag = workload.tags[model_id.index];
