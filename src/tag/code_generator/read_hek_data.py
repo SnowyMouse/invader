@@ -28,7 +28,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
         cpp_read_hek_data.write("        [[maybe_unused]] const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
             name = struct["name"]
-            if "cache_only" in struct and struct["cache_only"]:
+            cache_only = "cache_only" in struct and struct["cache_only"]
+            if cache_only and struct["type"] != "TagReflexive":
                 continue
             default_sign = "<=" if "default_sign" in struct and struct["default_sign"] else "=="
             if struct["type"] == "TagDependency":
@@ -67,10 +68,15 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
                 cpp_read_hek_data.write("            data_size -= total_size;\n")
                 cpp_read_hek_data.write("            data_read += total_size;\n")
                 cpp_read_hek_data.write("            data += total_size;\n")
-                cpp_read_hek_data.write("            r.{}.reserve(h_{}_count);\n".format(name, name))
+                if not cache_only:
+                    cpp_read_hek_data.write("            r.{}.reserve(h_{}_count);\n".format(name, name))
                 cpp_read_hek_data.write("            for(std::size_t ref = 0; ref < h_{}_count; ref++) {{\n".format(name))
                 cpp_read_hek_data.write("                std::size_t ref_data_read = 0;\n")
-                cpp_read_hek_data.write("                r.{}.emplace_back({}::parse_hek_tag_data(data, data_size, ref_data_read, postprocess, reinterpret_cast<const std::byte *>(array + ref)));\n".format(name, struct["struct"]))
+                call = "{}::parse_hek_tag_data(data, data_size, ref_data_read, postprocess, reinterpret_cast<const std::byte *>(array + ref))".format(struct["struct"])
+                if not cache_only:
+                    cpp_read_hek_data.write("                r.{}.emplace_back({});\n".format(name, call))
+                else:
+                    cpp_read_hek_data.write("                {};\n".format(call))
                 cpp_read_hek_data.write("                data += ref_data_read;\n")
                 cpp_read_hek_data.write("                data_read += ref_data_read;\n")
                 cpp_read_hek_data.write("                data_size -= ref_data_read;\n")
