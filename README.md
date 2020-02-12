@@ -444,19 +444,22 @@ Options:
 This program renames and moves tag references.
 
 ```
-Usage: invader-refactor [options] <-M | -N> < <from.class> <to.class> | -r <from-dir> <to-dir> >
+Usage: invader-refactor [options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >
 
 Find and replace tag references.
 
 Options:
+  -D --dry-run                 Do not actually make any changes. This cannot be
+                               set with --move or --no-move.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -M --move                    Move files that are being refactored. This can
                                only be set once and cannot be set with
-                               --no-move.
+                               --no-move or --dry-run.
   -N --no-move                 Do not move any files; just change the
                                references in the tags. This can only be set
-                               once and cannot be set with --move.
+                               once and cannot be set with --move, --dry-run,
+                               or --recursive.
   -r --recursive               Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
                                and new directories, and it cannot be used with
