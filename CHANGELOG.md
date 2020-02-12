@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Now errors if any tag has an animation graph but no model
+- invader-refactor: Some exceptions are now handled by gracefully closing
+  rather than calling abort() and crashing.
 
 ### Fixed
 - invader-archive: Fixed an issue with single tag archival when archiving
