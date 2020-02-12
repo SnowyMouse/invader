@@ -25,7 +25,7 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
     cpp_read_hek_data.write("            data += sizeof(struct_big);\n")
     cpp_read_hek_data.write("        }\n")
     if len(all_used_structs) > 0:
-        cpp_read_hek_data.write("        const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
+        cpp_read_hek_data.write("        [[maybe_unused]] const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
             name = struct["name"]
             if "cache_only" in struct and struct["cache_only"]:
