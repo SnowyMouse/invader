@@ -82,7 +82,7 @@ int main(int argc, const char **argv) {
     else {
         base_tag.insert(base_tag.end(), remaining_arguments[0], remaining_arguments[0] + std::strlen(remaining_arguments[0]));
     }
-    std::string base_tag_cpp_str = base_tag.data();
+    base_tag.emplace_back();
 
     // Variables to hold this
     std::vector<std::pair<std::string, std::string>> archive_list;
@@ -104,6 +104,10 @@ int main(int argc, const char **argv) {
             return EXIT_FAILURE;
         }
     }
+
+    // Fix this a bit
+    Invader::File::halo_path_to_preferred_path_chars(base_tag.data());
+    Invader::File::remove_duplicate_slashes_chars(base_tag.data());
 
     if(!archive_options.single_tag) {
         // Build the map
@@ -154,41 +158,36 @@ int main(int argc, const char **argv) {
     }
     else {
         // Turn it into something the filesystem can understand
-        Invader::File::halo_path_to_preferred_path_chars(base_tag.data());
+        auto base_tag_split_maybe = Invader::File::split_tag_class_extension_chars(base_tag.data());
 
         // Split the extension
-        char *tag_path_to_find = base_tag.data();
-        char *c = nullptr;
-        for(char *d = tag_path_to_find; *d; d++) {
-            if(*d == '.') {
-                c = d + 1;
-            }
-        }
-        if(!c) {
-            eprintf_error("No extension for %s. Archive could not be made.\n", tag_path_to_find);
+        if(!base_tag_split_maybe.has_value()) {
+            eprintf_error("%s is not a valid tag. Archive could not be made.\n", base_tag.data());
             return EXIT_FAILURE;
         }
-        Invader::TagClassInt tag_int_to_find = Invader::HEK::extension_to_tag_class(c);
 
+        // Add it
         bool exists = false;
         for(auto &dir : archive_options.tags) {
-            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag_cpp_str;
+            std::filesystem::path tag_path = std::filesystem::path(dir) / base_tag.data();
             if(std::filesystem::exists(tag_path)) {
                 exists = true;
-                archive_list.emplace_back(tag_path.string(), base_tag_cpp_str);
+                archive_list.emplace_back(tag_path.string(), base_tag.data());
                 break;
             }
         }
 
         if(!exists) {
-            eprintf_error("Failed to find %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            eprintf_error("Failed to find %s. Archive could not be made.\n", base_tag.data());
             return EXIT_FAILURE;
         }
 
+        // Now find its dependencies
         bool success;
-        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_cpp_str.substr(0, c - tag_path_to_find - 1).c_str(), tag_int_to_find, archive_options.tags, false, true, success);
+        auto &base_tag_split = base_tag_split_maybe.value();
+        auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.class_int, archive_options.tags, false, true, success);
         if(!success) {
-            eprintf_error("Failed to archive %s.%s. Archive could not be made.\n", tag_path_to_find, tag_class_to_extension(tag_int_to_find));
+            eprintf_error("Failed to find dependencies for %s. Archive could not be made.\n", base_tag.data());
             return EXIT_FAILURE;
         }
 
