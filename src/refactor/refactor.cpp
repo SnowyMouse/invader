@@ -136,13 +136,13 @@ std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePa
     }
     catch(std::exception &e) {
         eprintf_error("Error: Failed to refactor in %s", file_path);
-        throw;
+        std::exit(EXIT_FAILURE);
     }
 
     if(!check_only) {
         if(!dry_run && !save_file(file_path, file_data)) {
             eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path);
-            throw std::exception();
+            return 0;
         }
         oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
     }
