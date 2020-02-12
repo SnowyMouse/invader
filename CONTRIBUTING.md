@@ -42,7 +42,8 @@ Gearbox.
 - Invader does not (usually) care about the limitations of the original Halo
 Editing Kit.
 
-Forks that support other mods, such as Open Sauce, are certainly welcome, but
+Forks that support other mods, such as Open Sauce, or other releases of the
+game, such as the original Xbox version of the game, are certainly welcome, but
 code or definitions for functionality provided by these mods will not be
 accepted upstream.
 
