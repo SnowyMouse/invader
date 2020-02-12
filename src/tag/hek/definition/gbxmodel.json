@@ -669,7 +669,8 @@
                 "type": "TagReflexive",
                 "struct": "GBXModelMarker",
                 "compound": true,
-                "maximum": 0
+                "maximum": 0,
+                "hidden": true
             },
             {
                 "name": "nodes",
