@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-build: Now errors if any tag has an animation graph but no model
+
 ## [0.25.1] - 2020-02-12
 ### Changed
 - invader-build: Now warns if a biped or vehicle is missing an animation graph,
