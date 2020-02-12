@@ -392,7 +392,7 @@ namespace Invader::Parser {
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
 
         if(struct_val.animation_graph.tag_id.read().is_null()) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Vehicle has no animation graph, so the biped will not spawn", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Vehicle has no animation graph, so the vehicle will not spawn", tag_index);
         }
         else if(struct_val.model.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Vehicle is missing a model", tag_index);
