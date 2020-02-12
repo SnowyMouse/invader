@@ -360,7 +360,10 @@ namespace Invader::Parser {
 
         this->head_model_node_index = NULL_INDEX;
 
-        if(model_id.is_null()) {
+        if(struct_val.animation_graph.tag_id.read().is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
+        }
+        else if(model_id.is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Biped is missing a model", tag_index);
         }
         else {
@@ -382,14 +385,19 @@ namespace Invader::Parser {
             }
         }
 
-        if(struct_val.animation_graph.tag_id.read().is_null()) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
-        }
-
         head_index = this->head_model_node_index;
         calculate_object_predicted_resources(workload, struct_index);
     }
-    void Vehicle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+
+        if(struct_val.animation_graph.tag_id.read().is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Vehicle has no animation graph, so the biped will not spawn", tag_index);
+        }
+        else if(struct_val.model.tag_id.read().is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Vehicle is missing a model", tag_index);
+        }
+
         calculate_object_predicted_resources(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
