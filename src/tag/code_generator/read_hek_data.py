@@ -28,6 +28,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
         cpp_read_hek_data.write("        const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
             name = struct["name"]
+            if "cache_only" in struct and struct["cache_only"]:
+                continue
             default_sign = "<=" if "default_sign" in struct and struct["default_sign"] else "=="
             if struct["type"] == "TagDependency":
                 cpp_read_hek_data.write("        std::size_t h_{}_expected_length = h.{}.path_size;\n".format(name,name))
