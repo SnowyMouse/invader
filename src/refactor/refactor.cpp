@@ -320,7 +320,7 @@ int main(int argc, char * const *argv) {
         }
 
         // If we're moving tags, we can't change tag classes
-        if(!refactor_options.no_move && to.class_int != from.class_int) {
+        if(!refactor_options.no_move && !refactor_options.dry_run && to.class_int != from.class_int) {
             eprintf_error("Error: Tag class cannot be changed if moving tags.");
             return EXIT_FAILURE;
         }
