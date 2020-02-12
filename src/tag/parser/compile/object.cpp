@@ -360,10 +360,8 @@ namespace Invader::Parser {
 
         this->head_model_node_index = NULL_INDEX;
 
-        bool wont_spawn = false;
         if(model_id.is_null()) {
-            wont_spawn = true;
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped is missing a model tag, so it will not spawn", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Biped is missing a model tag", tag_index);
         }
         else {
             auto &model_tag = workload.tags[model_id.index];
@@ -380,13 +378,11 @@ namespace Invader::Parser {
                 }
             }
             else {
-                wont_spawn = true;
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no nodes, so the biped will not spawn", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Biped model has no nodes", tag_index);
             }
         }
 
-        if(!wont_spawn && struct_val.animation_graph.tag_id.read().is_null()) {
-            wont_spawn = true;
+        if(struct_val.animation_graph.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
         }
 
