@@ -256,11 +256,19 @@ namespace Invader {
         }
 
         // Get tag data
-        if(this->header.engine == CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            this->base_memory_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
-        }
-        else if(this->header.engine == CacheFileEngine::CACHE_FILE_DEMO) {
-            this->base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+        switch(this->header.engine) {
+            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                this->base_memory_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
+                break;
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                this->base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                break;
+            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                this->base_memory_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                break;
+            default:
+                this->base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                break;
         }
 
         this->tag_data_length = this->header.tag_data_size;
