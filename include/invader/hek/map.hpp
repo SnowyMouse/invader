@@ -14,7 +14,8 @@ namespace Invader::HEK {
         CACHE_FILE_CUSTOM_EDITION = 0x261,
         CACHE_FILE_DARK_CIRCLET = 0x1A86,
 
-        CACHE_FILE_ANNIVERSARY = 0x233, // CEA actually uses "7" like CACHE_FILE_RETAIL but doing that and supporting retail maps is insane
+        CACHE_FILE_ANNIVERSARY = 0x233, // CEA actually uses "7" like CACHE_FILE_RETAIL but doing that while supporting retail maps is insane
+        CACHE_FILE_ANNIVERSARY_COMPRESSED = 0x7,
 
         CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
         CACHE_FILE_RETAIL_COMPRESSED = 0x861A0007,
@@ -47,8 +48,8 @@ namespace Invader::HEK {
     enum CacheFileLimits : std::size_t {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
         CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = 0xFFFFFFFF,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH = SIZE_MAX,
-        
+        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
+
         CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY = static_cast<std::size_t>(0xFFFFFFFF - CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS),
 
         CACHE_FILE_MAX_TAG_COUNT = 65535

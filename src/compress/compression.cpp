@@ -5,6 +5,7 @@
 #include <zstd.h>
 #include <cstdio>
 #include <filesystem>
+#include <invader/compress/ceaflate.hpp>
 
 namespace Invader::Compression {
     static void compress_header(const std::byte *header_input, std::byte *header_output, std::size_t decompressed_size) {
@@ -29,6 +30,9 @@ namespace Invader::Compression {
                 if(header.decompressed_file_size.read() > 0) {
                     throw MapNeedsDecompressedException();
                 }
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                new_engine_version = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY_COMPRESSED;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
@@ -57,7 +61,9 @@ namespace Invader::Compression {
         // Figure out the new engine version
         auto new_engine_version = header_copy.engine.read();
         switch(header_copy.engine.read()) {
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY_COMPRESSED:
+                new_engine_version = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+                break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 throw MapNeedsCompressedException();
@@ -112,28 +118,56 @@ namespace Invader::Compression {
         // Load the data
         auto map = Map::map_with_pointer(const_cast<std::byte *>(data), data_size);
 
-        // Allocate the data
-        compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
+        // If we're anniversary, compress it with ceaflate
+        auto &header = map.get_cache_file_header();
+        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            std::vector<std::byte> modifiable_input_data(data, data + data_size);
+            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), modifiable_input_data.data(), data_size);
 
-        // Immediately compress it
-        auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
-        if(ZSTD_isError(compressed_size)) {
-            throw CompressionFailureException();
+            // Immediately compress it
+            if(!Ceaflate::compress_file(modifiable_input_data.data(), data_size, output, output_size)) {
+                throw CompressionFailureException();
+            }
+
+            // Done
+            return output_size;
         }
+        else {
+            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
 
-        // Done
-        return compressed_size + HEADER_SIZE;
+            // Immediately compress it
+            auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
+            if(ZSTD_isError(compressed_size)) {
+                throw CompressionFailureException();
+            }
+
+            // Done
+            return compressed_size + HEADER_SIZE;
+        }
     }
 
     std::size_t decompress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size) {
         // Check the header
         const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         if(sizeof(*header) > data_size || !header->valid()) {
-            auto demo_header = static_cast<const HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header));
-            if(demo_header.valid() && demo_header.engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-                throw MapNeedsCompressedException();
+            auto decompressed_size = Ceaflate::find_decompressed_file_size(data, data_size);
+            if(decompressed_size) {
+                if(!Ceaflate::decompress_file(data, data_size, output, output_size) || output_size < sizeof(*header)) {
+                    throw InvalidMapException();
+                }
+                decompress_header(output, output);
+
+                return output_size;
             }
-            throw InvalidMapException();
+            else {
+                auto demo_header = static_cast<const HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header));
+                if(demo_header.valid()) {
+                    if(demo_header.engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                        throw MapNeedsCompressedException();
+                    }
+                }
+                throw InvalidMapException();
+            }
         }
 
         decompress_header(data, output);
@@ -150,7 +184,16 @@ namespace Invader::Compression {
 
     std::vector<std::byte> compress_map_data(const std::byte *data, std::size_t data_size, int compression_level) {
         // Allocate the data
-        std::vector<std::byte> new_data(ZSTD_compressBound(data_size - HEADER_SIZE) + HEADER_SIZE);
+        std::vector<std::byte> new_data;
+        if(data_size < HEADER_SIZE) {
+            throw InvalidMapException();
+        }
+        if(reinterpret_cast<const HEK::CacheFileHeader *>(data)->engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            new_data.resize(data_size * 2);
+        }
+        else {
+            new_data.resize(ZSTD_compressBound(data_size - HEADER_SIZE) + HEADER_SIZE);
+        }
 
         // Compress
         auto compressed_size = compress_map_data(data, data_size, new_data.data(), new_data.size(), compression_level);
@@ -162,12 +205,21 @@ namespace Invader::Compression {
     }
 
     std::vector<std::byte> decompress_map_data(const std::byte *data, std::size_t data_size) {
-        // Allocate and decompress using data from the header
-        const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
-        std::vector<std::byte> new_data(header->decompressed_file_size);
-        decompress_header(data, new_data.data());
+        // If we can do this, move to the front
+        auto cea_decompressed_size = Ceaflate::find_decompressed_file_size(data, data_size);
+        std::vector<std::byte> new_data;
 
-        // Compress
+        if(cea_decompressed_size) {
+            new_data = std::vector<std::byte>(cea_decompressed_size);
+        }
+        else {
+            // Allocate and decompress using data from the header
+            const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+            new_data = std::vector<std::byte>(header->decompressed_file_size);
+            decompress_header(data, new_data.data());
+        }
+
+        // Decompress
         auto decompressed_size = decompress_map_data(data, data_size, new_data.data(), new_data.size());
 
         // Shrink the buffer to the new size

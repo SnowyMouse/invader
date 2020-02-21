@@ -151,6 +151,7 @@ int main(int argc, const char **argv) {
 
     // Warn if needed
     auto &header = map->get_cache_file_header();
+    bool cannot_extract_resources = header.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
     if(extract_options.maps_directory.has_value()) {
         using namespace Invader::HEK;
         switch(header.engine) {
@@ -180,7 +181,7 @@ int main(int argc, const char **argv) {
     // Also here's the tags directory
     std::vector<std::size_t> all_tags_to_extract;
 
-    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header](std::size_t tag_index) -> bool {
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header, &cannot_extract_resources](std::size_t tag_index) -> bool {
         // Used for bad paths
         static const std::regex BAD_PATH_DIRECTORY("(^|.*(\\\\|\\/))\\.{1,2}(\\\\|\\/).*");
 
@@ -189,6 +190,11 @@ int main(int argc, const char **argv) {
 
         // Get the tag path
         const auto &tag = map->get_tag(tag_index);
+
+        if(cannot_extract_resources && (tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP || tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND || tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP)) {
+            eprintf_warn("CEA bitmaps/sounds/BSPs cannot be extracted at this time");
+            return false;
+        }
 
         // See if we can extract this
         auto tag_class_int = tag.get_tag_class_int();

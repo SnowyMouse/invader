@@ -336,14 +336,25 @@ int main(int argc, const char **argv) {
             bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
             auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(crc != header.crc32) {
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                oprintf_success_warn("CRC32:             0x%08X (unable to calculate CEA CRC32s at this time)", crc);
+            }
+            else if(crc != header.crc32) {
                 oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
             }
             else {
                 oprintf_success("CRC32:             0x%08X (matches)", crc);
             }
 
-            if(dirty) {
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                if(memed_by_refinery() || map->is_protected()) {
+                    oprintf_success_warn("Integrity:         Dirty");
+                }
+                else {
+                    oprintf_success_warn("Integrity:         Unknown");
+                }
+            }
+            else if(dirty) {
                 oprintf_success_warn("Integrity:         Dirty");
             }
             else {
@@ -363,7 +374,7 @@ int main(int argc, const char **argv) {
             }
 
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)", total_tags, bitmaps, loc, sounds);
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu loc, %zu sounds%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", loc, sounds, sounds == 1 ? "" : "s");
 
                 char message[256];
                 if(total_indices == 0) {
@@ -395,7 +406,7 @@ int main(int argc, const char **argv) {
                 }
             }
             else {
-                oprintf_success_lesser_warn("External tags:     Yes (%zu bitmaps.map, %zu sounds.map)", bitmaps, sounds);
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu sound%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", sounds, sounds == 1 ? "" : "s");
             }
 
             // Is it protected?
@@ -423,7 +434,15 @@ int main(int argc, const char **argv) {
             oprintf("%08X\n", Invader::calculate_map_crc(map->get_data(), data_length));
             break;
         case DISPLAY_DIRTY:
-            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 || memed_by_refinery() || map->is_protected()) ? "yes" : "no");
+            if(memed_by_refinery() || map->is_protected()) {
+                oprintf("yes\n");
+            }
+            else if(map->get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                oprintf("unknown\n");
+            }
+            else {
+                oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32) ? "yes" : "no");
+            }
             break;
         case DISPLAY_ENGINE:
             oprintf("%s\n", engine_name(header.engine));
