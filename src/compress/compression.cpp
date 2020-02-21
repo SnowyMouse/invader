@@ -150,26 +150,23 @@ namespace Invader::Compression {
         // Check the header
         const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         if(sizeof(*header) > data_size || !header->valid()) {
-            auto demo_header = static_cast<const HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header));
-            if(demo_header.valid()) {
-                if(demo_header.engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-                    throw MapNeedsCompressedException();
-                }
-                throw InvalidMapException();
-            }
-            else {
-                auto decompressed_size = Ceaflate::find_decompressed_file_size(data, data_size);
-                if(decompressed_size) {
-                    if(!Ceaflate::decompress_file(data, data_size, output, output_size) || output_size < sizeof(*header)) {
-                        throw InvalidMapException();
-                    }
-                    decompress_header(output, output);
-
-                    return output_size;
-                }
-                else {
+            auto decompressed_size = Ceaflate::find_decompressed_file_size(data, data_size);
+            if(decompressed_size) {
+                if(!Ceaflate::decompress_file(data, data_size, output, output_size) || output_size < sizeof(*header)) {
                     throw InvalidMapException();
                 }
+                decompress_header(output, output);
+
+                return output_size;
+            }
+            else {
+                auto demo_header = static_cast<const HEK::CacheFileHeader>(*reinterpret_cast<const HEK::CacheFileDemoHeader *>(header));
+                if(demo_header.valid()) {
+                    if(demo_header.engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                        throw MapNeedsCompressedException();
+                    }
+                }
+                throw InvalidMapException();
             }
         }
 

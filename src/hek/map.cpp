@@ -62,7 +62,7 @@ namespace Invader::HEK {
 
     bool CacheFileHeader::valid() const noexcept {
         // Ensure the name and build don't overflow
-        if(this->name.overflows() && !this->build.overflows()) {
+        if(this->name.overflows() || this->build.overflows()) {
             return false;
         }
 
