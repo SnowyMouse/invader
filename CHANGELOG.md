@@ -2,6 +2,24 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.26.0] - 2020-02-21
+### Added
+- invader-compress: Can now decompress/compress CEA maps. If decompressed by a
+  tool besides invader-compress, then the engine version in the header will
+  need to be changed from 0x7 (7) to 0x233 (563) to correctly recompress. The
+  value will be set back to the correct value upon compression.
+- invader-extract: Can now extract tags from CEA maps. If the map is
+  uncompressed from a tool besides invader-compress, then the engine version in
+  the header will need to be changed from 0x7 (7) to 0x233 (563) to correctly
+  load. BSP tags, sounds, and bitmaps do not currently extract.
+- invader-indexer: Can now index tags from CEA maps. If the map is
+  uncompressed from a tool besides invader-compress, then the engine version in
+  the header will need to be changed from 0x7 (7) to 0x233 (563) to correctly
+  load.
+- invader-info: Can now query CEA maps. If the map is uncompressed from a tool
+  besides invader-compress, then the engine version in the header will need to
+  be changed from 0x7 (7) to 0x233 (563) to correctly load.
+
 ## [0.25.2] - 2020-02-12
 ### Added
 - invader-refactor: Added `-D` which performs the operation without making any

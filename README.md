@@ -730,18 +730,18 @@ registers to hold temporary data). People who are unsure may also download a
 made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
-Officially, invader-build only creates maps for the Gearbox port of Halo on the
-PC. The .yelo file format is specific to Open Sauce, a mod of Halo Custom
-Edition. Therefore, the Invader project does not support it. However, this does
-not mean that you can't make a fork of Invader that supports it, and there are
-people who have said they were willing to do this.
+Officially, invader-build only creates maps for officially-released versions of
+the PC game. The .yelo file format is specific to Open Sauce, a mod of Halo
+Custom Edition. Therefore, the Invader project does not support it. However,
+this does not mean that you can't make a fork of Invader that supports it, and
+there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Officially, invader-build only creates maps for the Gearbox port of Halo on the
-PC. While Xbox maps are very similar in format to PC maps, there exists enough
-differences to make supporting the Xbox version non-trivial. Kavawuvi also does
-not have a modded Xbox or a retail copy of the Xbox version of the game, so
-there is no means to debug or test.
+Officially, invader-build only creates maps for officially-released versions of
+the PC game. While Xbox maps are very similar in format to PC maps, there
+exists enough differences to make supporting the Xbox version non-trivial.
+Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox versio
+ of the game, so there is no means to debug or test.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
