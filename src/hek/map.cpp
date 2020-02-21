@@ -15,6 +15,8 @@ namespace Invader::HEK {
                 return "Halo: Combat Evolved (Xbox)";
             case CacheFileEngine::CACHE_FILE_DEMO:
                 return "Halo Demo / Trial";
+            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                return "Halo: Combat Evolved Anniversary (MCC)";
             default:
                 return "Unknown";
         }
