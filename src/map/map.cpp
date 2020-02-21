@@ -4,6 +4,7 @@
 #include <invader/tag/hek/definition.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
+#include <invader/compress/ceaflate.hpp>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 
@@ -80,20 +81,25 @@ namespace Invader {
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
         const auto *potential_header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         bool needs_decompressed = false;
-        if(data_size > sizeof(*potential_header) && potential_header->valid()) {
-            // Check if it needs decompressed
-            switch(potential_header->engine.read()) {
-                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    if(potential_header->decompressed_file_size != 0) {
+        if(data_size > sizeof(*potential_header)) {
+            // Check if it needs decompressed based on header
+            if(potential_header->valid()) {
+                switch(potential_header->engine.read()) {
+                    case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                        if(potential_header->decompressed_file_size != 0) {
+                            needs_decompressed = true;
+                        }
+                        break;
+                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                    case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
                         needs_decompressed = true;
-                    }
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    needs_decompressed = true;
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }
+            else if(Compression::Ceaflate::find_decompressed_file_size(data, data_size)) {
+                needs_decompressed = true;
             }
 
             // If so, decompress it
