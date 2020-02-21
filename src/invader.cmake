@@ -44,6 +44,7 @@ set(INVADER_SOURCE_FILES
     src/bitmap/color_plate_scanner.cpp
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
+    src/compress/ceaflate.cpp
     src/compress/compression.cpp
     src/sound/sound_encoder_flac.cpp
     src/sound/sound_encoder_ogg_vorbis.cpp

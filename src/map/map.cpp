@@ -235,6 +235,7 @@ namespace Invader {
             case CacheFileEngine::CACHE_FILE_DEMO:
             case CacheFileEngine::CACHE_FILE_RETAIL:
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                 break;
             case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                 if(this->header.decompressed_file_size != 0) {
