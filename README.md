@@ -54,10 +54,10 @@ some of these dependencies may have their own dependencies.
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
 - libsamplerate 0.1.9 or newer
+- zlib
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
-- zlib ([invader-bitmap])
 - freetype ([invader-font])
 - git (git commit hash in version - build only)
 
