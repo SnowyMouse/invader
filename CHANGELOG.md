@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.26.1] - 2020-02-21
+### Added
+- invader-extract: Can now extract BSP tags from CEA maps.
+
 ## [0.26.0] - 2020-02-21
 ### Added
 - invader-compress: Can now decompress/compress CEA maps. If decompressed by a

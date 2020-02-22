@@ -1570,11 +1570,22 @@
         "fields": [
             {
                 "name": "pointer",
-                "type": "Pointer"
+                "type": "Pointer",
+                "comment": "points to the BSP tag struct"
+            },
+            {
+                "name": "lightmap vertices size",
+                "type": "uint32",
+                "comment": "size of the lightmap vertices (Halo CE Anniversary on MCC)"
+            },
+            {
+                "name": "lightmap vertices start",
+                "type": "uint32",
+                "comment": "points to the beginning of the lightmap vertices (Halo CE Anniversary on MCC)"
             },
             {
                 "type": "pad",
-                "size": 16
+                "size": 8
             },
             {
                 "name": "signature",
