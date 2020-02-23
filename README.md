@@ -4,6 +4,8 @@ Evolved on the PC.
 
 Our Discord server is https://discord.gg/RCX3nvw
 
+The official source code repository is https://github.com/Kavawuvi/invader
+
 ## License
 Invader is licensed under version 3.0 of the GNU General Public License. Note
 that Invader is NOT licensed under any later or previous version of the GNU
@@ -17,10 +19,25 @@ respectively. Licenses can be found at `src/sound/adpcm_xq/license.txt` and
 
 ## Getting started
 This readme addresses a few topics:
+- [Staying up-to-date]
 - [Contributing]
 - [Getting Invader]
 - [Programs]
 - [Frequently asked questions]
+
+## Staying up-to-date
+To check if you are on an up-to-date version, run one of the tools (e.g.
+invader-info) with the `-i` parameter. On the top of the output is the version
+number that corresponds to the installation of Invader (e.g.
+`Invader 0.26.1.r1776.9db4cc5`). This is the project name (`Invader`), version
+(`0.26.1`), commit number (`r1776`), and commit hash (`9db4cc5`).
+
+Next, go to the [commits](https://github.com/Kavawuvi/invader/commits/master)
+and check the commit hash against the topmost commit. If it is the same, then
+you are using the latest version of Invader.
+
+Make sure to stay up-to-date, as newer version have more features while
+addressing more issues.
 
 ## Contributing
 See CONTRIBUTING.md.
@@ -29,7 +46,8 @@ See CONTRIBUTING.md.
 Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
-You can also download precompiled [Nightly Builds].
+You can also download precompiled [Nightly Builds]. These will generally be
+up-to-date unless commits were made very recently.
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
@@ -787,6 +805,7 @@ for multiplayer maps.
 [Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
 [Chimera]: https://chimera.opencarnage.net
 
+[Staying up-to-date]: #staying-up-to-date
 [Contributing]: #contributing
 [Getting Invader]: #getting-invader
 [Programs]: #programs
