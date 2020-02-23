@@ -1000,7 +1000,11 @@ namespace Invader {
             // Tag data
             auto primary_class = tag.tag_class_int;
             tag_index.indexed = tag.resource_index.has_value();
-            if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
+
+            if(tag.stubbed) {
+                tag_index.tag_data = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS;
+            }
+            else if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
             }
             else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {

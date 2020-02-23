@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unchanged]
+### Fixed
+- invader-build: Fixed maps with stubbed tags being detected as protected in
+  invader-info; note, however, that maps will need to be rebuilt
+
 ## [0.26.1] - 2020-02-21
 ### Added
 - invader-extract: Can now extract BSP tags from CEA maps.
