@@ -47,6 +47,7 @@ int main(int argc, const char **argv) {
         DISPLAY_TAGS_EXTERNAL_POINTERS,
         DISPLAY_TAGS_EXTERNAL_SOUND_INDICES,
         DISPLAY_TAGS_EXTERNAL_INDICES,
+        DISPLAY_UNCOMPRESSED_SIZE,
     };
 
     // Options struct
@@ -56,7 +57,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-bitmap-indices, tags-external-indices, tags-external-loc-indices, tags-external-pointers, tags-external-sound-indices", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-bitmap-indices, tags-external-indices, tags-external-loc-indices, tags-external-pointers, tags-external-sound-indices, uncompressed-size", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -155,6 +156,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "tags-external-indices") == 0) {
                     map_info_options.type = DISPLAY_TAGS_EXTERNAL_INDICES;
+                }
+                else if(std::strcmp(args[0], "uncompressed-size") == 0) {
+                    map_info_options.type = DISPLAY_UNCOMPRESSED_SIZE;
                 }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
@@ -530,6 +534,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_TAGS_EXTERNAL_INDICES:
             uses_external_data(false, true, true, true);
+            break;
+        case DISPLAY_UNCOMPRESSED_SIZE:
+            oprintf("%zu\n", data_length);
             break;
         case DISPLAY_LANGUAGES:
             uses_external_data();
