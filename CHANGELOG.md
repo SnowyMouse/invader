@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-build: Halo CEA tag space limits are now enforced (31 MiB tag space,
+  not including BSPs)
+
 ### Fixed
 - invader-extract: Fixed an issue where certain model_animation tags did not
   extract

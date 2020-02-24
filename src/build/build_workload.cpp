@@ -301,6 +301,8 @@ namespace Invader {
         std::size_t largest_bsp_count = 0;
         std::size_t bsp_count = (this->map_data_structs.size() - 1);
 
+        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
             bsp_count /= 2;
         }
@@ -430,7 +432,10 @@ namespace Invader {
         }
 
         // Make sure we don't go beyond the maximum tag space usage
-        std::size_t tag_space_usage = this->indexed_data_amount + largest_bsp_size + tag_data_size;
+        std::size_t tag_space_usage = this->indexed_data_amount + tag_data_size;
+        if(bsp_size_affects_tag_space) {
+            tag_space_usage += largest_bsp_size;
+        }
         if(tag_space_usage > this->tag_data_size) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size));
             throw MaximumFileSizeException();
@@ -502,7 +507,12 @@ namespace Invader {
                 }
 
                 if(largest_bsp_count < bsp_count) {
-                    oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+                    if(bsp_size_affects_tag_space) {
+                        oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+                    }
+                    else {
+                        oprintf("                   * = Largest BSP%s\n", largest_bsp_count == 1 ? "" : "s");
+                    }
                 }
             }
             oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size), 100.0 * tag_space_usage / this->tag_data_size);
@@ -1164,6 +1174,17 @@ namespace Invader {
         auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
         std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
         std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
+        HEK::Pointer bsp_start_pointer;
+        std::size_t max_bsp_size;
+        if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            bsp_start_pointer = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS;
+            max_bsp_size = bsp_start_pointer;
+        }
+        else {
+            bsp_start_pointer = this->tag_data_address + this->tag_data_size;
+            max_bsp_size = this->tag_data_size;
+        }
+
         if(bsp_count != this->bsp_count) {
             REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
             throw InvalidTagDataException();
@@ -1203,6 +1224,12 @@ namespace Invader {
                 auto &bsp_data_struct = this->map_data_structs.emplace_back();
                 recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
                 std::size_t bsp_size = bsp_data_struct.size();
+
+                if(bsp_size > max_bsp_size) {
+                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
+                    throw InvalidTagDataException();
+                }
+
                 HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
                 tag_data_b = bsp_data_struct.data();
 
