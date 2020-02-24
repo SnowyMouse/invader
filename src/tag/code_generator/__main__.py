@@ -56,7 +56,7 @@ for i in range(11, len(sys.argv)):
                                 for s in subclass:
                                     arr.append(s)
                                 break
-                    expand_superclass(f["classes"], "object", ["unit", "device", "item", "projectile", "scenery"])
+                    expand_superclass(f["classes"], "object", ["unit", "device", "item", "projectile", "scenery", "sound_scenery"])
                     expand_superclass(f["classes"], "unit", ["vehicle", "biped"])
                     expand_superclass(f["classes"], "item", ["weapon", "garbage", "equipment"])
                     expand_superclass(f["classes"], "shader", ["shader_environment", "shader_model", "shader_transparent_chicago", "shader_transparent_chicago_extended", "shader_transparent_glass", "shader_transparent_meter", "shader_transparent_plasma", "shader_transparent_water"])

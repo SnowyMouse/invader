@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Actually changed `anniversary` to `mcc`
+- invader-build: Fixed sound_scenery references not working in effect tags
 - invader-extract: Fixed an issue where certain model_animation tags did not
   extract
 
