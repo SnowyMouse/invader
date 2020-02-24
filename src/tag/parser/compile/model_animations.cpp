@@ -231,8 +231,8 @@ namespace Invader::Parser {
         this->offset_to_compressed_data = 0;
 
         // Let's do default_data. Basically just add what isn't in frame_data, and only for one frame
-        const auto *default_data_big = this->default_data.data();
-        if(!compressed) {
+        if(default_data_size != 0 && !compressed) {
+            const auto *default_data_big = this->default_data.data();
             std::vector<std::byte> default_data(default_data_size);
             auto *default_data_little = default_data.data();
             for(std::size_t node = 0; node < node_count; node++) {
