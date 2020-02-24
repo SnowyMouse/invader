@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.27.1] - 2020-02-24
 ### Added
 - invader-build: Added --uncompressed for engine targets that default to
   compressed (i.e. `mcc`) to be built as uncompressed.
