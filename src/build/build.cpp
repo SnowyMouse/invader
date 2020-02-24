@@ -107,7 +107,7 @@ int main(int argc, const char **argv) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                     build_options.compress = true; // there is no reason to not have this default since it always supports it
                 }
-                else if(std::strcmp(arguments[0], "anniversary") == 0) {
+                else if(std::strcmp(arguments[0], "mcc") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
                     build_options.compress = true; // CEA does not support uncompressed maps
                 }

@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
   not including BSPs)
 
 ### Fixed
+- invader-build: Actually changed `anniversary` to `mcc`
 - invader-extract: Fixed an issue where certain model_animation tags did not
   extract
 
