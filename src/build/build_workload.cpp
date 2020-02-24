@@ -205,6 +205,10 @@ namespace Invader {
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
                     break;
+                case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                    workload.tag_data_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_size = static_cast<HEK::Pointer>(~0) - HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                    break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
@@ -295,9 +299,17 @@ namespace Invader {
         std::size_t bsp_size = 0;
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
-        std::size_t bsp_count = this->map_data_structs.size() - 1;
+        std::size_t bsp_count = (this->map_data_structs.size() - 1);
+
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            bsp_count /= 2;
+        }
+
         for(std::size_t i = 1; i < 1 + bsp_count; i++) {
             std::size_t this_bsp_size = this->map_data_structs[i].size();
+            if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                this_bsp_size += this->map_data_structs[i + 1].size();
+            }
             if(this_bsp_size > largest_bsp_size) {
                 largest_bsp_size = this_bsp_size;
                 largest_bsp_count = 1;
@@ -334,8 +346,16 @@ namespace Invader {
         final_data.resize(sizeof(HEK::CacheFileHeader));
 
         // Go through each BSP and add that stuff
-        for(std::size_t b = 0; b < this->bsp_count; b++) {
-            final_data.insert(final_data.end(), this->map_data_structs[b + 1].begin(), this->map_data_structs[b + 1].end());
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            for(std::size_t b = 0; b < this->bsp_count; b++) {
+                final_data.insert(final_data.end(), this->map_data_structs[b * 2 + 1].begin(), this->map_data_structs[b * 2 + 1].end());
+                final_data.insert(final_data.end(), this->map_data_structs[b * 2 + 2].begin(), this->map_data_structs[b * 2 + 2].end());
+            }
+        }
+        else {
+            for(std::size_t b = 0; b < this->bsp_count; b++) {
+                final_data.insert(final_data.end(), this->map_data_structs[b + 1].begin(), this->map_data_structs[b + 1].end());
+            }
         }
 
         // Now add all the raw data
@@ -386,16 +406,20 @@ namespace Invader {
         }
 
         // Calculate the CRC32
-        if(this->verbose) {
-            oprintf("Calculating CRC32...");
-            oflush();
-        }
-        std::uint32_t new_random = 0;
-        std::uint32_t new_crc = calculate_map_crc(final_data.data(), final_data.size(), this->forge_crc.has_value() ? &this->forge_crc.value() : nullptr, &new_random);
-        tag_data_struct.random_number = new_random;
-        header.crc32 = new_crc;
-        if(this->verbose) {
-            oprintf(" done\n");
+        std::uint32_t new_crc = 0;
+        bool can_calculate_crc = this->engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+        if(can_calculate_crc) {
+            if(this->verbose) {
+                oprintf("Calculating CRC32...");
+                oflush();
+            }
+            std::uint32_t new_random = 0;
+            new_crc = calculate_map_crc(final_data.data(), final_data.size(), this->forge_crc.has_value() ? &this->forge_crc.value() : nullptr, &new_random);
+            tag_data_struct.random_number = new_random;
+            header.crc32 = new_crc;
+            if(this->verbose) {
+                oprintf(" done\n");
+            }
         }
 
         // Check to make sure we aren't too big
@@ -407,9 +431,8 @@ namespace Invader {
 
         // Make sure we don't go beyond the maximum tag space usage
         std::size_t tag_space_usage = this->indexed_data_amount + largest_bsp_size + tag_data_size;
-        std::size_t tag_space_max = this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET ? HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET : HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-        if(tag_space_usage > tag_space_max) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(tag_space_max));
+        if(tag_space_usage > this->tag_data_size) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size));
             throw MaximumFileSizeException();
         }
 
@@ -482,10 +505,12 @@ namespace Invader {
                     oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
                 }
             }
-            oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(tag_space_max), 100.0 * tag_space_usage / tag_space_max);
+            oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size), 100.0 * tag_space_usage / this->tag_data_size);
             oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
             oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(this->all_raw_data.size()), BYTES_TO_MiB(this->raw_bitmap_size), BYTES_TO_MiB(this->raw_sound_size));
-            oprintf("CRC32 checksum:    0x%08X\n", new_crc);
+            if(can_calculate_crc) {
+                oprintf("CRC32 checksum:    0x%08X\n", new_crc);
+            }
             if(this->compress) {
                 std::size_t compressed_size = final_data.size();
                 oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
@@ -1119,7 +1144,7 @@ namespace Invader {
         };
 
         // Build the tag data for the main tag data
-        auto &tag_data_struct = map_data_structs.emplace_back();
+        auto &tag_data_struct = this->map_data_structs.emplace_back();
         recursively_generate_data(tag_data_struct, 0, recursively_generate_data);
         auto *tag_data_b = tag_data_struct.data();
 
@@ -1154,10 +1179,29 @@ namespace Invader {
                     continue;
                 }
 
+                // Do it!
+                auto &base_struct = *t.base_struct;
+                if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                    auto &base_struct_data = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(this->structs[base_struct].data.data());
+                    bool found = false;
+                    for(auto &o : this->bsp_vertices) {
+                        if(o.first == i) {
+                            base_struct_data.lightmap_vertices_size = o.second.size();
+                            base_struct_data.lightmap_vertices_start = bsp_end;
+                            bsp_end += this->map_data_structs.emplace_back(o.second).size();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found) {
+                        this->map_data_structs.emplace_back();
+                    }
+                }
+
                 // Build the tag data for the BSP data now
                 pointers.clear();
-                auto &bsp_data_struct = map_data_structs.emplace_back();
-                recursively_generate_data(bsp_data_struct, *t.base_struct, recursively_generate_data);
+                auto &bsp_data_struct = this->map_data_structs.emplace_back();
+                recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
                 std::size_t bsp_size = bsp_data_struct.size();
                 HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
                 tag_data_b = bsp_data_struct.data();

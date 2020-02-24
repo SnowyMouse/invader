@@ -2,7 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unchanged]
+## [0.27.0] - 2020-02-24
+### Added
+- invader-info: Added `-T uncompressed-size`
+- invader-build: Added `anniversary` as an engine target. If building MCC CEA
+  maps, you will need to modify the .imeta tag, too
+
 ### Fixed
 - invader-build: Fixed maps with stubbed tags being detected as protected in
   invader-info; note, however, that maps will need to be rebuilt
