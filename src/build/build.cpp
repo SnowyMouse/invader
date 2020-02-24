@@ -51,7 +51,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, anniversary", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, anniversary, dark", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use a specific maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -59,7 +59,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
-    options.emplace_back("compress", 'c', 0, "Compress the cache file.");
+    options.emplace_back("compress", 'c', 0, "Compress the cache file. This is default for anniversary and dark engines.");
+    options.emplace_back("uncompressed", 'u', 0, "Do not compress the cache file. This is default for demo, retail, and custom engines.");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
 
@@ -92,15 +93,19 @@ int main(int argc, const char **argv) {
             case 'g':
                 if(std::strcmp(arguments[0], "custom") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "retail") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "demo") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "dark") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+                    build_options.compress = true; // there is no reason to not have this default since it always supports it
                 }
                 else if(std::strcmp(arguments[0], "anniversary") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
@@ -130,6 +135,9 @@ int main(int argc, const char **argv) {
             case 'c':
                 build_options.compress = true;
                 break;
+            case 'u':
+                build_options.compress = false;
+                break;
             case 'P':
                 build_options.use_filesystem_path = true;
                 break;
@@ -150,7 +158,7 @@ int main(int argc, const char **argv) {
     });
 
     if(build_options.always_index_tags && build_options.no_external_tags) {
-        eprintf_error("%s: --no-index-tags conflicts with --always-index-tags.", argv[0]);
+        eprintf_error("--no-index-tags conflicts with --always-index-tags.");
         return EXIT_FAILURE;
     }
 

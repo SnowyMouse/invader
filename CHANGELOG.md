@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-build: Added --uncompressed for engine targets that default to
+  compressed (i.e. `anniversary`) to be built as uncompressed.
+
 ## [0.27.0] - 2020-02-24
 ### Added
 - invader-info: Added `-T uncompressed-size`
