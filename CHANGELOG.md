@@ -6,7 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-info: Added `-T uncompressed-size`
 - invader-build: Added `anniversary` as an engine target. If building MCC CEA
-  maps, you will need to modify the .imeta tag, too
+  maps, you will need to modify the .fmeta tag, too
 
 ### Fixed
 - invader-build: Fixed maps with stubbed tags being detected as protected in
