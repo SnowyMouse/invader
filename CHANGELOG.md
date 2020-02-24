@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-extract: Fixed an issue where certain model_animation tags did not
+  extract
+
 ## [0.28.0] - 2020-02-24
 ### Added
 - New tool: invader-collection - Generates tag collection tags

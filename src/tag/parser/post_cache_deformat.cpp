@@ -348,43 +348,46 @@ namespace Invader::Parser {
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
         if(frame_size != total_frame_size) {
-            eprintf_error("frame size (%zu) != total frame size (%zu)", static_cast<std::size_t>(frame_size), total_frame_size);
+            eprintf_error("Frame size is invalid (%zu != %zu)", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
         }
 
         // Do default data
         std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
         if(!this->flags.compressed_data) {
-            if(default_data.size() != expected_default_data_size) {
-                eprintf_error("default data size (%zu) != expected_default_data_size (%zu)", static_cast<std::size_t>(frame_size), expected_default_data_size);
-                throw InvalidTagDataException();
-            }
+            std::size_t default_data_size = default_data.size();
+            if(default_data_size > 0) {
+                if(default_data.size() != expected_default_data_size) {
+                    eprintf_error("Default data size is invalid (%zu > 0 && %zu != %zu)", default_data_size, static_cast<std::size_t>(default_data_size), expected_default_data_size);
+                    throw InvalidTagDataException();
+                }
 
-            if(expected_default_data_size > 0) {
-                auto *default_data_big = this->default_data.data();
-                auto *default_data_little = default_data.data();
+                if(expected_default_data_size > 0) {
+                    auto *default_data_big = this->default_data.data();
+                    auto *default_data_little = default_data.data();
 
-                for(std::size_t node = 0; node < this->node_count; node++) {
-                    if(!rotate[node]) {
-                        auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
-                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
-                        rotation_big = rotation_little;
-                        default_data_big += sizeof(rotation_big);
-                        default_data_little += sizeof(rotation_big);
-                    }
-                    if(!transform[node]) {
-                        auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
-                        const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
-                        transform_big = transform_little;
-                        default_data_big += sizeof(transform_big);
-                        default_data_little += sizeof(transform_big);
-                    }
-                    if(!scale[node]) {
-                        auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
-                        const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
-                        scale_big = scale_little;
-                        default_data_big += sizeof(scale_big);
-                        default_data_little += sizeof(scale_big);
+                    for(std::size_t node = 0; node < this->node_count; node++) {
+                        if(!rotate[node]) {
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
+                            rotation_big = rotation_little;
+                            default_data_big += sizeof(rotation_big);
+                            default_data_little += sizeof(rotation_big);
+                        }
+                        if(!transform[node]) {
+                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
+                            transform_big = transform_little;
+                            default_data_big += sizeof(transform_big);
+                            default_data_little += sizeof(transform_big);
+                        }
+                        if(!scale[node]) {
+                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
+                            scale_big = scale_little;
+                            default_data_big += sizeof(scale_big);
+                            default_data_little += sizeof(scale_big);
+                        }
                     }
                 }
             }
@@ -404,7 +407,7 @@ namespace Invader::Parser {
         }
         else {
             if(frame_data.size() != frame_data_size_expected) {
-                eprintf_error("frame_data.size() (%zu) != frame_data_size_expected (%zu)", frame_data.size(), frame_data_size_expected);
+                eprintf_error("Frame data size is invalid (%zu != %zu)", frame_data.size(), frame_data_size_expected);
                 throw InvalidTagDataException();
             }
 
