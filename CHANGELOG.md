@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Actually changed `anniversary` to `mcc`
 - invader-build: Fixed sound_scenery references not working in effect tags
+- invader-build: Fixed some bounds checking issues when compiling invalid
+  collision models or BSP collision
 - invader-extract: Fixed an issue where certain model_animation tags did not
   extract
 

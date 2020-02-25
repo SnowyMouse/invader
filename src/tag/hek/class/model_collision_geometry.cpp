@@ -19,7 +19,7 @@ namespace Invader::HEK {
         while(!node_index.flag_value() && !node_index.is_null()) {
             // Make sure it's a valid index
             if(node_index >= bsp3d_node_count) {
-                eprintf_error("Invalid BSP2D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
+                eprintf_error("Invalid BSP3D node %u / %u in BSP.\n", node_index.int_value(), bsp3d_node_count);
                 throw OutOfBoundsException();
             }
 
