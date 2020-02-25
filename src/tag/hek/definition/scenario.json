@@ -768,8 +768,14 @@
         "name": "ScenarioScenery",
         "fields": [
             {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "unused in Halo PC; bitmask"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 6
             },
             {
                 "type": "pad",
@@ -1178,8 +1184,14 @@
         "name": "ScenarioLightFixture",
         "fields": [
             {
+                "type": "uint16",
+                "name": "bsp indices",
+                "cache_only": true,
+                "comment": "unused in Halo PC; bitmask"
+            },
+            {
                 "type": "pad",
-                "size": 8
+                "size": 6
             },
             {
                 "name": "power group",
@@ -3321,7 +3333,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioBSP",
                 "compound": true,
-                "maximum": 65534
+                "maximum": 16
             }
         ],
         "type": "struct",

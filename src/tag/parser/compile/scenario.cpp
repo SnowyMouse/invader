@@ -479,6 +479,33 @@ namespace Invader::Parser {
             }
         }
 
+        // Determine which BSP light fixtures and scenery are in
+        #define FIND_BSP_INDICES_FOR_OBJECT_ARRAY(array_type, objects) { \
+            std::size_t object_count = this->objects.size(); \
+            if(object_count) { \
+                auto &object_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.objects.pointer)]; \
+                auto *object_array = reinterpret_cast<array_type::struct_little *>(object_struct.data.data()); \
+                for(std::size_t o = 0; o < object_count; o++) { \
+                    std::uint32_t bsp_indices = 0; \
+                    auto &object = object_array[o]; \
+                    if(object.type != NULL_INDEX) { \
+                        for(std::size_t b = 0; b < bsp_count; b++) { \
+                            /* Check if we're inside this BSP */ \
+                            auto &bsp = bsp_data[b]; \
+                            if(!leaf_for_point_of_bsp_tree(object.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null()) { \
+                                bsp_indices |= 1 << b; \
+                            } \
+                        } \
+                    } \
+                    /* Set to the result */ \
+                    object.bsp_indices = bsp_indices; \
+                } \
+            } \
+        }
+
+        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioScenery, scenery);
+        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures);
+
         std::size_t bsp_find_warnings = 0;
 
         // Determine which BSP the encounters fall in

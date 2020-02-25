@@ -12,6 +12,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed sound_scenery references not working in effect tags
 - invader-build: Fixed some bounds checking issues when compiling invalid
   collision models or BSP collision
+- invader-build: Fixed scenery and light fixtures not spawning on MCC maps
 - invader-extract: Fixed an issue where certain model_animation tags did not
   extract
 
