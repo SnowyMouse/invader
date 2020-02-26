@@ -378,7 +378,7 @@ int main(int argc, const char **argv) {
             }
 
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu loc, %zu sounds%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", loc, sounds, sounds == 1 ? "" : "s");
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", loc, sounds, sounds == 1 ? "" : "s");
 
                 char message[256];
                 if(total_indices == 0) {
