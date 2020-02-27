@@ -179,7 +179,6 @@ namespace Invader::Parser {
             // Add lightmap vertices
             if(this->lightmap_vertices_count == this->rendered_vertices_count) {
                 const auto *compressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little *>(compressed_lightmap_vertices_start);
-                this->compressed_vertices.insert(this->compressed_vertices.end(), reinterpret_cast<const std::byte *>(compressed_bsp_lightmap_vertices), reinterpret_cast<const std::byte *>(compressed_bsp_lightmap_vertices + this->lightmap_vertices_count));
 
                 // Decompress them as well
                 auto *new_uncompressed_bsp_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(
@@ -197,6 +196,8 @@ namespace Invader::Parser {
                 eprintf_error("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
                 throw InvalidTagDataException();
             }
+
+            this->compressed_vertices = std::vector<std::byte>(compressed_bsp_vertices_start, compressed_bsp_vertices_start + total_vertices_size);
         }
         else {
             // Extract vertices
