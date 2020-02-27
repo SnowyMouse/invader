@@ -315,16 +315,19 @@ namespace Invader::HEK {
         r.normal.i = normal_i;
         r.normal.j = normal_j;
         r.normal.k = normal_k;
+        r.normal = r.normal.normalize();
 
         decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
         r.binormal.i = normal_i;
         r.binormal.j = normal_j;
         r.binormal.k = normal_k;
+        r.binormal = r.binormal.normalize();
 
         decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
         r.tangent.i = normal_i;
         r.tangent.j = normal_j;
         r.tangent.k = normal_k;
+        r.tangent = r.tangent.normalize();
         return r;
     }
 
@@ -347,6 +350,7 @@ namespace Invader::HEK {
         r.normal.i = normal_i;
         r.normal.j = normal_j;
         r.normal.k = normal_k;
+        r.normal = r.normal.normalize();
 
         r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_x);
         r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_y);
