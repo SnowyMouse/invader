@@ -112,6 +112,8 @@ namespace Invader::Extraction {
             case TagClassInt::TAG_CLASS_NULL:
                 break;
         }
+        
+        eprintf_error("Tag class %s is unsupported", tag_class_to_extension(tag_class_int));
 
         throw InvalidTagDataException();
     }
