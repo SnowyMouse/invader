@@ -242,6 +242,7 @@ namespace Invader {
             case CacheFileEngine::CACHE_FILE_RETAIL:
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+            case CacheFileEngine::CACHE_FILE_XBOX:
                 break;
             case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                 if(this->header.decompressed_file_size != 0) {
@@ -271,6 +272,9 @@ namespace Invader {
                 break;
             case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                 this->base_memory_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                break;
+            case CacheFileEngine::CACHE_FILE_XBOX:
+                this->base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                 break;
             default:
                 this->base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;

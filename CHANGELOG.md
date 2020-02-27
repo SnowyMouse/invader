@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-extract: Added partial support for uncompressed Xbox maps
+- invader-info: Added partial support for uncompressed Xbox maps
+
 ## [0.28.1] - 2020-02-25
 ### Changed
 - invader-build: Halo CEA tag space limits are now enforced (31 MiB tag space,

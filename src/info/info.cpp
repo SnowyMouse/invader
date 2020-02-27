@@ -335,22 +335,28 @@ int main(int argc, const char **argv) {
             oprintf(")\n");
 
             // Get CRC
-            auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
+            std::uint32_t crc = 0;
             bool external_data_used = uses_external_data();
             bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                oprintf_success_warn("CRC32:             0x%08X (unable to calculate CEA CRC32s at this time)", crc);
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                oprintf_success_warn("CRC32:             Unknown");
             }
-            else if(crc != header.crc32) {
-                oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
+            else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                oprintf_success_warn("CRC32:             Unknown");
             }
             else {
-                oprintf_success("CRC32:             0x%08X (matches)", crc);
+                crc = Invader::calculate_map_crc(map->get_data(), data_length);
+                if(crc != header.crc32) {
+                    oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
+                }
+                else {
+                    oprintf_success("CRC32:             0x%08X (matches)", crc);
+                }
             }
+            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 if(memed_by_refinery() || map->is_protected()) {
                     oprintf_success_warn("Integrity:         Dirty");
                 }
