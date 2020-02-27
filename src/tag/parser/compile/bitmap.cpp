@@ -22,7 +22,28 @@ namespace Invader::Parser {
 
     void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         this->postprocess_hek_data();
+
+        auto xbox = tag.get_map().get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+
+        // TODO: Deal with cubemaps and stuff
+        if(xbox && this->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
+            eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
+            throw InvalidTagDataException();
+        }
+
         for(auto &bitmap_data : this->bitmap_data) {
+            // TODO: Deswizzle bitmaps
+            if(bitmap_data.flags.swizzled) {
+                eprintf_error("Swizzled bitmaps are not currently supported");
+                throw InvalidTagDataException();
+            }
+
+            // TODO: Generate last two mipmaps if needed
+            if(bitmap_data.flags.compressed && xbox) {
+                eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
+                throw InvalidTagDataException();
+            }
+
             const std::byte *bitmap_data_ptr;
             bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
             bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
