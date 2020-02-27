@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstddef>
 #include <optional>
+#include <variant>
 #include "../hek/definition.hpp"
 
 namespace Invader {
@@ -13,6 +14,92 @@ namespace Invader {
 }
 
 namespace Invader::Parser {
+    class ParserStructValue {
+    public:
+        enum ValueType {
+            // Integer stuff
+            VALUE_TYPE_INT8,
+            VALUE_TYPE_UINT8,
+            VALUE_TYPE_INT16,
+            VALUE_TYPE_UINT16,
+            VALUE_TYPE_INT32,
+            VALUE_TYPE_UINT32,
+            VALUE_TYPE_COLOR_ARGB8,
+
+            // Float stuff
+            VALUE_TYPE_FLOAT,
+            VALUE_TYPE_ANGLE,
+            VALUE_TYPE_COLOR_ARGB,
+            VALUE_TYPE_COLOR_RGB,
+            VALUE_TYPE_VECTOR2D,
+            VALUE_TYPE_VECTOR3D,
+            VALUE_TYPE_PLANE2D,
+            VALUE_TYPE_PLANE3D,
+            VALUE_TYPE_POINT2D,
+            VALUE_TYPE_POINT3D,
+            VALUE_TYPE_QUATERNION,
+
+            // Other stuff
+            VALUE_TYPE_DATA,
+            VALUE_TYPE_REFLEXIVE, // use templates for this maybe?
+            VALUE_TYPE_DEPENDENCY,
+            VALUE_TYPE_BITMASK
+        };
+
+        enum NumberFormat {
+            NUMBER_FORMAT_FLOAT,
+            NUMBER_FORMAT_INT,
+            NUMBER_FORMAT_NONE
+        };
+
+        using Number = std::variant<std::int64_t, double>;
+
+        /**
+         * Get the value count
+         * @return value count
+         */
+        std::size_t get_value_count() const noexcept;
+
+        /**
+         * Get the number format
+         * @return number format
+         */
+        NumberFormat get_number_format() const noexcept;
+
+        /**
+         * Get the values
+         * @param values values to write to; must point to at least get_value_count() values
+         */
+        void get_values(Number *values) const noexcept;
+
+        /**
+         * Set the values
+         * @param values values to read from; must point to at least get_value_count() values
+         */
+        void set_values(const Number *values) const noexcept;
+
+        /**
+         * Get the value type used
+         * @return value type
+         */
+        ValueType get_type() const noexcept {
+            return this->type;
+        }
+
+        /**
+         * Get the name of the value
+         * @return name of the value
+         */
+        const char *get_name() const noexcept {
+            return this->name;
+        }
+
+    private:
+        ValueType type;
+        const char *name;
+        std::byte *address;
+    };
+
     struct ParserStruct {
         /**
          * Get whether or not the data is formatted for cache files.
