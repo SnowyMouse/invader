@@ -32,12 +32,6 @@ namespace Invader::Parser {
         }
 
         for(auto &bitmap_data : this->bitmap_data) {
-            // TODO: Deswizzle bitmaps
-            if(bitmap_data.flags.swizzled) {
-                eprintf_error("Swizzled bitmaps are not currently supported");
-                throw InvalidTagDataException();
-            }
-
             // TODO: Generate last two mipmaps if needed
             if(bitmap_data.flags.compressed && xbox) {
                 eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
@@ -77,6 +71,18 @@ namespace Invader::Parser {
         auto *pixel_data = this->processed_pixel_data.data();
 
         for(auto &data : this->bitmap_data) {
+            // DXTn bitmaps cannot be swizzled
+            if(data.flags.swizzled && data.flags.compressed) {
+                eprintf_error("Swizzled bitmaps are not supported for compressed bitmaps");
+                throw InvalidTagDataException();
+            }
+
+            // TODO: Swizzle bitmaps for Dark Circlet, deswizzle for Gearbox
+            if(data.flags.swizzled) {
+                eprintf_error("Swizzled bitmaps are not currently supported");
+                throw InvalidTagDataException();
+            }
+
             std::size_t data_index = &data - this->bitmap_data.data();
             bool compressed = data.flags.compressed;
             auto format = data.format;
