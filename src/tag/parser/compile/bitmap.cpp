@@ -146,6 +146,7 @@ namespace Invader::Parser {
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                     bits_per_pixel = 8;
