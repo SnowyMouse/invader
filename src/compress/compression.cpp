@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <invader/compress/ceaflate.hpp>
+#include <zlib.h>
 
 namespace Invader::Compression {
     static void compress_header(const std::byte *header_input, std::byte *header_output, std::size_t decompressed_size) {
@@ -26,6 +27,7 @@ namespace Invader::Compression {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED;
                 break;
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
             case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                 if(header.decompressed_file_size.read() > 0) {
                     throw MapNeedsDecompressedException();
@@ -69,6 +71,7 @@ namespace Invader::Compression {
                 throw MapNeedsCompressedException();
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                 if(header_copy.decompressed_file_size.read() == 0) {
                     throw MapNeedsCompressedException();
                 }
@@ -132,6 +135,23 @@ namespace Invader::Compression {
             // Done
             return output_size;
         }
+        else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
+
+            // Compress that!
+            z_stream deflate_stream = {};
+            deflate_stream.zalloc = Z_NULL;
+            deflate_stream.zfree = Z_NULL;
+            deflate_stream.opaque = Z_NULL;
+            deflate_stream.avail_in = data_size - sizeof(header);
+            deflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(header)));
+            deflate_stream.avail_out = output_size - sizeof(header);
+            deflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(header));
+            if((deflateInit(&deflate_stream, Z_BEST_COMPRESSION) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
+                throw DecompressionFailureException();
+            }
+            return deflate_stream.total_out + HEADER_SIZE;
+        }
         else {
             compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
 
@@ -171,6 +191,22 @@ namespace Invader::Compression {
         }
 
         decompress_header(data, output);
+
+        // If it's Xbox, do this
+        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            z_stream inflate_stream = {};
+            inflate_stream.zalloc = Z_NULL;
+            inflate_stream.zfree = Z_NULL;
+            inflate_stream.opaque = Z_NULL;
+            inflate_stream.avail_in = data_size - sizeof(*header);
+            inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(*header)));
+            inflate_stream.avail_out = output_size - sizeof(*header);
+            inflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(*header));
+            if((inflateInit(&inflate_stream) != Z_OK) || (inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END) || (inflateEnd(&inflate_stream) != Z_OK)) {
+                throw DecompressionFailureException();
+            }
+            return inflate_stream.total_out + HEADER_SIZE;
+        }
 
         // Immediately decompress
         auto decompressed_size = ZSTD_decompress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE);

@@ -4,8 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
-- invader-extract: Added partial support for uncompressed Xbox maps
-- invader-info: Added partial support for uncompressed Xbox maps
+- invader-extract: Added partial support for Xbox maps
+- invader-info: Added partial support for Xbox maps
 
 ## [0.28.1] - 2020-02-25
 ### Changed

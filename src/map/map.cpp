@@ -86,6 +86,7 @@ namespace Invader {
             if(potential_header->valid()) {
                 switch(potential_header->engine.read()) {
                     case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                         if(potential_header->decompressed_file_size != 0) {
                             needs_decompressed = true;
                         }
@@ -242,9 +243,9 @@ namespace Invader {
             case CacheFileEngine::CACHE_FILE_RETAIL:
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-            case CacheFileEngine::CACHE_FILE_XBOX:
                 break;
             case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+            case CacheFileEngine::CACHE_FILE_XBOX:
                 if(this->header.decompressed_file_size != 0) {
                     throw MapNeedsDecompressedException();
                 }
