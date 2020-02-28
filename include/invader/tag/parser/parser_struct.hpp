@@ -184,8 +184,8 @@ namespace Invader::Parser {
          * @return       size of array
          */
         template <typename T>
-        static std::size_t get_array_size_template(void *addr) {
-            return reinterpret_cast<T *>(addr)->size();
+        static std::size_t get_array_size_template(const void *addr) {
+            return reinterpret_cast<const T *>(addr)->size();
         }
 
         /**
@@ -196,9 +196,9 @@ namespace Invader::Parser {
          */
         template <typename T>
         static void delete_objects_in_array_template(std::size_t index, std::size_t count, void *addr) {
-            auto *array = reinterpret_cast<T *>(addr);
+            auto &array = *reinterpret_cast<T *>(addr);
             assert_range_exists(index, count, array);
-            array->erase(array->begin() + index, array->begin() + index + count);
+            array.erase(array.begin() + index, array.begin() + index + count);
         }
 
         /**
@@ -230,7 +230,7 @@ namespace Invader::Parser {
             assert_range_exists(index_from, count, array);
             auto size = array.size();
             if(index_to > size) { // can be inclusive if we're adding objects to the very end
-                eprintf_error("Index is out of bounds %zu > %zu", index, size);
+                eprintf_error("Index is out of bounds %zu > %zu", index_to, size);
                 throw OutOfBoundsException();
             }
             array.insert(array.begin() + index_from, count, typename T::value_type());
@@ -333,12 +333,12 @@ namespace Invader::Parser {
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
 
         template <typename T>
-        static void assert_range_exists(std::size_t index, std::size_t count, T *array) {
+        static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {
             if(count == 0) {
                 return;
             }
 
-            std::size_t size = array->size();
+            std::size_t size = array.size();
             if(count >= size || index >= size || (index + count) > size) {
                 eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count, size);
                 throw OutOfBoundsException();

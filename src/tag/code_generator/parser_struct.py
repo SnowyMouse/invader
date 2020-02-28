@@ -29,7 +29,9 @@ def make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name, ext
                     cpp_struct_value.write("TagClassInt::TAG_CLASS_{}".format(classes[c].upper()))
                 cpp_struct_value.write("};\n");
                 cpp_struct_value.write("    values.emplace_back({}, {}_types, {});\n".format(first_arguments, member_name, classes_len))
-        #elif struct["type"] == "TagReflexive":
+        elif struct["type"] == "TagReflexive":
+            vstruct = "std::vector<{}>".format(struct["struct"])
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>);\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")
