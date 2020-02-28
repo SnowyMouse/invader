@@ -30,8 +30,8 @@ namespace Invader::Parser {
         const char *name,
         const char *member_name,
         const char *comment,
-        ValueType   type,
         void *      object,
+        ValueType   type,
         std::size_t count,
         bool        bounds
     ) : name(name),

@@ -301,8 +301,8 @@ namespace Invader::Parser {
          * @param name        name of the value
          * @param member_name variable name of the value
          * @param comment     comments
-         * @param type        type of value
          * @param object      pointer to the object
+         * @param type        type of value
          * @param count       number of values (if multiple values or bounds)
          * @param bounds      whether or not this is bounds
          */
@@ -310,8 +310,8 @@ namespace Invader::Parser {
             const char *name,
             const char *member_name,
             const char *comment,
-            ValueType   type,
             void *      object,
+            ValueType   type,
             std::size_t count = 1,
             bool        bounds = false
         );
