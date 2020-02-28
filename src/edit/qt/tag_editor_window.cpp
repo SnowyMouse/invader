@@ -79,12 +79,23 @@ namespace Invader::EditQt {
         for(auto &value : values) {
             auto add_simple_bar = [&vbox_layout, &full_widget, &value](TagEditorTextboxWidget::TextboxSize size, const char *suffix = nullptr) {
                 std::vector<std::string> suffixes;
+
+                auto value_count = value.get_value_count();
+                auto split = value_count / 2;
+
+                for(std::size_t i = 0; i < value_count; i++) {
+                    if(i == split && value.is_bounds()) {
+                        suffixes.emplace_back("-");
+                    }
+                    else {
+                        suffixes.emplace_back();
+                    }
+                }
+
                 if(suffix) {
-                    suffixes.emplace_back();
                     suffixes.emplace_back(suffix);
                 }
 
-                auto value_count = value.get_value_count();
                 TagEditorTextboxWidget *textbox = new TagEditorTextboxWidget(full_widget, value.get_name(), size, value_count, suffixes);
                 std::vector<Parser::ParserStructValue::Number> values(value_count);
                 value.get_values(values.data());

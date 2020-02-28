@@ -98,10 +98,11 @@ namespace Invader::File {
 
     /**
      * Read a tags directory
-     * @param  tags tag directories
-     * @return      all tags in the folder
+     * @param  tags   tag directories
+     * @param  status optional pointer to a size_t to store the current number of tags loaded (for status bars)
+     * @return        all tags in the folder
      */
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags);
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::size_t *status = nullptr);
 
     /**
      * Convert the tag path to a path using the system's preferred separators

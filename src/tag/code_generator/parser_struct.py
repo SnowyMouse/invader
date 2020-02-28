@@ -62,7 +62,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             bounds = "true" if bounds_b else "false"
             count = 1 * (2 if bounds_b else 1)
 
-            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {});\n".format(first_arguments, type.upper(), count))
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {});\n".format(first_arguments, type.upper(), count, bounds))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")
