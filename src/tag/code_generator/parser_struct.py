@@ -36,12 +36,8 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
         elif type == "TagReflexive":
             vstruct = "std::vector<{}>".format(struct["struct"])
             cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>);\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct))
-        elif type == "TagDataOffset":
-            print("TODO: TagDataOffset")
-            pass
-        elif type == "TagString":
-            print("TODO: TagString")
-            pass
+        elif type == "TagDataOffset" or type == "TagString":
+            cpp_struct_value.write("    values.emplace_back({});\n".format(first_arguments))
         elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":
             pass
         elif type == "ScenarioType":

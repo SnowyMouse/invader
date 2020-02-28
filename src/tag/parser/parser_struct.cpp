@@ -63,6 +63,28 @@ namespace Invader::Parser {
         insert_objects_in_array_fn(insert_objects_in_array_fn),
         duplicate_objects_in_array_fn(duplicate_objects_in_array_fn) {}
 
+    ParserStructValue::ParserStructValue(
+        const char *    name,
+        const char *    member_name,
+        const char *    comment,
+        HEK::TagString *string
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(ValueType::VALUE_TYPE_TAGSTRING),
+        address(string) {}
+
+    ParserStructValue::ParserStructValue(
+        const char *            name,
+        const char *            member_name,
+        const char *            comment,
+        std::vector<std::byte> *offset
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(ValueType::VALUE_TYPE_TAGDATAOFFSET),
+        address(offset) {}
+
     ParserStructValue::NumberFormat ParserStructValue::get_number_format() const noexcept {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {
             return NumberFormat::NUMBER_FORMAT_INT;
@@ -108,6 +130,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_BITMASK:
+            case VALUE_TYPE_TAGSTRING:
+            case VALUE_TYPE_TAGDATAOFFSET:
                 return NumberFormat::NUMBER_FORMAT_NONE;
         }
     }
@@ -169,6 +193,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_BITMASK:
+            case VALUE_TYPE_TAGSTRING:
+            case VALUE_TYPE_TAGDATAOFFSET:
                 return 0;
         }
 
@@ -362,6 +388,8 @@ namespace Invader::Parser {
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_BITMASK:
+                case VALUE_TYPE_TAGSTRING:
+                case VALUE_TYPE_TAGDATAOFFSET:
                     eprintf_error("Tried to use get_values() with a type that doesn't have values");
                     std::terminate();
             }
@@ -555,6 +583,8 @@ namespace Invader::Parser {
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_BITMASK:
+                case VALUE_TYPE_TAGSTRING:
+                case VALUE_TYPE_TAGDATAOFFSET:
                     eprintf_error("Tried to use set_values() with a type that doesn't have values");
                     std::terminate();
             }

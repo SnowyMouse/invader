@@ -58,6 +58,8 @@ namespace Invader::Parser {
             VALUE_TYPE_DATA,
             VALUE_TYPE_REFLEXIVE, // use templates for this maybe?
             VALUE_TYPE_DEPENDENCY,
+            VALUE_TYPE_TAGSTRING,
+            VALUE_TYPE_TAGDATAOFFSET,
             VALUE_TYPE_BITMASK
         };
 
@@ -160,6 +162,22 @@ namespace Invader::Parser {
          */
         bool is_bounds() const noexcept {
             return this->bounds;
+        }
+
+        /**
+         * Read the string
+         * @return string
+         */
+        const char *read_string() const noexcept {
+            return reinterpret_cast<HEK::TagString *>(this->address)->string;
+        }
+
+        /**
+         * Write the string
+         * @param string new string
+         */
+        void write_string(const char *string) const noexcept {
+            std::strncpy(reinterpret_cast<HEK::TagString *>(this->address)->string, string, sizeof(HEK::TagString::string) - 1);
         }
 
         using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
@@ -301,6 +319,34 @@ namespace Invader::Parser {
             delete_objects_in_array_fn_type     delete_objects_in_array_fn,
             insert_objects_in_array_fn_type     insert_objects_in_array_fn,
             duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn
+        );
+
+        /**
+         * Instantiate a ParserStructValue with a TagString
+         * @param name        name of the value
+         * @param member_name variable name of the value
+         * @param comment     comments
+         * @param string      pointer to string
+         */
+        ParserStructValue(
+            const char *    name,
+            const char *    member_name,
+            const char *    comment,
+            HEK::TagString *string
+        );
+
+        /**
+         * Instantiate a ParserStructValue with a TagDataOffset
+         * @param name        name of the value
+         * @param member_name variable name of the value
+         * @param comment     comments
+         * @param string      pointer to string
+         */
+        ParserStructValue(
+            const char *            name,
+            const char *            member_name,
+            const char *            comment,
+            std::vector<std::byte> *offset
         );
 
         /**
