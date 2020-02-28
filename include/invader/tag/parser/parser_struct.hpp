@@ -16,6 +16,12 @@ namespace Invader {
 namespace Invader::Parser {
     struct ParserStruct;
 
+    struct Dependency {
+        TagClassInt tag_class_int;
+        std::string path;
+        HEK::TagID tag_id = HEK::TagID::null_tag_id();
+    };
+
     class ParserStructValue {
     public:
         enum ValueType {
@@ -233,35 +239,84 @@ namespace Invader::Parser {
         }
 
         /**
-         * Instantiate a ParserStructValue
-         * @param type                          type of value
-         * @param object                        pointer to the object
-         * @param get_object_in_array_fn        pointer to function for getting object in array (if it's an array)
-         * @param get_array_size_fn             pointer to function for getting the size of array (if it's an array)
-         * @param delete_objects_in_array_fn    pointer to function for deleting objects from an array (if it's an array)
-         * @param insert_objects_in_array_fn    pointer to function for inserting objects in an array (if it's an array)
-         * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array (if it's an array)
+         * Get all of the allowed classes of the dependency
+         * @return all allowed classes
+         */
+        const std::vector<TagClassInt> &get_allowed_classes() const noexcept {
+            return this->allowed_classes;
+        }
+
+        /**
+         * Instantiate a ParserStructValue with a dependency
+         * @param name            name of the dependency
+         * @param member_name     variable name of the dependency
+         * @param comment         comments
+         * @param dependency      pointer to the dependency
+         * @param allowed_classes array of allowed classes
+         * @param count           number of allowed classes in array
          */
         ParserStructValue(
-            ValueType                          type,
-            void *                             object,
-            get_object_in_array_fn_type        get_object_in_array_fn = nullptr,
-            get_array_size_fn_type             get_array_size_fn = nullptr,
-            delete_objects_in_array_fn_type    delete_objects_in_array_fn = nullptr,
-            insert_objects_in_array_fn_type    insert_objects_in_array_fn = nullptr,
-            duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr
+            const char *       name,
+            const char *       member_name,
+            const char *       comment,
+            Dependency *       dependency,
+            const TagClassInt *allowed_classes,
+            std::size_t        count
+        );
+
+        /**
+         * Instantiate a ParserStructValue with an array
+         * @param name                          name of the array
+         * @param member_name                   variable name of the array
+         * @param comment                       comments
+         * @param array                         pointer to the array
+         * @param get_object_in_array_fn        pointer to function for getting object in array
+         * @param get_array_size_fn             pointer to function for getting the size of array
+         * @param delete_objects_in_array_fn    pointer to function for deleting objects from an array
+         * @param insert_objects_in_array_fn    pointer to function for inserting objects in an array
+         * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array
+         */
+        ParserStructValue(
+            const char *                        name,
+            const char *                        member_name,
+            const char *                        comment,
+            void *                              array,
+            get_object_in_array_fn_type         get_object_in_array_fn,
+            get_array_size_fn_type              get_array_size_fn,
+            delete_objects_in_array_fn_type     delete_objects_in_array_fn,
+            insert_objects_in_array_fn_type     insert_objects_in_array_fn,
+            duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn
+        );
+
+        /**
+         * Instantiate a ParserStructValue with a value
+         * @param name        name of the value
+         * @param member_name variable name of the value
+         * @param comment     comments
+         * @param type        type of value
+         * @param object      pointer to the object
+         */
+        ParserStructValue(
+            const char *name,
+            const char *member_name,
+            const char *comment,
+            ValueType   type,
+            void *      object
         );
 
     private:
-        ValueType type;
         const char *name;
+        const char *member_name;
+        const char *comment;
+        ValueType type;
         void *address;
+        std::vector<TagClassInt> allowed_classes;
 
-        get_object_in_array_fn_type get_object_in_array_fn;
-        get_array_size_fn_type get_array_size_fn;
-        delete_objects_in_array_fn_type delete_objects_in_array_fn;
-        insert_objects_in_array_fn_type insert_objects_in_array_fn;
-        duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn;
+        get_object_in_array_fn_type get_object_in_array_fn = nullptr;
+        get_array_size_fn_type get_array_size_fn = nullptr;
+        delete_objects_in_array_fn_type delete_objects_in_array_fn = nullptr;
+        insert_objects_in_array_fn_type insert_objects_in_array_fn = nullptr;
+        duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, T *array) {

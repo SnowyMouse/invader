@@ -3,16 +3,56 @@
 #include <invader/tag/parser/parser_struct.hpp>
 
 namespace Invader::Parser {
+    /**
+     * Instantiate a ParserStructValue with a dependency
+     * @param name            name of the dependency
+     * @param member_name     variable name of the dependency
+     * @param comment         comments
+     * @param dependency      pointer to the dependency
+     * @param allowed_classes array of allowed classes
+     * @param count           number of allowed classes in array
+     */
     ParserStructValue::ParserStructValue(
-        ValueType                          type,
-        void *                             object,
-        get_object_in_array_fn_type        get_object_in_array_fn,
-        get_array_size_fn_type             get_array_size_fn,
-        delete_objects_in_array_fn_type    delete_objects_in_array_fn,
-        insert_objects_in_array_fn_type    insert_objects_in_array_fn,
-        duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn
-    ) : type(type),
-        address(object),
+        const char *       name,
+        const char *       member_name,
+        const char *       comment,
+        Dependency *       dependency,
+        const TagClassInt *allowed_classes,
+        std::size_t        count
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(ValueType::VALUE_TYPE_DEPENDENCY),
+        address(dependency),
+        allowed_classes(allowed_classes, allowed_classes + count) {}
+
+    ParserStructValue::ParserStructValue(
+        const char *name,
+        const char *member_name,
+        const char *comment,
+        ValueType   type,
+        void *      object
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(type),
+        address(object) {}
+
+    ParserStructValue::ParserStructValue(
+        const char *                        name,
+        const char *                        member_name,
+        const char *                        comment,
+        void *                              array,
+        get_object_in_array_fn_type         get_object_in_array_fn,
+        get_array_size_fn_type              get_array_size_fn,
+        delete_objects_in_array_fn_type     delete_objects_in_array_fn,
+        insert_objects_in_array_fn_type     insert_objects_in_array_fn,
+        duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(ValueType::VALUE_TYPE_REFLEXIVE),
+        address(array),
         get_object_in_array_fn(get_object_in_array_fn),
         get_array_size_fn(get_array_size_fn),
         delete_objects_in_array_fn(delete_objects_in_array_fn),

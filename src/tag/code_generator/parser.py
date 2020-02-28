@@ -31,11 +31,6 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
     hpp.write("    class BuildWorkload;\n")
     hpp.write("}\n")
     hpp.write("namespace Invader::Parser {\n")
-    hpp.write("    struct Dependency {\n")
-    hpp.write("        TagClassInt tag_class_int;\n")
-    hpp.write("        std::string path;\n")
-    hpp.write("        HEK::TagID tag_id = HEK::TagID::null_tag_id();\n")
-    hpp.write("    };\n")
 
     write_for_all_cpps("#include <invader/tag/parser/parser.hpp>\n")
     write_for_all_cpps("#include <invader/map/map.hpp>\n")
@@ -109,7 +104,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_read_hek_data)
-        make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name)
+        make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name, extract_hidden)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
         hpp.write("    private:\n")
