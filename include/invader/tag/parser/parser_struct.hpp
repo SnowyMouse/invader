@@ -298,8 +298,12 @@ namespace Invader::Parser {
         }
 
         using list_enum_fn_type = std::vector<const char *>(*)();
+
         using read_enum_fn_type = const char *(*)(void *address);
         using write_enum_fn_type = void (*)(const char *value, void *address);
+
+        using read_bitfield_fn_type = bool (*)(const char *value, void *address);
+        using write_bitfield_fn_type = void (*)(const char *value, bool flag, void *address);
 
         /**
          * Return a list of all of the possible enums
@@ -315,9 +319,9 @@ namespace Invader::Parser {
         }
 
         /**
-         * Convert from an enum value to string
-         * @param  value      value to convert from
-         * @return            string
+         * Read the enum value at the address
+         * @param  address value to read
+         * @return         value as string
          */
         template <typename T, const char *(*convert_fn)(T)>
         static const char *read_enum_template(void *address) {
@@ -325,13 +329,41 @@ namespace Invader::Parser {
         }
 
         /**
-         * Convert from an enum value to string
-         * @param  value      value to convert from
-         * @return            string
+         * Write the enum value at the address
+         * @param  value   value to write
+         * @param  address value to write to
+         * @return         value as string
          */
         template <typename T, T(*convert_fn)(const char *)>
         static void write_enum_template(const char *value, void *address) {
             *reinterpret_cast<T *>(address) = convert_fn(value);
+        }
+
+        /**
+         * Read the bitfield value at the address
+         * @param  value   bit name to read
+         * @param  address value to read from
+         * @return         value
+         */
+        template <typename T, T(*convert_fn)(const char *)>
+        static bool read_bitfield_template(const char *value, void *address) {
+            return static_cast<T>(convert_fn(value)) & *reinterpret_cast<T *>(address);
+        }
+
+        /**
+         * Write the bitfield value to the address
+         * @param  value   bit name to read
+         * @param  bool    bit to write
+         * @param  address value to read from
+         */
+        template <typename T, T(*convert_fn)(const char *)>
+        static void write_bitfield_template(const char *value, bool flag, void *address) {
+            if(flag) {
+                *reinterpret_cast<T *>(address) = static_cast<T>(*reinterpret_cast<T *>(address) | convert_fn(value));
+            }
+            else {
+                *reinterpret_cast<T *>(address) = static_cast<T>(*reinterpret_cast<T *>(address) & ~convert_fn(value));
+            }
         }
 
         /**
@@ -433,6 +465,26 @@ namespace Invader::Parser {
         );
 
         /**
+         * Instantiate a ParserStructValue with a bitfield
+         * @param name              name of the value
+         * @param member_name       variable name of the value
+         * @param comment           comments
+         * @param value             pointer to value
+         * @param list_enum_fn      pointer to function for listing enums
+         * @param read_bitfield_fn  pointer to function for reading enums
+         * @param write_bitfield_fn pointer to function for writing enums
+         */
+        ParserStructValue(
+            const char *       name,
+            const char *       member_name,
+            const char *       comment,
+            void *             value,
+            list_enum_fn_type  list_enum_fn,
+            read_bitfield_fn_type  read_bitfield_fn,
+            write_bitfield_fn_type write_bitfield_fn
+        );
+
+        /**
          * Instantiate a ParserStructValue with a value
          * @param name        name of the value
          * @param member_name variable name of the value
@@ -471,6 +523,8 @@ namespace Invader::Parser {
         list_enum_fn_type list_enum_fn = nullptr;
         read_enum_fn_type read_enum_fn = nullptr;
         write_enum_fn_type write_enum_fn = nullptr;
+        read_bitfield_fn_type read_bitfield_fn = nullptr;
+        write_bitfield_fn_type write_bitfield_fn = nullptr;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {

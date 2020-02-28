@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
+def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arranged):
     f.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     header_name = "INVADER__TAG__HEK__CLASS__DEFINITION_HPP"
     f.write("#ifndef {}\n".format(header_name))
@@ -13,39 +13,31 @@ def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
     ecpp.write("#include <cctype>\n")
     ecpp.write("#include <invader/tag/hek/definition.hpp>\n\n")
     ecpp.write("namespace Invader::HEK {\n")
-    ecpp.write("    static inline bool equal_string_case_insensitive(const char *a, const char *b) noexcept {\n")
-    ecpp.write("        while(std::tolower(*a) == std::tolower(*b)) {\n")
-    ecpp.write("            if(*a == 0) {\n")
-    ecpp.write("                return true;\n")
-    ecpp.write("            }\n")
-    ecpp.write("            a++; b++;\n")
-    ecpp.write("        }\n")
-    ecpp.write("        return false;\n")
-    ecpp.write("    }\n")
 
-    # Write enums at the top first, then bitfields
-    for e in all_enums:
-        f.write("    enum {} : TagEnum {{\n".format(e["name"]))
+    bcpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
+    bcpp.write("#include <cstring>\n")
+    bcpp.write("#include <cctype>\n")
+    bcpp.write("#include <invader/tag/hek/definition.hpp>\n\n")
+    bcpp.write("namespace Invader::HEK {\n")
 
-        # Convert PascalCase to UPPER_SNAKE_CASE
+    # Convert PascalCase to UPPER_SNAKE_CASE
+    def format_enum(prefix, value):
+        return "{}_{}".format(prefix,value.upper())
+
+    def format_enum_str(value):
+        return value.replace("_", "-")
+
+    def write_enum(name, fields, type, cpp):
+        f.write("    enum {} : {} {{\n".format(name, type))
         prefix = ""
-        name_to_consider = e["name"].replace("HUD", "Hud").replace("UI", "Ui")
+        name_to_consider = name.replace("HUD", "Hud").replace("UI", "Ui")
         for i in name_to_consider:
             if prefix != "" and i.isupper():
                 prefix += "_"
             prefix += i.upper()
-
-        def format_enum(value):
-            return "{}_{}".format(prefix,value.upper())
-
-        def format_enum_str(value):
-            return value.replace("_", "-")
-
-        for n in range(0,len(e["options"])):
-            f.write("        {},\n".format(format_enum(e["options"][n])))
-
-        f.write("        {}\n".format(format_enum("enum_count")))
-
+        for n in range(0,len(fields)):
+            f.write("        {},\n".format(format_enum(prefix, fields[n])))
+        f.write("        {}\n".format(format_enum(prefix, "enum_count")))
         f.write("    };\n")
 
         f.write("    /**\n")
@@ -53,40 +45,47 @@ def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
         f.write("     * @param value value of the enum\n")
         f.write("     * @return      string representation of the enum\n")
         f.write("     */\n")
-        f.write("    const char *{}_to_string({} value);\n".format(e["name"], e["name"]))
-        ecpp.write("    const char *{}_to_string({} value) {{\n".format(e["name"], e["name"]))
-        ecpp.write("        switch(value) {\n")
-        for n in e["options"]:
-            ecpp.write("        case {}::{}:\n".format(e["name"], format_enum(n)))
-            ecpp.write("            return \"{}\";\n".format(format_enum_str(n)))
-        ecpp.write("        default:\n")
-        ecpp.write("            throw std::exception();\n")
-        ecpp.write("        }\n")
-        ecpp.write("    }\n")
+        f.write("    const char *{}_to_string({} value);\n".format(name, name))
+        cpp.write("    const char *{}_to_string({} value) {{\n".format(name, name))
+        cpp.write("        switch(value) {\n")
+        for n in fields:
+            cpp.write("        case {}::{}:\n".format(name, format_enum(prefix, n)))
+            cpp.write("            return \"{}\";\n".format(format_enum_str(n)))
+        cpp.write("        default:\n")
+        cpp.write("            throw std::exception();\n")
+        cpp.write("        }\n")
+        cpp.write("    }\n")
 
         f.write("    /**\n")
         f.write("     * Get the enum value from the string.\n")
         f.write("     * @param value value of the enum as a string\n")
         f.write("     * @return      value of the enum\n")
         f.write("     */\n")
-        f.write("    {} {}_from_string(const char *value);\n".format(e["name"], e["name"]))
-        ecpp.write("    {} {}_from_string(const char *value) {{\n".format(e["name"], e["name"]))
-        for n in range(0,len(e["options"])):
-            ecpp.write("        {}if(equal_string_case_insensitive(value, \"{}\")) {{\n".format("" if n == 0 else "else ", format_enum_str(e["options"][n])))
-            ecpp.write("             return {}::{};\n".format(e["name"], format_enum(e["options"][n])))
-            ecpp.write("        }\n")
-        ecpp.write("        else {\n")
-        ecpp.write("            throw std::exception();\n")
-        ecpp.write("        }\n")
-        ecpp.write("    }\n")
+        f.write("    {} {}_from_string(const char *value);\n".format(name, name))
+        cpp.write("    {} {}_from_string(const char *value) {{\n".format(name, name))
+        for n in range(0,len(fields)):
+            cpp.write("        {}if(std::strcmp(value, \"{}\") == 0) {{\n".format("" if n == 0 else "else ", format_enum_str(fields[n])))
+            cpp.write("             return {}::{};\n".format(name, format_enum(prefix, fields[n])))
+            cpp.write("        }\n")
+        cpp.write("        else {\n")
+        cpp.write("            throw std::exception();\n")
+        cpp.write("        }\n")
+        cpp.write("    }\n")
+
+
+    # Write enums at the top first, then bitfields
+    for e in all_enums:
+        write_enum(e["name"], e["options"], "TagEnum", ecpp)
 
     for b in all_bitfields:
         f.write("    struct {} {{\n".format(b["name"]))
         for q in b["fields"]:
             f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
         f.write("    };\n")
+        write_enum("{}Enum".format(b["name"]), b["fields"], "std::uint{}_t".format(b["width"]), bcpp)
 
     ecpp.write("}\n")
+    bcpp.write("}\n")
 
     # Now the hard part
     padding_present = False

@@ -7,8 +7,8 @@ import os
 from definition import make_definitions
 from parser import make_parser
 
-if len(sys.argv) < 13:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 14:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <parser-struct-value.cpp> <bitfield.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -16,9 +16,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[9].lower() == "on" else False
+extract_hidden = True if sys.argv[12].lower() == "on" else False
 
-for i in range(12, len(sys.argv)):
+for i in range(13, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -109,8 +109,9 @@ def to_hex(number):
     return "0x{:X}".format(number)
 
 with open(sys.argv[1], "w") as f:
-    with open(sys.argv[10], "w") as ecpp:
-        make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged)
+    with open(sys.argv[10], "w") as bcpp:
+        with open(sys.argv[11], "w") as ecpp:
+            make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arranged)
 
 with open(sys.argv[2], "w") as hpp:
     with open(sys.argv[3], "w") as cpp_save_hek_data:

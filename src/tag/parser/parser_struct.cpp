@@ -5,15 +5,6 @@
 #include <invader/tag/hek/header.hpp>
 
 namespace Invader::Parser {
-    /**
-     * Instantiate a ParserStructValue with a dependency
-     * @param name            name of the dependency
-     * @param member_name     variable name of the dependency
-     * @param comment         comments
-     * @param dependency      pointer to the dependency
-     * @param allowed_classes array of allowed classes
-     * @param count           number of allowed classes in array
-     */
     ParserStructValue::ParserStructValue(
         const char *       name,
         const char *       member_name,
@@ -103,6 +94,23 @@ namespace Invader::Parser {
         list_enum_fn(list_enum_fn),
         read_enum_fn(read_enum_fn),
         write_enum_fn(write_enum_fn) {}
+
+   ParserStructValue::ParserStructValue(
+       const char *           name,
+       const char *           member_name,
+       const char *           comment,
+       void *                 value,
+       list_enum_fn_type      list_enum_fn,
+       read_bitfield_fn_type  read_bitfield_fn,
+       write_bitfield_fn_type write_bitfield_fn
+   ) : name(name),
+       member_name(member_name),
+       comment(comment),
+       type(ValueType::VALUE_TYPE_BITMASK),
+       address(value),
+       list_enum_fn(list_enum_fn),
+       read_bitfield_fn(read_bitfield_fn),
+       write_bitfield_fn(write_bitfield_fn) {}
 
     ParserStructValue::NumberFormat ParserStructValue::get_number_format() const noexcept {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {
@@ -711,7 +719,7 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
                 break;
         }
-        
+
         eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_class_int));
         throw InvalidTagDataException();
     }

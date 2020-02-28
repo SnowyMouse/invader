@@ -11,6 +11,7 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
 
@@ -29,6 +30,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
     src/hek/class_int.cpp
