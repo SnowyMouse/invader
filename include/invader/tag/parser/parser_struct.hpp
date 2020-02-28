@@ -147,6 +147,14 @@ namespace Invader::Parser {
             return this->duplicate_objects_in_array_fn(index_from, index_to, count, this->address);
         }
 
+        /**
+         * Get whether or not this is a bounds
+         * @return is bounds
+         */
+        bool is_bounds() const noexcept {
+            return this->bounds;
+        }
+
         using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
         using get_array_size_fn_type = std::size_t (*)(const void *addr);
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
@@ -295,13 +303,17 @@ namespace Invader::Parser {
          * @param comment     comments
          * @param type        type of value
          * @param object      pointer to the object
+         * @param count       number of values (if multiple values or bounds)
+         * @param bounds      whether or not this is bounds
          */
         ParserStructValue(
             const char *name,
             const char *member_name,
             const char *comment,
             ValueType   type,
-            void *      object
+            void *      object,
+            std::size_t count = 1,
+            bool        bounds = false
         );
 
     private:
@@ -311,6 +323,8 @@ namespace Invader::Parser {
         ValueType type;
         void *address;
         std::vector<TagClassInt> allowed_classes;
+        std::size_t count = 1;
+        bool bounds = false;
 
         get_object_in_array_fn_type get_object_in_array_fn = nullptr;
         get_array_size_fn_type get_array_size_fn = nullptr;
