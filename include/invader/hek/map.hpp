@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "data_type.hpp"
+#include "../tag/hek/definition.hpp"
 
 namespace Invader::HEK {
     enum CacheFileEngine : std::uint32_t {

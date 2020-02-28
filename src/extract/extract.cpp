@@ -224,7 +224,7 @@ int main(int argc, const char **argv) {
         }
 
         // Skip globals
-        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
+        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             eprintf_warn("Skipping the non-multiplayer map's globals tag");
             return false;
         }
@@ -258,7 +258,7 @@ int main(int argc, const char **argv) {
         }
 
         // Jason Jones the tag
-        if(header.map_type == Invader::HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+        if(header.map_type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
             auto tag_path = tag.get_path();
             switch(tag_class_int) {
                 case Invader::TagClassInt::TAG_CLASS_WEAPON: {

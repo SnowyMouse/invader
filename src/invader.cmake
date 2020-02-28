@@ -10,6 +10,8 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
 
@@ -27,6 +29,8 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
     src/hek/class_int.cpp
@@ -61,6 +65,7 @@ set(INVADER_SOURCE_FILES
     src/tag/hek/class/bitmap.cpp
     src/tag/hek/class/model_collision_geometry.cpp
     src/extract/extraction.cpp
+    src/tag/parser/parser_struct.cpp
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
     src/tag/parser/compile/antenna.cpp

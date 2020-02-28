@@ -256,7 +256,7 @@ namespace Invader::Parser {
         this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_deceleration_time;
 
         // Jason Jones the accuracy of the weapon
-        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
             auto &tag = workload.tags[tag_index];
             if(tag.path == "weapons\\pistol\\pistol") {
                 this->minimum_error = DEGREES_TO_RADIANS(0.2F);
