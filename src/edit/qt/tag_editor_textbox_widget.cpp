@@ -11,9 +11,11 @@ namespace Invader::EditQt {
 
         for(std::size_t i = 0; i < count; i++) {
             if(i < label_count) {
-                auto *label = new QLabel(this);
-                label->setText((*labels)[i].c_str());
-                this->layout()->addWidget(label);
+                if((*labels)[i].size() != 0) {
+                    auto *label = new QLabel(this);
+                    label->setText((*labels)[i].c_str());
+                    this->layout()->addWidget(label);
+                }
             }
             auto *textbox = new QLineEdit();
             switch(size) {
@@ -45,11 +47,23 @@ namespace Invader::EditQt {
         return this->text_boxes[textbox]->text();
     }
 
-    float TagEditorTextboxWidget::get_float(std::size_t textbox, bool *success) const {
-        return this->get_string(textbox).toFloat(success);
+    double TagEditorTextboxWidget::get_float(std::size_t textbox, bool *success) const {
+        return this->get_string(textbox).toDouble(success);
     }
 
-    std::int32_t TagEditorTextboxWidget::get_int(std::size_t textbox, bool *success) const {
-        return this->get_string(textbox).toInt(success);
+    std::int64_t TagEditorTextboxWidget::get_int(std::size_t textbox, bool *success) const {
+        return this->get_string(textbox).toLongLong(success);
+    }
+
+    void TagEditorTextboxWidget::set_string(QString value, std::size_t textbox) {
+        this->text_boxes[textbox]->setText(value);
+    }
+
+    void TagEditorTextboxWidget::set_float(double value, std::size_t textbox) {
+        this->text_boxes[textbox]->setText(QString::number(value));
+    }
+
+    void TagEditorTextboxWidget::set_int(std::int64_t value, std::size_t textbox) {
+        this->text_boxes[textbox]->setText(QString::number(value));
     }
 }

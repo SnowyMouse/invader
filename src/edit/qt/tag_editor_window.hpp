@@ -4,8 +4,13 @@
 #define INVADER__EDIT__QT__TAG_EDITOR_WINDOW_HPP
 
 #include <QMainWindow>
+#include <memory>
 #include "tag_file.hpp"
 #include "tag_tree_widget.hpp"
+
+namespace Invader::Parser {
+    struct ParserStruct;
+}
 
 namespace Invader::EditQt {
     class TagTreeWindow;
@@ -32,6 +37,8 @@ namespace Invader::EditQt {
          */
         const TagFile &get_file() const noexcept;
 
+        ~TagEditorWindow();
+
     private:
         TagTreeWindow *parent_window;
 
@@ -43,6 +50,8 @@ namespace Invader::EditQt {
         bool perform_save_as();
         bool perform_refactor();
         TagFile file;
+
+        Parser::ParserStruct *parser_data;
     };
 }
 

@@ -9,7 +9,7 @@ namespace Invader::EditQt {
         auto *hbox_layout = new QHBoxLayout(this);
         this->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         this->title_label = new QLabel(this);
-        this->title_label->setMinimumWidth(200);
+        this->title_label->setMinimumWidth(300);
         this->title_label->setMaximumWidth(this->title_label->minimumWidth());
         this->title_label->setText(text);
         this->title_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
