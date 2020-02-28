@@ -831,15 +831,17 @@ namespace Invader {
 
         // Load the correct tag collection tag
         switch(*this->cache_file_type) {
-            case ScenarioType::CACHE_FILE_SINGLEPLAYER:
+            case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
-            case ScenarioType::CACHE_FILE_MULTIPLAYER:
+            case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
-            case ScenarioType::CACHE_FILE_USER_INTERFACE:
+            case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
                 this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
                 break;
+            case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
+                std::terminate();
         }
 
         // These are required for UI elements and other things
@@ -856,7 +858,7 @@ namespace Invader {
         for(auto &tag : this->tags) {
             if(tag.stubbed) {
                 // Object tags and damage effects are referenced directly over the netcode
-                if(*this->cache_file_type == HEK::CacheFileType::CACHE_FILE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_class_int) || tag.tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
+                if(*this->cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER && (IS_OBJECT_TAG(tag.tag_class_int) || tag.tag_class_int == TagClassInt::TAG_CLASS_DAMAGE_EFFECT)) {
                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING, &tag - this->tags.data(), "%s.%s was stubbed out due to not being referenced.", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
                     warned++;
                 }
@@ -971,7 +973,7 @@ namespace Invader {
     BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::string> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
         workload.disable_recursion = !recursion;
-        workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
+        workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
         workload.tags.emplace_back();
         workload.hide_pedantic_warnings = true;
@@ -982,7 +984,7 @@ namespace Invader {
     BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::string> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
         workload.disable_recursion = !recursion;
-        workload.cache_file_type = HEK::CacheFileType::CACHE_FILE_MULTIPLAYER;
+        workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
         workload.hide_pedantic_warnings = true;
         workload.compile_tag_recursively(tag, tag_class_int);

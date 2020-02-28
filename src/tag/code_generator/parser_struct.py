@@ -40,9 +40,6 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             cpp_struct_value.write("    values.emplace_back({});\n".format(first_arguments))
         elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":
             pass
-        elif type == "ScenarioType":
-            print("TODO: ScenarioType enum")
-            pass
         else:
             found = False
             for b in all_bitfields:
@@ -54,9 +51,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             for e in all_enums:
                 if type == e["name"]:
                     found = True
-
                     cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(e["options"]), type, type, type, type))
-
                     break
             if found:
                 continue

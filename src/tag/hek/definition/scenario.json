@@ -1,5 +1,14 @@
 [
     {
+        "name": "ScenarioType",
+        "options": [
+            "singleplayer",
+            "multiplayer",
+            "user interface"
+        ],
+        "type": "enum"
+    },
+    {
         "name": "ScenarioSpawnType",
         "options": [
             "none",
