@@ -85,6 +85,23 @@ namespace Invader::Parser {
         type(ValueType::VALUE_TYPE_TAGDATAOFFSET),
         address(offset) {}
 
+    ParserStructValue::ParserStructValue(
+        const char *       name,
+        const char *       member_name,
+        const char *       comment,
+        void *             value,
+        list_enum_fn_type  list_enum_fn,
+        read_enum_fn_type  read_enum_fn,
+        write_enum_fn_type write_enum_fn
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(ValueType::VALUE_TYPE_ENUM),
+        address(value),
+        list_enum_fn(list_enum_fn),
+        read_enum_fn(read_enum_fn),
+        write_enum_fn(write_enum_fn) {}
+
     ParserStructValue::NumberFormat ParserStructValue::get_number_format() const noexcept {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {
             return NumberFormat::NUMBER_FORMAT_INT;
@@ -132,6 +149,7 @@ namespace Invader::Parser {
             case VALUE_TYPE_BITMASK:
             case VALUE_TYPE_TAGSTRING:
             case VALUE_TYPE_TAGDATAOFFSET:
+            case VALUE_TYPE_ENUM:
                 return NumberFormat::NUMBER_FORMAT_NONE;
         }
     }
@@ -195,6 +213,7 @@ namespace Invader::Parser {
             case VALUE_TYPE_BITMASK:
             case VALUE_TYPE_TAGSTRING:
             case VALUE_TYPE_TAGDATAOFFSET:
+            case VALUE_TYPE_ENUM:
                 return 0;
         }
 
@@ -390,6 +409,7 @@ namespace Invader::Parser {
                 case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
+                case VALUE_TYPE_ENUM:
                     eprintf_error("Tried to use get_values() with a type that doesn't have values");
                     std::terminate();
             }
@@ -585,6 +605,7 @@ namespace Invader::Parser {
                 case VALUE_TYPE_BITMASK:
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
+                case VALUE_TYPE_ENUM:
                     eprintf_error("Tried to use set_values() with a type that doesn't have values");
                     std::terminate();
             }

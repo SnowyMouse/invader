@@ -45,15 +45,18 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             pass
         else:
             found = False
-            for i in all_bitfields:
-                if type == i["name"]:
+            for b in all_bitfields:
+                if type == b["name"]:
                     found = True
                     break
             if found:
                 continue
-            for i in all_enums:
-                if type == i["name"]:
+            for e in all_enums:
+                if type == e["name"]:
                     found = True
+
+                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(e["options"]), type, type, type, type))
+
                     break
             if found:
                 continue

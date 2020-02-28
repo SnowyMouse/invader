@@ -60,6 +60,7 @@ namespace Invader::Parser {
             VALUE_TYPE_DEPENDENCY,
             VALUE_TYPE_TAGSTRING,
             VALUE_TYPE_TAGDATAOFFSET,
+            VALUE_TYPE_ENUM,
             VALUE_TYPE_BITMASK
         };
 
@@ -180,6 +181,30 @@ namespace Invader::Parser {
             std::strncpy(reinterpret_cast<HEK::TagString *>(this->address)->string, string, sizeof(HEK::TagString::string) - 1);
         }
 
+        /**
+         * Read the enum
+         * @return enum
+         */
+        const char *read_enum() const {
+            return this->read_enum_fn(address);
+        }
+
+        /**
+         * Write the enum
+         * @param value value to write
+         */
+        void write_enum(const char *value) {
+            this->write_enum_fn(value, address);
+        }
+
+        /**
+         * List all enum values
+         * @return all enum values
+         */
+        std::vector<const char *> list_enum() const noexcept {
+            return this->list_enum_fn();
+        }
+
         using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
         using get_array_size_fn_type = std::size_t (*)(const void *addr);
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
@@ -271,6 +296,43 @@ namespace Invader::Parser {
             }
         }
 
+        using list_enum_fn_type = std::vector<const char *>(*)();
+        using read_enum_fn_type = const char *(*)(void *address);
+        using write_enum_fn_type = void (*)(const char *value, void *address);
+
+        /**
+         * Return a list of all of the possible enums
+         * @return vector of all possible enums
+         */
+        template <typename T, const char *(*convert_fn)(T), std::size_t count>
+        static std::vector<const char *> list_enum_template() {
+            std::vector<const char *> out(count);
+            for(std::size_t i = 0; i < count; i++) {
+                out[i] = convert_fn(static_cast<T>(i));
+            }
+            return out;
+        }
+
+        /**
+         * Convert from an enum value to string
+         * @param  value      value to convert from
+         * @return            string
+         */
+        template <typename T, const char *(*convert_fn)(T)>
+        static const char *read_enum_template(void *address) {
+            return convert_fn(*reinterpret_cast<T *>(address));
+        }
+
+        /**
+         * Convert from an enum value to string
+         * @param  value      value to convert from
+         * @return            string
+         */
+        template <typename T, T(*convert_fn)(const char *)>
+        static void write_enum_template(const char *value, void *address) {
+            *reinterpret_cast<T *>(address) = convert_fn(value);
+        }
+
         /**
          * Get all of the allowed classes of the dependency
          * @return all allowed classes
@@ -350,6 +412,26 @@ namespace Invader::Parser {
         );
 
         /**
+         * Instantiate a ParserStructValue with a TagEnum
+         * @param name          name of the value
+         * @param member_name   variable name of the value
+         * @param comment       comments
+         * @param value         pointer to value
+         * @param list_enum_fn  pointer to function for listing enums
+         * @param read_enum_fn  pointer to function for reading enums
+         * @param write_enum_fn pointer to function for writing enums
+         */
+        ParserStructValue(
+            const char *       name,
+            const char *       member_name,
+            const char *       comment,
+            void *             value,
+            list_enum_fn_type  list_enum_fn,
+            read_enum_fn_type  read_enum_fn,
+            write_enum_fn_type write_enum_fn
+        );
+
+        /**
          * Instantiate a ParserStructValue with a value
          * @param name        name of the value
          * @param member_name variable name of the value
@@ -384,6 +466,10 @@ namespace Invader::Parser {
         delete_objects_in_array_fn_type delete_objects_in_array_fn = nullptr;
         insert_objects_in_array_fn_type insert_objects_in_array_fn = nullptr;
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
+
+        list_enum_fn_type list_enum_fn = nullptr;
+        read_enum_fn_type read_enum_fn = nullptr;
+        write_enum_fn_type write_enum_fn = nullptr;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {
