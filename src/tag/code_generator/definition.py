@@ -36,7 +36,7 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
                 prefix += "_"
             prefix += i.upper()
         for n in range(0,len(fields)):
-            f.write("        {},\n".format(format_enum(prefix, fields[n])))
+            f.write("        {}{},\n".format(format_enum(prefix, fields[n]), " = static_cast<{}>(1) << {}".format(type, n) if (cpp == bcpp) else ""))
         f.write("        {}\n".format(format_enum(prefix, "enum_count")))
         f.write("    };\n")
 
