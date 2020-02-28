@@ -119,7 +119,6 @@ namespace Invader::EditQt {
         std::size_t current_tag_index = SHOW_ALL_MERGED;
 
         QLabel *tag_count_label;
-        QLabel *tag_location_label;
         QLabel *tag_loading_label;
 
         std::vector<std::unique_ptr<TagEditorWindow>> open_documents;

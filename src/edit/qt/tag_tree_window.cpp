@@ -79,12 +79,10 @@ namespace Invader::EditQt {
         QStatusBar *status_bar = new QStatusBar();
         this->tag_count_label = new QLabel();
         this->tag_loading_label = new QLabel("Loading tags...");
-        this->tag_location_label = new QLabel();
         this->tag_loading_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->tag_count_label->setAlignment(Qt::AlignRight | Qt::AlignTop);
         this->tag_location_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         status_bar->addWidget(this->tag_loading_label, 1);
-        status_bar->addWidget(this->tag_location_label, 1);
         status_bar->addWidget(this->tag_count_label, 0);
         this->setStatusBar(status_bar);
 
