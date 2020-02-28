@@ -27,7 +27,7 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
     if len(all_used_structs) > 0:
         cpp_read_hek_data.write("        [[maybe_unused]] const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
-            name = struct["name"]
+            name = struct["member_name"]
             cache_only = "cache_only" in struct and struct["cache_only"]
             if cache_only and struct["type"] != "TagReflexive":
                 continue

@@ -13,7 +13,7 @@ def make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_ref
     cpp_refactor_reference.write("    std::size_t {}::refactor_reference([[maybe_unused]] const char *from_path, [[maybe_unused]] TagClassInt from_class, [[maybe_unused]] const char *to_path, [[maybe_unused]] TagClassInt to_class) {{\n".format(struct_name))
     cpp_refactor_reference.write("        std::size_t replaced = 0;\n")
     for struct in all_used_structs:
-        name = struct["name"]
+        name = struct["member_name"]
         if struct["type"] == "TagDependency":
             cpp_refactor_reference.write("        if(this->{}.tag_class_int == from_class && this->{}.path == from_path) {{\n".format(name, name))
 

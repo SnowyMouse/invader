@@ -17,7 +17,7 @@ def make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, 
     if len(all_used_structs) > 0:
         cpp_read_cache_file_data.write("        const auto &l = pointer.has_value() ? tag.get_struct_at_pointer<HEK::{}>(*pointer) : tag.get_base_struct<HEK::{}>();\n".format(struct_name, struct_name))
         for struct in all_used_structs:
-            name = struct["name"]
+            name = struct["member_name"]
             if struct["type"] == "TagID":
                 cpp_read_cache_file_data.write("        r.{} = HEK::TagID::null_tag_id();\n".format(name))
                 continue

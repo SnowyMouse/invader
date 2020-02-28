@@ -92,7 +92,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                     type_to_write = "{}<HEK::NativeEndian>".format(type_to_write)
                 if "bounds" in t and t["bounds"]:
                     type_to_write = "HEK::Bounds<{}>".format(type_to_write)
-                hpp.write("        {} {}{};\n".format(type_to_write, t["name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"])))
+                hpp.write("        {} {}{};\n".format(type_to_write, t["member_name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"])))
                 all_used_structs.append(t)
                 continue
         add_structs_from_struct(s)

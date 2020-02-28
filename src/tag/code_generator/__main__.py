@@ -47,7 +47,7 @@ for i in range(12, len(sys.argv)):
                     print("{}::{} - default AND cache_only cannot be used together in a field since they may be unexpectedly modified".format(s["name"],f["name"]), file=sys.stderr)
                     sys.exit(1)
                 if f["type"] != "pad":
-                    f["name"] = make_name_fun(f["name"], False)
+                    f["member_name"] = make_name_fun(f["name"], False)
                 if f["type"] == "TagDependency":
                     # Superclasses
                     def expand_superclass(arr, superclass, subclass):

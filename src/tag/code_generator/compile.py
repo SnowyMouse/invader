@@ -17,7 +17,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
     for struct in all_used_structs:
         if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
             continue
-        name = struct["name"]
+        name = struct["member_name"]
         if struct["type"] == "TagDependency":
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
             cpp_cache_format_data.write("        r.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))

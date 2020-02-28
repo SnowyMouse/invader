@@ -16,7 +16,7 @@ def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, c
         for struct in all_used_structs:
             if "cache_only" in struct and struct["cache_only"] and not extract_hidden:
                 continue
-            name = struct["name"]
+            name = struct["member_name"]
             if "drop_on_extract_hidden" in struct and struct["drop_on_extract_hidden"]:
                 cpp_save_hek_data.write("        b.{} = {{}};\n".format(name))
                 continue

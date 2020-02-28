@@ -105,7 +105,7 @@ def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
             if "flagged" in n and n["flagged"]:
                 type_to_write = "FlaggedInt<{}>".format(type_to_write)
 
-            name = n["name"]
+            name = n["member_name"]
             if "count" in n:
                 name = "{}[{}]".format(name, n["count"])
 
@@ -166,7 +166,7 @@ def make_definitions(f, ecpp, all_enums, all_bitfields, all_structs_arranged):
                 if n["type"] == "pad":
                     continue
                 else:
-                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", n["name"]))
+                    f.write("            {}({});\n".format("COPY_THIS_ARRAY" if "count" in n else "COPY_THIS", n["member_name"]))
         f.write("            return copy;\n")
         f.write("        }\n")
 
