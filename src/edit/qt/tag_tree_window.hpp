@@ -8,8 +8,8 @@
 #include <vector>
 #include <filesystem>
 #include <QObject>
+#include <invader/file/file.hpp>
 
-#include "tag_file.hpp"
 #include "tag_editor_window.hpp"
 
 class QTreeWidget;
@@ -35,7 +35,7 @@ namespace Invader::EditQt {
          * Get all of the tags available
          * @return all tags available
          */
-        const std::vector<TagFile> &get_all_tags() const noexcept;
+        const std::vector<File::TagFile> &get_all_tags() const noexcept;
 
         /**
          * Refresh the view, reloading the tags
@@ -86,7 +86,7 @@ namespace Invader::EditQt {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)
         };
 
-        std::vector<TagFile> all_tags;
+        std::vector<File::TagFile> all_tags;
 
         TagTreeWidget *tag_view;
         std::vector<std::filesystem::path> paths;

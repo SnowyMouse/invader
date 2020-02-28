@@ -92,9 +92,23 @@ namespace Invader::EditQt {
 
             auto &t = all_tags[i];
             QTreeWidgetItem *dir_item = nullptr;
-            std::size_t element_count = t.tag_path_separated.size();
+
+            std::vector<std::string> separate_tag_path;
+            auto prep = File::preferred_path_to_halo_path(t.tag_path);
+            std::size_t last_separator = 0;
+            std::size_t length = prep.size();
+
+            for(std::size_t i = 0; i < length; i++) {
+                if(prep[i] == '\\') {
+                    separate_tag_path.emplace_back(prep.c_str() + last_separator, (i - last_separator));
+                    last_separator = ++i;
+                }
+            }
+            separate_tag_path.emplace_back(prep.c_str() + last_separator, (length - last_separator));
+
+            std::size_t element_count = separate_tag_path.size();
             for(std::size_t e = 0; e < element_count; e++) {
-                auto &element = t.tag_path_separated[e];
+                auto &element = separate_tag_path[e];
                 bool found = false;
 
                 // See if we have it
@@ -214,11 +228,11 @@ namespace Invader::EditQt {
         this->tag_arrays_to_show = tags_directories;
     }
 
-    const TagFile *TagTreeWidget::get_selected_tag() const noexcept {
+    const File::TagFile *TagTreeWidget::get_selected_tag() const noexcept {
         auto selected_items = this->selectedItems();
         if(selected_items.size()) {
             auto data = selected_items[0]->data(0, Qt::UserRole);
-            return reinterpret_cast<const TagFile *>(data.value<std::uintptr_t>());
+            return reinterpret_cast<const File::TagFile *>(data.value<std::uintptr_t>());
         }
         else {
             return nullptr;

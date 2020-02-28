@@ -5,9 +5,9 @@
 
 #include <QTreeWidget>
 #include <filesystem>
+#include <invader/file/file.hpp>
 
 #include <invader/hek/class_int.hpp>
-#include "tag_file.hpp"
 
 namespace Invader::EditQt {
     class TagTreeWindow;
@@ -38,7 +38,7 @@ namespace Invader::EditQt {
          * Get the tag file
          * @return pointer to tag file if one is selected or nullptr
          */
-        const TagFile *get_selected_tag() const noexcept;
+        const File::TagFile *get_selected_tag() const noexcept;
     private:
         std::size_t total_tags = 0;
         std::optional<std::vector<HEK::TagClassInt>> filter;

@@ -36,7 +36,7 @@ namespace Invader::EditQt {
         this->addAction(refresh);
     }
 
-    const std::optional<TagFile> &TagTreeDialog::get_tag() const noexcept {
+    const std::optional<File::TagFile> &TagTreeDialog::get_tag() const noexcept {
         return this->tag;
     }
 

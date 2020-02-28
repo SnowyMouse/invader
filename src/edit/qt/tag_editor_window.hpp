@@ -5,7 +5,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "tag_file.hpp"
+#include <invader/file/file.hpp>
 #include "tag_tree_widget.hpp"
 
 namespace Invader::Parser {
@@ -23,7 +23,7 @@ namespace Invader::EditQt {
          * @param parent         parent widget
          * @param parent_window  parent window
          */
-        TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &file);
+        TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &file);
 
         /**
          * Close event
@@ -35,7 +35,7 @@ namespace Invader::EditQt {
          * Get the currently open tag file
          * @return tag file
          */
-        const TagFile &get_file() const noexcept;
+        const File::TagFile &get_file() const noexcept;
 
         ~TagEditorWindow();
 
@@ -49,7 +49,7 @@ namespace Invader::EditQt {
         bool perform_save();
         bool perform_save_as();
         bool perform_refactor();
-        TagFile file;
+        File::TagFile file;
 
         Parser::ParserStruct *parser_data;
     };

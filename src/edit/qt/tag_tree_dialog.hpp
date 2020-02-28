@@ -4,7 +4,6 @@
 #define INVADER__EDIT__QT__TAG_TREE_DIALOG_HPP
 
 #include <QDialog>
-#include "tag_file.hpp"
 #include "tag_tree_widget.hpp"
 
 namespace Invader::EditQt {
@@ -30,10 +29,10 @@ namespace Invader::EditQt {
          * Get the resulting tag file
          * @return tag file result
          */
-        const std::optional<TagFile> &get_tag() const noexcept;
+        const std::optional<File::TagFile> &get_tag() const noexcept;
 
     private:
-        std::optional<TagFile> tag;
+        std::optional<File::TagFile> tag;
         TagTreeWidget *tree_widget;
         void change_title(const std::optional<std::vector<HEK::TagClassInt>> &classes);
         void done(int r);

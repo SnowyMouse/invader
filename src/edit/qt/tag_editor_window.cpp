@@ -12,12 +12,11 @@
 #include <filesystem>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include "tag_file.hpp"
 #include "tag_tree_window.hpp"
 #include "tag_editor_textbox_widget.hpp"
 
 namespace Invader::EditQt {
-    TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
+    TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
         this->make_dirty(false);
 
         auto open_file = File::open_file(tag_file.full_path.string().c_str());
@@ -269,7 +268,7 @@ namespace Invader::EditQt {
         this->setWindowTitle(title_bar);
     }
 
-    const TagFile &TagEditorWindow::get_file() const noexcept {
+    const File::TagFile &TagEditorWindow::get_file() const noexcept {
         return this->file;
     }
 

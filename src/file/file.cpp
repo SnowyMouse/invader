@@ -291,7 +291,7 @@ namespace Invader::File {
                     file.tag_directory = priority;
                     file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
                     all_tags.emplace_back(std::move(file));
-                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                    //std::this_thread::sleep_for(std::chrono::milliseconds(5));
                     status->first.lock();
                     status->second++;
                     status->first.unlock();
