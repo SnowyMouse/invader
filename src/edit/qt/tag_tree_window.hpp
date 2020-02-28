@@ -8,6 +8,7 @@
 #include <vector>
 #include <filesystem>
 #include <QObject>
+#include <QThread>
 #include <invader/file/file.hpp>
 
 #include "tag_editor_window.hpp"
@@ -18,6 +19,23 @@ class QLabel;
 
 namespace Invader::EditQt {
     class TagTreeWidget;
+
+    class TagFetcherThread : public QThread {
+        Q_OBJECT
+    public:
+        TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths);
+
+    signals:
+        void tag_count_changed(std::pair<std::mutex, std::size_t> *new_count);
+        void fetch_finished(const std::vector<File::TagFile> *tags);
+
+    private:
+        void run() override;
+        std::vector<std::string> all_paths;
+        std::vector<File::TagFile> all_tags;
+        std::pair<std::mutex, std::size_t> statuser;
+        std::size_t last_tag_count;
+    };
 
     class TagTreeWindow : public QMainWindow {
         friend class TagEditorWindow;
@@ -47,6 +65,8 @@ namespace Invader::EditQt {
          * @param event event pointer
          */
         virtual void closeEvent(QCloseEvent *event);
+
+        virtual void paintEvent(QPaintEvent *event);
 
     signals:
         void tags_reloaded(TagTreeWindow *window);
@@ -82,6 +102,12 @@ namespace Invader::EditQt {
         /** Show the context menu */
         void show_context_menu(const QPoint &point);
 
+        /** We're done */
+        void tags_reloaded_finished(const std::vector<File::TagFile> *result);
+
+        /** We're done */
+        void tag_count_changed(std::pair<std::mutex, std::size_t> *count);
+
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)
         };
@@ -94,9 +120,15 @@ namespace Invader::EditQt {
 
         QLabel *tag_count_label;
         QLabel *tag_location_label;
+        QLabel *tag_loading_label;
 
         std::vector<std::unique_ptr<TagEditorWindow>> open_documents;
         void on_double_click(QTreeWidgetItem *item, int column);
+
+        bool initial_load = false;
+        bool tags_reloading_queued = false;
+
+        TagFetcherThread *fetcher_thread;
     };
 }
 

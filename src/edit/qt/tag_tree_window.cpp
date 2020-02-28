@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QCloseEvent>
 #include <QDesktopWidget>
+#include <QThread>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
 #include "tag_tree_dialog.hpp"
@@ -77,9 +78,12 @@ namespace Invader::EditQt {
         // Next, set up the status bar
         QStatusBar *status_bar = new QStatusBar();
         this->tag_count_label = new QLabel();
+        this->tag_loading_label = new QLabel("Loading tags...");
         this->tag_location_label = new QLabel();
+        this->tag_loading_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->tag_count_label->setAlignment(Qt::AlignRight | Qt::AlignTop);
         this->tag_location_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        status_bar->addWidget(this->tag_loading_label, 1);
         status_bar->addWidget(this->tag_location_label, 1);
         status_bar->addWidget(this->tag_count_label, 0);
         this->setStatusBar(status_bar);
@@ -98,12 +102,16 @@ namespace Invader::EditQt {
         );
     }
 
+    void TagTreeWindow::tag_count_changed(std::pair<std::mutex, std::size_t> *tag_count) {
+        tag_count->first.lock();
+        char tag_count_str[256];
+        std::snprintf(tag_count_str, sizeof(tag_count_str), "%zu tag%s", tag_count->second, tag_count->second == 1 ? "" : "s");
+        this->tag_count_label->setText(tag_count_str);
+        tag_count->first.unlock();
+    }
+
     void TagTreeWindow::refresh_view() {
         this->reload_tags();
-        char tag_count_str[256];
-        auto tag_count = this->tag_view->get_total_tags();
-        std::snprintf(tag_count_str, sizeof(tag_count_str), "%zu tag%s", tag_count, tag_count == 1 ? "" : "s");
-        this->tag_count_label->setText(tag_count_str);
     }
 
     void TagTreeWindow::show_about_window() {
@@ -132,22 +140,76 @@ namespace Invader::EditQt {
     void TagTreeWindow::set_tag_directories(const std::vector<std::filesystem::path> &directories) {
         this->paths = directories;
         this->current_tag_index = SHOW_ALL_MERGED;
-        this->refresh_view();
+
+        if(this->initial_load) {
+            this->refresh_view();
+        }
     }
 
+    void TagTreeWindow::paintEvent(QPaintEvent *event) {
+        if(!initial_load) {
+            event->accept();
+            this->initial_load = true;
+            this->refresh_view();
+        }
+    }
+
+    void TagFetcherThread::run() {
+        // Function for loading it
+        auto load_it = [](std::vector<File::TagFile> *to, std::vector<std::string> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
+            *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser);
+        };
+
+        // Run this in parallel
+        QThread *t = QThread::create(load_it, &this->all_tags, &this->all_paths, &this->statuser);
+        t->start();
+        std::size_t last_tag_count = 0;
+        while(!t->isFinished()) {
+            this->statuser.first.lock();
+            std::size_t new_count = this->statuser.second;
+            this->statuser.first.unlock();
+            if(new_count > last_tag_count) {
+                emit tag_count_changed(&this->statuser);
+            }
+        }
+        delete t;
+
+        // Emit one last signal
+        emit fetch_finished(&this->all_tags);
+    }
+
+    TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths) : QThread(parent), all_paths(all_paths) {}
+
     void TagTreeWindow::reload_tags() {
+        // Ensure we only reload once
+        if(this->tags_reloading_queued) {
+            return;
+        }
+        this->tags_reloading_queued = true;
+        this->tag_loading_label->show();
+
         // Clear all tags
-        auto &all_tags = this->all_tags;
-        all_tags.clear();
+        this->all_tags.clear();
+        emit tags_reloaded(this);
 
         // Load 'em
-        std::pair<std::mutex, std::size_t> status;
         std::vector<std::string> all_paths;
         for(auto &p : this->paths) {
             all_paths.emplace_back(p.string());
         }
-        all_tags = Invader::File::load_virtual_tag_folder(all_paths, &status);
 
+        // Now... let's do this
+        this->fetcher_thread = new TagFetcherThread(this, all_paths);
+        connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
+        connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
+        connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);
+        this->fetcher_thread->start();
+    }
+
+    void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result) {
+        this->tags_reloading_queued = false;
+        all_tags = *result;
+        this->tag_loading_label->hide();
         emit tags_reloaded(this);
     }
 
@@ -156,6 +218,10 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::closeEvent(QCloseEvent *event) {
+        if(this->tags_reloading_queued) {
+            this->fetcher_thread->wait();
+        }
+
         this->close_all_open_tags();
         event->setAccepted(this->open_documents.size() == 0);
     }
