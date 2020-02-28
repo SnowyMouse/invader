@@ -201,7 +201,7 @@ namespace Invader::Parser {
                 eprintf_error("Index is out of bounds %zu > %zu", index, size);
                 throw OutOfBoundsException();
             }
-            array->insert(array->begin() + index, count, T::value_type());
+            array.insert(array.begin() + index, count, typename T::value_type());
         }
 
         /**
@@ -219,7 +219,7 @@ namespace Invader::Parser {
                 eprintf_error("Index is out of bounds %zu > %zu", index, size);
                 throw OutOfBoundsException();
             }
-            array->insert(array->begin() + index_from, count, T::value_type());
+            array.insert(array.begin() + index_from, count, typename T::value_type());
 
             // Copy things over, handling overlap
             std::vector<std::size_t> copied_indices(count);
@@ -228,7 +228,7 @@ namespace Invader::Parser {
                 if(index_from + i >= index_to) {
                     q += count;
                 }
-                (*array)[index_to + i] = (*array)[q];
+                array[index_to + i] = array[q];
             }
         }
 
@@ -271,7 +271,7 @@ namespace Invader::Parser {
 
             std::size_t size = array->size();
             if(count >= size || index >= size || (index + count) > size) {
-                eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count);
+                eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count, size);
                 throw OutOfBoundsException();
             }
         }
