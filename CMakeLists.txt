@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.12)
 
 # Project name - You should change this if you're making a fork
 project(Invader
-    VERSION 0.24.2
+    VERSION 0.28.1
     DESCRIPTION "Modding toolkit for Halo Combat Evolved on the PC"
     LANGUAGES C CXX
 )
@@ -73,6 +73,8 @@ include(src/extract/extract.cmake)
 include(src/sound/sound.cmake)
 include(src/strip/strip.cmake)
 include(src/edit/qt/qt.cmake)
+include(src/refactor/refactor.cmake)
+include(src/collection/collection.cmake)
 
 # Install stuff
 install(

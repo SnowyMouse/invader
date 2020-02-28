@@ -47,6 +47,7 @@ int main(int argc, const char **argv) {
         DISPLAY_TAGS_EXTERNAL_POINTERS,
         DISPLAY_TAGS_EXTERNAL_SOUND_INDICES,
         DISPLAY_TAGS_EXTERNAL_INDICES,
+        DISPLAY_UNCOMPRESSED_SIZE,
     };
 
     // Options struct
@@ -56,7 +57,7 @@ int main(int argc, const char **argv) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-bitmap-indices, tags-external-indices, tags-external-loc-indices, tags-external-pointers, tags-external-sound-indices", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of data to show. Can be overview (default), build, compressed, compression-ratio, crc32, crc32-mismatched, dirty, engine, external-bitmap-indices, external-bitmaps, external-indices, external-loc, external-loc-indices, external-pointers, external-sound-indices, external-sounds, external-tags, language, map-types, protected, scenario, scenario-path, stub-count, tag-count, tags, tags-external-bitmap-indices, tags-external-indices, tags-external-loc-indices, tags-external-pointers, tags-external-sound-indices, uncompressed-size", "<type>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
 
     static constexpr char DESCRIPTION[] = "Display map metadata.";
@@ -155,6 +156,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(args[0], "tags-external-indices") == 0) {
                     map_info_options.type = DISPLAY_TAGS_EXTERNAL_INDICES;
+                }
+                else if(std::strcmp(args[0], "uncompressed-size") == 0) {
+                    map_info_options.type = DISPLAY_UNCOMPRESSED_SIZE;
                 }
                 else {
                     eprintf_error("Unknown type %s", args[0]);
@@ -331,19 +335,36 @@ int main(int argc, const char **argv) {
             oprintf(")\n");
 
             // Get CRC
-            auto crc = Invader::calculate_map_crc(map->get_data(), data_length);
+            std::uint32_t crc = 0;
             bool external_data_used = uses_external_data();
             bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(crc != header.crc32) {
-                oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                oprintf_success_warn("CRC32:             Unknown");
+            }
+            else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                oprintf_success_warn("CRC32:             Unknown");
             }
             else {
-                oprintf_success("CRC32:             0x%08X (matches)", crc);
+                crc = Invader::calculate_map_crc(map->get_data(), data_length);
+                if(crc != header.crc32) {
+                    oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
+                }
+                else {
+                    oprintf_success("CRC32:             0x%08X (matches)", crc);
+                }
             }
+            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(dirty) {
+            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                if(memed_by_refinery() || map->is_protected()) {
+                    oprintf_success_warn("Integrity:         Dirty");
+                }
+                else {
+                    oprintf_success_warn("Integrity:         Unknown");
+                }
+            }
+            else if(dirty) {
                 oprintf_success_warn("Integrity:         Dirty");
             }
             else {
@@ -363,7 +384,7 @@ int main(int argc, const char **argv) {
             }
 
             else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmaps.map, %zu loc.map, %zu sounds.map)", total_tags, bitmaps, loc, sounds);
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", loc, sounds, sounds == 1 ? "" : "s");
 
                 char message[256];
                 if(total_indices == 0) {
@@ -395,7 +416,7 @@ int main(int argc, const char **argv) {
                 }
             }
             else {
-                oprintf_success_lesser_warn("External tags:     Yes (%zu bitmaps.map, %zu sounds.map)", bitmaps, sounds);
+                oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu sound%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", sounds, sounds == 1 ? "" : "s");
             }
 
             // Is it protected?
@@ -423,7 +444,15 @@ int main(int argc, const char **argv) {
             oprintf("%08X\n", Invader::calculate_map_crc(map->get_data(), data_length));
             break;
         case DISPLAY_DIRTY:
-            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 || memed_by_refinery() || map->is_protected()) ? "yes" : "no");
+            if(memed_by_refinery() || map->is_protected()) {
+                oprintf("yes\n");
+            }
+            else if(map->get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                oprintf("unknown\n");
+            }
+            else {
+                oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32) ? "yes" : "no");
+            }
             break;
         case DISPLAY_ENGINE:
             oprintf("%s\n", engine_name(header.engine));
@@ -511,6 +540,9 @@ int main(int argc, const char **argv) {
             break;
         case DISPLAY_TAGS_EXTERNAL_INDICES:
             uses_external_data(false, true, true, true);
+            break;
+        case DISPLAY_UNCOMPRESSED_SIZE:
+            oprintf("%zu\n", data_length);
             break;
         case DISPLAY_LANGUAGES:
             uses_external_data();

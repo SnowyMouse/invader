@@ -32,6 +32,42 @@ conventions.
 
 These conventions are subject to change.
 
+## Scope conventions
+Issues and pull requests must remain in the scope of Invader. Here are some
+things to keep in mind:
+
+- Invader targets the base Halo Combat Evolved game as released on PC.
+- Invader is cross-platform and does not target any single operating system.
+- Invader does not (usually) care about the limitations of the original Halo
+Editing Kit.
+
+Forks that support other mods, such as Open Sauce, or other releases of the
+game, such as the original Xbox version of the game, are certainly welcome, but
+code or definitions for functionality provided by these mods will not be
+accepted upstream.
+
+Also, the standard library should be used whenever possible. Do not use any
+platform-specific types or functions such as the Windows API's `DWORD` or
+`fopen_s` when writing platform-independent code.
+
+There may be times where such platform-specific code is necessary, such as for
+doing networking or certain filesystem queries. If so, ensure you use `#ifdef`s
+so the code is only compiled when that platform is being targeted.
+
+Lastly, it is well known that the Halo Editing Kit imposes limitations on
+structures. For example:
+- tool.exe limits the maximum size of a bitmap to 16 MiB
+- tool.exe limits the maximum number of structs in most tags
+- tool.exe limits the file size of maps to 128 MiB in multiplayer and 384 MiB
+in singleplayer
+- and so on...
+
+As long as it is otherwise valid data, then Invader should not prevent the user
+from creating assets, even if these assets may not work with the Halo Editing
+Kit. In fact, Invader should not be expected to warn the user if such assets
+will not work with the original Halo Editing Kit. Usage of the original Halo
+Editing Kit should be discouraged whenever possible.
+
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation,
 and code to ensure it is understandable by most people.
@@ -95,44 +131,6 @@ reproduce the bug:
       the correct version of the map.
 - A simple way to remember this is: If a bug cannot be reproduced, then it
   isn't a bug, and your issue will be closed.
-
-## Scope conventions
-Issues and pull requests must remain in the scope of Invader. Here are some
-things to keep in mind:
-
-- Invader targets the base Halo Combat Evolved game as released on PC by
-  Gearbox.
-- Invader is cross-platform and does not target any single operating system.
-- Invader does not (usually) care about the limitations of the original Halo
-  Editing Kit.
-
-Remember, these conventions only apply to contributions towards the main
-Invader repository, not forks. This means that you are allowed to create a fork
-of Invader that targets a specific mod of the game (e.g. Chimera, Open Sauce,
-etc.), provided you follow the license of Invader and, if necessary, the mod
-you are targeting. However, code or definitions for functionality provided by
-these mods will not be accepted upstream.
-
-Also, if you contribute to Invader and write C/C++ code, remember to use
-functions and data types standard to C/C++. Do not use platform-specific types
-or functions such as the Windows API's `DWORD` or `fopen_s` when writing any
-platform-independent code. There may be times where such platform-specific code
-is necessary. If so, ensure you use `#ifdef`s so the code is only compiled when
-that platform is being targeted.
-
-Lastly, it is well known that the Halo Editing Kit imposes limitations on
-structures. For example:
-- tool.exe limits the maximum size of a bitmap to 16 MiB
-- tool.exe limits the maximum number of structs in most tags
-- tool.exe limits the file size of maps to 128 MiB in multiplayer and 384 MiB
-  in singleplayer
-- and so on...
-
-As long as it is otherwise valid data, then Invader should not prevent the user
-from creating assets, even if these assets may not work with the Halo Editing
-Kit. In fact, Invader should not be expected to warn the user if such assets
-will not work with the original Halo Editing Kit. Usage of the original Halo
-Editing Kit should be discouraged whenever possible.
 
 ## Source file conventions
 The Invader repository uses these conventions. If contributing code to Invader,

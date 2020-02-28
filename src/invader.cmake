@@ -1,18 +1,37 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Invader library
-set(INVADER_SOURCE_FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+# Parser files
+set(INVADER_PARSER_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+)
+
+# Invader library
+set(INVADER_SOURCE_FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
+
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -29,6 +48,7 @@ set(INVADER_SOURCE_FILES
     src/bitmap/color_plate_scanner.cpp
     src/bitmap/image_loader.cpp
     src/bitmap/bitmap_data_writer.cpp
+    src/compress/ceaflate.cpp
     src/compress/compression.cpp
     src/sound/sound_encoder_flac.cpp
     src/sound/sound_encoder_ogg_vorbis.cpp
@@ -45,6 +65,7 @@ set(INVADER_SOURCE_FILES
     src/tag/hek/class/bitmap.cpp
     src/tag/hek/class/model_collision_geometry.cpp
     src/extract/extraction.cpp
+    src/tag/parser/parser_struct.cpp
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
     src/tag/parser/compile/antenna.cpp
@@ -94,11 +115,14 @@ else()
     )
 endif()
 
-# Generate headers separately (this is to guarantee build order)
-add_custom_target(invader-header-gen
-    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+# Do this
+add_custom_target(invader-header-version
+    SOURCES "${CMAKE_CURRENT_BINARY_DIR}/version_str.hpp"
 )
-add_dependencies(invader invader-header-gen)
+add_custom_target(invader-header-gen
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp"
+)
+add_dependencies(invader invader-header-gen invader-header-version)
 
 # P8 palette library (separate for slightly faster building)
 add_library(invader-bitmap-p8-palette STATIC
@@ -110,9 +134,9 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for deb
 
 # Include definition script
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/hek/definition.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/invader/tag/parser/parser.hpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-read-cache-file-data.cpp" "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-format.cpp"  "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp" "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp" ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/header_generator.py"
+    OUTPUT ${INVADER_PARSER_FILES}
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
 
@@ -162,8 +186,8 @@ add_custom_command(
 
 # Build the resource list
 add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices" "${CMAKE_CURRENT_BINARY_DIR}/resource_list.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices" "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/bitmaps.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/sounds.tag_indices" "${CMAKE_CURRENT_SOURCE_DIR}/src/resource/list/loc.tag_indices"
 )
 
@@ -181,7 +205,7 @@ endif()
 set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 
 # Include that
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} ${ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)

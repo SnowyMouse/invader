@@ -40,7 +40,7 @@ namespace Invader::Parser {
         }
 
         // Put scripts in if need be
-        this->source_files.clear();
+        /*this->source_files.clear();
         try {
             if(this->scripts.size() != 0) {
                 auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
@@ -48,13 +48,11 @@ namespace Invader::Parser {
                 auto &source_file = this->source_files.emplace_back();
                 std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
                 source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
-
-                this->source_files.clear(); // clear this anyway
             }
         }
         catch(std::exception &e) {
             eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
-        }
+        }*/
 
         // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
         this->postprocess_hek_data();
@@ -82,7 +80,7 @@ namespace Invader::Parser {
                 std::size_t region_index = instance.region_index;
                 std::size_t region_count = regions.size();
                 if(region_index >= region_count) {
-                    eprintf_error("invalid region index %zu / %zu", region_index, region_count);
+                    eprintf_error("invalid region index (%zu >= %zu) in marker %s #%zu", region_index, region_count, marker.name.string, instance_index);
                     throw OutOfBoundsException();
                 }
 
@@ -91,7 +89,7 @@ namespace Invader::Parser {
                 std::size_t permutation_count = region.permutations.size();
                 std::size_t permutation_index = instance.permutation_index;
                 if(permutation_index >= permutation_count) {
-                    eprintf_error("invalid permutation index %zu / %zu for region #%zu", permutation_index, permutation_count, region_index);
+                    eprintf_error("invalid permutation index (%zu >= %zu) for region #%zu in marker %s #%zu", permutation_index, permutation_count, region_index, marker.name.string, instance_index);
                     throw OutOfBoundsException();
                 }
 
@@ -166,56 +164,6 @@ namespace Invader::Parser {
         this->duration /= TICK_RATE;
     }
 
-    void Invader::Parser::ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        // Do nothing if there is nothing to do
-        if(this->rendered_vertices_count == 0) {
-            this->lightmap_vertices_count = 0;
-            return;
-        }
-
-        // Extract vertices
-        auto &bsp_material = tag.get_struct_at_pointer<HEK::ScenarioStructureBSPMaterial>(*pointer);
-        std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
-        const auto *uncompressed_bsp_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(
-            tag.data(bsp_material.uncompressed_vertices.pointer, uncompressed_vertices_size)
-        );
-        this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices + this->rendered_vertices_count));
-
-        // Compress the vertices too
-        auto *new_compressed_bsp_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little *>(
-            this->compressed_vertices.insert(
-                this->compressed_vertices.end(),
-                this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little),
-                std::byte()
-            ).base()
-        );
-        for(std::size_t v = 0; v < this->rendered_vertices_count; v++) {
-            new_compressed_bsp_vertices[v] = HEK::compress_sbsp_rendered_vertex(uncompressed_bsp_vertices[v]);
-        }
-
-        // Add lightmap vertices
-        if(this->lightmap_vertices_count == this->rendered_vertices_count) {
-            auto *uncompressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(tag.data(bsp_material.uncompressed_vertices.pointer, uncompressed_vertices_size + this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little)) + uncompressed_vertices_size);
-            this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices + this->lightmap_vertices_count));
-
-            // Compress them as well
-            auto *new_compressed_bsp_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little *>(
-                this->compressed_vertices.insert(
-                    this->compressed_vertices.end(),
-                    this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little),
-                    std::byte()
-                ).base()
-            );
-            for(std::size_t v = 0; v < this->lightmap_vertices_count; v++) {
-                new_compressed_bsp_lightmap_vertices[v] = HEK::compress_sbsp_lightmap_vertex(uncompressed_bsp_lightmap_vertices[v]);
-            }
-        }
-        else if(this->lightmap_vertices_count != 0) {
-            eprintf_error("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
-            throw InvalidTagDataException();
-        }
-    }
-
     void Invader::Parser::GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
         const auto &map = tag.get_map();
@@ -253,7 +201,7 @@ namespace Invader::Parser {
             auto &straggler_triangle = this->triangles.emplace_back();
             auto *triangle_indices = indices + triangle_count * 3;
             straggler_triangle.vertex0_index = triangle_indices[0];
-            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1] : NULL_INDEX;
+            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1].read() : NULL_INDEX;
             straggler_triangle.vertex2_index = NULL_INDEX;
         }
     }
@@ -400,43 +348,46 @@ namespace Invader::Parser {
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
         if(frame_size != total_frame_size) {
-            eprintf_error("frame size (%zu) != total frame size (%zu)", static_cast<std::size_t>(frame_size), total_frame_size);
+            eprintf_error("Frame size is invalid (%zu != %zu)", static_cast<std::size_t>(frame_size), total_frame_size);
             throw InvalidTagDataException();
         }
 
         // Do default data
         std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
         if(!this->flags.compressed_data) {
-            if(default_data.size() != expected_default_data_size) {
-                eprintf_error("default data size (%zu) != expected_default_data_size (%zu)", static_cast<std::size_t>(frame_size), expected_default_data_size);
-                throw InvalidTagDataException();
-            }
+            std::size_t default_data_size = default_data.size();
+            if(default_data_size > 0) {
+                if(default_data.size() != expected_default_data_size) {
+                    eprintf_error("Default data size is invalid (%zu > 0 && %zu != %zu)", default_data_size, static_cast<std::size_t>(default_data_size), expected_default_data_size);
+                    throw InvalidTagDataException();
+                }
 
-            if(expected_default_data_size > 0) {
-                auto *default_data_big = this->default_data.data();
-                auto *default_data_little = default_data.data();
+                if(expected_default_data_size > 0) {
+                    auto *default_data_big = this->default_data.data();
+                    auto *default_data_little = default_data.data();
 
-                for(std::size_t node = 0; node < this->node_count; node++) {
-                    if(!rotate[node]) {
-                        auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
-                        const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
-                        rotation_big = rotation_little;
-                        default_data_big += sizeof(rotation_big);
-                        default_data_little += sizeof(rotation_big);
-                    }
-                    if(!transform[node]) {
-                        auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
-                        const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
-                        transform_big = transform_little;
-                        default_data_big += sizeof(transform_big);
-                        default_data_little += sizeof(transform_big);
-                    }
-                    if(!scale[node]) {
-                        auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
-                        const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
-                        scale_big = scale_little;
-                        default_data_big += sizeof(scale_big);
-                        default_data_little += sizeof(scale_big);
+                    for(std::size_t node = 0; node < this->node_count; node++) {
+                        if(!rotate[node]) {
+                            auto &rotation_big = *reinterpret_cast<ModelAnimationsRotation::struct_big *>(default_data_big);
+                            const auto &rotation_little = *reinterpret_cast<const ModelAnimationsRotation::struct_little *>(default_data_little);
+                            rotation_big = rotation_little;
+                            default_data_big += sizeof(rotation_big);
+                            default_data_little += sizeof(rotation_big);
+                        }
+                        if(!transform[node]) {
+                            auto &transform_big = *reinterpret_cast<ModelAnimationsTransform::struct_big *>(default_data_big);
+                            const auto &transform_little = *reinterpret_cast<const ModelAnimationsTransform::struct_little *>(default_data_little);
+                            transform_big = transform_little;
+                            default_data_big += sizeof(transform_big);
+                            default_data_little += sizeof(transform_big);
+                        }
+                        if(!scale[node]) {
+                            auto &scale_big = *reinterpret_cast<ModelAnimationscale::struct_big *>(default_data_big);
+                            const auto &scale_little = *reinterpret_cast<const ModelAnimationscale::struct_little *>(default_data_little);
+                            scale_big = scale_little;
+                            default_data_big += sizeof(scale_big);
+                            default_data_little += sizeof(scale_big);
+                        }
                     }
                 }
             }
@@ -456,7 +407,7 @@ namespace Invader::Parser {
         }
         else {
             if(frame_data.size() != frame_data_size_expected) {
-                eprintf_error("frame_data.size() (%zu) != frame_data_size_expected (%zu)", frame_data.size(), frame_data_size_expected);
+                eprintf_error("Frame data size is invalid (%zu != %zu)", frame_data.size(), frame_data_size_expected);
                 throw InvalidTagDataException();
             }
 

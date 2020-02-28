@@ -9,18 +9,35 @@ namespace Invader::Parser {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
+        this->pointer = 0xFFFFFFFF;
+        this->flags.external = 0;
+        this->flags.make_it_actually_work = 1;
+
+        // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
         auto &d = s.dependencies.emplace_back();
         d.tag_index = tag_index;
         d.offset = bitmap_data_offset;
         d.tag_id_only = true;
-        this->pointer = 0xFFFFFFFF;
-        this->flags.external = 0;
-        this->flags.make_it_actually_work = 1;
     }
 
     void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         this->postprocess_hek_data();
+
+        auto xbox = tag.get_map().get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+
+        // TODO: Deal with cubemaps and stuff
+        if(xbox && this->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
+            eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
+            throw InvalidTagDataException();
+        }
+
         for(auto &bitmap_data : this->bitmap_data) {
+            // TODO: Generate last two mipmaps if needed
+            if(bitmap_data.flags.compressed && xbox) {
+                eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
+                throw InvalidTagDataException();
+            }
+
             const std::byte *bitmap_data_ptr;
             bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
             bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
@@ -54,6 +71,18 @@ namespace Invader::Parser {
         auto *pixel_data = this->processed_pixel_data.data();
 
         for(auto &data : this->bitmap_data) {
+            // DXTn bitmaps cannot be swizzled
+            if(data.flags.swizzled && data.flags.compressed) {
+                eprintf_error("Swizzled bitmaps are not supported for compressed bitmaps");
+                throw InvalidTagDataException();
+            }
+
+            // TODO: Swizzle bitmaps for Dark Circlet, deswizzle for Gearbox
+            if(data.flags.swizzled) {
+                eprintf_error("Swizzled bitmaps are not currently supported");
+                throw InvalidTagDataException();
+            }
+
             std::size_t data_index = &data - this->bitmap_data.data();
             bool compressed = data.flags.compressed;
             auto format = data.format;
@@ -70,10 +99,10 @@ namespace Invader::Parser {
             if(!workload.hide_pedantic_warnings) {
                 auto power_of_two = [](auto value) -> bool {
                     while(value > 1) {
-                        value <<= 1;
                         if(value & 1) {
                             return false;
                         }
+                        value >>= 1;
                     }
                     return true;
                 };
@@ -144,6 +173,7 @@ namespace Invader::Parser {
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                     bits_per_pixel = 8;

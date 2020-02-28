@@ -22,6 +22,10 @@ namespace Invader {
 
         // Parse the map
         Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
+        auto engine = map.get_cache_file_header().engine;
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            return 0;
+        }
 
         // Reassign variables if needed
         data = map.get_data();

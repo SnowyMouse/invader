@@ -18,7 +18,7 @@ namespace Invader::SoundReader {
         #define READ_OR_BAIL(to_what) if(sizeof(to_what) > data_length - offset) { \
             eprintf_error("Failed to read " # to_what); \
             throw InvalidInputSoundException(); \
-        } std::memcpy(&to_what, data + offset, sizeof(to_what)); offset += sizeof(to_what);
+        } std::memcpy(reinterpret_cast<std::uint8_t *>(&to_what), data + offset, sizeof(to_what)); offset += sizeof(to_what);
 
         // Make sure everything is valid
         WAVChunk wav_chunk;

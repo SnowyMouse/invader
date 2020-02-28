@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "data_type.hpp"
+#include "../tag/hek/definition.hpp"
 
 namespace Invader::HEK {
     enum CacheFileEngine : std::uint32_t {
@@ -13,6 +14,9 @@ namespace Invader::HEK {
         CACHE_FILE_RETAIL = 0x7,
         CACHE_FILE_CUSTOM_EDITION = 0x261,
         CACHE_FILE_DARK_CIRCLET = 0x1A86,
+
+        CACHE_FILE_ANNIVERSARY = 0x233, // CEA actually uses "7" like CACHE_FILE_RETAIL but doing that while supporting retail maps is insane
+        CACHE_FILE_ANNIVERSARY_COMPRESSED = 0x7,
 
         CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
         CACHE_FILE_RETAIL_COMPRESSED = 0x861A0007,
@@ -37,21 +41,21 @@ namespace Invader::HEK {
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
         CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000000,
 
+        CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS = 0x40448000,
+        CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS = 0x41448000,
+
+        CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS = 0x803A6000,
+
         CACHE_FILE_STUB_MEMORY_ADDRESS = 0xFFFFFFFF
     };
 
     enum CacheFileLimits : std::size_t {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
-        #if SIZE_MAX > 0xFFFFFFFF
-        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = static_cast<std::size_t>(0x100000000 - CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS),
-        #else
-        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = static_cast<std::size_t>(0xFFFFFFFF - CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS),
-        #endif
-        #if SIZE_MAX > 0xFFFFFFFF
-        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0x100000000,
-        #else
-        CACHE_FILE_MAXIMUM_FILE_LENGTH = SIZE_MAX,
-        #endif
+        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = 0xFFFFFFFF,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
+
+        CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY = 0x1F00000,
+
         CACHE_FILE_MAX_TAG_COUNT = 65535
     };
 

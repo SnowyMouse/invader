@@ -6,11 +6,11 @@
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
-    template <typename T> void fix_render_bounding_radius(T &tag) {
+    template <typename T> static void fix_render_bounding_radius(T &tag) {
         tag.render_bounding_radius = tag.render_bounding_radius < tag.bounding_radius ? tag.bounding_radius : tag.render_bounding_radius;
     }
 
-    template <typename T> void compile_object(T &tag) {
+    template <typename T> static void compile_object(T &tag, BuildWorkload &workload, std::size_t tag_index) {
         tag.scales_change_colors = 0;
         for(auto &c : tag.change_colors) {
             if(c.scale_by != HEK::FunctionScaleBy::FUNCTION_SCALE_BY_NONE) {
@@ -19,6 +19,11 @@ namespace Invader::Parser {
             }
         }
         fix_render_bounding_radius(tag);
+
+        // Animate what?
+        if(tag.model.path.size() == 0 && tag.animation_graph.path.size() != 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Object tag has a model tag but no animation graph", tag_index);
+        }
     }
 
     void ObjectChangeColors::postprocess_hek_data() {
@@ -146,9 +151,9 @@ namespace Invader::Parser {
         tag.hard_ping_interrupt_ticks = static_cast<std::int16_t>(tag.hard_ping_interrupt_time * TICK_RATE);
     }
 
-    void Biped::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Biped::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_BIPED;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         compile_unit(*this);
         this->cosine_stationary_turning_threshold = std::cos(this->stationary_turning_threshold);
         this->crouch_camera_velocity = 1.0f / this->crouch_transition_time / TICK_RATE;
@@ -158,14 +163,14 @@ namespace Invader::Parser {
         this->sine_uphill_falloff_angle = static_cast<float>(std::sin(this->uphill_falloff_angle));
         this->sine_uphill_cutoff_angle = static_cast<float>(std::sin(this->uphill_cutoff_angle));
     }
-    void Vehicle::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Vehicle::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_VEHICLE;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         compile_unit(*this);
     }
     void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
 
         // Jason jones autoaim for the rocket warthog
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {
@@ -181,31 +186,31 @@ namespace Invader::Parser {
             }
         }
     }
-    void Equipment::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Equipment::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_EQUIPMENT;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
     }
-    void Garbage::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Garbage::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_GARBAGE;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
     }
-    void Projectile::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Projectile::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PROJECTILE;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         this->initial_velocity /= TICK_RATE;
         this->final_velocity /= TICK_RATE;
     }
-    void Scenery::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Scenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SCENERY;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
     }
-    void Placeholder::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void Placeholder::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_PLACEHOLDER;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
     }
-    void SoundScenery::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void SoundScenery::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_SOUND_SCENERY;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
     }
 
     template <typename T> void compile_device(T &tag) {
@@ -215,20 +220,20 @@ namespace Invader::Parser {
         tag.inverse_position_acceleration_time = 1.0f / (TICK_RATE * tag.position_acceleration_time);
     }
 
-    void DeviceMachine::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void DeviceMachine::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         compile_device(*this);
         this->door_open_time_ticks = static_cast<std::uint32_t>(this->door_open_time * TICK_RATE);
     }
-    void DeviceControl::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void DeviceControl::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_CONTROL;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         compile_device(*this);
     }
-    void DeviceLightFixture::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void DeviceLightFixture::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
-        compile_object(*this);
+        compile_object(*this, workload, tag_index);
         compile_device(*this);
     }
 
@@ -251,7 +256,7 @@ namespace Invader::Parser {
         this->error_deceleration_rate = this->error_deceleration_time <= 0.0F ? 1.0F : 1.0f / TICK_RATE / this->error_deceleration_time;
 
         // Jason Jones the accuracy of the weapon
-        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::CACHE_FILE_SINGLEPLAYER) {
+        if(offset == 0 && workload.cache_file_type.has_value() && workload.cache_file_type.value() == HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
             auto &tag = workload.tags[tag_index];
             if(tag.path == "weapons\\pistol\\pistol") {
                 this->minimum_error = DEGREES_TO_RADIANS(0.2F);
@@ -354,12 +359,14 @@ namespace Invader::Parser {
             return; // if recursion is disabled, doing any of this will be a meme
         }
 
-        auto &head_index = reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset)->head_model_node_index;
+        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+        auto &head_index = struct_val.head_model_node_index;
         auto &model_id = this->model.tag_id;
 
         this->head_model_node_index = NULL_INDEX;
-        if(model_id.is_null()) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped is missing a model tag, so it will not spawn", tag_index);
+
+        if(struct_val.animation_graph.tag_id.read().is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
         }
         else {
             auto &model_tag = workload.tags[model_id.index];
@@ -374,20 +381,19 @@ namespace Invader::Parser {
                         this->head_model_node_index = static_cast<HEK::Index>(n);
                     }
                 }
-
-                if(this->head_model_node_index == NULL_INDEX) {
-                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no \"bip01 head\" node, so the biped will not spawn", tag_index);
-                }
-            }
-            else {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped model has no nodes, so the biped will not spawn", tag_index);
             }
         }
 
         head_index = this->head_model_node_index;
         calculate_object_predicted_resources(workload, struct_index);
     }
-    void Vehicle::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
+
+        if(struct_val.animation_graph.tag_id.read().is_null()) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Vehicle has no animation graph, so the vehicle will not spawn", tag_index);
+        }
+
         calculate_object_predicted_resources(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {

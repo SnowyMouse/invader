@@ -15,6 +15,8 @@ namespace Invader::HEK {
                 return "Halo: Combat Evolved (Xbox)";
             case CacheFileEngine::CACHE_FILE_DEMO:
                 return "Halo Demo / Trial";
+            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                return "Halo: Combat Evolved Anniversary (MCC)";
             default:
                 return "Unknown";
         }
@@ -22,11 +24,11 @@ namespace Invader::HEK {
 
     const char *type_name(CacheFileType type) noexcept {
         switch(type) {
-            case CacheFileType::CACHE_FILE_MULTIPLAYER:
+            case CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
                 return "Multiplayer";
-            case CacheFileType::CACHE_FILE_SINGLEPLAYER:
+            case CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
                 return "Singleplayer";
-            case CacheFileType::CACHE_FILE_USER_INTERFACE:
+            case CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
                 return "User interface";
             default:
                 return "Unknown";
@@ -60,7 +62,7 @@ namespace Invader::HEK {
 
     bool CacheFileHeader::valid() const noexcept {
         // Ensure the name and build don't overflow
-        if(this->name.overflows() && !this->build.overflows()) {
+        if(this->name.overflows() || this->build.overflows()) {
             return false;
         }
 

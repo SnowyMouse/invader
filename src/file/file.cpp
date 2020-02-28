@@ -226,4 +226,120 @@ namespace Invader::File {
             }
         }
     }
+
+    std::optional<TagFilePath> split_tag_class_extension(const std::string &tag_path) {
+        return split_tag_class_extension_chars(tag_path.c_str());
+    }
+
+    std::optional<TagFilePath> split_tag_class_extension_chars(const char *tag_path) {
+        const char *extension = nullptr;
+        for(const char *c = tag_path; *c; c++) {
+            if(*c == '.') {
+                extension = c + 1;
+            }
+        }
+        if(!extension) {
+            return std::nullopt;
+        }
+
+        auto tag_class = HEK::extension_to_tag_class(extension);
+        if(tag_class == TagClassInt::TAG_CLASS_NONE || tag_class == TagClassInt::TAG_CLASS_NULL) {
+            return std::nullopt;
+        }
+        else {
+            return TagFilePath { std::string(tag_path, (extension - 1) - tag_path), HEK::extension_to_tag_class(extension) };
+        }
+    }
+
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags) {
+        std::vector<TagFile> all_tags;
+
+        auto iterate_directories = [&all_tags](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::string> &main_dir) -> void {
+            if(++depth == 256) {
+                return;
+            }
+
+            for(auto &d : std::filesystem::directory_iterator(dir)) {
+                std::vector<std::string> add_dir = the_story_thus_far;
+                auto file_path = d.path();
+                add_dir.emplace_back(file_path.filename().string());
+                if(d.is_directory()) {
+                    iterate_directories(add_dir, d, iterate_directories, depth, priority, main_dir);
+                }
+                else if(file_path.has_extension()) {
+                    auto extension = file_path.extension().string();
+                    auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
+
+                    // First, make sure it's valid
+                    if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+                        continue;
+                    }
+
+                    // Next, add it
+                    TagFile file;
+                    file.full_path = file_path;
+                    file.tag_class_int = tag_class_int;
+                    file.tag_directory = priority;
+                    file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
+                    all_tags.emplace_back(std::move(file));
+                }
+            }
+        };
+
+        // Go through each directory
+        std::size_t dir_count = tags.size();
+        for(std::size_t i = 0; i < dir_count; i++) {
+            auto &d = tags[i];
+            auto dir_str = d.c_str();
+            iterate_directories(std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::string>(&dir_str, &dir_str + 1));
+        }
+
+        return all_tags;
+    }
+
+    std::vector<std::string> TagFile::split_tag_path() {
+        std::vector<std::string> elements;
+        auto halo_path = preferred_path_to_halo_path(this->tag_path);
+
+        const char *word = halo_path.c_str();
+        for(const char *c = halo_path.c_str() + 1; *c; c++) {
+            if(*c == '\\') {
+                // Make a new string with this element and add it
+                elements.emplace_back(word, c - word);
+
+                // Fast forward through any duplicate backslashes
+                while(*c == '\\') {
+                    c++;
+                }
+
+                // Go back one so the iterator can handle this
+                c--;
+            }
+        }
+
+        // Add the last element
+        elements.emplace_back(word);
+
+        return elements;
+    }
+
+
+   std::string remove_duplicate_slashes(const std::string &path) {
+       const char *tag_path_c = path.c_str();
+       std::vector<char> tag_path_cv(tag_path_c, tag_path_c + path.size() + 1);
+       remove_duplicate_slashes_chars(tag_path_cv.data());
+       return tag_path_cv.data();
+   }
+
+   void remove_duplicate_slashes_chars(char *path) {
+       for(char *i = path; *i; i++) {
+           char this_i = i[0];
+           char next_i = i[1];
+           if((this_i == '\\' || this_i == '/' || this_i == std::filesystem::path::preferred_separator) && (next_i == '\\' || next_i == '/' || next_i == std::filesystem::path::preferred_separator)) {
+               for(char *j = i + 1; *j; j++) {
+                   j[0] = j[1];
+               }
+           }
+       }
+   }
 }

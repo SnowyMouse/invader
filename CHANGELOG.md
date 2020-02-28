@@ -4,15 +4,116 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-extract: Added partial support for Xbox maps
+- invader-info: Added partial support for Xbox maps
+
+## [0.28.1] - 2020-02-25
+### Changed
+- invader-build: Halo CEA tag space limits are now enforced (31 MiB tag space,
+  not including BSPs)
+
+### Fixed
+- invader-build: Actually changed `anniversary` to `mcc`
+- invader-build: Fixed sound_scenery references not working in effect tags
+- invader-build: Fixed some bounds checking issues when compiling invalid
+  collision models or BSP collision
+- invader-build: Fixed scenery and light fixtures not spawning on MCC maps
+- invader-extract: Fixed an issue where certain model_animation tags did not
+  extract
+
+## [0.28.0] - 2020-02-24
+### Added
+- New tool: invader-collection - Generates tag collection tags
+
+## [0.27.1] - 2020-02-24
+### Added
+- invader-build: Added --uncompressed for engine targets that default to
+  compressed (i.e. `mcc`) to be built as uncompressed.
+
+### Changed
+- invader-build: Changed `anniversary` to `mcc` for brevity
+
+## [0.27.0] - 2020-02-24
+### Added
+- invader-info: Added `-T uncompressed-size`
+- invader-build: Added `anniversary` as an engine target. If building MCC CEA
+  maps, you will need to modify the .fmeta tag, too
+
+### Fixed
+- invader-build: Fixed maps with stubbed tags being detected as protected in
+  invader-info; note, however, that maps will need to be rebuilt
+
+## [0.26.1] - 2020-02-21
+### Added
+- invader-extract: Can now extract BSP tags from CEA maps.
+
+## [0.26.0] - 2020-02-21
+### Added
+- invader-compress: Can now decompress/compress CEA maps. If decompressed by a
+  tool besides invader-compress, then the engine version in the header will
+  need to be changed from 0x7 (7) to 0x233 (563) to correctly recompress. The
+  value will be set back to the correct value upon compression.
+- invader-extract: Can now extract tags from CEA maps. If the map is
+  uncompressed from a tool besides invader-compress, then the engine version in
+  the header will need to be changed from 0x7 (7) to 0x233 (563) to correctly
+  load. BSP tags, sounds, and bitmaps do not currently extract.
+- invader-indexer: Can now index tags from CEA maps. If the map is
+  uncompressed from a tool besides invader-compress, then the engine version in
+  the header will need to be changed from 0x7 (7) to 0x233 (563) to correctly
+  load.
+- invader-info: Can now query CEA maps. If the map is uncompressed from a tool
+  besides invader-compress, then the engine version in the header will need to
+  be changed from 0x7 (7) to 0x233 (563) to correctly load.
+
+## [0.25.2] - 2020-02-12
+### Added
+- invader-refactor: Added `-D` which performs the operation without making any
+  actual changes
+- invader-refactor: Added `-s` which only writes to a single tag
+
+### Changed
+- invader-build: Now errors if any tag has an animation graph but no model
+- invader-refactor: Some exceptions are now handled by gracefully closing
+  rather than calling abort() and crashing.
+
+### Fixed
+- invader-archive: Fixed an issue with single tag archival when archiving
+  bitmaps or sounds
+- invader-extract: Fixed an issue where some hidden values were being stripped
+  unnecessarily
+- invader-strip: Fixed an issue where some hidden values were being stripped
+  unnecessarily
+
+## [0.25.1] - 2020-02-12
+### Changed
+- invader-build: Now warns if a biped or vehicle is missing an animation graph,
+  and, if not, errors if the tag is missing a model
+
+### Fixed
+- invader-build: Fixed a typo in an error message for weapon_hud_interface tags
+- invader-build: Fixed showing the wrong indices in weapon_hud_interface errors
+- invader-build: Fixed non-power-of-two check giving incorrect results when
+  compiling bitmaps
+- invader-build: Fixed a missing "bip01 head" resulting in a warning
+
+## [0.25.0] - 2020-02-11
+### Added
+- New tool: invader-refactor - Find and replace tag references.
 - invader-strip: Added `-p` which runs the tag through Invader's preprocessor
   (used in invader-build). This is to make tags easier to compare.
 
-## [0.24.2] - 2019-02-01
+### Changed
+- invader: gbxmodel tags that have markers located in the main model struct are
+  now considered invalid
+- invader: Tags with multiple consecutive path separators are now fixed when
+  run through the tag or map parser
+
+## [0.24.2] - 2020-02-01
 ### Fixed
 - invader-build: Fixed ejection port recovery rate being calculated as 1 for
   some tags
 
-## [0.24.1] - 2019-01-31
+## [0.24.1] - 2020-01-31
 ### Added
 - invader-build: Now shows tag space usage on map build and errors if exceeded
 
@@ -35,7 +136,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed change color permutation weights not being converted to
   cutoffs.
 
-## [0.24.0] - 2019-01-22
+## [0.24.0] - 2020-01-22
 ### Added
 - invader-strip: Added `-a` which strips the entire tags directory
 
@@ -43,7 +144,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-dependency: `-r` and `-R` no longer show tag errors
 - invader-extract: `-r` no longer shows tag errors
 
-## [0.23.5] - 2019-01-22
+## [0.23.5] - 2020-01-22
 ### Fixed
 - invader-build: Fixed a bug where negative-scale weapon HUD interface values
   were NOT defaulted to 1

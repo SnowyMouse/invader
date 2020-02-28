@@ -12,6 +12,12 @@ namespace Invader {
         std::vector<std::pair<std::string, TagClassInt>> dependencies;
         for(auto &s : tag_compiled.structs) {
             for(auto &d : s.dependencies) {
+                // Skip anything referencing ourselves
+                if(d.tag_index == 0) {
+                    continue;
+                }
+
+                // Continue
                 auto &tag = tag_compiled.tags[d.tag_index];
                 dependencies.emplace_back(tag.path, tag.tag_class_int);
             }

@@ -130,7 +130,9 @@
             {
                 "name": "tag id 0",
                 "comment": "Set to the sound tag's tag ID",
-                "type": "TagID"
+                "type": "TagID",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "buffer size",
@@ -141,7 +143,9 @@
             {
                 "name": "tag id 1",
                 "comment": "Set to the sound tag's tag ID",
-                "type": "TagID"
+                "type": "TagID",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "samples",

@@ -5,7 +5,10 @@
 
 #include <vector>
 #include <cstdlib>
+#include <filesystem>
 #include <optional>
+
+#include "../hek/class_int.hpp"
 
 namespace Invader::File {
     /**
@@ -50,6 +53,57 @@ namespace Invader::File {
     std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension);
 
     /**
+     * File path holder
+     */
+    struct TagFilePath {
+        /** Path without extension */
+        std::string path;
+
+        /** Class of the tag */
+        TagClassInt class_int;
+    };
+
+    /**
+     * Attempt to split the tag class extension from a path
+     * @param tag_path path to split
+     * @return         path followed by extension or nullptr if failed
+     */
+    std::optional<TagFilePath> split_tag_class_extension(const std::string &tag_path);
+
+    /**
+     * Attempt to split the tag class extension from a path
+     * @param tag_path path to split
+     * @return         path followed by extension or nullptr if failed
+     */
+    std::optional<TagFilePath> split_tag_class_extension_chars(const char *tag_path);
+
+    struct TagFile {
+        /** Full filesystem path */
+        std::filesystem::path full_path;
+
+        /** Virtual tag path */
+        std::string tag_path;
+
+        /** Tag directory this tag uses (lower number = higher priority) */
+        std::size_t tag_directory = {};
+
+        /** Tag class of this tag */
+        HEK::TagClassInt tag_class_int = {};
+
+        /**
+         * Split the tag path
+         */
+        std::vector<std::string> split_tag_path();
+    };
+
+    /**
+     * Read a tags directory
+     * @param  tags tag directories
+     * @return      all tags in the folder
+     */
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags);
+
+    /**
      * Convert the tag path to a path using the system's preferred separators
      * @param  tag_path tag path input
      */
@@ -87,6 +141,19 @@ namespace Invader::File {
      * @param  path path to remove trailing slashes from
      */
     void remove_trailing_slashes_chars(char *path);
+
+    /**
+     * Remove duplicate slashes from the path
+     * @param  path path to remove duplicate slashes from
+     * @return      path with removed duplicate slashes
+     */
+    std::string remove_duplicate_slashes(const std::string &path);
+
+    /**
+     * Remove duplicate slashes from the path
+     * @param  path path to remove duplicate slashes from
+     */
+    void remove_duplicate_slashes_chars(char *path);
 
     /**
      * Get the base name of the tag path

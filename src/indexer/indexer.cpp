@@ -62,11 +62,7 @@ int main(int argc, const char **argv) {
             try {
                 for(std::size_t i = skip; i < tag_count; i+= 1 + skip) {
                     auto &tag = map[i];
-
-                    // Replace double slashes (or more) with one slash
-                    std::string path = std::regex_replace(tag.path, std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-
-                    std::fprintf(f, "%s\n", path.c_str());
+                    std::fprintf(f, "%s\n", tag.path.c_str());
                 }
             }
             catch(std::exception &) {
@@ -97,10 +93,7 @@ int main(int argc, const char **argv) {
                 auto tag_count = map.get_tag_count();
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &tag = map.get_tag(i);
-
-                    // Replace double slashes (or more) with one slash
-                    std::string path = std::regex_replace(tag.get_path(), std::basic_regex<char>("\\\\{2,}"), "\\", std::regex_constants::match_default);
-                    std::fprintf(f, "%s.%s\n", path.c_str(), tag_class_to_extension(tag.get_tag_class_int()));
+                    std::fprintf(f, "%s.%s\n", tag.get_path().c_str(), tag_class_to_extension(tag.get_tag_class_int()));
                 }
             }
             catch(std::exception &) {

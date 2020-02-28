@@ -50,8 +50,7 @@
                 "name": "node stuff",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3,
-                "cache_only": true
+                "count": 3
             }
         ],
         "type": "struct",
@@ -64,8 +63,7 @@
                 "name": "vertices",
                 "type": "uint16",
                 "endian": "little",
-                "count": 3,
-                "cache_only": true
+                "count": 3
             },
             {
                 "type": "pad",
@@ -1572,15 +1570,34 @@
         "fields": [
             {
                 "name": "pointer",
-                "type": "Pointer"
+                "type": "Pointer",
+                "comment": "points to the BSP tag struct",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "name": "lightmap vertices size",
+                "type": "uint32",
+                "comment": "size of the lightmap vertices (Halo CE Anniversary on MCC)",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "name": "lightmap vertices start",
+                "type": "uint32",
+                "comment": "points to the beginning of the lightmap vertices (Halo CE Anniversary on MCC)",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
-                "size": 16
+                "size": 8
             },
             {
                 "name": "signature",
-                "type": "TagClassInt"
+                "type": "TagClassInt",
+                "cache_only": true,
+                "endian": "little"
             }
         ],
         "type": "struct",

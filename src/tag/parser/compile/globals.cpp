@@ -10,7 +10,7 @@ namespace Invader::Parser {
         this->harmful_falling_velocity.to = static_cast<float>(std::sqrt(this->harmful_falling_distance.to * GRAVITY * 2.0f));
     }
     void GlobalsPlayerInformation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(*workload.cache_file_type == HEK::CacheFileType::CACHE_FILE_USER_INTERFACE) {
+        if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->unit.path.clear();
             this->unit.tag_id = HEK::TagID::null_tag_id();
             this->unit.tag_class_int = TagClassInt::TAG_CLASS_NONE;
@@ -20,7 +20,7 @@ namespace Invader::Parser {
         }
     }
     void Globals::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(*workload.cache_file_type != HEK::CacheFileType::CACHE_FILE_MULTIPLAYER) {
+        if(*workload.cache_file_type != HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
             this->weapon_list.clear();
@@ -34,7 +34,7 @@ namespace Invader::Parser {
             }
         }
 
-        if(*workload.cache_file_type == HEK::CacheFileType::CACHE_FILE_USER_INTERFACE) {
+        if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->falling_damage.clear();
             this->materials.clear();
         }

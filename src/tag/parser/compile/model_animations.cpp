@@ -130,7 +130,7 @@ namespace Invader::Parser {
         std::size_t expected_frame_info_size = required_frame_info_size * frame_count;
         std::size_t frame_info_size = this->frame_info.size();
         if(expected_frame_info_size != frame_info_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame info size (%zu expected, %zu gotten)", struct_index, expected_frame_info_size, frame_info_size);
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame info size (%zu > %zu)", struct_index, frame_info_size, expected_frame_info_size);
             throw InvalidTagDataException();
         }
 
@@ -215,13 +215,13 @@ namespace Invader::Parser {
         std::size_t total_frame_size = rotation_count * sizeof(ModelAnimationsRotation::struct_big) + scale_count * sizeof(ModelAnimationscale::struct_big) + transform_count * sizeof(ModelAnimationsTransform::struct_big);
         std::size_t max_frame_size = node_count * (sizeof(ModelAnimationsRotation::struct_big) + sizeof(ModelAnimationscale::struct_big) + sizeof(ModelAnimationsTransform::struct_big));
         if(this->frame_size != total_frame_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame size (%zu expected, %zu gotten)", struct_index, total_frame_size, static_cast<std::size_t>(this->frame_size));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid frame size (%zu > %zu)", struct_index, static_cast<std::size_t>(this->frame_size), total_frame_size);
             throw InvalidTagDataException();
         }
 
         std::size_t expected_default_data_size = max_frame_size - total_frame_size;
-        if(default_data_size != expected_default_data_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid default data size (%zu expected, %zu gotten)", struct_index, expected_default_data_size, default_data_size);
+        if(default_data_size != 0 && (default_data_size != expected_default_data_size)) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Animation #%zu has an invalid default data size (%zu > %zu)", struct_index, default_data_size, expected_default_data_size);
             throw InvalidTagDataException();
         }
 
@@ -231,8 +231,8 @@ namespace Invader::Parser {
         this->offset_to_compressed_data = 0;
 
         // Let's do default_data. Basically just add what isn't in frame_data, and only for one frame
-        const auto *default_data_big = this->default_data.data();
-        if(!compressed) {
+        if(default_data_size != 0 && !compressed) {
+            const auto *default_data_big = this->default_data.data();
             std::vector<std::byte> default_data(default_data_size);
             auto *default_data_little = default_data.data();
             for(std::size_t node = 0; node < node_count; node++) {

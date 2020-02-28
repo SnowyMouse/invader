@@ -4,6 +4,8 @@ Evolved on the PC.
 
 Our Discord server is https://discord.gg/RCX3nvw
 
+The official source code repository is https://github.com/Kavawuvi/invader
+
 ## License
 Invader is licensed under version 3.0 of the GNU General Public License. Note
 that Invader is NOT licensed under any later or previous version of the GNU
@@ -11,16 +13,31 @@ GPL.
 
 See COPYING for a copy of version 3 of the GNU General Public License.
 
-The ADPCM encoder as well as MosesofEgypt's Xbox ADPCM modifications are MIT.
-The license can be found in `src/sound/adpcm_xq/license.txt` and
-`src/sound/reclaimer-license.txt` respectively.
+The ADPCM encoder and MosesofEgypt's Xbox ADPCM modifications are BSD and MIT,
+respectively. Licenses can be found at `src/sound/adpcm_xq/license.txt` and
+`src/sound/reclaimer-license.txt`.
 
 ## Getting started
 This readme addresses a few topics:
+- [Staying up-to-date]
 - [Contributing]
 - [Getting Invader]
 - [Programs]
 - [Frequently asked questions]
+
+## Staying up-to-date
+To check if you are on an up-to-date version, run one of the tools (e.g.
+invader-info) with the `-i` parameter. On the top of the output is the version
+number that corresponds to the installation of Invader (e.g.
+`Invader 0.26.1.r1776.9db4cc5`). This is the project name (`Invader`), version
+(`0.26.1`), commit number (`r1776`), and commit hash (`9db4cc5`).
+
+Next, go to the [commits](https://github.com/Kavawuvi/invader/commits/master)
+and check the commit hash against the topmost commit. If it is the same, then
+you are using the latest version of Invader.
+
+Make sure to stay up-to-date, as newer version have more features while
+addressing more issues.
 
 ## Contributing
 See CONTRIBUTING.md.
@@ -29,7 +46,8 @@ See CONTRIBUTING.md.
 Invader can be obtained by either downloading pre-compiled binaries or
 compiling from source.
 
-You can also download precompiled [Nightly Builds].
+You can also download precompiled [Nightly Builds]. These will generally be
+up-to-date unless commits were made very recently.
 
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
@@ -54,10 +72,10 @@ some of these dependencies may have their own dependencies.
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
 - libsamplerate 0.1.9 or newer
+- zlib
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
-- zlib ([invader-bitmap])
 - freetype ([invader-font])
 - git (git commit hash in version - build only)
 
@@ -131,6 +149,7 @@ this project is split into different programs.
 - [invader-font]
 - [invader-indexer]
 - [invader-info]
+- [invader-refactor]
 - [invader-resource]
 - [invader-sound]
     - [What is splitting?]
@@ -298,12 +317,13 @@ Build cache files for Halo Combat Evolved on the PC.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
-  -c --compress                Compress the cache file.
+  -c --compress                Compress the cache file. This is default for mcc
+                               and dark engines.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               retail
+                               retail, mcc, dark
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
@@ -320,6 +340,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+  -u --uncompressed            Do not compress the cache file. This is default
+                               for demo, retail, and custom engines.
   -w --with-index <file>       Use an index file for the tags, ensuring the
                                map's tags are ordered in the same way.
 ```
@@ -437,6 +459,37 @@ Options:
                                tags-external-loc-indices,
                                tags-external-pointers,
                                tags-external-sound-indices
+```
+
+### invader-refactor
+This program renames and moves tag references.
+
+```
+Usage: invader-refactor [options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >
+
+Find and replace tag references.
+
+Options:
+  -D --dry-run                 Do not actually make any changes. This cannot be
+                               set with --move or --no-move.
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -M --move                    Move files that are being refactored. This can
+                               only be set once and cannot be set with
+                               --no-move or --dry-run.
+  -N --no-move                 Do not move any files; just change the
+                               references in the tags. This can only be set
+                               once and cannot be set with --move, --dry-run,
+                               or --recursive.
+  -r --recursive               Recursively move all tags in a directory. This
+                               will fail if a tag is present in both the old
+                               and new directories, and it cannot be used with
+                               --no-move.
+  -s --single-tag <path>       Make changes to a single tag, only, rather than
+                               the whole tag directory.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
 ```
 
 ### invader-resource
@@ -698,18 +751,18 @@ registers to hold temporary data). People who are unsure may also download a
 made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
-Officially, invader-build only creates maps for the Gearbox port of Halo on the
-PC. The .yelo file format is specific to Open Sauce, a mod of Halo Custom
-Edition. Therefore, the Invader project does not support it. However, this does
-not mean that you can't make a fork of Invader that supports it, and there are
-people who have said they were willing to do this.
+Officially, invader-build only creates maps for officially-released versions of
+the PC game. The .yelo file format is specific to Open Sauce, a mod of Halo
+Custom Edition. Therefore, the Invader project does not support it. However,
+this does not mean that you can't make a fork of Invader that supports it, and
+there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Officially, invader-build only creates maps for the Gearbox port of Halo on the
-PC. While Xbox maps are very similar in format to PC maps, there exists enough
-differences to make supporting the Xbox version non-trivial. Kavawuvi also does
-not have a modded Xbox or a retail copy of the Xbox version of the game, so
-there is no means to debug or test.
+Officially, invader-build only creates maps for officially-released versions of
+the PC game. While Xbox maps are very similar in format to PC maps, there
+exists enough differences to make supporting the Xbox version non-trivial.
+Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox versio
+ of the game, so there is no means to debug or test.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
@@ -755,6 +808,7 @@ for multiplayer maps.
 [Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
 [Chimera]: https://chimera.opencarnage.net
 
+[Staying up-to-date]: #staying-up-to-date
 [Contributing]: #contributing
 [Getting Invader]: #getting-invader
 [Programs]: #programs
@@ -786,6 +840,7 @@ for multiplayer maps.
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer
 [invader-info]: #invader-info
+[invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
 [invader-sound]: #invader-sound
 [invader-string]: #invader-string
