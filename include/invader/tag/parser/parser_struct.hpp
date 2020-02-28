@@ -14,6 +14,8 @@ namespace Invader {
 }
 
 namespace Invader::Parser {
+    struct ParserStruct;
+
     class ParserStructValue {
     public:
         enum ValueType {
@@ -99,7 +101,7 @@ namespace Invader::Parser {
          * @param  index index
          * @return       object in array
          */
-        std::vector<ParserStructValue> get_object_in_array(std::size_t index) {
+        ParserStruct *get_object_in_array(std::size_t index) {
             return this->get_object_in_array_fn(index, this->address);
         }
 
@@ -139,11 +141,96 @@ namespace Invader::Parser {
             return this->duplicate_objects_in_array_fn(index_from, index_to, count, this->address);
         }
 
-        using get_object_in_array_fn_type = std::vector<ParserStructValue> (*)(std::size_t index, void *addr);
+        using get_object_in_array_fn_type = ParserStruct *(*)(std::size_t index, void *addr);
         using get_array_size_fn_type = std::size_t (*)(const void *addr);
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
         using insert_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
         using duplicate_objects_in_array_fn_type = void (*)(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr);
+
+        /**
+         * Get the object in the array (for get_object_in_array_fn)
+         * @param  index index of object
+         * @param  addr  address of object
+         * @return       object in array
+         */
+        template <typename T>
+        static ParserStruct *get_object_in_array_template(std::size_t index, void *addr) {
+            auto &array = *reinterpret_cast<T *>(addr);
+            auto size = array.size();
+            if(index >= size) {
+                eprintf_error("Index is out of bounds %zu >= %zu", index, size);
+                throw OutOfBoundsException();
+            }
+            return static_cast<ParserStruct *>(array.data() + index);
+        }
+
+        /**
+         * Get the object in the array (for get_array_size_fn)
+         * @param  addr  address of object
+         * @return       size of array
+         */
+        template <typename T>
+        static std::size_t get_array_size_template(void *addr) {
+            return reinterpret_cast<T *>(addr)->size();
+        }
+
+        /**
+         * Delete the object in the array (for delete_objects_in_array_fn)
+         * @param  index index of first object to delete
+         * @param  count count of objects to delete
+         * @param  addr  address of object
+         */
+        template <typename T>
+        static ParserStruct *delete_objects_in_array_template(std::size_t index, std::size_t count, void *addr) {
+            auto *array = reinterpret_cast<T *>(addr);
+            assert_range_exists(index, count, array);
+            array->erase(array->begin() + index, array->begin() + index + count);
+        }
+
+        /**
+         * Get the object in the array (for insert_objects_in_array_fn)
+         * @param  index index for objects to be inserted
+         * @param  count count of objects to delete
+         * @param  addr  address of object
+         */
+        template <typename T>
+        static void insert_object_in_array_template(std::size_t index, std::size_t count, void *addr) {
+            auto &array = *reinterpret_cast<T *>(addr);
+            auto size = array.size();
+            if(index > size) { // can be inclusive if we're adding objects to the very end
+                eprintf_error("Index is out of bounds %zu > %zu", index, size);
+                throw OutOfBoundsException();
+            }
+            array->insert(array->begin() + index, count, T::value_type());
+        }
+
+        /**
+         * Duplicate the object in the array (for duplicate_objects_in_array_fn)
+         * @param  index index for objects to be inserted
+         * @param  count count of objects to delete
+         * @param  addr  address of object
+         */
+        template <typename T>
+        static void duplicate_object_in_array_template(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr) {
+            auto &array = *reinterpret_cast<T *>(addr);
+            assert_range_exists(index_from, count, array);
+            auto size = array.size();
+            if(index_to > size) { // can be inclusive if we're adding objects to the very end
+                eprintf_error("Index is out of bounds %zu > %zu", index, size);
+                throw OutOfBoundsException();
+            }
+            array->insert(array->begin() + index_from, count, T::value_type());
+
+            // Copy things over, handling overlap
+            std::vector<std::size_t> copied_indices(count);
+            for(std::size_t i = 0; i < count; i++) {
+                std::size_t q = index_from + i;
+                if(index_from + i >= index_to) {
+                    q += count;
+                }
+                (*array)[index_to + i] = (*array)[q];
+            }
+        }
 
         /**
          * Instantiate a ParserStructValue
@@ -175,6 +262,19 @@ namespace Invader::Parser {
         delete_objects_in_array_fn_type delete_objects_in_array_fn;
         insert_objects_in_array_fn_type insert_objects_in_array_fn;
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn;
+
+        template <typename T>
+        static void assert_range_exists(std::size_t index, std::size_t count, T *array) {
+            if(count == 0) {
+                return;
+            }
+
+            std::size_t size = array->size();
+            if(count >= size || index >= size || (index + count) > size) {
+                eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count);
+                throw OutOfBoundsException();
+            }
+        }
     };
 
     struct ParserStruct {
@@ -208,14 +308,20 @@ namespace Invader::Parser {
         virtual std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) = 0;
 
         /**
-         * Refactor the tag reference, replacing all references with the given reference. Paths must use Halo path separators.\n")
-         * @param from_path  Path to look for\n")
-         * @param from_class Class to look for\n")
-         * @param to_path    Path to replace with\n")
-         * @param to_class   Class to replace with\n")
-         * @return           number of references replaced\n")
+         * Refactor the tag reference, replacing all references with the given reference. Paths must use Halo path separators.
+         * @param from_path  Path to look for
+         * @param from_class Class to look for
+         * @param to_path    Path to replace with
+         * @param to_class   Class to replace with
+         * @return           number of references replaced
          */
         virtual std::size_t refactor_reference(const char *from_path, TagClassInt from_class, const char *to_path, TagClassInt to_class) = 0;
+
+        /**
+         * Get the values in the struct
+         * @return values in the struct
+         */
+        virtual std::vector<ParserStructValue> get_values() = 0;
 
         virtual ~ParserStruct() = default;
     protected:

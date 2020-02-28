@@ -111,6 +111,8 @@ namespace Invader::Parser {
             case VALUE_TYPE_BITMASK:
                 return 0;
         }
+
+        std::terminate();
     }
 
     void ParserStructValue::get_values(Number *values) const noexcept {
