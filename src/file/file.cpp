@@ -252,14 +252,16 @@ namespace Invader::File {
         }
     }
 
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::size_t *status) {
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status) {
         std::vector<TagFile> all_tags;
 
-        std::size_t status_r;
+        std::pair<std::mutex, std::size_t> status_r;
         if(status == nullptr) {
             status = &status_r;
         }
-        *status = 0;
+        status->first.lock();
+        status->second = 0;
+        status->first.unlock();
 
         auto iterate_directories = [&all_tags, &status](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::string> &main_dir) -> void {
             if(++depth == 256) {
@@ -290,7 +292,9 @@ namespace Invader::File {
                     file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
                     all_tags.emplace_back(std::move(file));
                     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-                    status++;
+                    status->first.lock();
+                    status->second++;
+                    status->first.unlock();
                 }
             }
         };

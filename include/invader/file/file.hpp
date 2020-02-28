@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <optional>
+#include <mutex>
 
 #include "../hek/class_int.hpp"
 
@@ -102,7 +103,7 @@ namespace Invader::File {
      * @param  status optional pointer to a size_t to store the current number of tags loaded (for status bars)
      * @return        all tags in the folder
      */
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::size_t *status = nullptr);
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status = nullptr);
 
     /**
      * Convert the tag path to a path using the system's preferred separators
