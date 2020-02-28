@@ -3,6 +3,22 @@
 #include <invader/tag/parser/parser_struct.hpp>
 
 namespace Invader::Parser {
+    ParserStructValue::ParserStructValue(
+        ValueType                          type,
+        void *                             object,
+        get_object_in_array_fn_type        get_object_in_array_fn,
+        get_array_size_fn_type             get_array_size_fn,
+        delete_objects_in_array_fn_type    delete_objects_in_array_fn,
+        insert_objects_in_array_fn_type    insert_objects_in_array_fn,
+        duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn
+    ) : type(type),
+        address(object),
+        get_object_in_array_fn(get_object_in_array_fn),
+        get_array_size_fn(get_array_size_fn),
+        delete_objects_in_array_fn(delete_objects_in_array_fn),
+        insert_objects_in_array_fn(insert_objects_in_array_fn),
+        duplicate_objects_in_array_fn(duplicate_objects_in_array_fn) {}
+
     ParserStructValue::NumberFormat ParserStructValue::get_number_format() const noexcept {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {
             return NumberFormat::NUMBER_FORMAT_INT;

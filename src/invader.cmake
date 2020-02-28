@@ -61,6 +61,7 @@ set(INVADER_SOURCE_FILES
     src/tag/hek/class/bitmap.cpp
     src/tag/hek/class/model_collision_geometry.cpp
     src/extract/extraction.cpp
+    src/tag/parser/parser_struct.cpp
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
     src/tag/parser/compile/antenna.cpp

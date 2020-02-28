@@ -94,10 +94,87 @@ namespace Invader::Parser {
             return this->name;
         }
 
+        /**
+         * Get the object in the array
+         * @param  index index
+         * @return       object in array
+         */
+        std::vector<ParserStructValue> get_object_in_array(std::size_t index) {
+            return this->get_object_in_array_fn(index, this->address);
+        }
+
+        /**
+         * Get the number of elements in the array
+         * @return number of elements in array
+         */
+        std::size_t get_array_size() noexcept {
+            return this->get_array_size_fn(this->address);
+        }
+
+        /**
+         * Delete the objects in the array
+         * @param index index of first object
+         * @param count number of objects to delete
+         */
+        void delete_objects_in_array(std::size_t index, std::size_t count) {
+            return this->delete_objects_in_array_fn(index, count, this->address);
+        }
+
+        /**
+         * Insert new objects in the array
+         * @param index index of first object to insert to
+         * @param count number of objects to create
+         */
+        void insert_objects_in_array(std::size_t index, std::size_t count) {
+            return this->insert_objects_in_array_fn(index, count, this->address);
+        }
+
+        /**
+         * Insert new objects in the array
+         * @param index_from index of first object to copy
+         * @param index_to   index of first object to insert to
+         * @param count      number of objects to create
+         */
+        void duplicate_objects_in_array(std::size_t index_from, std::size_t index_to, std::size_t count) {
+            return this->duplicate_objects_in_array_fn(index_from, index_to, count, this->address);
+        }
+
+        using get_object_in_array_fn_type = std::vector<ParserStructValue> (*)(std::size_t index, void *addr);
+        using get_array_size_fn_type = std::size_t (*)(const void *addr);
+        using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
+        using insert_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
+        using duplicate_objects_in_array_fn_type = void (*)(std::size_t index_from, std::size_t index_to, std::size_t count, void *addr);
+
+        /**
+         * Instantiate a ParserStructValue
+         * @param type                          type of value
+         * @param object                        pointer to the object
+         * @param get_object_in_array_fn        pointer to function for getting object in array (if it's an array)
+         * @param get_array_size_fn             pointer to function for getting the size of array (if it's an array)
+         * @param delete_objects_in_array_fn    pointer to function for deleting objects from an array (if it's an array)
+         * @param insert_objects_in_array_fn    pointer to function for inserting objects in an array (if it's an array)
+         * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array (if it's an array)
+         */
+        ParserStructValue(
+            ValueType                          type,
+            void *                             object,
+            get_object_in_array_fn_type        get_object_in_array_fn = nullptr,
+            get_array_size_fn_type             get_array_size_fn = nullptr,
+            delete_objects_in_array_fn_type    delete_objects_in_array_fn = nullptr,
+            insert_objects_in_array_fn_type    insert_objects_in_array_fn = nullptr,
+            duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr
+        );
+
     private:
         ValueType type;
         const char *name;
-        std::byte *address;
+        void *address;
+
+        get_object_in_array_fn_type get_object_in_array_fn;
+        get_array_size_fn_type get_array_size_fn;
+        delete_objects_in_array_fn_type delete_objects_in_array_fn;
+        insert_objects_in_array_fn_type insert_objects_in_array_fn;
+        duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn;
     };
 
     struct ParserStruct {
