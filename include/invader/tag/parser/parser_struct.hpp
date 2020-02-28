@@ -101,7 +101,7 @@ namespace Invader::Parser {
          * @param  index index
          * @return       object in array
          */
-        ParserStruct *get_object_in_array(std::size_t index) {
+        ParserStruct &get_object_in_array(std::size_t index) {
             return this->get_object_in_array_fn(index, this->address);
         }
 
@@ -141,7 +141,7 @@ namespace Invader::Parser {
             return this->duplicate_objects_in_array_fn(index_from, index_to, count, this->address);
         }
 
-        using get_object_in_array_fn_type = ParserStruct *(*)(std::size_t index, void *addr);
+        using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
         using get_array_size_fn_type = std::size_t (*)(const void *addr);
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
         using insert_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
@@ -154,14 +154,14 @@ namespace Invader::Parser {
          * @return       object in array
          */
         template <typename T>
-        static ParserStruct *get_object_in_array_template(std::size_t index, void *addr) {
+        static ParserStruct &get_object_in_array_template(std::size_t index, void *addr) {
             auto &array = *reinterpret_cast<T *>(addr);
             auto size = array.size();
             if(index >= size) {
                 eprintf_error("Index is out of bounds %zu >= %zu", index, size);
                 throw OutOfBoundsException();
             }
-            return static_cast<ParserStruct *>(array.data() + index);
+            return array[index];
         }
 
         /**
@@ -181,7 +181,7 @@ namespace Invader::Parser {
          * @param  addr  address of object
          */
         template <typename T>
-        static ParserStruct *delete_objects_in_array_template(std::size_t index, std::size_t count, void *addr) {
+        static void delete_objects_in_array_template(std::size_t index, std::size_t count, void *addr) {
             auto *array = reinterpret_cast<T *>(addr);
             assert_range_exists(index, count, array);
             array->erase(array->begin() + index, array->begin() + index + count);
