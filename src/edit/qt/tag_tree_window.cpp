@@ -10,14 +10,26 @@
 #include <QApplication>
 #include <QStatusBar>
 #include <QCloseEvent>
+#include <QDesktopWidget>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
 #include "tag_tree_dialog.hpp"
 #include <invader/version.hpp>
 #include <invader/file/file.hpp>
+#include <QScreen>
 
 namespace Invader::EditQt {
     TagTreeWindow::TagTreeWindow() {
+        // Center this
+        this->setGeometry(
+            QStyle::alignedRect(
+                Qt::LeftToRight,
+                Qt::AlignCenter,
+                this->size(),
+                QGuiApplication::primaryScreen()->geometry()
+            )
+        );
+
         // Set some window stuff
         this->setWindowTitle("invader-edit-qt");
         this->setMinimumSize(800, 600);
@@ -81,6 +93,9 @@ namespace Invader::EditQt {
         status_bar->addWidget(this->tag_location_label, 1);
         status_bar->addWidget(this->tag_count_label, 0);
         this->setStatusBar(status_bar);
+
+        // Set more stuff
+        this->setWindowFlag(Qt::WindowStaysOnTopHint, 0);
     }
 
     void TagTreeWindow::refresh_view() {
