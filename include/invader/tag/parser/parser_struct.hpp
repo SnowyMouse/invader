@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <optional>
 #include <variant>
+#include <memory>
 #include "../hek/definition.hpp"
 
 namespace Invader {
@@ -491,6 +492,15 @@ namespace Invader::Parser {
          * @return true if data is formatted for cache files
          */
         bool is_cache_formatted() const noexcept { return this->cache_formatted; };
+
+        /**
+         * Parse the HEK tag file
+         * @param  data        Tag file data to read from
+         * @param  data_size   Size of the tag file
+         * @param  postprocess Do post-processing on data, such as default values
+         * @return             parsed tag data
+         */
+        static std::unique_ptr<ParserStruct> parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);
 
         /**
          * Format the tag to be used in HEK tags.

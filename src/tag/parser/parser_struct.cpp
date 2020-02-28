@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
+#include <invader/tag/hek/header.hpp>
 
 namespace Invader::Parser {
     /**
@@ -610,5 +612,107 @@ namespace Invader::Parser {
                     std::terminate();
             }
         }
+    }
+
+    std::unique_ptr<ParserStruct> ParserStruct::parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess) {
+        const auto *header = reinterpret_cast<const HEK::TagFileHeader *>(data);
+        HEK::TagFileHeader::validate_header(header, data_size);
+
+        #define READ_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
+            return std::make_unique<Parser::class_struct>(Invader::Parser::class_struct::parse_hek_tag_file(data, data_size, postprocess)); \
+        }
+
+        switch(header->tag_class_int) {
+            READ_TAG_CLASS(Actor, TAG_CLASS_ACTOR)
+            READ_TAG_CLASS(ActorVariant, TAG_CLASS_ACTOR_VARIANT)
+            READ_TAG_CLASS(Antenna, TAG_CLASS_ANTENNA)
+            READ_TAG_CLASS(ModelAnimations, TAG_CLASS_MODEL_ANIMATIONS)
+            READ_TAG_CLASS(Biped, TAG_CLASS_BIPED)
+            READ_TAG_CLASS(Bitmap, TAG_CLASS_BITMAP)
+            READ_TAG_CLASS(ModelCollisionGeometry, TAG_CLASS_MODEL_COLLISION_GEOMETRY)
+            READ_TAG_CLASS(ColorTable, TAG_CLASS_COLOR_TABLE)
+            READ_TAG_CLASS(Contrail, TAG_CLASS_CONTRAIL)
+            READ_TAG_CLASS(DeviceControl, TAG_CLASS_DEVICE_CONTROL)
+            READ_TAG_CLASS(Decal, TAG_CLASS_DECAL)
+            READ_TAG_CLASS(UIWidgetDefinition, TAG_CLASS_UI_WIDGET_DEFINITION)
+            READ_TAG_CLASS(InputDeviceDefaults, TAG_CLASS_INPUT_DEVICE_DEFAULTS)
+            READ_TAG_CLASS(Device, TAG_CLASS_DEVICE)
+            READ_TAG_CLASS(DetailObjectCollection, TAG_CLASS_DETAIL_OBJECT_COLLECTION)
+            READ_TAG_CLASS(Effect, TAG_CLASS_EFFECT)
+            READ_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT)
+            READ_TAG_CLASS(Flag, TAG_CLASS_FLAG)
+            READ_TAG_CLASS(Fog, TAG_CLASS_FOG)
+            READ_TAG_CLASS(Font, TAG_CLASS_FONT)
+            READ_TAG_CLASS(MaterialEffects, TAG_CLASS_MATERIAL_EFFECTS)
+            READ_TAG_CLASS(Garbage, TAG_CLASS_GARBAGE)
+            READ_TAG_CLASS(Glow, TAG_CLASS_GLOW)
+            READ_TAG_CLASS(GrenadeHUDInterface, TAG_CLASS_GRENADE_HUD_INTERFACE)
+            READ_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT)
+            READ_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER)
+            READ_TAG_CLASS(HUDGlobals, TAG_CLASS_HUD_GLOBALS)
+            READ_TAG_CLASS(Item, TAG_CLASS_ITEM)
+            READ_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION)
+            READ_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT)
+            READ_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE)
+            READ_TAG_CLASS(Lightning, TAG_CLASS_LIGHTNING)
+            READ_TAG_CLASS(DeviceLightFixture, TAG_CLASS_DEVICE_LIGHT_FIXTURE)
+            READ_TAG_CLASS(Light, TAG_CLASS_LIGHT)
+            READ_TAG_CLASS(SoundLooping, TAG_CLASS_SOUND_LOOPING)
+            READ_TAG_CLASS(DeviceMachine, TAG_CLASS_DEVICE_MACHINE)
+            READ_TAG_CLASS(Globals, TAG_CLASS_GLOBALS)
+            READ_TAG_CLASS(Meter, TAG_CLASS_METER)
+            READ_TAG_CLASS(LightVolume, TAG_CLASS_LIGHT_VOLUME)
+            READ_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
+            READ_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
+            READ_TAG_CLASS(Object, TAG_CLASS_OBJECT)
+            READ_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
+            READ_TAG_CLASS(ParticleSystem, TAG_CLASS_PARTICLE_SYSTEM)
+            READ_TAG_CLASS(Physics, TAG_CLASS_PHYSICS)
+            READ_TAG_CLASS(Placeholder, TAG_CLASS_PLACEHOLDER)
+            READ_TAG_CLASS(PointPhysics, TAG_CLASS_POINT_PHYSICS)
+            READ_TAG_CLASS(Projectile, TAG_CLASS_PROJECTILE)
+            READ_TAG_CLASS(WeatherParticleSystem, TAG_CLASS_WEATHER_PARTICLE_SYSTEM)
+            READ_TAG_CLASS(Scenery, TAG_CLASS_SCENERY)
+            READ_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
+            READ_TAG_CLASS(ShaderTransparentChicago, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO)
+            READ_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO)
+            READ_TAG_CLASS(ShaderEnvironment, TAG_CLASS_SHADER_ENVIRONMENT)
+            READ_TAG_CLASS(ShaderTransparentGlass, TAG_CLASS_SHADER_TRANSPARENT_GLASS)
+            READ_TAG_CLASS(Shader, TAG_CLASS_SHADER)
+            READ_TAG_CLASS(Sky, TAG_CLASS_SKY)
+            READ_TAG_CLASS(ShaderTransparentMeter, TAG_CLASS_SHADER_TRANSPARENT_METER)
+            READ_TAG_CLASS(Sound, TAG_CLASS_SOUND)
+            READ_TAG_CLASS(SoundEnvironment, TAG_CLASS_SOUND_ENVIRONMENT)
+            READ_TAG_CLASS(ShaderModel, TAG_CLASS_SHADER_MODEL)
+            READ_TAG_CLASS(ShaderTransparentGeneric, TAG_CLASS_SHADER_TRANSPARENT_GENERIC)
+            READ_TAG_CLASS(TagCollection, TAG_CLASS_UI_WIDGET_COLLECTION)
+            READ_TAG_CLASS(ShaderTransparentPlasma, TAG_CLASS_SHADER_TRANSPARENT_PLASMA)
+            READ_TAG_CLASS(SoundScenery, TAG_CLASS_SOUND_SCENERY)
+            READ_TAG_CLASS(StringList, TAG_CLASS_STRING_LIST)
+            READ_TAG_CLASS(ShaderTransparentWater, TAG_CLASS_SHADER_TRANSPARENT_WATER)
+            READ_TAG_CLASS(TagCollection, TAG_CLASS_TAG_COLLECTION)
+            READ_TAG_CLASS(CameraTrack, TAG_CLASS_CAMERA_TRACK)
+            READ_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE)
+            READ_TAG_CLASS(UnitHUDInterface, TAG_CLASS_UNIT_HUD_INTERFACE)
+            READ_TAG_CLASS(Unit, TAG_CLASS_UNIT)
+            READ_TAG_CLASS(UnicodeStringList, TAG_CLASS_UNICODE_STRING_LIST)
+            READ_TAG_CLASS(VirtualKeyboard, TAG_CLASS_VIRTUAL_KEYBOARD)
+            READ_TAG_CLASS(Vehicle, TAG_CLASS_VEHICLE)
+            READ_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
+            READ_TAG_CLASS(Wind, TAG_CLASS_WIND)
+            READ_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+            READ_TAG_CLASS(ScenarioStructureBSP, TAG_CLASS_SCENARIO_STRUCTURE_BSP)
+
+            case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
+            case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
+            case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
+                break;
+        }
+        
+        eprintf_error("Unknown tag class %s", tag_class_to_extension(header->tag_class_int));
+        throw InvalidTagDataException();
     }
 }
