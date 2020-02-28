@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name, extract_hidden):
+def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden):
     hpp.write("        std::vector<ParserStructValue> get_values() override;\n".format(struct_name))
     cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
     for struct in all_used_structs:
-        if "cache_only" in struct and struct["cache_only"] and not extract_hidden:
+        if "hidden" in struct and struct["hidden"]:
+            continue
+
+        if (("cache_only" in struct and struct["cache_only"]) or ("endian" in struct and struct["endian"] == "little")) and not extract_hidden:
             continue
 
         name = "\"{}\"".format(struct["name"])
@@ -14,8 +17,9 @@ def make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name, ext
         comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"])
 
         first_arguments = "{},{},{},&this->{}".format(name, member_name_q, comment, struct["member_name"])
+        type = struct["type"]
 
-        if struct["type"] == "TagDependency":
+        if type == "TagDependency":
             classes = struct["classes"]
             classes_len = len(classes)
 
@@ -29,9 +33,40 @@ def make_parser_struct(cpp_struct_value, all_used_structs, hpp, struct_name, ext
                     cpp_struct_value.write("TagClassInt::TAG_CLASS_{}".format(classes[c].upper()))
                 cpp_struct_value.write("};\n");
                 cpp_struct_value.write("    values.emplace_back({}, {}_types, {});\n".format(first_arguments, member_name, classes_len))
-        elif struct["type"] == "TagReflexive":
+        elif type == "TagReflexive":
             vstruct = "std::vector<{}>".format(struct["struct"])
             cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>);\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct))
+        elif type == "TagDataOffset":
+            print("TODO: TagDataOffset")
+            pass
+        elif type == "TagString":
+            print("TODO: TagString")
+            pass
+        elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":
+            pass
+        elif type == "ScenarioType":
+            print("TODO: ScenarioType enum")
+            pass
+        else:
+            found = False
+            for i in all_bitfields:
+                if type == i["name"]:
+                    found = True
+                    break
+            if found:
+                continue
+            for i in all_enums:
+                if type == i["name"]:
+                    found = True
+                    break
+            if found:
+                continue
+
+            bounds_b = "bounds" in struct and struct["bounds"]
+            bounds = "true" if bounds_b else "false"
+            count = 1 * (2 if bounds_b else 1)
+
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {});\n".format(first_arguments, type.upper(), count))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")

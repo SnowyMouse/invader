@@ -1571,17 +1571,23 @@
             {
                 "name": "pointer",
                 "type": "Pointer",
-                "comment": "points to the BSP tag struct"
+                "comment": "points to the BSP tag struct",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "lightmap vertices size",
                 "type": "uint32",
-                "comment": "size of the lightmap vertices (Halo CE Anniversary on MCC)"
+                "comment": "size of the lightmap vertices (Halo CE Anniversary on MCC)",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "lightmap vertices start",
                 "type": "uint32",
-                "comment": "points to the beginning of the lightmap vertices (Halo CE Anniversary on MCC)"
+                "comment": "points to the beginning of the lightmap vertices (Halo CE Anniversary on MCC)",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "type": "pad",
@@ -1589,7 +1595,9 @@
             },
             {
                 "name": "signature",
-                "type": "TagClassInt"
+                "type": "TagClassInt",
+                "cache_only": true,
+                "endian": "little"
             }
         ],
         "type": "struct",

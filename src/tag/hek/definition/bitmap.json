@@ -197,7 +197,8 @@
         "fields": [
             {
                 "name": "bitmap class",
-                "type": "TagClassInt"
+                "type": "TagClassInt",
+                "hidden": true
             },
             {
                 "name": "width",
@@ -248,7 +249,9 @@
             },
             {
                 "name": "bitmap tag id",
-                "type": "TagID"
+                "type": "TagID",
+                "cache_only": true,
+                "endian": "little"
             },
             {
                 "name": "pointer",
