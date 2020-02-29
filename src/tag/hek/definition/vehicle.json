@@ -79,6 +79,13 @@
     },
     {
         "name": "Vehicle",
+        "groups": [
+            {
+                "name": "Vehicle Data",
+                "description": "Vehicle attributes",
+                "first": "vehicle flags"
+            }
+        ],
         "fields": [
             {
                 "name": "vehicle flags",

@@ -11,6 +11,13 @@
     },
     {
         "name": "Item",
+        "groups": [
+            {
+                "name": "Item Data",
+                "description": "Base item attributes",
+                "first": "item flags"
+            }
+        ],
         "fields": [
             {
                 "name": "item flags",

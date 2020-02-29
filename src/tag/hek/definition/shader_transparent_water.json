@@ -12,6 +12,13 @@
     },
     {
         "name": "ShaderTransparentWaterRipple",
+        "groups": [
+            {
+                "name": "Shader Transparent Water Data",
+                "description": "Shader Transparent Water attributes",
+                "first": "contribution factor"
+            }
+        ],
         "fields": [
             {
                 "type": "pad",

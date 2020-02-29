@@ -45,6 +45,13 @@
     },
     {
         "name": "Biped",
+        "groups": [
+            {
+                "name": "Biped Data",
+                "description": "Biped attributes",
+                "first": "moving turning speed"
+            }
+        ],
         "fields": [
             {
                 "name": "moving turning speed",

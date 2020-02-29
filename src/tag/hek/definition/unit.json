@@ -312,6 +312,13 @@
     },
     {
         "name": "Unit",
+        "groups": [
+            {
+                "name": "Unit Data",
+                "description": "Base unit attributes",
+                "first": "unit flags"
+            }
+        ],
         "fields": [
             {
                 "name": "unit flags",

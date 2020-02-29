@@ -37,6 +37,13 @@
     },
     {
         "name": "ShaderModel",
+        "groups": [
+            {
+                "name": "Shader Model Data",
+                "description": "Shader Model attributes",
+                "first": "shader model flags"
+            }
+        ],
         "fields": [
             {
                 "name": "shader model flags",

@@ -161,6 +161,13 @@
     },
     {
         "name": "ShaderTransparentChicago",
+        "groups": [
+            {
+                "name": "Shader Transparent Chicago Data",
+                "description": "Shader Transparent Chicago attributes",
+                "first": "numeric counter limit"
+            }
+        ],
         "fields": [
             {
                 "name": "numeric counter limit",

@@ -13,6 +13,13 @@
     },
     {
         "name": "ShaderTransparentMeter",
+        "groups": [
+            {
+                "name": "Shader Transparent Meter Data",
+                "description": "Shader Transparent Meter attributes",
+                "first": "meter flags"
+            }
+        ],
         "fields": [
             {
                 "name": "meter flags",
