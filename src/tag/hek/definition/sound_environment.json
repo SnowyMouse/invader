@@ -4,7 +4,8 @@
         "fields": [
             {
                 "name": "unknown",
-                "type": "int32"
+                "type": "int32",
+                "cache_only": true
             },
             {
                 "name": "priority",
