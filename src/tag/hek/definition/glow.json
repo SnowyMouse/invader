@@ -83,7 +83,8 @@
             },
             {
                 "name": "attachment 0",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",
@@ -103,7 +104,8 @@
             },
             {
                 "name": "attachment 1",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",
@@ -123,7 +125,8 @@
             },
             {
                 "name": "attachment 2",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",
@@ -143,7 +146,8 @@
             },
             {
                 "name": "attachment 3",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",
@@ -171,7 +175,8 @@
             },
             {
                 "name": "attachment 4",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",
@@ -189,7 +194,8 @@
             },
             {
                 "name": "attachment 5",
-                "type": "FunctionOut"
+                "type": "FunctionOut",
+                "shifted_by_one": true
             },
             {
                 "type": "pad",

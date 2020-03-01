@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data):
+def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums):
     # compile()
     hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0) override;\n")
     cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
@@ -112,13 +112,15 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        r.{}.to = this->{}.to;\n".format(name, name))
         elif "count" in struct and struct["count"] > 1:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
-        elif struct["type"] == "enum":
-            cpp_cache_format_data.write("        if(static_cast<std::uint16_t>(r.{}) >= {}) {{\n".format(name, len(struct["options"])))
-            cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} exceeds maximum value of {}\", tag_index);\n".format(struct_name, name, len(struct["options"])))
-            cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
-            cpp_cache_format_data.write("        }\n")
-            cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         else:
+            for e in all_enums:
+                if e["name"] == struct["type"]:
+                    shifted_by_one = "+ 1" if ("shifted_by_one" in struct and struct["shifted_by_one"]) else ""
+                    cpp_cache_format_data.write("        if(static_cast<std::uint16_t>(this->{}{}) >= {}) {{\n".format(name, shifted_by_one, len(e["options"])))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is out of range (%zu >= {})\", static_cast<std::size_t>(static_cast<std::uint16_t>(this->{}{})));\n".format(struct_name, name, len(e["options"]), name, shifted_by_one))
+                    cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                    cpp_cache_format_data.write("        }\n")
+                    break
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
     if post_compile:
         cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
