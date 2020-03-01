@@ -380,7 +380,7 @@
             },
             {
                 "name": "overcharged action",
-                "type": "WeaponDistributionFunction"
+                "type": "WeaponOverchargedAction"
             },
             {
                 "type": "pad",

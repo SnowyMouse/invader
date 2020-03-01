@@ -98,7 +98,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         add_structs_from_struct(s)
 
         make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)
-        make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data)
+        make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums)
         make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, cpp_save_hek_data)
         make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
         make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
