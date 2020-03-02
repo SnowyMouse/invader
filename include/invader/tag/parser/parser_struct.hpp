@@ -92,10 +92,22 @@ namespace Invader::Parser {
         void get_values(Number *values) const noexcept;
 
         /**
+         * Get the values
+         * @return vector of values
+         */
+        std::vector<Number> get_values() const;
+
+        /**
          * Set the values
          * @param values values to read from; must point to at least get_value_count() values
          */
         void set_values(const Number *values) const noexcept;
+
+        /**
+         * Set the values
+         * @param values values to read from; must be at least get_value_count() values
+         */
+        void set_values(const std::vector<Number> &values) const noexcept;
 
         /**
          * Get the value type used
@@ -111,6 +123,24 @@ namespace Invader::Parser {
          */
         const char *get_name() const noexcept {
             return this->name;
+        }
+
+        /**
+         * Get the string value
+         * @return string value
+         */
+        const char *get_string() const noexcept {
+            return reinterpret_cast<HEK::TagString *>(this->address)->string;
+        }
+
+        /**
+         * Set the string value
+         * @param string string value
+         */
+        void set_string(const char *string) {
+            auto &str_to_write = reinterpret_cast<HEK::TagString *>(this->address)->string;
+            std::fill(str_to_write, str_to_write + sizeof(str_to_write), 0);
+            std::strncpy(str_to_write, string, sizeof(str_to_write) - 1);
         }
 
         /**

@@ -11,8 +11,8 @@ if(${INVADER_EDIT_QT})
 
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
-        src/edit/qt/tag_editor_abstract_widget.cpp
-        src/edit/qt/tag_editor_textbox_widget.cpp
+        src/edit/qt/tag_editor_edit_widget.cpp
+        src/edit/qt/tag_editor_widget.cpp
         src/edit/qt/tag_editor_window.cpp
         src/edit/qt/tag_tree_dialog.cpp
         src/edit/qt/tag_tree_widget.cpp

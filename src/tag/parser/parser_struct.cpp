@@ -230,6 +230,12 @@ namespace Invader::Parser {
         std::terminate();
     }
 
+    std::vector<ParserStructValue::Number> ParserStructValue::get_values() const {
+        std::vector<Number> values(this->get_value_count());
+        this->get_values(values.data());
+        return values;
+    }
+
     void ParserStructValue::get_values(Number *values) const noexcept {
         for(std::size_t i = 0; i < this->count; i++) {
             switch(this->type) {
@@ -420,8 +426,7 @@ namespace Invader::Parser {
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
                 case VALUE_TYPE_ENUM:
-                    eprintf_error("Tried to use get_values() with a type that doesn't have values");
-                    std::terminate();
+                    break;
             }
         }
     }
@@ -620,6 +625,10 @@ namespace Invader::Parser {
                     std::terminate();
             }
         }
+    }
+
+    void ParserStructValue::set_values(const std::vector<ParserStructValue::Number> &values) const noexcept {
+        return this->set_values(values.data());
     }
 
     std::unique_ptr<ParserStruct> ParserStruct::parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess) {

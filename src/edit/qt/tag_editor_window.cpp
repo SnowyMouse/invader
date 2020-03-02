@@ -13,7 +13,7 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include "tag_tree_window.hpp"
-#include "tag_editor_textbox_widget.hpp"
+#include "tag_editor_widget.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -74,8 +74,13 @@ namespace Invader::EditQt {
         auto *vbox_layout = new QVBoxLayout(scroll_view);
         auto *full_widget = new QWidget(this);
 
+        auto values = new std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
+        for(auto &value : *values) {
+            vbox_layout->addWidget(TagEditorWidget::generate_widget(this, &value, this));
+        }
+
         // TEST: Add widgets
-        auto values = this->parser_data->get_values();
+        /*auto values = this->parser_data->get_values();
         for(auto &value : values) {
             auto add_simple_bar = [&vbox_layout, &full_widget, &value](TagEditorTextboxWidget::TextboxSize size, const char *suffix = nullptr) {
                 std::vector<std::string> suffixes;
@@ -179,7 +184,7 @@ namespace Invader::EditQt {
                 case Parser::ParserStructValue::VALUE_TYPE_BITMASK:
                     break;
             }
-        }
+        }*/
 
         /*std::vector<std::string> xyz;
         xyz.emplace_back("x");
@@ -246,8 +251,15 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save() {
-        std::fprintf(stderr, "TODO: perform_save()\n");
-        return false;
+        auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
+        auto result = Invader::File::save_file(this->file.full_path.string().c_str(), tag_data);
+        if(!result) {
+            std::fprintf(stderr, "perform_save() failed\n");
+        }
+        else {
+            this->make_dirty(false);
+        }
+        return result;
     }
 
     bool TagEditorWindow::perform_save_as() {

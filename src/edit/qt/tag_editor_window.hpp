@@ -16,6 +16,8 @@ namespace Invader::EditQt {
     class TagTreeWindow;
 
     class TagEditorWindow : public QMainWindow {
+        friend class TagEditorWidget;
+
         Q_OBJECT
     public:
         /**
