@@ -54,6 +54,7 @@ namespace Invader::EditQt {
         File::TagFile file;
 
         Parser::ParserStruct *parser_data;
+        std::vector<std::unique_ptr<QWidget>> widgets_to_remove;
     };
 }
 

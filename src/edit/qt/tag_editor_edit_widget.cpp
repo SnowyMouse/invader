@@ -40,8 +40,8 @@ namespace Invader::EditQt {
                 }
 
                 // Make our textbox
-                int width = 50 * size;
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(std::make_unique<QLineEdit>()).get());
+                int width = textbox->fontMetrics().boundingRect("MMM").width() * size;
                 textbox_widgets.emplace_back(textbox);
                 textbox->setMinimumWidth(width);
                 textbox->setMaximumWidth(width);
@@ -66,105 +66,108 @@ namespace Invader::EditQt {
 
             switch(value->get_type()) {
                 case Parser::ParserStructValue::VALUE_TYPE_INT8:
-                    return add_single_textbox(1);
                 case Parser::ParserStructValue::VALUE_TYPE_UINT8:
                     return add_single_textbox(1);
+
                 case Parser::ParserStructValue::VALUE_TYPE_INT16:
-                    return add_single_textbox(2);
                 case Parser::ParserStructValue::VALUE_TYPE_UINT16:
                     return add_single_textbox(2);
+
                 case Parser::ParserStructValue::VALUE_TYPE_INDEX:
                     return add_single_textbox(2);
+
                 case Parser::ParserStructValue::VALUE_TYPE_INT32:
-                    return add_single_textbox(3);
                 case Parser::ParserStructValue::VALUE_TYPE_UINT32:
-                    return add_single_textbox(3);
                 case Parser::ParserStructValue::VALUE_TYPE_FLOAT:
-                    return add_single_textbox(3);
                 case Parser::ParserStructValue::VALUE_TYPE_FRACTION:
-                    return add_single_textbox(3);
                 case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
                     return add_single_textbox(3);
 
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
-                    add_single_textbox(2, "a");
-                    add_single_textbox(2, "r");
-                    add_single_textbox(2, "g");
-                    add_single_textbox(2, "b");
+                    add_single_textbox(2, "a:");
+                    add_single_textbox(2, "r:");
+                    add_single_textbox(2, "g:");
+                    add_single_textbox(2, "b:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
-                    add_single_textbox(2, "x");
-                    add_single_textbox(2, "y");
+                    add_single_textbox(2, "x:");
+                    add_single_textbox(2, "y:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_RECTANGLE2D:
-                    add_single_textbox(2, "top");
-                    add_single_textbox(2, "right");
-                    add_single_textbox(2, "bottom");
-                    add_single_textbox(2, "left");
+                    add_single_textbox(2, "t:");
+                    add_single_textbox(2, "r:");
+                    add_single_textbox(2, "b:");
+                    add_single_textbox(2, "l:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
-                    add_single_textbox(3, "a");
-                    add_single_textbox(3, "r");
-                    add_single_textbox(3, "g");
-                    add_single_textbox(3, "b");
+                    add_single_textbox(3, "a:");
+                    add_single_textbox(3, "r:");
+                    add_single_textbox(3, "g:");
+                    add_single_textbox(3, "b:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORRGB:
-                    add_single_textbox(3, "r");
-                    add_single_textbox(3, "g");
-                    add_single_textbox(3, "b");
+                    add_single_textbox(3, "r:");
+                    add_single_textbox(3, "g:");
+                    add_single_textbox(3, "b:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR2D:
-                    add_single_textbox(3, "i");
-                    add_single_textbox(3, "j");
+                    add_single_textbox(3, "i:");
+                    add_single_textbox(3, "j:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR3D:
-                    add_single_textbox(3, "i");
-                    add_single_textbox(3, "j");
-                    add_single_textbox(3, "k");
+                    add_single_textbox(3, "i:");
+                    add_single_textbox(3, "j:");
+                    add_single_textbox(3, "k:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
-                    add_single_textbox(3, "yaw");
-                    add_single_textbox(3, "pitch");
+                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, "p:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
-                    add_single_textbox(3, "yaw");
-                    add_single_textbox(3, "pitch");
-                    add_single_textbox(3, "roll");
+                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, "p:");
+                    add_single_textbox(3, "r:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_PLANE2D:
-                    add_single_textbox(3, "x");
-                    add_single_textbox(3, "y");
-                    add_single_textbox(3, "w");
+                    add_single_textbox(3, "x:");
+                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, "w:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2D:
-                    add_single_textbox(3, "x");
-                    add_single_textbox(3, "y");
+                    add_single_textbox(3, "x:");
+                    add_single_textbox(3, "y:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT3D:
-                    add_single_textbox(3, "x");
-                    add_single_textbox(3, "y");
-                    add_single_textbox(3, "z");
+                    add_single_textbox(3, "x:");
+                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, "z:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_PLANE3D:
+                    add_single_textbox(3, "x:");
+                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, "z:");
+                    add_single_textbox(3, "w:");
+                    break;
+
                 case Parser::ParserStructValue::VALUE_TYPE_QUATERNION:
-                    add_single_textbox(3, "x");
-                    add_single_textbox(3, "y");
-                    add_single_textbox(3, "z");
-                    add_single_textbox(3, "w");
+                    add_single_textbox(3, "i:");
+                    add_single_textbox(3, "j:");
+                    add_single_textbox(3, "k:");
+                    add_single_textbox(3, "w:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_MATRIX:
-                    add_single_textbox(3, "x0");
-                    add_single_textbox(3, "y0");
-                    add_single_textbox(3, "z0");
-                    add_single_textbox(3, "x1");
-                    add_single_textbox(3, "y1");
-                    add_single_textbox(3, "z1");
-                    add_single_textbox(3, "x2");
-                    add_single_textbox(3, "y2");
-                    add_single_textbox(3, "z2");
+                    add_single_textbox(3, "x0:");
+                    add_single_textbox(3, "y0:");
+                    add_single_textbox(3, "z0:");
+                    add_single_textbox(3, "x1:");
+                    add_single_textbox(3, "y1:");
+                    add_single_textbox(3, "z1:");
+                    add_single_textbox(3, "x2:");
+                    add_single_textbox(3, "y2:");
+                    add_single_textbox(3, "z2:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    return add_single_textbox(6);
+                    return add_single_textbox(12);
                 case Parser::ParserStructValue::VALUE_TYPE_DATA:
                 case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET:
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM:
@@ -195,10 +198,10 @@ namespace Invader::EditQt {
         }
     }
 
-    void TagEditorEditWidget::on_change(QString string_value) {
+    void TagEditorEditWidget::on_change() {
         auto *value = this->get_struct_value();
         if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
-            value->set_string(string_value.toLatin1().data());
+            value->set_string(this->textbox_widgets[0]->text().toLatin1().data());
         }
         else {
             auto widget_count = this->textbox_widgets.size();
