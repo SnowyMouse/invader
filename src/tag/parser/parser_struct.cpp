@@ -237,55 +237,64 @@ namespace Invader::Parser {
     }
 
     void ParserStructValue::get_values(Number *values) const noexcept {
+        const auto *addr = reinterpret_cast<const std::byte *>(this->address);
         for(std::size_t i = 0; i < this->count; i++) {
             switch(this->type) {
                 case VALUE_TYPE_INT8:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int8_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int8_t *>(addr));
+                    addr += sizeof(std::int8_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT8:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint8_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint8_t *>(addr));
+                    addr += sizeof(std::uint8_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_INT16:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int16_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int16_t *>(addr));
+                    addr += sizeof(std::int16_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint16_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint16_t *>(addr));
+                    addr += sizeof(std::uint16_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_INT32:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int32_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::int32_t *>(addr));
+                    addr += sizeof(std::int32_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT32:
-                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint32_t *>(this->address));
+                    *values = static_cast<std::int64_t>(*reinterpret_cast<const std::uint32_t *>(addr));
+                    addr += sizeof(std::uint32_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_COLORARGBINT: {
-                    const auto &color = *reinterpret_cast<const HEK::ColorARGBInt *>(this->address);
+                    const auto &color = *reinterpret_cast<const HEK::ColorARGBInt *>(addr);
                     values[0] = static_cast<std::int64_t>(color.alpha);
                     values[1] = static_cast<std::int64_t>(color.red);
                     values[2] = static_cast<std::int64_t>(color.green);
                     values[3] = static_cast<std::int64_t>(color.blue);
+                    addr += sizeof(color);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_RECTANGLE2D: {
-                    const auto &rectangle = *reinterpret_cast<const HEK::Rectangle2D<HEK::NativeEndian> *>(this->address);
+                    const auto &rectangle = *reinterpret_cast<const HEK::Rectangle2D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<std::int64_t>(rectangle.top);
                     values[1] = static_cast<std::int64_t>(rectangle.left);
                     values[2] = static_cast<std::int64_t>(rectangle.bottom);
                     values[3] = static_cast<std::int64_t>(rectangle.right);
+                    addr += sizeof(rectangle);
                     values += 4;
                     break;
                 }
@@ -293,109 +302,121 @@ namespace Invader::Parser {
                 case VALUE_TYPE_FLOAT:
                 case VALUE_TYPE_FRACTION:
                 case VALUE_TYPE_ANGLE:
-                    *values = static_cast<double>(*reinterpret_cast<const float *>(this->address));
+                    *values = static_cast<double>(*reinterpret_cast<const float *>(addr));
+                    addr += sizeof(float);
                     values++;
                     break;
 
                 case VALUE_TYPE_COLORARGB: {
-                    const auto &color = *reinterpret_cast<const HEK::ColorARGB<HEK::NativeEndian> *>(this->address);
+                    const auto &color = *reinterpret_cast<const HEK::ColorARGB<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(color.alpha);
                     values[1] = static_cast<double>(color.red);
                     values[2] = static_cast<double>(color.green);
                     values[3] = static_cast<double>(color.blue);
+                    addr += sizeof(color);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_COLORRGB: {
-                    const auto &color = *reinterpret_cast<const HEK::ColorRGB<HEK::NativeEndian> *>(this->address);
+                    const auto &color = *reinterpret_cast<const HEK::ColorRGB<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(color.red);
                     values[1] = static_cast<double>(color.green);
                     values[2] = static_cast<double>(color.blue);
+                    addr += sizeof(color);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_VECTOR2D: {
-                    const auto &vector = *reinterpret_cast<const HEK::Vector2D<HEK::NativeEndian> *>(this->address);
+                    const auto &vector = *reinterpret_cast<const HEK::Vector2D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(vector.i);
                     values[1] = static_cast<double>(vector.j);
+                    addr += sizeof(vector);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_VECTOR3D: {
-                    const auto &vector = *reinterpret_cast<const HEK::Vector3D<HEK::NativeEndian> *>(this->address);
+                    const auto &vector = *reinterpret_cast<const HEK::Vector3D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(vector.i);
                     values[1] = static_cast<double>(vector.j);
                     values[2] = static_cast<double>(vector.k);
+                    addr += sizeof(vector);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_EULER2D: {
-                    const auto &vector = *reinterpret_cast<const HEK::Euler2D<HEK::NativeEndian> *>(this->address);
+                    const auto &vector = *reinterpret_cast<const HEK::Euler2D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(vector.yaw);
                     values[1] = static_cast<double>(vector.pitch);
+                    addr += sizeof(vector);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_EULER3D: {
-                    const auto &vector = *reinterpret_cast<const HEK::Euler3D<HEK::NativeEndian> *>(this->address);
+                    const auto &vector = *reinterpret_cast<const HEK::Euler3D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(vector.yaw);
                     values[1] = static_cast<double>(vector.pitch);
                     values[2] = static_cast<double>(vector.roll);
+                    addr += sizeof(vector);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_PLANE2D: {
-                    const auto &plane = *reinterpret_cast<const HEK::Plane2D<HEK::NativeEndian> *>(this->address);
+                    const auto &plane = *reinterpret_cast<const HEK::Plane2D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(plane.vector.i);
                     values[1] = static_cast<double>(plane.vector.j);
                     values[2] = static_cast<double>(plane.w);
+                    addr += sizeof(plane);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_PLANE3D: {
-                    const auto &plane = *reinterpret_cast<const HEK::Plane3D<HEK::NativeEndian> *>(this->address);
+                    const auto &plane = *reinterpret_cast<const HEK::Plane3D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(plane.vector.i);
                     values[1] = static_cast<double>(plane.vector.j);
                     values[2] = static_cast<double>(plane.vector.k);
                     values[3] = static_cast<double>(plane.w);
+                    addr += sizeof(plane);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_POINT2D: {
-                    const auto &point = *reinterpret_cast<const HEK::Point2D<HEK::NativeEndian> *>(this->address);
+                    const auto &point = *reinterpret_cast<const HEK::Point2D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(point.x);
                     values[1] = static_cast<double>(point.y);
+                    addr += sizeof(point);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_POINT2DINT: {
-                    const auto &point = *reinterpret_cast<const HEK::Point2DInt<HEK::NativeEndian> *>(this->address);
+                    const auto &point = *reinterpret_cast<const HEK::Point2DInt<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<std::int64_t>(point.x);
                     values[1] = static_cast<std::int64_t>(point.y);
+                    addr += sizeof(point);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_POINT3D: {
-                    const auto &point = *reinterpret_cast<const HEK::Point3D<HEK::NativeEndian> *>(this->address);
+                    const auto &point = *reinterpret_cast<const HEK::Point3D<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(point.x);
                     values[1] = static_cast<double>(point.y);
                     values[2] = static_cast<double>(point.z);
+                    addr += sizeof(point);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_MATRIX: {
-                    auto &matrix = *reinterpret_cast<HEK::Matrix<HEK::NativeEndian> *>(this->address);
+                    auto &matrix = *reinterpret_cast<const HEK::Matrix<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(matrix.matrix[0][0]);
                     values[1] = static_cast<double>(matrix.matrix[0][1]);
                     values[2] = static_cast<double>(matrix.matrix[0][2]);
@@ -405,16 +426,18 @@ namespace Invader::Parser {
                     values[6] = static_cast<double>(matrix.matrix[2][0]);
                     values[7] = static_cast<double>(matrix.matrix[2][1]);
                     values[8] = static_cast<double>(matrix.matrix[2][2]);
+                    addr += sizeof(matrix);
                     values += 9;
                     break;
                 }
 
                 case VALUE_TYPE_QUATERNION: {
-                    const auto &quaternion = *reinterpret_cast<const HEK::Quaternion<HEK::NativeEndian> *>(this->address);
+                    const auto &quaternion = *reinterpret_cast<const HEK::Quaternion<HEK::NativeEndian> *>(addr);
                     values[0] = static_cast<double>(quaternion.i);
                     values[1] = static_cast<double>(quaternion.j);
                     values[2] = static_cast<double>(quaternion.k);
                     values[3] = static_cast<double>(quaternion.w);
+                    addr += sizeof(quaternion);
                     values += 4;
                     break;
                 }
@@ -432,55 +455,64 @@ namespace Invader::Parser {
     }
 
     void ParserStructValue::set_values(const Number *values) const noexcept {
+        auto *addr = reinterpret_cast<std::byte *>(this->address);
         for(std::size_t i = 0; i < this->count; i++) {
             switch(this->type) {
                 case VALUE_TYPE_INT8:
-                    *reinterpret_cast<std::int8_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::int8_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::int8_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT8:
-                    *reinterpret_cast<std::uint8_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::uint8_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::uint8_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_INT16:
-                    *reinterpret_cast<std::int16_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::int16_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::int16_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT16:
                 case VALUE_TYPE_INDEX:
-                    *reinterpret_cast<std::uint16_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::uint16_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::uint16_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_INT32:
-                    *reinterpret_cast<std::int32_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::int32_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::int32_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_UINT32:
-                    *reinterpret_cast<std::uint32_t *>(this->address) = std::get<std::int64_t>(*values);
+                    *reinterpret_cast<std::uint32_t *>(addr) = std::get<std::int64_t>(*values);
+                    addr += sizeof(std::uint32_t);
                     values++;
                     break;
 
                 case VALUE_TYPE_COLORARGBINT: {
-                    auto &color = *reinterpret_cast<HEK::ColorARGBInt *>(this->address);
+                    auto &color = *reinterpret_cast<HEK::ColorARGBInt *>(addr);
                     color.alpha = static_cast<std::uint8_t>(std::get<std::int64_t>(values[0]));
                     color.red = static_cast<std::uint8_t>(std::get<std::int64_t>(values[1]));
                     color.green = static_cast<std::uint8_t>(std::get<std::int64_t>(values[2]));
                     color.blue = static_cast<std::uint8_t>(std::get<std::int64_t>(values[3]));
+                    addr += sizeof(color);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_RECTANGLE2D: {
-                    auto &rectangle = *reinterpret_cast<HEK::Rectangle2D<HEK::NativeEndian> *>(this->address);
+                    auto &rectangle = *reinterpret_cast<HEK::Rectangle2D<HEK::NativeEndian> *>(addr);
                     rectangle.top = static_cast<std::int16_t>(std::get<std::int64_t>(values[0]));
                     rectangle.left = static_cast<std::int16_t>(std::get<std::int64_t>(values[1]));
                     rectangle.bottom = static_cast<std::int16_t>(std::get<std::int64_t>(values[2]));
                     rectangle.right = static_cast<std::int16_t>(std::get<std::int64_t>(values[3]));
+                    addr += sizeof(rectangle);
                     values += 4;
                     break;
                 }
@@ -488,109 +520,121 @@ namespace Invader::Parser {
                 case VALUE_TYPE_FLOAT:
                 case VALUE_TYPE_FRACTION:
                 case VALUE_TYPE_ANGLE:
-                    *reinterpret_cast<float *>(this->address) = static_cast<float>(std::get<double>(*values));
+                    *reinterpret_cast<float *>(addr) = static_cast<float>(std::get<double>(*values));
+                    addr += sizeof(float);
                     values++;
                     break;
 
                 case VALUE_TYPE_COLORARGB: {
-                    auto &color = *reinterpret_cast<HEK::ColorARGB<HEK::NativeEndian> *>(this->address);
+                    auto &color = *reinterpret_cast<HEK::ColorARGB<HEK::NativeEndian> *>(addr);
                     color.alpha = static_cast<float>(std::get<double>(values[0]));
                     color.red = static_cast<float>(std::get<double>(values[1]));
                     color.green = static_cast<float>(std::get<double>(values[2]));
                     color.blue = static_cast<float>(std::get<double>(values[3]));
+                    addr += sizeof(color);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_COLORRGB: {
-                    auto &color = *reinterpret_cast<HEK::ColorRGB<HEK::NativeEndian> *>(this->address);
+                    auto &color = *reinterpret_cast<HEK::ColorRGB<HEK::NativeEndian> *>(addr);
                     color.red = static_cast<float>(std::get<double>(values[0]));
                     color.green = static_cast<float>(std::get<double>(values[1]));
                     color.blue = static_cast<float>(std::get<double>(values[2]));
+                    addr += sizeof(color);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_VECTOR2D: {
-                    auto &vector = *reinterpret_cast<HEK::Vector2D<HEK::NativeEndian> *>(this->address);
+                    auto &vector = *reinterpret_cast<HEK::Vector2D<HEK::NativeEndian> *>(addr);
                     vector.i = static_cast<float>(std::get<double>(values[0]));
                     vector.j = static_cast<float>(std::get<double>(values[1]));
+                    addr += sizeof(vector);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_VECTOR3D: {
-                    auto &vector = *reinterpret_cast<HEK::Vector3D<HEK::NativeEndian> *>(this->address);
+                    auto &vector = *reinterpret_cast<HEK::Vector3D<HEK::NativeEndian> *>(addr);
                     vector.i = static_cast<float>(std::get<double>(values[0]));
                     vector.j = static_cast<float>(std::get<double>(values[1]));
                     vector.k = static_cast<float>(std::get<double>(values[2]));
+                    addr += sizeof(vector);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_EULER2D: {
-                    auto &vector = *reinterpret_cast<HEK::Euler2D<HEK::NativeEndian> *>(this->address);
+                    auto &vector = *reinterpret_cast<HEK::Euler2D<HEK::NativeEndian> *>(addr);
                     vector.yaw = static_cast<float>(std::get<double>(values[0]));
                     vector.pitch = static_cast<float>(std::get<double>(values[1]));
+                    addr += sizeof(vector);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_EULER3D: {
-                    auto &vector = *reinterpret_cast<HEK::Euler3D<HEK::NativeEndian> *>(this->address);
+                    auto &vector = *reinterpret_cast<HEK::Euler3D<HEK::NativeEndian> *>(addr);
                     vector.yaw = static_cast<float>(std::get<double>(values[0]));
                     vector.pitch = static_cast<float>(std::get<double>(values[1]));
                     vector.roll = static_cast<float>(std::get<double>(values[2]));
+                    addr += sizeof(vector);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_PLANE2D: {
-                    auto &plane = *reinterpret_cast<HEK::Plane2D<HEK::NativeEndian> *>(this->address);
+                    auto &plane = *reinterpret_cast<HEK::Plane2D<HEK::NativeEndian> *>(addr);
                     plane.vector.i = static_cast<float>(std::get<double>(values[0]));
                     plane.vector.j = static_cast<float>(std::get<double>(values[1]));
                     plane.w = static_cast<float>(std::get<double>(values[2]));
+                    addr += sizeof(plane);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_PLANE3D: {
-                    auto &plane = *reinterpret_cast<HEK::Plane3D<HEK::NativeEndian> *>(this->address);
+                    auto &plane = *reinterpret_cast<HEK::Plane3D<HEK::NativeEndian> *>(addr);
                     plane.vector.i = static_cast<float>(std::get<double>(values[0]));
                     plane.vector.j = static_cast<float>(std::get<double>(values[1]));
                     plane.vector.k = static_cast<float>(std::get<double>(values[2]));
                     plane.w = static_cast<float>(std::get<double>(values[3]));
+                    addr += sizeof(plane);
                     values += 4;
                     break;
                 }
 
                 case VALUE_TYPE_POINT2D: {
-                    auto &point = *reinterpret_cast<HEK::Point2D<HEK::NativeEndian> *>(this->address);
+                    auto &point = *reinterpret_cast<HEK::Point2D<HEK::NativeEndian> *>(addr);
                     point.x = static_cast<float>(std::get<double>(values[0]));
                     point.y = static_cast<float>(std::get<double>(values[1]));
+                    addr += sizeof(point);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_POINT2DINT: {
-                    auto &point = *reinterpret_cast<HEK::Point2DInt<HEK::NativeEndian> *>(this->address);
+                    auto &point = *reinterpret_cast<HEK::Point2DInt<HEK::NativeEndian> *>(addr);
                     point.x = static_cast<std::int16_t>(std::get<std::int64_t>(values[0]));
                     point.y = static_cast<std::int16_t>(std::get<std::int64_t>(values[1]));
+                    addr += sizeof(point);
                     values += 2;
                     break;
                 }
 
                 case VALUE_TYPE_POINT3D: {
-                    auto &point = *reinterpret_cast<HEK::Point3D<HEK::NativeEndian> *>(this->address);
+                    auto &point = *reinterpret_cast<HEK::Point3D<HEK::NativeEndian> *>(addr);
                     point.x = static_cast<float>(std::get<double>(values[0]));
                     point.y = static_cast<float>(std::get<double>(values[1]));
                     point.z = static_cast<float>(std::get<double>(values[2]));
+                    addr += sizeof(point);
                     values += 3;
                     break;
                 }
 
                 case VALUE_TYPE_MATRIX: {
-                    auto &matrix = *reinterpret_cast<HEK::Matrix<HEK::NativeEndian> *>(this->address);
+                    auto &matrix = *reinterpret_cast<HEK::Matrix<HEK::NativeEndian> *>(addr);
                     matrix.matrix[0][0] = static_cast<float>(std::get<double>(values[0]));
                     matrix.matrix[0][1] = static_cast<float>(std::get<double>(values[1]));
                     matrix.matrix[0][2] = static_cast<float>(std::get<double>(values[2]));
@@ -600,16 +644,18 @@ namespace Invader::Parser {
                     matrix.matrix[2][0] = static_cast<float>(std::get<double>(values[6]));
                     matrix.matrix[2][1] = static_cast<float>(std::get<double>(values[7]));
                     matrix.matrix[2][2] = static_cast<float>(std::get<double>(values[8]));
+                    addr += sizeof(matrix);
                     values += 9;
                     break;
                 }
 
                 case VALUE_TYPE_QUATERNION: {
-                    auto &quaternion = *reinterpret_cast<HEK::Quaternion<HEK::NativeEndian> *>(this->address);
+                    auto &quaternion = *reinterpret_cast<HEK::Quaternion<HEK::NativeEndian> *>(addr);
                     quaternion.i = static_cast<float>(std::get<double>(values[0]));
                     quaternion.j = static_cast<float>(std::get<double>(values[1]));
                     quaternion.k = static_cast<float>(std::get<double>(values[2]));
                     quaternion.w = static_cast<float>(std::get<double>(values[3]));
+                    addr += sizeof(quaternion);
                     values += 4;
                     break;
                 }

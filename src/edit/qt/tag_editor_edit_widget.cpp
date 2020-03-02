@@ -17,7 +17,7 @@ namespace Invader::EditQt {
         this->hbox_layout.setMargin(0);
         this->setLayout(&hbox_layout);
 
-        int value_index = 0;
+        std::size_t value_index = 0;
         auto &widgets_array = this->widgets;
         auto &layout = this->hbox_layout;
         auto values = value->get_values();
