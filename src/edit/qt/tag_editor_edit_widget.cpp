@@ -3,8 +3,10 @@
 #include <invader/tag/parser/parser.hpp>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QPushButton>
 #include "tag_editor_edit_widget.hpp"
 #include "tag_tree_window.hpp"
+#include "tag_tree_dialog.hpp"
 
 namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
@@ -13,6 +15,8 @@ namespace Invader::EditQt {
         hbox_layout(this) {
         this->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         int label_width = 300;
+        int standard_width = this->title_label.fontMetrics().boundingRect("MMM").width();
+        int prefix_label_width = standard_width * 3 / 5;
         this->title_label.setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         this->title_label.setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->hbox_layout.addWidget(&this->title_label);
@@ -26,24 +30,28 @@ namespace Invader::EditQt {
 
         auto &textbox_widgets = this->textbox_widgets;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets]() {
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets](int size, const char *prefix = nullptr) -> QLineEdit * {
+        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width]() {
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width](int size, const char *prefix = nullptr) -> QLineEdit * {
+                // Make our textbox
+                auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(std::make_unique<QLineEdit>()).get());
+
                 // If we've got a prefix, set it
                 if(prefix) {
                     auto *label = reinterpret_cast<QLabel *>(widgets_array.emplace_back(std::make_unique<QLabel>()).get());
                     label->setText(prefix);
+                    label->setMaximumWidth(prefix_label_width);
+                    label->setMinimumWidth(prefix_label_width);
+                    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
                     layout.addWidget(label);
 
                     // Align it
                     if(value_index == 0) {
-                        QFontMetrics fm = label->fontMetrics();
-                        label_width -= fm.boundingRect(prefix).width() + layout.spacing() + 1;
+                        label_width -= prefix_label_width + layout.spacing();
                     }
                 }
 
-                // Make our textbox
-                auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(std::make_unique<QLineEdit>()).get());
-                int width = textbox->fontMetrics().boundingRect("MMM").width() * size;
+                // Parameters for textbox
+                int width = standard_width * size;
                 textbox_widgets.emplace_back(textbox);
                 textbox->setMinimumWidth(width);
                 textbox->setMaximumWidth(width);
@@ -221,7 +229,11 @@ namespace Invader::EditQt {
 
         add_widget();
         if(value->is_bounds()) {
-            hbox_layout.addWidget(widgets_array.emplace_back(std::make_unique<QLabel>(" - ")).get());
+            auto *hyphen = reinterpret_cast<QLabel *>(widgets_array.emplace_back(new QLabel(" - ")).get());
+            hyphen->setMinimumWidth(prefix_label_width);
+            hyphen->setMaximumWidth(prefix_label_width);
+            hyphen->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+            hbox_layout.addWidget(hyphen);
             add_widget();
         }
 
@@ -229,11 +241,17 @@ namespace Invader::EditQt {
             layout.addWidget(widgets_array.emplace_back(std::make_unique<QLabel>("degrees")).get());
         }
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
+            // Set up dependency stuff
             this->verify_dependency_path();
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
             int comboWidth = combobox->fontMetrics().boundingRect("shader_transparent_chicago_extended").width() * 5 / 4;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
+
+            auto *button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Find...")).get());
+            layout.addWidget(button);
+
+            connect(button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
         }
 
@@ -323,6 +341,18 @@ namespace Invader::EditQt {
         }
         else {
             textbox->setStyleSheet("color: #FF0000");
+        }
+    }
+
+    void TagEditorEditWidget::find_dependency() {
+        TagTreeDialog dialog(this, this->get_editor_window()->get_parent_window(), this->get_struct_value()->get_allowed_classes());
+        dialog.exec();
+        auto &tag = dialog.get_tag();
+        if(tag.has_value()) {
+            auto &tag_val = tag.value();
+            this->textbox_widgets[0]->setText(File::split_tag_class_extension(File::halo_path_to_preferred_path(tag_val.tag_path))->path.c_str());
+            reinterpret_cast<QComboBox *>(this->widgets[0].get())->setCurrentText(HEK::tag_class_to_extension(tag_val.tag_class_int));
+            this->on_change();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Invader::EditQt {
         TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
 
     private slots:
-        virtual void on_change();
+        void on_change();
 
     private:
         QLabel title_label;
@@ -35,7 +35,7 @@ namespace Invader::EditQt {
         std::vector<std::unique_ptr<QWidget>> widgets;
         std::vector<QLineEdit *> textbox_widgets;
         void verify_dependency_path();
-
+        void find_dependency();
     };
 }
 
