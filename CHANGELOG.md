@@ -7,6 +7,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-extract: Added partial support for Xbox maps
 - invader-info: Added partial support for Xbox maps
 
+### Fixed
+- invader-build: Fixed incorrect CEA tag space limit being enforced
+
 ## [0.28.1] - 2020-02-25
 ### Changed
 - invader-build: Halo CEA tag space limits are now enforced (31 MiB tag space,
