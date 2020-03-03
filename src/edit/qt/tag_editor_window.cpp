@@ -32,7 +32,7 @@ namespace Invader::EditQt {
         }
         catch(std::exception &e) {
             char formatted_error[1024];
-            std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s due to an exception error:\n\n%s\n\nThe tag may be corrupt.", tag_file.full_path.string().c_str(), e.what());
+            std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s due to an exception error:\n\n%s", tag_file.full_path.string().c_str(), e.what());
             QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
             this->close();
             return;

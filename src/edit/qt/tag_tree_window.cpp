@@ -280,7 +280,12 @@ namespace Invader::EditQt {
 
             // Open; benchmark
             auto start = std::chrono::steady_clock::now();
-            this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag))->show();
+            auto *window = this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag)).get();
+            if(!window->is_successfully_opened()) {
+                this->open_documents.erase(this->open_documents.begin() + (this->open_documents.size() - 1));
+                return;
+            }
+            window->show();
             auto end = std::chrono::steady_clock::now();
             std::printf("Opened %s in %zu ms\n", tag->full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         }

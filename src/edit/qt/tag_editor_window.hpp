@@ -47,6 +47,14 @@ namespace Invader::EditQt {
             return this->parent_window;
         }
 
+        /**
+         * Get whether or not this opened successfully
+         * @return opened successfully
+         */
+        bool is_successfully_opened() const noexcept {
+            return this->successfully_opened;
+        }
+
         ~TagEditorWindow();
 
     private:
@@ -63,6 +71,8 @@ namespace Invader::EditQt {
 
         Parser::ParserStruct *parser_data;
         std::vector<std::unique_ptr<QWidget>> widgets_to_remove;
+
+        bool successfully_opened = false;
     };
 }
 
