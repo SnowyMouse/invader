@@ -137,6 +137,8 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save() {
+        // Save; benchmark
+        auto start = std::chrono::steady_clock::now();
         auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
         auto result = Invader::File::save_file(this->file.full_path.string().c_str(), tag_data);
         if(!result) {
@@ -144,6 +146,8 @@ namespace Invader::EditQt {
         }
         else {
             this->make_dirty(false);
+            auto end = std::chrono::steady_clock::now();
+            std::printf("Saved %s in %zu ms\n", this->get_file().full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         }
         return result;
     }

@@ -265,7 +265,12 @@ namespace Invader::EditQt {
                     return;
                 }
             }
+
+            // Open; benchmark
+            auto start = std::chrono::steady_clock::now();
             this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag))->show();
+            auto end = std::chrono::steady_clock::now();
+            std::printf("Opened %s in %zu ms\n", tag->full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         }
     }
 
