@@ -4,6 +4,7 @@
 #include "tag_editor_widget.hpp"
 #include "tag_editor_window.hpp"
 #include "tag_editor_edit_widget.hpp"
+#include "tag_editor_array_widget.hpp"
 
 namespace Invader::EditQt {
     TagEditorWidget::TagEditorWidget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) : QWidget(parent), struct_value(struct_value), editor_window(editor_window) {}
@@ -43,7 +44,7 @@ namespace Invader::EditQt {
                 return new TagEditorEditWidget(parent, struct_value, editor_window);
 
             case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
-                break;
+                return new TagEditorArrayWidget(parent, struct_value, editor_window);
         }
 
         return nullptr;
