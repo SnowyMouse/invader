@@ -36,7 +36,6 @@ namespace Invader::EditQt {
             case Parser::ParserStructValue::VALUE_TYPE_QUATERNION:
             case Parser::ParserStructValue::VALUE_TYPE_MATRIX:
             case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-            case Parser::ParserStructValue::VALUE_TYPE_DATA:
             case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET:
             case Parser::ParserStructValue::VALUE_TYPE_ENUM:
             case Parser::ParserStructValue::VALUE_TYPE_BITMASK:

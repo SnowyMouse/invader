@@ -116,7 +116,7 @@ namespace Invader::Parser {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {
             return NumberFormat::NUMBER_FORMAT_INT;
         }
-        else if(type < ValueType::VALUE_TYPE_DATA) {
+        else if(type < ValueType::VALUE_TYPE_REFLEXIVE) {
             return NumberFormat::NUMBER_FORMAT_FLOAT;
         }
         else {
@@ -150,10 +150,9 @@ namespace Invader::Parser {
             case VALUE_TYPE_POINT2D:
             case VALUE_TYPE_POINT3D:
             case VALUE_TYPE_MATRIX:
+            case VALUE_TYPE_QUATERNION:
                 return NumberFormat::NUMBER_FORMAT_FLOAT;
 
-            case VALUE_TYPE_QUATERNION:
-            case VALUE_TYPE_DATA:
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_BITMASK:
@@ -217,7 +216,6 @@ namespace Invader::Parser {
             case VALUE_TYPE_QUATERNION:
                 return 4 * this->count;
 
-            case VALUE_TYPE_DATA:
             case VALUE_TYPE_REFLEXIVE:
             case VALUE_TYPE_DEPENDENCY:
             case VALUE_TYPE_BITMASK:
@@ -442,7 +440,6 @@ namespace Invader::Parser {
                     break;
                 }
 
-                case VALUE_TYPE_DATA:
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_BITMASK:
@@ -660,7 +657,6 @@ namespace Invader::Parser {
                     break;
                 }
 
-                case VALUE_TYPE_DATA:
                 case VALUE_TYPE_REFLEXIVE:
                 case VALUE_TYPE_DEPENDENCY:
                 case VALUE_TYPE_BITMASK:

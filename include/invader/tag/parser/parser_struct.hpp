@@ -56,7 +56,6 @@ namespace Invader::Parser {
             VALUE_TYPE_MATRIX,
 
             // Other stuff
-            VALUE_TYPE_DATA,
             VALUE_TYPE_REFLEXIVE, // use templates for this maybe?
             VALUE_TYPE_DEPENDENCY,
             VALUE_TYPE_TAGSTRING,

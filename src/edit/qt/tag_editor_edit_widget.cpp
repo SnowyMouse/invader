@@ -8,6 +8,8 @@
 #include "tag_tree_window.hpp"
 #include "tag_tree_dialog.hpp"
 
+#define INTERNAL_VALUE "internal-value"
+
 namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
         TagEditorWidget(parent, value, editor_window),
@@ -216,9 +218,29 @@ namespace Invader::EditQt {
                     break;
                 }
 
-                case Parser::ParserStructValue::VALUE_TYPE_DATA:
                 case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET:
-                case Parser::ParserStructValue::VALUE_TYPE_ENUM:
+                    break;
+                case Parser::ParserStructValue::VALUE_TYPE_ENUM: {
+                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()).get());
+                    auto possible_values = value->list_enum();
+
+                    QStringList internal_items = QList<QString>(possible_values.data(), possible_values.data() + possible_values.size());
+                    combobox->addItems(internal_items);
+                    combobox->setProperty(INTERNAL_VALUE, internal_items);
+
+                    auto current_value = value->read_enum();
+
+                    // Set values
+                    for(auto &v : possible_values) {
+                        if(std::strcmp(current_value, v) == 0) {
+                            combobox->setCurrentIndex(&v - possible_values.data());
+                            break;
+                        }
+                    }
+                    layout.addWidget(combobox);
+
+                    break;
+                }
                 case Parser::ParserStructValue::VALUE_TYPE_BITMASK:
                     break;
 
@@ -254,6 +276,14 @@ namespace Invader::EditQt {
             connect(button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
         }
+        else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ENUM) {
+            // Set up the enum
+            auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
+            int comboWidth = standard_width * 8;
+            combobox->setMaximumWidth(comboWidth);
+            combobox->setMinimumWidth(comboWidth);
+            connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+        }
 
         this->title_label.setMinimumWidth(label_width);
         this->title_label.setMaximumWidth(this->title_label.minimumWidth());
@@ -282,6 +312,13 @@ namespace Invader::EditQt {
                 dependency.path = Invader::File::preferred_path_to_halo_path(path.toStdString());
 
                 this->verify_dependency_path();
+                break;
+            }
+
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_ENUM: {
+                // Write the combobox stuff
+                auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
+                value->write_enum(combobox->property(INTERNAL_VALUE).toStringList()[combobox->currentIndex()].toLatin1().data());
                 break;
             }
 
