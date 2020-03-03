@@ -2,7 +2,9 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <QLineEdit>
+#include <QComboBox>
 #include "tag_editor_edit_widget.hpp"
+#include "tag_tree_window.hpp"
 
 namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
@@ -25,7 +27,7 @@ namespace Invader::EditQt {
         auto &textbox_widgets = this->textbox_widgets;
 
         auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets]() {
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets](int size, const char *prefix = nullptr) {
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets](int size, const char *prefix = nullptr) -> QLineEdit * {
                 // If we've got a prefix, set it
                 if(prefix) {
                     auto *label = reinterpret_cast<QLabel *>(widgets_array.emplace_back(std::make_unique<QLabel>()).get());
@@ -62,27 +64,38 @@ namespace Invader::EditQt {
                 }
 
                 value_index++;
+                return textbox;
             };
 
             switch(value->get_type()) {
+                // Simple value types; just textboxes
                 case Parser::ParserStructValue::VALUE_TYPE_INT8:
                 case Parser::ParserStructValue::VALUE_TYPE_UINT8:
-                    return add_single_textbox(1);
+                    add_single_textbox(1);
+                    break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INT16:
                 case Parser::ParserStructValue::VALUE_TYPE_UINT16:
-                    return add_single_textbox(2);
+                    add_single_textbox(2);
+                    break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INDEX:
-                    return add_single_textbox(2);
+                    add_single_textbox(2);
+                    break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INT32:
                 case Parser::ParserStructValue::VALUE_TYPE_UINT32:
                 case Parser::ParserStructValue::VALUE_TYPE_FLOAT:
                 case Parser::ParserStructValue::VALUE_TYPE_FRACTION:
                 case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
-                    return add_single_textbox(3);
+                    add_single_textbox(3);
+                    break;
 
+                case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
+                    add_single_textbox(12);
+                    break;
+
+                // Some more complex stuff with multiple boxes
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
                     add_single_textbox(2, "a:");
                     add_single_textbox(2, "r:");
@@ -166,13 +179,39 @@ namespace Invader::EditQt {
                     add_single_textbox(3, "y2:");
                     add_single_textbox(3, "z2:");
                     break;
-                case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    return add_single_textbox(12);
+
+                // Dependencies!
+                case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY: {
+                    // Here's the combobox
+                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()).get());
+                    auto &allowed_classes = value->get_allowed_classes();
+                    for(auto &c : allowed_classes) {
+                        combobox->addItem(HEK::tag_class_to_extension(c));
+                    }
+                    layout.addWidget(combobox);
+
+                    // Next, the textbox
+                    auto *textbox = add_single_textbox(12);
+
+                    // Next, get our thing
+                    auto &dependency = value->get_dependency();
+
+                    // Lastly, set the dependency
+                    textbox->setText(Invader::File::halo_path_to_preferred_path(dependency.path).c_str());
+                    for(auto &c : allowed_classes) {
+                        if(c == dependency.tag_class_int) {
+                            combobox->setCurrentIndex(&c - allowed_classes.data());
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+
                 case Parser::ParserStructValue::VALUE_TYPE_DATA:
                 case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET:
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM:
                 case Parser::ParserStructValue::VALUE_TYPE_BITMASK:
-                case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY:
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
@@ -189,6 +228,14 @@ namespace Invader::EditQt {
         if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
             layout.addWidget(widgets_array.emplace_back(std::make_unique<QLabel>("degrees")).get());
         }
+        else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
+            this->verify_dependency_path();
+            auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
+            int comboWidth = combobox->fontMetrics().boundingRect("shader_transparent_chicago_extended").width() * 5 / 4;
+            combobox->setMaximumWidth(comboWidth);
+            combobox->setMinimumWidth(comboWidth);
+            connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+        }
 
         this->title_label.setMinimumWidth(label_width);
         this->title_label.setMaximumWidth(this->title_label.minimumWidth());
@@ -200,32 +247,82 @@ namespace Invader::EditQt {
 
     void TagEditorEditWidget::on_change() {
         auto *value = this->get_struct_value();
-        if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING) {
-            value->set_string(this->textbox_widgets[0]->text().toLatin1().data());
-        }
-        else {
-            auto widget_count = this->textbox_widgets.size();
-            std::vector<Parser::ParserStructValue::Number> numbers(widget_count);
-            for(std::size_t w = 0; w < widget_count; w++) {
-                auto *widget = this->textbox_widgets[w];
-                switch(value->get_number_format()) {
-                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
-                        double double_value = widget->text().toDouble();
-                        if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
-                            double_value = DEGREES_TO_RADIANS(double_value);
-                        }
-                        numbers[w] = double_value;
-                        break;
-                    }
-                    case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-                        numbers[w] = static_cast<std::int64_t>(widget->text().toLongLong());
-                        break;
-                    default:
-                        std::terminate();
-                }
+
+        switch(value->get_type()) {
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
+                value->set_string(this->textbox_widgets[0]->text().toLatin1().data());
+                break;
+
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
+                // Get the dependency stuff
+                auto class_int = HEK::extension_to_tag_class(reinterpret_cast<QComboBox *>(this->widgets[0].get())->currentText().toLatin1().data());
+                auto path = reinterpret_cast<QLineEdit *>(this->widgets[1].get())->text();
+
+                // Set the dependency
+                auto &dependency = value->get_dependency();
+                dependency.tag_class_int = class_int;
+                dependency.path = Invader::File::preferred_path_to_halo_path(path.toStdString());
+
+                this->verify_dependency_path();
+                break;
             }
-            value->set_values(numbers);
+
+            default: {
+                // Set the number value
+                auto widget_count = this->textbox_widgets.size();
+                std::vector<Parser::ParserStructValue::Number> numbers(widget_count);
+
+                // Go through each number
+                for(std::size_t w = 0; w < widget_count; w++) {
+                    auto *widget = this->textbox_widgets[w];
+                    switch(value->get_number_format()) {
+                        case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
+                            double double_value = widget->text().toDouble();
+                            if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
+                                double_value = DEGREES_TO_RADIANS(double_value);
+                            }
+                            numbers[w] = double_value;
+                            break;
+                        }
+                        case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
+                            numbers[w] = static_cast<std::int64_t>(widget->text().toLongLong());
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                }
+                value->set_values(numbers);
+            }
         }
         this->value_changed();
+    }
+
+    void TagEditorEditWidget::verify_dependency_path() {
+        // Find it!
+        auto &dependency = this->get_struct_value()->get_dependency();
+        bool found = false;
+        auto preferred_path = File::halo_path_to_preferred_path(dependency.path);
+
+        // If an empty path was given, don't color it red then
+        if(preferred_path == "") {
+            found = true;
+        }
+        else {
+            for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
+                if(t.tag_class_int == dependency.tag_class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == preferred_path) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        // Get the path
+        auto *textbox = textbox_widgets[0];
+        if(found) {
+            textbox->setStyleSheet("");
+        }
+        else {
+            textbox->setStyleSheet("color: #FF0000");
+        }
     }
 }

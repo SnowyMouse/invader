@@ -454,7 +454,7 @@ namespace Invader::Parser {
         }
     }
 
-    void ParserStructValue::set_values(const Number *values) const noexcept {
+    void ParserStructValue::set_values(const Number *values) noexcept {
         auto *addr = reinterpret_cast<std::byte *>(this->address);
         for(std::size_t i = 0; i < this->count; i++) {
             switch(this->type) {
@@ -673,7 +673,7 @@ namespace Invader::Parser {
         }
     }
 
-    void ParserStructValue::set_values(const std::vector<ParserStructValue::Number> &values) const noexcept {
+    void ParserStructValue::set_values(const std::vector<ParserStructValue::Number> &values) noexcept {
         return this->set_values(values.data());
     }
 

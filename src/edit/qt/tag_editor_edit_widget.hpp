@@ -8,15 +8,15 @@
 #include <QHBoxLayout>
 
 class QLineEdit;
+class QComboBox;
 
 namespace Invader::EditQt {
     class TagEditorEditWidget : public TagEditorWidget {
         Q_OBJECT
-        friend class TagEditorWidget;
 
-    protected:
+    public:
         /**
-         * Instantiate a simple edit widget
+         * Instantiate an edit widget
          * @param parent        parent widget
          * @param value         struct value
          * @param editor_window editor window
@@ -34,6 +34,7 @@ namespace Invader::EditQt {
         void place_textbox(int size, QLabel *prefix);
         std::vector<std::unique_ptr<QWidget>> widgets;
         std::vector<QLineEdit *> textbox_widgets;
+        void verify_dependency_path();
 
     };
 }

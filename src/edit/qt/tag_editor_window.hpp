@@ -39,6 +39,14 @@ namespace Invader::EditQt {
          */
         const File::TagFile &get_file() const noexcept;
 
+        /**
+         * Get the parent window
+         * @return parent window
+         */
+        TagTreeWindow *get_parent_window() noexcept {
+            return this->parent_window;
+        }
+
         ~TagEditorWindow();
 
     private:

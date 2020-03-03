@@ -101,13 +101,21 @@ namespace Invader::Parser {
          * Set the values
          * @param values values to read from; must point to at least get_value_count() values
          */
-        void set_values(const Number *values) const noexcept;
+        void set_values(const Number *values) noexcept;
 
         /**
          * Set the values
          * @param values values to read from; must be at least get_value_count() values
          */
-        void set_values(const std::vector<Number> &values) const noexcept;
+        void set_values(const std::vector<Number> &values) noexcept;
+
+        /**
+         * Get the dependency
+         * @return dependency
+         */
+        Dependency &get_dependency() noexcept {
+            return *reinterpret_cast<Dependency *>(this->address);
+        }
 
         /**
          * Get the value type used
