@@ -60,12 +60,8 @@ namespace Invader::EditQt {
          */
         void refresh_view();
 
-        /**
-         * Close event
-         * @param event event pointer
-         */
-        virtual void closeEvent(QCloseEvent *event);
 
+        virtual void closeEvent(QCloseEvent *event);
         virtual void paintEvent(QPaintEvent *event);
 
     signals:
@@ -107,6 +103,14 @@ namespace Invader::EditQt {
 
         /** We're done */
         void tag_count_changed(std::pair<std::mutex, std::size_t> *count);
+
+        /** Show the sauce! */
+        void show_source_code();
+
+        #ifdef SHOW_NIGHTLY_LINK
+        /** Nightly build? */
+        void show_nightly_build();
+        #endif
 
         enum : std::size_t {
             SHOW_ALL_MERGED = static_cast<std::size_t>(~0)

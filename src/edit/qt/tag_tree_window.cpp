@@ -11,6 +11,7 @@
 #include <QStatusBar>
 #include <QCloseEvent>
 #include <QDesktopWidget>
+#include <QDesktopServices>
 #include <QThread>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
@@ -59,9 +60,20 @@ namespace Invader::EditQt {
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
-        auto *about = help_menu->addAction("About invader-edit-qt");
+        auto *about = help_menu->addAction("About invader-edit-qt...");
         about->setIcon(QIcon::fromTheme(QStringLiteral("help-about")));
         connect(about, &QAction::triggered, this, &TagTreeWindow::show_about_window);
+
+        help_menu->addSeparator();
+
+        auto *source = help_menu->addAction("View source code...");
+        source->setIcon(QIcon::fromTheme(QStringLiteral("help-about")));
+        connect(source, &QAction::triggered, this, &TagTreeWindow::show_source_code);
+
+        #ifdef SHOW_NIGHTLY_LINK
+        auto *nightly = help_menu->addAction("Nightly builds...");
+        connect(nightly, &QAction::triggered, this, &TagTreeWindow::show_nightly_build);
+        #endif
 
         // Now, set up the layout
         auto *central_widget = new QWidget(this);
@@ -324,4 +336,14 @@ namespace Invader::EditQt {
             right_click_menu.exec(this->tag_view->mapToGlobal(point));
         }
     }
+
+    void TagTreeWindow::show_source_code() {
+        QDesktopServices::openUrl(QUrl::fromUserInput("https://github.com/Kavawuvi/invader"));
+    }
+
+    #ifdef SHOW_NIGHTLY_LINK
+    void TagTreeWindow::show_nightly_build() {
+        QDesktopServices::openUrl(QUrl::fromUserInput("https://invader.opencarnage.net/builds/nightly/download-latest.html"));
+    }
+    #endif
 }
