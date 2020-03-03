@@ -4,7 +4,7 @@ if(NOT DEFINED ${INVADER_REFACTOR})
     set(INVADER_STRIP true CACHE BOOL "Build invader-refactor (refactors tag paths)")
 endif()
 
-if(${INVADER_STRING})
+if(${INVADER_REFACTOR})
     add_executable(invader-refactor
         src/refactor/refactor.cpp
     )
