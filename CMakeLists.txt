@@ -72,9 +72,9 @@ include(src/info/info.cmake)
 include(src/extract/extract.cmake)
 include(src/sound/sound.cmake)
 include(src/strip/strip.cmake)
-include(src/edit/qt/qt.cmake)
 include(src/refactor/refactor.cmake)
 include(src/collection/collection.cmake)
+include(src/edit/qt/qt.cmake)
 
 # Install stuff
 install(
