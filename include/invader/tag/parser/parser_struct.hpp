@@ -236,6 +236,24 @@ namespace Invader::Parser {
         }
 
         /**
+         * Read the bitfield value
+         * @param  field field name
+         * @return value
+         */
+        bool read_bitfield(const char *field) const {
+            return this->read_bitfield_fn(field, address);
+        }
+
+        /**
+         * Read the bitfield value
+         * @param  field field name
+         * @param  value value name
+         */
+        void write_bitfield(const char *field, bool value) {
+            this->write_bitfield_fn(field, value, address);
+        }
+
+        /**
          * List all enum values
          * @return all enum values
          */
@@ -359,6 +377,19 @@ namespace Invader::Parser {
             std::vector<const char *> out(count);
             for(std::size_t i = 0; i < count; i++) {
                 out[i] = convert_fn(static_cast<T>(i));
+            }
+            return out;
+        }
+
+        /**
+         * Return a list of all of the possible enums
+         * @return vector of all possible enums
+         */
+        template <typename T, const char *(*convert_fn)(T), std::size_t count>
+        static std::vector<const char *> list_bitmask_template() {
+            std::vector<const char *> out(count);
+            for(std::size_t i = 0; i < count; i++) {
+                out[i] = convert_fn(static_cast<T>(static_cast<std::size_t>(1) << i));
             }
             return out;
         }

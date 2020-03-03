@@ -3,7 +3,10 @@
 #include <invader/tag/parser/parser.hpp>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QScrollBar>
 #include <QPushButton>
+#include <QListWidget>
+#include <QListWidgetItem>
 #include "tag_editor_edit_widget.hpp"
 #include "tag_tree_window.hpp"
 #include "tag_tree_dialog.hpp"
@@ -232,6 +235,7 @@ namespace Invader::EditQt {
                     auto pretty_values = value->list_enum_pretty();
                     QStringList pretty_items = QList<QString>(pretty_values.data(), pretty_values.data() + pretty_values.size());
                     combobox->addItems(pretty_items);
+                    combobox->setFocusPolicy(Qt::StrongFocus);
 
                     auto current_value = value->read_enum();
 
@@ -246,8 +250,28 @@ namespace Invader::EditQt {
 
                     break;
                 }
-                case Parser::ParserStructValue::VALUE_TYPE_BITMASK:
+                case Parser::ParserStructValue::VALUE_TYPE_BITMASK: {
+                    auto *list = reinterpret_cast<QListWidget *>(widgets_array.emplace_back(new QListWidget()).get());
+
+                    // Internal items
+                    auto possible_values = value->list_enum();
+                    auto value_count = possible_values.size();
+                    QStringList internal_items = QList<QString>(possible_values.data(), possible_values.data() + possible_values.size());
+                    list->setProperty(INTERNAL_VALUE, internal_items);
+
+                    // "Pretty" items
+                    auto pretty_values = value->list_enum_pretty();
+                    QStringList pretty_items = QList<QString>(pretty_values.data(), pretty_values.data() + pretty_values.size());
+                    for(std::size_t i = 0; i < value_count; i++) {
+                        QListWidgetItem *item = new QListWidgetItem(tr(pretty_values[i]), list);
+                        item->setCheckState(value->read_bitfield(possible_values[i]) ? Qt::Checked : Qt::Unchecked);
+                    }
+                    layout.addWidget(list);
+
+                    // TODO: MAKE SHIT IN THE TABLE NOT CUT OFF
+
                     break;
+                }
 
                 case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
                     std::terminate();
@@ -289,6 +313,14 @@ namespace Invader::EditQt {
             combobox->setMinimumWidth(comboWidth);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
         }
+        else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_BITMASK) {
+            // Set the list up
+            auto *list = reinterpret_cast<QListWidget *>(this->widgets[0].get());
+            int listWidth = standard_width * 8;
+            list->setMaximumWidth(listWidth);
+            list->setMinimumWidth(listWidth);
+            connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
+        }
 
         this->title_label.setMinimumWidth(label_width);
         this->title_label.setMaximumWidth(this->title_label.minimumWidth());
@@ -324,6 +356,16 @@ namespace Invader::EditQt {
                 // Write the combobox stuff
                 auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
                 value->write_enum(combobox->property(INTERNAL_VALUE).toStringList()[combobox->currentIndex()].toLatin1().data());
+                break;
+            }
+
+            case Parser::ParserStructValue::ValueType::VALUE_TYPE_BITMASK: {
+                auto *list = reinterpret_cast<QListWidget *>(this->widgets[0].get());
+                auto possible_values = value->list_enum();
+                auto value_count = possible_values.size();
+                for(std::size_t i = 0; i < value_count; i++) {
+                    value->write_bitfield(possible_values[i], list->item(i)->checkState() == Qt::Checked);
+                }
                 break;
             }
 

@@ -46,7 +46,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 if type == b["name"]:
                     found = True
                     type = "{}Enum".format(type)
-                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string_pretty, {}>, ParserStructValue::read_bitfield_template<HEK::{}, HEK::{}_from_string>, ParserStructValue::write_bitfield_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(b["fields_formatted"]), type, type, len(b["fields_formatted"]), type, type, type, type))
+                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string_pretty, {}>, ParserStructValue::read_bitfield_template<HEK::{}, HEK::{}_from_string>, ParserStructValue::write_bitfield_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(b["fields_formatted"]), type, type, len(b["fields_formatted"]), type, type, type, type))
                     break
             if found:
                 continue
