@@ -254,6 +254,14 @@ namespace Invader::Parser {
         }
 
         /**
+         * Read the data size
+         * @return data size
+         */
+        std::size_t get_data_size() const noexcept {
+            return reinterpret_cast<const std::vector<std::byte> *>(this->address)->size();
+        }
+
+        /**
          * List all enum values
          * @return all enum values
          */

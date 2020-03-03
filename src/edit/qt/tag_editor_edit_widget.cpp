@@ -221,8 +221,14 @@ namespace Invader::EditQt {
                     break;
                 }
 
-                case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET:
+                case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET: {
+                    char fmt[256];
+                    auto size = value->get_data_size();
+                    std::snprintf(fmt, sizeof(fmt), "%zu byte%s", size, size == 1 ? "" : "s");
+                    widgets_array.emplace_back(new QLabel(fmt));
                     break;
+                }
+
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM: {
                     auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()).get());
 
