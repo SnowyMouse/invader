@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QScrollBar>
 #include <QPushButton>
+#include <QWheelEvent>
 #include <QListWidget>
 #include <QListWidgetItem>
 #include "tag_editor_edit_widget.hpp"
@@ -14,6 +15,15 @@
 #define INTERNAL_VALUE "internal-value"
 
 namespace Invader::EditQt {
+    /**
+     * Enum box to prevent accidentally changing values by scrolling over them
+     */
+    class EnumComboBox : public QComboBox {
+        void wheelEvent(QWheelEvent *event) override {
+            event->ignore();
+        }
+    };
+
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
         TagEditorWidget(parent, value, editor_window),
         title_label(value->get_name()) {
@@ -196,7 +206,7 @@ namespace Invader::EditQt {
                 // Dependencies!
                 case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY: {
                     // Here's the combobox
-                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()));
+                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new EnumComboBox()));
                     auto &allowed_classes = value->get_allowed_classes();
                     for(auto &c : allowed_classes) {
                         combobox->addItem(HEK::tag_class_to_extension(c));
@@ -233,7 +243,7 @@ namespace Invader::EditQt {
                 }
 
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM: {
-                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()));
+                    auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new EnumComboBox()));
 
                     // Internal items
                     auto possible_values = value->list_enum();
