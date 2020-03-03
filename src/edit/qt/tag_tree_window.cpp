@@ -245,6 +245,7 @@ namespace Invader::EditQt {
             window_closed = false;
             for(auto &w : this->open_documents) {
                 if(w->isHidden()) {
+                    w.release()->deleteLater();
                     this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
                     window_closed = true;
                     break;
@@ -280,12 +281,14 @@ namespace Invader::EditQt {
 
             // Open; benchmark
             auto start = std::chrono::steady_clock::now();
-            auto *window = this->open_documents.emplace_back(std::make_unique<TagEditorWindow>(this, this, *tag)).get();
+            auto document = std::make_unique<TagEditorWindow>(this, this, *tag);
+            auto *window = document.get();
             if(!window->is_successfully_opened()) {
-                this->open_documents.erase(this->open_documents.begin() + (this->open_documents.size() - 1));
+                document.release()->deleteLater();
                 return;
             }
             window->show();
+            this->open_documents.emplace_back(std::move(document));
             auto end = std::chrono::steady_clock::now();
             std::printf("Opened %s in %zu ms\n", tag->full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         }
