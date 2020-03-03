@@ -57,12 +57,6 @@ namespace Invader::EditQt {
 
         file_menu->addSeparator();
 
-        auto *refactor = file_menu->addAction("Refactor...");
-        refactor->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
-        connect(refactor, &QAction::triggered, this, &TagEditorWindow::perform_refactor);
-
-        file_menu->addSeparator();
-
         auto *close = file_menu->addAction("Close");
         close->setShortcut(QKeySequence::Close);
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
