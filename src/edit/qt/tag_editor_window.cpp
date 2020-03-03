@@ -101,6 +101,9 @@ namespace Invader::EditQt {
                 QGuiApplication::primaryScreen()->geometry()
             )
         );
+
+        // We did it!
+        this->successfully_opened = true;
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {
