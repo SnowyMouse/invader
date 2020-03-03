@@ -206,8 +206,8 @@ namespace Invader {
                     workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
                     break;
                 case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-                    workload.tag_data_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
-                    workload.tag_data_size = static_cast<HEK::Pointer>(~0) - HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY;
                     break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
