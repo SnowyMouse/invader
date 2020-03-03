@@ -222,10 +222,13 @@ namespace Invader::EditQt {
                 }
 
                 case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET: {
-                    char fmt[256];
-                    auto size = value->get_data_size();
-                    std::snprintf(fmt, sizeof(fmt), "%zu byte%s", size, size == 1 ? "" : "s");
-                    widgets_array.emplace_back(new QLabel(fmt));
+                    auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()).get());
+                    textbox->setText(QString::number(value->get_data_size()));
+                    textbox->setReadOnly(true);
+                    textbox->setMinimumWidth(3 * standard_width);
+                    textbox->setMaximumWidth(textbox->minimumWidth());
+                    layout.addWidget(textbox);
+                    layout.addWidget(widgets_array.emplace_back(new QLabel("bytes")).get());
                     break;
                 }
 
@@ -320,7 +323,7 @@ namespace Invader::EditQt {
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ENUM) {
             // Set up the enum
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0].get());
-            int comboWidth = standard_width * 8;
+            int comboWidth = standard_width * 12;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
@@ -328,7 +331,7 @@ namespace Invader::EditQt {
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_BITMASK) {
             // Set the list up
             auto *list = reinterpret_cast<QListWidget *>(this->widgets[0].get());
-            int listWidth = standard_width * 8;
+            int listWidth = standard_width * 12;
             list->setMaximumWidth(listWidth);
             list->setMinimumWidth(listWidth);
             connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
