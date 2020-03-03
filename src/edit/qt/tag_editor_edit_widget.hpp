@@ -28,10 +28,9 @@ namespace Invader::EditQt {
 
     private:
         QLabel title_label;
-        QHBoxLayout hbox_layout;
 
         void place_textbox(int size, QLabel *prefix);
-        std::vector<std::unique_ptr<QWidget>> widgets;
+        std::vector<QWidget *> widgets;
         std::vector<QLineEdit *> textbox_widgets;
         void verify_dependency_path();
         void find_dependency();
