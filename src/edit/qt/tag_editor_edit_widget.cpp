@@ -252,6 +252,7 @@ namespace Invader::EditQt {
                 }
                 case Parser::ParserStructValue::VALUE_TYPE_BITMASK: {
                     auto *list = reinterpret_cast<QListWidget *>(widgets_array.emplace_back(new QListWidget()).get());
+                    layout.addWidget(list);
 
                     // Internal items
                     auto possible_values = value->list_enum();
@@ -262,13 +263,18 @@ namespace Invader::EditQt {
                     // "Pretty" items
                     auto pretty_values = value->list_enum_pretty();
                     QStringList pretty_items = QList<QString>(pretty_values.data(), pretty_values.data() + pretty_values.size());
+                    bool height_set = false;
+
                     for(std::size_t i = 0; i < value_count; i++) {
                         QListWidgetItem *item = new QListWidgetItem(tr(pretty_values[i]), list);
                         item->setCheckState(value->read_bitfield(possible_values[i]) ? Qt::Checked : Qt::Unchecked);
-                    }
-                    layout.addWidget(list);
+                        if(!height_set) {
+                            int height = list->visualItemRect(item).height() * value_count + list->frameWidth() * 2;
 
-                    // TODO: MAKE SHIT IN THE TABLE NOT CUT OFF
+                            list->setMinimumHeight(height);
+                            list->setMaximumHeight(height);
+                        }
+                    }
 
                     break;
                 }
