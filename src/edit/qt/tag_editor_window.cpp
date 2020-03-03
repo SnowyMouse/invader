@@ -14,6 +14,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include "tag_tree_window.hpp"
 #include "tag_editor_widget.hpp"
+#include "tag_editor_edit_widget_view.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -62,30 +63,14 @@ namespace Invader::EditQt {
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
 
-        // Set up the scroll area
+        // Set up the scroll area and widgets
         auto *scroll_view = new QScrollArea(this);
         this->setCentralWidget(scroll_view);
-        auto *vbox_layout = new QVBoxLayout(scroll_view);
-        auto *full_widget = new QWidget(this);
-
-        auto values = new std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
-        for(auto &value : *values) {
-            auto *widget = TagEditorWidget::generate_widget(this, &value, this);
-            if(widget) {
-                widgets_to_remove.emplace_back(widget);
-                vbox_layout->addWidget(widget);
-            }
-        }
-
-        // Add a spacer so it doesn't try to evenly space everything if we're too big
-        auto *spacer = new QSpacerItem(0 ,0);
-        vbox_layout->addSpacerItem(spacer);
-        vbox_layout->setSpacing(2);
-        full_widget->setLayout(vbox_layout);
-        scroll_view->setWidget(full_widget);
+        auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
+        scroll_view->setWidget(new TagEditorEditWidgetView(this, values, this, true));
 
         // Lock the scroll view and window to a set width
-        int max_width = full_widget->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 50;
+        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 50;
 
         // Center this
         this->setGeometry(

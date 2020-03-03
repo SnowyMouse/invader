@@ -20,7 +20,6 @@ namespace Invader::EditQt {
          * @param parent        parent widget
          * @param value         struct value
          * @param editor_window editor window
-         * @param edit_widget   edit widget to use
          */
         TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
 
