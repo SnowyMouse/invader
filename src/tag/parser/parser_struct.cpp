@@ -84,6 +84,7 @@ namespace Invader::Parser {
         const char *       comment,
         void *             value,
         list_enum_fn_type  list_enum_fn,
+        list_enum_fn_type  list_enum_pretty_fn,
         read_enum_fn_type  read_enum_fn,
         write_enum_fn_type write_enum_fn
     ) : name(name),
@@ -92,6 +93,7 @@ namespace Invader::Parser {
         type(ValueType::VALUE_TYPE_ENUM),
         address(value),
         list_enum_fn(list_enum_fn),
+        list_enum_pretty_fn(list_enum_pretty_fn),
         read_enum_fn(read_enum_fn),
         write_enum_fn(write_enum_fn) {}
 
@@ -101,6 +103,7 @@ namespace Invader::Parser {
        const char *           comment,
        void *                 value,
        list_enum_fn_type      list_enum_fn,
+       list_enum_fn_type      list_enum_pretty_fn,
        read_bitfield_fn_type  read_bitfield_fn,
        write_bitfield_fn_type write_bitfield_fn
    ) : name(name),
@@ -109,6 +112,7 @@ namespace Invader::Parser {
        type(ValueType::VALUE_TYPE_BITMASK),
        address(value),
        list_enum_fn(list_enum_fn),
+       list_enum_pretty_fn(list_enum_pretty_fn),
        read_bitfield_fn(read_bitfield_fn),
        write_bitfield_fn(write_bitfield_fn) {}
 

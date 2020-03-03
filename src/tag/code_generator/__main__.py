@@ -34,12 +34,14 @@ for i in range(13, len(sys.argv)):
     # Get all enums, bitfields, and structs
     for s in objects:
         if s["type"] == "enum":
+            s["options_formatted"] = []
             for o in range(len(s["options"])):
-                s["options"][o] = make_name_fun(s["options"][o], True)
+                s["options_formatted"].append(make_name_fun(s["options"][o], True))
             all_enums.append(s)
         elif s["type"] == "bitfield":
+            s["fields_formatted"] = []
             for f in range(len(s["fields"])):
-                s["fields"][f] = make_name_fun(s["fields"][f], False)
+                s["fields_formatted"].append(make_name_fun(s["fields"][f], False))
             all_bitfields.append(s)
         elif s["type"] == "struct":
             for f in s["fields"]:

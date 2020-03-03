@@ -243,6 +243,14 @@ namespace Invader::Parser {
             return this->list_enum_fn();
         }
 
+        /**
+         * List all enum values with definition values
+         * @return all enum values
+         */
+        std::vector<const char *> list_enum_pretty() const noexcept {
+            return this->list_enum_pretty_fn();
+        }
+
         using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
         using get_array_size_fn_type = std::size_t (*)(const void *addr);
         using delete_objects_in_array_fn_type = void (*)(std::size_t index, std::size_t count, void *addr);
@@ -483,13 +491,14 @@ namespace Invader::Parser {
 
         /**
          * Instantiate a ParserStructValue with a TagEnum
-         * @param name          name of the value
-         * @param member_name   variable name of the value
-         * @param comment       comments
-         * @param value         pointer to value
-         * @param list_enum_fn  pointer to function for listing enums
-         * @param read_enum_fn  pointer to function for reading enums
-         * @param write_enum_fn pointer to function for writing enums
+         * @param name                 name of the value
+         * @param member_name          variable name of the value
+         * @param comment              comments
+         * @param value                pointer to value
+         * @param list_enum_fn         pointer to function for listing enums
+         * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
+         * @param read_enum_fn         pointer to function for reading enums
+         * @param write_enum_fn        pointer to function for writing enums
          */
         ParserStructValue(
             const char *       name,
@@ -497,26 +506,29 @@ namespace Invader::Parser {
             const char *       comment,
             void *             value,
             list_enum_fn_type  list_enum_fn,
+            list_enum_fn_type  list_enum_pretty_fn,
             read_enum_fn_type  read_enum_fn,
             write_enum_fn_type write_enum_fn
         );
 
         /**
          * Instantiate a ParserStructValue with a bitfield
-         * @param name              name of the value
-         * @param member_name       variable name of the value
-         * @param comment           comments
-         * @param value             pointer to value
-         * @param list_enum_fn      pointer to function for listing enums
-         * @param read_bitfield_fn  pointer to function for reading enums
-         * @param write_bitfield_fn pointer to function for writing enums
+         * @param name                 name of the value
+         * @param member_name          variable name of the value
+         * @param comment              comments
+         * @param value                pointer to value
+         * @param list_enum_fn         pointer to function for listing enums
+         * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
+         * @param read_bitfield_fn     pointer to function for reading enums
+         * @param write_bitfield_fn    pointer to function for writing enums
          */
         ParserStructValue(
-            const char *       name,
-            const char *       member_name,
-            const char *       comment,
-            void *             value,
-            list_enum_fn_type  list_enum_fn,
+            const char *           name,
+            const char *           member_name,
+            const char *           comment,
+            void *                 value,
+            list_enum_fn_type      list_enum_fn,
+            list_enum_fn_type      list_enum_pretty_fn,
             read_bitfield_fn_type  read_bitfield_fn,
             write_bitfield_fn_type write_bitfield_fn
         );
@@ -558,6 +570,7 @@ namespace Invader::Parser {
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
 
         list_enum_fn_type list_enum_fn = nullptr;
+        list_enum_fn_type list_enum_pretty_fn = nullptr;
         read_enum_fn_type read_enum_fn = nullptr;
         write_enum_fn_type write_enum_fn = nullptr;
         read_bitfield_fn_type read_bitfield_fn = nullptr;

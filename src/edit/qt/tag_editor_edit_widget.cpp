@@ -222,11 +222,16 @@ namespace Invader::EditQt {
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM: {
                     auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new QComboBox()).get());
-                    auto possible_values = value->list_enum();
 
+                    // Internal items
+                    auto possible_values = value->list_enum();
                     QStringList internal_items = QList<QString>(possible_values.data(), possible_values.data() + possible_values.size());
-                    combobox->addItems(internal_items);
                     combobox->setProperty(INTERNAL_VALUE, internal_items);
+
+                    // "Pretty" items
+                    auto pretty_values = value->list_enum_pretty();
+                    QStringList pretty_items = QList<QString>(pretty_values.data(), pretty_values.data() + pretty_values.size());
+                    combobox->addItems(pretty_items);
 
                     auto current_value = value->read_enum();
 
