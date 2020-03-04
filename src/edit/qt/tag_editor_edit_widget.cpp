@@ -374,6 +374,8 @@ namespace Invader::EditQt {
             list->setMaximumWidth(listWidth);
             list->setMinimumWidth(listWidth);
             connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
+            list->setFocusPolicy(Qt::NoFocus);
+            list->setSelectionMode(QAbstractItemView::NoSelection);
         }
 
         title_label->setMinimumWidth(label_width);
