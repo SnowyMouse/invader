@@ -219,6 +219,7 @@ namespace Invader::EditQt {
         }
 
         this->reflexive_index->setModel(this->item_model);
+        this->reflexive_index->setEnabled(count > 0);
 
         this->reflexive_index->setUpdatesEnabled(true);
         this->reflexive_index->blockSignals(false);

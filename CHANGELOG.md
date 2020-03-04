@@ -4,7 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Changed
-- invader-edit-qt: Improved styling
+- invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
 
 ### Fixed
