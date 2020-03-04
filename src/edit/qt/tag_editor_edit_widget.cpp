@@ -243,7 +243,7 @@ namespace Invader::EditQt {
                 case Parser::ParserStructValue::VALUE_TYPE_TAGDATAOFFSET: {
                     auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
                     textbox->setText(QString::number(value->get_data_size()));
-                    textbox->setReadOnly(true);
+                    textbox->setEnabled(false);
                     textbox->setMinimumWidth(3 * standard_width);
                     textbox->setMaximumWidth(textbox->minimumWidth());
                     layout->addWidget(textbox);
