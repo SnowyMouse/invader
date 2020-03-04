@@ -173,7 +173,8 @@
                 "name": "ripples",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentWaterRipple",
-                "compound": true
+                "compound": true,
+                "maximum": 4
             },
             {
                 "type": "pad",

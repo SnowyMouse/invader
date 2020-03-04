@@ -473,13 +473,15 @@
                 "name": "maps",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericMap",
-                "compound": true
+                "compound": true,
+                "maximum": 4
             },
             {
                 "name": "stages",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericStage",
-                "compound": true
+                "compound": true,
+                "maximum": 7
             }
         ],
         "type": "struct",

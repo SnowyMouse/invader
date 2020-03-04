@@ -221,7 +221,8 @@
                 "name": "maps",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
-                "compound": true
+                "compound": true,
+                "maximum": 4
             },
             {
                 "name": "extra flags",

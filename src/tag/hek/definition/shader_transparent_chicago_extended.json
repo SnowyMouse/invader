@@ -61,13 +61,15 @@
                 "name": "maps 4 stage",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
-                "compound": true
+                "compound": true,
+                "maximum": 4
             },
             {
                 "name": "maps 2 stage",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
-                "compound": true
+                "compound": true,
+                "maximum": 2
             },
             {
                 "name": "extra flags",
