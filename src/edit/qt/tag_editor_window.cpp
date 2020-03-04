@@ -40,6 +40,14 @@ namespace Invader::EditQt {
                 this->close();
                 return;
             }
+
+            if(this->parser_data->check_for_broken_enums(false)) {
+                char formatted_error[1024];
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to parse %s due to enumerators being out-of-bounds.\n\nThe tag appears to be corrupt.", tag_file.full_path.string().c_str());
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                this->close();
+                return;
+            }
         }
         else {
             this->make_dirty(true);

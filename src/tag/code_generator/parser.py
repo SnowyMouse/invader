@@ -8,8 +8,9 @@ from read_hek_file import make_parse_hek_tag_file
 from cache_deformat_data import make_cache_deformat
 from refactor_reference import make_refactor_reference
 from parser_struct import make_parser_struct
+from check_broken_enums import make_check_broken_enums
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -17,6 +18,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_cache_format_data.write(what)
         cpp_cache_deformat_data.write(what)
         cpp_struct_value.write(what)
+        cpp_check_broken_enums.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -105,6 +107,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_read_hek_data)
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden)
+        make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
         hpp.write("    private:\n")

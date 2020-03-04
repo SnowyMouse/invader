@@ -660,6 +660,13 @@ namespace Invader::Parser {
         static std::vector<TagClassInt> all_tag_classes(bool exclude_subclasses);
 
         /**
+         * Check for broken enums
+         * @param  reset_enums attempt to fix the enums by setting them to 0
+         * @return             true if broken enums were found; false if not
+         */
+        virtual bool check_for_broken_enums(bool reset_enums) = 0;
+
+        /**
          * Format the tag to be used in HEK tags.
          */
         virtual void cache_deformat() = 0;

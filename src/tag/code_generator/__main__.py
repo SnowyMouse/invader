@@ -7,8 +7,8 @@ import os
 from definition import make_definitions
 from parser import make_parser
 
-if len(sys.argv) < 14:
-    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <parser-struct-value.cpp> <bitfield.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
+if len(sys.argv) < 15:
+    print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <parser-struct-value.cpp> <parser-check-broken-enums.cpp> <bitfield.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
     sys.exit(1)
 
 files = []
@@ -16,9 +16,9 @@ all_enums = []
 all_bitfields = []
 all_structs = []
 
-extract_hidden = True if sys.argv[12].lower() == "on" else False
+extract_hidden = True if sys.argv[13].lower() == "on" else False
 
-for i in range(13, len(sys.argv)):
+for i in range(14, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
         name = name.replace(" ", "_").replace("'", "").replace("-","_")
         if not ignore_numbers and name[0].isnumeric():
@@ -111,8 +111,8 @@ def to_hex(number):
     return "0x{:X}".format(number)
 
 with open(sys.argv[1], "w") as f:
-    with open(sys.argv[10], "w") as bcpp:
-        with open(sys.argv[11], "w") as ecpp:
+    with open(sys.argv[11], "w") as bcpp:
+        with open(sys.argv[12], "w") as ecpp:
             make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arranged)
 
 with open(sys.argv[2], "w") as hpp:
@@ -123,4 +123,5 @@ with open(sys.argv[2], "w") as hpp:
                     with open(sys.argv[7], "w") as cpp_cache_deformat_data:
                         with open(sys.argv[8], "w") as cpp_refactor_reference:
                             with open(sys.argv[9], "w") as cpp_struct_value:
-                                make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value)
+                                with open(sys.argv[10], "w") as cpp_check_broken_enums:
+                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums)

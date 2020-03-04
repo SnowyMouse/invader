@@ -5,6 +5,9 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows
+- invader-edit-qt: Fixed out-of-bounds enums crashing. Instead, an error
+  message will appear. A tool will be released on a later date to resolve these
+  invalid values.
 
 ## [0.29.0] - 2020-03-04
 ### Added
