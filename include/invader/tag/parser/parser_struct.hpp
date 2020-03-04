@@ -176,6 +176,22 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get the minimum number of elements in the array
+         * @return minimum number of elements in array
+         */
+        std::size_t get_array_minimum_size() noexcept {
+            return this->min_array_size;
+        }
+
+        /**
+         * Get the maximum number of elements in the array
+         * @return maximum number of elements in array
+         */
+        std::size_t get_array_maximum_size() noexcept {
+            return this->max_array_size;
+        }
+
+        /**
          * Delete the objects in the array
          * @param index index of first object
          * @param count number of objects to delete
@@ -495,6 +511,8 @@ namespace Invader::Parser {
          * @param delete_objects_in_array_fn    pointer to function for deleting objects from an array
          * @param insert_objects_in_array_fn    pointer to function for inserting objects in an array
          * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array
+         * @param minimum_array_size            minimum number of elements in the array
+         * @param maximum_array_size            maximum number of elements in the array
          */
         ParserStructValue(
             const char *                        name,
@@ -505,7 +523,9 @@ namespace Invader::Parser {
             get_array_size_fn_type              get_array_size_fn,
             delete_objects_in_array_fn_type     delete_objects_in_array_fn,
             insert_objects_in_array_fn_type     insert_objects_in_array_fn,
-            duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn
+            duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
+            std::size_t                         minimum_array_size,
+            std::size_t                         maximum_array_size
         );
 
         /**
@@ -622,6 +642,9 @@ namespace Invader::Parser {
         write_enum_fn_type write_enum_fn = nullptr;
         read_bitfield_fn_type read_bitfield_fn = nullptr;
         write_bitfield_fn_type write_bitfield_fn = nullptr;
+
+        std::size_t min_array_size;
+        std::size_t max_array_size;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {

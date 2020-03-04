@@ -34,8 +34,11 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 cpp_struct_value.write("};\n");
                 cpp_struct_value.write("    values.emplace_back({}, {}_types, {});\n".format(first_arguments, member_name, classes_len))
         elif type == "TagReflexive":
+            minimum = 0 if not ("minimum" in struct) else struct["minimum"]
+            maximum = 0xFFFFFFFF if not ("maximum" in struct) else struct["maximum"]
+
             vstruct = "std::vector<{}>".format(struct["struct"])
-            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>);\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct))
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::get_object_in_array_template<{}>, ParserStructValue::get_array_size_template<{}>, ParserStructValue::delete_objects_in_array_template<{}>, ParserStructValue::insert_object_in_array_template<{}>, ParserStructValue::duplicate_object_in_array_template<{}>, {}, {});\n".format(first_arguments, vstruct, vstruct, vstruct, vstruct, vstruct, minimum, maximum))
         elif type == "TagDataOffset" or type == "TagString":
             cpp_struct_value.write("    values.emplace_back({});\n".format(first_arguments))
         elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":

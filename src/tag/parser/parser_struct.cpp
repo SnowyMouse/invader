@@ -44,7 +44,9 @@ namespace Invader::Parser {
         get_array_size_fn_type              get_array_size_fn,
         delete_objects_in_array_fn_type     delete_objects_in_array_fn,
         insert_objects_in_array_fn_type     insert_objects_in_array_fn,
-        duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn
+        duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
+        std::size_t                         minimum_array_size,
+        std::size_t                         maximum_array_size
     ) : name(name),
         member_name(member_name),
         comment(comment),
@@ -54,7 +56,9 @@ namespace Invader::Parser {
         get_array_size_fn(get_array_size_fn),
         delete_objects_in_array_fn(delete_objects_in_array_fn),
         insert_objects_in_array_fn(insert_objects_in_array_fn),
-        duplicate_objects_in_array_fn(duplicate_objects_in_array_fn) {}
+        duplicate_objects_in_array_fn(duplicate_objects_in_array_fn),
+        min_array_size(minimum_array_size),
+        max_array_size(maximum_array_size) {}
 
     ParserStructValue::ParserStructValue(
         const char *    name,
