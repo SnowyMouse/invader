@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-edit-qt: Improved styling
+- invader-edit-qt: Bitfields can no longer be highlighted
+
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows
 - invader-edit-qt: Fixed out-of-bounds enums crashing. Instead, an error
