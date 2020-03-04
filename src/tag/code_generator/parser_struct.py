@@ -46,14 +46,14 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 if type == b["name"]:
                     found = True
                     type = "{}Enum".format(type)
-                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::read_bitfield_template<HEK::{}, HEK::{}_from_string>, ParserStructValue::write_bitfield_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(b["fields"]), type, type, type, type))
+                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string_pretty, {}>, ParserStructValue::read_bitfield_template<HEK::{}, HEK::{}_from_string>, ParserStructValue::write_bitfield_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(b["fields_formatted"]), type, type, len(b["fields_formatted"]), type, type, type, type))
                     break
             if found:
                 continue
             for e in all_enums:
                 if type == e["name"]:
                     found = True
-                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(e["options"]), type, type, type, type))
+                    cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string_pretty, {}>, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>);\n".format(first_arguments, type, type, len(e["options_formatted"]), type, type, len(e["options_formatted"]), type, type, type, type))
                     break
             if found:
                 continue
@@ -62,7 +62,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             bounds = "true" if bounds_b else "false"
             count = 1 * (2 if bounds_b else 1)
 
-            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {});\n".format(first_arguments, type.upper(), count))
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {});\n".format(first_arguments, type.upper(), count, bounds))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")

@@ -28,6 +28,13 @@
     },
     {
         "name": "DeviceMachine",
+        "groups": [
+            {
+                "name": "Device Machine Data",
+                "description": "Device Machine attributes",
+                "first": "machine type"
+            }
+        ],
         "fields": [
             {
                 "name": "machine type",

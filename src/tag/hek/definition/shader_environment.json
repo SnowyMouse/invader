@@ -56,6 +56,13 @@
     },
     {
         "name": "ShaderEnvironment",
+        "groups": [
+            {
+                "name": "Shader Environment Data",
+                "description": "Shader Environment attributes",
+                "first": "shader environment flags"
+            }
+        ],
         "fields": [
             {
                 "name": "shader environment flags",

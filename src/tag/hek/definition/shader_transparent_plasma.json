@@ -1,6 +1,13 @@
 [
     {
         "name": "ShaderTransparentPlasma",
+        "groups": [
+            {
+                "name": "Shader Transparent Plasma Data",
+                "description": "Shader Transparent Plasma attributes",
+                "first": "intensity source"
+            }
+        ],
         "fields": [
             {
                 "type": "pad",

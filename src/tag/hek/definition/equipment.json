@@ -14,6 +14,13 @@
     },
     {
         "name": "Equipment",
+        "groups": [
+            {
+                "name": "Equipment Data",
+                "description": "Equipment attributes",
+                "first": "powerup type"
+            }
+        ],
         "fields": [
             {
                 "name": "powerup type",

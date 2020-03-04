@@ -19,6 +19,13 @@
     },
     {
         "name": "DeviceControl",
+        "groups": [
+            {
+                "name": "Device Control Data",
+                "description": "Device Control attributes",
+                "first": "type"
+            }
+        ],
         "fields": [
             {
                 "name": "type",

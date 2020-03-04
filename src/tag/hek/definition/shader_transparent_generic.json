@@ -413,6 +413,13 @@
     },
     {
         "name": "ShaderTransparentGeneric",
+        "groups": [
+            {
+                "name": "Shader Transparent Generic Data",
+                "description": "Shader Transparent Generic attributes",
+                "first": "numeric counter limit"
+            }
+        ],
         "fields": [
             {
                 "name": "numeric counter limit",

@@ -100,6 +100,13 @@
     },
     {
         "name": "Shader",
+        "groups": [
+            {
+                "name": "Shader Data",
+                "description": "Base shader attributes",
+                "first": "shader flags"
+            }
+        ],
         "fields": [
             {
                 "name": "shader flags",

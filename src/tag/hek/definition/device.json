@@ -23,6 +23,13 @@
     },
     {
         "name": "Device",
+        "groups": [
+            {
+                "name": "Device Data",
+                "description": "Base device attributes",
+                "first": "device flags"
+            }
+        ],
         "fields": [
             {
                 "name": "device flags",

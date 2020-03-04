@@ -1,6 +1,13 @@
 [
     {
         "name": "ShaderTransparentChicagoExtended",
+        "groups": [
+            {
+                "name": "Shader Transparent Chicago Extended Data",
+                "description": "This class is shit. Use shader_transparent_chicago instead.",
+                "first": "numeric counter limit"
+            }
+        ],
         "fields": [
             {
                 "name": "numeric counter limit",

@@ -530,6 +530,13 @@
     },
     {
         "name": "Weapon",
+        "groups": [
+            {
+                "name": "Weapon Data",
+                "description": "Weapon attributes",
+                "first": "weapon flags"
+            }
+        ],
         "fields": [
             {
                 "name": "weapon flags",

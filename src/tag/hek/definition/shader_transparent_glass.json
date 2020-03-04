@@ -21,6 +21,13 @@
     },
     {
         "name": "ShaderTransparentGlass",
+        "groups": [
+            {
+                "name": "Shader Transparent Glass Data",
+                "description": "Shader Transparent Glass attributes",
+                "first": "shader transparent glass flags"
+            }
+        ],
         "fields": [
             {
                 "name": "shader transparent glass flags",

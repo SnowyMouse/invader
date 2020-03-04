@@ -56,7 +56,6 @@ namespace Invader::Parser {
             VALUE_TYPE_MATRIX,
 
             // Other stuff
-            VALUE_TYPE_DATA,
             VALUE_TYPE_REFLEXIVE, // use templates for this maybe?
             VALUE_TYPE_DEPENDENCY,
             VALUE_TYPE_TAGSTRING,
@@ -92,10 +91,30 @@ namespace Invader::Parser {
         void get_values(Number *values) const noexcept;
 
         /**
+         * Get the values
+         * @return vector of values
+         */
+        std::vector<Number> get_values() const;
+
+        /**
          * Set the values
          * @param values values to read from; must point to at least get_value_count() values
          */
-        void set_values(const Number *values) const noexcept;
+        void set_values(const Number *values) noexcept;
+
+        /**
+         * Set the values
+         * @param values values to read from; must be at least get_value_count() values
+         */
+        void set_values(const std::vector<Number> &values) noexcept;
+
+        /**
+         * Get the dependency
+         * @return dependency
+         */
+        Dependency &get_dependency() noexcept {
+            return *reinterpret_cast<Dependency *>(this->address);
+        }
 
         /**
          * Get the value type used
@@ -111,6 +130,24 @@ namespace Invader::Parser {
          */
         const char *get_name() const noexcept {
             return this->name;
+        }
+
+        /**
+         * Get the string value
+         * @return string value
+         */
+        const char *get_string() const noexcept {
+            return reinterpret_cast<HEK::TagString *>(this->address)->string;
+        }
+
+        /**
+         * Set the string value
+         * @param string string value
+         */
+        void set_string(const char *string) {
+            auto &str_to_write = reinterpret_cast<HEK::TagString *>(this->address)->string;
+            std::fill(str_to_write, str_to_write + sizeof(str_to_write), 0);
+            std::strncpy(str_to_write, string, sizeof(str_to_write) - 1);
         }
 
         /**
@@ -199,11 +236,45 @@ namespace Invader::Parser {
         }
 
         /**
+         * Read the bitfield value
+         * @param  field field name
+         * @return value
+         */
+        bool read_bitfield(const char *field) const {
+            return this->read_bitfield_fn(field, address);
+        }
+
+        /**
+         * Read the bitfield value
+         * @param  field field name
+         * @param  value value name
+         */
+        void write_bitfield(const char *field, bool value) {
+            this->write_bitfield_fn(field, value, address);
+        }
+
+        /**
+         * Read the data size
+         * @return data size
+         */
+        std::size_t get_data_size() const noexcept {
+            return reinterpret_cast<const std::vector<std::byte> *>(this->address)->size();
+        }
+
+        /**
          * List all enum values
          * @return all enum values
          */
         std::vector<const char *> list_enum() const noexcept {
             return this->list_enum_fn();
+        }
+
+        /**
+         * List all enum values with definition values
+         * @return all enum values
+         */
+        std::vector<const char *> list_enum_pretty() const noexcept {
+            return this->list_enum_pretty_fn();
         }
 
         using get_object_in_array_fn_type = ParserStruct &(*)(std::size_t index, void *addr);
@@ -284,7 +355,7 @@ namespace Invader::Parser {
                 eprintf_error("Index is out of bounds %zu > %zu", index_to, size);
                 throw OutOfBoundsException();
             }
-            array.insert(array.begin() + index_from, count, typename T::value_type());
+            array.insert(array.begin() + index_to, count, typename T::value_type());
 
             // Copy things over, handling overlap
             std::vector<std::size_t> copied_indices(count);
@@ -314,6 +385,19 @@ namespace Invader::Parser {
             std::vector<const char *> out(count);
             for(std::size_t i = 0; i < count; i++) {
                 out[i] = convert_fn(static_cast<T>(i));
+            }
+            return out;
+        }
+
+        /**
+         * Return a list of all of the possible enums
+         * @return vector of all possible enums
+         */
+        template <typename T, const char *(*convert_fn)(T), std::size_t count>
+        static std::vector<const char *> list_bitmask_template() {
+            std::vector<const char *> out(count);
+            for(std::size_t i = 0; i < count; i++) {
+                out[i] = convert_fn(static_cast<T>(static_cast<std::size_t>(1) << i));
             }
             return out;
         }
@@ -446,13 +530,14 @@ namespace Invader::Parser {
 
         /**
          * Instantiate a ParserStructValue with a TagEnum
-         * @param name          name of the value
-         * @param member_name   variable name of the value
-         * @param comment       comments
-         * @param value         pointer to value
-         * @param list_enum_fn  pointer to function for listing enums
-         * @param read_enum_fn  pointer to function for reading enums
-         * @param write_enum_fn pointer to function for writing enums
+         * @param name                 name of the value
+         * @param member_name          variable name of the value
+         * @param comment              comments
+         * @param value                pointer to value
+         * @param list_enum_fn         pointer to function for listing enums
+         * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
+         * @param read_enum_fn         pointer to function for reading enums
+         * @param write_enum_fn        pointer to function for writing enums
          */
         ParserStructValue(
             const char *       name,
@@ -460,26 +545,29 @@ namespace Invader::Parser {
             const char *       comment,
             void *             value,
             list_enum_fn_type  list_enum_fn,
+            list_enum_fn_type  list_enum_pretty_fn,
             read_enum_fn_type  read_enum_fn,
             write_enum_fn_type write_enum_fn
         );
 
         /**
          * Instantiate a ParserStructValue with a bitfield
-         * @param name              name of the value
-         * @param member_name       variable name of the value
-         * @param comment           comments
-         * @param value             pointer to value
-         * @param list_enum_fn      pointer to function for listing enums
-         * @param read_bitfield_fn  pointer to function for reading enums
-         * @param write_bitfield_fn pointer to function for writing enums
+         * @param name                 name of the value
+         * @param member_name          variable name of the value
+         * @param comment              comments
+         * @param value                pointer to value
+         * @param list_enum_fn         pointer to function for listing enums
+         * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
+         * @param read_bitfield_fn     pointer to function for reading enums
+         * @param write_bitfield_fn    pointer to function for writing enums
          */
         ParserStructValue(
-            const char *       name,
-            const char *       member_name,
-            const char *       comment,
-            void *             value,
-            list_enum_fn_type  list_enum_fn,
+            const char *           name,
+            const char *           member_name,
+            const char *           comment,
+            void *                 value,
+            list_enum_fn_type      list_enum_fn,
+            list_enum_fn_type      list_enum_pretty_fn,
             read_bitfield_fn_type  read_bitfield_fn,
             write_bitfield_fn_type write_bitfield_fn
         );
@@ -521,6 +609,7 @@ namespace Invader::Parser {
         duplicate_objects_in_array_fn_type duplicate_objects_in_array_fn = nullptr;
 
         list_enum_fn_type list_enum_fn = nullptr;
+        list_enum_fn_type list_enum_pretty_fn = nullptr;
         read_enum_fn_type read_enum_fn = nullptr;
         write_enum_fn_type write_enum_fn = nullptr;
         read_bitfield_fn_type read_bitfield_fn = nullptr;
@@ -533,7 +622,7 @@ namespace Invader::Parser {
             }
 
             std::size_t size = array.size();
-            if(count >= size || index >= size || (index + count) > size) {
+            if(count > size || index >= size || (index + count) > size) {
                 eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count, size);
                 throw OutOfBoundsException();
             }
@@ -555,6 +644,20 @@ namespace Invader::Parser {
          * @return             parsed tag data
          */
         static std::unique_ptr<ParserStruct> parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);
+
+        /**
+         * Generate a tag base struct
+         * @param  tag_class tag class
+         * @return           a tag reference
+         */
+        static std::unique_ptr<ParserStruct> generate_base_struct(TagClassInt tag_class);
+
+        /**
+         * Get a vector of all tag classes
+         * @param  exclude_subclasses exclude all subclasses
+         * @return all tag classes
+         */
+        static std::vector<TagClassInt> all_tag_classes(bool exclude_subclasses);
 
         /**
          * Format the tag to be used in HEK tags.

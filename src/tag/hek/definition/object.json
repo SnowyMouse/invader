@@ -330,6 +330,14 @@
     },
     {
         "name": "Object",
+        "groups": [
+            {
+                "name": "Object Data",
+                "type": "Section",
+                "description": "Base object attributes",
+                "first": "object type"
+            }
+        ],
         "fields": [
             {
                 "name": "object type",

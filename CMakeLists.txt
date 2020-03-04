@@ -74,6 +74,7 @@ include(src/sound/sound.cmake)
 include(src/strip/strip.cmake)
 include(src/refactor/refactor.cmake)
 include(src/collection/collection.cmake)
+include(src/edit/qt/qt.cmake)
 
 # Install stuff
 install(
