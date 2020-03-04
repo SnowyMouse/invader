@@ -145,6 +145,7 @@ this project is split into different programs.
 - [invader-build]
 - [invader-compress]
 - [invader-dependency]
+- [invader-edit-qt]
 - [invader-extract]
 - [invader-font]
 - [invader-indexer]
@@ -378,6 +379,22 @@ Options:
   -P --fs-path                 Use a filesystem path for the tag.
   -r --recursive               Recursively get all depended tags.
   -R --reverse                 Find all tags that depend on the tag, instead.
+  -t --tags <dir>              Use the specified tags directory. Use multiple
+                               times to add more directories, ordered by
+                               precedence.
+```
+
+### invader-edit-qt
+This program edits tags in a Qt-based GUI.
+
+```
+Usage: invader-edit-qt [options]
+
+Edit tag files.
+
+Options:
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
@@ -716,11 +733,12 @@ behind closed groups and obfuscation as modding this game has been in the past.
 That is why Invader uses version 3 of the GNU GPL.
 
 ### Are there any GUI tools?
-Officially, none of these tools currently have graphical user interfaces. Some
-people have offered to make GUI versions of these tools, and it probably isn't
-difficult to make a GUI wrapper for these tools due to the nature of them.
+Officially, only one of these tools has a graphical user interface,
+invader-edit-qt. Some people have offered to make GUI versions of these tools,
+and it probably isn't difficult to make a GUI wrapper for these tools due to
+the simple nature of them.
 
-There are a few reasons why Invader officially has only command-line tools:
+There are a few reasons why Invader officially has mostly command-line tools:
 - Command-line tools require significantly less time to write and test.
 - Command-line tools require fewer dependencies (e.g. no Qt or GTK).
 - Command-line tools work well with scripts and shell commands.
@@ -836,6 +854,7 @@ for multiplayer maps.
 [invader-build]: #invader-build
 [invader-compress]: #invader-compress
 [invader-dependency]: #invader-dependency
+[invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract
 [invader-font]: #invader-font
 [invader-indexer]: #invader-indexer

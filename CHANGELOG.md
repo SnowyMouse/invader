@@ -2,8 +2,9 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.29.0] - 2020-03-04
 ### Added
+- invader-edit-qt: GUI tool for editing tags
 - invader-extract: Added partial support for Xbox maps
 - invader-info: Added partial support for Xbox maps
 
