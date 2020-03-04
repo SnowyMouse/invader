@@ -16,8 +16,7 @@ namespace Invader::EditQt {
 
         // Add a spacer so it doesn't try to evenly space everything if we're too big
         if(primary) {
-            auto *spacer = new QSpacerItem(0 ,0);
-            vbox_layout->addSpacerItem(spacer);
+            vbox_layout->addStretch(1);
         }
         else {
             this->setFrameStyle(QFrame::Panel | QFrame::Raised);
