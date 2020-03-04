@@ -6,9 +6,10 @@
 #include <invader/tag/parser/parser_struct.hpp>
 #include "tag_editor_widget.hpp"
 #include <QVBoxLayout>
+#include <QFrame>
 
 namespace Invader::EditQt {
-    class TagEditorEditWidgetView : public QWidget {
+    class TagEditorEditWidgetView : public QFrame {
         Q_OBJECT
 
     public:

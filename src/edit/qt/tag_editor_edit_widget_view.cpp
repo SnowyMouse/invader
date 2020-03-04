@@ -3,7 +3,7 @@
 #include "tag_editor_edit_widget_view.hpp"
 
 namespace Invader::EditQt {
-    TagEditorEditWidgetView::TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary) : QWidget(parent), values(values), editor_window(editor_window) {
+    TagEditorEditWidgetView::TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary) : QFrame(parent), values(values), editor_window(editor_window) {
         auto *vbox_layout = new QVBoxLayout();
         this->setLayout(vbox_layout);
 
@@ -19,6 +19,10 @@ namespace Invader::EditQt {
         if(primary) {
             auto *spacer = new QSpacerItem(0 ,0);
             vbox_layout->addSpacerItem(spacer);
+        }
+        else {
+            this->setFrameStyle(QFrame::Panel | QFrame::Raised);
+            this->setLineWidth(3);
         }
     }
 }
