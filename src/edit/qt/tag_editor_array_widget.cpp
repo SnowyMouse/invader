@@ -18,8 +18,7 @@ namespace Invader::EditQt {
     TagEditorArrayWidget::TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) : TagEditorWidget(parent, value, editor_window) {
         this->vbox_layout = new QVBoxLayout();
         this->reflexive_index = new QComboBox();
-        this->item_model = new QStandardItemModel(this->reflexive_index);
-        this->reflexive_index->setModel(this->item_model);
+        this->item_model = nullptr;
 
         // Set our header stuff
         QFrame *header = new QFrame();
@@ -205,11 +204,15 @@ namespace Invader::EditQt {
         this->reflexive_index->setUpdatesEnabled(false);
 
         // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
-        this->item_model->clear();
+        delete this->item_model;
+        this->item_model = new QStandardItemModel(this->reflexive_index);
+
         std::size_t count = this->get_struct_value()->get_array_size();
         for(std::size_t i = 0; i < count; i++) {
             this->item_model->appendRow(new QStandardItem(QString::number(i)));
         }
+
+        this->reflexive_index->setModel(this->item_model);
 
         this->reflexive_index->setUpdatesEnabled(true);
         this->reflexive_index->blockSignals(false);

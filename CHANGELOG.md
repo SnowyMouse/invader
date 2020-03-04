@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-edit-qt: Fixed a performance issue on Windows
+
 ## [0.29.0] - 2020-03-04
 ### Added
 - invader-edit-qt: GUI tool for editing tags
