@@ -66,7 +66,6 @@ namespace Invader::EditQt {
 
         bool perform_save();
         bool perform_save_as();
-        bool perform_refactor();
         File::TagFile file;
 
         Parser::ParserStruct *parser_data;

@@ -135,11 +135,6 @@ namespace Invader::EditQt {
         return false;
     }
 
-    bool TagEditorWindow::perform_refactor() {
-        std::fprintf(stderr, "TODO: perform_refactor()\n");
-        return false;
-    }
-
     void TagEditorWindow::make_dirty(bool dirty) {
         this->dirty = dirty;
         char title_bar[512];
