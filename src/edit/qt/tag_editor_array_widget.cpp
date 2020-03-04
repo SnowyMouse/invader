@@ -28,7 +28,7 @@ namespace Invader::EditQt {
         header_layout->addWidget(title_label);
         header_layout->addWidget(this->reflexive_index);
         header->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        header->setLineWidth(3);
+        header->setLineWidth(2);
         header_layout->setMargin(8);
         header_layout->setMargin(8);
         this->vbox_layout->setSpacing(0);

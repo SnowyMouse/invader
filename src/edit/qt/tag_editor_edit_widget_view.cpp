@@ -22,7 +22,7 @@ namespace Invader::EditQt {
         }
         else {
             this->setFrameStyle(QFrame::Panel | QFrame::Raised);
-            this->setLineWidth(3);
+            this->setLineWidth(2);
         }
     }
 }
