@@ -269,7 +269,7 @@ namespace Invader::EditQt {
     void TagTreeWindow::perform_open() {
         const auto *tag = this->tag_view->get_selected_tag();
         if(tag) {
-            this->open_tag(tag->full_path.c_str(), true);
+            this->open_tag(tag->full_path.string().c_str(), true);
         }
     }
 
