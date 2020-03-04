@@ -28,7 +28,6 @@ namespace Invader::EditQt {
 
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
         TagEditorWidget(parent, value, editor_window) {
-        this->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         int label_width = 300;
 
         auto *title_label = new QLabel(value->get_name());
@@ -40,7 +39,6 @@ namespace Invader::EditQt {
 
         auto *layout = new QHBoxLayout();
         layout->addWidget(title_label);
-        layout->setMargin(0);
         this->setLayout(layout);
 
         std::size_t value_index = 0;
@@ -384,6 +382,9 @@ namespace Invader::EditQt {
         for(auto *textbox_widget : this->textbox_widgets) {
             connect(textbox_widget, &QLineEdit::textEdited, this, &TagEditorEditWidget::on_change);
         }
+
+        layout->addStretch(1);
+        layout->setMargin(6);
     }
 
     void TagEditorEditWidget::on_change() {

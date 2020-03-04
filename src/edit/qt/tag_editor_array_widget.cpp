@@ -13,10 +13,13 @@
 #include <QLabel>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QApplication>
 
 namespace Invader::EditQt {
     TagEditorArrayWidget::TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) : TagEditorWidget(parent, value, editor_window) {
         this->vbox_layout = new QVBoxLayout();
+        this->vbox_layout->setMargin(8);
+        this->vbox_layout->setSpacing(2);
         this->reflexive_index = new QComboBox();
         this->item_model = nullptr;
 
@@ -34,7 +37,11 @@ namespace Invader::EditQt {
         header->setLineWidth(2);
         header_layout->setMargin(8);
         header_layout->setMargin(8);
-        this->vbox_layout->setSpacing(0);
+
+        QPalette palette;
+        header->setAutoFillBackground(true);
+        palette.setColor(QPalette::Window, QApplication::palette().color(QPalette::Light));
+        header->setPalette(palette);
 
         // Set size stuff
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -44,7 +51,6 @@ namespace Invader::EditQt {
         this->reflexive_index->setMinimumWidth(150);
         this->reflexive_index->setMaximumWidth(150);
         this->reflexive_index->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        this->vbox_layout->setMargin(0);
         title_label->setText(value->get_name());
 
         // Font stuff

@@ -3,7 +3,7 @@
 #ifndef INVADER__EDIT__QT__TAG_EDITOR_WIDGET_HPP
 #define INVADER__EDIT__QT__TAG_EDITOR_WIDGET_HPP
 
-#include <QWidget>
+#include <QFrame>
 
 namespace Invader::Parser {
     class ParserStructValue;
@@ -12,7 +12,7 @@ namespace Invader::Parser {
 namespace Invader::EditQt {
     class TagEditorWindow;
 
-    class TagEditorWidget : public QWidget {
+    class TagEditorWidget : public QFrame {
         Q_OBJECT
 
     public:

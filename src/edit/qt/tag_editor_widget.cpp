@@ -7,7 +7,7 @@
 #include "tag_editor_array_widget.hpp"
 
 namespace Invader::EditQt {
-    TagEditorWidget::TagEditorWidget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) : QWidget(parent), struct_value(struct_value), editor_window(editor_window) {}
+    TagEditorWidget::TagEditorWidget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) : QFrame(parent), struct_value(struct_value), editor_window(editor_window) {}
 
     TagEditorWidget *TagEditorWidget::generate_widget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) {
         switch(struct_value->get_type()) {
