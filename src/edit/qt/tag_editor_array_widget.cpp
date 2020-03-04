@@ -11,6 +11,8 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QStandardItemModel>
+#include <QStandardItem>
 
 namespace Invader::EditQt {
     TagEditorArrayWidget::TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) : TagEditorWidget(parent, value, editor_window) {
@@ -199,11 +201,15 @@ namespace Invader::EditQt {
     void TagEditorArrayWidget::regenerate_enum() {
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setUpdatesEnabled(false);
-        this->reflexive_index->clear();
+
+        // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
+        auto *model = new QStandardItemModel();
         std::size_t count = this->get_struct_value()->get_array_size();
         for(std::size_t i = 0; i < count; i++) {
-            this->reflexive_index->addItem(QString::number(i));
+            model->appendRow(new QStandardItem(QString::number(i)));
         }
+        this->reflexive_index->setModel(model);
+
         this->reflexive_index->setUpdatesEnabled(true);
         this->reflexive_index->blockSignals(false);
     }

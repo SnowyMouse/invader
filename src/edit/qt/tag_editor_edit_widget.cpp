@@ -8,6 +8,8 @@
 #include <QWheelEvent>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QStandardItemModel>
+#include <QStandardItem>
 #include "tag_editor_edit_widget.hpp"
 #include "tag_tree_window.hpp"
 #include "tag_tree_dialog.hpp"
@@ -208,10 +210,16 @@ namespace Invader::EditQt {
                     // Here's the combobox
                     auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new EnumComboBox()));
                     combobox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+
+                    // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
+                    auto *model = new QStandardItemModel();
                     auto &allowed_classes = value->get_allowed_classes();
-                    for(auto &c : allowed_classes) {
-                        combobox->addItem(HEK::tag_class_to_extension(c));
+                    std::size_t count = allowed_classes.size();
+                    for(std::size_t i = 0; i < count; i++) {
+                        model->appendRow(new QStandardItem(HEK::tag_class_to_extension(allowed_classes[i])));
                     }
+                    combobox->setModel(model);
+
                     layout->addWidget(combobox);
 
                     // Next, the textbox
@@ -254,8 +262,15 @@ namespace Invader::EditQt {
 
                     // "Pretty" items
                     auto pretty_values = value->list_enum_pretty();
-                    QStringList pretty_items = QList<QString>(pretty_values.data(), pretty_values.data() + pretty_values.size());
-                    combobox->addItems(pretty_items);
+
+                    // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
+                    auto *model = new QStandardItemModel();
+                    std::size_t count = pretty_values.size();
+                    for(std::size_t i = 0; i < count; i++) {
+                        model->appendRow(new QStandardItem(pretty_values[i]));
+                    }
+                    combobox->setModel(model);
+
                     combobox->setFocusPolicy(Qt::StrongFocus);
 
                     auto current_value = value->read_enum();
