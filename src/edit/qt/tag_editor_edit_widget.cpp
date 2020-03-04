@@ -295,6 +295,8 @@ namespace Invader::EditQt {
                     auto value_count = possible_values.size();
                     QStringList internal_items = QList<QString>(possible_values.data(), possible_values.data() + possible_values.size());
                     list->setProperty(INTERNAL_VALUE, internal_items);
+                    list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                    list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
                     // "Pretty" items
                     auto pretty_values = value->list_enum_pretty();
