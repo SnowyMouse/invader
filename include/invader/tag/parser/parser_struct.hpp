@@ -109,6 +109,14 @@ namespace Invader::Parser {
         void set_values(const std::vector<Number> &values) noexcept;
 
         /**
+         * Get the comment
+         * @return the comment
+         */
+        const char *get_comment() const noexcept {
+            return this->comment;
+        }
+
+        /**
          * Get the dependency
          * @return dependency
          */

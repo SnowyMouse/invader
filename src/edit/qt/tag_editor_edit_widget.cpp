@@ -28,6 +28,12 @@ namespace Invader::EditQt {
 
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
         TagEditorWidget(parent, value, editor_window) {
+
+        auto *comment = value->get_comment();
+        if(comment) {
+            this->setToolTip(comment);
+        }
+
         int label_width = 300;
 
         auto *title_label = new QLabel(value->get_name());
