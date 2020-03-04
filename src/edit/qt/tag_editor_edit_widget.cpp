@@ -394,7 +394,7 @@ namespace Invader::EditQt {
 
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_DEPENDENCY: {
                 // Get the dependency stuff
-                auto class_int = HEK::extension_to_tag_class(reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLatin1().data());
+                auto class_int = HEK::extension_to_tag_class(reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
                 auto path = reinterpret_cast<QLineEdit *>(this->widgets[1])->text();
 
                 // Set the dependency
@@ -499,7 +499,7 @@ namespace Invader::EditQt {
 
     void TagEditorEditWidget::open_dependency() {
         char path_to_open[1024];
-        std::snprintf(path_to_open, sizeof(path_to_open), "%s.%s", this->textbox_widgets[0]->text().toLatin1().data(), reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLatin1().data());
+        std::snprintf(path_to_open, sizeof(path_to_open), "%s.%s", this->textbox_widgets[0]->text().toLatin1().data(), reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
         this->get_editor_window()->get_parent_window()->open_tag(path_to_open, false);
     }
 }
