@@ -27,8 +27,6 @@ namespace Invader::EditQt {
         void on_change();
 
     private:
-        QLabel title_label;
-
         void place_textbox(int size, QLabel *prefix);
         std::vector<QWidget *> widgets;
         std::vector<QLineEdit *> textbox_widgets;

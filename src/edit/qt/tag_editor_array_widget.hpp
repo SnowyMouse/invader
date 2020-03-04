@@ -9,6 +9,7 @@ class QLineEdit;
 class QComboBox;
 class QPushButton;
 class QVBoxLayout;
+class QStandardItemModel;
 
 namespace Invader::EditQt {
     class TagEditorEditWidgetView;
@@ -50,6 +51,8 @@ namespace Invader::EditQt {
         QPushButton *clear_button;
         QPushButton *shift_up_button;
         QPushButton *shift_down_button;
+
+        QStandardItemModel *item_model;
     };
 }
 

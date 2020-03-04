@@ -27,17 +27,19 @@ namespace Invader::EditQt {
     };
 
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
-        TagEditorWidget(parent, value, editor_window),
-        title_label(value->get_name()) {
+        TagEditorWidget(parent, value, editor_window) {
         this->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         int label_width = 300;
-        int standard_width = this->title_label.fontMetrics().boundingRect("MMM").width();
+
+        auto *title_label = new QLabel(value->get_name());
+        int standard_width = title_label->fontMetrics().boundingRect("MMM").width();
         int prefix_label_width = standard_width * 3 / 5;
-        this->title_label.setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
-        this->title_label.setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+        title_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+        title_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
         auto *layout = new QHBoxLayout();
-        layout->addWidget(&this->title_label);
+        layout->addWidget(title_label);
         layout->setMargin(0);
         this->setLayout(layout);
 
@@ -213,7 +215,7 @@ namespace Invader::EditQt {
                     combobox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
                     // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
-                    auto *model = new QStandardItemModel();
+                    auto *model = new QStandardItemModel(combobox);
                     auto &allowed_classes = value->get_allowed_classes();
                     std::size_t count = allowed_classes.size();
                     if(count) {
@@ -268,7 +270,7 @@ namespace Invader::EditQt {
                     auto pretty_values = value->list_enum_pretty();
 
                     // Use a QStandardItemModel - it's a bit faster than adding directly, especially on Windows for whatever reason
-                    auto *model = new QStandardItemModel();
+                    auto *model = new QStandardItemModel(combobox);
                     std::size_t count = pretty_values.size();
                     for(std::size_t i = 0; i < count; i++) {
                         model->appendRow(new QStandardItem(pretty_values[i]));
@@ -376,8 +378,8 @@ namespace Invader::EditQt {
             connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
         }
 
-        this->title_label.setMinimumWidth(label_width);
-        this->title_label.setMaximumWidth(this->title_label.minimumWidth());
+        title_label->setMinimumWidth(label_width);
+        title_label->setMaximumWidth(title_label->minimumWidth());
 
         for(auto *textbox_widget : this->textbox_widgets) {
             connect(textbox_widget, &QLineEdit::textEdited, this, &TagEditorEditWidget::on_change);
