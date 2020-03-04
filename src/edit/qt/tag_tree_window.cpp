@@ -267,31 +267,57 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::perform_open() {
-        this->cleanup_windows();
-
         const auto *tag = this->tag_view->get_selected_tag();
         if(tag) {
-            for(auto &doc : this->open_documents) {
-                if(doc->get_file().full_path == tag->full_path) {
-                    doc->raise();
-                    QApplication::setActiveWindow(doc.get());
-                    return;
+            this->open_tag(tag->full_path.c_str(), true);
+        }
+    }
+
+    void TagTreeWindow::open_tag(const char *path, bool full_path) {
+        // See if we can figure out this path
+        File::TagFile tag;
+        if(full_path) {
+            for(auto &t : this->get_all_tags()) {
+                if(t.full_path == path) {
+                    tag = t;
+                    break;
                 }
             }
+        }
+        else {
+            auto preferred_path = File::halo_path_to_preferred_path(path);
+            for(auto &t : this->get_all_tags()) {
+                if(File::halo_path_to_preferred_path(t.tag_path) == path) {
+                    tag = t;
+                    break;
+                }
+            }
+        }
 
-            // Open; benchmark
-            auto start = std::chrono::steady_clock::now();
-            auto document = std::make_unique<TagEditorWindow>(this, this, *tag);
-            auto *window = document.get();
-            if(!window->is_successfully_opened()) {
-                document.release()->deleteLater();
+        // Clean some things up
+        this->cleanup_windows();
+
+        // Do we have it open already?
+        for(auto &doc : this->open_documents) {
+            if(doc->isVisible() && doc->get_file().full_path == tag.full_path) {
+                doc->raise();
+                QApplication::setActiveWindow(doc.get());
                 return;
             }
-            window->show();
-            this->open_documents.emplace_back(std::move(document));
-            auto end = std::chrono::steady_clock::now();
-            std::printf("Opened %s in %zu ms\n", tag->full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
         }
+
+        // Open; benchmark
+        auto start = std::chrono::steady_clock::now();
+        auto document = std::make_unique<TagEditorWindow>(this, this, tag);
+        auto *window = document.get();
+        if(!window->is_successfully_opened()) {
+            document.release()->deleteLater();
+            return;
+        }
+        window->show();
+        this->open_documents.emplace_back(std::move(document));
+        auto end = std::chrono::steady_clock::now();
+        std::printf("Opened %s in %zu ms\n", tag.full_path.string().c_str(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     }
 
     bool TagTreeWindow::perform_new() {

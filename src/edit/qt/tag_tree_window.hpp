@@ -60,6 +60,12 @@ namespace Invader::EditQt {
          */
         void refresh_view();
 
+        /**
+         * Attempt to open the tag with the given path
+         * @param path      path to open
+         * @param full_path this is the full path
+         */
+        void open_tag(const char *path, bool full_path);
 
         virtual void closeEvent(QCloseEvent *event);
         virtual void paintEvent(QPaintEvent *event);

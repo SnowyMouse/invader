@@ -494,6 +494,8 @@ namespace Invader::EditQt {
     }
 
     void TagEditorEditWidget::open_dependency() {
-        std::printf("TODO: open_dependency()\n");
+        char path_to_open[1024];
+        std::snprintf(path_to_open, sizeof(path_to_open), "%s.%s", this->textbox_widgets[0]->text().toLatin1().data(), reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLatin1().data());
+        this->get_editor_window()->get_parent_window()->open_tag(path_to_open, false);
     }
 }
