@@ -37,8 +37,8 @@ namespace Invader::EditQt {
         int label_width = 300;
 
         auto *title_label = new QLabel(value->get_name());
-        int standard_width = title_label->fontMetrics().boundingRect("MMM").width();
-        int prefix_label_width = standard_width * 3 / 5;
+        int standard_width = title_label->fontMetrics().boundingRect("MMMM").width();
+        int prefix_label_width = standard_width / 2;
 
         title_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -124,15 +124,15 @@ namespace Invader::EditQt {
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    add_single_textbox(11);
+                    add_single_textbox(8);
                     break;
 
                 // Some more complex stuff with multiple boxes
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
-                    add_single_textbox(2, "a:");
-                    add_single_textbox(2, "r:");
-                    add_single_textbox(2, "g:");
-                    add_single_textbox(2, "b:");
+                    add_single_textbox(1, "a:");
+                    add_single_textbox(1, "r:");
+                    add_single_textbox(1, "g:");
+                    add_single_textbox(1, "b:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                     add_single_textbox(2, "x:");
@@ -238,7 +238,7 @@ namespace Invader::EditQt {
                     layout->addWidget(combobox);
 
                     // Next, the textbox
-                    auto *textbox = add_single_textbox(11);
+                    auto *textbox = add_single_textbox(8);
 
                     // Next, get our thing
                     auto &dependency = value->get_dependency();
@@ -368,7 +368,7 @@ namespace Invader::EditQt {
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ENUM) {
             // Set up the enum
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0]);
-            int comboWidth = standard_width * 11;
+            int comboWidth = standard_width * 8;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
@@ -376,7 +376,7 @@ namespace Invader::EditQt {
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_BITMASK) {
             // Set the list up
             auto *list = reinterpret_cast<QListWidget *>(this->widgets[0]);
-            int listWidth = standard_width * 11;
+            int listWidth = standard_width * 8;
             list->setMaximumWidth(listWidth);
             list->setMinimumWidth(listWidth);
             connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
