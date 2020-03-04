@@ -805,16 +805,18 @@ namespace Invader::Parser {
         #undef DO_TAG_CLASS
     }
 
-    std::vector<TagClassInt> ParserStruct::all_tag_classes() {
+    std::vector<TagClassInt> ParserStruct::all_tag_classes(bool exclude_subclasses) {
         std::vector<TagClassInt> classes;
 
         #define DO_TAG_CLASS(class_struct, class_int) classes.emplace_back(TagClassInt::class_int);
         DO_BASED_ON_TAG_CLASS;
 
         // Remove subclasses
-        for(std::size_t i = 0; i < classes.size(); i++) {
-            if(classes[i] == TagClassInt::TAG_CLASS_ITEM || classes[i] == TagClassInt::TAG_CLASS_OBJECT || classes[i] == TagClassInt::TAG_CLASS_UNIT || classes[i] == TagClassInt::TAG_CLASS_DEVICE || classes[i] == TagClassInt::TAG_CLASS_SHADER) {
-                classes.erase(classes.begin() + i--);
+        if(!exclude_subclasses) {
+            for(std::size_t i = 0; i < classes.size(); i++) {
+                if(classes[i] == TagClassInt::TAG_CLASS_ITEM || classes[i] == TagClassInt::TAG_CLASS_OBJECT || classes[i] == TagClassInt::TAG_CLASS_UNIT || classes[i] == TagClassInt::TAG_CLASS_DEVICE || classes[i] == TagClassInt::TAG_CLASS_SHADER) {
+                    classes.erase(classes.begin() + i--);
+                }
             }
         }
 

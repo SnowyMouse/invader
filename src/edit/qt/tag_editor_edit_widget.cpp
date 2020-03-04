@@ -215,8 +215,16 @@ namespace Invader::EditQt {
                     auto *model = new QStandardItemModel();
                     auto &allowed_classes = value->get_allowed_classes();
                     std::size_t count = allowed_classes.size();
-                    for(std::size_t i = 0; i < count; i++) {
-                        model->appendRow(new QStandardItem(HEK::tag_class_to_extension(allowed_classes[i])));
+                    if(count) {
+                        for(std::size_t i = 0; i < count; i++) {
+                            model->appendRow(new QStandardItem(HEK::tag_class_to_extension(allowed_classes[i])));
+                        }
+                    }
+                    else {
+                        auto all_classes = Parser::ParserStruct::all_tag_classes(true);
+                        for(auto c : all_classes) {
+                            model->appendRow(new QStandardItem(HEK::tag_class_to_extension(c)));
+                        }
                     }
                     combobox->setModel(model);
 
@@ -230,12 +238,7 @@ namespace Invader::EditQt {
 
                     // Lastly, set the dependency
                     textbox->setText(Invader::File::halo_path_to_preferred_path(dependency.path).c_str());
-                    for(auto &c : allowed_classes) {
-                        if(c == dependency.tag_class_int) {
-                            combobox->setCurrentIndex(&c - allowed_classes.data());
-                            break;
-                        }
-                    }
+                    combobox->setCurrentText(HEK::tag_class_to_extension(dependency.tag_class_int));
 
                     break;
                 }

@@ -654,9 +654,10 @@ namespace Invader::Parser {
 
         /**
          * Get a vector of all tag classes
+         * @param  exclude_subclasses exclude all subclasses
          * @return all tag classes
          */
-        static std::vector<TagClassInt> all_tag_classes();
+        static std::vector<TagClassInt> all_tag_classes(bool exclude_subclasses);
 
         /**
          * Format the tag to be used in HEK tags.
