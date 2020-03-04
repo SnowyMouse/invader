@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Added partial support for Xbox maps
 
 ### Fixed
+- invader-bitmap: Fixed TIFFs without alpha being read as black
 - invader-build: Fixed incorrect CEA tag space limit being enforced
 
 ## [0.28.1] - 2020-02-25
