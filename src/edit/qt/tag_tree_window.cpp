@@ -38,8 +38,6 @@ namespace Invader::EditQt {
         new_document->setShortcut(QKeySequence::New);
         connect(new_document, &QAction::triggered, this, &TagTreeWindow::perform_new);
 
-        file_menu->addSeparator();
-
         auto *delete_tag = file_menu->addAction("Delete...");
         delete_tag->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
         delete_tag->setShortcut(QKeySequence::Delete);
