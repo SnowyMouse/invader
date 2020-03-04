@@ -116,6 +116,10 @@ namespace Invader::EditQt {
         );
     }
 
+    const std::vector<std::filesystem::path> &TagTreeWindow::get_tag_directories() const noexcept {
+        return this->paths;
+    }
+
     void TagTreeWindow::tag_count_changed(std::pair<std::mutex, std::size_t> *tag_count) {
         tag_count->first.lock();
         char tag_count_str[256];

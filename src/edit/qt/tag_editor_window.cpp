@@ -15,6 +15,7 @@
 #include "tag_tree_window.hpp"
 #include "tag_editor_widget.hpp"
 #include "tag_editor_edit_widget_view.hpp"
+#include "tag_tree_dialog.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -125,6 +126,7 @@ namespace Invader::EditQt {
         }
 
         event->setAccepted(accept);
+        // TODO: tell the main window that we're closing so it can free things sooner
     }
 
     bool TagEditorWindow::perform_save() {
@@ -144,7 +146,15 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save_as() {
-        std::fprintf(stderr, "TODO: perform_save_as()\n");
+        TagTreeDialog d(this, this->parent_window, this->file.tag_class_int);
+        if(d.exec() == QMessageBox::Accepted) {
+            this->file = *d.get_tag();
+            std::filesystem::create_directories(this->file.full_path.parent_path());
+            auto result = this->perform_save();
+            this->parent_window->reload_tags();
+            return result;
+        }
+
         return false;
     }
 

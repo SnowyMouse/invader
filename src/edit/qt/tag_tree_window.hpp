@@ -50,6 +50,12 @@ namespace Invader::EditQt {
         void set_tag_directories(const std::vector<std::filesystem::path> &directories);
 
         /**
+         * Get all tag directories
+         * @return tag directories
+         */
+        const std::vector<std::filesystem::path> &get_tag_directories() const noexcept;
+
+        /**
          * Get all of the tags available
          * @return all tags available
          */

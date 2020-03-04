@@ -10,7 +10,7 @@
 #include <QMessageBox>
 
 namespace Invader::EditQt {
-    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories) {
+    TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
@@ -86,7 +86,8 @@ namespace Invader::EditQt {
         QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
 
         for(std::size_t i = 0; i < all_tags_size; i++) {
-            if(all_tags_ignored[i]) {
+            bool hide = all_tags_ignored[i];
+            if(hide && !show_directories) {
                 continue;
             }
 
@@ -135,6 +136,11 @@ namespace Invader::EditQt {
                     }
                 }
 
+                // Bail early if we're hiding this
+                if(e + 1 == element_count && hide) {
+                    break;
+                }
+
                 // If we don't have it, make it
                 if(!found) {
                     auto *new_dir_item = new QTreeWidgetItem(QStringList(element.c_str()));
@@ -161,9 +167,13 @@ namespace Invader::EditQt {
             }
         }
 
+        this->resort_elements();
+    }
+
+    void TagTreeWidget::resort_elements() {
         auto less_than = [](QTreeWidgetItem *item_i, QTreeWidgetItem *item_j) {
-            bool i_is_dir = item_i->childCount() != 0;
-            bool j_is_dir = item_j->childCount() != 0;
+            bool i_is_dir = !item_i->data(0, Qt::UserRole).isValid();
+            bool j_is_dir = !item_j->data(0, Qt::UserRole).isValid();
 
             return !(j_is_dir && !i_is_dir) && ((i_is_dir && !j_is_dir) || (item_i->text(0).compare(item_j->text(0), Qt::CaseInsensitive) < 0));
         };
