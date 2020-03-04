@@ -40,6 +40,13 @@ namespace Invader::EditQt {
 
         file_menu->addSeparator();
 
+        auto *delete_tag = file_menu->addAction("Delete...");
+        delete_tag->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
+        delete_tag->setShortcut(QKeySequence::Delete);
+        connect(delete_tag, &QAction::triggered, this, &TagTreeWindow::perform_delete);
+
+        file_menu->addSeparator();
+
         auto *close_all_open = file_menu->addAction("Close all");
         close_all_open->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close_all_open, &QAction::triggered, this, &TagTreeWindow::close_all_open_tags);
@@ -326,8 +333,26 @@ namespace Invader::EditQt {
     }
 
     bool TagTreeWindow::perform_delete() {
-        std::fprintf(stderr, "TODO: perform_delete()\n");
-        return false;
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(!tag) {
+            return false;
+        }
+
+        // TODO: Show all tags that depend on this tag
+        char message_entire_text[512];
+        std::snprintf(message_entire_text, sizeof(message_entire_text), "Are you sure you want to delete \"%s\"?\n\nIf a tag depends on this tag, that tag may no longer function.", tag->full_path.string().c_str());
+        QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel, this);
+        switch(are_you_sure.exec()) {
+            case QMessageBox::Yes:
+                std::filesystem::remove(tag->full_path);
+                this->reload_tags();
+                return true;
+            case QMessageBox::Cancel:
+                return false;
+            default:
+                std::terminate();
+        }
+
     }
 
     bool TagTreeWindow::perform_refactor() {
@@ -350,22 +375,25 @@ namespace Invader::EditQt {
 
             right_click_menu.addSeparator();
 
+            auto *delete_tag = right_click_menu.addAction("Delete...");
+            delete_tag->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
+            delete_tag->setShortcut(QKeySequence::Delete);
+            connect(delete_tag, &QAction::triggered, this, &TagTreeWindow::perform_delete);
+
+            // Future functionality
+            /*
+            right_click_menu.addSeparator();
+
             auto *refactor = right_click_menu.addAction("Refactor...");
             refactor->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
             connect(refactor, &QAction::triggered, this, &TagTreeWindow::perform_refactor);
 
             right_click_menu.addSeparator();
 
-            auto *delete_tag = right_click_menu.addAction("Delete...");
-            delete_tag->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
-            delete_tag->setShortcut(QKeySequence::Delete);
-            connect(delete_tag, &QAction::triggered, this, &TagTreeWindow::perform_delete);
-
-            right_click_menu.addSeparator();
-
             auto *properties = right_click_menu.addAction("Properties...");
             properties->setIcon(QIcon::fromTheme(QStringLiteral("document-properties")));
             connect(properties, &QAction::triggered, this, &TagTreeWindow::show_properties);
+            */
 
             right_click_menu.exec(this->tag_view->mapToGlobal(point));
         }
