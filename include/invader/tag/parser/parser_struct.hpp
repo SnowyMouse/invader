@@ -646,6 +646,19 @@ namespace Invader::Parser {
         static std::unique_ptr<ParserStruct> parse_hek_tag_file(const std::byte *data, std::size_t data_size, bool postprocess = false);
 
         /**
+         * Generate a tag base struct
+         * @param  tag_class tag class
+         * @return           a tag reference
+         */
+        static std::unique_ptr<ParserStruct> generate_base_struct(TagClassInt tag_class);
+
+        /**
+         * Get a vector of all tag classes
+         * @return all tag classes
+         */
+        static std::vector<TagClassInt> all_tag_classes();
+
+        /**
          * Format the tag to be used in HEK tags.
          */
         virtual void cache_deformat() = 0;

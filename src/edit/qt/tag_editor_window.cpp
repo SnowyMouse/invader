@@ -18,25 +18,38 @@
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
-        this->make_dirty(false);
-
-        auto open_file = File::open_file(tag_file.full_path.string().c_str());
-        if(!open_file.has_value()) {
-            char formatted_error[1024];
-            std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s. Make sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
-            QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
-            this->close();
-            return;
+        // If we're loading an existing tag, open it and parse it
+        if(tag_file.tag_path.size() != 0) {
+            this->make_dirty(false);
+            auto open_file = File::open_file(tag_file.full_path.string().c_str());
+            if(!open_file.has_value()) {
+                char formatted_error[1024];
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s. Make sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                this->close();
+                return;
+            }
+            try {
+                this->parser_data = Parser::ParserStruct::parse_hek_tag_file(open_file->data(), open_file->size(), false).release();
+            }
+            catch(std::exception &e) {
+                char formatted_error[1024];
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s due to an exception error:\n\n%s", tag_file.full_path.string().c_str(), e.what());
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                this->close();
+                return;
+            }
         }
-        try {
-            this->parser_data = Parser::ParserStruct::parse_hek_tag_file(open_file->data(), open_file->size(), false).release();
-        }
-        catch(std::exception &e) {
-            char formatted_error[1024];
-            std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s due to an exception error:\n\n%s", tag_file.full_path.string().c_str(), e.what());
-            QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
-            this->close();
-            return;
+        else {
+            this->make_dirty(true);
+            this->parser_data = Parser::ParserStruct::generate_base_struct(tag_file.tag_class_int).release();
+            if(!this->parser_data) {
+                char formatted_error[1024];
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_class_int));
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                this->close();
+                return;
+            }
         }
 
         // Make and set our menu bar
