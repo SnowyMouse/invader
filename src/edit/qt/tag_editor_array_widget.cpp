@@ -229,14 +229,16 @@ namespace Invader::EditQt {
         auto *value = this->get_struct_value();
         std::size_t count = value->get_array_size();
         int index = this->current_index();
+        auto index_unsigned = static_cast<std::size_t>(index);
+        bool selection = index >= 0;
 
         auto min = value->get_array_minimum_size();
         auto max = value->get_array_maximum_size();
 
-        this->delete_button->setEnabled(index >= min);
+        this->delete_button->setEnabled(selection && index_unsigned >= min);
         this->clear_button->setEnabled(count > 0 && min == 0);
-        this->shift_down_button->setEnabled(index > 0);
-        this->shift_up_button->setEnabled(index >= 0 ? static_cast<std::size_t>(index) + 1 < count : false);
+        this->shift_down_button->setEnabled(selection && index_unsigned > 0);
+        this->shift_up_button->setEnabled(selection && index_unsigned + 1 < count);
         this->add_button->setEnabled(count < max);
         this->duplicate_button->setEnabled(index >= 0 && this->add_button->isEnabled());
     }
