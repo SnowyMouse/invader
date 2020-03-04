@@ -12,12 +12,14 @@
 #include <QCloseEvent>
 #include <QDesktopWidget>
 #include <QDesktopServices>
+#include <QInputDialog>
 #include <QThread>
 #include "tag_tree_window.hpp"
 #include "tag_tree_widget.hpp"
 #include "tag_tree_dialog.hpp"
 #include <invader/version.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/parser/parser.hpp>
 #include <QScreen>
 
 namespace Invader::EditQt {
@@ -330,7 +332,40 @@ namespace Invader::EditQt {
     }
 
     bool TagTreeWindow::perform_new() {
-        std::fprintf(stderr, "TODO: perform_new()\n");
+        // Start creating a new tag
+        QInputDialog dialog;
+        dialog.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+        QStringList items;
+        for(auto i : Parser::ParserStruct::all_tag_classes(false)) {
+            items.append(HEK::tag_class_to_extension(i));
+        }
+        dialog.setComboBoxItems(items);
+        dialog.setLabelText("Choose a class for the new tag");
+        dialog.setWindowTitle("New tag");
+
+        // If we got it, onwards!
+        if(dialog.exec() == QDialog::Accepted) {
+            std::fprintf(stderr, "TODO: perform_new()\n");
+
+            File::TagFile tag = {};
+            tag.tag_class_int = HEK::extension_to_tag_class(dialog.textValue().toLatin1().data());
+
+            // Create; benchmark
+            auto start = std::chrono::steady_clock::now();
+            auto document = std::make_unique<TagEditorWindow>(this, this, tag);
+            auto *window = document.get();
+            if(!window->is_successfully_opened()) {
+                document.release()->deleteLater();
+                return false;
+            }
+            window->show();
+            this->open_documents.emplace_back(std::move(document));
+            auto end = std::chrono::steady_clock::now();
+            std::printf("Created %s in %zu ms\n", dialog.textValue().toLatin1().data(), std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
+            return true;
+        }
+
         return false;
     }
 
@@ -342,7 +377,7 @@ namespace Invader::EditQt {
 
         // TODO: Show all tags that depend on this tag
         char message_entire_text[512];
-        std::snprintf(message_entire_text, sizeof(message_entire_text), "Are you sure you want to delete \"%s\"?\n\nIf a tag depends on this tag, that tag may no longer function.", tag->full_path.string().c_str());
+        std::snprintf(message_entire_text, sizeof(message_entire_text), "Are you sure you want to delete \"%s\"?\n\nIf a tag depends on this tag, then that tag may no longer function.", tag->full_path.string().c_str());
         QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel, this);
         switch(are_you_sure.exec()) {
             case QMessageBox::Yes:

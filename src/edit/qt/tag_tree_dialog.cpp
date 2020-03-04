@@ -120,6 +120,7 @@ namespace Invader::EditQt {
         // Ask for a directory
         QInputDialog dialog_ask;
         dialog_ask.setInputMode(QInputDialog::TextInput);
+        dialog_ask.setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
         dialog_ask.setLabelText("Enter the directory name");
         dialog_ask.setWindowTitle("New folder");
 

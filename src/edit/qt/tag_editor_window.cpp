@@ -105,7 +105,12 @@ namespace Invader::EditQt {
         bool accept;
         if(dirty) {
             char message_entire_text[512];
-            std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
+            if(this->file.tag_path.size() == 0) {
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This is a new %s file.\nDo you want to save your changes?", HEK::tag_class_to_extension(this->file.tag_class_int));
+            }
+            else {
+                std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
+            }
             QMessageBox are_you_sure(QMessageBox::Icon::Question, "Unsaved changes", message_entire_text, QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, this);
             switch(are_you_sure.exec()) {
                 case QMessageBox::Accepted:
