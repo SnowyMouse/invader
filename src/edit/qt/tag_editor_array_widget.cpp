@@ -156,14 +156,6 @@ namespace Invader::EditQt {
         std::printf("TODO: perform_shift_down()\n");
     }
 
-    /*
-
-    auto start = std::chrono::steady_clock::now();
-    auto end = std::chrono::steady_clock::now();
-    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::printf("Parse time: %zu ms\n", time);
-     */
-
     void TagEditorArrayWidget::regenerate_widget() {
         delete this->tag_view_widget;
 
