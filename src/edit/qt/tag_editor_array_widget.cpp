@@ -34,7 +34,6 @@ namespace Invader::EditQt {
         this->vbox_layout->setSpacing(0);
 
         // Set size stuff
-        this->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         title_label->setMinimumWidth(300);
         title_label->setMaximumWidth(300);
@@ -185,7 +184,6 @@ namespace Invader::EditQt {
         int index = this->current_index();
         std::size_t count = this->get_struct_value()->get_array_size();
         if(index < 0 || static_cast<std::size_t>(index) > count) {
-            this->resize_it_all();
             this->tag_view_widget = nullptr;
             return;
         }
@@ -195,7 +193,6 @@ namespace Invader::EditQt {
         auto &s = this->get_struct_value()->get_object_in_array(index_unsigned);
         this->tag_view_widget = new TagEditorEditWidgetView(nullptr, s.get_values(), this->get_editor_window(), false);
         this->vbox_layout->addWidget(this->tag_view_widget);
-        this->resize_it_all();
     }
 
     void TagEditorArrayWidget::regenerate_enum() {
@@ -217,12 +214,5 @@ namespace Invader::EditQt {
         this->shift_down_button->setEnabled(index > 0);
         this->shift_up_button->setEnabled(index >= 0 ? static_cast<std::size_t>(index) + 1 < count : false);
         this->duplicate_button->setEnabled(index >= 0);
-    }
-
-    void TagEditorArrayWidget::resize_it_all() {
-        this->adjustSize();
-        if(this->parentWidget()) {
-            this->parentWidget()->adjustSize();
-        }
     }
 }

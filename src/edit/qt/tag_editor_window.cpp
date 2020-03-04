@@ -65,6 +65,7 @@ namespace Invader::EditQt {
 
         // Set up the scroll area and widgets
         auto *scroll_view = new QScrollArea;
+        scroll_view->setWidgetResizable(true);
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
         this->setCentralWidget(scroll_view);
         auto *view = new TagEditorEditWidgetView(nullptr, values, this, true);

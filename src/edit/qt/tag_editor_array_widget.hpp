@@ -37,7 +37,6 @@ namespace Invader::EditQt {
         void regenerate_widget();
         void regenerate_enum();
         void set_buttons_enabled();
-        void resize_it_all();
 
         int current_index() const noexcept;
 
