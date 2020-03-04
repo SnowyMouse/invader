@@ -355,7 +355,7 @@ namespace Invader::Parser {
                 eprintf_error("Index is out of bounds %zu > %zu", index_to, size);
                 throw OutOfBoundsException();
             }
-            array.insert(array.begin() + index_from, count, typename T::value_type());
+            array.insert(array.begin() + index_to, count, typename T::value_type());
 
             // Copy things over, handling overlap
             std::vector<std::size_t> copied_indices(count);

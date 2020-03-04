@@ -149,7 +149,17 @@ namespace Invader::EditQt {
     }
 
     void TagEditorArrayWidget::perform_shift_up() {
-        std::printf("TODO: perform_shift_up()\n");
+        auto index = static_cast<std::size_t>(this->current_index());
+        this->get_struct_value()->duplicate_objects_in_array(index, index + 2, 1);
+        this->get_struct_value()->delete_objects_in_array(index, 1);
+
+        this->regenerate_enum();
+        this->value_changed();
+
+        this->reflexive_index->blockSignals(true);
+        this->reflexive_index->setCurrentIndex(index + 1);
+        this->reflexive_index->blockSignals(false);
+        this->regenerate_widget();
     }
 
     void TagEditorArrayWidget::perform_shift_down() {
