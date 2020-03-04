@@ -130,6 +130,10 @@ namespace Invader::EditQt {
     }
 
     bool TagEditorWindow::perform_save() {
+        if(this->file.tag_path.size() == 0) {
+            return this->perform_save_as();
+        }
+
         // Save; benchmark
         auto start = std::chrono::steady_clock::now();
         auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
@@ -160,9 +164,15 @@ namespace Invader::EditQt {
 
     void TagEditorWindow::make_dirty(bool dirty) {
         this->dirty = dirty;
+
         char title_bar[512];
-        const char *asterisk = dirty ? " *" : "";
-        std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.tag_path.c_str(), asterisk);
+        if(this->file.tag_path.size() == 0) {
+            std::snprintf(title_bar, sizeof(title_bar), "Untitled %s", HEK::tag_class_to_extension(this->file.tag_class_int));
+        }
+        else {
+            const char *asterisk = dirty ? " *" : "";
+            std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.tag_path.c_str(), asterisk);
+        }
         this->setWindowTitle(title_bar);
     }
 
