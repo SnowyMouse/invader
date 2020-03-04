@@ -121,7 +121,7 @@ namespace Invader::EditQt {
             }
             QMessageBox are_you_sure(QMessageBox::Icon::Question, "Unsaved changes", message_entire_text, QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, this);
             switch(are_you_sure.exec()) {
-                case QMessageBox::Accepted:
+                case QMessageBox::Save:
                     accept = this->perform_save();
                     break;
                 case QMessageBox::Cancel:
@@ -144,6 +144,7 @@ namespace Invader::EditQt {
 
     bool TagEditorWindow::perform_save() {
         if(this->file.tag_path.size() == 0) {
+            printf("CHU!\n");
             return this->perform_save_as();
         }
 
