@@ -56,9 +56,16 @@ namespace Invader {
         TIFFGetField(image_tiff, TIFFTAG_IMAGEWIDTH, &image_width);
         TIFFGetField(image_tiff, TIFFTAG_IMAGELENGTH, &image_height);
 
-        // Force associated alpha so alpha doesn't get multiplied in TIFFReadRGBAImageOriented
-        uint16_t ua[] = { EXTRASAMPLE_ASSOCALPHA };
-        TIFFSetField(image_tiff, TIFFTAG_EXTRASAMPLES, 1, ua);
+        // Force associated alpha if we have alpha so alpha doesn't get multiplied in TIFFReadRGBAImageOriented
+        std::uint16_t count;
+        std::uint16_t *attributes;
+        int defined = TIFFGetField(image_tiff, TIFFTAG_EXTRASAMPLES, &count, &attributes);
+        if(defined && count == 1) {
+            if(*attributes == EXTRASAMPLE_UNASSALPHA) {
+                std::uint16_t new_value = EXTRASAMPLE_ASSOCALPHA;
+                TIFFSetField(image_tiff, TIFFTAG_EXTRASAMPLES, 1, &new_value);
+            }
+        }
 
         // Read it all
         image_size = image_width * image_height * sizeof(Invader::ColorPlatePixel);
