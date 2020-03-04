@@ -86,6 +86,7 @@ namespace Invader::EditQt {
                 }
                 else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_TAGSTRING) {
                     textbox->setText(value->get_string());
+                    textbox->setMaxLength(sizeof(HEK::TagString::string) - 1);
                 }
 
                 value_index++;
