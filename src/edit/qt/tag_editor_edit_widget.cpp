@@ -207,6 +207,7 @@ namespace Invader::EditQt {
                 case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY: {
                     // Here's the combobox
                     auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new EnumComboBox()));
+                    combobox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
                     auto &allowed_classes = value->get_allowed_classes();
                     for(auto &c : allowed_classes) {
                         combobox->addItem(HEK::tag_class_to_extension(c));
@@ -244,6 +245,7 @@ namespace Invader::EditQt {
 
                 case Parser::ParserStructValue::VALUE_TYPE_ENUM: {
                     auto *combobox = reinterpret_cast<QComboBox *>(widgets_array.emplace_back(new EnumComboBox()));
+                    combobox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
                     // Internal items
                     auto possible_values = value->list_enum();

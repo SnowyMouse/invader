@@ -37,6 +37,7 @@ namespace Invader::EditQt {
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         title_label->setMinimumWidth(300);
         title_label->setMaximumWidth(300);
+        this->reflexive_index->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
         this->reflexive_index->setMinimumWidth(150);
         this->reflexive_index->setMaximumWidth(150);
         this->reflexive_index->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -197,11 +198,13 @@ namespace Invader::EditQt {
 
     void TagEditorArrayWidget::regenerate_enum() {
         this->reflexive_index->blockSignals(true);
+        this->reflexive_index->setUpdatesEnabled(false);
         this->reflexive_index->clear();
         std::size_t count = this->get_struct_value()->get_array_size();
         for(std::size_t i = 0; i < count; i++) {
             this->reflexive_index->addItem(QString::number(i));
         }
+        this->reflexive_index->setUpdatesEnabled(true);
         this->reflexive_index->blockSignals(false);
     }
 
