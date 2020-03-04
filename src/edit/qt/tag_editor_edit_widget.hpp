@@ -34,6 +34,7 @@ namespace Invader::EditQt {
         std::vector<QLineEdit *> textbox_widgets;
         void verify_dependency_path();
         void find_dependency();
+        void open_dependency();
     };
 }
 

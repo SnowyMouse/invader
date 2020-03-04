@@ -117,7 +117,7 @@ namespace Invader::EditQt {
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    add_single_textbox(12);
+                    add_single_textbox(11);
                     break;
 
                 // Some more complex stuff with multiple boxes
@@ -223,7 +223,7 @@ namespace Invader::EditQt {
                     layout->addWidget(combobox);
 
                     // Next, the textbox
-                    auto *textbox = add_single_textbox(12);
+                    auto *textbox = add_single_textbox(11);
 
                     // Next, get our thing
                     auto &dependency = value->get_dependency();
@@ -337,22 +337,28 @@ namespace Invader::EditQt {
         }
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
             // Set up dependency stuff
-            this->verify_dependency_path();
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0]);
             int comboWidth = combobox->fontMetrics().boundingRect("shader_transparent_chicago_extended").width() * 5 / 4;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
 
-            auto *button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Find...")));
-            layout->addWidget(button);
+            auto *find_button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Find...")));
+            layout->addWidget(find_button);
+            connect(find_button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
 
-            connect(button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
+            auto *open_button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Open...")));
+            layout->addWidget(open_button);
+            connect(open_button, &QPushButton::clicked, this, &TagEditorEditWidget::open_dependency);
+
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+
+            // Verify it's all there
+            this->verify_dependency_path();
         }
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ENUM) {
             // Set up the enum
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0]);
-            int comboWidth = standard_width * 12;
+            int comboWidth = standard_width * 11;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
             connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
@@ -360,7 +366,7 @@ namespace Invader::EditQt {
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_BITMASK) {
             // Set the list up
             auto *list = reinterpret_cast<QListWidget *>(this->widgets[0]);
-            int listWidth = standard_width * 12;
+            int listWidth = standard_width * 11;
             list->setMaximumWidth(listWidth);
             list->setMinimumWidth(listWidth);
             connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
@@ -462,7 +468,7 @@ namespace Invader::EditQt {
             }
         }
 
-        // Get the path
+        // Color based on if we found it or it's empty, or we didn't find it
         auto *textbox = textbox_widgets[0];
         if(found) {
             textbox->setStyleSheet("");
@@ -470,6 +476,9 @@ namespace Invader::EditQt {
         else {
             textbox->setStyleSheet("color: #FF0000");
         }
+
+        // Set our button as enabled
+        this->widgets[3]->setEnabled(found && preferred_path != "");
     }
 
     void TagEditorEditWidget::find_dependency() {
@@ -482,5 +491,9 @@ namespace Invader::EditQt {
             reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_class_to_extension(tag_val.tag_class_int));
             this->on_change();
         }
+    }
+
+    void TagEditorEditWidget::open_dependency() {
+        std::printf("TODO: open_dependency()\n");
     }
 }
