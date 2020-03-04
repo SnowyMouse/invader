@@ -4,13 +4,12 @@
 
 namespace Invader::EditQt {
     TagEditorEditWidgetView::TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary) : QFrame(parent), values(values), editor_window(editor_window) {
-        auto *vbox_layout = new QVBoxLayout();
+        auto *vbox_layout = new QVBoxLayout(this);
         this->setLayout(vbox_layout);
 
         for(auto &value : this->values) {
-            auto *widget = TagEditorWidget::generate_widget(this, &value, editor_window);
+            auto *widget = TagEditorWidget::generate_widget(nullptr, &value, editor_window);
             if(widget) {
-                widgets_to_remove.emplace_back(widget);
                 vbox_layout->addWidget(widget);
             }
         }

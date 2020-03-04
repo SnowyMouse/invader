@@ -622,7 +622,7 @@ namespace Invader::Parser {
             }
 
             std::size_t size = array.size();
-            if(count >= size || index >= size || (index + count) > size) {
+            if(count > size || index >= size || (index + count) > size) {
                 eprintf_error("Range is out of bounds (%zu + %zu) > %zu", index, count, size);
                 throw OutOfBoundsException();
             }

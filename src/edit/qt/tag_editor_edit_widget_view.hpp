@@ -24,7 +24,6 @@ namespace Invader::EditQt {
 
     private:
         std::vector<Parser::ParserStructValue> values;
-        std::vector<std::unique_ptr<QWidget>> widgets_to_remove;
         TagEditorWindow *editor_window;
     };
 }

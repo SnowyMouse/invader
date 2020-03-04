@@ -7,6 +7,7 @@
 
 class QLineEdit;
 class QComboBox;
+class QPushButton;
 class QVBoxLayout;
 
 namespace Invader::EditQt {
@@ -35,10 +36,21 @@ namespace Invader::EditQt {
     private:
         void regenerate_widget();
         void regenerate_enum();
+        void set_buttons_enabled();
+        void resize_it_all();
+
+        int current_index() const noexcept;
 
         TagEditorEditWidgetView *tag_view_widget = nullptr;
         QComboBox *reflexive_index;
         QVBoxLayout *vbox_layout;
+
+        QPushButton *add_button;
+        QPushButton *duplicate_button;
+        QPushButton *delete_button;
+        QPushButton *clear_button;
+        QPushButton *shift_up_button;
+        QPushButton *shift_down_button;
     };
 }
 

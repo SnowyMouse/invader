@@ -64,10 +64,11 @@ namespace Invader::EditQt {
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
 
         // Set up the scroll area and widgets
-        auto *scroll_view = new QScrollArea(this);
-        this->setCentralWidget(scroll_view);
+        auto *scroll_view = new QScrollArea;
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
-        scroll_view->setWidget(new TagEditorEditWidgetView(this, values, this, true));
+        this->setCentralWidget(scroll_view);
+        auto *view = new TagEditorEditWidgetView(nullptr, values, this, true);
+        scroll_view->setWidget(view);
 
         // Lock the scroll view and window to a set width
         int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 50;
