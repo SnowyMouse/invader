@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
+- invader-edit-qt: Limits for certain tags are enforced
 
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows
