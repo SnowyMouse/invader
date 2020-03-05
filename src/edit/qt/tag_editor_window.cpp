@@ -93,7 +93,7 @@ namespace Invader::EditQt {
         scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true));
 
         // Lock the scroll view and window to a set width
-        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 50;
+        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 16;
 
         // Center this
         this->setGeometry(

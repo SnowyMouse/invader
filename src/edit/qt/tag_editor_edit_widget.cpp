@@ -34,11 +34,10 @@ namespace Invader::EditQt {
             this->setToolTip(comment);
         }
 
-        int label_width = 300;
-
         auto *title_label = new QLabel(value->get_name());
         int standard_width = title_label->fontMetrics().boundingRect("MMMM").width();
         int prefix_label_width = standard_width / 2;
+        int label_width = standard_width * 7;
 
         title_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
