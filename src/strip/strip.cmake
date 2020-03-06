@@ -4,7 +4,7 @@ if(NOT DEFINED ${INVADER_STRIP})
     set(INVADER_STRIP true CACHE BOOL "Build invader-strip (strips hidden values from tags)")
 endif()
 
-if(${INVADER_STRING})
+if(${INVADER_STRIP})
     add_executable(invader-strip
         src/strip/strip.cpp
     )
