@@ -75,6 +75,7 @@ include(src/strip/strip.cmake)
 include(src/refactor/refactor.cmake)
 include(src/collection/collection.cmake)
 include(src/edit/qt/qt.cmake)
+include(src/bludgeon/bludgeon.cmake)
 
 # Install stuff
 install(

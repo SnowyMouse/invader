@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- New tool: invader-bludgeon - Tool that convinces tags to work with Invader
+
 ### Changed
 - invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
