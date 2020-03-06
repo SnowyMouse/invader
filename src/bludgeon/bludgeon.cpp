@@ -40,16 +40,16 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
         tool.exe) */
-    REFINERMEME_MODEL_MARKERS           = 1ull << 61,
+    REFINERY_MODEL_MARKERS              = 1ull << 61,
 
     /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation - why the
         fuck was this made off by default????) */
-    REFINERMEME_VERTICES                = 1ull << 62,
+    REFINERY_VERTICES                   = 1ull << 62,
 
     /** Make sound tags that were truncated by Refinery' "safe mode" bullshit valid again (basically Refinery turns
         perfectly valid tags into invalid tags BY DEFAULT; this is a longstanding issue that's been ignored - see
         https://github.com/Sigmmma/refinery/issues/13) */
-    REFINERMEME_SOUND_PERMUTATIONS      = 1ull << 63,
+    REFINERY_SOUND_PERMUTATIONS         = 1ull << 63,
 
     /** Attempt to unfuck anything that can be unfucked (you can unscrew a lightbulb; you can't unscrew a Halo tag) */
     EVERYTHING                          = ~0ull
@@ -61,9 +61,9 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define BULLSHIT_ESCHATON_REFERENCES_FIX "invalid-references"
 #define BULLSHIT_SOUND_FORMAT_FIX "invalid-sound-format"
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
-#define REFINERMEME_MODEL_MARKERS_FIX "invalid-model-markers"
-#define REFINERMEME_VERTICES_FIX "invalid-vertices"
-#define REFINERMEME_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
+#define REFINERY_MODEL_MARKERS_FIX "invalid-model-markers"
+#define REFINERY_VERTICES_FIX "invalid-vertices"
+#define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define EVERYTHING_FIX "everything"
 
 static bool bullshit_enums(Invader::Parser::ParserStruct *s, bool fix) {
@@ -182,17 +182,17 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], POWER_OF_FUCK_YOU_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::POWER_OF_FUCK_YOU;
                 }
-                else if(std::strcmp(arguments[0], REFINERMEME_MODEL_MARKERS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERMEME_MODEL_MARKERS;
+                else if(std::strcmp(arguments[0], REFINERY_MODEL_MARKERS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_MODEL_MARKERS;
                 }
-                else if(std::strcmp(arguments[0], REFINERMEME_MODEL_MARKERS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERMEME_MODEL_MARKERS;
+                else if(std::strcmp(arguments[0], REFINERY_MODEL_MARKERS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_MODEL_MARKERS;
                 }
-                else if(std::strcmp(arguments[0], REFINERMEME_VERTICES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERMEME_VERTICES;
+                else if(std::strcmp(arguments[0], REFINERY_VERTICES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_VERTICES;
                 }
-                else if(std::strcmp(arguments[0], REFINERMEME_SOUND_PERMUTATIONS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERMEME_SOUND_PERMUTATIONS;
+                else if(std::strcmp(arguments[0], REFINERY_SOUND_PERMUTATIONS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_SOUND_PERMUTATIONS;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;
