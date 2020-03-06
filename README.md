@@ -142,6 +142,7 @@ this project is split into different programs.
     - [Block-compressed bitmap formats]
     - [More bitmap formats]
     - [Which bitmap format should I use?]
+- [invader-bludgeon]
 - [invader-build]
 - [invader-compress]
 - [invader-dependency]
@@ -306,6 +307,26 @@ explicit on dxt3, thus dxt3 works better for things that need definite shape
 such as HUD backgrounds. It will result in banding on gradients, however. dxt5
 compresses alpha to be interpolated like the color, so it works better for
 more things than dxt3.
+
+### invader-bludgeon
+This program convinces tags to work with Invader.
+
+```
+Usage: invader-bludgeon [options] <-a | tag.class>
+
+Convinces tags to work with Invader.
+
+Options:
+  -a --all                     Bludgeon all tags in the tags directory.
+  -h --help                    Show this list of options.
+  -i --info                    Show license and credits.
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
+  -t --tags <dir>              Use the specified tags directory.
+  -T --type                    Type of bludgeoning. Can be: invalid-enums,
+                               invalid-model-markers, none, everything
+                               (default: none)
+```
 
 ### invader-build
 This program builds cache files.
@@ -851,6 +872,7 @@ for multiplayer maps.
 
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
+[invader-bludgeon]: #invader-bludgeon
 [invader-build]: #invader-build
 [invader-compress]: #invader-compress
 [invader-dependency]: #invader-dependency
