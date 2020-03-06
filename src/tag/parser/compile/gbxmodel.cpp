@@ -2,6 +2,7 @@
 
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/tag/hek/class/gbxmodel.hpp>
 
 namespace Invader::Parser {
     void GBXModel::postprocess_hek_data() {
@@ -582,5 +583,23 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation %s has an index that is out of range (%lu >= %zu)", this->name.string, permutation_number, static_cast<std::size_t>(NULL_INDEX));
             }
         }
+    }
+
+    void Invader::Parser::GBXModel::post_cache_deformat() {
+        this->flags.blend_shared_normals = 0; // prevent generational loss
+
+        HEK::uncache_model_markers(*this);
+
+        float super_low = this->super_low_detail_cutoff;
+        float low = this->low_detail_cutoff;
+        float high = this->high_detail_cutoff;
+        float super_high = this->super_high_detail_cutoff;
+
+        this->super_low_detail_cutoff = super_high;
+        this->low_detail_cutoff = high;
+        this->high_detail_cutoff = low;
+        this->super_high_detail_cutoff = super_low;
+
+        this->postprocess_hek_data();
     }
 }

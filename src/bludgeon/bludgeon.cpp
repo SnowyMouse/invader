@@ -9,6 +9,7 @@
 #include <invader/tag/hek/definition.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/tag/hek/class/gbxmodel.hpp>
 #include <invader/file/file.hpp>
 
 enum WaysToFuckUpTheTag : std::uint64_t {
@@ -70,6 +71,18 @@ static bool bullshit_enums(Invader::Parser::ParserStruct *s, bool fix) {
     return s->check_for_broken_enums(fix);
 }
 
+static bool refinery_model_markers(Invader::Parser::ParserStruct *s, bool fix, const Invader::HEK::TagFileHeader *header) {
+    bool return_value = false;
+    if(header->tag_class_int == Invader::TagClassInt::TAG_CLASS_GBXMODEL) {
+        auto *model = dynamic_cast<Invader::Parser::GBXModel *>(s);
+        return_value = model->markers.size() != 0;
+        if(return_value && fix) {
+            Invader::HEK::uncache_model_markers(*model);
+        }
+    }
+    return return_value;
+}
+
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
     // Open the tag
     auto tag = Invader::File::open_file(file_path);
@@ -92,11 +105,18 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
                 oprintf_success_warn("%s: invalid enums detected; fix with " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
+            if(refinery_model_markers(parsed_data.get(), false, header)) {
+                oprintf_success_warn("%s: invalid model markers detected; fix with " REFINERY_MODEL_MARKERS_FIX, file_path);
+                issues_present = true;
+            }
         }
         else {
-            // Detect bullshit enums
             if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed %s", file_path, BULLSHIT_ENUMS_FIX);
+                issues_present = true;
+            }
+            if((fixes & REFINERY_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true, header)) {
+                oprintf_success("%s: Fixed %s", file_path, REFINERY_MODEL_MARKERS_FIX);
                 issues_present = true;
             }
         }
@@ -137,7 +157,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " REFINERY_MODEL_MARKERS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
