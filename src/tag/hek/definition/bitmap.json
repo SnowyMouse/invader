@@ -75,7 +75,9 @@
             "64x64",
             "128x128",
             "256x256",
-            "512x512"
+            "512x512",
+            "1024x1024",
+            "2048x2048"
         ],
         "type": "enum"
     },
@@ -100,7 +102,8 @@
             "v16u16",
             "unused",
             "make it actually work",
-            "external"
+            "external",
+            "(invader) use Xbox channel order"
         ],
         "width": 16
     },
@@ -112,12 +115,13 @@
             "disable height map compression",
             "uniform sprite sequences",
             "filthy sprite bug fix",
-            "invader nearest mipmap alpha",
-            "invader nearest mipmap alpha and color",
-            "invader dither alpha",
-            "invader dither red",
-            "invader dither green",
-            "invader dither blue"
+            "(invader) nearest mipmap alpha",
+            "(invader) nearest mipmap alpha and color",
+            "(invader) dither alpha",
+            "(invader) dither red",
+            "(invader) dither green",
+            "(invader) dither blue",
+            "(invader) use Xbox channel order"
         ],
         "width": 16
     },

@@ -7,6 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader
 
 ### Changed
+- invader-bitmap: Added support for 16K sprite plates
+- invader-bitmap: Added support for 1K and 2K budgets for sprites
 - invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
 - invader-edit-qt: Limits for certain tags are enforced

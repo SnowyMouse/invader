@@ -1362,7 +1362,7 @@ namespace Invader {
         std::uint32_t max_budget = parameters.sprite_budget;
         std::uint32_t max_sheet_count = parameters.sprite_budget_count;
         if(max_sheet_count == 0) {
-            max_budget = 2048;
+            max_budget = 16384;
             max_sheet_count = 1;
         }
 

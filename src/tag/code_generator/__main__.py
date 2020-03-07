@@ -20,7 +20,7 @@ extract_hidden = True if sys.argv[13].lower() == "on" else False
 
 for i in range(14, len(sys.argv)):
     def make_name_fun(name, ignore_numbers):
-        name = name.replace(" ", "_").replace("'", "").replace("-","_")
+        name = name.replace(" ", "_").replace("'", "").replace("-","_").replace("(","").replace(")","")
         if not ignore_numbers and name[0].isnumeric():
             name = "_{}".format(name)
         return name

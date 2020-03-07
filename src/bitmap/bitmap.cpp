@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
-    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, or 512. Default (new tag): 32", "<length>");
+    options.emplace_back("budget", 'B', 1, "Set max length of sprite sheet. Can be 32, 64, 128, 256, 512, 1024, or 2048. Default (new tag): 32", "<length>");
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. This will not work with stock Halo. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
@@ -278,6 +278,8 @@ int main(int argc, char *argv[]) {
                     case 128:
                     case 256:
                     case 512:
+                    case 1024:
+                    case 2048:
                         break;
                     default:
                         eprintf_error("Invalid sprite budget %u.", bitmap_options.sprite_budget.value());
@@ -641,6 +643,12 @@ int main(int argc, char *argv[]) {
             break;
         case 512:
             bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_512X512;
+            break;
+        case 1024:
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_1024X1024;
+            break;
+        case 2048:
+            bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_2048X2048;
             break;
         default:
             bitmap_tag_data.sprite_budget_size = BitmapSpriteBudgetSize::BITMAP_SPRITE_BUDGET_SIZE_32X32;
