@@ -52,6 +52,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         pre_compile = "pre_compile" in s and s["pre_compile"]
         post_compile = "post_compile" in s and s["post_compile"]
         postprocess_hek_data = "postprocess_hek_data" in s and s["postprocess_hek_data"]
+        read_only = "read_only" in s and s["read_only"]
         private_functions = post_cache_deformat
 
         hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
@@ -106,7 +107,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_read_hek_data)
-        make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden)
+        make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only)
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))

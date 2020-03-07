@@ -12,6 +12,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
 - invader-edit-qt: Limits for certain tags are enforced
+- invader-edit-qt: Some elements have been marked as read-only. This isn't as
+  restrictive as Guerilla, but there are some elements that, if edited, will
+  likely lead to the tag not working in invader-build or Halo
 
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows

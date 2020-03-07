@@ -62,34 +62,47 @@ namespace Invader::EditQt {
 
         // Buttons
         this->add_button = new QPushButton("Add");
-        connect(this->add_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_add);
         header_layout->addWidget(this->add_button);
         this->add_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->delete_button = new QPushButton("Delete");
-        connect(this->delete_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_delete);
         header_layout->addWidget(this->delete_button);
         this->delete_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->duplicate_button = new QPushButton("Duplicate");
-        connect(this->duplicate_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_duplicate);
         header_layout->addWidget(this->duplicate_button);
         this->duplicate_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->shift_up_button = new QPushButton("Shift Up");
-        connect(this->shift_up_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_up);
         header_layout->addWidget(this->shift_up_button);
         this->shift_up_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->shift_down_button = new QPushButton("Shift Down");
-        connect(this->shift_down_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_down);
         header_layout->addWidget(this->shift_down_button);
         this->shift_down_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->clear_button = new QPushButton("Clear");
-        connect(this->clear_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_clear);
         header_layout->addWidget(this->clear_button);
         this->clear_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+        // If we're read only, disable buttons
+        if(value->is_read_only()) {
+            this->add_button->setEnabled(false);
+            this->delete_button->setEnabled(false);
+            this->duplicate_button->setEnabled(false);
+            this->shift_up_button->setEnabled(false);
+            this->shift_down_button->setEnabled(false);
+            this->clear_button->setEnabled(false);
+        }
+        // Otherwise, connect things
+        else {
+            connect(this->add_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_add);
+            connect(this->delete_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_delete);
+            connect(this->duplicate_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_duplicate);
+            connect(this->shift_up_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_up);
+            connect(this->shift_down_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_down);
+            connect(this->clear_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_clear);
+        }
 
         // Set this stuff up
         this->regenerate_enum();
@@ -228,6 +241,12 @@ namespace Invader::EditQt {
 
     void TagEditorArrayWidget::set_buttons_enabled() {
         auto *value = this->get_struct_value();
+
+        // If we're read only, don't bother
+        if(value->is_read_only()) {
+            return;
+        }
+
         std::size_t count = value->get_array_size();
         int index = this->current_index();
         auto index_unsigned = static_cast<std::size_t>(index);

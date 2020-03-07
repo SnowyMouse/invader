@@ -483,6 +483,14 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get whether the value is read only or not
+         * @return true if value is read only
+         */
+        bool is_read_only() const noexcept {
+            return this->read_only;
+        }
+
+        /**
          * Instantiate a ParserStructValue with a dependency
          * @param name            name of the dependency
          * @param member_name     variable name of the dependency
@@ -490,6 +498,7 @@ namespace Invader::Parser {
          * @param dependency      pointer to the dependency
          * @param allowed_classes array of allowed classes
          * @param count           number of allowed classes in array
+         * @param read_only       value is read only
          */
         ParserStructValue(
             const char *       name,
@@ -497,7 +506,8 @@ namespace Invader::Parser {
             const char *       comment,
             Dependency *       dependency,
             const TagClassInt *allowed_classes,
-            std::size_t        count
+            std::size_t        count,
+            bool               read_only
         );
 
         /**
@@ -513,6 +523,7 @@ namespace Invader::Parser {
          * @param duplicate_objects_in_array_fn pointer to function for duplicating objects in an array
          * @param minimum_array_size            minimum number of elements in the array
          * @param maximum_array_size            maximum number of elements in the array
+         * @param read_only                     value is read only
          */
         ParserStructValue(
             const char *                        name,
@@ -525,7 +536,8 @@ namespace Invader::Parser {
             insert_objects_in_array_fn_type     insert_objects_in_array_fn,
             duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
             std::size_t                         minimum_array_size,
-            std::size_t                         maximum_array_size
+            std::size_t                         maximum_array_size,
+            bool                                read_only
         );
 
         /**
@@ -534,12 +546,14 @@ namespace Invader::Parser {
          * @param member_name variable name of the value
          * @param comment     comments
          * @param string      pointer to string
+         * @param read_only   value is read only
          */
         ParserStructValue(
             const char *    name,
             const char *    member_name,
             const char *    comment,
-            HEK::TagString *string
+            HEK::TagString *string,
+            bool            read_only
         );
 
         /**
@@ -548,12 +562,14 @@ namespace Invader::Parser {
          * @param member_name variable name of the value
          * @param comment     comments
          * @param string      pointer to string
+         * @param read_only   value is read only
          */
         ParserStructValue(
             const char *            name,
             const char *            member_name,
             const char *            comment,
-            std::vector<std::byte> *offset
+            std::vector<std::byte> *offset,
+            bool                    read_only
         );
 
         /**
@@ -566,6 +582,7 @@ namespace Invader::Parser {
          * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
          * @param read_enum_fn         pointer to function for reading enums
          * @param write_enum_fn        pointer to function for writing enums
+         * @param read_only            value is read only
          */
         ParserStructValue(
             const char *       name,
@@ -575,7 +592,8 @@ namespace Invader::Parser {
             list_enum_fn_type  list_enum_fn,
             list_enum_fn_type  list_enum_pretty_fn,
             read_enum_fn_type  read_enum_fn,
-            write_enum_fn_type write_enum_fn
+            write_enum_fn_type write_enum_fn,
+            bool               read_only
         );
 
         /**
@@ -588,6 +606,7 @@ namespace Invader::Parser {
          * @param list_enum_pretty_fn  pointer to function for listing enums with definition naming
          * @param read_bitfield_fn     pointer to function for reading enums
          * @param write_bitfield_fn    pointer to function for writing enums
+         * @param read_only            value is read only
          */
         ParserStructValue(
             const char *           name,
@@ -597,7 +616,8 @@ namespace Invader::Parser {
             list_enum_fn_type      list_enum_fn,
             list_enum_fn_type      list_enum_pretty_fn,
             read_bitfield_fn_type  read_bitfield_fn,
-            write_bitfield_fn_type write_bitfield_fn
+            write_bitfield_fn_type write_bitfield_fn,
+            bool                   read_only
         );
 
         /**
@@ -609,6 +629,7 @@ namespace Invader::Parser {
          * @param type        type of value
          * @param count       number of values (if multiple values or bounds)
          * @param bounds      whether or not this is bounds
+         * @param read_only   value is read only
          */
         ParserStructValue(
             const char *name,
@@ -617,7 +638,8 @@ namespace Invader::Parser {
             void *      object,
             ValueType   type,
             std::size_t count = 1,
-            bool        bounds = false
+            bool        bounds = false,
+            bool        read_only = false
         );
 
     private:
@@ -645,6 +667,8 @@ namespace Invader::Parser {
 
         std::size_t min_array_size;
         std::size_t max_array_size;
+
+        bool read_only = false;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {

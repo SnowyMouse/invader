@@ -11,13 +11,15 @@ namespace Invader::Parser {
         const char *       comment,
         Dependency *       dependency,
         const TagClassInt *allowed_classes,
-        std::size_t        count
+        std::size_t        count,
+        bool               read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
         type(ValueType::VALUE_TYPE_DEPENDENCY),
         address(dependency),
-        allowed_classes(allowed_classes, allowed_classes + count) {}
+        allowed_classes(allowed_classes, allowed_classes + count),
+        read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
         const char *name,
@@ -26,14 +28,16 @@ namespace Invader::Parser {
         void *      object,
         ValueType   type,
         std::size_t count,
-        bool        bounds
+        bool        bounds,
+        bool        read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
         type(type),
         address(object),
         count(count),
-        bounds(bounds) {}
+        bounds(bounds),
+        read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
         const char *                        name,
@@ -46,7 +50,8 @@ namespace Invader::Parser {
         insert_objects_in_array_fn_type     insert_objects_in_array_fn,
         duplicate_objects_in_array_fn_type  duplicate_objects_in_array_fn,
         std::size_t                         minimum_array_size,
-        std::size_t                         maximum_array_size
+        std::size_t                         maximum_array_size,
+        bool                                read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
@@ -58,29 +63,34 @@ namespace Invader::Parser {
         insert_objects_in_array_fn(insert_objects_in_array_fn),
         duplicate_objects_in_array_fn(duplicate_objects_in_array_fn),
         min_array_size(minimum_array_size),
-        max_array_size(maximum_array_size) {}
+        max_array_size(maximum_array_size),
+        read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
         const char *    name,
         const char *    member_name,
         const char *    comment,
-        HEK::TagString *string
+        HEK::TagString *string,
+        bool            read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
         type(ValueType::VALUE_TYPE_TAGSTRING),
-        address(string) {}
+        address(string),
+        read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
         const char *            name,
         const char *            member_name,
         const char *            comment,
-        std::vector<std::byte> *offset
+        std::vector<std::byte> *offset,
+        bool                    read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
         type(ValueType::VALUE_TYPE_TAGDATAOFFSET),
-        address(offset) {}
+        address(offset),
+        read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
         const char *       name,
@@ -90,7 +100,8 @@ namespace Invader::Parser {
         list_enum_fn_type  list_enum_fn,
         list_enum_fn_type  list_enum_pretty_fn,
         read_enum_fn_type  read_enum_fn,
-        write_enum_fn_type write_enum_fn
+        write_enum_fn_type write_enum_fn,
+        bool               read_only
     ) : name(name),
         member_name(member_name),
         comment(comment),
@@ -99,7 +110,8 @@ namespace Invader::Parser {
         list_enum_fn(list_enum_fn),
         list_enum_pretty_fn(list_enum_pretty_fn),
         read_enum_fn(read_enum_fn),
-        write_enum_fn(write_enum_fn) {}
+        write_enum_fn(write_enum_fn),
+        read_only(read_only) {}
 
    ParserStructValue::ParserStructValue(
        const char *           name,
@@ -109,7 +121,8 @@ namespace Invader::Parser {
        list_enum_fn_type      list_enum_fn,
        list_enum_fn_type      list_enum_pretty_fn,
        read_bitfield_fn_type  read_bitfield_fn,
-       write_bitfield_fn_type write_bitfield_fn
+       write_bitfield_fn_type write_bitfield_fn,
+       bool                   read_only
    ) : name(name),
        member_name(member_name),
        comment(comment),
@@ -118,7 +131,8 @@ namespace Invader::Parser {
        list_enum_fn(list_enum_fn),
        list_enum_pretty_fn(list_enum_pretty_fn),
        read_bitfield_fn(read_bitfield_fn),
-       write_bitfield_fn(write_bitfield_fn) {}
+       write_bitfield_fn(write_bitfield_fn),
+       read_only(read_only) {}
 
     ParserStructValue::NumberFormat ParserStructValue::get_number_format() const noexcept {
         if(this->type < ValueType::VALUE_TYPE_FLOAT) {

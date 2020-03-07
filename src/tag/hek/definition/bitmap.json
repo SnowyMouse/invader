@@ -161,7 +161,8 @@
             }
         ],
         "type": "struct",
-        "size": 32
+        "size": 32,
+        "read_only": true
     },
     {
         "name": "BitmapGroupSequence",
@@ -192,7 +193,8 @@
             }
         ],
         "type": "struct",
-        "size": 64
+        "size": 64,
+        "read_only": true
     },
     {
         "name": "BitmapData",
@@ -273,7 +275,8 @@
         "type": "struct",
         "size": 48,
         "pre_compile": true,
-        "unsafe_to_dedupe": true
+        "unsafe_to_dedupe": true,
+        "read_only": true
     },
     {
         "name": "Bitmap",
@@ -317,24 +320,28 @@
             {
                 "name": "color plate width",
                 "type": "uint16",
-                "non_cached": true
+                "non_cached": true,
+                "read_only": true
             },
             {
                 "name": "color plate height",
                 "type": "uint16",
-                "non_cached": true
+                "non_cached": true,
+                "read_only": true
             },
             {
                 "name": "compressed color plate data",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "read_only": true
             },
             {
                 "name": "processed pixel data",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "read_only": true
             },
             {
                 "name": "blur filter size",
@@ -365,14 +372,16 @@
                 "type": "TagReflexive",
                 "struct": "BitmapGroupSequence",
                 "compound": true,
-                "maximum": 65534
+                "maximum": 65534,
+                "read_only": true
             },
             {
                 "name": "bitmap data",
                 "type": "TagReflexive",
                 "struct": "BitmapData",
                 "compound": true,
-                "maximum": 65534
+                "maximum": 65534,
+                "read_only": true
             }
         ],
         "type": "struct",

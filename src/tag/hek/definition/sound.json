@@ -98,7 +98,8 @@
             {
                 "name": "name",
                 "type": "TagString",
-                "endian": null
+                "endian": null,
+                "read_only": true
             },
             {
                 "name": "skip fraction",
@@ -111,11 +112,13 @@
             },
             {
                 "name": "format",
-                "type": "SoundFormat"
+                "type": "SoundFormat",
+                "read_only": true
             },
             {
                 "name": "next permutation index",
-                "type": "Index"
+                "type": "Index",
+                "read_only": true
             },
             {
                 "name": "samples pointer",
@@ -138,7 +141,8 @@
                 "name": "buffer size",
                 "type": "uint32",
                 "comment": "this is the buffer size used to hold (and, for Vorbis, decompress) the 16-bit PCM data (unused in Xbox ADPCM)",
-                "endian": "little"
+                "endian": "little",
+                "read_only": true
             },
             {
                 "name": "tag id 1",
@@ -153,17 +157,20 @@
                 "compound": true,
                 "file_offset": true,
                 "external_file_offset": "sounds.map",
-                "compile_ignore": true
+                "compile_ignore": true,
+                "read_only": true
             },
             {
                 "name": "mouth data",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "subtitle data",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "read_only": true
             }
         ],
         "type": "struct",
@@ -193,7 +200,8 @@
             },
             {
                 "name": "actual permutation count",
-                "type": "uint16"
+                "type": "uint16",
+                "read_only": true
             },
             {
                 "type": "pad",
@@ -221,7 +229,8 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "SoundPermutation",
-                "compound": true
+                "compound": true,
+                "read_only": true
             }
         ],
         "type": "struct",
@@ -370,7 +379,8 @@
                 "name": "pitch ranges",
                 "type": "TagReflexive",
                 "struct": "SoundPitchRange",
-                "compound": true
+                "compound": true,
+                "read_only": true
             }
         ],
         "type": "struct",

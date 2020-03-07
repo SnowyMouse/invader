@@ -34,6 +34,8 @@ namespace Invader::EditQt {
             this->setToolTip(comment);
         }
 
+        bool read_only = value->is_read_only();
+
         auto *title_label = new QLabel(value->get_name());
         int standard_width = title_label->fontMetrics().boundingRect("MMMM").width();
         int prefix_label_width = standard_width / 2;
@@ -52,8 +54,8 @@ namespace Invader::EditQt {
 
         auto &textbox_widgets = this->textbox_widgets;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width]() {
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width](int size, const char *prefix = nullptr) -> QLineEdit * {
+        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only]() {
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
 
@@ -92,6 +94,10 @@ namespace Invader::EditQt {
                 else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_TAGSTRING) {
                     textbox->setText(value->get_string());
                     textbox->setMaxLength(sizeof(HEK::TagString::string) - 1);
+                }
+
+                if(read_only) {
+                    textbox->setEnabled(false);
                 }
 
                 value_index++;
@@ -353,13 +359,20 @@ namespace Invader::EditQt {
 
             auto *find_button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Find...")));
             layout->addWidget(find_button);
-            connect(find_button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
 
             auto *open_button = reinterpret_cast<QPushButton *>(widgets_array.emplace_back(new QPushButton("Open...")));
             layout->addWidget(open_button);
             connect(open_button, &QPushButton::clicked, this, &TagEditorEditWidget::open_dependency);
 
-            connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+            // For read-only stuff, disable the find button and combobox
+            if(read_only) {
+                combobox->setEnabled(false);
+                find_button->setEnabled(false);
+            }
+            else {
+                connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+                connect(find_button, &QPushButton::clicked, this, &TagEditorEditWidget::find_dependency);
+            }
 
             // Verify it's all there
             this->verify_dependency_path();
@@ -370,7 +383,14 @@ namespace Invader::EditQt {
             int comboWidth = standard_width * 8;
             combobox->setMaximumWidth(comboWidth);
             combobox->setMinimumWidth(comboWidth);
-            connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+
+            // Block enum from being set if read only
+            if(read_only) {
+                combobox->setEnabled(false);
+            }
+            else {
+                connect(combobox, &QComboBox::currentTextChanged, this, &TagEditorEditWidget::on_change);
+            }
         }
         else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_BITMASK) {
             // Set the list up
@@ -378,7 +398,12 @@ namespace Invader::EditQt {
             int listWidth = standard_width * 8;
             list->setMaximumWidth(listWidth);
             list->setMinimumWidth(listWidth);
-            connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
+            if(read_only) {
+                list->setEnabled(false);
+            }
+            else {
+                connect(list, &QListWidget::itemChanged, this, &TagEditorEditWidget::on_change);
+            }
             list->setFocusPolicy(Qt::NoFocus);
             list->setSelectionMode(QAbstractItemView::NoSelection);
         }
@@ -386,8 +411,11 @@ namespace Invader::EditQt {
         title_label->setMinimumWidth(label_width);
         title_label->setMaximumWidth(title_label->minimumWidth());
 
-        for(auto *textbox_widget : this->textbox_widgets) {
-            connect(textbox_widget, &QLineEdit::textEdited, this, &TagEditorEditWidget::on_change);
+        // Set this stuff for things that aren't read only
+        if(!read_only) {
+            for(auto *textbox_widget : this->textbox_widgets) {
+                connect(textbox_widget, &QLineEdit::textEdited, this, &TagEditorEditWidget::on_change);
+            }
         }
 
         layout->addStretch(1);
@@ -396,6 +424,11 @@ namespace Invader::EditQt {
 
     void TagEditorEditWidget::on_change() {
         auto *value = this->get_struct_value();
+
+        // Don't worry about it
+        if(value->is_read_only()) {
+            return;
+        }
 
         switch(value->get_type()) {
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
