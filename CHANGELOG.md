@@ -18,9 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows
-- invader-edit-qt: Fixed out-of-bounds enums crashing. Instead, an error
-  message will appear. A tool will be released on a later date to resolve these
-  invalid values.
+- invader-edit-qt: Fixed out-of-bounds enums crashing. For tags that have
+  invalid enums, you should use invader-bludgeon to resolve them.
 - invader-edit-qt: Fixed closing modified tags crashing if "Save" was clicked
 
 ### Removed
