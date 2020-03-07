@@ -103,7 +103,7 @@
             "unused",
             "make it actually work",
             "external",
-            "(invader) use Xbox channel order"
+            "(invader) use Xbox multipurpose channel order"
         ],
         "width": 16
     },
@@ -121,7 +121,7 @@
             "(invader) dither red",
             "(invader) dither green",
             "(invader) dither blue",
-            "(invader) use Xbox channel order"
+            "(invader) use Xbox multipurpose channel order"
         ],
         "width": 16
     },
