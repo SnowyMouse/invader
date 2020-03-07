@@ -118,9 +118,7 @@
             "(invader) nearest mipmap alpha",
             "(invader) nearest mipmap alpha and color",
             "(invader) dither alpha",
-            "(invader) dither red",
-            "(invader) dither green",
-            "(invader) dither blue",
+            "(invader) dither color",
             "(invader) use Xbox multipurpose channel order"
         ],
         "width": 16

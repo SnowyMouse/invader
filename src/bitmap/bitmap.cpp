@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         std::optional<std::uint32_t> sprite_budget_count;
 
         // Dithering?
-        std::optional<bool> dither_alpha, dither_red, dither_green, dither_blue;
+        std::optional<bool> dither_alpha, dither_color;
         bool dithering = false;
 
         // Sharpen and blur; legacy support for older tags and should not be used in newer ones
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
-    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. Specify channels with letters (i.e. argb).", "<channels>");
+    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. Can be: a, rgb, or argb. Default: none", "<channels>");
     options.emplace_back("data <path>", 'd', 1, "Set the data directory.", "<path>");
     options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
@@ -203,29 +203,23 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'D':
-                bitmap_options.dithering = true;
-                bitmap_options.dither_alpha = false;
-                bitmap_options.dither_red = false;
-                bitmap_options.dither_green = false;
-                bitmap_options.dither_blue = false;
-                for(const char *c = arguments[0]; *c; c++) {
-                    switch(*c) {
-                        case 'a':
-                            bitmap_options.dither_alpha = true;
-                            break;
-                        case 'r':
-                            bitmap_options.dither_red = true;
-                            break;
-                        case 'g':
-                            bitmap_options.dither_green = true;
-                            break;
-                        case 'b':
-                            bitmap_options.dither_blue = true;
-                            break;
-                        default:
-                            eprintf_error("Unknown channel %c.", *c);
-                            std::exit(EXIT_FAILURE);
-                    }
+                if(std::strcmp(arguments[0],"a") == 0) {
+                    bitmap_options.dither_alpha = true;
+                }
+                else if(std::strcmp(arguments[0],"rgb") == 0) {
+                    bitmap_options.dither_color = true;
+                }
+                else if(std::strcmp(arguments[0],"argb") == 0) {
+                    bitmap_options.dither_alpha = true;
+                    bitmap_options.dither_color = true;
+                }
+                else if(std::strcmp(arguments[0],"none") == 0) {
+                    bitmap_options.dither_alpha = false;
+                    bitmap_options.dither_color = false;
+                }
+                else {
+                    eprintf_error("Unknown dither type %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
 
@@ -426,9 +420,7 @@ int main(int argc, char *argv[]) {
         }
         if(!bitmap_options.dithering) {
             bitmap_options.dither_alpha = header_flags.invader_dither_alpha == 1;
-            bitmap_options.dither_red = header_flags.invader_dither_red == 1;
-            bitmap_options.dither_green = header_flags.invader_dither_green == 1;
-            bitmap_options.dither_blue = header_flags.invader_dither_blue == 1;
+            bitmap_options.dither_color = header_flags.invader_dither_color == 1;
         }
 
         std::fclose(tag_read);
@@ -450,9 +442,7 @@ int main(int argc, char *argv[]) {
     DEFAULT_VALUE(bitmap_options.bump_height,0.026F);
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.dither_alpha,false);
-    DEFAULT_VALUE(bitmap_options.dither_red,false);
-    DEFAULT_VALUE(bitmap_options.dither_green,false);
-    DEFAULT_VALUE(bitmap_options.dither_blue,false);
+    DEFAULT_VALUE(bitmap_options.dither_color,false);
 
     #undef DEFAULT_VALUE
 
@@ -559,7 +549,7 @@ int main(int argc, char *argv[]) {
     // Add our bitmap data
     oprintf("Found %zu bitmap%s:\n", bitmap_count, bitmap_count == 1 ? "" : "s");
     try {
-        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_red.value(), bitmap_options.dither_green.value(), bitmap_options.dither_blue.value());
+        write_bitmap_data(scanned_color_plate, bitmap_tag_data.processed_pixel_data, bitmap_tag_data.bitmap_data, bitmap_options.usage.value(), bitmap_options.format.value(), bitmap_options.bitmap_type.value(), bitmap_options.palettize.value(), bitmap_options.dither_alpha.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value(), bitmap_options.dither_color.value());
     }
     catch (std::exception &e) {
         eprintf_error("Failed to generate bitmap data: %s", e.what());
@@ -619,9 +609,7 @@ int main(int argc, char *argv[]) {
             break;
     };
     flags.invader_dither_alpha = bitmap_options.dither_alpha.value();
-    flags.invader_dither_red = bitmap_options.dither_red.value();
-    flags.invader_dither_green = bitmap_options.dither_green.value();
-    flags.invader_dither_blue = bitmap_options.dither_blue.value();
+    flags.invader_dither_color = bitmap_options.dither_color.value();
 
     // Set sprite stuff
     bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;

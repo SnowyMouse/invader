@@ -200,7 +200,7 @@ Options:
                                0
   -d --data <path> <path>      Set the data directory.
   -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
-                               Specify channels with letters (i.e. argb).
+                               Can be: a, rgb, or argb. Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new

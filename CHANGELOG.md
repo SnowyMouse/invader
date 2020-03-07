@@ -20,6 +20,10 @@ This is used for recording Invader's changes. This changelog is based on
   invalid values.
 - invader-edit-qt: Fixed closing modified tags crashing if "Save" was clicked
 
+### Removed
+- invader-bitmap: Removed dithering red, green, and blue channels individually.
+  Instead, you use "a", "rgb", or "argb" for colors.
+
 ## [0.29.0] - 2020-03-04
 ### Added
 - invader-edit-qt: GUI tool for editing tags
