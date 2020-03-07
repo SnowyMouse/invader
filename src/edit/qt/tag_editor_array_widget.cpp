@@ -61,13 +61,13 @@ namespace Invader::EditQt {
         title_label->setFont(font);
 
         // Buttons
-        this->add_button = new QPushButton("Add");
+        this->add_button = new QPushButton("Add New");
         header_layout->addWidget(this->add_button);
         this->add_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-        this->delete_button = new QPushButton("Delete");
-        header_layout->addWidget(this->delete_button);
-        this->delete_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        this->insert_button = new QPushButton("Insert New");
+        header_layout->addWidget(this->insert_button);
+        this->insert_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         this->duplicate_button = new QPushButton("Duplicate");
         header_layout->addWidget(this->duplicate_button);
@@ -85,23 +85,35 @@ namespace Invader::EditQt {
         header_layout->addWidget(this->clear_button);
         this->clear_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+        this->delete_button = new QPushButton("Delete");
+        header_layout->addWidget(this->delete_button);
+        this->delete_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+        this->delete_all_button = new QPushButton("Delete All");
+        header_layout->addWidget(this->delete_all_button);
+        this->delete_all_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
         // If we're read only, disable buttons
         if(value->is_read_only()) {
             this->add_button->setEnabled(false);
+            this->insert_button->setEnabled(false);
             this->delete_button->setEnabled(false);
             this->duplicate_button->setEnabled(false);
             this->shift_up_button->setEnabled(false);
             this->shift_down_button->setEnabled(false);
             this->clear_button->setEnabled(false);
+            this->delete_all_button->setEnabled(false);
         }
         // Otherwise, connect things
         else {
             connect(this->add_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_add);
+            connect(this->insert_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_insert);
             connect(this->delete_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_delete);
             connect(this->duplicate_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_duplicate);
             connect(this->shift_up_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_up);
             connect(this->shift_down_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_shift_down);
             connect(this->clear_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_clear);
+            connect(this->delete_all_button, &QPushButton::clicked, this, &TagEditorArrayWidget::perform_delete_all);
         }
 
         // Set this stuff up
@@ -117,7 +129,19 @@ namespace Invader::EditQt {
     }
 
     void TagEditorArrayWidget::perform_add() {
-        int index = this->current_index() + 1;
+        int index = this->get_struct_value()->get_array_size();
+        this->get_struct_value()->insert_objects_in_array(index, 1);
+        this->regenerate_enum();
+        this->value_changed();
+
+        this->reflexive_index->blockSignals(true);
+        this->reflexive_index->setCurrentIndex(index);
+        this->reflexive_index->blockSignals(false);
+        this->regenerate_widget();
+    }
+
+    void TagEditorArrayWidget::perform_insert() {
+        int index = this->current_index();
         this->get_struct_value()->insert_objects_in_array(index, 1);
         this->regenerate_enum();
         this->value_changed();
@@ -161,6 +185,20 @@ namespace Invader::EditQt {
     }
 
     void TagEditorArrayWidget::perform_clear() {
+        auto index = static_cast<std::size_t>(this->current_index());
+        this->get_struct_value()->delete_objects_in_array(index, 1);
+        this->get_struct_value()->insert_objects_in_array(index, 1);
+
+        this->regenerate_enum();
+        this->value_changed();
+
+        this->reflexive_index->blockSignals(true);
+        this->reflexive_index->setCurrentIndex(index);
+        this->reflexive_index->blockSignals(false);
+        this->regenerate_widget();
+    }
+
+    void TagEditorArrayWidget::perform_delete_all() {
         this->get_struct_value()->delete_objects_in_array(0, this->get_struct_value()->get_array_size());
         this->regenerate_enum();
         this->value_changed();
@@ -256,10 +294,12 @@ namespace Invader::EditQt {
         auto max = value->get_array_maximum_size();
 
         this->delete_button->setEnabled(selection && index_unsigned >= min);
-        this->clear_button->setEnabled(count > 0 && min == 0);
+        this->delete_all_button->setEnabled(count > 0 && min == 0);
         this->shift_down_button->setEnabled(selection && index_unsigned > 0);
         this->shift_up_button->setEnabled(selection && index_unsigned + 1 < count);
         this->add_button->setEnabled(count < max);
+        this->insert_button->setEnabled(count < max);
         this->duplicate_button->setEnabled(index >= 0 && this->add_button->isEnabled());
+        this->clear_button->setEnabled(index >= 0);
     }
 }

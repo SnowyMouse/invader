@@ -28,7 +28,9 @@ namespace Invader::EditQt {
 
     private slots:
         void perform_add();
+        void perform_insert();
         void perform_delete();
+        void perform_delete_all();
         void perform_duplicate();
         void perform_clear();
         void perform_shift_up();
@@ -46,8 +48,10 @@ namespace Invader::EditQt {
         QVBoxLayout *vbox_layout;
 
         QPushButton *add_button;
+        QPushButton *insert_button;
         QPushButton *duplicate_button;
         QPushButton *delete_button;
+        QPushButton *delete_all_button;
         QPushButton *clear_button;
         QPushButton *shift_up_button;
         QPushButton *shift_down_button;

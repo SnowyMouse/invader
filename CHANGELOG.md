@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader
+- invader-edit-qt: Added two new buttons to arrays: "Insert" and "Delete All".
+  "Insert" now does what "Add" did, and "Delete All" now does what "Clear" did.
 
 ### Changed
 - invader-bitmap: Added support for 16K sprite plates
@@ -15,6 +17,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Some elements have been marked as read-only. This isn't as
   restrictive as Guerilla, but there are some elements that, if edited, will
   likely lead to the tag not working in invader-build or Halo
+- invader-edit-qt: The "Clear" button now clears all fields rather than deleting
+  all elements from the array
+- invader-edit-qt: The "Add" button now appends elements to the bottom of the
+  array similar to what Guerilla does
 
 ### Fixed
 - invader-edit-qt: Fixed a performance issue on Windows
