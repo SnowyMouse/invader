@@ -44,6 +44,8 @@ namespace Invader::EditQt {
         int current_index() const noexcept;
 
         TagEditorEditWidgetView *tag_view_widget = nullptr;
+        bool read_only = false;
+
         QComboBox *reflexive_index;
         QVBoxLayout *vbox_layout;
 

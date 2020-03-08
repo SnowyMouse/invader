@@ -34,7 +34,7 @@ namespace Invader::EditQt {
             this->setToolTip(comment);
         }
 
-        bool read_only = value->is_read_only();
+        this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
 
         auto *title_label = new QLabel(value->get_name());
         int standard_width = title_label->fontMetrics().boundingRect("MMMM").width();
@@ -53,6 +53,8 @@ namespace Invader::EditQt {
         auto values = value->get_values();
 
         auto &textbox_widgets = this->textbox_widgets;
+
+        auto &read_only = this->read_only;
 
         auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only]() {
             auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
@@ -426,7 +428,7 @@ namespace Invader::EditQt {
         auto *value = this->get_struct_value();
 
         // Don't worry about it
-        if(value->is_read_only()) {
+        if(this->read_only) {
             return;
         }
 

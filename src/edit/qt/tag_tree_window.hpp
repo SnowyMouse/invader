@@ -44,6 +44,22 @@ namespace Invader::EditQt {
         TagTreeWindow();
 
         /**
+         * Set whether or not safeguards are enabled
+         * @param enabled
+         */
+        void set_safeguards(bool enabled) noexcept {
+            this->safeguards_set = enabled;
+        }
+
+        /**
+         * Get whether or not safeguards are enabled
+         * @return enabled
+         */
+        bool safeguards() const noexcept {
+            return this->safeguards_set;
+        }
+
+        /**
          * Set all the tag directories
          * @param directories tag directories
          */
@@ -142,6 +158,8 @@ namespace Invader::EditQt {
 
         bool initial_load = false;
         bool tags_reloading_queued = false;
+
+        bool safeguards_set = true;
 
         TagFetcherThread *fetcher_thread;
     };

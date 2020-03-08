@@ -2,6 +2,8 @@
 
 #include "tag_editor_array_widget.hpp"
 #include "tag_editor_edit_widget_view.hpp"
+#include "tag_editor_window.hpp"
+#include "tag_tree_window.hpp"
 #include <invader/tag/parser/parser_struct.hpp>
 
 #include <QSpacerItem>
@@ -22,6 +24,7 @@ namespace Invader::EditQt {
         this->vbox_layout->setSpacing(2);
         this->reflexive_index = new QComboBox();
         this->item_model = nullptr;
+        this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
 
         // Set our header stuff
         QFrame *header = new QFrame();
@@ -94,7 +97,7 @@ namespace Invader::EditQt {
         this->delete_all_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         // If we're read only, disable buttons
-        if(value->is_read_only()) {
+        if(this->read_only) {
             this->add_button->setEnabled(false);
             this->insert_button->setEnabled(false);
             this->delete_button->setEnabled(false);
@@ -281,7 +284,7 @@ namespace Invader::EditQt {
         auto *value = this->get_struct_value();
 
         // If we're read only, don't bother
-        if(value->is_read_only()) {
+        if(this->read_only) {
             return;
         }
 

@@ -33,6 +33,7 @@ namespace Invader::EditQt {
         void verify_dependency_path();
         void find_dependency();
         void open_dependency();
+        bool read_only;
     };
 }
 
