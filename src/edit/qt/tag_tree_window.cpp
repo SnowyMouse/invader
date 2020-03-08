@@ -230,6 +230,12 @@ namespace Invader::EditQt {
         this->tags_reloading_queued = false;
         all_tags = *result;
         this->tag_loading_label->hide();
+        if(this->tags_to_open.size()) {
+            for(auto &t : this->tags_to_open) {
+                this->open_tag(t.c_str(), this->tags_to_open_full_path);
+            }
+            this->tags_to_open.clear();
+        }
         emit tags_reloaded(this);
     }
 
@@ -287,10 +293,12 @@ namespace Invader::EditQt {
     void TagTreeWindow::open_tag(const char *path, bool full_path) {
         // See if we can figure out this path
         File::TagFile tag;
+        bool found = false;
         if(full_path) {
             for(auto &t : this->get_all_tags()) {
                 if(t.full_path == path) {
                     tag = t;
+                    found = true;
                     break;
                 }
             }
@@ -300,9 +308,18 @@ namespace Invader::EditQt {
             for(auto &t : this->get_all_tags()) {
                 if(File::halo_path_to_preferred_path(t.tag_path) == path) {
                     tag = t;
+                    found = true;
                     break;
                 }
             }
+        }
+
+        if(!found) {
+            char tagpath[512];
+            std::snprintf(tagpath, sizeof(tagpath), "Failed to find %s.\n\nMake sure the path is correct.", path);
+            QMessageBox box(QMessageBox::Critical, "Failed to find a tag", tagpath, QMessageBox::Cancel);
+            box.exec();
+            return;
         }
 
         // Clean some things up

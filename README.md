@@ -410,13 +410,17 @@ Options:
 This program edits tags in a Qt-based GUI.
 
 ```
-Usage: invader-edit-qt [options]
+Usage: invader-edit-qt [options] [<tag1> [tag2] [...]]
 
 Edit tag files.
 
 Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
+  -n --no-safeguards           Allow all tag data to be edited (proceed at your
+                               own risk)
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.

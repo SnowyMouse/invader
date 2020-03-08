@@ -44,6 +44,16 @@ namespace Invader::EditQt {
         TagTreeWindow();
 
         /**
+         * Open the tags when ready
+         * @param tags      tags to open
+         * @param full_path use full path mode
+         */
+        void open_tags_when_ready(const std::vector<std::string> &tags, bool full_path) {
+            this->tags_to_open = tags;
+            this->tags_to_open_full_path = full_path;
+        }
+
+        /**
          * Set whether or not safeguards are enabled
          * @param enabled
          */
@@ -145,6 +155,9 @@ namespace Invader::EditQt {
         };
 
         std::vector<File::TagFile> all_tags;
+
+        std::vector<std::string> tags_to_open;
+        bool tags_to_open_full_path = false;
 
         TagTreeWidget *tag_view;
         std::vector<std::filesystem::path> paths;

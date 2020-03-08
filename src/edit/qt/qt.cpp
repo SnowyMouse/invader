@@ -14,20 +14,19 @@ int main(int argc, char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
 
     static constexpr char DESCRIPTION[] = "Edit tag files.";
-    static constexpr char USAGE[] = "[options]";
+    static constexpr char USAGE[] = "[options] [<tag1> [tag2] [...]]";
 
     struct EditQtOption {
-        // Tags directory
         std::vector<std::filesystem::path> tags;
-
         bool void_warranty = false;
-
         bool disable_safeguards = false;
+        bool fs_path = false;
     } edit_qt_options;
 
-    auto remaining_arguments = CommandLineOption::parse_arguments<EditQtOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, edit_qt_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_qt_options) {
+    auto remaining_arguments = CommandLineOption::parse_arguments<EditQtOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 65535, edit_qt_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_qt_options) {
         switch(opt) {
             case 'i':
                 show_version_info();
@@ -39,6 +38,10 @@ int main(int argc, char **argv) {
 
             case 'n':
                 edit_qt_options.disable_safeguards = true;
+                break;
+
+            case 'P':
+                edit_qt_options.fs_path = true;
                 break;
         }
     });
@@ -54,10 +57,14 @@ int main(int argc, char **argv) {
         }
     }
 
+    // Instantiate the application
     QApplication a(argc, argv);
 
+    // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
     w.set_tag_directories(edit_qt_options.tags);
+
+    // Give a spiel
     if(edit_qt_options.disable_safeguards) {
         QMessageBox message(QMessageBox::Warning, "You think you want this, but you actually don't.", "WARNING: Safeguards have been disabled.\n\nManually editing data that is normally read-only will likely break your tags.\n\nRemember: If something is normally read-only, then there is a much better program for modifying it than a tag editor.", QMessageBox::Ok | QMessageBox::Cancel);
         message.setDefaultButton(QMessageBox::Cancel);
@@ -67,7 +74,16 @@ int main(int argc, char **argv) {
         }
         w.set_safeguards(false);
     }
+
+    // Show it!
     w.show();
+
+    // Open tags
+    std::vector<std::string> tags;
+    for(auto &i : remaining_arguments) {
+        tags.emplace_back(i);
+    }
+    w.open_tags_when_ready(tags, edit_qt_options.fs_path);
 
     return a.exec();
 }
