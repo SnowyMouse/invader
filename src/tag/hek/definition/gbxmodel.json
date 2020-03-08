@@ -60,6 +60,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
@@ -90,6 +91,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 64
     },
     {
@@ -156,6 +158,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 156
     },
     {
@@ -190,6 +193,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 80
     },
     {
@@ -202,6 +206,7 @@
             },
             {
                 "name": "flags",
+                "read_only": false,
                 "type": "GBXModelRegionPermutationFlags"
             },
             {
@@ -252,6 +257,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "read_only": true,
         "size": 88
     },
     {
@@ -275,6 +281,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 76
     },
     {
@@ -323,6 +330,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 68
     },
     {
@@ -369,6 +377,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
@@ -388,6 +397,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 6
     },
     {
@@ -541,6 +551,7 @@
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
         "pre_compile": true,
+        "read_only": true,
         "size": 132
     },
     {
@@ -562,6 +573,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 48
     },
     {
@@ -604,22 +616,27 @@
             },
             {
                 "name": "super high detail cutoff",
+                "read_only": false,
                 "type": "float"
             },
             {
                 "name": "high detail cutoff",
+                "read_only": false,
                 "type": "float"
             },
             {
                 "name": "medium detail cutoff",
+                "read_only": false,
                 "type": "float"
             },
             {
                 "name": "low detail cutoff",
+                "read_only": false,
                 "type": "float"
             },
             {
                 "name": "super low detail cutoff",
+                "read_only": false,
                 "type": "float"
             },
             {
@@ -705,6 +722,7 @@
         "pre_compile": true,
         "post_compile": true,
         "postprocess_hek_data": true,
+        "read_only": true,
         "size": 232
     }
 ]

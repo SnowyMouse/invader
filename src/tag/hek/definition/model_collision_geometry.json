@@ -63,6 +63,7 @@
             {
                 "name": "name",
                 "type": "TagString",
+                "read_only": true,
                 "endian": null
             },
             {
@@ -111,6 +112,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
@@ -119,6 +121,7 @@
             {
                 "name": "name",
                 "type": "TagString",
+                "read_only": true,
                 "endian": null
             },
             {
@@ -149,6 +152,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryPermutation",
+                "read_only": true,
                 "compound": true
             }
         ],
@@ -215,6 +219,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -227,6 +232,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -246,6 +252,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 8
     },
     {
@@ -264,6 +271,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 8
     },
     {
@@ -288,6 +296,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 20
     },
     {
@@ -318,6 +327,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -349,6 +359,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 24
     },
     {
@@ -365,6 +376,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -421,6 +433,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "read_only": true,
         "size": 96
     },
     {
@@ -459,6 +472,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 64
     },
     {
@@ -658,18 +672,21 @@
                 "name": "materials",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryMaterial",
+                "read_only": true,
                 "compound": true
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryRegion",
+                "read_only": true,
                 "compound": true
             },
             {
                 "name": "modifiers",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryModifier",
+                "read_only": true,
                 "compound": true
             },
             {
@@ -701,6 +718,7 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometryNode",
+                "read_only": true,
                 "compound": true
             }
         ],

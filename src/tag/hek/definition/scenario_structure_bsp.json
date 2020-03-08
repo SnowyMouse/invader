@@ -41,6 +41,7 @@
         ],
         "type": "struct",
         "post_compile": true,
+        "read_only": true,
         "size": 20
     },
     {
@@ -54,6 +55,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 6
     },
     {
@@ -83,6 +85,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -98,30 +101,27 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 8
-    },
-    {
-        "name": "ScenarioStructureBSPArrayVertex",
-        "fields": [
-            {
-                "name": "a",
-                "type": "int16"
-            }
-        ],
-        "type": "struct",
-        "size": 2
     },
     {
         "name": "ScenarioStructureBSPSurface",
         "fields": [
             {
-                "name": "vertices",
-                "type": "ScenarioStructureBSPArrayVertex",
-                "compound": true,
-                "count": 3
+                "name": "vertex0 index",
+                "type": "Index"
+            },
+            {
+                "name": "vertex1 index",
+                "type": "Index"
+            },
+            {
+                "name": "vertex2 index",
+                "type": "Index"
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 6
     },
     {
@@ -230,10 +230,12 @@
                 "classes": [
                     "shader"
                 ],
+                "read_only": false,
                 "compound": true
             },
             {
                 "name": "shader permutation",
+                "read_only": false,
                 "type": "Index"
             },
             {
@@ -251,11 +253,13 @@
             {
                 "name": "centroid",
                 "type": "Point3D",
+                "read_only": false,
                 "compound": true
             },
             {
                 "name": "ambient color",
                 "type": "ColorRGB",
+                "read_only": false,
                 "compound": true
             },
             {
@@ -268,21 +272,25 @@
             },
             {
                 "name": "distant light 0 color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
             {
                 "name": "distant light 0 direction",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
             {
                 "name": "distant light 1 color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
             {
                 "name": "distant light 1 direction",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
@@ -292,22 +300,26 @@
             },
             {
                 "name": "reflection tint",
+                "read_only": false,
                 "type": "ColorARGB",
                 "compound": true
             },
             {
                 "name": "shadow vector",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
             {
                 "name": "shadow color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
             {
                 "name": "plane",
                 "type": "Plane3D",
+                "read_only": false,
                 "compound": true
             },
             {
@@ -367,6 +379,7 @@
         "type": "struct",
         "post_cache_parse": true,
         "pre_compile": true,
+        "read_only": true,
         "size": 256
     },
     {
@@ -392,11 +405,11 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
         "name": "ScenarioStructureBSPLensFlare",
-        "type": "struct",
         "fields": [
             {
                 "name": "lens",
@@ -407,6 +420,8 @@
                 ]
             }
         ],
+        "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -439,6 +454,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -450,6 +466,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 4
     },
     {
@@ -478,6 +495,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 36
     },
     {
@@ -489,6 +507,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 4
     },
     {
@@ -501,6 +520,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -531,6 +551,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 64
     },
     {
@@ -542,6 +563,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 2
     },
     {
@@ -549,26 +571,32 @@
         "fields": [
             {
                 "name": "sky",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "fog",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "background sound",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "sound environment",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "weather",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "transition structure bsp",
+                "read_only": false,
                 "type": "Index"
             },
             {
@@ -627,6 +655,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 104
     },
     {
@@ -639,6 +668,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -681,6 +711,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 64
     },
     {
@@ -705,6 +736,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 48
     },
     {
@@ -717,6 +749,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -745,6 +778,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
@@ -756,14 +790,17 @@
             },
             {
                 "name": "fog palette",
+                "read_only": false,
                 "type": "Index"
             },
             {
                 "name": "weather palette",
+                "read_only": false,
                 "type": "Index"
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 40
     },
     {
@@ -872,6 +909,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -898,6 +936,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 32
     },
     {
@@ -910,6 +949,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 1
     },
     {
@@ -922,6 +962,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 1
     },
     {
@@ -1175,6 +1216,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -1187,6 +1229,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 8
     },
     {
@@ -1204,6 +1247,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 16
     },
     {
@@ -1215,6 +1259,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 4
     },
     {
@@ -1234,6 +1279,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 24
     },
     {
@@ -1246,6 +1292,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 12
     },
     {
@@ -1271,6 +1318,7 @@
             }
         ],
         "type": "struct",
+        "read_only": true,
         "size": 24
     },
     {
@@ -1286,10 +1334,12 @@
             },
             {
                 "name": "vehicle floor",
+                "read_only": false,
                 "type": "float"
             },
             {
                 "name": "vehicle ceiling",
+                "read_only": false,
                 "type": "float"
             },
             {
@@ -1298,6 +1348,7 @@
             },
             {
                 "name": "default ambient color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
@@ -1307,21 +1358,25 @@
             },
             {
                 "name": "default distant light 0 color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
             {
                 "name": "default distant light 0 direction",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
             {
                 "name": "default distant light 1 color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
             {
                 "name": "default distant light 1 direction",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
@@ -1331,16 +1386,19 @@
             },
             {
                 "name": "default reflection tint",
+                "read_only": false,
                 "type": "ColorARGB",
                 "compound": true
             },
             {
                 "name": "default shadow vector",
+                "read_only": false,
                 "type": "Vector3D",
                 "compound": true
             },
             {
                 "name": "default shadow color",
+                "read_only": false,
                 "type": "ColorRGB",
                 "compound": true
             },
@@ -1464,6 +1522,7 @@
                 "name": "fog palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPFogPalette",
+                "read_only": false,
                 "compound": true,
                 "maximum": 65534
             },
@@ -1475,6 +1534,7 @@
                 "name": "weather palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPWeatherPalette",
+                "read_only": false,
                 "compound": true
             },
             {
@@ -1503,12 +1563,14 @@
                 "name": "background sound palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPBackgroundSoundPalette",
+                "read_only": false,
                 "compound": true
             },
             {
                 "name": "sound environment palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPSoundEnvironmentPalette",
+                "read_only": false,
                 "compound": true
             },
             {
@@ -1530,6 +1592,7 @@
                 "name": "detail objects",
                 "type": "TagReflexive",
                 "struct": "ScenarioStructureBSPDetailObjectData",
+                "read_only": false,
                 "compound": true
             },
             {
@@ -1563,6 +1626,7 @@
         "type": "struct",
         "pre_compile": true,
         "post_compile": true,
+        "read_only": true,
         "size": 648
     },
     {
