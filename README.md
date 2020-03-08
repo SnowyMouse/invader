@@ -573,9 +573,8 @@ rates and channel count. By default, the highest sample rate will be used for
 the entire tag, and if that is not 22050 Hz or 44100 Hz, then it will
 automatically be resampled.
 
-
 ```
-Usage: invader-sound [options] <sound-tag>
+Usage: invader-sound [options] -F <fmt> <sound-tag>
 
 Create or modify a sound tag.
 
@@ -604,7 +603,7 @@ Options:
                                longer but offering slightly better ratios.
                                Default: 5
   -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               xbox-adpcm. Default (new tag): 16-bit-pcm
+                               xbox-adpcm, or flac. Setting this is required.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -P --fs-path                 Use a filesystem path for the data.
@@ -620,6 +619,7 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+
 ```
 
 #### What is splitting?

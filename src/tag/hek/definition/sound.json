@@ -246,7 +246,8 @@
             },
             {
                 "name": "sound class",
-                "type": "SoundClass"
+                "type": "SoundClass",
+                "read_only": true
             },
             {
                 "name": "sample rate",

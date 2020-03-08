@@ -38,7 +38,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
     options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm. Default (new tag): 16-bit-pcm", "<fmt>");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm, or flac. Setting this is required.", "<fmt>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
@@ -47,7 +47,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
-    static constexpr char USAGE[] = "[options] <sound-tag>";
+    static constexpr char USAGE[] = "[options] -F <fmt> <sound-tag>";
 
     auto remaining_arguments = CommandLineOption::parse_arguments<SoundOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, sound_options, [](char opt, const std::vector<const char *> &arguments, auto &sound_options) {
         switch(opt) {
@@ -145,6 +145,12 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
+
+    // Make sure format was set
+    if(!sound_options.format.has_value()) {
+        eprintf_error("No sound format was set. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
 
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
