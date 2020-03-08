@@ -10,6 +10,7 @@
 #include <invader/extract/extraction.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
+#include <invader/compress/ceaflate.hpp>
 #include <regex>
 
 bool string_matches(const char *string, const char *pattern) {
@@ -47,6 +48,7 @@ int main(int argc, const char **argv) {
     struct ExtractOptions {
         std::string tags_directory = "tags";
         std::optional<std::string> maps_directory;
+        std::optional<std::string> ipak;
         std::vector<std::string> tags_to_extract;
         std::vector<std::string> search_queries;
         bool search_all_tags = true;
@@ -64,6 +66,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
     options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
     options.emplace_back("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals");
+    options.emplace_back("use-ipak", 'p', 1, "Use the inplace1.ipak file", "<ipak>");
 
     static constexpr char DESCRIPTION[] = "Extract data from cache files.";
     static constexpr char USAGE[] = "[options] <map>";
@@ -90,6 +93,9 @@ int main(int argc, const char **argv) {
                 extract_options.search_queries.emplace_back(args[0]);
                 extract_options.search_all_tags = false;
                 break;
+            case 'p':
+                extract_options.ipak = args[0];
+                break;
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
@@ -111,31 +117,41 @@ int main(int argc, const char **argv) {
     auto start = std::chrono::steady_clock::now();
     std::vector<std::byte> loc, bitmaps, sounds;
 
-    // Load asset data
-    if(!extract_options.maps_directory.has_value()) {
-        std::filesystem::path map = std::string(remaining_arguments[0]);
-        auto maps_folder = std::filesystem::absolute(map).parent_path();
-        if(std::filesystem::is_directory(maps_folder)) {
-            extract_options.maps_directory = maps_folder.string();
+    // Find the asset data
+    if(extract_options.ipak.has_value()) {
+        using namespace Compression::Ceaflate;
+        auto potential_file = Invader::File::open_file(extract_options.ipak->c_str());
+        if(!potential_file.has_value()) {
+            eprintf_error("Failed to open %s", extract_options.ipak->c_str());
+            return EXIT_FAILURE;
         }
+        bitmaps = *potential_file;
     }
-
-    if(extract_options.maps_directory.has_value()) {
-        std::filesystem::path maps_directory(*extract_options.maps_directory);
-        auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
-            auto potential_map_path = (maps_directory / map).string();
-            auto potential_map = Invader::File::open_file(potential_map_path.c_str());
-            if(potential_map.has_value()) {
-                return *potential_map;
+    else {
+        if(!extract_options.maps_directory.has_value()) {
+            std::filesystem::path map = std::string(remaining_arguments[0]);
+            auto maps_folder = std::filesystem::absolute(map).parent_path();
+            if(std::filesystem::is_directory(maps_folder)) {
+                extract_options.maps_directory = maps_folder.string();
             }
-            else {
-                return std::vector<std::byte>();
-            }
-        };
+        }
+        if(extract_options.maps_directory.has_value()) {
+            std::filesystem::path maps_directory(*extract_options.maps_directory);
+            auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
+                auto potential_map_path = (maps_directory / map).string();
+                auto potential_map = Invader::File::open_file(potential_map_path.c_str());
+                if(potential_map.has_value()) {
+                    return *potential_map;
+                }
+                else {
+                    return std::vector<std::byte>();
+                }
+            };
 
-        loc = open_map_possibly("loc.map");
-        bitmaps = open_map_possibly("bitmaps.map");
-        sounds = open_map_possibly("sounds.map");
+            loc = open_map_possibly("loc.map");
+            bitmaps = open_map_possibly("bitmaps.map");
+            sounds = open_map_possibly("sounds.map");
+        }
     }
 
     // Load map
@@ -191,8 +207,8 @@ int main(int argc, const char **argv) {
         // Get the tag path
         const auto &tag = map->get_tag(tag_index);
 
-        if(cannot_extract_resources && (tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP || tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND)) {
-            eprintf_warn("CE Anniversary bitmaps and sounds cannot be extracted at this time");
+        if(cannot_extract_resources && (tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND)) {
+            eprintf_warn("CE Anniversary sounds cannot be extracted at this time");
             return false;
         }
 

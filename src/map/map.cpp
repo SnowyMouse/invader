@@ -5,6 +5,7 @@
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/compress/ceaflate.hpp>
+#include <invader/resource/resource_map.hpp>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
 
@@ -273,6 +274,9 @@ namespace Invader {
                 break;
             case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                 this->base_memory_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                if(this->bitmap_data_length && this->ipak_data.size() == 0) {
+                    this->ipak_data = load_compressed_ipak(this->bitmap_data, this->bitmap_data_length);
+                }
                 break;
             case CacheFileEngine::CACHE_FILE_XBOX:
                 this->base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
@@ -523,6 +527,7 @@ namespace Invader {
         }
 
         move.tags.clear();
+        this->ipak_data = move.ipak_data;
 
         this->load_map();
         this->compressed = move.compressed;

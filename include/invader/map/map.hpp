@@ -33,8 +33,8 @@ namespace Invader {
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data
-         * @param bitmaps_data_size length of bitmaps data
+         * @param bitmaps_data      pointer to bitmaps data or ipak data
+         * @param bitmaps_data_size length of bitmaps data or ipak data
          * @param loc_data          pointer to loc data
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
@@ -49,7 +49,7 @@ namespace Invader {
         /**
          * Create a Map by moving the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this way.
          * @param  data         map data vector
-         * @param  bitmaps_data bitmap data vector
+         * @param  bitmaps_data bitmap data vector or ipak vector
          * @param  loc_data     loc data vector
          * @param  sounds_data  sound data vector
          * @return              map
@@ -66,8 +66,8 @@ namespace Invader {
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data
-         * @param bitmaps_data_size length of bitmaps data
+         * @param bitmaps_data      pointer to bitmaps data or ipak data
+         * @param bitmaps_data_size length of bitmaps data or ipak data
          * @param loc_data          pointer to loc data
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
@@ -209,6 +209,14 @@ namespace Invader {
         const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
 
         /**
+         * Get the ipak data
+         * @return ipak data
+         */
+        const std::vector<Resource> &get_ipak_data() const {
+            return this->ipak_data;
+        }
+
+        /**
          * Get whether the map was originally compressed
          * @return true if the map was compressed
          */
@@ -282,6 +290,9 @@ namespace Invader {
 
         /** Map is compressed */
         bool compressed = false;
+
+        /** ipak data */
+        std::vector<Resource> ipak_data;
 
 
         /** Load the map now */

@@ -16,7 +16,7 @@ namespace Invader::Compression::Ceaflate {
     std::size_t find_decompressed_file_size(const std::byte *input_data, std::size_t input_size) noexcept;
 
     /**
-     * Decompress the map file.
+     * Decompress the file.
      * @param  input_data  input data
      * @param  input_size  input size
      * @param  output_data output data

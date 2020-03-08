@@ -3,6 +3,8 @@
 #include <invader/resource/resource_map.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/file/file.hpp>
+#include <invader/compress/ceaflate.hpp>
+#include <invader/resource/hek/ipak.hpp>
 
 namespace Invader {
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size) {
@@ -55,5 +57,32 @@ namespace Invader {
         }
 
         return returned_resources;
+    }
+
+    std::vector<Resource> load_ipak(const std::byte *data, std::size_t size) {
+        using namespace HEK;
+
+        auto count = *reinterpret_cast<const std::uint32_t *>(data);
+        const auto *elements = reinterpret_cast<const IPAKElement *>(data + 0x8);
+        std::vector<Resource> resources(count);
+
+        for(std::size_t i = 0; i < count; i++) {
+            auto &element = elements[i];
+            auto this_offset = static_cast<std::size_t>(element.offset);
+            auto this_size = i + 1 == count ? (size - this_offset) : (elements[i+1].offset - this_offset);
+            resources[i].path = element.name;
+            resources[i].data = std::vector<std::byte>(data + this_offset, data + this_offset + this_size);
+            resources[i].data_offset = static_cast<std::size_t>(element.offset);
+            resources[i].path_offset = reinterpret_cast<const std::byte *>(&element) - data;
+        }
+        return resources;
+    }
+
+    std::vector<Resource> load_compressed_ipak(const std::byte *data, std::size_t size) {
+        using namespace Compression::Ceaflate;
+        std::size_t decompressed_size = find_decompressed_file_size(data, size);
+        std::vector<std::byte> ipak(decompressed_size);
+        decompress_file(data, size, ipak.data(), decompressed_size);
+        return load_ipak(ipak.data(), decompressed_size);
     }
 }

@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added `--no-safeguards`
 - invader-edit-qt: Added opening tags if a path is given when opening the
   program
+- invader-extract: Added MCC CEA bitmap tag extraction
 
 ### Changed
 - invader-bitmap: Added support for 16K sprite plates

@@ -440,6 +440,7 @@ Options:
   -m --maps <dir>              Set the maps directory
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
+  -p --use-ipak <ipak>         Use the inplace1.ipak file
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards); use
                                multiple times for multiple queries

@@ -3,8 +3,89 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/resource/hek/ipak.hpp>
 
 namespace Invader::Parser {
+    template <typename T> static bool power_of_two(T value) {
+        while(value > 1) {
+            if(value & 1) {
+                return false;
+            }
+            value >>= 1;
+        }
+        return true;
+    }
+
+    static std::size_t size_of_bitmap(const BitmapData &data) {
+        std::size_t size = 0;
+        std::size_t bits_per_pixel = 0;
+
+        switch(data.format) {
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
+                bits_per_pixel = 32;
+                break;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+                bits_per_pixel = 16;
+                break;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                bits_per_pixel = 8;
+                break;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                bits_per_pixel = 4;
+                break;
+            default:
+                eprintf_error("Unknown format %u", static_cast<unsigned int>(data.format));
+                //std::terminate();
+                throw std::exception();
+        }
+
+        std::size_t height = data.height;
+        std::size_t width = data.width;
+        std::size_t depth = data.depth;
+        bool should_be_compressed = data.flags.compressed;
+        std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+
+        // Do it
+        for(std::size_t i = 0; i <= data.mipmap_count; i++) {
+            size += width * height * depth * multiplier * bits_per_pixel / 8;
+
+            // Divide by 2, resetting back to 1 when needed
+            width /= 2;
+            height /= 2;
+            depth /= 2;
+            if(width == 0) {
+                width = 1;
+            }
+            if(height == 0) {
+                height = 1;
+            }
+            if(depth == 0) {
+                depth = 1;
+            }
+
+            // If we're DXT compressed, the minimum is actually 4x4
+            if(should_be_compressed) {
+                if(width < 4) {
+                    width = 4;
+                }
+                if(height < 4) {
+                    height = 4;
+                }
+            }
+        }
+
+        return size;
+    }
+
     void BitmapData::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &s = workload.structs[struct_index];
         auto *data = s.data.data();
@@ -23,7 +104,9 @@ namespace Invader::Parser {
     void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         this->postprocess_hek_data();
 
-        auto xbox = tag.get_map().get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        auto &map = tag.get_map();
+        auto xbox = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        auto mcc = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
 
         // TODO: Deal with cubemaps and stuff
         if(xbox && this->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
@@ -31,15 +114,106 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        for(auto &bitmap_data : this->bitmap_data) {
+        const auto *path_cstr = tag.get_path().c_str();
+        auto bd_count = this->bitmap_data.size();
+        for(std::size_t bd = 0; bd < bd_count; bd++) {
+            auto &bitmap_data = this->bitmap_data[bd];
+
             // TODO: Generate last two mipmaps if needed
             if(bitmap_data.flags.compressed && xbox) {
                 eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
                 throw InvalidTagDataException();
             }
 
-            const std::byte *bitmap_data_ptr;
-            bitmap_data_ptr = tag.get_map().get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
+            // MCC has meme matching (e.g. hce_ltb_bloodgulch = levels/test/bloodgulch/bloodgulch)
+            const std::byte *bitmap_data_ptr = nullptr;
+            if(mcc) {
+                const auto &ipak_data = map.get_ipak_data();
+                char path[0x100] = {};
+                auto offset = std::snprintf(path, sizeof(path), "hce_");
+                const char *i = path_cstr;
+                const char *last_backslash = i;
+
+                // Get the shortened bit
+                for(; *i != 0; i++) {
+                    if(*i == '\\') {
+                        if(offset == sizeof(path)) {
+                            break;
+                        }
+                        path[offset++] = *(last_backslash);
+                        last_backslash = i + 1;
+                    }
+                }
+                path[offset++] = '_';
+
+                // Get the rest of the path
+                if(last_backslash) {
+                    for(i = last_backslash; *i; i++) {
+                        if(offset == sizeof(path)) {
+                            break;
+                        }
+
+                        if(*i == ' ' || *i == '-' || *i == '_') {
+                            path[offset++] = '_';
+                        }
+                        else {
+                            path[offset++] = *i;
+                        }
+                    }
+                }
+
+                // And lastly, the index
+                std::snprintf(path + offset, sizeof(path) - offset, "_%zu", bd);
+
+                for(auto &d : ipak_data) {
+                    if(d.path == path) {
+                        auto &header = *reinterpret_cast<const HEK::IPAKBitmapHeader *>(d.data.data());
+
+                        // The bitmap data is often times bullshit, so we have to fix it
+                        bitmap_data.height = header.height;
+                        bitmap_data.width = header.width;
+                        bitmap_data.depth = header.depth;
+                        bitmap_data.mipmap_count = header.mipmap_count - 1;
+                        bitmap_data.flags.power_of_two_dimensions = power_of_two(header.width.read()) && power_of_two(header.height.read());
+
+                        // The format might be wrong for whatever reason
+                        switch(header.format) {
+                            case 0x0:
+                            case 0x16:
+                                bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
+                                break;
+                            case 0xD:
+                                bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
+                                break;
+                            case 0x3:
+                                bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
+                                break;
+                            case 0x11:
+                                bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
+                                break;
+                        }
+
+                        bitmap_data.pixel_data_size = size_of_bitmap(bitmap_data);
+                        auto remaining_size = d.data.size() - sizeof(header);
+                        if(bitmap_data.pixel_data_size <= remaining_size) {
+                            bitmap_data_ptr = reinterpret_cast<const std::byte *>(&header + 1);
+                        }
+                        else {
+                            eprintf_error("Size check fail: %zu expected > %zu remaining", static_cast<std::size_t>(bitmap_data.pixel_data_size), remaining_size);
+                        }
+                        break;
+                    }
+                }
+
+                if(!bitmap_data_ptr) {
+                    eprintf_error("Failed to find %s in the ipak", path);
+                    throw std::exception();
+                }
+            }
+            else {
+                bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
+            }
+
             bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
             this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
             bitmap_data.flags.external = 0;
@@ -91,22 +265,11 @@ namespace Invader::Parser {
 
             std::size_t depth = data.depth;
             std::size_t start = data.pixel_data_offset;
-            std::size_t size = 0;
             std::size_t width = data.width;
             std::size_t height = data.height;
 
             // Warn for stuff
             if(!workload.hide_pedantic_warnings) {
-                auto power_of_two = [](auto value) -> bool {
-                    while(value > 1) {
-                        if(value & 1) {
-                            return false;
-                        }
-                        value >>= 1;
-                    }
-                    return true;
-                };
-
                 bool exceeded = false;
                 bool non_power_of_two = (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth));
                 if(this->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
@@ -143,8 +306,8 @@ namespace Invader::Parser {
                                  exceeded = true;
                             }
                             break;
-                        default:
-                            std::terminate();
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_ENUM_COUNT:
+                            break;
                     }
                     if(exceeded) {
                         eprintf_warn("Some compliant hardware may not be able to render this bitmap");
@@ -156,75 +319,19 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is not a 3D texture but has depth (%zu != 1)", data_index, depth);
             }
 
-            std::size_t multiplier = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
-            std::size_t bits_per_pixel;
-
-            switch(format) {
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                    bits_per_pixel = 32;
-                    break;
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                    bits_per_pixel = 16;
-                    break;
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                    bits_per_pixel = 8;
-                    break;
-                case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                    bits_per_pixel = 4;
-                    break;
-                default:
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data %zu has an invalid format", data_index);
-                    throw InvalidTagDataException();
-            }
-
             // Make sure these are equal
             if(compressed != should_be_compressed) {
                 const char *format_name = HEK::bitmap_data_format_name(format);
                 if(compressed) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
+                    data.flags.compressed = 0;
+                    //REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
                 }
                 else {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is not marked as compressed", data_index, format_name);
                 }
             }
 
-            // Do it
-            for(std::size_t i = 0; i <= data.mipmap_count; i++) {
-                size += width * height * depth * multiplier * bits_per_pixel / 8;
-
-                // Divide by 2, resetting back to 1 when needed
-                width /= 2;
-                height /= 2;
-                depth /= 2;
-                if(width == 0) {
-                    width = 1;
-                }
-                if(height == 0) {
-                    height = 1;
-                }
-                if(depth == 0) {
-                    depth = 1;
-                }
-
-                // If we're DXT compressed, the minimum is actually 4x4
-                if(should_be_compressed) {
-                    if(width < 4) {
-                        width = 4;
-                    }
-                    if(height < 4) {
-                        height = 4;
-                    }
-                }
-            }
+            auto size = size_of_bitmap(data);
 
             // Make sure we won't explode
             std::size_t end = start + size;
