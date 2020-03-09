@@ -122,15 +122,15 @@ namespace Invader::Parser {
         }
     }
 
-    void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, 1.0f / TICK_RATE);
-        this->unknown_ffffffff_0 = 0xFFFFFFFF;
-        this->unknown_ffffffff_1 = 0xFFFFFFFF;
+    template <typename T> static void sound_pre_compile(T *sound, BuildWorkload &workload, std::size_t tag_index) {
+        sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, 1.0f / TICK_RATE);
+        sound->unknown_ffffffff_0 = 0xFFFFFFFF;
+        sound->unknown_ffffffff_1 = 0xFFFFFFFF;
 
         std::size_t errors = 0;
-        for(auto &pr : this->pitch_ranges) {
+        for(auto &pr : sound->pitch_ranges) {
             for(auto &pe : pr.permutations) {
-                if(pe.format != this->format) {
+                if(pe.format != sound->format) {
                     errors++;
                 }
             }
@@ -139,13 +139,13 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound format does not match %zu permutation%s.", errors, errors == 1 ? "" : "s");
         }
 
-        if(this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
 
         // If we didn't split long sounds into permutations, go through each permutation and Jason Jones it
-        if(!this->flags.split_long_sound_into_permutations) {
-            for(auto &pr : this->pitch_ranges) {
+        if(!sound->flags.split_long_sound_into_permutations) {
+            for(auto &pr : sound->pitch_ranges) {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {
                     p.next_permutation_index = NULL_INDEX;
@@ -154,20 +154,24 @@ namespace Invader::Parser {
         }
 
         // Default these if need be
-        if(this->one_skip_fraction_modifier == 0.0f && this->zero_skip_fraction_modifier == 0.0f) {
-            this->one_skip_fraction_modifier = 1.0f;
-            this->zero_skip_fraction_modifier = 1.0f;
+        if(sound->one_skip_fraction_modifier == 0.0f && sound->zero_skip_fraction_modifier == 0.0f) {
+            sound->one_skip_fraction_modifier = 1.0f;
+            sound->zero_skip_fraction_modifier = 1.0f;
         }
 
-        if(this->one_gain_modifier == 0.0f && this->zero_gain_modifier == 0.0f) {
-            this->one_gain_modifier = 1.0f;
-            this->zero_gain_modifier = 1.0f;
+        if(sound->one_gain_modifier == 0.0f && sound->zero_gain_modifier == 0.0f) {
+            sound->one_gain_modifier = 1.0f;
+            sound->zero_gain_modifier = 1.0f;
         }
 
-        if(this->zero_pitch_modifier == 0.0f && this->one_pitch_modifier == 0.0f) {
-            this->one_pitch_modifier = 1.0f;
-            this->zero_pitch_modifier = 1.0f;
+        if(sound->zero_pitch_modifier == 0.0f && sound->one_pitch_modifier == 0.0f) {
+            sound->one_pitch_modifier = 1.0f;
+            sound->zero_pitch_modifier = 1.0f;
         }
+    }
+
+    void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        sound_pre_compile(this, workload, tag_index);
     }
 
     void SoundLooping::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {

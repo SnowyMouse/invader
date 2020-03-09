@@ -101,23 +101,30 @@ namespace Invader::Parser {
         d.tag_id_only = true;
     }
 
-    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        this->postprocess_hek_data();
+    void Invader::Parser::Bitmap::postprocess_hek_data() {
+        if(this->compressed_color_plate_data.size() == 0) {
+            this->color_plate_height = 0;
+            this->color_plate_width = 0;
+        }
+    }
+
+    template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
+        bitmap->postprocess_hek_data();
 
         auto &map = tag.get_map();
         auto xbox = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         auto mcc = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
 
         // TODO: Deal with cubemaps and stuff
-        if(xbox && this->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
+        if(xbox && bitmap->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
             eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
             throw InvalidTagDataException();
         }
 
         const auto *path_cstr = tag.get_path().c_str();
-        auto bd_count = this->bitmap_data.size();
+        auto bd_count = bitmap->bitmap_data.size();
         for(std::size_t bd = 0; bd < bd_count; bd++) {
-            auto &bitmap_data = this->bitmap_data[bd];
+            auto &bitmap_data = bitmap->bitmap_data[bd];
 
             // TODO: Generate last two mipmaps if needed
             if(bitmap_data.flags.compressed && xbox) {
@@ -214,8 +221,8 @@ namespace Invader::Parser {
                 bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
             }
 
-            bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
-            this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+            bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());
+            bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
 
             // Unset these flags
             bitmap_data.flags.external = 0;
@@ -223,31 +230,24 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Bitmap::postprocess_hek_data() {
-        if(this->compressed_color_plate_data.size() == 0) {
-            this->color_plate_height = 0;
-            this->color_plate_width = 0;
-        }
-    }
-
-    void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        for(auto &sequence : this->bitmap_group_sequence) {
+    template <typename T> static void do_pre_compile(T *bitmap, BuildWorkload &workload, std::size_t tag_index) {
+        for(auto &sequence : bitmap->bitmap_group_sequence) {
             for(auto &sprite : sequence.sprites) {
-                if(sprite.bitmap_index >= this->bitmap_data.size()) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sprite %zu of sequence %zu has an invalid bitmap index", &sprite - sequence.sprites.data(), &sequence - this->bitmap_group_sequence.data());
+                if(sprite.bitmap_index >= bitmap->bitmap_data.size()) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sprite %zu of sequence %zu has an invalid bitmap index", &sprite - sequence.sprites.data(), &sequence - bitmap->bitmap_group_sequence.data());
                     throw InvalidTagDataException();
                 }
             }
         }
 
-        while(this->bitmap_group_sequence.size() > 0 && this->bitmap_group_sequence[this->bitmap_group_sequence.size() - 1].first_bitmap_index == NULL_INDEX) {
-            this->bitmap_group_sequence.erase(this->bitmap_group_sequence.begin() + (this->bitmap_group_sequence.size() - 1));
+        while(bitmap->bitmap_group_sequence.size() > 0 && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].first_bitmap_index == NULL_INDEX) {
+            bitmap->bitmap_group_sequence.erase(bitmap->bitmap_group_sequence.begin() + (bitmap->bitmap_group_sequence.size() - 1));
         }
 
-        auto max_size = this->processed_pixel_data.size();
-        auto *pixel_data = this->processed_pixel_data.data();
+        auto max_size = bitmap->processed_pixel_data.size();
+        auto *pixel_data = bitmap->processed_pixel_data.data();
 
-        for(auto &data : this->bitmap_data) {
+        for(auto &data : bitmap->bitmap_data) {
             // DXTn bitmaps cannot be swizzled
             if(data.flags.swizzled && data.flags.compressed) {
                 eprintf_error("Swizzled bitmaps are not supported for compressed bitmaps");
@@ -260,7 +260,7 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
 
-            std::size_t data_index = &data - this->bitmap_data.data();
+            std::size_t data_index = &data - bitmap->bitmap_data.data();
             bool compressed = data.flags.compressed;
             auto format = data.format;
             auto type = data.type;
@@ -275,7 +275,7 @@ namespace Invader::Parser {
             if(!workload.hide_pedantic_warnings) {
                 bool exceeded = false;
                 bool non_power_of_two = (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth));
-                if(this->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
+                if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
                     exceeded = true;
                 }
@@ -349,5 +349,13 @@ namespace Invader::Parser {
             workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
             data.pixel_data_size = static_cast<std::uint32_t>(size);
         }
+    }
+
+    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        do_post_cache_parse(this, tag);
+    }
+
+    void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        do_pre_compile(this, workload, tag_index);
     }
 }

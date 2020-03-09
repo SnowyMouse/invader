@@ -111,7 +111,6 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
-        hpp.write("    private:\n")
 
         if postprocess_hek_data:
             hpp.write("        void postprocess_hek_data();\n")
