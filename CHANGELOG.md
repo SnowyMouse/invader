@@ -30,6 +30,8 @@ This is used for recording Invader's changes. This changelog is based on
   being put into a map
 
 ### Fixed
+- invader-build: MCC maps no longer include bitmap or sound data inside of the
+  cache file since it isn't even used. This should make maps smaller.
 - invader-edit-qt: Fixed a performance issue on Windows
 - invader-edit-qt: Fixed out-of-bounds enums crashing. For tags that have
   invalid enums, you should use invader-bludgeon to resolve them.

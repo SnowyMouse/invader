@@ -322,14 +322,16 @@ namespace Invader {
             bsp_size += this_bsp_size;
         }
 
-        // Get the bitmap and sound data in there
-        if(this->verbose) {
-            oprintf("Building raw data...");
-            oflush();
-        }
-        this->generate_bitmap_sound_data(end_of_bsps);
-        if(this->verbose) {
-            oprintf(" done\n");
+        // Get the bitmap and sound data in there (anniversary maps do not have this present in the cache file)
+        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            if(this->verbose) {
+                oprintf("Building raw data...");
+                oflush();
+            }
+            this->generate_bitmap_sound_data(end_of_bsps);
+            if(this->verbose) {
+                oprintf(" done\n");
+            }
         }
 
         std::vector<std::byte> final_data;
