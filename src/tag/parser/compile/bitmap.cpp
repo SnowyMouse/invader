@@ -91,7 +91,7 @@ namespace Invader::Parser {
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
         this->pointer = 0xFFFFFFFF;
-        this->flags.external = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+        this->flags.external = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY; // anniversary is always external
         this->flags.make_it_actually_work = 1;
 
         // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
@@ -216,7 +216,10 @@ namespace Invader::Parser {
 
             bitmap_data.pixel_data_offset = static_cast<std::size_t>(this->processed_pixel_data.size());
             this->processed_pixel_data.insert(this->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+
+            // Unset these flags
             bitmap_data.flags.external = 0;
+            bitmap_data.flags.make_it_actually_work = 0;
         }
     }
 
