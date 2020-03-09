@@ -137,27 +137,6 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        this->maximum_bend_per_second = std::pow(this->maximum_bend_per_second, TICK_RATE);
-        if(tag.is_indexed()) {
-            auto &tag_data = *(reinterpret_cast<const struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(0, 0)) - 1);
-            this->format = tag_data.format;
-            this->channel_count = tag_data.channel_count;
-        }
-    }
-
-    void Invader::Parser::SoundPermutation::post_cache_deformat() {
-        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-            auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
-            auto *end = start + this->samples.size() / sizeof(*start);
-
-            while(start < end) {
-                *reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(start) = *start;
-                start++;
-            }
-        }
-    }
-
     template <typename A, typename B> static void swap_endian_array(A *to, const B *from, std::size_t count) {
         for(std::size_t i = 0; i < count; i++) {
             to[i] = from[i];

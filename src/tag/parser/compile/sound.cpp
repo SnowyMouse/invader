@@ -170,8 +170,33 @@ namespace Invader::Parser {
         }
     }
 
+    template <typename T> static void sound_post_cache_parse(T *sound, const Invader::Tag &tag) {
+        sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, TICK_RATE);
+        if(tag.is_indexed()) {
+            auto &tag_data = *(reinterpret_cast<const typename T::struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(0, 0)) - 1);
+            sound->format = tag_data.format;
+            sound->channel_count = tag_data.channel_count;
+        }
+    }
+
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
+    }
+
+    void Invader::Parser::Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        sound_post_cache_parse(this, tag);
+    }
+
+    void Invader::Parser::SoundPermutation::post_cache_deformat() {
+        if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
+            auto *end = start + this->samples.size() / sizeof(*start);
+
+            while(start < end) {
+                *reinterpret_cast<HEK::BigEndian<std::uint16_t> *>(start) = *start;
+                start++;
+            }
+        }
     }
 
     void SoundLooping::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
