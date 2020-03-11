@@ -11,7 +11,7 @@
 #include <QThread>
 #include <invader/file/file.hpp>
 
-#include "tag_editor_window.hpp"
+#include "../editor/tag_editor_window.hpp"
 
 class QTreeWidget;
 class QMenu;

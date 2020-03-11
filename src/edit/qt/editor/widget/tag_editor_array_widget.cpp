@@ -2,8 +2,8 @@
 
 #include "tag_editor_array_widget.hpp"
 #include "tag_editor_edit_widget_view.hpp"
-#include "tag_editor_window.hpp"
-#include "tag_tree_window.hpp"
+#include "../tag_editor_window.hpp"
+#include "../../tree/tag_tree_window.hpp"
 #include <invader/tag/parser/parser_struct.hpp>
 
 #include <QSpacerItem>

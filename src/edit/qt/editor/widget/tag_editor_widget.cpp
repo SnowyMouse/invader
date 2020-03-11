@@ -2,7 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include "tag_editor_widget.hpp"
-#include "tag_editor_window.hpp"
+#include "../tag_editor_window.hpp"
 #include "tag_editor_edit_widget.hpp"
 #include "tag_editor_array_widget.hpp"
 

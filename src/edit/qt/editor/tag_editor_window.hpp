@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <memory>
 #include <invader/file/file.hpp>
-#include "tag_tree_widget.hpp"
+#include "../tree/tag_tree_widget.hpp"
 
 namespace Invader::Parser {
     struct ParserStruct;

@@ -12,10 +12,10 @@
 #include <filesystem>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include "tag_tree_window.hpp"
-#include "tag_editor_widget.hpp"
-#include "tag_editor_edit_widget_view.hpp"
-#include "tag_tree_dialog.hpp"
+#include "../tree/tag_tree_window.hpp"
+#include "widget/tag_editor_widget.hpp"
+#include "widget/tag_editor_edit_widget_view.hpp"
+#include "../tree/tag_tree_dialog.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {

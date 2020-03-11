@@ -5,7 +5,7 @@
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
-#include "tag_tree_window.hpp"
+#include "tree/tag_tree_window.hpp"
 
 int main(int argc, char **argv) {
     using namespace Invader;
