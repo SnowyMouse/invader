@@ -101,13 +101,6 @@ namespace Invader::Parser {
         d.tag_id_only = true;
     }
 
-    void Invader::Parser::Bitmap::postprocess_hek_data() {
-        if(this->compressed_color_plate_data.size() == 0) {
-            this->color_plate_height = 0;
-            this->color_plate_width = 0;
-        }
-    }
-
     template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
         bitmap->postprocess_hek_data();
 
@@ -351,11 +344,34 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    template <typename T> static void do_postprocess_hek_data(T *bitmap) {
+        if(bitmap->compressed_color_plate_data.size() == 0) {
+            bitmap->color_plate_height = 0;
+            bitmap->color_plate_width = 0;
+        }
+    }
+
+    void Bitmap::postprocess_hek_data() {
+        do_postprocess_hek_data(this);
+    }
+
+    void Bitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         do_post_cache_parse(this, tag);
     }
 
     void Bitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        do_pre_compile(this, workload, tag_index);
+    }
+
+    void ExtendedBitmap::postprocess_hek_data() {
+        do_postprocess_hek_data(this);
+    }
+
+    void ExtendedBitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        do_post_cache_parse(this, tag);
+    }
+
+    void ExtendedBitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         do_pre_compile(this, workload, tag_index);
     }
 }
