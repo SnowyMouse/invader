@@ -91,6 +91,7 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
         cpp.write("            throw std::exception();\n")
         cpp.write("        }\n")
         cpp.write("    }\n")
+        f.write("\n")
 
 
     # Write enums at the top first, then bitfields
@@ -190,7 +191,7 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
         f.write("        }\n")
 
         f.write("    };\n")
-        f.write("    static_assert(sizeof({}<NativeEndian>) == 0x{:X});\n".format(s["name"], s["size"]))
+        f.write("    static_assert(sizeof({}<NativeEndian>) == 0x{:X});\n\n".format(s["name"], s["size"]))
 
     f.write("}\n\n")
     f.write("#endif\n")
