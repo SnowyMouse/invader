@@ -27,6 +27,7 @@ namespace Invader::Parser {
         const char *comment,
         void *      object,
         ValueType   type,
+        const char *unit,
         std::size_t count,
         bool        bounds,
         bool        read_only
@@ -37,6 +38,7 @@ namespace Invader::Parser {
         address(object),
         count(count),
         bounds(bounds),
+        unit(unit),
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(

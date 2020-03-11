@@ -1555,7 +1555,9 @@
             },
             {
                 "name": "spawn time",
-                "type": "uint16"
+                "type": "uint16",
+                "unit": "seconds",
+                "comment": "0 = use default spawn time in item_collection"
             },
             {
                 "type": "pad",

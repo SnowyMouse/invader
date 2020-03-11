@@ -14,8 +14,9 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
         name = "\"{}\"".format(struct["name"])
         member_name = struct["member_name"]
         member_name_q = "\"{}\"".format(member_name)
-        comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"])
+        comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"].replace("\"", "\\\""))
         struct_read_only = "true" if ((read_only or ("read_only" in struct and struct["read_only"])) and not ("read_only" in struct and struct["read_only"] == False)) else "false"
+        unit = "nullptr" if "unit" not in struct else "\"{}\"".format(struct["unit"].replace("\"", "\\\""))
 
         first_arguments = "{},{},{},&this->{}".format(name, member_name_q, comment, struct["member_name"])
         type = struct["type"]
@@ -66,7 +67,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             bounds = "true" if bounds_b else "false"
             count = 1 * (2 if bounds_b else 1)
 
-            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {});\n".format(first_arguments, type.upper(), count, bounds, struct_read_only))
+            cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, {}, {});\n".format(first_arguments, type.upper(), unit, count, bounds, struct_read_only))
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")

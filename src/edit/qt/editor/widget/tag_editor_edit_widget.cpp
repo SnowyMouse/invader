@@ -349,10 +349,7 @@ namespace Invader::EditQt {
             add_widget();
         }
 
-        if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
-            layout->addWidget(widgets_array.emplace_back(new QLabel("degrees")));
-        }
-        else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
+        if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
             // Set up dependency stuff
             auto *combobox = reinterpret_cast<QComboBox *>(this->widgets[0]);
             int comboWidth = combobox->fontMetrics().boundingRect("shader_transparent_chicago_extended").width() * 5 / 4;
@@ -408,6 +405,15 @@ namespace Invader::EditQt {
             }
             list->setFocusPolicy(Qt::NoFocus);
             list->setSelectionMode(QAbstractItemView::NoSelection);
+        }
+
+        // Add any suffix if needed
+        const char *unit = value->get_unit();
+        if(unit == nullptr && value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
+            unit = "degrees";
+        }
+        if(unit) {
+            layout->addWidget(widgets_array.emplace_back(new QLabel(unit)));
         }
 
         title_label->setMinimumWidth(label_width);

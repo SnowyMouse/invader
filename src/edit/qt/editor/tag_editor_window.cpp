@@ -6,9 +6,11 @@
 #include <QScrollArea>
 #include <QLabel>
 #include <QApplication>
+#include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
-#include <QSpacerItem>
+#include <QHBoxLayout>
+#include <QFrame>
 #include <filesystem>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
@@ -86,12 +88,61 @@ namespace Invader::EditQt {
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
 
+        // Add another widget to our view?
+        QFrame *extra_widget_panel = nullptr;
+        QPushButton *extra_widget;
+        switch(tag_file.tag_class_int) {
+            // case TagClassInt::TAG_CLASS_BITMAP:
+            // case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+            //     extra_widget = new QPushButton("Preview bitmap");
+            //     break;
+            // case TagClassInt::TAG_CLASS_SOUND:
+            //     extra_widget = new QPushButton("Preview sound");
+            //     break;
+            // case TagClassInt::TAG_CLASS_GBXMODEL:
+            // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
+            //     extra_widget = new QPushButton("Preview model");
+            //     break;
+            // case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+            // case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            // case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            // case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
+            // case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
+            //     extra_widget = new QPushButton("Preview interface");
+            //     break;
+            // case TagClassInt::TAG_CLASS_SHADER:
+            // case TagClassInt::TAG_CLASS_SHADER_MODEL:
+            // case TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
+            // case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+            //     extra_widget = new QPushButton("Preview shader");
+            //     break;
+            // case TagClassInt::TAG_CLASS_SCENARIO:
+            //     extra_widget = new QPushButton("Edit scenario");
+            //     break;
+            default:
+                extra_widget = nullptr;
+                break;
+        }
+        if(extra_widget) {
+            extra_widget_panel = new QFrame();
+            QHBoxLayout *extra_layout = new QHBoxLayout();
+            extra_widget_panel->setLayout(extra_layout);
+            extra_layout->addWidget(extra_widget);
+            extra_layout->setMargin(4);
+        }
+
         // Set up the scroll area and widgets
         auto *scroll_view = new QScrollArea();
         scroll_view->setWidgetResizable(true);
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
         this->setCentralWidget(scroll_view);
-        scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true));
+        scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true, extra_widget_panel));
 
         // View menu
         auto *view_menu = bar->addMenu("View");

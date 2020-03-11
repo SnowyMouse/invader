@@ -19,8 +19,9 @@ namespace Invader::EditQt {
          * @param values        struct values
          * @param editor_window editor window
          * @param primary       is the primary widget of the window
+         * @param extra_widget  additional widget to add
          */
-        TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary);
+        TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary, QWidget *extra_widget = nullptr);
 
     private:
         std::vector<Parser::ParserStructValue> values;

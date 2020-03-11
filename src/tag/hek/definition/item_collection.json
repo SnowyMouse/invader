@@ -37,8 +37,9 @@
                 "compound": true
             },
             {
-                "name": "spawn time",
-                "type": "uint16"
+                "name": "default spawn time",
+                "type": "uint16",
+                "unit": "seconds"
             },
             {
                 "type": "pad",

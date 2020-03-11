@@ -149,6 +149,14 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get the unit
+         * @return unit
+         */
+        const char *get_unit() const noexcept {
+            return this->unit;
+        }
+
+        /**
          * Set the string value
          * @param string string value
          */
@@ -627,6 +635,7 @@ namespace Invader::Parser {
          * @param comment     comments
          * @param object      pointer to the object
          * @param type        type of value
+         * @param unit        unit to use
          * @param count       number of values (if multiple values or bounds)
          * @param bounds      whether or not this is bounds
          * @param read_only   value is read only
@@ -637,6 +646,7 @@ namespace Invader::Parser {
             const char *comment,
             void *      object,
             ValueType   type,
+            const char *unit = nullptr,
             std::size_t count = 1,
             bool        bounds = false,
             bool        read_only = false
@@ -651,6 +661,7 @@ namespace Invader::Parser {
         std::vector<TagClassInt> allowed_classes;
         std::size_t count = 1;
         bool bounds = false;
+        const char *unit = nullptr;
 
         get_object_in_array_fn_type get_object_in_array_fn = nullptr;
         get_array_size_fn_type get_array_size_fn = nullptr;
