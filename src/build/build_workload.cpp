@@ -647,6 +647,7 @@ namespace Invader {
             COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+            COMPILE_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
@@ -670,7 +671,18 @@ namespace Invader {
                 tag_data_parsed.compile(*this, tag_index, new_ptr.struct_index, bsp);
                 break;
             }
-            default:
+            case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
+            case TagClassInt::TAG_CLASS_SPHEROID:
+            case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
+            case TagClassInt::TAG_CLASS_MODEL:
+            case TagClassInt::TAG_CLASS_NONE:
+            case TagClassInt::TAG_CLASS_NULL:
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case TagClassInt::TAG_CLASS_NEW_FONT:
+            case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 throw UnknownTagClassException();
         }
     }

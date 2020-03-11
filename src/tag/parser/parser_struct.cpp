@@ -713,6 +713,7 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE) \
                                   DO_TAG_CLASS(Effect, TAG_CLASS_EFFECT) \
                                   DO_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT) \
+                                  DO_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP) \
                                   DO_TAG_CLASS(Flag, TAG_CLASS_FLAG) \
                                   DO_TAG_CLASS(Fog, TAG_CLASS_FOG) \
                                   DO_TAG_CLASS(Font, TAG_CLASS_FONT) \
@@ -792,6 +793,12 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
+            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }
 
@@ -815,6 +822,12 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
+            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }
 

@@ -95,6 +95,7 @@ namespace Invader::Extraction {
             EXTRACT_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             EXTRACT_TAG_CLASS(Wind, TAG_CLASS_WIND)
             EXTRACT_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+            EXTRACT_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
 
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 HEK::TagFileHeader tag_data_header(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
@@ -110,9 +111,15 @@ namespace Invader::Extraction {
             case TagClassInt::TAG_CLASS_MODEL:
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case TagClassInt::TAG_CLASS_NEW_FONT:
+            case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }
-        
+
         eprintf_error("Tag class %s is unsupported", tag_class_to_extension(tag_class_int));
 
         throw InvalidTagDataException();

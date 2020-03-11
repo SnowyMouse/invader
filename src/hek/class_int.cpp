@@ -5,8 +5,7 @@
 #include <invader/hek/class_int.hpp>
 
 namespace Invader::HEK {
-    // Check the first byte. If they're equal, do strcmp. Otherwise it's not the same. This is a little faster than just doing strcmp.
-    #define EQUAL(a, b) a[0] == b[0] ? std::strcmp(a, b) == 0 : false
+    #define MATCH_TAG_CLASS(check_extension,tag_class_int) else if(std::strcmp(extension, check_extension) == 0) return TagClassInt::tag_class_int;
 
     /**
      * Convert a string extension to its respective tag class integer
@@ -17,260 +16,102 @@ namespace Invader::HEK {
         if(extension == nullptr) {
             return TagClassInt::TAG_CLASS_NULL;
         }
-        if(EQUAL(extension,"actor")) {
-            return TagClassInt::TAG_CLASS_ACTOR;
-        }
-        else if(EQUAL(extension,"actor_variant")) {
-            return TagClassInt::TAG_CLASS_ACTOR_VARIANT;
-        }
-        else if(EQUAL(extension,"antenna")) {
-            return TagClassInt::TAG_CLASS_ANTENNA;
-        }
-        else if(EQUAL(extension,"model_animations")) {
-            return TagClassInt::TAG_CLASS_MODEL_ANIMATIONS;
-        }
-        else if(EQUAL(extension,"biped")) {
-            return TagClassInt::TAG_CLASS_BIPED;
-        }
-        else if(EQUAL(extension,"bitmap")) {
-            return TagClassInt::TAG_CLASS_BITMAP;
-        }
-        else if(EQUAL(extension,"spheroid")) {
-            return TagClassInt::TAG_CLASS_SPHEROID;
-        }
-        else if(EQUAL(extension,"continuous_damage_effect")) {
-            return TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT;
-        }
-        else if(EQUAL(extension,"model_collision_geometry")) {
-            return TagClassInt::TAG_CLASS_MODEL_COLLISION_GEOMETRY;
-        }
-        else if(EQUAL(extension,"color_table")) {
-            return TagClassInt::TAG_CLASS_COLOR_TABLE;
-        }
-        else if(EQUAL(extension,"contrail")) {
-            return TagClassInt::TAG_CLASS_CONTRAIL;
-        }
-        else if(EQUAL(extension,"device_control")) {
-            return TagClassInt::TAG_CLASS_DEVICE_CONTROL;
-        }
-        else if(EQUAL(extension,"decal")) {
-            return TagClassInt::TAG_CLASS_DECAL;
-        }
-        else if(EQUAL(extension,"ui_widget_definition")) {
-            return TagClassInt::TAG_CLASS_UI_WIDGET_DEFINITION;
-        }
-        else if(EQUAL(extension,"input_device_defaults")) {
-            return TagClassInt::TAG_CLASS_INPUT_DEVICE_DEFAULTS;
-        }
-        else if(EQUAL(extension,"device")) {
-            return TagClassInt::TAG_CLASS_DEVICE;
-        }
-        else if(EQUAL(extension,"detail_object_collection")) {
-            return TagClassInt::TAG_CLASS_DETAIL_OBJECT_COLLECTION;
-        }
-        else if(EQUAL(extension,"effect")) {
-            return TagClassInt::TAG_CLASS_EFFECT;
-        }
-        else if(EQUAL(extension,"equipment")) {
-            return TagClassInt::TAG_CLASS_EQUIPMENT;
-        }
-        else if(EQUAL(extension,"flag")) {
-            return TagClassInt::TAG_CLASS_FLAG;
-        }
-        else if(EQUAL(extension,"fog")) {
-            return TagClassInt::TAG_CLASS_FOG;
-        }
-        else if(EQUAL(extension,"font")) {
-            return TagClassInt::TAG_CLASS_FONT;
-        }
-        else if(EQUAL(extension,"material_effects")) {
-            return TagClassInt::TAG_CLASS_MATERIAL_EFFECTS;
-        }
-        else if(EQUAL(extension,"garbage")) {
-            return TagClassInt::TAG_CLASS_GARBAGE;
-        }
-        else if(EQUAL(extension,"glow")) {
-            return TagClassInt::TAG_CLASS_GLOW;
-        }
-        else if(EQUAL(extension,"grenade_hud_interface")) {
-            return TagClassInt::TAG_CLASS_GRENADE_HUD_INTERFACE;
-        }
-        else if(EQUAL(extension,"hud_message_text")) {
-            return TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
-        }
-        else if(EQUAL(extension,"hud_number")) {
-            return TagClassInt::TAG_CLASS_HUD_NUMBER;
-        }
-        else if(EQUAL(extension,"hud_globals")) {
-            return TagClassInt::TAG_CLASS_HUD_GLOBALS;
-        }
-        else if(EQUAL(extension,"item")) {
-            return TagClassInt::TAG_CLASS_ITEM;
-        }
-        else if(EQUAL(extension,"item_collection")) {
-            return TagClassInt::TAG_CLASS_ITEM_COLLECTION;
-        }
-        else if(EQUAL(extension,"damage_effect")) {
-            return TagClassInt::TAG_CLASS_DAMAGE_EFFECT;
-        }
-        else if(EQUAL(extension,"lens_flare")) {
-            return TagClassInt::TAG_CLASS_LENS_FLARE;
-        }
-        else if(EQUAL(extension,"lightning")) {
-            return TagClassInt::TAG_CLASS_LIGHTNING;
-        }
-        else if(EQUAL(extension,"device_light_fixture")) {
-            return TagClassInt::TAG_CLASS_DEVICE_LIGHT_FIXTURE;
-        }
-        else if(EQUAL(extension,"light")) {
-            return TagClassInt::TAG_CLASS_LIGHT;
-        }
-        else if(EQUAL(extension,"sound_looping")) {
-            return TagClassInt::TAG_CLASS_SOUND_LOOPING;
-        }
-        else if(EQUAL(extension,"device_machine")) {
-            return TagClassInt::TAG_CLASS_DEVICE_MACHINE;
-        }
-        else if(EQUAL(extension,"globals")) {
-            return TagClassInt::TAG_CLASS_GLOBALS;
-        }
-        else if(EQUAL(extension,"meter")) {
-            return TagClassInt::TAG_CLASS_METER;
-        }
-        else if(EQUAL(extension,"light_volume")) {
-            return TagClassInt::TAG_CLASS_LIGHT_VOLUME;
-        }
-        else if(EQUAL(extension,"gbxmodel")) {
-            return TagClassInt::TAG_CLASS_GBXMODEL;
-        }
-        else if(EQUAL(extension,"model")) {
-            return TagClassInt::TAG_CLASS_MODEL;
-        }
-        else if(EQUAL(extension,"multiplayer_scenario_description")) {
-            return TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION;
-        }
-        else if(EQUAL(extension,"preferences_network_game")) {
-            return TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME;
-        }
-        else if(EQUAL(extension,"none")) {
-            return TagClassInt::TAG_CLASS_NONE;
-        }
-        else if(EQUAL(extension,"object")) {
-            return TagClassInt::TAG_CLASS_OBJECT;
-        }
-        else if(EQUAL(extension,"particle")) {
-            return TagClassInt::TAG_CLASS_PARTICLE;
-        }
-        else if(EQUAL(extension,"particle_system")) {
-            return TagClassInt::TAG_CLASS_PARTICLE_SYSTEM;
-        }
-        else if(EQUAL(extension,"physics")) {
-            return TagClassInt::TAG_CLASS_PHYSICS;
-        }
-        else if(EQUAL(extension,"placeholder")) {
-            return TagClassInt::TAG_CLASS_PLACEHOLDER;
-        }
-        else if(EQUAL(extension,"point_physics")) {
-            return TagClassInt::TAG_CLASS_POINT_PHYSICS;
-        }
-        else if(EQUAL(extension,"projectile")) {
-            return TagClassInt::TAG_CLASS_PROJECTILE;
-        }
-        else if(EQUAL(extension,"weather_particle_system")) {
-            return TagClassInt::TAG_CLASS_WEATHER_PARTICLE_SYSTEM;
-        }
-        else if(EQUAL(extension,"scenario_structure_bsp")) {
-            return TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
-        }
-        else if(EQUAL(extension,"scenery")) {
-            return TagClassInt::TAG_CLASS_SCENERY;
-        }
-        else if(EQUAL(extension,"shader_transparent_chicago_extended")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
-        }
-        else if(EQUAL(extension,"shader_transparent_chicago")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO;
-        }
-        else if(EQUAL(extension,"scenario")) {
-            return TagClassInt::TAG_CLASS_SCENARIO;
-        }
-        else if(EQUAL(extension,"shader_environment")) {
-            return TagClassInt::TAG_CLASS_SHADER_ENVIRONMENT;
-        }
-        else if(EQUAL(extension,"shader_transparent_glass")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS;
-        }
-        else if(EQUAL(extension,"shader")) {
-            return TagClassInt::TAG_CLASS_SHADER;
-        }
-        else if(EQUAL(extension,"sky")) {
-            return TagClassInt::TAG_CLASS_SKY;
-        }
-        else if(EQUAL(extension,"shader_transparent_meter")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER;
-        }
-        else if(EQUAL(extension,"sound")) {
-            return TagClassInt::TAG_CLASS_SOUND;
-        }
-        else if(EQUAL(extension,"sound_environment")) {
-            return TagClassInt::TAG_CLASS_SOUND_ENVIRONMENT;
-        }
-        else if(EQUAL(extension,"shader_model")) {
-            return TagClassInt::TAG_CLASS_SHADER_MODEL;
-        }
-        else if(EQUAL(extension,"shader_transparent_generic")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC;
-        }
-        else if(EQUAL(extension,"ui_widget_collection")) {
-            return TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION;
-        }
-        else if(EQUAL(extension,"shader_transparent_plasma")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA;
-        }
-        else if(EQUAL(extension,"sound_scenery")) {
-            return TagClassInt::TAG_CLASS_SOUND_SCENERY;
-        }
-        else if(EQUAL(extension,"string_list")) {
-            return TagClassInt::TAG_CLASS_STRING_LIST;
-        }
-        else if(EQUAL(extension,"shader_transparent_water")) {
-            return TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER;
-        }
-        else if(EQUAL(extension,"tag_collection")) {
-            return TagClassInt::TAG_CLASS_TAG_COLLECTION;
-        }
-        else if(EQUAL(extension,"camera_track")) {
-            return TagClassInt::TAG_CLASS_CAMERA_TRACK;
-        }
-        else if(EQUAL(extension,"dialogue")) {
-            return TagClassInt::TAG_CLASS_DIALOGUE;
-        }
-        else if(EQUAL(extension,"unit_hud_interface")) {
-            return TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE;
-        }
-        else if(EQUAL(extension,"unit")) {
-            return TagClassInt::TAG_CLASS_UNIT;
-        }
-        else if(EQUAL(extension,"unicode_string_list")) {
-            return TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
-        }
-        else if(EQUAL(extension,"virtual_keyboard")) {
-            return TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD;
-        }
-        else if(EQUAL(extension,"vehicle")) {
-            return TagClassInt::TAG_CLASS_VEHICLE;
-        }
-        else if(EQUAL(extension,"weapon")) {
-            return TagClassInt::TAG_CLASS_WEAPON;
-        }
-        else if(EQUAL(extension,"wind")) {
-            return TagClassInt::TAG_CLASS_WIND;
-        }
-        else if(EQUAL(extension,"weapon_hud_interface")) {
-            return TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE;
-        }
-        else {
-            return TagClassInt::TAG_CLASS_NULL;
-        }
+
+        MATCH_TAG_CLASS("actor", TAG_CLASS_ACTOR)
+        MATCH_TAG_CLASS("actor_variant", TAG_CLASS_ACTOR_VARIANT)
+        MATCH_TAG_CLASS("antenna", TAG_CLASS_ANTENNA)
+        MATCH_TAG_CLASS("model_animations", TAG_CLASS_MODEL_ANIMATIONS)
+        MATCH_TAG_CLASS("biped", TAG_CLASS_BIPED)
+        MATCH_TAG_CLASS("bitmap", TAG_CLASS_BITMAP)
+        MATCH_TAG_CLASS("spheroid", TAG_CLASS_SPHEROID)
+        MATCH_TAG_CLASS("continuous_damage_effect", TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT)
+        MATCH_TAG_CLASS("model_collision_geometry", TAG_CLASS_MODEL_COLLISION_GEOMETRY)
+        MATCH_TAG_CLASS("color_table", TAG_CLASS_COLOR_TABLE)
+        MATCH_TAG_CLASS("contrail", TAG_CLASS_CONTRAIL)
+        MATCH_TAG_CLASS("device_control", TAG_CLASS_DEVICE_CONTROL)
+        MATCH_TAG_CLASS("decal", TAG_CLASS_DECAL)
+        MATCH_TAG_CLASS("ui_widget_definition", TAG_CLASS_UI_WIDGET_DEFINITION)
+        MATCH_TAG_CLASS("input_device_defaults", TAG_CLASS_INPUT_DEVICE_DEFAULTS)
+        MATCH_TAG_CLASS("device", TAG_CLASS_DEVICE)
+        MATCH_TAG_CLASS("detail_object_collection", TAG_CLASS_DETAIL_OBJECT_COLLECTION)
+        MATCH_TAG_CLASS("effect", TAG_CLASS_EFFECT)
+        MATCH_TAG_CLASS("equipment", TAG_CLASS_EQUIPMENT)
+        MATCH_TAG_CLASS("flag", TAG_CLASS_FLAG)
+        MATCH_TAG_CLASS("fog", TAG_CLASS_FOG)
+        MATCH_TAG_CLASS("font", TAG_CLASS_FONT)
+        MATCH_TAG_CLASS("material_effects", TAG_CLASS_MATERIAL_EFFECTS)
+        MATCH_TAG_CLASS("garbage", TAG_CLASS_GARBAGE)
+        MATCH_TAG_CLASS("glow", TAG_CLASS_GLOW)
+        MATCH_TAG_CLASS("grenade_hud_interface", TAG_CLASS_GRENADE_HUD_INTERFACE)
+        MATCH_TAG_CLASS("hud_message_text", TAG_CLASS_HUD_MESSAGE_TEXT)
+        MATCH_TAG_CLASS("hud_number", TAG_CLASS_HUD_NUMBER)
+        MATCH_TAG_CLASS("hud_globals", TAG_CLASS_HUD_GLOBALS)
+        MATCH_TAG_CLASS("item", TAG_CLASS_ITEM)
+        MATCH_TAG_CLASS("item_collection", TAG_CLASS_ITEM_COLLECTION)
+        MATCH_TAG_CLASS("damage_effect", TAG_CLASS_DAMAGE_EFFECT)
+        MATCH_TAG_CLASS("lens_flare", TAG_CLASS_LENS_FLARE)
+        MATCH_TAG_CLASS("lightning", TAG_CLASS_LIGHTNING)
+        MATCH_TAG_CLASS("device_light_fixture", TAG_CLASS_DEVICE_LIGHT_FIXTURE)
+        MATCH_TAG_CLASS("light", TAG_CLASS_LIGHT)
+        MATCH_TAG_CLASS("sound_looping", TAG_CLASS_SOUND_LOOPING)
+        MATCH_TAG_CLASS("device_machine", TAG_CLASS_DEVICE_MACHINE)
+        MATCH_TAG_CLASS("globals", TAG_CLASS_GLOBALS)
+        MATCH_TAG_CLASS("meter", TAG_CLASS_METER)
+        MATCH_TAG_CLASS("light_volume", TAG_CLASS_LIGHT_VOLUME)
+        MATCH_TAG_CLASS("gbxmodel", TAG_CLASS_GBXMODEL)
+        MATCH_TAG_CLASS("model", TAG_CLASS_MODEL)
+        MATCH_TAG_CLASS("multiplayer_scenario_description", TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
+        MATCH_TAG_CLASS("preferences_network_game", TAG_CLASS_PREFERENCES_NETWORK_GAME)
+        MATCH_TAG_CLASS("none", TAG_CLASS_NONE)
+        MATCH_TAG_CLASS("object", TAG_CLASS_OBJECT)
+        MATCH_TAG_CLASS("particle", TAG_CLASS_PARTICLE)
+        MATCH_TAG_CLASS("particle_system", TAG_CLASS_PARTICLE_SYSTEM)
+        MATCH_TAG_CLASS("physics", TAG_CLASS_PHYSICS)
+        MATCH_TAG_CLASS("placeholder", TAG_CLASS_PLACEHOLDER)
+        MATCH_TAG_CLASS("point_physics", TAG_CLASS_POINT_PHYSICS)
+        MATCH_TAG_CLASS("projectile", TAG_CLASS_PROJECTILE)
+        MATCH_TAG_CLASS("weather_particle_system", TAG_CLASS_WEATHER_PARTICLE_SYSTEM)
+        MATCH_TAG_CLASS("scenario_structure_bsp", TAG_CLASS_SCENARIO_STRUCTURE_BSP)
+        MATCH_TAG_CLASS("scenery", TAG_CLASS_SCENERY)
+        MATCH_TAG_CLASS("shader_transparent_chicago_extended", TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
+        MATCH_TAG_CLASS("shader_transparent_chicago", TAG_CLASS_SHADER_TRANSPARENT_CHICAGO)
+        MATCH_TAG_CLASS("scenario", TAG_CLASS_SCENARIO)
+        MATCH_TAG_CLASS("shader_environment", TAG_CLASS_SHADER_ENVIRONMENT)
+        MATCH_TAG_CLASS("shader_transparent_glass", TAG_CLASS_SHADER_TRANSPARENT_GLASS)
+        MATCH_TAG_CLASS("shader", TAG_CLASS_SHADER)
+        MATCH_TAG_CLASS("sky", TAG_CLASS_SKY)
+        MATCH_TAG_CLASS("shader_transparent_meter", TAG_CLASS_SHADER_TRANSPARENT_METER)
+        MATCH_TAG_CLASS("sound", TAG_CLASS_SOUND)
+        MATCH_TAG_CLASS("sound_environment", TAG_CLASS_SOUND_ENVIRONMENT)
+        MATCH_TAG_CLASS("shader_model", TAG_CLASS_SHADER_MODEL)
+        MATCH_TAG_CLASS("shader_transparent_generic", TAG_CLASS_SHADER_TRANSPARENT_GENERIC)
+        MATCH_TAG_CLASS("ui_widget_collection", TAG_CLASS_UI_WIDGET_COLLECTION)
+        MATCH_TAG_CLASS("shader_transparent_plasma", TAG_CLASS_SHADER_TRANSPARENT_PLASMA)
+        MATCH_TAG_CLASS("sound_scenery", TAG_CLASS_SOUND_SCENERY)
+        MATCH_TAG_CLASS("string_list", TAG_CLASS_STRING_LIST)
+        MATCH_TAG_CLASS("shader_transparent_water", TAG_CLASS_SHADER_TRANSPARENT_WATER)
+        MATCH_TAG_CLASS("tag_collection", TAG_CLASS_TAG_COLLECTION)
+        MATCH_TAG_CLASS("camera_track", TAG_CLASS_CAMERA_TRACK)
+        MATCH_TAG_CLASS("dialogue", TAG_CLASS_DIALOGUE)
+        MATCH_TAG_CLASS("unit_hud_interface", TAG_CLASS_UNIT_HUD_INTERFACE)
+        MATCH_TAG_CLASS("unit", TAG_CLASS_UNIT)
+        MATCH_TAG_CLASS("unicode_string_list", TAG_CLASS_UNICODE_STRING_LIST)
+        MATCH_TAG_CLASS("virtual_keyboard", TAG_CLASS_VIRTUAL_KEYBOARD)
+        MATCH_TAG_CLASS("vehicle", TAG_CLASS_VEHICLE)
+        MATCH_TAG_CLASS("weapon", TAG_CLASS_WEAPON)
+        MATCH_TAG_CLASS("wind", TAG_CLASS_WIND)
+        MATCH_TAG_CLASS("weapon_hud_interface", TAG_CLASS_WEAPON_HUD_INTERFACE)
+
+        MATCH_TAG_CLASS("extended_bitmap", TAG_CLASS_EXTENDED_BITMAP)
+        MATCH_TAG_CLASS("extended_sound", TAG_CLASS_EXTENDED_SOUND)
+        MATCH_TAG_CLASS("new_font", TAG_CLASS_NEW_FONT)
+        MATCH_TAG_CLASS("new_ui_widget_definition", TAG_CLASS_NEW_UI_WIDGET_DEFINITION)
+        MATCH_TAG_CLASS("new_unit_hud_interface", TAG_CLASS_NEW_UNIT_HUD_INTERFACE)
+        MATCH_TAG_CLASS("new_weapon_hud_interface", TAG_CLASS_NEW_WEAPON_HUD_INTERFACE)
+        MATCH_TAG_CLASS("shader_transparent_glsl", TAG_CLASS_SHADER_TRANSPARENT_GLSL)
+
+        return TAG_CLASS_NULL;
     }
+
+    #undef MATCH_TAG_CLASS
 }

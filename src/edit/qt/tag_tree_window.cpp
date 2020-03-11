@@ -362,8 +362,6 @@ namespace Invader::EditQt {
 
         // If we got it, onwards!
         if(dialog.exec() == QDialog::Accepted) {
-            std::fprintf(stderr, "TODO: perform_new()\n");
-
             File::TagFile tag = {};
             tag.tag_class_int = HEK::extension_to_tag_class(dialog.textValue().toLatin1().data());
 

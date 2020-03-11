@@ -91,7 +91,15 @@ namespace Invader::HEK {
         TAG_CLASS_VEHICLE = 0x76656869,
         TAG_CLASS_WEAPON = 0x77656170,
         TAG_CLASS_WIND = 0x77696E64,
-        TAG_CLASS_WEAPON_HUD_INTERFACE = 0x77706869
+        TAG_CLASS_WEAPON_HUD_INTERFACE = 0x77706869,
+
+        TAG_CLASS_EXTENDED_BITMAP = 0x65626974,
+        TAG_CLASS_EXTENDED_SOUND = 0x65736E64,
+        TAG_CLASS_NEW_FONT = 0x6E666E74,
+        TAG_CLASS_NEW_UI_WIDGET_DEFINITION = 0x6E757764,
+        TAG_CLASS_NEW_UNIT_HUD_INTERFACE = 0x6E756869,
+        TAG_CLASS_NEW_WEAPON_HUD_INTERFACE = 0x6E776869,
+        TAG_CLASS_SHADER_TRANSPARENT_GLSL = 0x7374676C
     };
 
     /**
@@ -290,6 +298,20 @@ namespace Invader::HEK {
              return "wind";
          case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
              return "weapon_hud_interface";
+         case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+             return "extended_bitmap";
+         case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+             return "extended_sound";
+         case TagClassInt::TAG_CLASS_NEW_FONT:
+             return "new_font";
+         case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+             return "new_ui_widget_definition";
+         case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
+             return "new_unit_hud_interface";
+         case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+             return "new_weapon_hud_interface";
+         case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+             return "new_shader_transparent_glsl";
          case TagClassInt::TAG_CLASS_NULL:
              break;
          }

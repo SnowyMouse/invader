@@ -1,0 +1,51 @@
+[
+    {
+        "name": "ExtendedBitmapFlags",
+        "fields": [
+            "dither alpha",
+            "dither color",
+            "use Xbox multipurpose channel order"
+        ],
+        "type": "bitfield",
+        "width": 16
+    },
+    {
+        "name": "ExtendedBitmapMipmapScaling",
+        "options": [
+            "linear",
+            "nearest mipmap alpha",
+            "nearest mipmap alpha and color"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ExtendedBitmap",
+        "groups": [
+            {
+                "name": "Extended Bitmap Data",
+                "description": "Invader-specific bitmap data",
+                "first": "extended flags"
+            }
+        ],
+        "fields": [
+            {
+                "name": "extended flags",
+                "type": "ExtendedBitmapFlags"
+            },
+            {
+                "name": "mipmap scaling",
+                "type": "ExtendedBitmapMipmapScaling"
+            },
+            {
+                "type": "pad",
+                "size": 60
+            }
+        ],
+        "type": "struct",
+        "pre_compile": true,
+        "post_cache_parse": true,
+        "postprocess_hek_data": true,
+        "size": 172,
+        "inherits": "Bitmap"
+    }
+]
