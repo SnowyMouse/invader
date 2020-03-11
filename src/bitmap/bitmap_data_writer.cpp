@@ -3,7 +3,7 @@
 #define STB_DXT_USE_ROUNDING_BIAS
 #include "stb/stb_dxt.h"
 
-#include <invader/bitmap/bitmap_data_writer.hpp>
+#include "bitmap_data_writer.hpp"
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/printf.hpp>
 

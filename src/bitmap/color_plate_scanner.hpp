@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 #include <optional>
-#include "../tag/hek/definition.hpp"
+#include <invader/tag/hek/definition.hpp>
 
 namespace Invader {
     using BitmapType = HEK::BitmapType;

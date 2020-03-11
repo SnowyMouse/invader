@@ -3,7 +3,7 @@
 #include <optional>
 
 #include <invader/hek/data_type.hpp>
-#include <invader/bitmap/color_plate_scanner.hpp>
+#include "color_plate_scanner.hpp"
 #include <invader/printf.hpp>
 
 namespace Invader {

@@ -47,9 +47,6 @@ set(INVADER_SOURCE_FILES
     src/script/compiler.cpp
     src/script/script_tree.cpp
     src/script/tokenizer.cpp
-    src/bitmap/color_plate_scanner.cpp
-    src/bitmap/image_loader.cpp
-    src/bitmap/bitmap_data_writer.cpp
     src/compress/ceaflate.cpp
     src/compress/compression.cpp
     src/sound/sound_encoder_flac.cpp
@@ -95,7 +92,6 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/scenario_structure_bsp.cpp
     src/tag/parser/compile/shader.cpp
     src/tag/parser/compile/sound.cpp
-    src/bitmap/stb/stb_impl.c
 
     src/crc/crc32.c
     src/crc/crc_spoof.c
@@ -208,7 +204,7 @@ endif()
 set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -Wno-unused-function)
 
 # Include that
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${TIFF_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette zstd ${TIFF_LIBRARIES} ${ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)

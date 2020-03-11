@@ -4,7 +4,7 @@
 #define INVADER__BITMAP__BITMAP_DATA_WRITER_HPP
 
 #include "color_plate_scanner.hpp"
-#include "../tag/parser/parser.hpp"
+#include <invader/tag/parser/parser.hpp>
 
 namespace Invader {
     using BitmapFormat = HEK::BitmapFormat;

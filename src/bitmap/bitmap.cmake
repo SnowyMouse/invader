@@ -6,15 +6,21 @@ if(NOT DEFINED ${INVADER_BITMAP})
 endif()
 
 if(${INVADER_BITMAP})
+    find_package(TIFF REQUIRED)
+
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
+        src/bitmap/stb/stb_impl.c
+        src/bitmap/color_plate_scanner.cpp
+        src/bitmap/image_loader.cpp
+        src/bitmap/bitmap_data_writer.cpp
     )
 
     target_include_directories(invader-bitmap
-        PUBLIC ${ZLIB_INCLUDE_DIRS}
+        PUBLIC ${TIFF_INCLUDE_DIRS}
     )
 
-    target_link_libraries(invader-bitmap invader ${ZLIB_LIBRARIES})
+    target_link_libraries(invader-bitmap ${TIFF_LIBRARIES} invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bitmap)
 endif()
