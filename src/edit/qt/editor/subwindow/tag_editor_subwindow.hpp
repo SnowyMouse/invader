@@ -3,12 +3,12 @@
 #ifndef INVADER__EDIT__QT__TAG_EDITOR_SUBWINDOW_HPP
 #define INVADER__EDIT__QT__TAG_EDITOR_SUBWINDOW_HPP
 
-#include <QWindow>
+#include <QMainWindow>
 
 namespace Invader::EditQt {
     class TagEditorWindow;
 
-    class TagEditorSubwindow : public QWindow {
+    class TagEditorSubwindow : public QMainWindow {
         Q_OBJECT
 
     public:
@@ -22,7 +22,14 @@ namespace Invader::EditQt {
          * Instantiate a subwindow
          * @param parent parent window
          */
-        TagEditorSubwindow(QWindow *parent, TagEditorWindow *parent_window);
+        TagEditorSubwindow(TagEditorWindow *parent);
+
+        TagEditorWindow *get_parent_window() noexcept {
+            return this->parent_window;
+        }
+
+    private:
+        TagEditorWindow *parent_window;
     };
 }
 

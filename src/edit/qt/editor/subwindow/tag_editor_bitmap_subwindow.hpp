@@ -19,12 +19,11 @@ namespace Invader::EditQt {
          */
         void update() override;
 
-    private:
         /**
          * Instantiate a subwindow
          * @param parent parent window
          */
-        TagEditorBitmapSubwindow(QWindow *parent, TagEditorWindow *parent_window);
+        TagEditorBitmapSubwindow(TagEditorWindow *parent_window);
     };
 }
 

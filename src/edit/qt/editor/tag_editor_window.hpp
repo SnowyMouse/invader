@@ -76,6 +76,7 @@ namespace Invader::EditQt {
         bool successfully_opened = false;
 
         void toggle_fullscreen();
+        void show_subwindow();
     };
 }
 

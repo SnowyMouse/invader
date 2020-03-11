@@ -19,6 +19,7 @@
 #include "widget/tag_editor_edit_widget_view.hpp"
 #include "../tree/tag_tree_dialog.hpp"
 #include "subwindow/tag_editor_subwindow.hpp"
+#include "subwindow/tag_editor_bitmap_subwindow.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -92,10 +93,11 @@ namespace Invader::EditQt {
         QFrame *extra_widget_panel = nullptr;
         QPushButton *extra_widget;
         switch(tag_file.tag_class_int) {
-            // case TagClassInt::TAG_CLASS_BITMAP:
-            // case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-            //     extra_widget = new QPushButton("Preview bitmap");
-            //     break;
+            case TagClassInt::TAG_CLASS_BITMAP:
+            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+                extra_widget = new QPushButton("Preview bitmap");
+                this->subwindow = new TagEditorBitmapSubwindow(this);
+                break;
             // case TagClassInt::TAG_CLASS_SOUND:
             //     extra_widget = new QPushButton("Preview sound");
             //     break;
@@ -135,6 +137,7 @@ namespace Invader::EditQt {
             extra_widget_panel->setLayout(extra_layout);
             extra_layout->addWidget(extra_widget);
             extra_layout->setMargin(4);
+            connect(extra_widget, &QPushButton::clicked, this, &TagEditorWindow::show_subwindow);
         }
 
         // Set up the scroll area and widgets
@@ -197,6 +200,12 @@ namespace Invader::EditQt {
             accept = true;
         }
 
+        // Delete subwindow
+        if(accept && this->subwindow) {
+            this->subwindow->deleteLater();
+            this->subwindow = nullptr;
+        }
+
         event->setAccepted(accept);
         // TODO: tell the main window that we're closing so it can free things sooner
     }
@@ -247,6 +256,10 @@ namespace Invader::EditQt {
             std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.tag_path.c_str(), asterisk);
         }
         this->setWindowTitle(title_bar);
+
+        if(this->subwindow) {
+            this->subwindow->setWindowTitle(title_bar);
+        }
     }
 
     const File::TagFile &TagEditorWindow::get_file() const noexcept {
@@ -268,5 +281,10 @@ namespace Invader::EditQt {
             this->subwindow = nullptr;
         }
         delete this->parser_data;
+    }
+
+    void TagEditorWindow::show_subwindow() {
+        this->subwindow->show();
+        this->subwindow->setWindowState(Qt::WindowState::WindowActive);
     }
 }
