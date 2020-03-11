@@ -97,7 +97,7 @@ namespace Invader::EditQt {
         auto *view_menu = bar->addMenu("View");
         auto *toggle_fullscreen = view_menu->addAction("Toggle Full Screen");
         toggle_fullscreen->setShortcut(QKeySequence::FullScreen);
-        close->setIcon(QIcon::fromTheme(QStringLiteral("view-fullscreen")));
+        toggle_fullscreen->setIcon(QIcon::fromTheme(QStringLiteral("view-fullscreen")));
         connect(toggle_fullscreen, &QAction::triggered, this, &TagEditorWindow::toggle_fullscreen);
 
         // Lock the scroll view and window to a set width
