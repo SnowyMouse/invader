@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader
+- New class: extended_bitmap - Contains all extra features in invader-bitmap
+  that are not present in stock tool.exe (use `-x` to enable)
 - invader-edit-qt: Added two new buttons to arrays: "Insert" and "Delete All".
   "Insert" now does what "Add" did, and "Delete All" now does what "Clear" did.
 - invader-edit-qt: Added `--no-safeguards`
@@ -15,6 +17,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-bitmap: Added support for 16K sprite plates
 - invader-bitmap: Added support for 1K and 2K budgets for sprites
+- invader-bitmap: Moved >512x512 sprite budgets, dithering, and nearest-neighbor
+  to extended_bitmap
 - invader-edit-qt: Improved styling and UX
 - invader-edit-qt: Bitfields can no longer be highlighted
 - invader-edit-qt: Limits for certain tags are enforced

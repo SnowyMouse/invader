@@ -102,8 +102,7 @@
             "v16u16",
             "unused",
             "make it actually work",
-            "external",
-            "(invader) use Xbox multipurpose channel order"
+            "external"
         ],
         "width": 16
     },
@@ -114,12 +113,7 @@
             "enable diffusion dithering",
             "disable height map compression",
             "uniform sprite sequences",
-            "filthy sprite bug fix",
-            "(invader) nearest mipmap alpha",
-            "(invader) nearest mipmap alpha and color",
-            "(invader) dither alpha",
-            "(invader) dither color",
-            "(invader) use Xbox multipurpose channel order"
+            "filthy sprite bug fix"
         ],
         "width": 16
     },
@@ -361,7 +355,8 @@
             },
             {
                 "name": "sprite spacing",
-                "type": "uint16"
+                "type": "uint16",
+                "read_only": true
             },
             {
                 "type": "pad",

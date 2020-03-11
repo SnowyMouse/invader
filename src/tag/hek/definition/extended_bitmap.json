@@ -13,8 +13,8 @@
         "name": "ExtendedBitmapMipmapScaling",
         "options": [
             "linear",
-            "nearest mipmap alpha",
-            "nearest mipmap alpha and color"
+            "nearest alpha",
+            "nearest alpha and color"
         ],
         "type": "enum"
     },
