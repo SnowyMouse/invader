@@ -11,6 +11,8 @@ if(${INVADER_EDIT_QT})
 
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
+        src/edit/qt/editor/subwindow/tag_editor_bitmap_subwindow.cpp
+        src/edit/qt/editor/subwindow/tag_editor_subwindow.cpp
         src/edit/qt/editor/widget/tag_editor_array_widget.cpp
         src/edit/qt/editor/widget/tag_editor_edit_widget_view.cpp
         src/edit/qt/editor/widget/tag_editor_edit_widget.cpp

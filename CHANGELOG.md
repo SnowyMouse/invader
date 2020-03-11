@@ -9,9 +9,11 @@ This is used for recording Invader's changes. This changelog is based on
   that are not present in stock tool.exe (use `-x` to enable)
 - invader-edit-qt: Added two new buttons to arrays: "Insert" and "Delete All".
   "Insert" now does what "Add" did, and "Delete All" now does what "Clear" did.
-- invader-edit-qt: Added `--no-safeguards`
+- invader-edit-qt: Added `--no-safeguards` to allow editing of any field (don't
+  use this feature)
 - invader-edit-qt: Added opening tags if a path is given when opening the
   program
+- invader-edit-qt: Added the ability to toggle fullscreen for tag editing
 - invader-extract: Added MCC CEA bitmap tag extraction
 
 ### Changed

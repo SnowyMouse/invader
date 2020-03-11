@@ -16,6 +16,7 @@
 #include "widget/tag_editor_widget.hpp"
 #include "widget/tag_editor_edit_widget_view.hpp"
 #include "../tree/tag_tree_dialog.hpp"
+#include "subwindow/tag_editor_subwindow.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -91,6 +92,13 @@ namespace Invader::EditQt {
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
         this->setCentralWidget(scroll_view);
         scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true));
+
+        // View menu
+        auto *view_menu = bar->addMenu("View");
+        auto *toggle_fullscreen = view_menu->addAction("Toggle Full Screen");
+        toggle_fullscreen->setShortcut(QKeySequence::FullScreen);
+        close->setIcon(QIcon::fromTheme(QStringLiteral("view-fullscreen")));
+        connect(toggle_fullscreen, &QAction::triggered, this, &TagEditorWindow::toggle_fullscreen);
 
         // Lock the scroll view and window to a set width
         int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 16;
@@ -194,7 +202,20 @@ namespace Invader::EditQt {
         return this->file;
     }
 
+    void TagEditorWindow::toggle_fullscreen() {
+        if(this->isFullScreen()) {
+            this->showNormal();
+        }
+        else {
+            this->showFullScreen();
+        }
+    }
+
     TagEditorWindow::~TagEditorWindow() {
+        if(this->subwindow) {
+            this->subwindow->deleteLater();
+            this->subwindow = nullptr;
+        }
         delete this->parser_data;
     }
 }

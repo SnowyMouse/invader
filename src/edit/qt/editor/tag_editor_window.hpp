@@ -14,6 +14,7 @@ namespace Invader::Parser {
 
 namespace Invader::EditQt {
     class TagTreeWindow;
+    class TagEditorSubwindow;
 
     class TagEditorWindow : public QMainWindow {
         friend class TagEditorWidget;
@@ -70,8 +71,11 @@ namespace Invader::EditQt {
 
         Parser::ParserStruct *parser_data;
         std::vector<std::unique_ptr<QWidget>> widgets_to_remove;
+        TagEditorSubwindow *subwindow = nullptr;
 
         bool successfully_opened = false;
+
+        void toggle_fullscreen();
     };
 }
 
