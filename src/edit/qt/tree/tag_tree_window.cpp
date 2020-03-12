@@ -256,12 +256,12 @@ namespace Invader::EditQt {
         this->perform_open();
     }
 
-    void TagTreeWindow::cleanup_windows() {
+    void TagTreeWindow::cleanup_windows(TagEditorWindow *also_close) {
         bool window_closed;
         do {
             window_closed = false;
             for(auto &w : this->open_documents) {
-                if(w->isHidden()) {
+                if(w->isHidden() || w.get() == also_close) {
                     w.release()->deleteLater();
                     this->open_documents.erase(this->open_documents.begin() + (&w - this->open_documents.data()));
                     window_closed = true;

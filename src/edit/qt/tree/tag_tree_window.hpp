@@ -113,7 +113,7 @@ namespace Invader::EditQt {
         void show_about_window();
 
         /** Free all closed tags */
-        void cleanup_windows();
+        void cleanup_windows(TagEditorWindow *also_close = nullptr);
 
         /** Close all open tags and then cleanup */
         bool close_all_open_tags();

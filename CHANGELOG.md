@@ -43,6 +43,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed out-of-bounds enums crashing. For tags that have
   invalid enums, you should use invader-bludgeon to resolve them.
 - invader-edit-qt: Fixed closing modified tags crashing if "Save" was clicked
+- invader-edit-qt: Fixed memory not being freed when closing a tag until
+  another tag was opened
 
 ### Removed
 - invader-bitmap: Removed dithering red, green, and blue channels individually.

@@ -206,7 +206,9 @@ namespace Invader::EditQt {
         }
 
         event->setAccepted(accept);
-        // TODO: tell the main window that we're closing so it can free things sooner
+
+        // Clean up
+        this->parent_window->cleanup_windows(this);
     }
 
     bool TagEditorWindow::perform_save() {
