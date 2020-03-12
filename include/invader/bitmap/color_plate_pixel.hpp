@@ -130,7 +130,7 @@ namespace Invader {
          * @return       color
          */
         static ColorPlatePixel convert_from_y8(std::uint8_t color) {
-            return ColorPlatePixel { 0xFF, color, color, color };
+            return ColorPlatePixel { color, color, color, 0xFF };
         }
 
         /**
@@ -147,7 +147,7 @@ namespace Invader {
          * @return       color
          */
         static ColorPlatePixel convert_from_a8(std::uint8_t color) {
-            return ColorPlatePixel { color, 0xFF, 0xFF, 0xFF };
+            return ColorPlatePixel { 0xFF, 0xFF, 0xFF, color };
         }
 
         /**
@@ -165,7 +165,7 @@ namespace Invader {
          */
         static ColorPlatePixel convert_from_a8y8(std::uint16_t color) {
             auto luminosity = static_cast<std::uint8_t>(color);
-            return ColorPlatePixel { static_cast<std::uint8_t>(color >> 8), luminosity, luminosity, luminosity };
+            return ColorPlatePixel { luminosity, luminosity, luminosity, static_cast<std::uint8_t>(color >> 8) };
         }
 
         /**
