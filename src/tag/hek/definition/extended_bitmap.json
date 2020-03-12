@@ -19,6 +19,29 @@
         "type": "enum"
     },
     {
+        "name": "ExtendedBitmapMetadataFlags",
+        "fields": [
+            "stubbed"
+        ],
+        "type": "bitfield",
+        "width": 32
+    },
+    {
+        "name": "ExtendedBitmapDataMetadata",
+        "fields": [
+            {
+                "name": "flags",
+                "type": "ExtendedBitmapMetadataFlags"
+            },
+            {
+                "type": "pad",
+                "size": 124
+            }
+        ],
+        "type": "struct",
+        "size": 128
+    },
+    {
         "name": "ExtendedBitmap",
         "groups": [
             {
@@ -37,8 +60,14 @@
                 "type": "ExtendedBitmapMipmapScaling"
             },
             {
+                "name": "data metadata",
+                "type": "TagReflexive",
+                "struct": "ExtendedBitmapDataMetadata",
+                "compound": true
+            },
+            {
                 "type": "pad",
-                "size": 60
+                "size": 48
             }
         ],
         "type": "struct",
