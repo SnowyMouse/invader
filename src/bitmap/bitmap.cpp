@@ -377,6 +377,12 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             break;
     }
 
+    // Make sure data metadata is correctly sized
+    if(sizeof(T) == sizeof(Parser::ExtendedBitmap)) {
+        auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
+        extended_bitmap->data_metadata.resize(bitmap_tag_data.bitmap_data.size());
+    }
+
     // Write it all
     try {
         if(!std::filesystem::exists(tag_path.parent_path())) {
