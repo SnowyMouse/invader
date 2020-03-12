@@ -66,12 +66,6 @@ namespace Invader::EditQt {
     };
 
     template<typename T> static void generate_main_widget(TagEditorBitmapSubwindow *subwindow, T *bitmap_data, void (*set_values)(TagEditorBitmapSubwindow *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QScrollArea *)) {
-        // Delete the old one if we have one
-        auto *oldCentralWidget = subwindow->takeCentralWidget();
-        if(oldCentralWidget) {
-            delete oldCentralWidget;
-        }
-
         // Set up the main widget
         auto *main_widget = new QWidget();
         subwindow->setCentralWidget(main_widget);
