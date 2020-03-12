@@ -21,7 +21,9 @@
     {
         "name": "ExtendedBitmapMetadataFlags",
         "fields": [
-            "stubbed"
+            "stubbed",
+            "xbox format",
+            "uses zstandard compression"
         ],
         "type": "bitfield",
         "width": 32
@@ -63,7 +65,8 @@
                 "name": "data metadata",
                 "type": "TagReflexive",
                 "struct": "ExtendedBitmapDataMetadata",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "type": "pad",
