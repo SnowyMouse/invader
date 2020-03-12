@@ -154,20 +154,39 @@ namespace Invader::EditQt {
         if(index >= 0) {
             std::size_t index_unsigned = static_cast<std::size_t>(index);
             auto *parent_window = this->get_parent_window();
-            std::size_t mipmap_count;
+            Parser::BitmapData *bitmap_data;
             switch(parent_window->get_file().tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP:
-                    mipmap_count = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned].mipmap_count;
+                    bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
                 case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-                    mipmap_count = dynamic_cast<Parser::ExtendedBitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned].mipmap_count;
+                    bitmap_data = &dynamic_cast<Parser::ExtendedBitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
                 default:
                     std::terminate();
             }
+            std::size_t mipmap_count = bitmap_data->mipmap_count;
             this->mipmaps->addItem("All");
-            for(std::size_t i = 1; i <= mipmap_count; i++) {
-                this->mipmaps->addItem(QString::number(i));
+            std::size_t width = bitmap_data->width;
+            std::size_t height = bitmap_data->height;
+            for(std::size_t i = 0; i <= mipmap_count; i++) {
+                char name[128];
+                if(i == 0) {
+                    std::snprintf(name, sizeof(name), "Main image (%zu x %zu)", width, height);
+                }
+                else {
+                    std::snprintf(name, sizeof(name), "Mipmap #%zu (%zu x %zu)", i, width, height);
+                }
+                this->mipmaps->addItem(name);
+
+                width /= 2;
+                height /= 2;
+                if(width == 0) {
+                    width = 1;
+                }
+                if(height == 0) {
+                    height = 1;
+                }
             }
             this->mipmaps->setCurrentIndex(0);
         }
@@ -555,11 +574,13 @@ namespace Invader::EditQt {
         };
 
         // Draw the mips
-        make_row(mip_index_unsigned);
         if(mip_index_unsigned == 0) {
-            for(std::size_t i = 1; i <= bitmap_data->mipmap_count; i++) {
+            for(std::size_t i = 0; i <= bitmap_data->mipmap_count; i++) {
                 make_row(i);
             }
+        }
+        else {
+            make_row(mip_index_unsigned - 1);
         }
 
         layout->addStretch();
