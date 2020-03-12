@@ -85,6 +85,17 @@ namespace Invader::EditQt {
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
+        BitmapType type = bitmap_data->type;
+        switch(type) {
+            case BitmapType::BITMAP_TYPE_2D_TEXTURES:
+            case BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS:
+            case BitmapType::BITMAP_TYPE_ENUM_COUNT:
+            case BitmapType::BITMAP_TYPE_CUBE_MAPS:
+            case BitmapType::BITMAP_TYPE_3D_TEXTURES:
+                break;
+            case BitmapType::BITMAP_TYPE_SPRITES:
+                break;
+        }
         main_layout->addWidget(generate_text_widget("Scale:", &scale));
 
         // Get the size
@@ -515,17 +526,51 @@ namespace Invader::EditQt {
                 std::terminate();
         }
 
-        // Draw the mips
         auto *scroll_widget = new QWidget();
         auto *layout = new QVBoxLayout();
+        auto color = static_cast<Colors>(this->colors->currentIndex());
         int scale = 1 << (this->scale->currentIndex());
-        layout->addWidget(draw_bitmap_to_widget(bitmap_data, mip_index_unsigned, 0, static_cast<Colors>(this->colors->currentIndex()), scale, pixel_data));
+
+        auto make_widget = [&bitmap_data, &color, &scale, &pixel_data](std::size_t mip, std::size_t index) {
+            return draw_bitmap_to_widget(bitmap_data, mip, index, color, scale, pixel_data);
+        };
+
+        auto make_row = [&make_widget, &bitmap_data, &layout](std::size_t mip) {
+            std::size_t elements;
+            switch(bitmap_data->type) {
+                case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                    elements = bitmap_data->depth;
+                    break;
+                case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                    elements = 6;
+                    break;
+                default:
+                    elements = 1;
+            }
+
+            QWidget *row = new QWidget();
+            auto *row_layout = new QHBoxLayout();
+            row->setLayout(row_layout);
+            for(std::size_t e = 0; e < elements; e++) {
+                row_layout->addWidget(make_widget(mip, e));
+            }
+            row_layout->addStretch();
+            row_layout->setMargin(4);
+            row_layout->setSpacing(4);
+            layout->addWidget(row);
+        };
+
+        // Draw the mips
+        make_row(mip_index_unsigned);
         if(mip_index_unsigned == 0) {
             for(std::size_t i = 1; i <= bitmap_data->mipmap_count; i++) {
-                layout->addWidget(draw_bitmap_to_widget(bitmap_data, i, 0, static_cast<Colors>(this->colors->currentIndex()), scale, pixel_data));
+                make_row(i);
             }
         }
+
         layout->addStretch();
+        layout->setMargin(0);
+        layout->setSpacing(0);
         scroll_widget->setLayout(layout);
 
         // Replace it!
