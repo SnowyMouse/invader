@@ -373,6 +373,10 @@ namespace Invader::Parser {
 
     void ExtendedBitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         do_pre_compile(this, workload, tag_index);
+        if(this->data_metadata.size() != this->bitmap_data.size()) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Metadata count does not match bitmap data count (%zu != %zu)", this->data_metadata.size(), this->bitmap_data.size());
+            throw InvalidTagDataException();
+        }
     }
 
     Bitmap downgrade_extended_bitmap(const ExtendedBitmap &tag) {
