@@ -169,23 +169,43 @@ namespace Invader::EditQt {
             this->mipmaps->addItem("All");
             std::size_t width = bitmap_data->width;
             std::size_t height = bitmap_data->height;
+            std::size_t depth = bitmap_data->depth;
             for(std::size_t i = 0; i <= mipmap_count; i++) {
+                // Based on the type, we could have two or three numbers here
+                char resolution[128];
+                auto resolution_ending = static_cast<std::size_t>(std::snprintf(resolution, sizeof(resolution), "%zu x %zu", width, height));
+                switch(bitmap_data->type) {
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                        std::snprintf(resolution + resolution_ending, sizeof(resolution) - resolution_ending, " x %zu", depth);
+                        break;
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                        std::snprintf(resolution + resolution_ending, sizeof(resolution) - resolution_ending, " x 6");
+                        break;
+                    default:
+                        break;
+                }
+
+                // Add item
                 char name[128];
                 if(i == 0) {
-                    std::snprintf(name, sizeof(name), "Main image (%zu x %zu)", width, height);
+                    std::snprintf(name, sizeof(name), "Main image (%s)", resolution);
                 }
                 else {
-                    std::snprintf(name, sizeof(name), "Mipmap #%zu (%zu x %zu)", i, width, height);
+                    std::snprintf(name, sizeof(name), "Mipmap #%zu (%s)", i, resolution);
                 }
                 this->mipmaps->addItem(name);
 
                 width /= 2;
                 height /= 2;
+                depth /= 2;
                 if(width == 0) {
                     width = 1;
                 }
                 if(height == 0) {
                     height = 1;
+                }
+                if(depth == 0) {
+                    depth = 1;
                 }
             }
             this->mipmaps->setCurrentIndex(0);
