@@ -41,7 +41,8 @@
             }
         ],
         "type": "struct",
-        "size": 128
+        "size": 128,
+        "read_only": true
     },
     {
         "name": "ExtendedBitmap",
