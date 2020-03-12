@@ -56,6 +56,11 @@ if(INVADER_NO_OUTPUT)
     add_definitions(-DNO_OUTPUT)
 endif()
 
+# Define this if on Windows so %zu works
+if(WIN32)
+    add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(src/invader.cmake)
 include(src/build/build.cmake)
