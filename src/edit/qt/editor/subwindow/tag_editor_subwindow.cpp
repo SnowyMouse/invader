@@ -9,7 +9,9 @@
 namespace Invader::EditQt {
     TagEditorSubwindow::TagEditorSubwindow(TagEditorWindow *parent_window) : parent_window(parent_window) {
         this->setWindowTitle(parent_window->get_file().tag_path.c_str());
+    }
 
+    void TagEditorSubwindow::center_window() {
         // Center this
         this->setGeometry(
             QStyle::alignedRect(

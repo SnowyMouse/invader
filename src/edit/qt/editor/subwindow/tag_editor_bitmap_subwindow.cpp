@@ -141,6 +141,7 @@ namespace Invader::EditQt {
 
     TagEditorBitmapSubwindow::TagEditorBitmapSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
         this->update();
+        this->center_window();
     }
 
     void TagEditorBitmapSubwindow::refresh_data() {

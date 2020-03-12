@@ -30,6 +30,11 @@ namespace Invader::EditQt {
             return this->parent_window;
         }
 
+        /**
+         * Center it!
+         */
+        void center_window();
+
     private:
         TagEditorWindow *parent_window;
     };
