@@ -149,10 +149,14 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
         if(sizeof(T) == sizeof(Parser::ExtendedBitmap) && !bitmap_options.dithering.has_value()) {
             auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
-            bitmap_options.mipmap_scale_type = extended_bitmap->mipmap_scaling;
-            bitmap_options.dither_alpha = extended_bitmap->extended_flags.dither_alpha == 1;
-            bitmap_options.dither_color = extended_bitmap->extended_flags.dither_color == 1;
-            bitmap_options.dithering = *bitmap_options.dither_alpha || *bitmap_options.dither_color;
+            if(!bitmap_options.mipmap_scale_type.has_value()) {
+                bitmap_options.mipmap_scale_type = extended_bitmap->mipmap_scaling;
+            }
+            if(!bitmap_options.dithering.has_value()) {
+                bitmap_options.dither_alpha = extended_bitmap->extended_flags.dither_alpha == 1;
+                bitmap_options.dither_color = extended_bitmap->extended_flags.dither_color == 1;
+                bitmap_options.dithering = *bitmap_options.dither_alpha || *bitmap_options.dither_color;
+            }
         }
 
         // Clear existing data
@@ -281,7 +285,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         bitmap_tag_data.color_plate_width = image_width;
         bitmap_tag_data.color_plate_height = image_height;
 
-        // Set decompressed sizeblue_dither_alphadithering
+        // Set decompressed size
         BigEndian<std::uint32_t> decompressed_size;
         decompressed_size = static_cast<std::uint32_t>(image_size);
 
@@ -377,10 +381,13 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             break;
     }
 
-    // Make sure data metadata is correctly sized
+    // Make sure data metadata is correctly sized and other stuff is in place
     if(sizeof(T) == sizeof(Parser::ExtendedBitmap)) {
         auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
         extended_bitmap->data_metadata.resize(bitmap_tag_data.bitmap_data.size());
+        extended_bitmap->extended_flags.dither_alpha = *bitmap_options.dither_alpha;
+        extended_bitmap->extended_flags.dither_color = *bitmap_options.dither_color;
+        extended_bitmap->mipmap_scaling = *bitmap_options.mipmap_scale_type;
     }
 
     // Write it all
