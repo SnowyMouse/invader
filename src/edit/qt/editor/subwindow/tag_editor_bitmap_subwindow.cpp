@@ -483,7 +483,7 @@ namespace Invader::EditQt {
 
         // Finish up
         QGraphicsView *view = new QGraphicsView();
-        QGraphicsScene *scene = new QGraphicsScene();
+        QGraphicsScene *scene = new QGraphicsScene(view);
         QPixmap map;
         map.convertFromImage(QImage(reinterpret_cast<const uchar *>(data.data()), static_cast<int>(real_width), static_cast<int>(real_height), QImage::Format_ARGB32));
         scene->addPixmap(map);
