@@ -186,7 +186,7 @@ namespace Invader::EditQt {
                 }
 
                 // Add item
-                char name[128];
+                char name[256];
                 if(i == 0) {
                     std::snprintf(name, sizeof(name), "Main image (%s)", resolution);
                 }
