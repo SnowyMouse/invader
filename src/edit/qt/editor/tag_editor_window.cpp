@@ -96,7 +96,6 @@ namespace Invader::EditQt {
             case TagClassInt::TAG_CLASS_BITMAP:
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
-                this->subwindow = new TagEditorBitmapSubwindow(this);
                 break;
             // case TagClassInt::TAG_CLASS_SOUND:
             //     extra_widget = new QPushButton("Preview sound");
@@ -284,6 +283,16 @@ namespace Invader::EditQt {
     }
 
     void TagEditorWindow::show_subwindow() {
+        if(!this->subwindow) {
+            switch(this->file.tag_class_int) {
+                case TagClassInt::TAG_CLASS_BITMAP:
+                case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+                    this->subwindow = new TagEditorBitmapSubwindow(this);
+                    break;
+                default:
+                    std::terminate();
+            }
+        }
         this->subwindow->show();
         this->subwindow->setWindowState(Qt::WindowState::WindowActive);
     }

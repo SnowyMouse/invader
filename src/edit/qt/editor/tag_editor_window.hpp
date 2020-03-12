@@ -56,6 +56,14 @@ namespace Invader::EditQt {
             return this->successfully_opened;
         }
 
+        /**
+         * Get the parser data
+         * @return parser data
+         */
+        Parser::ParserStruct *get_parser_data() noexcept {
+            return this->parser_data;
+        }
+
         ~TagEditorWindow();
 
     private:

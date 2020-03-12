@@ -17,6 +17,8 @@ namespace Invader::EditQt {
          */
         virtual void update() = 0;
 
+        ~TagEditorSubwindow() = default;
+
     protected:
         /**
          * Instantiate a subwindow

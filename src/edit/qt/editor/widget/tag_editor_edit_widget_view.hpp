@@ -23,6 +23,8 @@ namespace Invader::EditQt {
          */
         TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary, QWidget *extra_widget = nullptr);
 
+        ~TagEditorEditWidgetView() = default;
+
     private:
         std::vector<Parser::ParserStructValue> values;
         TagEditorWindow *editor_window;

@@ -26,6 +26,8 @@ namespace Invader::EditQt {
          */
         TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
 
+        ~TagEditorArrayWidget() = default;
+
     private slots:
         void perform_add();
         void perform_insert();

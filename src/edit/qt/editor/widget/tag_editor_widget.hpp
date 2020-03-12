@@ -41,6 +41,8 @@ namespace Invader::EditQt {
             return this->editor_window;
         }
 
+        virtual ~TagEditorWidget() = default;
+
     protected:
         /**
          * Instantiate a widget

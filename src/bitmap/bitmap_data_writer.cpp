@@ -336,7 +336,7 @@ namespace Invader {
 
                     // If we're dithering, do dithering things
                     if(dithering) {
-                        dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::p8_to_color, first_pixel, pixel_8_bit, bitmap.width, bitmap.height, mipmap_count);
+                        dither_do(&ColorPlatePixel::convert_to_p8, ColorPlatePixel::convert_from_p8, first_pixel, pixel_8_bit, bitmap.width, bitmap.height, mipmap_count);
                     }
                     else {
                         for(auto *pixel = first_pixel; pixel < last_pixel; pixel++, pixel_8_bit++) {

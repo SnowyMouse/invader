@@ -23,6 +23,8 @@ namespace Invader::EditQt {
          */
         TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
 
+        ~TagEditorEditWidget() = default;
+
     private slots:
         void on_change();
 
