@@ -4,7 +4,8 @@
         "fields": [
             "dither alpha",
             "dither color",
-            "use Xbox multipurpose channel order"
+            "swap to Xbox multipurpose channel order",
+            "use zstandard compression"
         ],
         "type": "bitfield",
         "width": 16
@@ -23,7 +24,7 @@
         "fields": [
             "stubbed",
             "xbox format",
-            "uses zstandard compression"
+            "zstandard compressed"
         ],
         "type": "bitfield",
         "width": 32
