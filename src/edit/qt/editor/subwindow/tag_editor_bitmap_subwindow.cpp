@@ -201,6 +201,7 @@ namespace Invader::EditQt {
         // Get the dimensions of the mipmap
         std::size_t width = static_cast<std::size_t>(bitmap_data->width);
         std::size_t height = static_cast<std::size_t>(bitmap_data->height);
+        std::size_t depth = static_cast<std::size_t>(bitmap_data->depth);
         std::size_t real_width = width;
         std::size_t real_height = height;
         std::size_t offset = bitmap_data->pixel_data_offset;;
@@ -240,21 +241,22 @@ namespace Invader::EditQt {
                 return nullptr;
         }
 
-        std::size_t stride = bitmap_data->depth;
-        if(bitmap_data->type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP) {
-            stride *= 6;
-        }
+        std::size_t stride = bitmap_data->type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
 
         // Find the offset
-        std::size_t pixels_required = ((width * height) * (bits_per_pixel) / 8);
+        std::size_t pixels_required = ((depth * width * height) * (bits_per_pixel) / 8);
         for(std::size_t m = 0; m < mipmap; m++) {
             offset += pixels_required * stride;
             real_width /= 2;
             real_height /= 2;
             width = real_width;
             height = real_height;
+            depth /= 2;
             if(width < 1) {
                 width = 1;
+            }
+            if(depth < 1) {
+                depth = 1;
             }
             if(height < 1) {
                 height = 1;
@@ -267,8 +269,11 @@ namespace Invader::EditQt {
                     height += 4 - (height % 4);
                 }
             }
-            pixels_required = ((width * height) * (bits_per_pixel) / 8);
+            pixels_required = ((depth * width * height) * (bits_per_pixel) / 8);
         }
+
+        // Recalculate pixels required with 1 depth since we're doing 1 bitmap at a time
+        pixels_required = ((width * height) * (bits_per_pixel) / 8);
         offset += index * pixels_required;
 
         // Zero width/height
@@ -552,7 +557,10 @@ namespace Invader::EditQt {
             std::size_t elements;
             switch(bitmap_data->type) {
                 case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                    elements = bitmap_data->depth;
+                    elements = bitmap_data->depth >> mip;
+                    if(elements == 0) {
+                        elements = 1;
+                    }
                     break;
                 case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
                     elements = 6;
