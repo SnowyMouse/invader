@@ -43,26 +43,10 @@ namespace Invader::Parser {
             std::snprintf(bitmap_tag_path, bitmap_tag_path_size, "%s.%s", bitmap_tag.path.c_str(), HEK::tag_class_to_extension(bitmap_tag.tag_class_int));
             Invader::File::halo_path_to_preferred_path_chars(bitmap_tag_path);
             const auto &bitmap_struct = workload.structs[*bitmap_tag.base_struct];
-
-            // Get the data we need
-            auto get_data = [&bitmap_struct, &bitmap_type, &sequence_count, &sequences, &workload](const auto *where) {
-                const auto &bitmap = *where;
-                bitmap_type = bitmap.type;
-                sequence_count = bitmap.bitmap_group_sequence.count;
-                sequences = sequence_count > 0 ? reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(workload.structs[*bitmap_struct.resolve_pointer(&bitmap.bitmap_group_sequence.pointer)].data.data()) : nullptr;
-            };
-
-            switch(bitmap_tag.tag_class_int) {
-                case TagClassInt::TAG_CLASS_BITMAP:
-                    get_data(reinterpret_cast<const Bitmap::struct_little *>(bitmap_struct.data.data()));
-                    break;
-                case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-                    get_data(reinterpret_cast<const ExtendedBitmap::struct_little *>(bitmap_struct.data.data()));
-                    break;
-                default:
-                    eprintf_error("Tried to get sequence data from %s which isn't a bitmap", bitmap_tag_path);
-                    throw InvalidTagDataException();
-            }
+            const auto &bitmap = *reinterpret_cast<const Bitmap::struct_little *>(bitmap_struct.data.data());
+            bitmap_type = bitmap.type;
+            sequence_count = bitmap.bitmap_group_sequence.count;
+            sequences = sequence_count > 0 ? reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(workload.structs[*bitmap_struct.resolve_pointer(&bitmap.bitmap_group_sequence.pointer)].data.data()) : nullptr;
         }
     }
 
