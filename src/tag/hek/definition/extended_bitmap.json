@@ -24,6 +24,7 @@
         "fields": [
             "stubbed",
             "xbox format",
+            "uses xbox multipurpose channel order",
             "zstandard compressed"
         ],
         "type": "bitfield",
