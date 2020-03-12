@@ -257,7 +257,7 @@ namespace Invader::EditQt {
         this->setWindowTitle(title_bar);
 
         if(this->subwindow) {
-            this->subwindow->setWindowTitle(title_bar);
+            this->subwindow->setWindowTitle(this->file.tag_path.c_str());
         }
     }
 
