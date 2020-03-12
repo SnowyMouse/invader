@@ -32,10 +32,11 @@ namespace Invader::EditQt {
         QComboBox *mipmaps;
         QComboBox *colors;
         QComboBox *bitmaps;
+        QComboBox *scale;
         QComboBox *more;
         QScrollArea *images;
 
-        static void set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *colors, QComboBox *mimaps, QComboBox *more, QScrollArea *images);
+        static void set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *colors, QComboBox *mimaps, QComboBox *zoom, QComboBox *more, QScrollArea *images);
         void refresh_data();
         void reload_view();
 
