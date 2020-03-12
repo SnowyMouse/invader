@@ -667,8 +667,8 @@ considerably faster, so this may be beneficial for firing effects. However, we
 instead recommend using uncompressed 16-bit PCM if possible.
 
 ### invader-string
-This program generates font tags. If building a unicode or latin-1 tag, strings
-are stored in a .txt file, with each string ending with a line,
+This program generates string tags. If building a unicode or latin-1 tag,
+strings are stored in a .txt file, with each string ending with a line,
 `###END-STRING###`.
 
 ```
