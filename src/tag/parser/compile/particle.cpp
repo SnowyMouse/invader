@@ -2,6 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::Parser {
     float get_bitmap_tag_pixel_size(BuildWorkload &workload, std::size_t bitmap_tag_index) {
@@ -10,54 +11,67 @@ namespace Invader::Parser {
         }
 
         auto &bitmap_tag_struct = workload.structs[*workload.tags[bitmap_tag_index].base_struct];
-        auto &bitmap_tag_data = *reinterpret_cast<Bitmap::struct_little *>(bitmap_tag_struct.data.data());
-        float pixel_size = 1.0F;
+        auto do_it = [&bitmap_tag_struct, &workload](const auto *what) {
+            auto &bitmap_tag_data = *what;
+            float pixel_size = 1.0F;
 
-        // Get the dimensions of the bitmaps
-        std::uint32_t bitmap_count = bitmap_tag_data.bitmap_data.count;
-        std::optional<std::size_t> bitmap_data_index = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_data.pointer);
+            // Get the dimensions of the bitmaps
+            std::uint32_t bitmap_count = bitmap_tag_data.bitmap_data.count;
+            std::optional<std::size_t> bitmap_data_index = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_data.pointer);
 
-        if(bitmap_data_index.has_value()) {
-            std::vector<std::pair<std::uint16_t, std::uint16_t>> bitmap_dimensions(bitmap_count);
-            auto *bitmap_data = reinterpret_cast<BitmapData::struct_little *>(workload.structs[*bitmap_data_index].data.data());
-            for(std::uint32_t b = 0; b < bitmap_count; b++) {
-                bitmap_dimensions[b].first = bitmap_data[b].width;
-                bitmap_dimensions[b].second = bitmap_data[b].height;
-            }
+            if(bitmap_data_index.has_value()) {
+                std::vector<std::pair<std::uint16_t, std::uint16_t>> bitmap_dimensions(bitmap_count);
+                auto *bitmap_data = reinterpret_cast<BitmapData::struct_little *>(workload.structs[*bitmap_data_index].data.data());
+                for(std::uint32_t b = 0; b < bitmap_count; b++) {
+                    bitmap_dimensions[b].first = bitmap_data[b].width;
+                    bitmap_dimensions[b].second = bitmap_data[b].height;
+                }
 
-            // Get sequences
-            auto sequence_offset = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_group_sequence.pointer);
-            if(sequence_offset.has_value()) {
-                auto &sequences_struct = workload.structs[*sequence_offset];
-                auto *sequences = reinterpret_cast<BitmapGroupSequence::struct_little *>(sequences_struct.data.data());
+                // Get sequences
+                auto sequence_offset = bitmap_tag_struct.resolve_pointer(&bitmap_tag_data.bitmap_group_sequence.pointer);
+                if(sequence_offset.has_value()) {
+                    auto &sequences_struct = workload.structs[*sequence_offset];
+                    auto *sequences = reinterpret_cast<BitmapGroupSequence::struct_little *>(sequences_struct.data.data());
 
-                for(std::size_t sequence_index = 0; sequence_index < bitmap_tag_data.bitmap_group_sequence.count; sequence_index++) {
-                    auto &sequence = sequences[sequence_index];
-                    auto sprites_offset = sequences_struct.resolve_pointer(&sequence.sprites.pointer);
+                    for(std::size_t sequence_index = 0; sequence_index < bitmap_tag_data.bitmap_group_sequence.count; sequence_index++) {
+                        auto &sequence = sequences[sequence_index];
+                        auto sprites_offset = sequences_struct.resolve_pointer(&sequence.sprites.pointer);
 
-                    if(sprites_offset.has_value()) {
-                        auto *sprites = reinterpret_cast<BitmapGroupSprite::struct_little *>(workload.structs[*sprites_offset].data.data());
+                        if(sprites_offset.has_value()) {
+                            auto *sprites = reinterpret_cast<BitmapGroupSprite::struct_little *>(workload.structs[*sprites_offset].data.data());
 
-                        // We'll need to iterate through all of the sprites
-                        std::size_t sprite_count = sequence.sprites.count;
-                        for(std::size_t i = 0; i < sprite_count; i++) {
-                            auto &sprite = sprites[i];
+                            // We'll need to iterate through all of the sprites
+                            std::size_t sprite_count = sequence.sprites.count;
+                            for(std::size_t i = 0; i < sprite_count; i++) {
+                                auto &sprite = sprites[i];
 
-                            // Get yer values here. Get 'em while they're hot.
-                            float width_bitmap = 1.0F / std::fabs(sprite.right - sprite.left) / bitmap_dimensions[sprite.bitmap_index].first;
-                            float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
+                                // Get yer values here. Get 'em while they're hot.
+                                float width_bitmap = 1.0F / std::fabs(sprite.right - sprite.left) / bitmap_dimensions[sprite.bitmap_index].first;
+                                float height_bitmap = 1.0F / std::fabs(sprite.bottom - sprite.top) / bitmap_dimensions[sprite.bitmap_index].second;
 
-                            // There!
-                            float smaller = (height_bitmap > width_bitmap) ? width_bitmap : height_bitmap;
-                            if(pixel_size > smaller) {
-                                pixel_size = smaller;
+                                // There!
+                                float smaller = (height_bitmap > width_bitmap) ? width_bitmap : height_bitmap;
+                                if(pixel_size > smaller) {
+                                    pixel_size = smaller;
+                                }
                             }
                         }
                     }
                 }
             }
+            return pixel_size;
+        };
+
+        // Do it!
+        switch(workload.tags[bitmap_tag_index].tag_class_int) {
+            case TagClassInt::TAG_CLASS_BITMAP:
+                return do_it(reinterpret_cast<const Bitmap::struct_little *>(bitmap_tag_struct.data.data()));
+            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+                return do_it(reinterpret_cast<const ExtendedBitmap::struct_little *>(bitmap_tag_struct.data.data()));
+            default:
+                eprintf_error("Tried to get pixel information from %s.%s which is not a bitmap", File::halo_path_to_preferred_path(workload.tags[bitmap_tag_index].path).c_str(), tag_class_to_extension(workload.tags[bitmap_tag_index].tag_class_int));
+                throw InvalidTagDataException();
         }
-        return pixel_size;
     }
 
     void Particle::postprocess_hek_data() {

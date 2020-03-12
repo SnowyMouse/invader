@@ -155,6 +155,9 @@ namespace Invader {
             /** Class of the tag */
             TagClassInt tag_class_int;
 
+            /** Original tag class, if applicable */
+            std::optional<TagClassInt> alias;
+
             /** Asset data structs */
             std::vector<std::size_t> asset_data;
 

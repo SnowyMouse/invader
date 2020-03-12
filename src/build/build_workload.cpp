@@ -11,6 +11,7 @@
 #include <invader/crc/hek/crc.hpp>
 #include <invader/compress/compression.hpp>
 #include <invader/tag/index/index.hpp>
+#include <invader/tag/parser/compile/bitmap.hpp>
 #include "../crc/crc32.h"
 
 namespace Invader {
@@ -542,11 +543,7 @@ namespace Invader {
 
     void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
         #define COMPILE_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \
-            auto tag_data_parsed = Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size, true); \
-            auto &new_struct = this->structs.emplace_back(); \
-            this->tags[tag_index].base_struct = &new_struct - this->structs.data(); \
-            new_struct.data.resize(sizeof(Parser::class_struct::struct_little), std::byte()); \
-            tag_data_parsed.compile(*this, tag_index, &new_struct - this->structs.data()); \
+            do_compile_tag(std::move(Parser::class_struct::parse_hek_tag_file(tag_data, tag_data_size, true))); \
             break; \
         }
 
@@ -567,6 +564,16 @@ namespace Invader {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));
             }
         }
+
+        auto &structs = this->structs;
+        auto &tags = this->tags;
+        auto &workload = *this;
+        auto do_compile_tag = [&structs, &tags, &workload, &tag_index](auto new_tag_struct) {
+            auto &new_struct = structs.emplace_back();
+            tags[tag_index].base_struct = &new_struct - structs.data();
+            new_struct.data.resize(sizeof(typename decltype(new_tag_struct)::struct_little), std::byte());
+            new_tag_struct.compile(workload, tag_index, &new_struct - structs.data());
+        };
 
         switch(*tag_class_int) {
             COMPILE_TAG_CLASS(Actor, TAG_CLASS_ACTOR)
@@ -647,7 +654,18 @@ namespace Invader {
             COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
-            COMPILE_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
+            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
+               auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
+               if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                   do_compile_tag(std::move(tag_data_parsed));
+               }
+               else {
+                   this->tags[tag_index].alias = *tag_class_int;
+                   this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
+                   do_compile_tag(downgrade_extended_bitmap(tag_data_parsed));
+               }
+               break;
+            }
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
@@ -702,7 +720,7 @@ namespace Invader {
         bool found = false;
         for(std::size_t i = 0; i < return_value; i++) {
             auto &tag = this->tags[i];
-            if(tag.tag_class_int == tag_class_int && tag.path == tag_path) {
+            if((tag.tag_class_int == tag_class_int || tag.alias == tag_class_int) && tag.path == tag_path) {
                 if(tag.base_struct.has_value()) {
                     return i;
                 }
