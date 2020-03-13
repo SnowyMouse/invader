@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QMessageBox>
+#include <QFontDatabase>
 #include <invader/printf.hpp>
 #include "../tag_editor_window.hpp"
 #include <invader/tag/parser/parser.hpp>
@@ -54,10 +55,11 @@ namespace Invader::EditQt {
         connect(this->slider, &QSlider::valueChanged, this, &TagEditorSoundSubwindow::change_sample);
         layout->addWidget(this->slider);
 
+        // Add playback
         auto *playback_widget = new QWidget();
         auto *playback_layout = new QHBoxLayout();
         playback_layout->setMargin(0);
-        playback_layout->setSpacing(0);
+        playback_layout->setSpacing(4);
         playback_widget->setLayout(playback_layout);
         this->play_button = new QPushButton("Play");
         connect(this->play_button, &QPushButton::clicked, this, &TagEditorSoundSubwindow::play_sound);
@@ -65,6 +67,16 @@ namespace Invader::EditQt {
         connect(this->stop_button, &QPushButton::clicked, this, &TagEditorSoundSubwindow::stop_sound);
         playback_layout->addWidget(this->play_button);
         playback_layout->addWidget(this->stop_button);
+
+        // Show the time
+        this->time = new QLabel();
+        this->time->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+        int time_width = this->time->fontMetrics().horizontalAdvance("00:00.00 / 00:00.00");
+        this->time->setMinimumWidth(time_width);
+        this->time->setMaximumWidth(time_width);
+        this->time->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+        playback_layout->addWidget(this->time);
+
         layout->addWidget(playback_widget);
 
         // Done
@@ -271,9 +283,10 @@ namespace Invader::EditQt {
         this->sample = 0;
         this->slider->blockSignals(true);
         this->slider->setValue(0);
-        this->sample_granularity = this->channel_count * *this->bits_per_sample;
+        this->sample_granularity = this->channel_count * (*this->bits_per_sample / 8);
         this->slider->setMaximum(this->all_pcm.size() / this->sample_granularity);
         this->slider->blockSignals(false);
+        this->update_time_label();
 
         this->stop_sound();
     }
@@ -341,6 +354,7 @@ namespace Invader::EditQt {
         if(this->sample >= this->all_pcm.size()) {
             this->sample = 0;
         }
+        this->update_time_label();
         this->play_sample();
     }
 
@@ -356,6 +370,7 @@ namespace Invader::EditQt {
             this->stop_sound();
             return;
         }
+        this->update_time_label();
         std::size_t pcm_data_increment = this->device->write(reinterpret_cast<const char *>(this->all_pcm.data()) + this->sample, pcm_data_remaining);
         this->sample += pcm_data_increment;
         this->slider->blockSignals(true);
@@ -365,9 +380,25 @@ namespace Invader::EditQt {
 
     void TagEditorSoundSubwindow::change_sample() {
         this->sample = this->slider->value() * this->sample_granularity;
+        this->update_time_label();
     }
 
     void TagEditorSoundSubwindow::closeEvent(QCloseEvent *) {
         this->stop_sound();
+    }
+
+    void TagEditorSoundSubwindow::update_time_label() {
+        char format[64] = {};
+
+        std::size_t centiseconds = (this->sample / this->sample_granularity * 100) / this->sample_rate;
+        std::size_t seconds = centiseconds / 100;
+        std::size_t minutes = seconds / 60;
+
+        std::size_t total_centiseconds = (this->all_pcm.size() / this->sample_granularity * 100) / this->sample_rate;
+        std::size_t total_seconds = total_centiseconds / 100;
+        std::size_t total_minutes = total_seconds / 60;
+
+        std::snprintf(format, sizeof(format), "%02zu:%02zu.%02zu / %02zu:%02zu.%02zu", minutes % 100, seconds % 60, centiseconds % 100, total_minutes % 100, total_seconds % 60, total_centiseconds % 100);
+        this->time->setText(format);
     }
 }

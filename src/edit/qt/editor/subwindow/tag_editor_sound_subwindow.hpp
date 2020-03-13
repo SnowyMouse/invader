@@ -12,6 +12,7 @@ class QSlider;
 class QAudioOutput;
 class QPushButton;
 class QIODevice;
+class QLabel;
 
 namespace Invader::Parser {
     struct SoundPitchRange;
@@ -69,6 +70,7 @@ namespace Invader::EditQt {
         QComboBox *actual_permutation;
         QComboBox *permutation;
         QSlider *slider;
+        QLabel *time;
         QAudioOutput *output = nullptr;
         QIODevice *device = nullptr;
 
@@ -79,6 +81,7 @@ namespace Invader::EditQt {
         void stop_sound();
         void play_sample();
         void change_sample();
+        void update_time_label();
 
         void closeEvent(QCloseEvent *) override;
     };
