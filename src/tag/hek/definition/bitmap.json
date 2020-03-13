@@ -280,8 +280,9 @@
                 "type": "BitmapType"
             },
             {
-                "name": "format",
-                "type": "BitmapFormat"
+                "name": "encoding format",
+                "type": "BitmapFormat",
+                "comment": "Format to use when generating the tag"
             },
             {
                 "name": "usage",

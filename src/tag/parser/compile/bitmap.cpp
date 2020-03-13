@@ -382,7 +382,7 @@ namespace Invader::Parser {
     Bitmap downgrade_extended_bitmap(const ExtendedBitmap &tag) {
         Bitmap new_tag = {};
         new_tag.type = tag.type;
-        new_tag.format = tag.format;
+        new_tag.encoding_format = tag.encoding_format;
         new_tag.usage = tag.usage;
         new_tag.flags = tag.flags;
         new_tag.detail_fade_factor = tag.detail_fade_factor;

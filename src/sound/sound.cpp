@@ -43,7 +43,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
     options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0", "<qlty>");
-    options.emplace_back("flac-level", 'f', 1, "Set the FLAC compression level. This can be between 0 and 8, with higher levels taking longer but offering slightly better ratios. Default: 5", "<lvl>");
+    options.emplace_back("flac-level", 'f', 1, "[REQUIRES --extended] Set the FLAC compression level. This can be between 0 and 8, with higher levels taking longer but offering slightly better ratios. Default: 5", "<lvl>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";

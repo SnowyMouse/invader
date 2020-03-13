@@ -105,7 +105,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
         // Set some default values
         if(!bitmap_options.format.has_value()) {
-            bitmap_options.format = bitmap_tag_data.format;
+            bitmap_options.format = bitmap_tag_data.encoding_format;
         }
         if(!bitmap_options.mipmap_fade.has_value()) {
             bitmap_options.mipmap_fade = bitmap_tag_data.detail_fade_factor;
@@ -339,7 +339,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.usage = bitmap_options.usage.value();
     bitmap_tag_data.bump_height = bitmap_options.bump_height.value();
     bitmap_tag_data.detail_fade_factor = bitmap_options.mipmap_fade.value();
-    bitmap_tag_data.format = bitmap_options.format.value();
+    bitmap_tag_data.encoding_format = bitmap_options.format.value();
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
