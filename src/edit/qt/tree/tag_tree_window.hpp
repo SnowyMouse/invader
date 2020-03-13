@@ -165,6 +165,7 @@ namespace Invader::EditQt {
 
         QLabel *tag_count_label;
         QLabel *tag_loading_label;
+        QLabel *tag_opening_label;
 
         std::vector<std::unique_ptr<TagEditorWindow>> open_documents;
         void on_double_click(QTreeWidgetItem *item, int column);
@@ -173,6 +174,8 @@ namespace Invader::EditQt {
         bool tags_reloading_queued = false;
 
         bool safeguards_set = true;
+
+        bool opening_tag = false;
 
         TagFetcherThread *fetcher_thread;
     };

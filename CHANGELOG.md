@@ -34,6 +34,7 @@ This is used for recording Invader's changes. This changelog is based on
   all elements from the array
 - invader-edit-qt: The "Add" button now appends elements to the bottom of the
   array similar to what Guerilla does
+- invader-edit-qt: Opening a file now displays in the status bar
 - invader-sound: Specifying the format is now required whenever sound data is
   being put into a map
 

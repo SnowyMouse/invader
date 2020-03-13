@@ -98,10 +98,13 @@ namespace Invader::EditQt {
         QStatusBar *status_bar = new QStatusBar();
         this->tag_count_label = new QLabel();
         this->tag_loading_label = new QLabel("Loading tags...");
+        this->tag_opening_label = new QLabel();
+        this->tag_opening_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->tag_loading_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->tag_count_label->setAlignment(Qt::AlignRight | Qt::AlignTop);
         status_bar->addWidget(this->tag_loading_label, 0);
-        status_bar->addWidget(this->tag_count_label, 1);
+        status_bar->addWidget(this->tag_opening_label, 1);
+        status_bar->addWidget(this->tag_count_label, 2);
         this->setStatusBar(status_bar);
 
         // Set more stuff
@@ -334,9 +337,21 @@ namespace Invader::EditQt {
             }
         }
 
+        // Don't open something if we're busy
+        if(this->opening_tag) {
+            return;
+        }
+
         // Open; benchmark
         auto start = std::chrono::steady_clock::now();
+        char open_label[256];
+        std::snprintf(open_label, sizeof(open_label), "Opening %s...", tag.full_path.string().c_str());
+        this->tag_opening_label->setText(open_label);
+        this->opening_tag = true;
+        QCoreApplication::processEvents();
         auto document = std::make_unique<TagEditorWindow>(this, this, tag);
+        this->opening_tag = false;
+        this->tag_opening_label->setText("");
         auto *window = document.get();
         if(!window->is_successfully_opened()) {
             document.release()->deleteLater();
