@@ -5,37 +5,40 @@
 #include <cstdio>
 #include <filesystem>
 #include <cstring>
+#include <climits>
 
 namespace Invader::File {
     std::optional<std::vector<std::byte>> open_file(const char *path) {
-        // Get the file
-        std::filesystem::path file_path(path);
-
-        // Make sure we're dealing with a file we can open
-        if(!std::filesystem::is_regular_file(file_path)) {
-            return std::nullopt;
-        }
-
-        // Get the size
-        auto sizeb = std::filesystem::file_size(file_path);
-
-        // Get the size and make sure we can use it
-        if(sizeb > SIZE_MAX) {
-            return std::nullopt;
-        }
-        auto size = static_cast<std::size_t>(sizeb);
-
         // Attempt to open it
         std::FILE *file = std::fopen(path, "rb");
         if(!file) {
             return std::nullopt;
         }
 
-        // Read it
-        std::vector<std::byte> file_data(static_cast<std::size_t>(size));
-        if(std::fread(file_data.data(), size, 1, file) != 1) {
-            std::fclose(file);
+        // Get the size
+        std::vector<std::byte> file_data;
+        auto size = std::filesystem::file_size(std::filesystem::path(path));
+
+        // Get the size and make sure we can use it
+        if(size > file_data.max_size()) {
             return std::nullopt;
+        }
+
+        // Read it
+        file_data.resize(static_cast<std::size_t>(size));
+
+        auto *data = file_data.data();
+        std::size_t offset = 0;
+
+        while(offset < size) {
+            long amount_to_read = (size - offset) > LONG_MAX ? LONG_MAX : (size - offset);
+            if(std::fread(data, amount_to_read, 1, file) != 1) {
+                std::fclose(file);
+                return std::nullopt;
+            }
+
+            data += amount_to_read;
+            offset += amount_to_read;
         }
 
         // Return what we got
