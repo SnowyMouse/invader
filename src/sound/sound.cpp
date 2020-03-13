@@ -11,190 +11,44 @@
 #include <vorbis/vorbisenc.h>
 #include <samplerate.h>
 
-int main(int argc, const char **argv) {
-    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+using namespace Invader;
+using namespace Invader::HEK;
 
-    using namespace Invader;
-    using namespace Invader::HEK;
+struct SoundOptions {
+    const char *data = "data";
+    const char *tags = "tags";
+    std::optional<bool> split;
+    std::optional<SoundFormat> format;
+    bool fs_path = false;
+    float compression_level = 1.0F;
+    bool extended = false;
+    std::optional<std::size_t> channel_count;
+    std::optional<SoundClass> sound_class;
+    std::optional<std::uint32_t> sample_rate;
+};
+
+template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
     static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
 
-    struct SoundOptions {
-        const char *data = "data";
-        const char *tags = "tags";
-        std::optional<bool> split;
-        std::optional<SoundFormat> format;
-        bool fs_path = false;
-        float vorbis_quality = 1.0F;
-        std::uint32_t flac_compression = 5;
-        std::optional<std::size_t> channel_count;
-        std::optional<SoundClass> sound_class;
-        std::optional<std::uint32_t> sample_rate;
-    } sound_options;
-
-    std::vector<CommandLineOption> options;
-    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
-    options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
-    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, xbox-adpcm, or flac. Setting this is required.", "<fmt>");
-    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
-    options.emplace_back("channel-count", 'C', 1, "Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
-    options.emplace_back("sample-rate", 'r', 1, "Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
-    options.emplace_back("vorbis-quality", 'q', 1, "Set the Vorbis quality. This can be between -0.1 and 1.0. Default: 1.0", "<qlty>");
-    options.emplace_back("flac-level", 'f', 1, "[REQUIRES --extended] Set the FLAC compression level. This can be between 0 and 8, with higher levels taking longer but offering slightly better ratios. Default: 5", "<lvl>");
-    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
-
-    static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
-    static constexpr char USAGE[] = "[options] -F <fmt> <sound-tag>";
-
-    auto remaining_arguments = CommandLineOption::parse_arguments<SoundOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, sound_options, [](char opt, const std::vector<const char *> &arguments, auto &sound_options) {
-        switch(opt) {
-            case 'd':
-                sound_options.data = arguments[0];
-                break;
-
-            case 't':
-                sound_options.tags = arguments[0];
-                break;
-
-            case 'i':
-                show_version_info();
-                std::exit(EXIT_SUCCESS);
-
-            case 's':
-                sound_options.split = true;
-                break;
-
-            case 'S':
-                sound_options.split = false;
-                break;
-
-            case 'C':
-                try {
-                    sound_options.channel_count = SoundChannelCount_from_string(arguments[0]) == SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1 : 2;
-                }
-                catch(std::exception &) {
-                    eprintf_error("Unknown channel count %s (should be \"mono\" or \"stereo\")", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                break;
-
-            case 'F':
-                try {
-                    sound_options.format = SoundFormat_from_string(arguments[0]);
-                }
-                catch(std::exception &) {
-                    eprintf_error("Unknown sound format %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                break;
-
-            case 'q':
-                sound_options.vorbis_quality = std::atof(arguments[0]);
-                if(sound_options.vorbis_quality > 1.0F || sound_options.vorbis_quality < -0.1F) {
-                    eprintf_error("Vorbis quality is outside of the allowed range of -0.1 to 1.0");
-                    std::exit(EXIT_FAILURE);
-                }
-                break;
-
-            case 'P':
-                sound_options.fs_path = true;
-                break;
-
-            case 'f': {
-                long level;
-                try {
-                    level = std::stol(arguments[0]);
-                }
-                catch(std::exception &) {
-                    eprintf_error("Invalid sample rate: %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                if(level < 0 || level > 8) {
-                    eprintf_error("Compression level must be between 0 and 8");
-                    std::exit(EXIT_FAILURE);
-                }
-                sound_options.flac_compression = static_cast<std::uint32_t>(level);
-                break;
-            }
-
-            case 'r':
-                try {
-                    sound_options.sample_rate = static_cast<std::uint32_t>(std::stol(arguments[0]));
-                }
-                catch(std::exception &) {
-                    eprintf_error("Invalid sample rate: %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                if(sound_options.sample_rate != 22050 && sound_options.sample_rate != 44100) {
-                    eprintf_error("Only 22050 Hz and 44100 Hz sample rates are allowed");
-                    std::exit(EXIT_FAILURE);
-                }
-                break;
-
-            case 'c':
-                try {
-                    sound_options.sound_class = SoundClass_from_string(arguments[0]);
-                }
-                catch(std::exception &) {
-                    eprintf_error("Unknown sound class %s", arguments[0]);
-                    std::exit(EXIT_FAILURE);
-                }
-                break;
-        }
-    });
-
-    // Make sure format was set
-    if(!sound_options.format.has_value()) {
-        eprintf_error("No sound format was set. Use -h for more information.");
-        return EXIT_FAILURE;
-    }
-
-    // Get our paths and make sure a data directory exists
-    std::string halo_tag_path;
-    if(sound_options.fs_path) {
-        std::vector<std::string> data;
-        data.emplace_back(std::string(sound_options.data));
-        try {
-            halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
-        }
-        catch(std::exception &) {
-            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.data);
-            return EXIT_FAILURE;
-        }
-    }
-    else {
-        halo_tag_path = remaining_arguments[0];
-    }
-
-    // Remove trailing slashes
-    halo_tag_path = Invader::File::remove_trailing_slashes(halo_tag_path);
-
-    auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
-    auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
-    if(!std::filesystem::is_directory(data_path)) {
-        eprintf_error("No directory exists at %s", data_path.string().c_str());
-        return EXIT_FAILURE;
-    }
-
     // Parse the sound tag
-    Parser::Sound sound_tag = {};
+    T sound_tag = {};
+    auto *extended_sound = sizeof(Parser::ExtendedSound) == sizeof(T) ? reinterpret_cast<Parser::ExtendedSound *>(&sound_tag) : nullptr;
+
     if(std::filesystem::exists(tag_path)) {
         if(std::filesystem::is_directory(tag_path)) {
             eprintf_error("A directory exists at %s where a file was expected", tag_path.string().c_str());
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
         auto sound_file = File::open_file(tag_path.string().c_str());
         if(sound_file.has_value()) {
             auto &sound_data = *sound_file;
             try {
-                sound_tag = Parser::Sound::parse_hek_tag_file(sound_data.data(), sound_data.size());
+                sound_tag = T::parse_hek_tag_file(sound_data.data(), sound_data.size());
             }
             catch(std::exception &e) {
                 eprintf_error("An error occurred while attempting to read %s", tag_path.string().c_str());
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             }
         }
         if(sound_options.sound_class.has_value()) {
@@ -202,6 +56,72 @@ int main(int argc, const char **argv) {
         }
         else {
             sound_options.sound_class = sound_tag.sound_class;
+        }
+
+        if(extended_sound) {
+            // Set sample rate
+            if(sound_options.sample_rate.has_value()) {
+                switch(*sound_options.sample_rate) {
+                    case 22050:
+                        extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ;
+                        break;
+                    case 44100:
+                        extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ;
+                        break;
+                    default:
+                        std::terminate();
+                }
+            }
+            else switch(extended_sound->encoding_sample_rate) {
+                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_AUTOMATIC:
+                    break;
+                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ:
+                    sound_options.sample_rate = 22050;
+                    break;
+                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ:
+                    sound_options.sample_rate = 44100;
+                    break;
+                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_ENUM_COUNT:
+                    std::terminate();
+                    break;
+            }
+
+            // Set channel count
+            if(sound_options.channel_count.has_value()) {
+                switch(*sound_options.sample_rate) {
+                    case 1:
+                        extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO;
+                        break;
+                    case 2:
+                        extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO;
+                        break;
+                    default:
+                        std::terminate();
+                }
+            }
+            else switch(extended_sound->encoding_channel_count) {
+                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_AUTOMATIC:
+                    break;
+                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO:
+                    sound_options.channel_count = 1;
+                    break;
+                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO:
+                    sound_options.channel_count = 2;
+                    break;
+                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_ENUM_COUNT:
+                    std::terminate();
+                    break;
+            }
+
+            // Set channel count
+            if(sound_options.format.has_value()) {
+                extended_sound->encoding_format = *sound_options.format;
+            }
+            else {
+                sound_options.format = extended_sound->encoding_format;
+            }
+
+            extended_sound->source_FLACs.clear();
         }
     }
     else {
@@ -216,7 +136,7 @@ int main(int argc, const char **argv) {
 
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
         sound_tag.sound_class = *sound_options.sound_class;
     }
@@ -227,6 +147,15 @@ int main(int argc, const char **argv) {
     // If a format is defined, use it
     if(sound_options.format.has_value()) {
         sound_tag.format = *sound_options.format;
+    }
+    else {
+        sound_options.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
+    }
+
+    // DRM flac tags
+    if(!extended_sound && sound_options.format == SoundFormat::SOUND_FORMAT_FLAC) {
+        eprintf_error("FLAC cannot be used without --extended");
+        std::exit(EXIT_FAILURE);
     }
 
     auto &format = sound_tag.format;
@@ -252,7 +181,7 @@ int main(int argc, const char **argv) {
         old_actual_permutation_count = old_pitch_range.actual_permutation_count;
         if(old_actual_permutation_count > old_pitch_range.permutations.size()) {
             eprintf_error("Existing sound tag has an invalid actual permutation count");
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
     }
     else {
@@ -280,7 +209,7 @@ int main(int argc, const char **argv) {
         auto *path_str_cstr = path_str.c_str();
         if(wav.is_directory()) {
             eprintf_error("Unexpected directory %s", path_str_cstr);
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
         auto extension = path.extension().string();
 
@@ -295,12 +224,12 @@ int main(int argc, const char **argv) {
             }
             else {
                 eprintf_error("Unknown file format for %s", path_str_cstr);
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             }
         }
         catch(std::exception &e) {
             eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
 
         // Use the highest channel count and sample rate
@@ -314,18 +243,18 @@ int main(int argc, const char **argv) {
         // Make sure we can actually work with this
         if(sound.channel_count > 2 || sound.channel_count < 1) {
             eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
         if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
             eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
-            return EXIT_FAILURE;
+            std::exit(EXIT_FAILURE);
         }
         auto filename = path.filename().string();
 
         // Get the permutation name
         sound.name = filename.substr(0, filename.size() - extension.size());
-        if(sound.name.size() >= sizeof(TagString)) {
-            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(TagString));
+        if(sound.name.size() >= sizeof(HEK::TagString)) {
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
             std::exit(EXIT_FAILURE);
         }
 
@@ -337,6 +266,14 @@ int main(int argc, const char **argv) {
         // Make it small
         sound.pcm.shrink_to_fit();
 
+        // Add it to the source list
+        if(extended_sound) {
+            auto &source = extended_sound->source_FLACs.emplace_back();
+            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
+            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
+            source.compressed_audio_data = Invader::SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 8);
+        }
+
         // Add it
         std::size_t i;
         for(i = 0; i < permutations.size(); i++) {
@@ -345,7 +282,7 @@ int main(int argc, const char **argv) {
             }
             else if(sound.name == permutations[i].name) {
                 eprintf_error("Multiple permutations with the same name (%s) cannot be added", permutations[i].name.c_str());
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             }
         }
         permutations.insert(permutations.begin() + i, std::move(sound));
@@ -359,14 +296,14 @@ int main(int argc, const char **argv) {
     // Make sure we have stuff
     if(permutations.size() == 0) {
         eprintf_error("No permutations found in %s", data_path.string().c_str());
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // Set the actual permutation count
     auto actual_permutation_count = permutations.size();
     if(actual_permutation_count > MAX_PERMUTATIONS) {
         eprintf_error("Maximum number of actual permutations (%zu > %zu) exceeded", actual_permutation_count, MAX_PERMUTATIONS);
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
     pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
@@ -392,7 +329,7 @@ int main(int argc, const char **argv) {
     }
     else {
         eprintf_error("Unsupported sample rate %u", highest_sample_rate);
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // Sound tags currently only support single and dual channels
@@ -404,7 +341,7 @@ int main(int argc, const char **argv) {
     }
     else {
         eprintf_error("Unsupported channel count %u", highest_channel_count);
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     // Resample permutations when needed
@@ -431,7 +368,7 @@ int main(int argc, const char **argv) {
             int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation.channel_count);
             if(res) {
                 eprintf_error("Failed to resample: %s", src_strerror(res));
-                return EXIT_FAILURE;
+                std::exit(EXIT_FAILURE);
             }
             new_samples.resize(data.output_frames_gen * permutation.channel_count);
 
@@ -548,7 +485,7 @@ int main(int argc, const char **argv) {
 
     if(is_dialogue && split) {
         eprintf_error("Split dialogue is unsupported.");
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
 
     for(std::size_t i = 0; i < actual_permutation_count; i++) {
@@ -661,15 +598,32 @@ int main(int argc, const char **argv) {
                     break;
 
                 // Encode to Vorbis in an Ogg container
-                case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
-                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.vorbis_quality);
+                case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
+                    if(sound_options.compression_level > 1.0F) {
+                        sound_options.compression_level = 1.0F;
+                    }
+                    else if(sound_options.compression_level < 0.0F) {
+                        sound_options.compression_level = 0.0F;
+                    }
+                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.compression_level);
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
+                }
 
                 // Encode to FLAC
-                case SoundFormat::SOUND_FORMAT_FLAC:
-                    p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.flac_compression);
+                case SoundFormat::SOUND_FORMAT_FLAC: {
+                    // Clamp to 0.0 - 0.8
+                    if(sound_options.compression_level > 0.8F) {
+                        sound_options.compression_level = 0.8F;
+                    }
+                    else if(sound_options.compression_level < 0.0F) {
+                        sound_options.compression_level = 0.0F;
+                    }
+                    // Convert to integer, rounding to the nearest level
+                    int flac_level = static_cast<int>(sound_options.compression_level * 10.0F + 0.5F);
+                    p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, flac_level);
                     break;
+                }
 
                 // Encode to Xbox ADPCMeme
                 case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
@@ -709,7 +663,7 @@ int main(int argc, const char **argv) {
                     std::size_t next_permutation = pitch_range.permutations.size();
                     if(next_permutation > MAX_PERMUTATIONS) {
                         eprintf_error("Maximum number of total permutations (%zu > %zu) exceeded", next_permutation, MAX_PERMUTATIONS);
-                        return EXIT_FAILURE;
+                        std::exit(EXIT_FAILURE);
                     }
                     p.next_permutation_index = static_cast<Index>(next_permutation);
                 }
@@ -730,7 +684,7 @@ int main(int argc, const char **argv) {
                 while(new_permutation != NULL_INDEX && old_permutation != NULL_INDEX) {
                     if(old_permutation > old_pitch_range.permutations.size()) {
                         eprintf_error("Existing sound tag has an invalid next permutation index");
-                        return EXIT_FAILURE;
+                        std::exit(EXIT_FAILURE);
                     }
 
                     auto &old_pr = old_pitch_range.permutations[old_permutation];
@@ -761,8 +715,165 @@ int main(int argc, const char **argv) {
     static constexpr char DEFAULT_NAME[] = "default";
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
     sound_tag.pitch_ranges[0] = std::move(pitch_range);
-    auto sound_tag_data = sound_tag.generate_hek_tag_data(TagClassInt::TAG_CLASS_SOUND, true);
-    oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0);
+    auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_EXTENDED_SOUND, true);
+    oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, extended_sound == nullptr ? "" : " [--extended]");
+
+    return sound_tag_data;
+}
+
+int main(int argc, const char **argv) {
+    EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
+
+    SoundOptions sound_options;
+
+    std::vector<CommandLineOption> options;
+    options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("split", 's', 0, "Split permutations into 227.5 KiB chunks. This is necessary for longer sounds (e.g. music) when being played in the original Halo engine.");
+    options.emplace_back("no-split", 'S', 0, "Do not split permutations.");
+    options.emplace_back("extended", 'x', 0, "Create an extended_sound tag.");
+    options.emplace_back("format", 'F', 1, "Set the format. Can be: 16-bit-pcm, ogg-vorbis, or xbox-adpcm. Using flac requires --extended. Setting this is required unless creating an extended tag, in which case it defaults to 16-bit-pcm.", "<fmt>");
+    options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("channel-count", 'C', 1, "[REQUIRES --extended] Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
+    options.emplace_back("sample-rate", 'r', 1, "[REQUIRES --extended] Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
+    options.emplace_back("compression-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
+    options.emplace_back("flac-level", 'f', 1, "[REQUIRES --extended] Set the FLAC compression level. This can be between 0 and 8, with higher levels taking longer but offering slightly better ratios. Default: 5", "<lvl>");
+    options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
+
+    static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
+    static constexpr char USAGE[] = "[options] <sound-tag>";
+
+    auto remaining_arguments = CommandLineOption::parse_arguments<SoundOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, sound_options, [](char opt, const std::vector<const char *> &arguments, auto &sound_options) {
+        switch(opt) {
+            case 'd':
+                sound_options.data = arguments[0];
+                break;
+
+            case 't':
+                sound_options.tags = arguments[0];
+                break;
+
+            case 'i':
+                show_version_info();
+                std::exit(EXIT_SUCCESS);
+
+            case 's':
+                sound_options.split = true;
+                break;
+
+            case 'S':
+                sound_options.split = false;
+                break;
+
+            case 'C':
+                try {
+                    sound_options.channel_count = SoundChannelCount_from_string(arguments[0]) == SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1 : 2;
+                }
+                catch(std::exception &) {
+                    eprintf_error("Unknown channel count %s (should be \"mono\" or \"stereo\")", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
+            case 'F':
+                try {
+                    sound_options.format = SoundFormat_from_string(arguments[0]);
+                }
+                catch(std::exception &) {
+                    eprintf_error("Unknown sound format %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
+            case 'l':
+                sound_options.compression_level = std::atof(arguments[0]);
+                if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
+                    eprintf_error("Compression level is outside of the allowed range of 0.0 to 1.0");
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
+            case 'P':
+                sound_options.fs_path = true;
+                break;
+
+            case 'x':
+                sound_options.extended = true;
+                break;
+
+            case 'r':
+                try {
+                    sound_options.sample_rate = static_cast<std::uint32_t>(std::stol(arguments[0]));
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid sample rate: %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                if(sound_options.sample_rate != 22050 && sound_options.sample_rate != 44100) {
+                    eprintf_error("Only 22050 Hz and 44100 Hz sample rates are allowed");
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+
+            case 'c':
+                try {
+                    sound_options.sound_class = SoundClass_from_string(arguments[0]);
+                }
+                catch(std::exception &) {
+                    eprintf_error("Unknown sound class %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
+        }
+    });
+
+    // Get our paths and make sure a data directory exists
+    std::string halo_tag_path;
+    if(sound_options.fs_path) {
+        std::vector<std::string> data;
+        data.emplace_back(std::string(sound_options.data));
+        try {
+            halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
+        }
+        catch(std::exception &) {
+            eprintf_error("Cannot find %s in %s", remaining_arguments[0], sound_options.data);
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        halo_tag_path = remaining_arguments[0];
+    }
+
+    // Remove trailing slashes
+    halo_tag_path = Invader::File::remove_trailing_slashes(halo_tag_path);
+    auto data_path = std::filesystem::path(sound_options.data) / halo_tag_path;
+    if(!std::filesystem::is_directory(data_path)) {
+        eprintf_error("No directory exists at %s", data_path.string().c_str());
+        return EXIT_FAILURE;
+    }
+
+    // Find it!
+    auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".extended_sound");
+    if(std::filesystem::exists(tag_path)) {
+        sound_options.extended = true;
+    }
+
+    std::vector<std::byte> sound_tag_data;
+    if(!sound_options.extended) {
+        auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
+
+        // Make sure format was set
+        if(!sound_options.format.has_value()) {
+            eprintf_error("No sound format set (required for .sound tags). Use -h for more information.");
+            return EXIT_FAILURE;
+        }
+
+        sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
+    }
+    else {
+        sound_tag_data= make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
+    }
 
     // Create missing directories if needed
     try {

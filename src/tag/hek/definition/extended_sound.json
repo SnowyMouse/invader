@@ -23,6 +23,7 @@
         "fields": [
             {
                 "name": "file name",
+                "endian": null,
                 "type": "TagString"
             },
             {
@@ -77,7 +78,8 @@
                 "struct": "ExtendedSoundSourceFLAC",
                 "name": "source FLACs",
                 "compound": true,
-                "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC"
+                "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC",
+                "read_only": true
             },
             {
                 "type": "pad",
