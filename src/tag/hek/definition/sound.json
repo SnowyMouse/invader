@@ -251,7 +251,8 @@
             },
             {
                 "name": "sample rate",
-                "type": "SoundSampleRate"
+                "type": "SoundSampleRate",
+                "read_only": true
             },
             {
                 "name": "minimum distance",
@@ -333,11 +334,13 @@
             },
             {
                 "name": "channel count",
-                "type": "SoundChannelCount"
+                "type": "SoundChannelCount",
+                "read_only": true
             },
             {
                 "name": "format",
-                "type": "SoundFormat"
+                "type": "SoundFormat",
+                "read_only": true
             },
             {
                 "name": "promotion sound",
