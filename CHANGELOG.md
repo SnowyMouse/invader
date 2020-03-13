@@ -7,6 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader
 - New class: extended_bitmap - Contains all extra features in invader-bitmap
   that are not present in stock tool.exe (use `-x` to enable)
+- New class: extended_sound - Contains all extra features in invader-sound
+  that are not present in stock tool.exe (use `-x` to enable)
 - invader-edit-qt: Added two new buttons to arrays: "Insert" and "Delete All".
   "Insert" now does what "Add" did, and "Delete All" now does what "Clear" did.
 - invader-edit-qt: Added `--no-safeguards` to allow editing of any field (don't
@@ -37,6 +39,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Opening a file now displays in the status bar
 - invader-sound: Specifying the format is now required whenever sound data is
   being put into a map
+- invader-sound: Moved forcing sample rate and channel count to extended_sound,
+  as well as using FLAC tags or creating sound tags without specifying a format
 
 ### Fixed
 - invader: Fixed some issues with outputting text on various installations of
