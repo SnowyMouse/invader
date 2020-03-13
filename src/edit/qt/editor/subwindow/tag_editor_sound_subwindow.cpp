@@ -75,9 +75,6 @@ namespace Invader::EditQt {
         // Show the time
         this->time = new QLabel();
         this->time->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-        int time_width = this->time->fontMetrics().horizontalAdvance("00:00.00 / 00:00.00");
-        this->time->setMinimumWidth(time_width);
-        this->time->setMaximumWidth(time_width);
         this->time->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
         playback_layout->addWidget(this->time);
 
