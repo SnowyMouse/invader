@@ -1,10 +1,49 @@
 [
     {
+        "name": "ExtendedSoundSampleRate",
+        "options": [
+            "automatic",
+            "22050 Hz",
+            "44100 Hz"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ExtendedSoundChannelCount",
+        "options": [
+            "automatic",
+            "mono",
+            "stereo"
+        ],
+        "type": "enum"
+    },
+    {
+        "name": "ExtendedSoundSourceFLAC",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "file name",
+                "type": "TagString"
+            },
+            {
+                "name": "compressed audio data",
+                "type": "TagDataOffset",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "size": 64,
+        "read_only": true
+    },
+    {
         "name": "ExtendedSound",
         "groups": [
             {
                 "name": "Extended Sound Data",
-                "description": "Invader-specific bitmap data",
+                "description": "Invader-specific sound data",
                 "first": "encoding format"
             }
         ],
@@ -12,6 +51,16 @@
             {
                 "type": "pad",
                 "size": 2
+            },
+            {
+                "name": "encoding sample rate",
+                "type": "ExtendedSoundSampleRate",
+                "comment": "This can be used to resample the sample rate to be different from the source sample rate. Choosing \"automatic\" will, instead, do the default behavior of picking the closer sample rate to the highest sample rate of all of the permutations."
+            },
+            {
+                "name": "encoding channel count",
+                "type": "ExtendedSoundChannelCount",
+                "comment": "This can be used to mix up/down the channel count to be different from the source channel count. Choosing \"automatic\" will, instead, do the default behavior of picking the highest channel count of all of the permutations."
             },
             {
                 "name": "encoding format",
@@ -24,8 +73,15 @@
                 "comment": "This can be from 0.0 to 1.0. For Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10). For FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8). Note that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality."
             },
             {
+                "type": "TagReflexive",
+                "struct": "ExtendedSoundSourceFLAC",
+                "name": "source FLACs",
+                "compound": true,
+                "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC"
+            },
+            {
                 "type": "pad",
-                "size": 56
+                "size": 40
             }
         ],
         "type": "struct",
