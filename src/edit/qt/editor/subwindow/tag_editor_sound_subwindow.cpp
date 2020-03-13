@@ -40,8 +40,8 @@ namespace Invader::EditQt {
             option_label->setMinimumWidth(width);
             option_label->setMaximumWidth(width);
             *set_to = new QComboBox();
+            (*set_to)->setMinimumWidth(width * 2);
             option_layout->addWidget(*set_to);
-            option_layout->addStretch();
             layout->addWidget(option_widget);
         };
 
