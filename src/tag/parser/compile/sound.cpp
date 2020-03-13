@@ -2,6 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/tag/parser/compile/sound.hpp>
 
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -183,11 +184,19 @@ namespace Invader::Parser {
         sound_pre_compile(this, workload, tag_index);
     }
 
-    void Invader::Parser::Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         sound_post_cache_parse(this, tag);
     }
 
-    void Invader::Parser::SoundPermutation::post_cache_deformat() {
+    void ExtendedSound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        sound_pre_compile(this, workload, tag_index);
+    }
+
+    void ExtendedSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        sound_post_cache_parse(this, tag);
+    }
+
+    void SoundPermutation::post_cache_deformat() {
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             auto *start = reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(this->samples.data());
             auto *end = start + this->samples.size() / sizeof(*start);
@@ -210,5 +219,36 @@ namespace Invader::Parser {
 
         std::fill(this->one_detail_unknown_floats, this->one_detail_unknown_floats + 2, 1.0F);
         std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);
+    }
+
+    Sound downgrade_extended_sound(ExtendedSound &sound) {
+        Sound s = {};
+        s.flags = sound.flags;
+        s.sound_class = sound.sound_class;
+        s.sample_rate = sound.sample_rate;
+        s.minimum_distance = sound.minimum_distance;
+        s.maximum_distance = sound.maximum_distance;
+        s.skip_fraction = sound.skip_fraction;
+        s.random_pitch_bounds = sound.random_pitch_bounds;
+        s.inner_cone_angle = sound.inner_cone_angle;
+        s.outer_cone_angle = sound.outer_cone_angle;
+        s.outer_cone_gain = sound.outer_cone_gain;
+        s.random_gain_modifier = sound.random_gain_modifier;
+        s.maximum_bend_per_second = sound.maximum_bend_per_second;
+        s.zero_skip_fraction_modifier = sound.zero_skip_fraction_modifier;
+        s.zero_gain_modifier = sound.zero_gain_modifier;
+        s.zero_pitch_modifier = sound.zero_pitch_modifier;
+        s.one_skip_fraction_modifier = sound.one_skip_fraction_modifier;
+        s.one_gain_modifier = sound.one_gain_modifier;
+        s.one_pitch_modifier = sound.one_pitch_modifier;
+        s.channel_count = sound.channel_count;
+        s.format = sound.format;
+        s.promotion_sound = sound.promotion_sound;
+        s.promotion_count = sound.promotion_count;
+        s.unknown_int = sound.unknown_int;
+        s.unknown_ffffffff_0 = sound.unknown_ffffffff_0;
+        s.unknown_ffffffff_1 = sound.unknown_ffffffff_1;
+        s.pitch_ranges = sound.pitch_ranges;
+        return s;
     }
 }

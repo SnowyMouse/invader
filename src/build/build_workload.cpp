@@ -12,6 +12,7 @@
 #include <invader/compress/compression.hpp>
 #include <invader/tag/index/index.hpp>
 #include <invader/tag/parser/compile/bitmap.hpp>
+#include <invader/tag/parser/compile/sound.hpp>
 #include "../crc/crc32.h"
 
 namespace Invader {
@@ -655,16 +656,28 @@ namespace Invader {
             COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
-               auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
-               if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                   do_compile_tag(std::move(tag_data_parsed));
-               }
-               else {
-                   this->tags[tag_index].alias = *tag_class_int;
-                   this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
-                   do_compile_tag(downgrade_extended_bitmap(tag_data_parsed));
-               }
-               break;
+                auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    do_compile_tag(std::move(tag_data_parsed));
+                }
+                else {
+                    this->tags[tag_index].alias = *tag_class_int;
+                    this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
+                    do_compile_tag(downgrade_extended_bitmap(tag_data_parsed));
+                }
+                break;
+            }
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND: {
+                auto tag_data_parsed = Parser::ExtendedSound::parse_hek_tag_file(tag_data, tag_data_size, true);
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    do_compile_tag(std::move(tag_data_parsed));
+                }
+                else {
+                    this->tags[tag_index].alias = *tag_class_int;
+                    this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_SOUND;
+                    do_compile_tag(downgrade_extended_sound(tag_data_parsed));
+                }
+                break;
             }
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
@@ -695,7 +708,6 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_MODEL:
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
             case TagClassInt::TAG_CLASS_NEW_FONT:
             case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:

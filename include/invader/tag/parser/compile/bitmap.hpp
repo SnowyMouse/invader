@@ -5,10 +5,6 @@
 
 #include "../parser.hpp"
 
-namespace Invader {
-    class BuildWorkload;
-}
-
 namespace Invader::Parser {
     /**
      * Downgrade an extended bitmap tag to a regular bitmap tag

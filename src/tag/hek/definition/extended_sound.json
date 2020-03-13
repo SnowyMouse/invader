@@ -88,6 +88,9 @@
         ],
         "type": "struct",
         "size": 228,
+        "post_cache_parse": true,
+        "unsafe_to_dedupe": true,
+        "pre_compile": true,
         "inherits": "Sound"
     }
 ]
