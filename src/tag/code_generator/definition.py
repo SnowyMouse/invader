@@ -26,7 +26,7 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
         return "{}_{}".format(prefix,value.upper())
 
     def format_enum_str(value):
-        return value.replace("_", "-")
+        return value.replace("_", "-").lower()
 
     def write_enum(name, fields, fields_pretty, type, cpp):
         f.write("    enum {} : {} {{\n".format(name, type))
