@@ -1,10 +1,31 @@
 [
     {
         "name": "ExtendedSound",
+        "groups": [
+            {
+                "name": "Extended Sound Data",
+                "description": "Invader-specific bitmap data",
+                "first": "encoding format"
+            }
+        ],
         "fields": [
             {
                 "type": "pad",
-                "size": 64
+                "size": 2
+            },
+            {
+                "name": "encoding format",
+                "type": "SoundFormat",
+                "comment": "Format to use when generating the tag"
+            },
+            {
+                "type": "float",
+                "name": "compression level",
+                "comment": "This can be from 0.0 to 1.0. For Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10). For FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8). Note that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality."
+            },
+            {
+                "type": "pad",
+                "size": 56
             }
         ],
         "type": "struct",
