@@ -86,7 +86,7 @@ namespace Invader::SoundReader {
         std::size_t bytes_to_store = data_remaining > *bytes ? *bytes : data_remaining;
         *bytes = bytes_to_store;
         std::memcpy(buffer, stream_holder_stuff.data + stream_holder_stuff.offset, bytes_to_store);
-        stream_holder_stuff.offset += data_remaining;
+        stream_holder_stuff.offset += bytes_to_store;
 
         // And then end here
         return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
@@ -95,11 +95,12 @@ namespace Invader::SoundReader {
     static FLAC__StreamDecoderSeekStatus seek_flac_data(const FLAC__StreamDecoder *, FLAC__uint64 absolute_byte_offset, void *client_data) noexcept {
         auto &client_data_sound = *reinterpret_cast<SoundReader::Sound *>(client_data);
         auto &stream_holder_stuff = *reinterpret_cast<StreamHolder *>(client_data_sound.internal);
-        std::size_t new_offset = stream_holder_stuff.offset + absolute_byte_offset;
-        if(new_offset < stream_holder_stuff.offset || new_offset > stream_holder_stuff.data_length) {
-            return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
+        if(absolute_byte_offset > stream_holder_stuff.data_length) {
+            stream_holder_stuff.offset = stream_holder_stuff.data_length;
         }
-        stream_holder_stuff.offset = new_offset;
+        else {
+            stream_holder_stuff.offset = absolute_byte_offset;
+        }
         return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
     }
 
@@ -140,7 +141,7 @@ namespace Invader::SoundReader {
                 throw InvalidInputSoundException();
             }
             if(!FLAC__stream_decoder_process_until_end_of_stream(decoder)) {
-                eprintf_error("Failed to init FLAC stream");
+                eprintf_error("Failed to process FLAC stream");
                 throw InvalidInputSoundException();
             }
             if(result.pcm.size() == 0) {
