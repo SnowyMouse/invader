@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <invader/file/file.hpp>
 
 #include <cstdio>
@@ -17,10 +21,26 @@ namespace Invader::File {
 
         // Get the size
         std::vector<std::byte> file_data;
+
+        // Workaround for filesystem::file_size() being screwed up on Windows when using files >2 GiB even though the damn thing returns a uintmax_t
+        #ifdef _WIN32
+        fseek(file, 0, SEEK_END);
+        auto sizel = _ftelli64(file);
+        if(sizel < 0) {
+            std::fclose(file);
+            return std::nullopt;
+        }
+        auto size = static_cast<std::size_t>(sizel);
+        fseek(file, 0, SEEK_SET);
+
+        // Get the size normally
+        #else
         auto size = std::filesystem::file_size(std::filesystem::path(path));
+        #endif
 
         // Get the size and make sure we can use it
         if(size > file_data.max_size()) {
+            std::fclose(file);
             return std::nullopt;
         }
 
