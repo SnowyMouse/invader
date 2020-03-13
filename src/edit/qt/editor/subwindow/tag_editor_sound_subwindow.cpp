@@ -103,6 +103,11 @@ namespace Invader::EditQt {
 
     TagEditorSoundSubwindow::TagEditorSoundSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
         this->update();
+        this->adjustSize();
+        this->setMaximumHeight(this->height());
+        this->setMinimumHeight(this->height());
+        this->setMaximumWidth(this->width());
+        this->setMinimumWidth(this->width());
         this->center_window();
     }
 
