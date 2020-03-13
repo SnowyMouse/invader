@@ -393,7 +393,7 @@ namespace Invader::EditQt {
         // TODO: Show all tags that depend on this tag
         char message_entire_text[512];
         std::snprintf(message_entire_text, sizeof(message_entire_text), "Are you sure you want to delete \"%s\"?\n\nIf a tag depends on this tag, then that tag may no longer function.", tag->full_path.string().c_str());
-        QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel, this);
+        QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel);
         switch(are_you_sure.exec()) {
             case QMessageBox::Yes:
                 std::filesystem::remove(tag->full_path);

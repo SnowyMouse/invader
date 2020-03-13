@@ -20,6 +20,7 @@
 #include "../tree/tag_tree_dialog.hpp"
 #include "subwindow/tag_editor_subwindow.hpp"
 #include "subwindow/tag_editor_bitmap_subwindow.hpp"
+#include "subwindow/tag_editor_sound_subwindow.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -30,7 +31,7 @@ namespace Invader::EditQt {
             if(!open_file.has_value()) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s. Make sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
-                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
             }
@@ -40,7 +41,7 @@ namespace Invader::EditQt {
             catch(std::exception &e) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s due to an exception error:\n\n%s", tag_file.full_path.string().c_str(), e.what());
-                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
             }
@@ -48,7 +49,7 @@ namespace Invader::EditQt {
             if(this->parser_data->check_for_broken_enums(false)) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to parse %s due to enumerators being out-of-bounds.\n\nThe tag appears to be corrupt.", tag_file.full_path.string().c_str());
-                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
             }
@@ -59,7 +60,7 @@ namespace Invader::EditQt {
             if(!this->parser_data) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to create a %s.", tag_class_to_extension(tag_file.tag_class_int));
-                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok, this).exec();
+                QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
             }
@@ -180,7 +181,7 @@ namespace Invader::EditQt {
             else {
                 std::snprintf(message_entire_text, sizeof(message_entire_text), "This file \"%s\" has been modified.\nDo you want to save your changes?", this->file.full_path.string().c_str());
             }
-            QMessageBox are_you_sure(QMessageBox::Icon::Question, "Unsaved changes", message_entire_text, QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, this);
+            QMessageBox are_you_sure(QMessageBox::Icon::Question, "Unsaved changes", message_entire_text, QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
             switch(are_you_sure.exec()) {
                 case QMessageBox::Save:
                     accept = this->perform_save();

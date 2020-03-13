@@ -182,7 +182,7 @@ namespace Invader::EditQt {
         static constexpr char PREFERRED_SEPARATOR[] = { std::filesystem::path::preferred_separator, 0 };
 
         if(potential_final_path.size() == 0 || potential_final_path.endsWith(PREFERRED_SEPARATOR) || potential_final_path.startsWith(PREFERRED_SEPARATOR) || this->path_to_enter->text() != potential_final_path) {
-            QMessageBox(QMessageBox::Icon::Critical, "Invalid path", "The path given was invalid or empty. Paths cannot start or end with a path separator or contain any uppercase characters.", QMessageBox::Cancel, this).exec();
+            QMessageBox(QMessageBox::Icon::Critical, "Invalid path", "The path given was invalid or empty. Paths cannot start or end with a path separator or contain any uppercase characters.", QMessageBox::Cancel).exec();
             return;
         }
 

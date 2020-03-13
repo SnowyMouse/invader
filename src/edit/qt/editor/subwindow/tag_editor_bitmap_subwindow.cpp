@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QMessageBox>
 #include "../tag_editor_window.hpp"
 #include "tag_editor_bitmap_subwindow.hpp"
 #include "tag_editor_subwindow.hpp"
@@ -309,6 +310,7 @@ namespace Invader::EditQt {
         std::size_t data_remaining = pixel_data->size();
         if(offset >= data_remaining || data_remaining - offset < pixels_required) {
             eprintf_warn("Not enough data left for bitmap preview (%zu < %zu)", data_remaining, pixels_required);
+            QMessageBox(QMessageBox::Icon::Critical, "Error", "Failed to load all data.\n\nThe tag may be corrupt.", QMessageBox::Ok).exec();
             return nullptr;
         }
 
@@ -594,7 +596,11 @@ namespace Invader::EditQt {
             auto *row_layout = new QHBoxLayout();
             row->setLayout(row_layout);
             for(std::size_t e = 0; e < elements; e++) {
-                row_layout->addWidget(make_widget(mip, e));
+                auto *widget = make_widget(mip, e);
+                if(!widget) {
+                    break;
+                }
+                row_layout->addWidget(widget);
             }
             row_layout->addStretch();
             row_layout->setMargin(4);
