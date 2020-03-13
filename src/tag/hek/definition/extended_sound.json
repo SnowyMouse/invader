@@ -10,4 +10,5 @@
         "type": "struct",
         "size": 228,
         "inherits": "Sound"
+    }
 ]
