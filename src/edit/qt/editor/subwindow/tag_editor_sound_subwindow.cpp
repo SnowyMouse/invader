@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QFontDatabase>
+#include <QCheckBox>
 #include <invader/printf.hpp>
 #include "../tag_editor_window.hpp"
 #include <invader/tag/parser/parser.hpp>
@@ -29,11 +30,11 @@ namespace Invader::EditQt {
         this->setCentralWidget(widget);
 
         // Add options
-        auto add_option = [&layout](const char *label_text, auto **set_to) {
+        auto add_option = [&layout](const char *label_text, auto **set_to, double width_multiplier) -> QLayout * {
             auto *option_widget = new QWidget();
             auto *option_layout = new QHBoxLayout();
             option_layout->setMargin(0);
-            option_layout->setSpacing(0);
+            option_layout->setSpacing(8);
             auto *option_label = new QLabel(label_text);
             option_layout->addWidget(option_label);
             option_widget->setLayout(option_layout);
@@ -41,14 +42,17 @@ namespace Invader::EditQt {
             option_label->setMinimumWidth(width);
             option_label->setMaximumWidth(width);
             *set_to = new QComboBox();
-            (*set_to)->setMinimumWidth(width * 2);
+            (*set_to)->setMinimumWidth(width * width_multiplier);
             option_layout->addWidget(*set_to);
             layout->addWidget(option_widget);
+            return option_layout;
         };
 
         // Generate our options
-        add_option("Actual permutation:", &this->actual_permutation);
-        add_option("Permutation:", &this->permutation);
+        add_option("Actual permutation:", &this->actual_permutation, 2.0);
+
+        this->loop = new QCheckBox("Loop");
+        add_option("Permutation:", &this->permutation, 1.0)->addWidget(this->loop);
 
         // Add playback stuff
         this->slider = new QSlider(Qt::Orientation::Horizontal);
@@ -365,17 +369,40 @@ namespace Invader::EditQt {
     }
 
     void TagEditorSoundSubwindow::play_sample() {
-        std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
-        if(pcm_data_remaining == 0 || !this->playing) {
+        // If we're done, stop
+        if(!this->playing) {
             this->stop_sound();
             return;
         }
-        this->update_time_label();
-        std::size_t pcm_data_increment = this->device->write(reinterpret_cast<const char *>(this->all_pcm.data()) + this->sample, pcm_data_remaining);
+
+        // Get how much data is left
+        std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
+        bool play_in_loop = this->loop->checkState() == Qt::Checked;
+        if(pcm_data_remaining == 0) {
+            if(play_in_loop) {
+                this->sample = 0;
+                pcm_data_remaining = this->all_pcm.size();
+            }
+            else {
+                this->stop_sound();
+                return;
+            }
+        }
+
+        auto *data = reinterpret_cast<const char *>(this->all_pcm.data());
+        std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_remaining);
+
+        // Did we play everything? And are we looping? If so, loop back.
         this->sample += pcm_data_increment;
+        if(this->sample == this->all_pcm.size() && play_in_loop) {
+            this->sample = this->device->write(data, this->all_pcm.size());
+        }
+
         this->slider->blockSignals(true);
         this->slider->setValue(this->sample / this->sample_granularity);
         this->slider->blockSignals(false);
+
+        this->update_time_label();
     }
 
     void TagEditorSoundSubwindow::change_sample() {
