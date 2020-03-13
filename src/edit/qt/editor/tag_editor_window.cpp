@@ -98,9 +98,9 @@ namespace Invader::EditQt {
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
-            // case TagClassInt::TAG_CLASS_SOUND:
-            //     extra_widget = new QPushButton("Preview sound");
-            //     break;
+            case TagClassInt::TAG_CLASS_SOUND:
+                 extra_widget = new QPushButton("Preview sound");
+                 break;
             // case TagClassInt::TAG_CLASS_GBXMODEL:
             // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
             //     extra_widget = new QPushButton("Preview model");
@@ -298,6 +298,9 @@ namespace Invader::EditQt {
                 case TagClassInt::TAG_CLASS_BITMAP:
                 case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);
+                    break;
+                case TagClassInt::TAG_CLASS_SOUND:
+                    this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
                 default:
                     std::terminate();
