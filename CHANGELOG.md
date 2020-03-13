@@ -47,6 +47,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed closing modified tags crashing if "Save" was clicked
 - invader-edit-qt: Fixed memory not being freed when closing a tag until
   another tag was opened
+- invader-edit-qt: Fixed an issue where files >2 GiB would not open on Windows;
+  this was due to filesystem::file_size() being bugged in the fs implementation
 
 ### Removed
 - invader-bitmap: Removed dithering red, green, and blue channels individually.
