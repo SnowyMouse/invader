@@ -366,4 +366,8 @@ namespace Invader::EditQt {
     void TagEditorSoundSubwindow::change_sample() {
         this->sample = this->slider->value() * this->sample_granularity;
     }
+
+    void TagEditorSoundSubwindow::closeEvent(QCloseEvent *) {
+        this->stop_sound();
+    }
 }

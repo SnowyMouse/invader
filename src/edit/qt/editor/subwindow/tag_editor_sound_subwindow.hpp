@@ -79,6 +79,8 @@ namespace Invader::EditQt {
         void stop_sound();
         void play_sample();
         void change_sample();
+
+        void closeEvent(QCloseEvent *) override;
     };
 }
 
