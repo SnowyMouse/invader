@@ -1,0 +1,13 @@
+[
+    {
+        "name": "ExtendedSound",
+        "fields": [
+            {
+                "type": "pad",
+                "size": 64
+            }
+        ],
+        "type": "struct",
+        "size": 228,
+        "inherits": "Sound"
+]
