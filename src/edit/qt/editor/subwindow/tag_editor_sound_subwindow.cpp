@@ -330,6 +330,8 @@ namespace Invader::EditQt {
         switch(this->get_parent_window()->get_file().tag_class_int) {
             case TagClassInt::TAG_CLASS_SOUND:
                 return get_it(dynamic_cast<Parser::Sound *>(parser_data));
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+                return get_it(dynamic_cast<Parser::ExtendedSound *>(parser_data));
             default:
                 std::terminate();
         }

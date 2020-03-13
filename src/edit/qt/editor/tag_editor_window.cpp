@@ -99,6 +99,7 @@ namespace Invader::EditQt {
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
             case TagClassInt::TAG_CLASS_SOUND:
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
                  extra_widget = new QPushButton("Preview sound");
                  break;
             // case TagClassInt::TAG_CLASS_GBXMODEL:
@@ -300,6 +301,7 @@ namespace Invader::EditQt {
                     this->subwindow = new TagEditorBitmapSubwindow(this);
                     break;
                 case TagClassInt::TAG_CLASS_SOUND:
+                case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
                 default:
