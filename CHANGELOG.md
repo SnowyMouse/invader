@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
   program
 - invader-edit-qt: Added the ability to toggle fullscreen for tag editing
 - invader-edit-qt: Added bitmap previewing
+- invader-edit-qt: Added sound previewing
 - invader-extract: Added MCC CEA bitmap tag extraction
 
 ### Changed
