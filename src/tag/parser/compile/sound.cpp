@@ -221,7 +221,7 @@ namespace Invader::Parser {
         std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);
     }
 
-    Sound downgrade_extended_sound(ExtendedSound &sound) {
+    Sound downgrade_extended_sound(const ExtendedSound &sound) {
         Sound s = {};
         s.flags = sound.flags;
         s.sound_class = sound.sound_class;
