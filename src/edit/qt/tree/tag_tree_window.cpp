@@ -276,13 +276,12 @@ namespace Invader::EditQt {
     }
 
     bool TagTreeWindow::close_all_open_tags() {
-        for(auto &w : this->open_documents) {
-            if(!w->isHidden() && !w->close()) {
-                this->cleanup_windows();
-                return false;
+        while(this->open_documents.size() > 0) {
+            if(!this->open_documents[0]->isHidden() && !this->open_documents[0]->close()) {
+                return false; // failed to close due to user input
             }
+            this->cleanup_windows();
         }
-        this->cleanup_windows();
         return true;
     }
 
