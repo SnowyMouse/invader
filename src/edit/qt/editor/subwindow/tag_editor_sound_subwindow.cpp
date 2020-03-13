@@ -233,6 +233,21 @@ namespace Invader::EditQt {
             // Check if it works
             QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
             if(!info.isFormatSupported(format)) {
+                QAudioDeviceInfo device = QAudioDeviceInfo::defaultOutputDevice();
+                oprintf("Querying %s...\n", device.deviceName().toLatin1().data());
+
+                for(int i : device.supportedSampleRates()) {
+                    oprintf("    %.03f kHz\n", i / 1000.0);
+                }
+
+                for(int i : device.supportedSampleSizes()) {
+                    oprintf("    %i-bit\n", i);
+                }
+
+                for(auto i : device.supportedCodecs()) {
+                    oprintf("    %s\n", i.toLatin1().data());
+                }
+
                 char message[256];
                 std::snprintf(message, sizeof(message), "Your default output device does not support playback of this sound (%.03f kHz, %u ch, %u-bit)\n\nMake sure you're not using a dinosaur.", this->sample_rate / 1000.0, this->channel_count, *bits_per_sample);
                 QMessageBox(QMessageBox::Icon::Critical, "Error", message, QMessageBox::Ok).exec();
