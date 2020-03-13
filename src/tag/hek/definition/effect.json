@@ -141,7 +141,8 @@
             },
             {
                 "name": "type class",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true
             },
             {
                 "name": "type",
