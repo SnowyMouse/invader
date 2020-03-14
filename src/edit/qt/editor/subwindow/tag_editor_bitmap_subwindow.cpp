@@ -606,6 +606,7 @@ namespace Invader::EditQt {
                             right = static_cast<int>(real_width);
                         }
 
+                        // Blend the sprite with a transparent shade of red
                         static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
                         for(int y = top; y < bottom; y++) {
                             for(int x = left; x < right; x++) {
@@ -619,8 +620,12 @@ namespace Invader::EditQt {
                         }
                     }
 
-                    for(int x = middle_x - 1; x <= middle_x + 1; x++) {
-                        for(int y = middle_y - 1; y <= middle_y + 1; y++) {
+                    // Show a blue crosshair in the center
+                    for(int x = middle_x - 2; x <= middle_x + 2; x++) {
+                        for(int y = middle_y - 2; y <= middle_y + 2; y++) {
+                            if(x != middle_x && y != middle_y) {
+                                continue;
+                            }
                             if(x >= 0 && x < static_cast<long>(real_width) && y >= 0 && y < static_cast<long>(real_height)) {
                                 data[CALCULATE_PIXEL(x,y)] = 0xFF00FFFF;
                             }
