@@ -16,18 +16,25 @@
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::EditQt {
-    void TagEditorBitmapSubwindow::set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *mipmaps, QComboBox *colors, QComboBox *scale, QComboBox *more, QScrollArea *images) {
+    void TagEditorBitmapSubwindow::set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *mipmaps, QComboBox *colors, QComboBox *scale, QComboBox *sequence, QComboBox *sprite, QScrollArea *images, std::vector<Parser::BitmapGroupSequence> *all_sequences) {
         what->mipmaps = mipmaps;
         what->colors = colors;
         what->bitmaps = bitmaps;
         what->scale = scale;
-        what->more = more;
+        what->sequence = sequence;
+        what->sprite = sprite;
         what->images = images;
+        what->all_sequences = all_sequences;
 
         connect(mipmaps, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::reload_view);
         connect(colors, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::reload_view);
         connect(scale, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::reload_view);
         connect(bitmaps, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::refresh_data);
+
+        if(sequence) {
+            connect(sequence, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::refresh_sprite_list);
+            connect(sprite, &QComboBox::currentTextChanged, what, &TagEditorBitmapSubwindow::select_sprite);
+        }
 
         what->refresh_data();
     }
@@ -57,16 +64,7 @@ namespace Invader::EditQt {
         return w;
     }
 
-    enum Colors {
-        COLOR_ARGB,
-        COLOR_RGB,
-        COLOR_ALPHA,
-        COLOR_RED,
-        COLOR_GREEN,
-        COLOR_BLUE
-    };
-
-    template<typename T> static void generate_main_widget(TagEditorBitmapSubwindow *subwindow, T *bitmap_data, void (*set_values)(TagEditorBitmapSubwindow *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QScrollArea *)) {
+    template<typename T> static void generate_main_widget(TagEditorBitmapSubwindow *subwindow, T *bitmap_data, void (*set_values)(TagEditorBitmapSubwindow *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QScrollArea *, std::vector<Parser::BitmapGroupSequence> *)) {
         // Set up the main widget
         auto *main_widget = new QWidget();
         subwindow->setCentralWidget(main_widget);
@@ -74,24 +72,39 @@ namespace Invader::EditQt {
         main_widget->setLayout(main_layout);
 
         // Add the header
-        QComboBox *bitmaps, *mipmaps, *colors, *scale, *more = nullptr;
+        QComboBox *bitmaps, *mipmaps, *colors, *scale, *sequence = nullptr, *sprite = nullptr;
         main_layout->setSpacing(4);
         main_layout->setMargin(4);
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
         BitmapType type = bitmap_data->type;
-        switch(type) {
-            case BitmapType::BITMAP_TYPE_2D_TEXTURES:
-            case BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS:
-            case BitmapType::BITMAP_TYPE_ENUM_COUNT:
-            case BitmapType::BITMAP_TYPE_CUBE_MAPS:
-            case BitmapType::BITMAP_TYPE_3D_TEXTURES:
-                break;
-            case BitmapType::BITMAP_TYPE_SPRITES:
-                break;
-        }
         main_layout->addWidget(generate_text_widget("Scale:", &scale));
+
+        // Add this if we have sprites
+        if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+            auto *sprite_and_sequence = new QWidget();
+            auto *sprite_and_sequence_layout = new QHBoxLayout();
+            sprite_and_sequence->setLayout(sprite_and_sequence_layout);
+            sequence = new QComboBox();
+            sprite = new QComboBox();
+            sprite_and_sequence_layout->addWidget(new QLabel("Sequence:"));
+            sprite_and_sequence_layout->addWidget(sequence);
+            sprite_and_sequence_layout->addWidget(new QLabel("Sprite:"));
+            sprite_and_sequence_layout->addWidget(sprite);
+            sprite_and_sequence_layout->setMargin(0);
+            sprite_and_sequence_layout->setSpacing(8);
+            sprite_and_sequence_layout->addStretch();
+
+            // Populate sequences
+            sequence->addItem("None");
+            sprite->setEnabled(false);
+            auto sequence_count = bitmap_data->bitmap_group_sequence.size();
+            for(std::size_t i = 0; i < sequence_count; i++) {
+                sequence->addItem(QString::number(i));
+            }
+            main_layout->addWidget(sprite_and_sequence);
+        }
 
         // Get the size
         auto bitmap_count = bitmap_data->bitmap_data.size();
@@ -122,7 +135,7 @@ namespace Invader::EditQt {
         scroll_view->setWidgetResizable(true);
 
         // Set the stuff we just got
-        set_values(subwindow, bitmaps, mipmaps, colors, scale, more, scroll_view);
+        set_values(subwindow, bitmaps, mipmaps, colors, scale, sequence, sprite, scroll_view, &bitmap_data->bitmap_group_sequence);
     }
 
     void TagEditorBitmapSubwindow::TagEditorBitmapSubwindow::update() {
@@ -219,7 +232,7 @@ namespace Invader::EditQt {
         this->reload_view();
     }
 
-    static QGraphicsView *draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data) {
+    QGraphicsView *TagEditorBitmapSubwindow::draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data) {
         // Get the dimensions of the mipmap
         std::size_t width = static_cast<std::size_t>(bitmap_data->width);
         std::size_t height = static_cast<std::size_t>(bitmap_data->height);
@@ -522,6 +535,114 @@ namespace Invader::EditQt {
                 break;
         }
 
+        // Show sprite if selected
+        if(this->sequence) {
+            int current_sequence_index = this->sequence->currentIndex();
+            int current_sprite_index = this->sprite->currentIndex();
+            if(current_sequence_index > 0 && current_sprite_index >= 0) {
+                std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
+                std::size_t current_sprite_index_unsigned = static_cast<std::size_t>(current_sprite_index);
+                auto &sprite = (*this->all_sequences)[current_sequence_index_unsigned].sprites[current_sprite_index_unsigned];
+
+                if(static_cast<int>(sprite.bitmap_index) == this->bitmaps->currentIndex()) {
+                    int left = sprite.left * real_width;
+                    int right = sprite.right * real_width - 1;
+                    int width = right - left;
+
+                    int top = sprite.top * real_height;
+                    int bottom = sprite.bottom * real_height - 1;
+                    int height = bottom - top;
+
+                    int middle_x = sprite.registration_point.x * real_width + left;
+                    int middle_y = sprite.registration_point.y * real_height + top;
+
+                    #define CALCULATE_PIXEL(x,y) (y * real_width + x)
+
+                    if(width > 0 && height > 0) {
+                        if(left >= 0) {
+                            // Draw the top and bottom borders
+                            for(int i = left; i < right && i < static_cast<long>(real_width); i++) {
+                                if(i < 0) {
+                                    i = -1;
+                                }
+                                else {
+                                    if(top >= 0 && static_cast<std::size_t>(top) < real_height) {
+                                        data[CALCULATE_PIXEL(i, top)] |= 0x0000FF00;
+                                    }
+                                    if(bottom >= 0 && static_cast<std::size_t>(bottom) < real_height) {
+                                        data[CALCULATE_PIXEL(i, bottom)] |= 0x0000FF00;
+                                    }
+                                }
+                            }
+
+                            // Draw the left and right borders
+                            for(int i = top; i < bottom && i < static_cast<long>(real_height); i++) {
+                                if(i < 0) {
+                                    i = -1;
+                                }
+                                else {
+                                    if(left >= 0 && static_cast<std::size_t>(left) < real_width) {
+                                        data[CALCULATE_PIXEL(left, i)] |= 0x0000FF00;
+                                    }
+                                    if(right >= 0 && static_cast<std::size_t>(right) < real_width) {
+                                        data[CALCULATE_PIXEL(right, i)] |= 0x0000FF00;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(top < 0) {
+                            top = 0;
+                        }
+                        if(left < 0) {
+                            left = 0;
+                        }
+                        if(right < 0) {
+                            right = 0;
+                        }
+                        if(bottom < 0) {
+                            bottom = 0;
+                        }
+
+                        if(top > static_cast<long>(real_height)) {
+                            top = static_cast<int>(real_height);
+                        }
+                        if(bottom > static_cast<long>(real_height)) {
+                            bottom = static_cast<int>(real_height);
+                        }
+                        if(left > static_cast<long>(real_width)) {
+                            left = static_cast<int>(real_width);
+                        }
+                        if(right > static_cast<long>(real_width)) {
+                            right = static_cast<int>(real_width);
+                        }
+
+                        static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
+                        for(int y = top; y < bottom; y++) {
+                            for(int x = left; x < right; x++) {
+                                auto &pixel_output = data[CALCULATE_PIXEL(x,y)];
+
+                                ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
+                                auto resulting_pixel = pixel.alpha_blend(red);
+
+                                pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
+                            }
+                        }
+                    }
+
+                    for(int x = middle_x - 1; x <= middle_x + 1; x++) {
+                        for(int y = middle_y - 1; y <= middle_y + 1; y++) {
+                            if(x >= 0 && x < static_cast<long>(real_width) && y >= 0 && y < static_cast<long>(real_height)) {
+                                data[CALCULATE_PIXEL(x,y)] = 0xFF00FFFF;
+                            }
+                        }
+                    }
+
+                    #undef CALCULATE_PIXEL
+                }
+            }
+        }
+
         // Finish up
         QGraphicsView *view = new QGraphicsView();
         QGraphicsScene *scene = new QGraphicsScene(view);
@@ -571,9 +692,10 @@ namespace Invader::EditQt {
         auto *layout = new QVBoxLayout();
         auto color = static_cast<Colors>(this->colors->currentIndex());
         int scale = 1 << (this->scale->currentIndex());
+        auto *what = this;
 
-        auto make_widget = [&bitmap_data, &color, &scale, &pixel_data](std::size_t mip, std::size_t index) {
-            return draw_bitmap_to_widget(bitmap_data, mip, index, color, scale, pixel_data);
+        auto make_widget = [&bitmap_data, &color, &scale, &pixel_data, &what](std::size_t mip, std::size_t index) {
+            return what->draw_bitmap_to_widget(bitmap_data, mip, index, color, scale, pixel_data);
         };
 
         auto make_row = [&make_widget, &bitmap_data, &layout](std::size_t mip) {
@@ -629,5 +751,50 @@ namespace Invader::EditQt {
             old_widget->deleteLater();
         }
         this->images->setWidget(scroll_widget);
+    }
+
+    void TagEditorBitmapSubwindow::refresh_sprite_list() {
+        // Clear everything. Yay
+        this->sprite->blockSignals(true);
+        this->sprite->clear();
+        this->sprite->blockSignals(false);
+
+        // Make sure we have a sprite selected
+        int current_sequence_index = this->sequence->currentIndex();
+        if(current_sequence_index > 0) {
+            std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
+            this->sprite->blockSignals(true);
+            this->sprite->clear();
+            auto sprite_count = (*this->all_sequences)[current_sequence_index_unsigned].sprites.size();
+            for(std::size_t i = 0; i < sprite_count; i++) {
+                this->sprite->addItem(QString::number(i));
+            }
+            this->sprite->setCurrentIndex(0);
+            this->sprite->blockSignals(false);
+            this->sprite->setEnabled(true);
+        }
+        else {
+            this->sprite->setEnabled(false);
+        }
+
+        // Done
+        this->select_sprite();
+    }
+
+    void TagEditorBitmapSubwindow::select_sprite() {
+        int current_sequence_index = this->sequence->currentIndex();
+        int current_sprite_index = this->sprite->currentIndex();
+        if(current_sequence_index > 0 && current_sprite_index >= 0) {
+            std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
+            std::size_t current_sprite_index_unsigned = static_cast<std::size_t>(current_sprite_index);
+            auto &sprite = (*this->all_sequences)[current_sequence_index_unsigned].sprites[current_sprite_index_unsigned];
+            if(sprite.bitmap_index < this->bitmaps->count()) {
+                this->bitmaps->blockSignals(true);
+                this->bitmaps->setCurrentIndex(sprite.bitmap_index);
+                this->bitmaps->blockSignals(false);
+            }
+        }
+
+        this->reload_view();
     }
 }
