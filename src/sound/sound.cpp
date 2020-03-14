@@ -57,80 +57,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         else {
             sound_options.sound_class = sound_tag.sound_class;
         }
-
-        if(extended_sound) {
-            // Set sample rate
-            if(sound_options.sample_rate.has_value()) {
-                switch(*sound_options.sample_rate) {
-                    case 22050:
-                        extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ;
-                        break;
-                    case 44100:
-                        extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ;
-                        break;
-                    default:
-                        std::terminate();
-                }
-            }
-            else switch(extended_sound->encoding_sample_rate) {
-                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_AUTOMATIC:
-                    break;
-                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ:
-                    sound_options.sample_rate = 22050;
-                    break;
-                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ:
-                    sound_options.sample_rate = 44100;
-                    break;
-                case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_ENUM_COUNT:
-                    std::terminate();
-                    break;
-            }
-
-            // Set channel count
-            if(sound_options.channel_count.has_value()) {
-                switch(*sound_options.sample_rate) {
-                    case 1:
-                        extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO;
-                        break;
-                    case 2:
-                        extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO;
-                        break;
-                    default:
-                        std::terminate();
-                }
-            }
-            else switch(extended_sound->encoding_channel_count) {
-                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_AUTOMATIC:
-                    break;
-                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO:
-                    sound_options.channel_count = 1;
-                    break;
-                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO:
-                    sound_options.channel_count = 2;
-                    break;
-                case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_ENUM_COUNT:
-                    std::terminate();
-                    break;
-            }
-
-            // Set channel count
-            if(sound_options.format.has_value()) {
-                extended_sound->encoding_format = *sound_options.format;
-            }
-            else {
-                sound_options.format = extended_sound->encoding_format;
-            }
-
-            // Set this stuff too
-            if(sound_options.compression_level.has_value()) {
-                extended_sound->compression_level = *sound_options.compression_level;
-            }
-            else {
-                sound_options.compression_level = extended_sound->compression_level;
-            }
-
-            extended_sound->source_FLACs.clear();
-        }
     }
     else {
         sound_tag.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
@@ -146,15 +72,85 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             sound_options.compression_level = 1.0F;
         }
 
-        if(extended_sound) {
-            extended_sound->compression_level = *sound_options.compression_level;
-        }
-
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
             std::exit(EXIT_FAILURE);
         }
         sound_tag.sound_class = *sound_options.sound_class;
+    }
+
+    if(extended_sound) {
+        // Set sample rate
+        if(sound_options.sample_rate.has_value()) {
+            switch(*sound_options.sample_rate) {
+                case 22050:
+                    extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ;
+                    break;
+                case 44100:
+                    extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ;
+                    break;
+                default:
+                    std::terminate();
+            }
+        }
+        else switch(extended_sound->encoding_sample_rate) {
+            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_AUTOMATIC:
+                break;
+            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ:
+                sound_options.sample_rate = 22050;
+                break;
+            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ:
+                sound_options.sample_rate = 44100;
+                break;
+            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_ENUM_COUNT:
+                std::terminate();
+                break;
+        }
+
+        // Set channel count
+        if(sound_options.channel_count.has_value()) {
+            switch(*sound_options.sample_rate) {
+                case 1:
+                    extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO;
+                    break;
+                case 2:
+                    extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO;
+                    break;
+                default:
+                    std::terminate();
+            }
+        }
+        else switch(extended_sound->encoding_channel_count) {
+            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_AUTOMATIC:
+                break;
+            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO:
+                sound_options.channel_count = 1;
+                break;
+            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO:
+                sound_options.channel_count = 2;
+                break;
+            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_ENUM_COUNT:
+                std::terminate();
+                break;
+        }
+
+        // Set format
+        if(sound_options.format.has_value()) {
+            extended_sound->encoding_format = *sound_options.format;
+        }
+        else {
+            sound_options.format = extended_sound->encoding_format;
+        }
+
+        // Set this stuff too
+        if(sound_options.compression_level.has_value()) {
+            extended_sound->compression_level = *sound_options.compression_level;
+        }
+        else {
+            sound_options.compression_level = extended_sound->compression_level;
+        }
+
+        extended_sound->source_FLACs.clear();
     }
 
     // Hold onto this
