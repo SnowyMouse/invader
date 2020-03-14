@@ -83,18 +83,8 @@ namespace Invader::EditQt {
 
         // Add this if we have sprites
         if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-            auto *sprite_and_sequence = new QWidget();
-            auto *sprite_and_sequence_layout = new QHBoxLayout();
-            sprite_and_sequence->setLayout(sprite_and_sequence_layout);
-            sequence = new QComboBox();
-            sprite = new QComboBox();
-            sprite_and_sequence_layout->addWidget(new QLabel("Sequence:"));
-            sprite_and_sequence_layout->addWidget(sequence);
-            sprite_and_sequence_layout->addWidget(new QLabel("Sprite:"));
-            sprite_and_sequence_layout->addWidget(sprite);
-            sprite_and_sequence_layout->setMargin(0);
-            sprite_and_sequence_layout->setSpacing(8);
-            sprite_and_sequence_layout->addStretch();
+            main_layout->addWidget(generate_text_widget("Sequence:", &sequence));
+            main_layout->addWidget(generate_text_widget("Sprite:", &sprite));
 
             // Populate sequences
             sequence->addItem("None");
@@ -103,7 +93,6 @@ namespace Invader::EditQt {
             for(std::size_t i = 0; i < sequence_count; i++) {
                 sequence->addItem(QString::number(i));
             }
-            main_layout->addWidget(sprite_and_sequence);
         }
 
         // Get the size
