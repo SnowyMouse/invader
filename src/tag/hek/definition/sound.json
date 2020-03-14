@@ -177,6 +177,7 @@
         "post_cache_deformat": true,
         "unsafe_to_dedupe": true,
         "pre_compile": true,
+        "title": "name",
         "size": 124
     },
     {

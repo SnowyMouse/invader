@@ -99,6 +99,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 104
     },
     {

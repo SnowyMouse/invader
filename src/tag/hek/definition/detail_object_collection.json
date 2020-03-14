@@ -89,6 +89,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 96
     },
     {

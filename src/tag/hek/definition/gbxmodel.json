@@ -92,6 +92,7 @@
         ],
         "type": "struct",
         "read_only": true,
+        "title": "name",
         "size": 64
     },
     {
@@ -159,6 +160,7 @@
         ],
         "type": "struct",
         "read_only": true,
+        "title": "name",
         "size": 156
     },
     {
@@ -194,6 +196,7 @@
         ],
         "type": "struct",
         "read_only": true,
+        "title": "name",
         "size": 80
     },
     {
@@ -258,6 +261,7 @@
         "type": "struct",
         "pre_compile": true,
         "read_only": true,
+        "title": "name",
         "size": 88
     },
     {
@@ -282,6 +286,7 @@
         ],
         "type": "struct",
         "read_only": true,
+        "title": "name",
         "size": 76
     },
     {
@@ -601,6 +606,7 @@
             }
         ],
         "type": "struct",
+        "title": "shader",
         "size": 32
     },
     {

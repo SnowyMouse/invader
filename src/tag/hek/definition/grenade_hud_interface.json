@@ -140,6 +140,7 @@
             }
         ],
         "type": "struct",
+        "title": "sound",
         "size": 56
     },
     {

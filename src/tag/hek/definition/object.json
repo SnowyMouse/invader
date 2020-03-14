@@ -119,6 +119,7 @@
             }
         ],
         "type": "struct",
+        "title": "type",
         "size": 72
     },
     {
@@ -142,6 +143,7 @@
                 "size": 16
             }
         ],
+        "title": "reference",
         "size": 32
     },
     {

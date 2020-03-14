@@ -330,6 +330,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 188
     },
     {
@@ -603,6 +604,7 @@
                 "size": 4
             }
         ],
+        "title": "sound",
         "size": 20
     },
     {
@@ -648,6 +650,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 64
     },
     {
@@ -785,6 +788,7 @@
         ],
         "type": "struct",
         "post_cache_deformat": true,
+        "title": "name",
         "pre_compile": true,
         "size": 180
     },

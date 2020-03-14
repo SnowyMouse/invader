@@ -25,6 +25,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "title": "item",
         "size": 84
     },
     {

@@ -650,6 +650,7 @@
         ],
         "type": "struct",
         "post_compile": true,
+        "title": "crosshair bitmap",
         "size": 104
     },
     {

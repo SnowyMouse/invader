@@ -262,6 +262,7 @@
             }
         ],
         "type": "struct",
+        "title": "label",
         "size": 284
     },
     {
@@ -281,6 +282,7 @@
                 "size": 20
             }
         ],
+        "title": "weapon",
         "size": 36
     },
     {

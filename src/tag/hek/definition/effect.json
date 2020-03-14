@@ -114,6 +114,7 @@
             }
         ],
         "type": "struct",
+        "title": "marker name",
         "size": 32
     },
     {
@@ -194,6 +195,7 @@
             }
         ],
         "type": "struct",
+        "title": "type",
         "size": 104
     },
     {
@@ -330,6 +332,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "title": "particle type",
         "size": 232
     },
     {

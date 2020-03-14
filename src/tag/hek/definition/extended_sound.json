@@ -37,6 +37,7 @@
             }
         ],
         "size": 64,
+        "title": "file name",
         "read_only": true
     },
     {

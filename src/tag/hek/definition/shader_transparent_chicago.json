@@ -157,6 +157,7 @@
             }
         ],
         "type": "struct",
+        "title": "map",
         "size": 220
     },
     {

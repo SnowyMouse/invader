@@ -79,6 +79,7 @@
                 ]
             }
         ],
+        "title": "sound",
         "size": 16
     },
     {
@@ -86,7 +87,7 @@
         "type": "struct",
         "fields": [
             {
-                "name": "default_unit_camera_track",
+                "name": "default unit camera track",
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -94,6 +95,7 @@
                 ]
             }
         ],
+        "title": "default unit camera track",
         "size": 16
     },
     {
@@ -1471,6 +1473,7 @@
             }
         ],
         "type": "struct",
+        "title": "particle type",
         "size": 128
     },
     {
@@ -1609,6 +1612,7 @@
             }
         ],
         "type": "struct",
+        "title": "map name",
         "size": 148
     },
     {

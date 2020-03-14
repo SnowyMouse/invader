@@ -41,6 +41,7 @@
         ],
         "type": "struct",
         "post_compile": true,
+        "title": "shader",
         "read_only": true,
         "size": 20
     },
@@ -834,6 +835,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 136
     },
     {
@@ -897,6 +899,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 240
     },
     {

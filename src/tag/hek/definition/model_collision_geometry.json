@@ -100,6 +100,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 72
     },
     {
@@ -113,6 +114,7 @@
         ],
         "type": "struct",
         "read_only": true,
+        "title": "name",
         "size": 32
     },
     {
@@ -157,6 +159,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 84
     },
     {

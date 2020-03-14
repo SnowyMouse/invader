@@ -528,6 +528,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 80
     },
     {
@@ -568,6 +569,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 80
     },
     {
@@ -758,6 +760,7 @@
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 1004
     }
 ]
