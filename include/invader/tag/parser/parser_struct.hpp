@@ -771,6 +771,18 @@ namespace Invader::Parser {
          */
         virtual std::vector<ParserStructValue> get_values() = 0;
 
+        /**
+         * Get whether or not the struct has a title
+         * @return true if struct has title
+         */
+        virtual bool has_title();
+
+        /**
+         * Get the title of the struct
+         * @return title of the struct
+         */
+        virtual const char *title();
+
         virtual ~ParserStruct() = default;
     protected:
         bool cache_formatted = false;

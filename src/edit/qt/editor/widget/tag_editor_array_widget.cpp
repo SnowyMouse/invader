@@ -48,12 +48,12 @@ namespace Invader::EditQt {
 
         // Set size stuff
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        int title_width = title_label->fontMetrics().boundingRect("MMMM").width() * 7;
+        int title_width = title_label->fontMetrics().boundingRect("MMMM").width() * 5;
         title_label->setMinimumWidth(title_width);
         title_label->setMaximumWidth(title_width);
         this->reflexive_index->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-        this->reflexive_index->setMinimumWidth(title_width / 2);
-        this->reflexive_index->setMaximumWidth(title_width / 2);
+        this->reflexive_index->setMinimumWidth(title_width * 3 / 2);
+        this->reflexive_index->setMaximumWidth(title_width * 3 / 2);
         this->reflexive_index->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         title_label->setText(value->get_name());
 
@@ -268,9 +268,30 @@ namespace Invader::EditQt {
         delete this->item_model;
         this->item_model = new QStandardItemModel(this->reflexive_index);
 
-        std::size_t count = this->get_struct_value()->get_array_size();
+        auto *struct_value = this->get_struct_value();
+        std::size_t count = struct_value->get_array_size();
+        bool has_title = false;
         for(std::size_t i = 0; i < count; i++) {
-            this->item_model->appendRow(new QStandardItem(QString::number(i)));
+            // See if we have a title
+            if(i == 0) {
+                has_title = struct_value->get_object_in_array(i).has_title();
+            }
+            // If so, show that alongside the index
+            if(has_title) {
+                const char *title_value = struct_value->get_object_in_array(i).title();
+                if(title_value == nullptr || title_value[0] == 0) {
+                    this->item_model->appendRow(new QStandardItem(QString::number(i)));
+                }
+                else {
+                    char title[256];
+                    std::snprintf(title, sizeof(title), "%zu (%s)", i, title_value);
+                    this->item_model->appendRow(new QStandardItem(title));
+                }
+            }
+            // If not, well... darn
+            else {
+                this->item_model->appendRow(new QStandardItem(QString::number(i)));
+            }
         }
 
         this->reflexive_index->setModel(this->item_model);

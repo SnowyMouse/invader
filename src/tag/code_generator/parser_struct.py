@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only):
+def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, struct_title):
     hpp.write("        std::vector<ParserStructValue> get_values() override;\n".format(struct_name))
     cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
@@ -71,4 +71,26 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")
-    pass
+
+    if not struct_title is None:
+        hpp.write("        bool has_title() override;\n")
+        cpp_struct_value.write("bool {}::has_title() {{\n".format(struct_name))
+        cpp_struct_value.write("    return true;\n")
+        cpp_struct_value.write("}\n")
+        hpp.write("        const char *title() override;\n")
+        cpp_struct_value.write("const char *{}::title() {{\n".format(struct_name))
+        for struct in all_used_structs:
+            if "name" in struct and struct["name"] == struct_title:
+                if struct["type"] == "TagString":
+                    cpp_struct_value.write("    return this->{}.string;\n".format(struct["member_name"]))
+                elif struct["type"] == "TagDependency":
+                    cpp_struct_value.write("    const auto *start = this->{}.path.c_str();\n".format(struct["member_name"]))
+                    cpp_struct_value.write("    for(const char *q = start; q && *q; q++) {\n")
+                    cpp_struct_value.write("        if(*q == '\\\\') {\n")
+                    cpp_struct_value.write("            start = q + 1;\n")
+                    cpp_struct_value.write("        }\n")
+                    cpp_struct_value.write("    }\n")
+                    cpp_struct_value.write("    return start;\n")
+                else:
+                    raise "ohno"
+        cpp_struct_value.write("}\n")

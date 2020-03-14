@@ -854,4 +854,12 @@ namespace Invader::Parser {
 
         return classes;
     }
+
+    bool ParserStruct::has_title() {
+        return false;
+    }
+
+    const char *ParserStruct::title() {
+        return nullptr;
+    }
 }
