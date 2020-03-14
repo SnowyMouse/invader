@@ -81,7 +81,6 @@ namespace Invader::EditQt {
                 int width = standard_width * size;
                 textbox_widgets.emplace_back(textbox);
                 textbox->setMinimumWidth(width);
-                textbox->setMaximumWidth(width);
                 layout->addWidget(textbox);
 
                 // Radians get converted to degrees
@@ -427,7 +426,9 @@ namespace Invader::EditQt {
             }
         }
 
-        layout->addStretch(1);
+        if(value->get_type() != Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
+            layout->addStretch(1);
+        }
         layout->setMargin(6);
     }
 
