@@ -57,12 +57,12 @@
             {
                 "name": "encoding sample rate",
                 "type": "ExtendedSoundSampleRate",
-                "comment": "This can be used to resample the sample rate to be different from the source sample rate. Choosing \"automatic\" will, instead, do the default behavior of picking the closer sample rate to the highest sample rate of all of the permutations."
+                "comment": "This can be used to resample the sample rate to be different from the source sample rate.\nChoosing \"automatic\" will, instead, do the default behavior of picking the closer sample rate to the highest sample rate of all of the permutations."
             },
             {
                 "name": "encoding channel count",
                 "type": "ExtendedSoundChannelCount",
-                "comment": "This can be used to mix up/down the channel count to be different from the source channel count. Choosing \"automatic\" will, instead, do the default behavior of picking the highest channel count of all of the permutations."
+                "comment": "This can be used to mix up/down the channel count to be different from the source channel count.\nChoosing \"automatic\" will, instead, do the default behavior of picking the highest channel count of all of the permutations."
             },
             {
                 "name": "encoding format",
@@ -72,7 +72,7 @@
             {
                 "type": "float",
                 "name": "compression level",
-                "comment": "This can be from 0.0 to 1.0. For Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10). For FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8). Note that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality."
+                "comment": "This can be from 0.0 to 1.0.\nFor Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10).\nFor FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8).\nNote that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality."
             },
             {
                 "type": "TagReflexive",

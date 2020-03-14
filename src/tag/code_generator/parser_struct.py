@@ -14,7 +14,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
         name = "\"{}\"".format(struct["name"])
         member_name = struct["member_name"]
         member_name_q = "\"{}\"".format(member_name)
-        comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"].replace("\"", "\\\""))
+        comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"].replace("\"", "\\\"").replace("\n", "\\n\\n"))
         struct_read_only = "true" if ((read_only or ("read_only" in struct and struct["read_only"])) and not ("read_only" in struct and struct["read_only"] == False)) else "false"
         unit = "nullptr" if "unit" not in struct else "\"{}\"".format(struct["unit"].replace("\"", "\\\""))
 
