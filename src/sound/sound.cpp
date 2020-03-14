@@ -20,7 +20,7 @@ struct SoundOptions {
     std::optional<bool> split;
     std::optional<SoundFormat> format;
     bool fs_path = false;
-    float compression_level = 1.0F;
+    std::optional<float> compression_level;
     bool extended = false;
     std::optional<std::size_t> channel_count;
     std::optional<SoundClass> sound_class;
@@ -121,6 +121,14 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 sound_options.format = extended_sound->encoding_format;
             }
 
+            // Set this stuff too
+            if(sound_options.compression_level.has_value()) {
+                extended_sound->compression_level = *sound_options.compression_level;
+            }
+            else {
+                sound_options.compression_level = extended_sound->compression_level;
+            }
+
             extended_sound->source_FLACs.clear();
         }
     }
@@ -134,12 +142,21 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         sound_tag.inner_cone_angle = 2 * HALO_PI;
         sound_tag.outer_cone_angle = 2 * HALO_PI;
 
+        if(!sound_options.compression_level.has_value()) {
+            sound_options.compression_level = 1.0F;
+        }
+
+        if(extended_sound) {
+            extended_sound->compression_level = *sound_options.compression_level;
+        }
+
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
             std::exit(EXIT_FAILURE);
         }
         sound_tag.sound_class = *sound_options.sound_class;
     }
+
 
     // Hold onto this
     auto sound_class = sound_tag.sound_class;
@@ -271,7 +288,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             auto &source = extended_sound->source_FLACs.emplace_back();
             std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
             std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
-            source.compressed_audio_data = Invader::SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 8);
+            if(extension == ".flac") {
+                source.compressed_audio_data = *File::open_file(path_str_cstr);
+            }
+            else {
+                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
+            }
         }
 
         // Add it
@@ -286,6 +308,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             }
         }
         permutations.insert(permutations.begin() + i, std::move(sound));
+    }
+
+    // Error if bullshit compression levels were given
+    if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
+        eprintf_error("Compression level (%.05f) is outside of the allowed range of 0.0 to 1.0", *sound_options.compression_level);
+        std::exit(EXIT_FAILURE);
     }
 
     // Force channel count
@@ -605,7 +633,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     else if(sound_options.compression_level < 0.0F) {
                         sound_options.compression_level = 0.0F;
                     }
-                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, sound_options.compression_level);
+                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
                     p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                     break;
                 }
@@ -620,7 +648,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         sound_options.compression_level = 0.0F;
                     }
                     // Convert to integer, rounding to the nearest level
-                    int flac_level = static_cast<int>(sound_options.compression_level * 10.0F + 0.5F);
+                    int flac_level = static_cast<int>(*sound_options.compression_level * 10.0F + 0.5F);
                     p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, flac_level);
                     break;
                 }
@@ -787,10 +815,6 @@ int main(int argc, const char **argv) {
 
             case 'l':
                 sound_options.compression_level = std::atof(arguments[0]);
-                if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
-                    eprintf_error("Compression level is outside of the allowed range of 0.0 to 1.0");
-                    std::exit(EXIT_FAILURE);
-                }
                 break;
 
             case 'P':
