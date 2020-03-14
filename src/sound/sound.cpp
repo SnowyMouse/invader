@@ -157,7 +157,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         sound_tag.sound_class = *sound_options.sound_class;
     }
 
-
     // Hold onto this
     auto sound_class = sound_tag.sound_class;
 
@@ -169,10 +168,24 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         sound_options.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
     }
 
-    // DRM flac tags
-    if(!extended_sound && sound_options.format == SoundFormat::SOUND_FORMAT_FLAC) {
-        eprintf_error("FLAC cannot be used without --extended");
-        std::exit(EXIT_FAILURE);
+    // Make sure we support the format
+    switch(*sound_options.format) {
+        case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+        case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+        case SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+            break;
+        case SoundFormat::SOUND_FORMAT_FLAC:
+            if(!extended_sound) {
+                eprintf_error("FLAC cannot be used without --extended");
+                std::exit(EXIT_FAILURE);
+            }
+            break;
+        case SoundFormat::SOUND_FORMAT_IMA_ADPCM:
+            eprintf_error("IMA ADPCM is unsupported");
+            std::exit(EXIT_FAILURE);
+        default:
+            eprintf_error("Unsupported audio codec");
+            std::exit(EXIT_FAILURE);
     }
 
     auto &format = sound_tag.format;
@@ -660,8 +673,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     break;
 
                 default:
-                    eprintf_error("Unimplemented sound format");
-                    std::exit(EXIT_FAILURE);
+                    std::terminate();
             }
         };
 
