@@ -9,7 +9,7 @@
 namespace Invader::EditQt {
     TagEditorWidget::TagEditorWidget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) : QFrame(parent), struct_value(struct_value), editor_window(editor_window) {}
 
-    TagEditorWidget *TagEditorWidget::generate_widget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window) {
+    TagEditorWidget *TagEditorWidget::generate_widget(QWidget *parent, Parser::ParserStructValue *struct_value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) {
         switch(struct_value->get_type()) {
             case Parser::ParserStructValue::VALUE_TYPE_INT8:
             case Parser::ParserStructValue::VALUE_TYPE_UINT8:
@@ -41,7 +41,7 @@ namespace Invader::EditQt {
             case Parser::ParserStructValue::VALUE_TYPE_ENUM:
             case Parser::ParserStructValue::VALUE_TYPE_BITMASK:
             case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY:
-                return new TagEditorEditWidget(parent, struct_value, editor_window);
+                return new TagEditorEditWidget(parent, struct_value, editor_window, array_widget);
 
             case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
                 return new TagEditorArrayWidget(parent, struct_value, editor_window);

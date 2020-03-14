@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "tag_editor_edit_widget_view.hpp"
+#include "tag_editor_array_widget.hpp"
 #include <QApplication>
 
 namespace Invader::EditQt {
@@ -36,7 +37,7 @@ namespace Invader::EditQt {
         }
 
         for(auto &value : this->values) {
-            auto *widget = TagEditorWidget::generate_widget(nullptr, &value, editor_window);
+            auto *widget = TagEditorWidget::generate_widget(nullptr, &value, editor_window, dynamic_cast<TagEditorArrayWidget *>(parent));
             if(widget) {
                 add_widget(widget);
             }

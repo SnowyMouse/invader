@@ -13,6 +13,7 @@
 #include "tag_editor_edit_widget.hpp"
 #include "../../tree/tag_tree_window.hpp"
 #include "../../tree/tag_tree_dialog.hpp"
+#include "tag_editor_array_widget.hpp"
 
 #define INTERNAL_VALUE "internal-value"
 
@@ -26,8 +27,8 @@ namespace Invader::EditQt {
         }
     };
 
-    TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) :
-        TagEditorWidget(parent, value, editor_window) {
+    TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
+        TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
 
         auto *comment = value->get_comment();
         if(comment) {
@@ -501,6 +502,11 @@ namespace Invader::EditQt {
                 value->set_values(numbers);
             }
         }
+
+        if(this->array_widget) {
+            this->array_widget->update_text();
+        }
+
         this->value_changed();
     }
 

@@ -28,6 +28,9 @@ namespace Invader::EditQt {
 
         ~TagEditorArrayWidget() = default;
 
+    public slots:
+        void update_text();
+
     private slots:
         void perform_add();
         void perform_insert();

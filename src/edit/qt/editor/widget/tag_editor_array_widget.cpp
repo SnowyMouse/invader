@@ -256,7 +256,7 @@ namespace Invader::EditQt {
         // Get it!
         auto index_unsigned = static_cast<std::size_t>(index);
         auto &s = this->get_struct_value()->get_object_in_array(index_unsigned);
-        this->tag_view_widget = new TagEditorEditWidgetView(nullptr, s.get_values(), this->get_editor_window(), false);
+        this->tag_view_widget = new TagEditorEditWidgetView(this, s.get_values(), this->get_editor_window(), false);
         this->vbox_layout->addWidget(this->tag_view_widget);
     }
 
@@ -325,5 +325,25 @@ namespace Invader::EditQt {
         this->insert_button->setEnabled(count < max);
         this->duplicate_button->setEnabled(index >= 0 && this->add_button->isEnabled());
         this->clear_button->setEnabled(index >= 0);
+    }
+
+    void TagEditorArrayWidget::update_text() {
+        this->reflexive_index->blockSignals(true);
+
+        // We've changed a value that changes some reflexive bullshit
+        QString new_title;
+        std::size_t i = this->reflexive_index->currentIndex();
+        const char *title_value = this->get_struct_value()->get_object_in_array(i).title();
+        if(title_value == nullptr || title_value[0] == 0) {
+            new_title = QString::number(i);
+        }
+        else {
+            char title[256];
+            std::snprintf(title, sizeof(title), "%zu (%s)", i, title_value);
+            new_title = title;
+        }
+        this->reflexive_index->setItemText(this->reflexive_index->currentIndex(), new_title);
+
+        this->reflexive_index->blockSignals(false);
     }
 }

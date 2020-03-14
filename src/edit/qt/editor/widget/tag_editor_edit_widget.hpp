@@ -11,6 +11,8 @@ class QLineEdit;
 class QComboBox;
 
 namespace Invader::EditQt {
+    class TagEditorArrayWidget;
+
     class TagEditorEditWidget : public TagEditorWidget {
         Q_OBJECT
 
@@ -20,8 +22,9 @@ namespace Invader::EditQt {
          * @param parent        parent widget
          * @param value         struct value
          * @param editor_window editor window
+         * @param array_widget  optional array widget to update if changed
          */
-        TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
+        TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget = nullptr);
 
         ~TagEditorEditWidget() = default;
 
@@ -36,6 +39,7 @@ namespace Invader::EditQt {
         void find_dependency();
         void open_dependency();
         bool read_only;
+        TagEditorArrayWidget *array_widget;
     };
 }
 

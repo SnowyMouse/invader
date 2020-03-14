@@ -11,6 +11,7 @@ namespace Invader::Parser {
 
 namespace Invader::EditQt {
     class TagEditorWindow;
+    class TagEditorArrayWidget;
 
     class TagEditorWidget : public QFrame {
         Q_OBJECT
@@ -21,9 +22,10 @@ namespace Invader::EditQt {
          * @param  parent        parent widget
          * @param  value         struct value
          * @param  editor_window editor window
+         * @param  array_widget  optional array widget to update on change
          * @return               new widget
          */
-        static TagEditorWidget *generate_widget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window);
+        static TagEditorWidget *generate_widget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget = nullptr);
 
         /**
          * Get the struct value
