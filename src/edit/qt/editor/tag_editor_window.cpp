@@ -161,7 +161,6 @@ namespace Invader::EditQt {
         auto screen_geometry = QGuiApplication::primaryScreen()->geometry();
         int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) * 2 + min_width;
         int max_height = min_height + scroll_view->widget()->height() + qApp->style()->pixelMetric(QStyle::PM_DefaultFrameWidth) * 2;
-        oprintf("%i\n", max_height);
         scroll_view->setWidgetResizable(true);
 
         if(max_height > screen_geometry.height() / 5 * 4) {
@@ -229,7 +228,6 @@ namespace Invader::EditQt {
 
     bool TagEditorWindow::perform_save() {
         if(this->file.tag_path.size() == 0) {
-            printf("CHU!\n");
             return this->perform_save_as();
         }
 
