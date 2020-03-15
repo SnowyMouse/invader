@@ -71,8 +71,7 @@
             "does not cast shadow",
             "transparent self occlusion",
             "brighter than it should be",
-            "not a pathfinding obstacle",
-            "cast shadow by default"
+            "not a pathfinding obstacle"
         ],
         "width": 16
     },
