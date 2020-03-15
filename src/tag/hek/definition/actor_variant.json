@@ -28,16 +28,6 @@
         "type": "enum"
     },
     {
-        "name": "ActorVariantGrenadeType",
-        "options": [
-            "human fragmentation",
-            "covenant plasma",
-            "custom 2",
-            "custom 3"
-        ],
-        "type": "enum"
-    },
-    {
         "name": "ActorVariantTrajectoryType",
         "options": [
             "toss",
@@ -382,7 +372,7 @@
             },
             {
                 "name": "grenade type",
-                "type": "ActorVariantGrenadeType"
+                "type": "GrenadeType"
             },
             {
                 "name": "trajectory type",

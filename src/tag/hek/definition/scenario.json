@@ -1362,18 +1362,8 @@
                 "endian": null
             },
             {
-                "name": "starting custom 2 grenade count",
-                "type": "int8",
-                "endian": null
-            },
-            {
-                "name": "starting custom 3 grenade count",
-                "type": "int8",
-                "endian": null
-            },
-            {
                 "type": "pad",
-                "size": 20
+                "size": 22
             }
         ],
         "type": "struct",
