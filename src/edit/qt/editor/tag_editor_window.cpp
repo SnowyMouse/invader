@@ -164,12 +164,12 @@ namespace Invader::EditQt {
         oprintf("%i\n", max_height);
         scroll_view->setWidgetResizable(true);
 
-        if(max_height > screen_geometry.height() / 4 * 3) {
-            max_height = screen_geometry.height() / 4 * 3;
+        if(max_height > screen_geometry.height() / 5 * 4) {
+            max_height = screen_geometry.height() / 5 * 4;
         }
 
-        if(max_width > screen_geometry.width() / 4 * 3) {
-            max_width = screen_geometry.width() / 4 * 3;
+        if(max_width > screen_geometry.width() / 5 * 4) {
+            max_width = screen_geometry.width() / 5 * 4;
         }
 
         // Center this
