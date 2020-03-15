@@ -15,6 +15,8 @@
 #include "s3tc/s3tc.hpp"
 #include <invader/tag/parser/parser.hpp>
 
+#define GET_PIXEL(x,y) (x + y * real_width)
+
 namespace Invader::EditQt {
     void TagEditorBitmapSubwindow::set_values(TagEditorBitmapSubwindow *what, QComboBox *bitmaps, QComboBox *mipmaps, QComboBox *colors, QComboBox *scale, QComboBox *sequence, QComboBox *sprite, QScrollArea *images, std::vector<Parser::BitmapGroupSequence> *all_sequences) {
         what->mipmaps = mipmaps;
@@ -110,13 +112,19 @@ namespace Invader::EditQt {
         colors->addItem("Blue only");
         colors->setCurrentIndex(0);
 
-        // Zoom stuff
-        for(int z = 0; z < 4; z++) {
+        // Scaling stuff
+        for(int z = 3; z > 0; z--) {
+            char t[8];
+            std::snprintf(t, sizeof(t), "1/%ix", 1 << z);
+            scale->addItem(t);
+        }
+        scale->addItem("Original");
+        for(int z = 1; z < 4; z++) {
             char t[8];
             std::snprintf(t, sizeof(t), "%ix", 1 << z);
             scale->addItem(t);
         }
-        scale->setCurrentIndex(0);
+        scale->setCurrentIndex(3);
 
         // Set up the scroll view
         auto *scroll_view = new QScrollArea();
@@ -195,7 +203,7 @@ namespace Invader::EditQt {
                     std::snprintf(name, sizeof(name), "Main image (%s)", resolution);
                 }
                 else {
-                    std::snprintf(name, sizeof(name), "Mipmap #%zu (%s)", i, resolution);
+                    std::snprintf(name, sizeof(name), "Mipmap #%zu (%s)", i - 1, resolution);
                 }
                 this->mipmaps->addItem(name);
 
@@ -220,6 +228,8 @@ namespace Invader::EditQt {
 
         this->reload_view();
     }
+
+
 
     QGraphicsView *TagEditorBitmapSubwindow::draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data) {
         // Get the dimensions of the mipmap
@@ -316,7 +326,301 @@ namespace Invader::EditQt {
             return nullptr;
         }
 
+        // Decode bitmap
         const auto *bytes = pixel_data->data() + offset;
+        std::vector<std::uint32_t> data = this->decode_bitmap(real_width, real_height, width, height, pixels_required, pixel_count, bytes, bitmap_data);
+
+        // Scale if needed
+        if(scale != 0) {
+            this->scale_bitmap(scale, real_width, real_height, pixel_count, data);
+        }
+
+        // Filter for mode
+        this->show_channel(data.data(), real_width, real_height, mode);
+
+        // Show sprite if selected
+        if(this->sequence) {
+            this->highlight_sprite(data.data(), real_width, real_height);
+        }
+
+        // Finish up
+        QGraphicsView *view = new QGraphicsView();
+        QGraphicsScene *scene = new QGraphicsScene(view);
+        QPixmap map;
+        map.convertFromImage(QImage(reinterpret_cast<const uchar *>(data.data()), static_cast<int>(real_width), static_cast<int>(real_height), QImage::Format_ARGB32));
+        scene->addPixmap(map);
+        view->setScene(scene);
+
+        view->setFrameStyle(0);
+        view->setMinimumSize(real_width,real_height);
+        view->setMaximumSize(real_width,real_height);
+        view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        view->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+
+        return view;
+    }
+
+    void TagEditorBitmapSubwindow::show_channel(std::uint32_t *data, std::size_t real_width, std::size_t real_height, Colors mode) {
+        // Get the number of pixels we'll be dealing with
+        std::size_t pixel_count = static_cast<std::size_t>(real_width) * real_height;
+
+        // Only show one channel
+        auto set_to_channel = [](std::size_t channel, std::uint32_t &input) {
+            std::uint32_t value = (input >> (24 - (channel * 8))) & 0xFF;
+            input = (value) | (value << 8) | (value << 16) | (value << 24);
+        };
+
+        switch(mode) {
+            case COLOR_ARGB:
+                for(std::size_t y = 0; y < real_height; y++) {
+                    for(std::size_t x = 0; x < real_width; x++) {
+                        // Blend with checkerboard
+                        auto luminosity = static_cast<std::uint8_t>(((x / 4) % 2) ^ !((y / 4) % 2) ? 0x5F : 0x3F);
+                        ColorPlatePixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
+                        auto &pixel_output = data[x + y * real_width];
+
+                        ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
+                        auto resulting_pixel = checkerboard.alpha_blend(pixel);
+
+                        pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
+                    }
+                }
+                break;
+            case COLOR_RGB:
+                for(std::size_t p = 0; p < pixel_count; p++) {
+                    data[p] |= 0xFF000000;
+                }
+                break;
+            case COLOR_ALPHA:
+                for(std::size_t p = 0; p < pixel_count; p++) {
+                    set_to_channel(0, data[p]);
+                    data[p] |= 0xFF000000;
+                }
+                break;
+            case COLOR_RED:
+                for(std::size_t p = 0; p < pixel_count; p++) {
+                    set_to_channel(1, data[p]);
+                    data[p] |= 0xFF000000;
+                }
+                break;
+            case COLOR_GREEN:
+                for(std::size_t p = 0; p < pixel_count; p++) {
+                    set_to_channel(2, data[p]);
+                    data[p] |= 0xFF000000;
+                }
+                break;
+            case COLOR_BLUE:
+                for(std::size_t p = 0; p < pixel_count; p++) {
+                    set_to_channel(3, data[p]);
+                    data[p] |= 0xFF000000;
+                }
+                break;
+        }
+    }
+
+    void TagEditorBitmapSubwindow::highlight_sprite(std::uint32_t *data, std::size_t real_width, std::size_t real_height) {
+        int current_sequence_index = this->sequence->currentIndex();
+        int current_sprite_index = this->sprite->currentIndex();
+        if(current_sequence_index > 0 && current_sprite_index >= 0) {
+            std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
+            std::size_t current_sprite_index_unsigned = static_cast<std::size_t>(current_sprite_index);
+            auto &sprite = (*this->all_sequences)[current_sequence_index_unsigned].sprites[current_sprite_index_unsigned];
+
+            if(static_cast<int>(sprite.bitmap_index) == this->bitmaps->currentIndex()) {
+                int left = sprite.left * real_width;
+                int right = sprite.right * real_width - 1;
+                int width = right - left;
+
+                int top = sprite.top * real_height;
+                int bottom = sprite.bottom * real_height - 1;
+                int height = bottom - top;
+
+                int middle_x = sprite.registration_point.x * real_width + left;
+                int middle_y = sprite.registration_point.y * real_height + top;
+
+                if(width > 0 && height > 0) {
+                    if(left >= 0) {
+                        // Draw the top and bottom borders
+                        for(int i = left; i < right && i < static_cast<long>(real_width); i++) {
+                            if(i < 0) {
+                                i = -1;
+                            }
+                            else {
+                                if(top >= 0 && static_cast<std::size_t>(top) < real_height) {
+                                    data[GET_PIXEL(i, top)] |= 0x0000FF00;
+                                }
+                                if(bottom >= 0 && static_cast<std::size_t>(bottom) < real_height) {
+                                    data[GET_PIXEL(i, bottom)] |= 0x0000FF00;
+                                }
+                            }
+                        }
+
+                        // Draw the left and right borders
+                        for(int i = top; i < bottom && i < static_cast<long>(real_height); i++) {
+                            if(i < 0) {
+                                i = -1;
+                            }
+                            else {
+                                if(left >= 0 && static_cast<std::size_t>(left) < real_width) {
+                                    data[GET_PIXEL(left, i)] |= 0x0000FF00;
+                                }
+                                if(right >= 0 && static_cast<std::size_t>(right) < real_width) {
+                                    data[GET_PIXEL(right, i)] |= 0x0000FF00;
+                                }
+                            }
+                        }
+                    }
+
+                    if(top < 0) {
+                        top = 0;
+                    }
+                    if(left < 0) {
+                        left = 0;
+                    }
+                    if(right < 0) {
+                        right = 0;
+                    }
+                    if(bottom < 0) {
+                        bottom = 0;
+                    }
+
+                    if(top > static_cast<long>(real_height)) {
+                        top = static_cast<int>(real_height);
+                    }
+                    if(bottom > static_cast<long>(real_height)) {
+                        bottom = static_cast<int>(real_height);
+                    }
+                    if(left > static_cast<long>(real_width)) {
+                        left = static_cast<int>(real_width);
+                    }
+                    if(right > static_cast<long>(real_width)) {
+                        right = static_cast<int>(real_width);
+                    }
+
+                    // Blend the sprite with a transparent shade of red
+                    static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
+                    for(int y = top; y < bottom; y++) {
+                        for(int x = left; x < right; x++) {
+                            auto &pixel_output = data[GET_PIXEL(x,y)];
+
+                            ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
+                            auto resulting_pixel = pixel.alpha_blend(red);
+
+                            pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
+                        }
+                    }
+                }
+
+                // Show a blue crosshair in the center
+                for(int x = middle_x - 2; x <= middle_x + 2; x++) {
+                    for(int y = middle_y - 2; y <= middle_y + 2; y++) {
+                        if(x != middle_x && y != middle_y) {
+                            continue;
+                        }
+                        if(x >= 0 && x < static_cast<long>(real_width) && y >= 0 && y < static_cast<long>(real_height)) {
+                            data[GET_PIXEL(x,y)] = 0xFF00FFFF;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void TagEditorBitmapSubwindow::scale_bitmap(int scale, std::size_t &real_width, std::size_t &real_height, std::size_t &pixel_count, std::vector<std::uint32_t> &data) {
+        std::size_t new_height;
+        std::size_t new_width;
+
+        if(scale > 0) {
+            new_height = real_height << scale;
+            new_width = real_width << scale;
+        }
+        else {
+            new_height = real_height >> -scale;
+            new_width = real_width >> -scale;
+        }
+
+        std::vector<std::uint32_t> scaled(new_height * new_width);
+
+        if(new_width * new_height > 0) {
+            if(scale > 0) {
+                std::size_t scale_s = 1 << scale;
+                for(std::size_t y = 0; y < real_height; y++) {
+                    for(std::size_t x = 0; x < real_width; x++) {
+                        auto pixel = data[GET_PIXEL(x,y)];
+                        auto base_x = x * scale_s;
+                        auto base_y = y * scale_s;
+                        for(std::size_t ys = 0; ys < scale_s; ys++) {
+                            for(std::size_t xs = 0; xs < scale_s; xs++) {
+                                scaled[xs + base_x + (ys + base_y) * new_width] = pixel;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Downscale it (linear filter)
+            else {
+                std::size_t scale_s = 1 << -scale;
+                for(std::size_t ys = 0; ys < new_height; ys++) {
+                    for(std::size_t xs = 0; xs < new_width; xs++) {
+                        std::uint32_t total_red = 0;
+                        std::uint32_t total_green = 0;
+                        std::uint32_t total_blue = 0;
+                        std::uint32_t total_alpha = 0;
+                        std::size_t total_pixel = 0;
+
+                        // Cap it to real_width / real_height in case we have a non Po2 bitmap
+                        std::size_t y_start = ys * scale_s;
+                        std::size_t y_end = (ys + 1) * scale_s;
+                        if(y_end > real_height) {
+                            y_end = real_height;
+                        }
+                        std::size_t x_start = xs * scale_s;
+                        std::size_t x_end = (xs + 1) * scale_s;
+                        if(y_end > real_width) {
+                            y_end = real_width;
+                        }
+
+                        // Add all pixels together
+                        for(std::size_t y = y_start; y < y_end; y++) {
+                            for(std::size_t x = x_start; x < x_end; x++) {
+                                total_pixel++;
+                                auto pixel = data[GET_PIXEL(x,y)];
+                                total_alpha += (pixel & 0xFF000000) >> 24;
+                                total_red += (pixel & 0xFF0000) >> 16;
+                                total_green += (pixel & 0xFF00) >> 8;
+                                total_blue += (pixel & 0xFF);
+                            }
+                        }
+
+                        // Average
+                        if(total_pixel) {
+                            auto average_red = total_red / total_pixel;
+                            auto average_green = total_green / total_pixel;
+                            auto average_blue = total_blue / total_pixel;
+                            auto average_alpha = total_alpha / total_pixel;
+
+                            scaled[xs + ys * new_width] = ((static_cast<std::uint32_t>(average_alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(average_red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(average_green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(average_blue) & 0xFF);
+                        }
+                    }
+                }
+            }
+        }
+
+        real_width = new_width;
+        real_height = new_height;
+        if(scale > 0) {
+            pixel_count <<= scale * 2;
+        }
+        else {
+            pixel_count >>= scale * 2;
+        }
+
+        data = std::move(scaled);
+    }
+
+    std::vector<std::uint32_t> TagEditorBitmapSubwindow::decode_bitmap(std::size_t real_width, std::size_t real_height, std::size_t width, std::size_t height, std::size_t pixels_required, std::size_t pixel_count, const std::byte *bytes, const Parser::BitmapData *bitmap_data) {
         std::vector<std::uint32_t> data(real_width * real_height);
 
         auto decode_8_bit = [&pixels_required, &bytes, &data](ColorPlatePixel (*with_what)(std::uint8_t)) {
@@ -447,212 +751,7 @@ namespace Invader::EditQt {
                 break;
         }
 
-        // Scale if needed
-        if(scale > 1) {
-            std::size_t new_height = real_height * scale;
-            std::size_t new_width = real_width * scale;
-            std::vector<std::uint32_t> scaled(new_height * new_width);
-            auto scale_s = static_cast<std::size_t>(scale);
-            for(std::size_t y = 0; y < real_height; y++) {
-                for(std::size_t x = 0; x < real_width; x++) {
-                    auto pixel = data[x + y * real_width];
-                    auto base_x = x * scale_s;
-                    auto base_y = y * scale_s;
-                    for(std::size_t ys = 0; ys < scale_s; ys++) {
-                        for(std::size_t xs = 0; xs < scale_s; xs++) {
-                            scaled[xs + base_x + (ys + base_y) * new_width] = pixel;
-                        }
-                    }
-                }
-            }
-            real_width = new_width;
-            real_height = new_height;
-            pixel_count *= scale * scale;
-            data = std::move(scaled);
-        }
-
-        // Filter for mode
-        auto set_to_channel = [](std::size_t channel, std::uint32_t &input) {
-            std::uint32_t value = (input >> (24 - (channel * 8))) & 0xFF;
-            input = (value) | (value << 8) | (value << 16) | (value << 24);
-        };
-
-        switch(mode) {
-            case COLOR_ARGB:
-                for(std::size_t y = 0; y < real_height; y++) {
-                    for(std::size_t x = 0; x < real_width; x++) {
-                        // Blend with checkerboard
-                        auto luminosity = static_cast<std::uint8_t>(((x / 4) % 2) ^ !((y / 4) % 2) ? 0x5F : 0x3F);
-                        ColorPlatePixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
-                        auto &pixel_output = data[x + y * real_width];
-
-                        ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
-                        auto resulting_pixel = checkerboard.alpha_blend(pixel);
-
-                        pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
-                    }
-                }
-                break;
-            case COLOR_RGB:
-                for(std::size_t p = 0; p < pixel_count; p++) {
-                    data[p] |= 0xFF000000;
-                }
-                break;
-            case COLOR_ALPHA:
-                for(std::size_t p = 0; p < pixel_count; p++) {
-                    set_to_channel(0, data[p]);
-                    data[p] |= 0xFF000000;
-                }
-                break;
-            case COLOR_RED:
-                for(std::size_t p = 0; p < pixel_count; p++) {
-                    set_to_channel(1, data[p]);
-                    data[p] |= 0xFF000000;
-                }
-                break;
-            case COLOR_GREEN:
-                for(std::size_t p = 0; p < pixel_count; p++) {
-                    set_to_channel(2, data[p]);
-                    data[p] |= 0xFF000000;
-                }
-                break;
-            case COLOR_BLUE:
-                for(std::size_t p = 0; p < pixel_count; p++) {
-                    set_to_channel(3, data[p]);
-                    data[p] |= 0xFF000000;
-                }
-                break;
-        }
-
-        // Show sprite if selected
-        if(this->sequence) {
-            int current_sequence_index = this->sequence->currentIndex();
-            int current_sprite_index = this->sprite->currentIndex();
-            if(current_sequence_index > 0 && current_sprite_index >= 0) {
-                std::size_t current_sequence_index_unsigned = static_cast<std::size_t>(current_sequence_index - 1);
-                std::size_t current_sprite_index_unsigned = static_cast<std::size_t>(current_sprite_index);
-                auto &sprite = (*this->all_sequences)[current_sequence_index_unsigned].sprites[current_sprite_index_unsigned];
-
-                if(static_cast<int>(sprite.bitmap_index) == this->bitmaps->currentIndex()) {
-                    int left = sprite.left * real_width;
-                    int right = sprite.right * real_width - 1;
-                    int width = right - left;
-
-                    int top = sprite.top * real_height;
-                    int bottom = sprite.bottom * real_height - 1;
-                    int height = bottom - top;
-
-                    int middle_x = sprite.registration_point.x * real_width + left;
-                    int middle_y = sprite.registration_point.y * real_height + top;
-
-                    #define CALCULATE_PIXEL(x,y) (y * real_width + x)
-
-                    if(width > 0 && height > 0) {
-                        if(left >= 0) {
-                            // Draw the top and bottom borders
-                            for(int i = left; i < right && i < static_cast<long>(real_width); i++) {
-                                if(i < 0) {
-                                    i = -1;
-                                }
-                                else {
-                                    if(top >= 0 && static_cast<std::size_t>(top) < real_height) {
-                                        data[CALCULATE_PIXEL(i, top)] |= 0x0000FF00;
-                                    }
-                                    if(bottom >= 0 && static_cast<std::size_t>(bottom) < real_height) {
-                                        data[CALCULATE_PIXEL(i, bottom)] |= 0x0000FF00;
-                                    }
-                                }
-                            }
-
-                            // Draw the left and right borders
-                            for(int i = top; i < bottom && i < static_cast<long>(real_height); i++) {
-                                if(i < 0) {
-                                    i = -1;
-                                }
-                                else {
-                                    if(left >= 0 && static_cast<std::size_t>(left) < real_width) {
-                                        data[CALCULATE_PIXEL(left, i)] |= 0x0000FF00;
-                                    }
-                                    if(right >= 0 && static_cast<std::size_t>(right) < real_width) {
-                                        data[CALCULATE_PIXEL(right, i)] |= 0x0000FF00;
-                                    }
-                                }
-                            }
-                        }
-
-                        if(top < 0) {
-                            top = 0;
-                        }
-                        if(left < 0) {
-                            left = 0;
-                        }
-                        if(right < 0) {
-                            right = 0;
-                        }
-                        if(bottom < 0) {
-                            bottom = 0;
-                        }
-
-                        if(top > static_cast<long>(real_height)) {
-                            top = static_cast<int>(real_height);
-                        }
-                        if(bottom > static_cast<long>(real_height)) {
-                            bottom = static_cast<int>(real_height);
-                        }
-                        if(left > static_cast<long>(real_width)) {
-                            left = static_cast<int>(real_width);
-                        }
-                        if(right > static_cast<long>(real_width)) {
-                            right = static_cast<int>(real_width);
-                        }
-
-                        // Blend the sprite with a transparent shade of red
-                        static constexpr const ColorPlatePixel red = { 0, 0, 0xFF, 0x1F };
-                        for(int y = top; y < bottom; y++) {
-                            for(int x = left; x < right; x++) {
-                                auto &pixel_output = data[CALCULATE_PIXEL(x,y)];
-
-                                ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
-                                auto resulting_pixel = pixel.alpha_blend(red);
-
-                                pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
-                            }
-                        }
-                    }
-
-                    // Show a blue crosshair in the center
-                    for(int x = middle_x - 2; x <= middle_x + 2; x++) {
-                        for(int y = middle_y - 2; y <= middle_y + 2; y++) {
-                            if(x != middle_x && y != middle_y) {
-                                continue;
-                            }
-                            if(x >= 0 && x < static_cast<long>(real_width) && y >= 0 && y < static_cast<long>(real_height)) {
-                                data[CALCULATE_PIXEL(x,y)] = 0xFF00FFFF;
-                            }
-                        }
-                    }
-
-                    #undef CALCULATE_PIXEL
-                }
-            }
-        }
-
-        // Finish up
-        QGraphicsView *view = new QGraphicsView();
-        QGraphicsScene *scene = new QGraphicsScene(view);
-        QPixmap map;
-        map.convertFromImage(QImage(reinterpret_cast<const uchar *>(data.data()), static_cast<int>(real_width), static_cast<int>(real_height), QImage::Format_ARGB32));
-        scene->addPixmap(map);
-        view->setScene(scene);
-
-        view->setFrameStyle(0);
-        view->setMinimumSize(real_width,real_height);
-        view->setMaximumSize(real_width,real_height);
-        view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-        view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-        view->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
-
-        return view;
+        return data;
     }
 
     void TagEditorBitmapSubwindow::reload_view() {
@@ -685,7 +784,7 @@ namespace Invader::EditQt {
         auto *scroll_widget = new QWidget();
         auto *layout = new QVBoxLayout();
         auto color = static_cast<Colors>(this->colors->currentIndex());
-        int scale = 1 << (this->scale->currentIndex());
+        int scale = this->scale->currentIndex() - 4;
         auto *what = this;
 
         auto make_widget = [&bitmap_data, &color, &scale, &pixel_data, &what](std::size_t mip, std::size_t index) {
