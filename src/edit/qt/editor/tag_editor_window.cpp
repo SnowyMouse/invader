@@ -65,6 +65,7 @@ namespace Invader::EditQt {
                 return;
             }
         }
+        int min_width = this->minimumSizeHint().width();
 
         // Make and set our menu bar
         QMenuBar *bar = new QMenuBar(this);
@@ -89,6 +90,8 @@ namespace Invader::EditQt {
         close->setShortcut(QKeySequence::Close);
         close->setIcon(QIcon::fromTheme(QStringLiteral("document-close")));
         connect(close, &QAction::triggered, this, &TagEditorWindow::close);
+
+        int min_height = this->minimumSizeHint().height();
 
         // Add another widget to our view?
         QFrame *extra_widget_panel = nullptr;
@@ -143,7 +146,6 @@ namespace Invader::EditQt {
 
         // Set up the scroll area and widgets
         auto *scroll_view = new QScrollArea();
-        scroll_view->setWidgetResizable(true);
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
         this->setCentralWidget(scroll_view);
         scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true, extra_widget_panel));
@@ -155,16 +157,28 @@ namespace Invader::EditQt {
         toggle_fullscreen->setIcon(QIcon::fromTheme(QStringLiteral("view-fullscreen")));
         connect(toggle_fullscreen, &QAction::triggered, this, &TagEditorWindow::toggle_fullscreen);
 
-        // Lock the scroll view and window to a set width
-        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) + 16;
+        // Figure out how big we want to make this window
+        auto screen_geometry = QGuiApplication::primaryScreen()->geometry();
+        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) * 2 + min_width;
+        int max_height = min_height + scroll_view->widget()->height() + qApp->style()->pixelMetric(QStyle::PM_DefaultFrameWidth) * 2;
+        oprintf("%i\n", max_height);
+        scroll_view->setWidgetResizable(true);
+
+        if(max_height > screen_geometry.height() / 4 * 3) {
+            max_height = screen_geometry.height() / 4 * 3;
+        }
+
+        if(max_width > screen_geometry.width() / 4 * 3) {
+            max_width = screen_geometry.width() / 4 * 3;
+        }
 
         // Center this
         this->setGeometry(
             QStyle::alignedRect(
                 Qt::LeftToRight,
                 Qt::AlignCenter,
-                QSize(max_width, 600),
-                QGuiApplication::primaryScreen()->geometry()
+                QSize(max_width, max_height),
+                screen_geometry
             )
         );
 
