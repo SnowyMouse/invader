@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.30.0] - 2020-03-15
 ### Added
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader
 - New class: extended_bitmap - Contains all extra features in invader-bitmap
@@ -16,7 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added opening tags if a path is given when opening the
   program
 - invader-edit-qt: Added the ability to toggle fullscreen for tag editing
-- invader-edit-qt: Added bitmap previewing
+- invader-edit-qt: Added bitmap previewing, complete with sprite highlighting,
+  color channel viewing, nearest-neighbor upscaling, and linear downscaling
 - invader-edit-qt: Added sound previewing
 - invader-edit-qt: Added naming to some arrays
 - invader-extract: Added MCC CEA bitmap tag extraction
