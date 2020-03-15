@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.30.1] - 2020-03-15
+### Fixed
+- invader-edit-qt: Fixed bitmaps with non-equal height & width being cut off
+- invader-edit-qt: Fixed "Original" scaling actually being 2x
+
 ## [0.30.0] - 2020-03-15
 ### Added
 - New tool: invader-bludgeon - Tool that convinces tags to work with Invader

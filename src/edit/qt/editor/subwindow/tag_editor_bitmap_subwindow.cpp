@@ -229,8 +229,6 @@ namespace Invader::EditQt {
         this->reload_view();
     }
 
-
-
     QGraphicsView *TagEditorBitmapSubwindow::draw_bitmap_to_widget(Parser::BitmapData *bitmap_data, std::size_t mipmap, std::size_t index, Colors mode, int scale, const std::vector<std::byte> *pixel_data) {
         // Get the dimensions of the mipmap
         std::size_t width = static_cast<std::size_t>(bitmap_data->width);
@@ -238,7 +236,7 @@ namespace Invader::EditQt {
         std::size_t depth = static_cast<std::size_t>(bitmap_data->depth);
         std::size_t real_width = width;
         std::size_t real_height = height;
-        std::size_t offset = bitmap_data->pixel_data_offset;;
+        std::size_t offset = bitmap_data->pixel_data_offset;
         std::size_t bits_per_pixel;
         bool compressed = false;
 
@@ -578,8 +576,8 @@ namespace Invader::EditQt {
                         }
                         std::size_t x_start = xs * scale_s;
                         std::size_t x_end = (xs + 1) * scale_s;
-                        if(y_end > real_width) {
-                            y_end = real_width;
+                        if(x_end > real_width) {
+                            x_end = real_width;
                         }
 
                         // Add all pixels together
@@ -784,7 +782,7 @@ namespace Invader::EditQt {
         auto *scroll_widget = new QWidget();
         auto *layout = new QVBoxLayout();
         auto color = static_cast<Colors>(this->colors->currentIndex());
-        int scale = this->scale->currentIndex() - 4;
+        int scale = this->scale->currentIndex() - 3;
         auto *what = this;
 
         auto make_widget = [&bitmap_data, &color, &scale, &pixel_data, &what](std::size_t mip, std::size_t index) {
