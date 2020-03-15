@@ -1328,11 +1328,11 @@
                 "compound": true
             },
             {
-                "name": "rounds loaded",
+                "name": "primary rounds loaded",
                 "type": "uint16"
             },
             {
-                "name": "rounds total",
+                "name": "primary rounds total",
                 "type": "uint16"
             },
             {
@@ -1344,11 +1344,11 @@
                 "compound": true
             },
             {
-                "name": "rounds loaded 1",
+                "name": "secondary rounds loaded",
                 "type": "uint16"
             },
             {
-                "name": "rounds total 1",
+                "name": "secondary rounds total",
                 "type": "uint16"
             },
             {

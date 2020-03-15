@@ -18,7 +18,8 @@
                 "name": "strings",
                 "type": "TagReflexive",
                 "struct": "StringListString",
-                "compound": true
+                "compound": true,
+                "read_only": true
             }
         ],
         "type": "struct",

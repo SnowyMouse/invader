@@ -65,7 +65,8 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "size": 20
+        "size": 20,
+        "read_only": true
     },
     {
         "name": "Font",
@@ -137,7 +138,8 @@
                 "name": "characters",
                 "type": "TagReflexive",
                 "struct": "FontCharacter",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "pixels",
