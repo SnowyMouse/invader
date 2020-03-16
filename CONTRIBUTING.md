@@ -7,30 +7,24 @@ project:
 - Submitting [pull requests]
 
 # Testing Invader
-To test Invader, run it and use it for making Halo maps and tags. To make maps,
-you will need a tag set which you can get by extracting the [Halo Editing Kit]
-installer.
-
-You can extract the installer by either running it (requires a Halo Custom
-Edition install and Windows or Wine) or by using a program like [7-Zip] or
-[p7zip].
+To test Invader, run it and use it for making Halo maps and tags. Report issues
+as you find them. If reporting an issue for invader-build, make sure the issue
+is *not* present in `tool.exe build-cache-file`. You can get a set of base tags
+from the the [Halo Editing Kit] installer which can be extracted by either
+running it (requires a Halo Custom Edition install and Windows or Wine) or by
+using a program like [7-Zip] or [p7zip].
 
 You should always test using the latest [Git master branch] build when
 testing Invader. It is not recommended to test even slightly outdated versions
-of Invader, regardless of if it is a release or not.
-
-## Stable releases
-Releases are used only for versioning and keeping track of changes. They are
-**not** an indication of stability. So, if the latest release uses code that is
-older than the Git master branch, then it is just as out-of-date and,
-therefore, less "stable" as a result.
+of Invader, regardless of if it was a release or not. Note that Invader, in its
+current state, has no concept of a "stable" release, though the tools,
+themselves, may possibly be more stable than the Halo Editing Kit counterparts.
 
 # Conventions
 These conventions apply only for contributing to the official Invader
-repository. Forks or other derivatives of Invader may use completely different
-conventions.
-
-These conventions are subject to change.
+repository. Forks and other derivatives of Invader may use completely different
+conventions even if this CONTRIBUTING.md file is present. *These conventions are
+subject to change.*
 
 ## Scope conventions
 Issues and pull requests must remain in the scope of Invader. Here are some
@@ -48,11 +42,9 @@ accepted upstream.
 
 Also, the standard library should be used whenever possible. Do not use any
 platform-specific types or functions such as the Windows API's `DWORD` or
-`fopen_s` when writing platform-independent code.
-
-There may be times where such platform-specific code is necessary, such as for
-doing networking or certain filesystem queries. If so, ensure you use `#ifdef`s
-so the code is only compiled when that platform is being targeted.
+`fopen_s` or the Linux API when writing platform-independent code. If and when
+it is necessary to write platform-specific code, use `#ifdef`s to isolate the
+code so it doesn't compile on incompatible systems.
 
 Lastly, it is well known that the Halo Editing Kit imposes limitations on
 structures. For example:
@@ -62,21 +54,21 @@ structures. For example:
 in singleplayer
 - and so on...
 
-As long as it is otherwise valid data, then Invader should not prevent the user
-from creating assets, even if these assets may not work with the Halo Editing
-Kit. In fact, Invader should not be expected to warn the user if such assets
-will not work with the original Halo Editing Kit. Usage of the original Halo
-Editing Kit should be discouraged whenever possible.
+As long as it is otherwise valid data that can be handled sanely, then Invader
+should not prevent the user from creating it, even if such assets would not work
+with the original Halo Editing Kit.
+
+Invader should not be expected to warn the user if such assets will not work
+with the original Halo Editing Kit (or anyone else's tools). Usage of the
+original Halo Editing Kit should be discouraged whenever possible.
 
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation,
 and code to ensure it is understandable by most people.
 
-- Use American English
-    - A specific dialect of English is chosen for consistency in spelling
-    - Comments inside of issues and pull requests do not specifically need to
-      use the American English dialect, but they should not require a
-      translator for American English speakers to read, either.
+- Use American English when writing documentation
+    - A specific dialect of English is chosen for consistency in spelling, and
+      it is easily understandable by most English speakers
 - Use ISO dates (YYYY-MM-DD). This date format is universally easy to
   understand as there is no ambiguity, and the components of the date is
   ordered logically from most significant (year) to least significant (day).
@@ -84,15 +76,21 @@ and code to ensure it is understandable by most people.
 - Use commas (`,`) when separating thousands, and use decimal points (`.`) when
   a decimal point is needed
 - Use the metric system when applicable. The only exception to this is when
-  talking about world units, which one world unit in Halo is equal to 10 feet
+  talking about world units, which one world unit in Halo is equal to ten feet
   or 3.048 meters.
 - Use IEC base-2 units when referring to a large number of bytes (i.e. KiB,
-  MiB, GiB, TiB, etc.)
+  MiB, GiB, TiB, etc.).
     - This is to prevent confusion. Windows uses MB and GB as 2^20 and 2^30
       bytes, respectively, while almost everything else uses MB and GB as 10^3
       and 10^6 bytes, respectively.
 - All text files must end with a newline. Most modern text editors will do this
   for you.
+- Tag classes should *always* be referred to by their full name and not 4CCs.
+  For example, you should always refer to a `gbxmodel` as such and not a `mod2`.
+    - The 4CCs are often confusing and don't always reflect the full name in any
+      way (e.g., `jpt!` referring to a `damage_effect`)
+    - Referring to tags as their 4CCs is a product of map modding which, in
+      itself, should be discouraged.
 
 ## Issue conventions
 Create your issue in the [issues] page.
@@ -114,12 +112,13 @@ For new issues, it is recommended to prefix the title with **one** of these:
 For all new bug reports, ensure your issue has enough information for us to
 reproduce the bug:
 - You must specify the version of Invader that your bug report applies to
-  (e.g. `Invader 0.21.3.r1153.179f7d4`). If you are unsure about this,
+  (e.g., `Invader 0.21.3.r1153.179f7d4`). If you are unsure about this,
   use `invader-build -i` to get this string.
+- You must specify any necessary steps for reproducing your bug.
 - You must specify the version of the game required to reproduce the bug, if
   necessary. Use univocal names such as "Custom Edition" or "Retail" and avoid
   ambiguous names such as "CE" and "PC" when doing this.
-- You must include any and all relevant files that cause the bug, unless
+- You must include any and all relevant files that cause the bug unless
   these files came with the original game OR Halo Editing Kit (again, specify).
     - We recommend using formats such as .7z, .zip, .tar.xz, or .tar.zst.
       Proprietary formats such as .rar should not be used. You may either link
@@ -138,6 +137,19 @@ be sure to follow it. This may be somewhat lengthy, but it is organized to be
 easy to follow. Some conventions may have been missed, and if this is the case,
 they will be added here even if these conventions were discovered upon a pull
 request being submitted.
+
+### License conventions
+These apply to license headers and licensing.
+
+- The first line of every source file must be a single-line comment,
+`SPDX-License-Identifier: GPL-3.0-only`, unless comments are not supported
+for that particular file type (e.g., `.tag_indices`)
+- Everything must be contributed under the project's license, the GNU General
+Public License version 3 **only**
+- If using GPLv3-only compatible code (e.g., "GPLv2/GPLv3 or later", MIT, public
+domain, etc.), indicate at the top of the file (below the aforementioned
+single-line comment) that this version of the file is released under GPLv3
+only. This is done for clarity.
 
 ### Exceptions and externally-added code
 By "externally-added" code, it is meant that non-Invader code was added into
@@ -160,19 +172,6 @@ These are the conventions for externally-added code:
   license header, including the modification to add the license comment but not
   the modification list, itself, of course.
 
-### License conventions
-These apply to license headers and licensing.
-
-- The first line of every source file must be a single-line comment,
-  `SPDX-License-Identifier: GPL-3.0-only`, unless comments are not supported
-  for that particular file type (e.g. `.tag_indices`)
-- Everything must be contributed under the project's license, the GNU General
-  Public License version 3 **only**
-- If using GPLv3-only compatible code (e.g. "GPLv2/GPLv3 or later", MIT, public
-  domain, etc.), indicate at the top of the file (below the aforementioned
-  single-line comment) that this version of the file is released under GPLv3
-  only. This is done for clarity.
-
 ### File name conventions
 This applies to how files and directories are named.
 
@@ -187,7 +186,7 @@ This applies to how files and directories are named.
 This applies to how markdown files are created and edited.
 
 - Capitalize the first letter of headings as well as any proper noun
-    - Do not use title case (e.g. write "Coding conventions" instead of "Coding
+    - Do not use title case (e.g., write "Coding conventions" instead of "Coding
       Conventions")
 - Markdown file lines must be no more than 80 characters in length unless it
   is part of code, or it is a URL on the bottom of the page.
@@ -243,8 +242,10 @@ These apply to C/C++ code specifically.
 - Static and global variables defined in your code may not be modified
     - The reason for this is because it's usually not thread safe, and
       singletons are often a result of poor design
-- Directory separators in `#include` statements must use forward slashes (e.g.
+- Directory separators in `#include` statements must use forward slashes (e.g.,
   `#include "tag/compiled_tag.hpp"`)
+- When including code from the include directory, use the proper include path
+  (i.e. `<invader/...>`)
 - Use [fixed-width integer types] whenever you need a specific size
   of integer. Never assume the size of fundamental types like `int`, `short`,
   `size_t`, etc.
@@ -269,13 +270,13 @@ These apply to C/C++ header files.
 - Put HEK specific struct definitions in the relevant `hek` directory to avoid
   confusion with Invader struct definitions.
 - Header files must use C standards-compliant header guards (**not**
-  `#pragma once`)
+  `#pragma once` as these *can* have issues in limited cases)
 - Header guard constants must resemble the path of the file relative to the
   source tree to avoid collisions
     - Guard constant must begin with with `INVADER__`
     - Use all-uppercase characters
-    - Use two underscores to separate directories relative to src, not
-      including the src folder itself
+    - Use two underscores to separate directories relative to src or include,
+      not including the aforementioned src or include folders
     - Use one underscore for dots
     - Here is an example header guard (from `invader/map/tag.hpp`):
         ```cpp
@@ -289,7 +290,7 @@ These apply to C/C++ header files.
 These apply to C code.
 
 - Use `.c` for C source files
-- For null pointers, use `NULL`
+- For null pointers, use `NULL` and not `0`
 
 ##### C++ conventions
 These apply to C++ code.
@@ -301,16 +302,20 @@ These apply to C++ code.
       are less error-prone
     - You can use `std::make_unique` to create a `std::unique_ptr` instead of
       using `new` in the constructor
+    - In some cases, using `new` may be necessary, such as for the Qt objects.
+      Ensure these don't leak, and note that Qt may automatically free child
+      objects when their parents are destructed
 - Do not use C-style casting, such as `(int)i`
-    - Use the correct casting functions (e.g. `static_cast`,
+    - Use the correct casting functions (e.g., `static_cast`, `dynamic_cast`,
       `reinterpret_cast`, `const_cast`, etc.) when necessary
-- For null pointers, use `nullptr`
+- For null pointers, use C++'s `nullptr` and not C's `NULL`
 - When using the C or C++ standard library, use the `std::` namespace
   explicitly when possible, such as `std::uint32_t`
     - The `using namespace std;` directive may result in collisions at some
-      point, so using it is inadvisable
+      point, so using it is inadvisable, but there may be instances where it is
+      useful
 - Do not use `std::cout` or `std::err` for console output. Instead, use
-  `oprintf` and `eprintf` (`src/printf.hpp`), respectively.
+  `oprintf` and `eprintf` (`<invader/printf.hpp>`), respectively.
 - Use C++17's `std::byte` type for raw memory instead of an integer type like
   `char` or `std::uint8_t`
 
