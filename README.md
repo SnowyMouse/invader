@@ -805,7 +805,7 @@ there are people who have said they were willing to do this.
 Officially, invader-build only creates maps for officially-released versions of
 the PC game. While Xbox maps are very similar in format to PC maps, there
 exists enough differences to make supporting the Xbox version non-trivial.
-Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox versio
+Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox version
  of the game, so there is no means to debug or test.
 
 ### The HEK says my bitmap tag is "too large" when opening.
