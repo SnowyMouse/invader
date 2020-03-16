@@ -714,8 +714,7 @@ Invader's development.
 - [Can invader-build create Xbox maps?]
 - [The HEK says my bitmap tag is "too large" when opening.]
 - [How close to completion is Invader?]
-- [Should I use invader-bitmap or tool.exe?]
-- [Should I use invader-build or tool.exe?]
+- [Should I use invader-build for my map right now?]
 
 ### What operating systems are supported?
 Invader does not support any one operating system, but Invader is developed on
@@ -776,13 +775,13 @@ There are a few reasons why Invader officially has mostly command-line tools:
 
 Basically, for most functions, a command-line interface is enough, while a GUI
 may add overhead to such a task (e.g. mouse usage, file navigation, etc.) while
-not getting any of the benefits of a command-line shell such as tab completion
-or command history.
+not getting any of the benefits of a command-line shell such as tab completion,
+command history, scriptability, etc.
 
 Even so, there are some functions where a graphical user interface is better.
 Tasks that require a large amount of user interaction such as direct editing of
 HEK tag files or scenario editing are tasks that are better suited to a GUI
-than the command line, as opposed to simple tasks such as building a cache file
+than the command line as opposed to simple tasks such as building a cache file
 which requires a small amount of input to perform the entire task.
 
 ### Are 32-bit Windows builds available?
@@ -833,20 +832,21 @@ and it has a number of features tool.exe does not have, such as support for the
 .tga format (goes well with Refinery's data extraction) as well as dithering.
 Therefore, invader-bitmap is the superior choice.
 
-### Should I use invader-build or tool.exe?
-It depends. Right now, invader-build isn't finished and has a number of issues
-that need ironed out before this FAQ can confidently recommend it for *every*
-use case, while tool.exe is basically the reference when it comes to building
-cache files.
+### Should I use invader-build for my map right now?
+It depends.
 
-Most singleplayer maps will probably work, but until the stock campaign works
-as it did when built with tool.exe, then it is not recommended to use
-invader-build for singleplayer maps except for testing.
+Most multiplayer maps will work without issue, particularly those without
+scripts, but singleplayer maps may have issues. Because tool.exe has a number of
+bugs and invader-build does quite a few things tool.exe doesn't do (such as
+better error checking), there are a few reasons to use invader-build over
+tool.exe for multiplayer maps.
 
-Most multiplayer maps work fine when built under invader-build. Because
-tool.exe has a number of bugs and invader-build does quite a few things
-tool.exe doesn't do, there are a few reasons to use invader-build over tool.exe
-for multiplayer maps.
+However, invader-build isn't finished and has a number of issues that need
+ironed out before this FAQ can confidently recommend it for *every* use case,
+while tool.exe is basically the reference when it comes to building cache files.
+
+However, we do ask that you consider testing invader-build so we can improve it
+to a point where it can be a solid replacement to tool.exe.
 
 [GitHub]: https://github.com/Kavawuvi/invader
 [Arch Linux AUR]: https://aur.archlinux.org/packages/invader-git/
@@ -867,8 +867,7 @@ for multiplayer maps.
 [Can invader-build create Xbox maps?]: #can-invader-build-create-xbox-maps
 [The HEK says my bitmap tag is "too large" when opening.]: #the-hek-says-my-bitmap-tag-is-too-large-when-opening
 [How close to completion is Invader?]: #how-close-to-completion-is-invader
-[Should I use invader-bitmap or tool.exe?]: #should-i-use-invader-bitmap-or-toolexe
-[Should I use invader-build or tool.exe?]: #should-i-use-invader-build-or-toolexe
+[Should I use invader-build for my map right now?]: #should-i-use-invader-build-for-my-map-right-now
 
 [Map protection]: http://forum.halomaps.org/index.cfm?page=topic&topicID=16885
 [Obfuscating software]: http://forum.halomaps.org/index.cfm?page=topic&topicID=51196&start=112
