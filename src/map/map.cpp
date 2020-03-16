@@ -298,7 +298,7 @@ namespace Invader {
 
         auto &map = *this;
 
-        const auto &header = *reinterpret_cast<const CacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC)));
+        const auto &header = *reinterpret_cast<const CacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeader)));
 
         std::size_t tag_count = header.tag_count;
         this->tags.reserve(tag_count);
@@ -306,6 +306,19 @@ namespace Invader {
         this->scenario_tag_id = header.scenario_tag.read().index;
         if(this->scenario_tag_id >= tag_count) {
             throw OutOfBoundsException();
+        }
+
+        // Set this stuff!
+        auto set_model_stuff = [&map](auto &header) {
+            map.model_data_offset = header.model_data_file_offset;
+            map.model_data_size = header.model_data_size;
+            map.model_index_offset = header.vertex_size;
+        };
+        if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            set_model_stuff(*reinterpret_cast<const DarkCircletCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(DarkCircletCacheFileTagDataHeader))));
+        }
+        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            set_model_stuff(*reinterpret_cast<const CacheFileTagDataHeaderPC *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC))));
         }
 
         auto do_populate_the_array = [&map, &tag_count](auto *tags) {
