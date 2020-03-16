@@ -810,8 +810,8 @@ Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox version
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this
-limitation, and you can use the MEK to view bitmap tags that exceed 16 MiB.
-Halo PC also does not have any problems loading bitmaps that exceed 16 MiB.
+limitation, and you can use invader-edit-qt to view bitmap tags that exceed 16
+MiB. Halo PC also does not have any problems loading bitmaps that exceed 16 MiB.
 That said, some DirectX 9 GPUs and/or implementations won't support textures
 larger than 2048x2048 (2D textures) or 256x256x256 (3D textures).
 
