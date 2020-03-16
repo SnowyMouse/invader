@@ -17,12 +17,8 @@
                 "type": "uint64"
             },
             {
-                "name": "structure bsp",
-                "type": "TagDependency",
-                "classes": [
-                    "scenario_structure_bsp"
-                ],
-                "compound": true
+                "type": "pad",
+                "size": 16
             }
         ],
         "type": "struct",
@@ -36,7 +32,8 @@
                 "name": "extended scenario bsps",
                 "type": "TagReflexive",
                 "struct": "ExtendedScenarioBSP",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             },
             {
                 "type": "pad",
