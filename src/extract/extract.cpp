@@ -166,11 +166,12 @@ int main(int argc, const char **argv) {
     }
 
     // Warn if needed
-    auto &header = map->get_cache_file_header();
-    bool cannot_extract_resources = header.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+    auto engine = map->get_engine();
+    auto type = map->get_type();
+    bool cannot_extract_resources = engine == Invader::HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
     if(extract_options.maps_directory.has_value()) {
         using namespace Invader::HEK;
-        switch(header.engine) {
+        switch(engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 if(loc.size() == 0) {
                     eprintf_error("Failed to find a loc.map");
@@ -197,7 +198,7 @@ int main(int argc, const char **argv) {
     // Also here's the tags directory
     std::vector<std::size_t> all_tags_to_extract;
 
-    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &header, &cannot_extract_resources](std::size_t tag_index) -> bool {
+    auto extract_tag = [&extracted_tags, &map, &tags, &extract_options, &all_tags_to_extract, &engine, &type, &cannot_extract_resources](std::size_t tag_index) -> bool {
         // Used for bad paths
         static const std::regex BAD_PATH_DIRECTORY("(^|.*(\\\\|\\/))\\.{1,2}(\\\\|\\/).*");
 
@@ -212,7 +213,7 @@ int main(int argc, const char **argv) {
             return false;
         }
 
-        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP) {
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP) {
             eprintf_warn("Xbox bitmaps cannot be extracted at this time");
             return false;
         }
@@ -245,7 +246,7 @@ int main(int argc, const char **argv) {
         }
 
         // Skip globals
-        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && header.map_type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
+        if(tag_class_int == Invader::TagClassInt::TAG_CLASS_GLOBALS && !extract_options.non_mp_globals && type != Invader::HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             eprintf_warn("Skipping the non-multiplayer map's globals tag");
             return false;
         }
@@ -279,7 +280,7 @@ int main(int argc, const char **argv) {
         }
 
         // Jason Jones the tag
-        if(header.map_type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
+        if(type == Invader::HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER) {
             auto tag_path = tag.get_path();
             switch(tag_class_int) {
                 case Invader::TagClassInt::TAG_CLASS_WEAPON: {

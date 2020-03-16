@@ -9,15 +9,9 @@
 #include <zlib.h>
 
 namespace Invader::Compression {
-    static void compress_header(const std::byte *header_input, std::byte *header_output, std::size_t decompressed_size) {
-        // Check the header
-        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(header_input);
-        if(!header.valid()) {
-            throw InvalidMapException();
-        }
-
-        auto new_engine_version = header.engine.read();
-        switch(header.engine.read()) {
+    static void compress_header(const Map &map, std::byte *header_output, std::size_t decompressed_size) {
+        auto new_engine_version = map.get_engine();
+        switch(new_engine_version) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED;
                 break;
@@ -29,7 +23,7 @@ namespace Invader::Compression {
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
             case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                if(header.decompressed_file_size.read() > 0) {
+                if(map.is_compressed()) {
                     throw MapNeedsDecompressedException();
                 }
                 break;
@@ -46,19 +40,25 @@ namespace Invader::Compression {
 
         // Write the header
         auto &header_out = *reinterpret_cast<HEK::CacheFileHeader *>(header_output);
-        header_out = header;
+        header_out = {};
+        header_out.crc32 = map.get_header_crc32();
+        std::strncpy(header_out.build.string, map.get_build(), sizeof(header_out.build));
+        std::strncpy(header_out.name.string, map.get_scenario_name(), sizeof(header_out.name));
+        header_out.map_type = map.get_type();
         header_out.engine = new_engine_version;
         header_out.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT;
         header_out.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD;
+        header_out.tag_data_size = map.get_tag_data_length();
+        header_out.tag_data_offset = map.get_tag_data_at_offset(0) - map.get_data_at_offset(0);
         if(decompressed_size > UINT32_MAX) {
             throw MaximumFileSizeException();
         }
         header_out.decompressed_file_size = static_cast<std::uint32_t>(decompressed_size);
     }
 
-    static void decompress_header(const std::byte *header_input, std::byte *header_output) {
+    template <typename T> static void decompress_header(const std::byte *header_input, std::byte *header_output) {
         // Check to see if we can't even fit the header
-        auto header_copy = *reinterpret_cast<const HEK::CacheFileHeader *>(header_input);
+        auto header_copy = *reinterpret_cast<const T *>(header_input);
 
         // Figure out the new engine version
         auto new_engine_version = header_copy.engine.read();
@@ -108,10 +108,10 @@ namespace Invader::Compression {
         if(new_engine_version == HEK::CACHE_FILE_DEMO) {
             header_copy.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
             header_copy.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
-            *reinterpret_cast<HEK::CacheFileDemoHeader *>(header_output) = header_copy;
+            *reinterpret_cast<HEK::CacheFileDemoHeader *>(header_output) = *reinterpret_cast<HEK::CacheFileHeader *>(&header_copy);
         }
         else {
-            *reinterpret_cast<HEK::CacheFileHeader *>(header_output) = header_copy;
+            *reinterpret_cast<T *>(header_output) = header_copy;
         }
     }
 
@@ -122,10 +122,10 @@ namespace Invader::Compression {
         auto map = Map::map_with_pointer(const_cast<std::byte *>(data), data_size);
 
         // If we're anniversary, compress it with ceaflate
-        auto &header = map.get_cache_file_header();
-        if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+        auto engine = map.get_engine();
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
             std::vector<std::byte> modifiable_input_data(data, data + data_size);
-            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), modifiable_input_data.data(), data_size);
+            compress_header(map, modifiable_input_data.data(), data_size);
 
             // Immediately compress it
             if(!Ceaflate::compress_file(modifiable_input_data.data(), data_size, output, output_size)) {
@@ -135,25 +135,26 @@ namespace Invader::Compression {
             // Done
             return output_size;
         }
-        else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
+        else if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            compress_header(map, output, data_size);
 
             // Compress that!
             z_stream deflate_stream = {};
+            auto offset = sizeof(HEK::CacheFileHeader);
             deflate_stream.zalloc = Z_NULL;
             deflate_stream.zfree = Z_NULL;
             deflate_stream.opaque = Z_NULL;
-            deflate_stream.avail_in = data_size - sizeof(header);
-            deflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(header)));
-            deflate_stream.avail_out = output_size - sizeof(header);
-            deflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(header));
+            deflate_stream.avail_in = data_size - offset;
+            deflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + offset));
+            deflate_stream.avail_out = output_size - offset;
+            deflate_stream.next_out = reinterpret_cast<Bytef *>(output + offset);
             if((deflateInit(&deflate_stream, Z_BEST_COMPRESSION) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
                 throw DecompressionFailureException();
             }
             return deflate_stream.total_out + HEADER_SIZE;
         }
         else {
-            compress_header(reinterpret_cast<const std::byte *>(&map.get_cache_file_header()), output, data_size);
+            compress_header(map, output, data_size);
 
             // Immediately compress it
             auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
@@ -175,7 +176,7 @@ namespace Invader::Compression {
                 if(!Ceaflate::decompress_file(data, data_size, output, output_size) || output_size < sizeof(*header)) {
                     throw InvalidMapException();
                 }
-                decompress_header(output, output);
+                decompress_header<HEK::CacheFileHeader>(output, output);
 
                 return output_size;
             }
@@ -190,22 +191,27 @@ namespace Invader::Compression {
             }
         }
 
-        decompress_header(data, output);
+        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            decompress_header<HEK::DarkCircletCacheFileHeader>(data, output);
+        }
+        else {
+            decompress_header<HEK::CacheFileHeader>(data, output);
 
-        // If it's Xbox, do this
-        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            z_stream inflate_stream = {};
-            inflate_stream.zalloc = Z_NULL;
-            inflate_stream.zfree = Z_NULL;
-            inflate_stream.opaque = Z_NULL;
-            inflate_stream.avail_in = data_size - sizeof(*header);
-            inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(*header)));
-            inflate_stream.avail_out = output_size - sizeof(*header);
-            inflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(*header));
-            if((inflateInit(&inflate_stream) != Z_OK) || (inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END) || (inflateEnd(&inflate_stream) != Z_OK)) {
-                throw DecompressionFailureException();
+            // If it's Xbox, do this
+            if(header->engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                z_stream inflate_stream = {};
+                inflate_stream.zalloc = Z_NULL;
+                inflate_stream.zfree = Z_NULL;
+                inflate_stream.opaque = Z_NULL;
+                inflate_stream.avail_in = data_size - sizeof(*header);
+                inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + sizeof(*header)));
+                inflate_stream.avail_out = output_size - sizeof(*header);
+                inflate_stream.next_out = reinterpret_cast<Bytef *>(output + sizeof(*header));
+                if((inflateInit(&inflate_stream) != Z_OK) || (inflate(&inflate_stream, Z_FINISH) != Z_STREAM_END) || (inflateEnd(&inflate_stream) != Z_OK)) {
+                    throw DecompressionFailureException();
+                }
+                return inflate_stream.total_out + HEADER_SIZE;
             }
-            return inflate_stream.total_out + HEADER_SIZE;
         }
 
         // Immediately decompress
@@ -252,7 +258,13 @@ namespace Invader::Compression {
             // Allocate and decompress using data from the header
             const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
             new_data = std::vector<std::byte>(header->decompressed_file_size);
-            decompress_header(data, new_data.data());
+
+            if(header->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                decompress_header<HEK::DarkCircletCacheFileHeader>(data, new_data.data());
+            }
+            else {
+                decompress_header<HEK::CacheFileHeader>(data, new_data.data());
+            }
         }
 
         // Decompress
@@ -298,7 +310,12 @@ namespace Invader::Compression {
              // Make the output header and write it
              std::byte header_output[HEADER_SIZE];
              try {
-                 decompress_header(reinterpret_cast<std::byte *>(&header_input), header_output);
+                 if(header_input.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                     decompress_header<HEK::DarkCircletCacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);
+                 }
+                 else {
+                     decompress_header<HEK::CacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);
+                 }
              }
              catch (std::exception &) {
                  std::fclose(input_file);

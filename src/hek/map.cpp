@@ -81,6 +81,20 @@ namespace Invader::HEK {
         return true;
     }
 
+    bool DarkCircletCacheFileHeader::valid() const noexcept {
+        // Ensure the name and build don't overflow
+        if(this->name.overflows() || this->build.overflows()) {
+            return false;
+        }
+
+        // Make sure head/foot things are valid
+        if(this->head_literal != CacheFileLiteral::CACHE_FILE_HEAD || this->foot_literal != CacheFileLiteral::CACHE_FILE_FOOT) {
+            return false;
+        }
+
+        return true;
+    }
+
     CacheFileDemoHeader::CacheFileDemoHeader(const CacheFileHeader &copy) {
         PERFORM_COPY
     }

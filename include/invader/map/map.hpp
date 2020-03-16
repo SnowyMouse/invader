@@ -28,6 +28,78 @@ namespace Invader {
         };
 
         /**
+         * Get the engine
+         * @return engine
+         */
+        HEK::CacheFileEngine get_engine() const noexcept {
+            return this->engine;
+        }
+
+        /**
+         * Get the map type
+         * @return map type
+         */
+        HEK::CacheFileType get_type() const noexcept {
+            return this->type;
+        }
+
+        /**
+         * Get the model data offset
+         * @return offset
+         */
+        std::size_t get_model_data_offset() const noexcept {
+            return this->model_data_offset;
+        }
+
+        /**
+         * Get the model data size
+         * @return size
+         */
+        std::size_t get_model_data_size() const noexcept {
+            return this->model_data_size;
+        }
+
+        /**
+         * Get the model index offset
+         * @return offset
+         */
+        std::size_t get_model_index_offset() const noexcept {
+            return this->model_index_offset;
+        }
+
+        /**
+         * Get the scenario name
+         * @return scenario name
+         */
+        const char *get_scenario_name() const noexcept {
+            return this->scenario_name.string;
+        }
+
+        /**
+         * Get the build
+         * @return build
+         */
+        const char *get_build() const noexcept {
+            return this->build.string;
+        }
+
+        /**
+         * Get the header's precomputed CRC32
+         * @return header's precomputed CRC32
+         */
+        std::uint32_t get_header_crc32() const noexcept {
+            return this->crc32;
+        }
+
+        /**
+         * Get the tag data length
+         * @return tag data length
+         */
+        std::size_t get_tag_data_length() const noexcept {
+            return this->tag_data_length;
+        }
+
+        /**
          * Create a Map by copying the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this
          * way.
          *
@@ -191,24 +263,6 @@ namespace Invader {
         std::size_t get_scenario_tag_id() const noexcept;
 
         /**
-         * Get the tag data header
-         * @return reference to the tag data header
-         */
-        HEK::CacheFileTagDataHeader &get_tag_data_header() noexcept;
-
-        /**
-         * Get the tag data header
-         * @return reference to the tag data header
-         */
-        const HEK::CacheFileTagDataHeader &get_tag_data_header() const noexcept;
-
-        /**
-         * Get the cache file header
-         * @return reference to the cache file header
-         */
-        const HEK::CacheFileHeader &get_cache_file_header() const noexcept;
-
-        /**
          * Get the ipak data
          * @return ipak data
          */
@@ -269,6 +323,15 @@ namespace Invader {
         /** Sounds data length */
         std::size_t sound_data_length = 0;
 
+        /** Model data offset */
+        std::size_t model_data_offset;
+
+        /** Model index offset */
+        std::size_t model_index_offset;
+
+        /** Model data size too! */
+        std::size_t model_data_size;
+
 
         /** Tag array */
         std::vector<Tag> tags;
@@ -285,15 +348,26 @@ namespace Invader {
         /** Base memory address */
         std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
 
-        /** Header */
-        HEK::CacheFileHeader header;
-
         /** Map is compressed */
         bool compressed = false;
 
         /** ipak data */
         std::vector<Resource> ipak_data;
 
+        /** Engine */
+        HEK::CacheFileEngine engine;
+
+        /** Type */
+        HEK::CacheFileType type;
+
+        /** Name */
+        HEK::TagString scenario_name;
+
+        /** Build */
+        HEK::TagString build;
+
+        /** CRC32 */
+        std::uint32_t crc32;
 
         /** Load the map now */
         void load_map();

@@ -86,6 +86,24 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileHeader) == 0x800);
 
+    struct DarkCircletCacheFileHeader {
+        LittleEndian<CacheFileLiteral> head_literal;
+        LittleEndian<CacheFileEngine> engine;
+        LittleEndian<std::uint64_t> decompressed_file_size;
+        LittleEndian<std::uint64_t> tag_data_offset;
+        LittleEndian<std::uint64_t> tag_data_size;
+        TagString name;
+        TagString build;
+        LittleEndian<CacheFileType> map_type;
+        PAD(0x2);
+        LittleEndian<std::uint32_t> crc32;
+        PAD(0x794);
+        LittleEndian<CacheFileLiteral> foot_literal;
+
+        bool valid() const noexcept;
+    };
+    static_assert(sizeof(DarkCircletCacheFileHeader) == 0x800);
+
     struct CacheFileDemoHeader {
         PAD(0x2);
         LittleEndian<CacheFileType> map_type;
@@ -131,6 +149,14 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileTagDataHeaderPC) == 0x28);
 
+    struct DarkCircletCacheFileTagDataHeaderPC : CacheFileTagDataHeader {
+        LittleEndian<std::uint64_t> model_data_file_offset;
+        LittleEndian<std::uint64_t> vertex_size;
+        LittleEndian<std::uint64_t> model_data_size;
+        LittleEndian<CacheFileLiteral> tags_literal;
+    };
+    static_assert(sizeof(DarkCircletCacheFileTagDataHeaderPC) == 0x30);
+
     struct CacheFileTagDataTag {
         LittleEndian<TagClassInt> primary_class;
         LittleEndian<TagClassInt> secondary_class;
@@ -142,5 +168,15 @@ namespace Invader::HEK {
         PAD(0x4);
     };
     static_assert(sizeof(CacheFileTagDataTag) == 0x20);
+
+    struct DarkCircletCacheFileTagDataTag {
+        LittleEndian<TagClassInt> primary_class;
+        LittleEndian<TagClassInt> secondary_class;
+        LittleEndian<TagClassInt> tertiary_class;
+        LittleEndian<TagID> tag_id;
+        LittleEndian<HEK::Pointer64> tag_path;
+        LittleEndian<HEK::Pointer64> tag_data;
+    };
+    static_assert(sizeof(DarkCircletCacheFileTagDataTag) == 0x20);
 }
 #endif

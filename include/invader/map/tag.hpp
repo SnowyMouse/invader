@@ -100,6 +100,26 @@ namespace Invader {
         }
 
         /**
+         * Get a pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
+         * @return         pointer to the data; nullptr if no data and minimum is not set
+         * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
+         */
+        std::byte *data(HEK::Pointer64 pointer, std::size_t minimum = 0);
+
+        /**
+         * Get a const pointer to the tag data, optionally guaranteeing that a set amount of bytes is valid.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
+         * @return         const pointer to the data; nullptr if no data and minimum is not set
+         * @throws         throw if invalid and minimum is set or if there are fewer bytes valid than minimum
+         */
+        const std::byte *data(HEK::Pointer64 pointer, std::size_t minimum = 0) const {
+            return const_cast<Tag *>(this)->data(pointer, minimum);
+        }
+
+        /**
          * Get a reference to the struct at the given offset.
          * @param  pointer Halo pointer where the data is
          * @param  minimum minimum number of bytes to guarantee to be valid
@@ -108,6 +128,18 @@ namespace Invader {
          */
         template <template<template<typename> typename> typename StructType>
         StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) {
+            return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(pointer, minimum));
+        }
+
+        /**
+         * Get a reference to the struct at the given offset.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
+         * @return a reference to the base struct
+         * @throws throw if out of bounds
+         */
+        template <template<template<typename> typename> typename StructType>
+        StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer64 pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) {
             return *reinterpret_cast<StructType<HEK::LittleEndian> *>(this->data(pointer, minimum));
         }
 
@@ -129,6 +161,18 @@ namespace Invader {
          */
         template <template<template<typename> typename> typename StructType>
         const StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) const {
+            return const_cast<Tag *>(this)->get_struct_at_pointer<StructType>(pointer, minimum);
+        }
+
+        /**
+         * Get a reference to the struct at the given offset.
+         * @param  pointer Halo pointer where the data is
+         * @param  minimum minimum number of bytes to guarantee to be valid
+         * @return a reference to the base struct
+         * @throws throw if out of bounds
+         */
+        template <template<template<typename> typename> typename StructType>
+        const StructType<HEK::LittleEndian> &get_struct_at_pointer(HEK::Pointer64 pointer, std::size_t minimum = sizeof(StructType<HEK::LittleEndian>)) const {
             return const_cast<Tag *>(this)->get_struct_at_pointer<StructType>(pointer, minimum);
         }
 

@@ -105,8 +105,9 @@ namespace Invader::Parser {
         bitmap->postprocess_hek_data();
 
         auto &map = tag.get_map();
-        auto xbox = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-        auto mcc = map.get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+        auto engine = map.get_engine();
+        auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+        auto mcc = engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
 
         // TODO: Deal with cubemaps and stuff
         if(xbox && bitmap->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {

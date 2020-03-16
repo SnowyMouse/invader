@@ -140,6 +140,15 @@ namespace Invader {
             }
 
             /**
+             * Resolve the pointer at the given address
+             * @param pointer_pointer pointer to look at
+             * @return                the struct index if found
+             */
+            std::optional<std::size_t> resolve_pointer(const HEK::LittleEndian<HEK::Pointer64> *pointer_pointer) const noexcept {
+                return this->resolve_pointer(reinterpret_cast<const std::byte *>(pointer_pointer) - this->data.data());
+            }
+
+            /**
              * Get whether or not a struct can be safely deduped and replaced with this
              * @param  other other struct to check
              * @return       true if it can be

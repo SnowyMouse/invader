@@ -22,7 +22,7 @@ namespace Invader {
 
         // Parse the map
         Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
-        auto engine = map.get_cache_file_header().engine;
+        auto engine = map.get_engine();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }
@@ -67,9 +67,8 @@ namespace Invader {
         CRC_DATA(model_start, model_end);
 
         // Lastly, do tag data
-        const auto &cache_file_header = map.get_cache_file_header();
-        std::size_t tag_data_start = cache_file_header.tag_data_offset.read();
-        std::size_t tag_data_end = tag_data_start + cache_file_header.tag_data_size.read();
+        std::size_t tag_data_start = map.get_tag_data_at_offset(0) - map.get_data_at_offset(0);
+        std::size_t tag_data_end = tag_data_start + map.get_tag_data_length();
         if(tag_data_start >= size || tag_data_end > size) {
             throw OutOfBoundsException();
         }
@@ -96,7 +95,7 @@ namespace Invader {
         else {
             std::uint32_t crc_value = ~crc;
             if(check_dirty) {
-                *check_dirty = crc_value != cache_file_header.crc32;
+                *check_dirty = crc_value != map.get_header_crc32();
             }
             return crc_value;
         }

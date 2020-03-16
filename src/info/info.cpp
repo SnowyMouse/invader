@@ -184,7 +184,6 @@ int main(int argc, const char **argv) {
     }
 
     // Get the header
-    auto &header = map->get_cache_file_header();
     auto data_length = map->get_data_length();
     bool compressed = map->is_compressed();
     auto compression_ratio = static_cast<float>(file_size) / data_length;
@@ -323,11 +322,13 @@ int main(int argc, const char **argv) {
 
     switch(map_info_options.type) {
         case DISPLAY_OVERVIEW: {
-            oprintf("Scenario name:     %s\n", header.name.string);
-            oprintf("Build:             %s\n", header.build.string);
-            oprintf("Engine:            %s\n", engine_name(header.engine));
-            oprintf("Map type:          %s\n", type_name(header.map_type));
-            oprintf("Tags:              %zu / %zu (%.02f MiB", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(header.tag_data_size));
+            auto engine = map->get_engine();
+
+            oprintf("Scenario name:     %s\n", map->get_scenario_name());
+            oprintf("Build:             %s\n", map->get_build());
+            oprintf("Engine:            %s\n", engine_name(engine));
+            oprintf("Map type:          %s\n", type_name(map->get_type()));
+            oprintf("Tags:              %zu / %zu (%.02f MiB", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(map->get_tag_data_length()));
             auto stubbed = stub_count();
             if(stubbed) {
                 oprintf(", %zu stubbed out", stubbed);
@@ -337,26 +338,27 @@ int main(int argc, const char **argv) {
             // Get CRC
             std::uint32_t crc = 0;
             bool external_data_used = uses_external_data();
-            bool unsupported_external_data = header.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+            bool unsupported_external_data = engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+            auto header_crc32 = map->get_header_crc32();
 
-            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 oprintf_success_warn("CRC32:             Unknown");
             }
-            else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            else if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
                 oprintf_success_warn("CRC32:             Unknown");
             }
             else {
                 crc = Invader::calculate_map_crc(map->get_data(), data_length);
-                if(crc != header.crc32) {
+                if(crc != header_crc32) {
                     oprintf_success_warn("CRC32:             0x%08X (mismatched)", crc);
                 }
                 else {
                     oprintf_success("CRC32:             0x%08X (matches)", crc);
                 }
             }
-            auto dirty = crc != header.crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
+            auto dirty = crc != header_crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(header.engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 if(memed_by_refinery() || map->is_protected()) {
                     oprintf_success_warn("Integrity:         Dirty");
                 }
@@ -383,7 +385,7 @@ int main(int argc, const char **argv) {
                 oprintf_success("External tags:     0 (map will work regardless of resource maps)");
             }
 
-            else if(header.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            else if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
                 oprintf_success_lesser_warn("External tags:     %zu (%zu bitmap%s, %zu loc, %zu sound%s)", total_tags, bitmaps, bitmaps == 1 ? "" : "s", loc, sounds, sounds == 1 ? "" : "s");
 
                 char message[256];
@@ -447,21 +449,21 @@ int main(int argc, const char **argv) {
             if(memed_by_refinery() || map->is_protected()) {
                 oprintf("yes\n");
             }
-            else if(map->get_cache_file_header().engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            else if(map->get_engine() == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
                 oprintf("unknown\n");
             }
             else {
-                oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32) ? "yes" : "no");
+                oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != map->get_header_crc32()) ? "yes" : "no");
             }
             break;
         case DISPLAY_ENGINE:
-            oprintf("%s\n", engine_name(header.engine));
+            oprintf("%s\n", engine_name(map->get_engine()));
             break;
         case DISPLAY_MAP_TYPE:
-            oprintf("%s\n", type_name(header.map_type));
+            oprintf("%s\n", type_name(map->get_type()));
             break;
         case DISPLAY_SCENARIO:
-            oprintf("%s\n", header.name.string);
+            oprintf("%s\n", map->get_scenario_name());
             break;
         case DISPLAY_SCENARIO_PATH:
             oprintf("%s\n", File::halo_path_to_preferred_path(map->get_tag(map->get_scenario_tag_id()).get_path()).c_str());
@@ -482,10 +484,10 @@ int main(int argc, const char **argv) {
             oprintf("%.05f\n", compression_ratio);
             break;
         case DISPLAY_BUILD:
-            oprintf("%s\n", header.build.string);
+            oprintf("%s\n", map->get_build());
             break;
         case DISPLAY_CRC32_MISMATCHED:
-            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != header.crc32 ? "yes" : "no"));
+            oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != map->get_header_crc32() ? "yes" : "no"));
             break;
         case DISPLAY_STUB_COUNT:
             oprintf("%zu\n", stub_count());

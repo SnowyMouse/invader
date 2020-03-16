@@ -31,8 +31,13 @@ namespace Invader {
         }
     }
 
-    std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
+    std::byte *Tag::data(HEK::Pointer64 pointer, std::size_t minimum) {
         using namespace HEK;
+
+        // Limit the pointer to 32-bit
+        if(this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            pointer &= UINT32_MAX;
+        }
 
         // Indexed sound tags can use data in both the sound tag in the cache file and the sound tag in sounds.map
         if(this->tag_class_int == TagClassInt::TAG_CLASS_SOUND && this->indexed) {
@@ -75,6 +80,10 @@ namespace Invader {
         else {
             return this->map.resolve_tag_data_pointer(pointer, minimum);
         }
+    }
+
+    std::byte *Tag::data(HEK::Pointer pointer, std::size_t minimum) {
+        return this->data(static_cast<HEK::Pointer64>(pointer), minimum);
     }
 
     HEK::CacheFileTagDataTag &Tag::get_tag_data_index() noexcept {

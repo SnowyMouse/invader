@@ -37,6 +37,7 @@
 
 namespace Invader::HEK {
     using Pointer = std::uint32_t;
+    using Pointer64 = std::uint64_t;
     using TagEnum = std::uint16_t;
     using Angle = float;
     using Fraction = float;
@@ -238,11 +239,8 @@ namespace Invader::HEK {
         /** Number of chunks */
         EndianType<std::uint32_t> count;
 
-        /** Pointer to first block if compiled, otherwise I don't know what it does if it does anything */
-        EndianType<Pointer> pointer;
-
-        /** I don't know what this does but it doesn't seem to do anything. Always set to 0 when compiled. */
-        EndianType<std::uint32_t> unknown;
+        /** Pointer to first block if compiled */
+        EndianType<Pointer64> pointer;
 
         /** Little endian version of the struct type */
         using struct_type_little = StructType<LittleEndian>;
@@ -756,8 +754,7 @@ namespace Invader::HEK {
         EndianType<std::uint32_t> size;
         LittleEndian<std::uint32_t> external;
         EndianType<std::uint32_t> file_offset;
-        EndianType<Pointer> pointer;
-        PAD(0x4);
+        EndianType<Pointer64> pointer;
 
         ENDIAN_TEMPLATE(OtherType) operator TagDataOffset<OtherType>() const noexcept {
             TagDataOffset<OtherType> copy = {};

@@ -98,11 +98,12 @@ namespace Invader::Parser {
     void Invader::Parser::GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
         const auto &map = tag.get_map();
-        const auto &header = *reinterpret_cast<const HEK::CacheFileTagDataHeaderPC *>(&map.get_tag_data_header());
 
         // Get model vertices
         std::size_t vertex_count = part.vertex_count.read();
-        const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
+        auto model_data_offset = map.get_model_data_offset();
+        auto model_index_offset = map.get_model_index_offset() + model_data_offset;
+        const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
 
         for(std::size_t v = 0; v < vertex_count; v++) {
             GBXModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
@@ -118,7 +119,7 @@ namespace Invader::Parser {
 
         std::size_t triangle_count = (index_count) / 3;
         std::size_t triangle_modulo = index_count % 3;
-        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(header.model_data_file_offset.read() + part.triangle_offset.read() + header.vertex_size.read(), sizeof(std::uint16_t) * index_count));
+        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
 
         for(std::size_t t = 0; t < triangle_count; t++) {
             auto &triangle = this->triangles.emplace_back();
