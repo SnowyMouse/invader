@@ -18,8 +18,8 @@
 namespace Invader {
     using namespace HEK;
 
-    #define TAG_DATA_HEADER_STRUCT (this->structs[0])
-    #define TAG_ARRAY_STRUCT (this->structs[1])
+    #define TAG_DATA_HEADER_STRUCT (structs[0])
+    #define TAG_ARRAY_STRUCT (structs[1])
 
     bool BuildWorkload::BuildWorkloadStruct::can_dedupe(const BuildWorkload::BuildWorkloadStruct &other) const noexcept {
         if(this->unsafe_to_dedupe || other.unsafe_to_dedupe || (this->bsp.has_value() && this->bsp != other.bsp)) {
@@ -260,15 +260,27 @@ namespace Invader {
         this->generate_tag_array();
 
         // Set the scenario tag thingy
-        auto &scenario_tag_dependency = TAG_DATA_HEADER_STRUCT.dependencies.emplace_back();
-        auto &header_struct_data_temp = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(TAG_DATA_HEADER_STRUCT.data.data());
-        scenario_tag_dependency.tag_id_only = true;
-        scenario_tag_dependency.tag_index = this->scenario_index;
-        scenario_tag_dependency.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp.scenario_tag) - reinterpret_cast<const std::byte *>(&header_struct_data_temp);
-        TAG_DATA_HEADER_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataHeaderPC));
-        auto &tag_data_ptr = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
-        tag_data_ptr.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp.tag_array_address) - reinterpret_cast<const std::byte *>(&header_struct_data_temp);
-        tag_data_ptr.struct_index = 1;
+        auto make_tag_data_header_struct = [](std::size_t scenario_index, auto &structs, auto size) {
+            auto &scenario_tag_dependency = TAG_DATA_HEADER_STRUCT.dependencies.emplace_back();
+            scenario_tag_dependency.tag_id_only = true;
+            scenario_tag_dependency.tag_index = scenario_index;
+            auto *header_struct_data_temp = reinterpret_cast<HEK::CacheFileTagDataHeader *>(TAG_DATA_HEADER_STRUCT.data.data());
+            scenario_tag_dependency.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp->scenario_tag) - reinterpret_cast<const std::byte *>(header_struct_data_temp);
+            TAG_DATA_HEADER_STRUCT.data.resize(size);
+            auto &tag_data_ptr = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
+            tag_data_ptr.offset = reinterpret_cast<const std::byte *>(&header_struct_data_temp->tag_array_address) - reinterpret_cast<const std::byte *>(header_struct_data_temp);
+            tag_data_ptr.struct_index = 1;
+            tag_data_ptr.limit_to_32_bits = true;
+        };
+
+        switch(this->engine_target) {
+            case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::DarkCircletCacheFileTagDataHeader));
+                break;
+            default:
+                make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::CacheFileTagDataHeaderPC));
+                break;
+        }
 
         if(this->errors) {
             if(this->verbose) {
@@ -336,210 +348,233 @@ namespace Invader {
             }
         }
 
-        std::vector<std::byte> final_data;
-        HEK::CacheFileHeader header = {};
-        std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
-        header.engine = this->engine_target;
-        header.map_type = *this->cache_file_type;
-        header.name = this->scenario_name;
+        auto &workload = *this;
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_count](auto &header, auto max_size) {
+            std::vector<std::byte> final_data;
+            header = {};
+            std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
+            header.engine = workload.engine_target;
+            header.map_type = *workload.cache_file_type;
+            header.name = workload.scenario_name;
 
-        if(this->verbose) {
-            oprintf("Building cache file data...");
-            oflush();
-        }
-
-        // Add header stuff
-        final_data.resize(sizeof(HEK::CacheFileHeader));
-
-        // Go through each BSP and add that stuff
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            for(std::size_t b = 0; b < this->bsp_count; b++) {
-                final_data.insert(final_data.end(), this->map_data_structs[b * 2 + 1].begin(), this->map_data_structs[b * 2 + 1].end());
-                final_data.insert(final_data.end(), this->map_data_structs[b * 2 + 2].begin(), this->map_data_structs[b * 2 + 2].end());
-            }
-        }
-        else {
-            for(std::size_t b = 0; b < this->bsp_count; b++) {
-                final_data.insert(final_data.end(), this->map_data_structs[b + 1].begin(), this->map_data_structs[b + 1].end());
-            }
-        }
-
-        // Now add all the raw data
-        final_data.insert(final_data.end(), this->all_raw_data.begin(), this->all_raw_data.end());
-
-        // Let's get the model data there
-        std::size_t model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
-        final_data.resize(model_offset, std::byte());
-        final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(this->model_vertices.data()), reinterpret_cast<std::byte *>(this->model_vertices.data() + this->model_vertices.size()));
-
-        // Now add model indices
-        std::size_t vertex_size = this->model_vertices.size() * sizeof(*this->model_vertices.data());
-        final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(this->model_indices.data()), reinterpret_cast<std::byte *>(this->model_indices.data() + this->model_indices.size()));
-
-        // We're almost there
-        std::size_t tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
-        std::size_t model_data_size = tag_data_offset - model_offset;
-        final_data.resize(tag_data_offset, std::byte());
-
-        // Add tag data
-        final_data.insert(final_data.end(), this->map_data_structs[0].begin(), this->map_data_structs[0].end());
-        auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
-        tag_data_struct.tag_count = static_cast<std::uint32_t>(this->tags.size());
-        tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
-        tag_data_struct.model_part_count = static_cast<std::uint32_t>(this->part_count);
-        tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(this->part_count);
-        tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
-        tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
-        tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
-
-        // Lastly, do the header
-        std::size_t tag_data_size = this->map_data_structs[0].size();
-        header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
-        header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-            header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
-            header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
-            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
-        }
-        else {
-            header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD;
-            header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT;
-            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
-        }
-
-        if(this->verbose) {
-            oprintf(" done\n");
-        }
-
-        // Calculate the CRC32
-        std::uint32_t new_crc = 0;
-        bool can_calculate_crc = this->engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
-        if(can_calculate_crc) {
-            if(this->verbose) {
-                oprintf("Calculating CRC32...");
+            if(workload.verbose) {
+                oprintf("Building cache file data...");
                 oflush();
             }
-            std::uint32_t new_random = 0;
-            new_crc = calculate_map_crc(final_data.data(), final_data.size(), this->forge_crc.has_value() ? &this->forge_crc.value() : nullptr, &new_random);
-            tag_data_struct.random_number = new_random;
-            header.crc32 = new_crc;
-            if(this->verbose) {
-                oprintf(" done\n");
-            }
-        }
 
-        // Check to make sure we aren't too big
-        std::size_t uncompressed_size = final_data.size();
-        if(static_cast<std::uint64_t>(uncompressed_size) > UINT32_MAX) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds 4 GiB when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(static_cast<std::size_t>(UINT32_MAX)));
-            throw MaximumFileSizeException();
-        }
+            // Add header stuff
+            final_data.resize(sizeof(HEK::CacheFileHeader));
 
-        // Make sure we don't go beyond the maximum tag space usage
-        std::size_t tag_space_usage = this->indexed_data_amount + tag_data_size;
-        if(bsp_size_affects_tag_space) {
-            tag_space_usage += largest_bsp_size;
-        }
-        if(tag_space_usage > this->tag_data_size) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size));
-            throw MaximumFileSizeException();
-        }
-
-        // Copy it again, this time with the new CRC32
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
-            *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = header;
-        }
-        else {
-            *reinterpret_cast<HEK::CacheFileHeader *>(final_data.data()) = header;
-        }
-
-        // Compress if needed
-        if(this->compress) {
-            if(this->verbose) {
-                oprintf("Compressing...");
-                oflush();
-            }
-            final_data = Compression::compress_map_data(final_data.data(), final_data.size());
-            if(this->verbose) {
-                oprintf(" done\n");
-            }
-        }
-
-        // Display the scenario name and information
-        if(this->verbose) {
-            if(this->warnings) {
-                oprintf_success_warn("Built successfully with %zu warning%s", this->warnings, this->warnings == 1 ? "" : "s");
+            // Go through each BSP and add that stuff
+            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                for(std::size_t b = 0; b < workload.bsp_count; b++) {
+                    final_data.insert(final_data.end(), workload.map_data_structs[b * 2 + 1].begin(), workload.map_data_structs[b * 2 + 1].end());
+                    final_data.insert(final_data.end(), workload.map_data_structs[b * 2 + 2].begin(), workload.map_data_structs[b * 2 + 2].end());
+                }
             }
             else {
-                oprintf_success("Built successfully");
-            }
-
-            bool easter_egg = false;
-            if(ON_COLOR_TERM) {
-                if(new_crc == 0x21706156) {
-                    oprintf("\x1B[38;5;51m");
-                    easter_egg = true;
-                }
-                else if(new_crc == 0x21756843) {
-                    oprintf("\x1B[38;5;204m");
-                    easter_egg = true;
+                for(std::size_t b = 0; b < workload.bsp_count; b++) {
+                    final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
             }
 
-            oprintf("Scenario:          %s\n", this->scenario_name.string);
-            oprintf("Engine:            %s\n", HEK::engine_name(this->engine_target));
-            oprintf("Map type:          %s\n", HEK::type_name(*this->cache_file_type));
-            oprintf("Tags:              %zu / %zu (%.02f MiB)", this->tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(this->map_data_structs[0].size()));
-            if(this->stubbed_tag_count) {
-                oprintf(", %zu stubbed", this->stubbed_tag_count);
-            }
-            oprintf("\n");
-            oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
-            if(bsp_size > 0) {
-                auto &scenario_tag_struct = this->structs[*this->tags[this->scenario_index].base_struct];
-                auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
-                auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(this->map_data_structs[0].data() + *this->structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
-                for(std::size_t b = 0; b < bsp_count; b++) {
-                    auto &bsp = scenario_tag_bsps[b];
-                    std::size_t bss = bsp.bsp_size.read();
-                    oprintf(
-                        "                   %s (%.02f MiB)%s\n",
-                        File::halo_path_to_preferred_path(this->tags[bsp.structure_bsp.tag_id.read().index].path).c_str(),
-                        BYTES_TO_MiB(bss),
-                        (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
-                    );
-                }
+            // Now add all the raw data
+            final_data.insert(final_data.end(), workload.all_raw_data.begin(), workload.all_raw_data.end());
 
-                if(largest_bsp_count < bsp_count) {
-                    if(bsp_size_affects_tag_space) {
-                        oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
-                    }
-                    else {
-                        oprintf("                   * = Largest BSP%s\n", largest_bsp_count == 1 ? "" : "s");
-                    }
-                }
+            // Let's get the model data there
+            std::size_t model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+            final_data.resize(model_offset, std::byte());
+            final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_vertices.data()), reinterpret_cast<std::byte *>(workload.model_vertices.data() + workload.model_vertices.size()));
+
+            // Now add model indices
+            std::size_t vertex_size = workload.model_vertices.size() * sizeof(*workload.model_vertices.data());
+            final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
+
+            // We're almost there
+            std::size_t tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+            std::size_t model_data_size = tag_data_offset - model_offset;
+            final_data.resize(tag_data_offset, std::byte());
+
+            // Add tag data
+            final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
+            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                auto &tag_data_struct = *reinterpret_cast<HEK::DarkCircletCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
+                tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
+                tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
+                tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
+                tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
             }
-            oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(this->tag_data_size), 100.0 * tag_space_usage / this->tag_data_size);
-            oprintf("Models:            %zu (%.02f MiB)\n", this->part_count, BYTES_TO_MiB(model_data_size));
-            oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(this->all_raw_data.size()), BYTES_TO_MiB(this->raw_bitmap_size), BYTES_TO_MiB(this->raw_sound_size));
+            else {
+                auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
+                tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
+                tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
+                tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
+                tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
+            }
+
+            // Lastly, do the header
+            std::size_t tag_data_size = workload.map_data_structs[0].size();
+            header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
+            header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
+            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
+                header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
+                *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
+            }
+            else {
+                header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD;
+                header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT;
+                std::memcpy(final_data.data(), &header, sizeof(header));
+            }
+
+            if(workload.verbose) {
+                oprintf(" done\n");
+            }
+
+            // Calculate the CRC32
+            std::uint32_t new_crc = 0;
+            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
             if(can_calculate_crc) {
-                oprintf("CRC32 checksum:    0x%08X\n", new_crc);
+                if(workload.verbose) {
+                    oprintf("Calculating CRC32...");
+                    oflush();
+                }
+                std::uint32_t new_random = 0;
+                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &new_random);
+                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->random_number = new_random;
+                header.crc32 = new_crc;
+                if(workload.verbose) {
+                    oprintf(" done\n");
+                }
             }
-            if(this->compress) {
-                std::size_t compressed_size = final_data.size();
-                oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
-            }
-            oprintf("Uncompressed size: %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(UINT32_MAX), 100.0 * uncompressed_size / UINT32_MAX);
-            oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - this->start).count() / 1000.0);
 
-            if(easter_egg) {
-                oprintf("\x1B[m");
+            // Check to make sure we aren't too big
+            std::size_t uncompressed_size = final_data.size();
+            if(static_cast<std::uint64_t>(uncompressed_size) > max_size) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds maximum size when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(static_cast<std::size_t>(max_size)));
+                throw MaximumFileSizeException();
             }
 
-            oprintf("\n");
+            // Make sure we don't go beyond the maximum tag space usage
+            std::size_t tag_space_usage = workload.indexed_data_amount + tag_data_size;
+            if(bsp_size_affects_tag_space) {
+                tag_space_usage += largest_bsp_size;
+            }
+            if(tag_space_usage > workload.tag_data_size) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size));
+                throw MaximumFileSizeException();
+            }
+
+            // Copy it again, this time with the new CRC32
+            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+                *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
+            }
+            else {
+                std::memcpy(final_data.data(), &header, sizeof(header));
+            }
+
+            // Compress if needed
+            if(workload.compress) {
+                if(workload.verbose) {
+                    oprintf("Compressing...");
+                    oflush();
+                }
+                final_data = Compression::compress_map_data(final_data.data(), final_data.size());
+                if(workload.verbose) {
+                    oprintf(" done\n");
+                }
+            }
+
+            // Display the scenario name and information
+            if(workload.verbose) {
+                if(workload.warnings) {
+                    oprintf_success_warn("Built successfully with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
+                }
+                else {
+                    oprintf_success("Built successfully");
+                }
+
+                bool easter_egg = false;
+                if(ON_COLOR_TERM) {
+                    if(new_crc == 0x21706156) {
+                        oprintf("\x1B[38;5;51m");
+                        easter_egg = true;
+                    }
+                    else if(new_crc == 0x21756843) {
+                        oprintf("\x1B[38;5;204m");
+                        easter_egg = true;
+                    }
+                }
+
+                oprintf("Scenario:          %s\n", workload.scenario_name.string);
+                oprintf("Engine:            %s\n", HEK::engine_name(workload.engine_target));
+                oprintf("Map type:          %s\n", HEK::type_name(*workload.cache_file_type));
+                oprintf("Tags:              %zu / %zu (%.02f MiB)", workload.tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(workload.map_data_structs[0].size()));
+                if(workload.stubbed_tag_count) {
+                    oprintf(", %zu stubbed", workload.stubbed_tag_count);
+                }
+                oprintf("\n");
+                oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
+                if(bsp_size > 0) {
+                    auto &scenario_tag_struct = workload.structs[*workload.tags[workload.scenario_index].base_struct];
+                    auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
+                    auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(workload.map_data_structs[0].data() + *workload.structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
+                    for(std::size_t b = 0; b < bsp_count; b++) {
+                        auto &bsp = scenario_tag_bsps[b];
+                        std::size_t bss = bsp.bsp_size.read();
+                        oprintf(
+                            "                   %s (%.02f MiB)%s\n",
+                            File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str(),
+                            BYTES_TO_MiB(bss),
+                            (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
+                        );
+                    }
+
+                    if(largest_bsp_count < bsp_count) {
+                        if(bsp_size_affects_tag_space) {
+                            oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
+                        }
+                        else {
+                            oprintf("                   * = Largest BSP%s\n", largest_bsp_count == 1 ? "" : "s");
+                        }
+                    }
+                }
+                oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
+                oprintf("Models:            %zu (%.02f MiB)\n", workload.part_count, BYTES_TO_MiB(model_data_size));
+                oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(workload.all_raw_data.size()), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
+                if(can_calculate_crc) {
+                    oprintf("CRC32 checksum:    0x%08X\n", new_crc);
+                }
+                if(workload.compress) {
+                    std::size_t compressed_size = final_data.size();
+                    oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
+                }
+                oprintf("Uncompressed size: %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(UINT32_MAX), 100.0 * uncompressed_size / UINT32_MAX);
+                oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - workload.start).count() / 1000.0);
+
+                if(easter_egg) {
+                    oprintf("\x1B[m");
+                }
+
+                oprintf("\n");
+            }
+
+            return final_data;
+        };
+
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            HEK::DarkCircletCacheFileHeader header;
+            return generate_final_data(header, UINT64_MAX);
         }
-
-        return final_data;
+        else {
+            HEK::CacheFileHeader header;
+            return generate_final_data(header, UINT32_MAX);
+        }
     }
 
     void BuildWorkload::compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int) {
@@ -692,6 +727,7 @@ namespace Invader {
                 new_bsp_header_struct.data.resize(sizeof(*bsp_data), std::byte());
                 bsp_data = reinterpret_cast<decltype(bsp_data)>(new_bsp_header_struct.data.data());
                 auto &new_ptr = new_bsp_header_struct.pointers.emplace_back();
+                new_ptr.limit_to_32_bits = true;
                 new_ptr.offset = reinterpret_cast<std::byte *>(&bsp_data->pointer) - reinterpret_cast<std::byte *>(bsp_data);
                 bsp_data->signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
 
@@ -712,6 +748,7 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 throw UnknownTagClassException();
         }
@@ -1035,28 +1072,22 @@ namespace Invader {
         return workload;
     }
 
-    void BuildWorkload::generate_tag_array() {
-        std::size_t tag_count = this->tags.size();
-        if(tag_count > UINT16_MAX) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum number of tags exceeded (%zu > %zu)", tag_count, static_cast<std::size_t>(UINT16_MAX));
-            throw InvalidTagDataException();
-        }
-
-        TAG_ARRAY_STRUCT.data.resize(sizeof(HEK::CacheFileTagDataTag) * tag_count);
+    template <typename Tag, HEK::Pointer64 stub_address, bool index_if_needed> static void do_generate_tag_array(std::size_t tag_count, std::vector<BuildWorkload::BuildWorkloadTag> &tags, std::vector<BuildWorkload::BuildWorkloadStruct> &structs) {
+        TAG_ARRAY_STRUCT.data.resize(sizeof(Tag) * tag_count);
 
         // Reserve tag paths
         std::size_t potential_size = 0;
         for(std::size_t t = 0; t < tag_count; t++) {
-            potential_size += this->tags[t].path.size() + 1;
+            potential_size += tags[t].path.size() + 1;
         }
         TAG_ARRAY_STRUCT.data.reserve(TAG_ARRAY_STRUCT.data.size() + potential_size);
 
         // Tag path
         for(std::size_t t = 0; t < tag_count; t++) {
             bool found = false;
-            auto &tag = this->tags[t];
+            auto &tag = tags[t];
             for(std::size_t t2 = 0; t2 < t; t2++) {
-                auto &tag2 = this->tags[t2];
+                auto &tag2 = tags[t2];
                 if(tag2.path == tag.path) {
                     tag.path_offset = tag2.path_offset;
                     found = true;
@@ -1071,19 +1102,21 @@ namespace Invader {
         }
         TAG_ARRAY_STRUCT.data.resize(TAG_ARRAY_STRUCT.data.size() + REQUIRED_PADDING_32_BIT(TAG_ARRAY_STRUCT.data.size()));
 
-        auto *tag_array = reinterpret_cast<HEK::CacheFileTagDataTag *>(TAG_ARRAY_STRUCT.data.data());
+        auto *tag_array = reinterpret_cast<Tag *>(TAG_ARRAY_STRUCT.data.data());
 
         // Set tag classes, paths, etc.
         for(std::size_t t = 0; t < tag_count; t++) {
             auto &tag_index = tag_array[t];
-            auto &tag = this->tags[t];
+            auto &tag = tags[t];
 
             // Tag data
             auto primary_class = tag.tag_class_int;
-            tag_index.indexed = tag.resource_index.has_value();
+            if(index_if_needed) {
+                reinterpret_cast<HEK::CacheFileTagDataTag *>(&tag_index)->indexed = tag.resource_index.has_value();
+            }
 
             if(tag.stubbed) {
-                tag_index.tag_data = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS;
+                tag_index.tag_data = stub_address;
             }
             else if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
@@ -1145,21 +1178,34 @@ namespace Invader {
         }
     }
 
+    void BuildWorkload::generate_tag_array() {
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            do_generate_tag_array<HEK::DarkCircletCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_DARK_CIRCLET, false>(this->tags.size(), this->tags, this->structs);
+        }
+        else {
+            do_generate_tag_array<HEK::CacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS, true>(this->tags.size(), this->tags, this->structs);
+        }
+    }
+
     std::size_t BuildWorkload::generate_tag_data() {
         auto &structs = this->structs;
         auto &tags = this->tags;
         std::size_t tag_count = tags.size();
 
         // Pointer offset to what struct
-        std::vector<std::pair<std::size_t, std::size_t>> pointers;
+        using PointerInternal = std::pair<std::size_t, std::size_t>;
+        std::vector<PointerInternal> pointers;
+        std::vector<PointerInternal> pointers_64_bit;
         auto name_tag_data_pointer = this->tag_data_address;
         auto &tag_array_struct = TAG_ARRAY_STRUCT;
 
-        auto pointer_of_tag_path = [&tags, &name_tag_data_pointer, &tag_array_struct](std::size_t tag_index) -> HEK::Pointer {
-            return static_cast<HEK::Pointer>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
+        auto pointer_of_tag_path = [&tags, &name_tag_data_pointer, &tag_array_struct](std::size_t tag_index) -> HEK::Pointer64 {
+            return static_cast<HEK::Pointer64>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
         };
 
-        auto recursively_generate_data = [&structs, &tags, &pointers, &pointer_of_tag_path](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
+        auto &engine_target = this->engine_target;
+
+        auto recursively_generate_data = [&structs, &tags, &pointers, &pointers_64_bit, &pointer_of_tag_path, &engine_target](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
             auto &s = structs[struct_index];
 
             // Return the pointer thingy
@@ -1175,7 +1221,13 @@ namespace Invader {
             // Get the pointers
             for(auto &pointer : s.pointers) {
                 recursively_generate_data(data, pointer.struct_index, recursively_generate_data);
-                pointers.emplace_back(pointer.offset + offset, pointer.struct_index);
+                PointerInternal pointer_internal(pointer.offset + offset, pointer.struct_index);
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || pointer.limit_to_32_bits) {
+                    pointers.emplace_back(pointer_internal);
+                }
+                else {
+                    pointers_64_bit.emplace_back(pointer_internal);
+                }
             }
 
             // Get the pointers
@@ -1191,7 +1243,9 @@ namespace Invader {
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
                     dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
                     dependency_struct.tag_id = new_tag_id;
-                    dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
+                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
+                    }
                 }
             }
 
@@ -1207,6 +1261,10 @@ namespace Invader {
         // Adjust the pointers
         for(auto &p : pointers) {
             *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + *this->structs[p.second].offset);
+        }
+
+        for(auto &p : pointers_64_bit) {
+            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(name_tag_data_pointer + *this->structs[p.second].offset);
         }
 
         // Get the tag path pointers working
@@ -1267,6 +1325,7 @@ namespace Invader {
 
                 // Build the tag data for the BSP data now
                 pointers.clear();
+                pointers_64_bit.clear();
                 auto &bsp_data_struct = this->map_data_structs.emplace_back();
                 recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
                 std::size_t bsp_size = bsp_data_struct.size();
@@ -1276,7 +1335,13 @@ namespace Invader {
                     throw InvalidTagDataException();
                 }
 
-                HEK::Pointer tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
+                HEK::Pointer64 tag_data_base;
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
+                }
+                else {
+                    tag_data_base = 0;
+                }
                 tag_data_b = bsp_data_struct.data();
 
                 // Chu
@@ -1284,6 +1349,11 @@ namespace Invader {
                     auto &struct_pointed_to = this->structs[p.second];
                     auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
                     *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset);
+                }
+                for(auto &p : pointers_64_bit) {
+                    auto &struct_pointed_to = this->structs[p.second];
+                    auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
+                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(base + *struct_pointed_to.offset);
                 }
 
                 // Find the BSP in the scenario array thingy

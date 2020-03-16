@@ -91,6 +91,9 @@ namespace Invader {
             /** Offset of the pointer */
             std::size_t offset;
 
+            /** We're only limited to 32-bit pointers */
+            bool limit_to_32_bits = false;
+
             bool operator==(const BuildWorkloadStructPointer &other) const noexcept {
                 return this->struct_index == other.struct_index && this->offset == other.offset;
             }
