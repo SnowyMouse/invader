@@ -61,6 +61,7 @@ namespace Invader::EditQt {
         std::uint32_t sample_rate;
         std::uint32_t channel_count;
         std::optional<std::uint32_t> bits_per_sample;
+        std::vector<std::byte> silence;
 
         std::vector<std::byte> all_pcm;
         std::size_t sample = 0;
@@ -84,6 +85,7 @@ namespace Invader::EditQt {
         void play_sample();
         void change_sample();
         void update_time_label();
+        void change_volume(float volume);
 
         void closeEvent(QCloseEvent *) override;
     };

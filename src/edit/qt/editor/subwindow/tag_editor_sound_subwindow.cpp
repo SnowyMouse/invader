@@ -30,7 +30,7 @@ namespace Invader::EditQt {
         this->setCentralWidget(widget);
 
         // Add options
-        auto add_option = [&layout](const char *label_text, auto **set_to, double width_multiplier) -> QLayout * {
+        auto add_option = [&layout](const char *label_text, auto *what, double width_multiplier) -> QLayout * {
             auto *option_widget = new QWidget();
             auto *option_layout = new QHBoxLayout();
             option_layout->setMargin(0);
@@ -41,18 +41,19 @@ namespace Invader::EditQt {
             int width = option_label->fontMetrics().horizontalAdvance('M') * 13;
             option_label->setMinimumWidth(width);
             option_label->setMaximumWidth(width);
-            *set_to = new QComboBox();
-            (*set_to)->setMinimumWidth(width * width_multiplier);
-            option_layout->addWidget(*set_to);
+            what->setMinimumWidth(width * width_multiplier);
+            option_layout->addWidget(what);
             layout->addWidget(option_widget);
             return option_layout;
         };
 
         // Generate our options
-        add_option("Actual permutation:", &this->actual_permutation, 2.0);
+        this->actual_permutation = new QComboBox();
+        add_option("Actual permutation:", this->actual_permutation, 2.0);
 
         this->loop = new QCheckBox("Loop");
-        add_option("Permutation:", &this->permutation, 1.0)->addWidget(this->loop);
+        this->permutation = new QComboBox();
+        add_option("Permutation:", this->permutation, 1.0)->addWidget(this->loop);
 
         // Add playback stuff
         this->slider = new QSlider(Qt::Orientation::Horizontal);
@@ -77,7 +78,6 @@ namespace Invader::EditQt {
         this->time->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
         this->time->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
         playback_layout->addWidget(this->time);
-
         layout->addWidget(playback_widget);
 
         // Done
@@ -277,6 +277,7 @@ namespace Invader::EditQt {
             this->output->setNotifyInterval(1);
             connect(this->output, &QAudioOutput::notify, this, &TagEditorSoundSubwindow::play_sample);
             this->device = this->output->start();
+            this->silence = std::vector<std::byte>(static_cast<std::size_t>(this->output->periodSize()), std::byte());
         }
 
         this->playing = false;
@@ -369,32 +370,53 @@ namespace Invader::EditQt {
 
     void TagEditorSoundSubwindow::play_sample() {
         // If we're done, stop
-        if(!this->playing) {
+        if(!this->playing || this->all_pcm.size() == 0) {
             this->stop_sound();
             return;
         }
 
-        // Get how much data is left
-        std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
+        // How much data can we send?
+        std::size_t allowed_pcm_data = static_cast<std::size_t>(this->output->periodSize());
+        std::size_t free_data = static_cast<std::size_t>(this->output->bytesFree());
+        std::size_t loops = free_data / allowed_pcm_data;
         bool play_in_loop = this->loop->checkState() == Qt::Checked;
-        if(pcm_data_remaining == 0) {
-            if(play_in_loop) {
-                this->sample = 0;
-                pcm_data_remaining = this->all_pcm.size();
-            }
-            else {
-                this->stop_sound();
-                return;
+        auto *data = reinterpret_cast<const char *>(this->all_pcm.data());
+
+        if(play_in_loop) {
+            // If we are looping, keep doing it until it's happy
+            for(std::size_t l = 0; l < loops; l++) {
+                std::size_t loop_data_remaining = allowed_pcm_data;
+                while(loop_data_remaining) {
+                    std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
+                    std::size_t pcm_data_to_play = pcm_data_remaining > loop_data_remaining ? loop_data_remaining : pcm_data_remaining;
+                    if(pcm_data_to_play == 0) {
+                        this->sample = 0;
+                        continue;
+                    }
+                    std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_to_play);
+                    loop_data_remaining -= pcm_data_increment;
+                    this->sample += pcm_data_increment;
+                }
             }
         }
-
-        auto *data = reinterpret_cast<const char *>(this->all_pcm.data());
-        std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_remaining);
-
-        // Did we play everything? And are we looping? If so, loop back.
-        this->sample += pcm_data_increment;
-        if(this->sample == this->all_pcm.size() && play_in_loop) {
-            this->sample = this->device->write(data, this->all_pcm.size());
+        else {
+            // If we aren't looping, play what we can
+            bool was_anything_played_at_all = false;
+            for(std::size_t l = 0; l < loops; l++) {
+                std::size_t pcm_data_remaining = this->all_pcm.size() - this->sample;
+                std::size_t pcm_data_to_play = pcm_data_remaining > allowed_pcm_data ? allowed_pcm_data : pcm_data_remaining;
+                if(pcm_data_to_play == 0) {
+                    this->device->write(reinterpret_cast<const char *>(this->silence.data()), this->silence.size());
+                }
+                else {
+                    std::size_t pcm_data_increment = this->device->write(data + this->sample, pcm_data_to_play);
+                    this->sample += pcm_data_increment;
+                    was_anything_played_at_all = true;
+                }
+            }
+            if(loops && !was_anything_played_at_all) {
+                this->stop_sound();
+            }
         }
 
         this->slider->blockSignals(true);
@@ -426,5 +448,9 @@ namespace Invader::EditQt {
 
         std::snprintf(format, sizeof(format), "%02zu:%02zu.%02zu / %02zu:%02zu.%02zu", minutes % 100, seconds % 60, centiseconds % 100, total_minutes % 100, total_seconds % 60, total_centiseconds % 100);
         this->time->setText(format);
+    }
+
+    void TagEditorSoundSubwindow::change_volume(float volume) {
+        this->output->setVolume(QAudio::convertVolume(volume, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale));
     }
 }
