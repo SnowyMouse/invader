@@ -417,8 +417,8 @@ int main(int argc, char *argv[]) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
     options.emplace_back("dithering", 'D', 1, "[REQUIRES --extended] Apply dithering to 16-bit, dxtn, or p8 bitmaps. Can be: a, rgb, or argb. Default: none", "<channels>");
-    options.emplace_back("data <path>", 'd', 1, "Set the data directory.", "<path>");
-    options.emplace_back("tags", 't', 1, "Set the data directory.", "<path>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
     options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");

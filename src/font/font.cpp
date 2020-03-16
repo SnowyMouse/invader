@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
 
     // Command line options
     std::vector<Invader::CommandLineOption> options;
-    options.emplace_back("data", 'd', 1, "Set the data directory.", "<dir>");
-    options.emplace_back("tags", 't', 1, "Set the tags directory.", "<dir>");
+    options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
+    options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font file.");
