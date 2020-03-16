@@ -793,6 +793,7 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
             case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
@@ -824,6 +825,7 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
+            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
             case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:

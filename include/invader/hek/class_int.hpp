@@ -94,6 +94,7 @@ namespace Invader::HEK {
         TAG_CLASS_WEAPON_HUD_INTERFACE = 0x77706869,
 
         TAG_CLASS_EXTENDED_BITMAP = 0x65626974,
+        TAG_CLASS_EXTENDED_SCENARIO = 0x53636E72,
         TAG_CLASS_EXTENDED_SOUND = 0x65736E64,
         TAG_CLASS_NEW_FONT = 0x6E666E74,
         TAG_CLASS_NEW_UI_WIDGET_DEFINITION = 0x6E757764,
@@ -300,6 +301,8 @@ namespace Invader::HEK {
              return "weapon_hud_interface";
          case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
              return "extended_bitmap";
+         case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
+             return "extended_scenario";
          case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
              return "extended_sound";
          case TagClassInt::TAG_CLASS_NEW_FONT:

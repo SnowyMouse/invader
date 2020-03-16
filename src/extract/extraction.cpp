@@ -112,6 +112,7 @@ namespace Invader::Extraction {
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case TagClassInt::TAG_CLASS_NEW_FONT:
             case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:

@@ -58,15 +58,15 @@ namespace Invader {
         }
 
         // Now copy model data
-        const auto &tag_data_header = static_cast<const HEK::CacheFileTagDataHeaderPC &>(map.get_tag_data_header());
-        std::size_t model_start = tag_data_header.model_data_file_offset.read();
-        std::size_t model_end = model_start + tag_data_header.model_data_size.read();
+        std::size_t model_start = map.get_model_data_offset();
+        std::size_t model_end = model_start + map.get_model_data_size();
         if(model_start >= size || model_end > size) {
             throw OutOfBoundsException();
         }
         CRC_DATA(model_start, model_end);
 
         // Lastly, do tag data
+        auto *tag_data = map.get_tag_data_at_offset(0);
         std::size_t tag_data_start = map.get_tag_data_at_offset(0) - map.get_data_at_offset(0);
         std::size_t tag_data_end = tag_data_start + map.get_tag_data_length();
         if(tag_data_start >= size || tag_data_end > size) {
@@ -74,8 +74,9 @@ namespace Invader {
         }
 
         // Find out where we're going to be doing CRC32 stuff
-        const std::byte *random_number_ptr = reinterpret_cast<const std::byte *>(&tag_data_header.random_number);
-        std::size_t random_number_offset_in_memory = random_number_ptr - reinterpret_cast<const std::byte *>(&tag_data_header) + data_crc.size();
+        auto *random_number = &reinterpret_cast<HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->random_number;
+        const std::byte *random_number_ptr = reinterpret_cast<const std::byte *>(random_number);
+        std::size_t random_number_offset_in_memory = random_number_ptr - tag_data + data_crc.size();
         CRC_DATA(tag_data_start, tag_data_end);
 
         // Overwrite with new CRC32
