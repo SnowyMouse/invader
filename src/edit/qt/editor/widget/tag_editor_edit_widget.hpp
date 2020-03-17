@@ -40,6 +40,8 @@ namespace Invader::EditQt {
         void open_dependency();
         bool read_only;
         TagEditorArrayWidget *array_widget;
+        QWidget *auxiliary_widget;
+        void update_auxiliary_widget();
     };
 }
 

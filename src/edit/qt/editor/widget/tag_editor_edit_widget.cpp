@@ -10,9 +10,12 @@
 #include <QListWidgetItem>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include "tag_editor_edit_widget.hpp"
 #include "../../tree/tag_tree_window.hpp"
 #include "../../tree/tag_tree_dialog.hpp"
+#include <invader/bitmap/color_plate_pixel.hpp>
 #include "tag_editor_array_widget.hpp"
 
 #define INTERNAL_VALUE "internal-value"
@@ -56,8 +59,10 @@ namespace Invader::EditQt {
         auto &textbox_widgets = this->textbox_widgets;
 
         auto &read_only = this->read_only;
+        auto &auxiliary_widget = this->auxiliary_widget;
+        auxiliary_widget = nullptr;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only]() {
+        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget]() {
             auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
@@ -106,6 +111,19 @@ namespace Invader::EditQt {
                 return textbox;
             };
 
+            // Make a color widget thing
+            auto make_color_widget = [&auxiliary_widget, &layout]() {
+                auto *new_auxiliary_widget = new QGraphicsView();
+                new_auxiliary_widget->setMaximumHeight(QLineEdit().minimumSizeHint().height());
+                new_auxiliary_widget->setMaximumWidth(new_auxiliary_widget->maximumHeight());
+                new_auxiliary_widget->setMinimumHeight(new_auxiliary_widget->maximumHeight());
+                new_auxiliary_widget->setMinimumWidth(new_auxiliary_widget->maximumWidth());
+                new_auxiliary_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                new_auxiliary_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                auxiliary_widget = new_auxiliary_widget;
+                layout->addWidget(auxiliary_widget);
+            };
+
             switch(value->get_type()) {
                 // Simple value types; just textboxes
                 case Parser::ParserStructValue::VALUE_TYPE_INT8:
@@ -140,6 +158,7 @@ namespace Invader::EditQt {
                     add_single_textbox(1, "r:");
                     add_single_textbox(1, "g:");
                     add_single_textbox(1, "b:");
+                    make_color_widget();
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                     add_single_textbox(2, "x:");
@@ -156,11 +175,13 @@ namespace Invader::EditQt {
                     add_single_textbox(3, "r:");
                     add_single_textbox(3, "g:");
                     add_single_textbox(3, "b:");
+                    make_color_widget();
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORRGB:
                     add_single_textbox(3, "r:");
                     add_single_textbox(3, "g:");
                     add_single_textbox(3, "b:");
+                    make_color_widget();
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR2D:
                     add_single_textbox(3, "i:");
@@ -407,6 +428,10 @@ namespace Invader::EditQt {
             list->setSelectionMode(QAbstractItemView::NoSelection);
         }
 
+        if(this->auxiliary_widget) {
+            this->update_auxiliary_widget();
+        }
+
         // Add any suffix if needed
         const char *unit = value->get_unit();
         if(unit == nullptr && value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
@@ -430,6 +455,74 @@ namespace Invader::EditQt {
             layout->addStretch(1);
         }
         layout->setMargin(6);
+    }
+
+    void TagEditorEditWidget::update_auxiliary_widget() {
+        auto *value = this->get_struct_value();
+
+        switch(value->get_type()) {
+            case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
+            case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
+            case Parser::ParserStructValue::VALUE_TYPE_COLORRGB: {
+                // Get our stuff
+                auto *color_widget = dynamic_cast<QGraphicsView *>(this->auxiliary_widget);
+                auto *scene = new QGraphicsScene();
+                int width = color_widget->minimumWidth();
+                int height = color_widget->minimumHeight();
+
+                // Make the pixel stuff
+                std::vector<std::uint32_t> colors(width * height);
+
+                QPixmap map(width, height);
+                auto value_count = value->get_value_count();
+                std::vector<Parser::ParserStructValue::Number> numbers(value_count);
+                value->get_values(numbers.data());
+
+                // Make the pixel colors
+                ColorPlatePixel pixel = { 255, 255, 255, 255 };
+                switch(value->get_type()) {
+                    case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
+                        pixel.alpha = static_cast<int>(std::get<std::int64_t>(numbers[0]));
+                        pixel.red =   static_cast<int>(std::get<std::int64_t>(numbers[1]));
+                        pixel.green = static_cast<int>(std::get<std::int64_t>(numbers[2]));
+                        pixel.blue =  static_cast<int>(std::get<std::int64_t>(numbers[3]));
+                        break;
+                    case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
+                        pixel.alpha = static_cast<int>(std::get<double>(numbers[0]) * 255);
+                        pixel.red =   static_cast<int>(std::get<double>(numbers[1]) * 255);
+                        pixel.green = static_cast<int>(std::get<double>(numbers[2]) * 255);
+                        pixel.blue =  static_cast<int>(std::get<double>(numbers[3]) * 255);
+                        break;
+                    case Parser::ParserStructValue::VALUE_TYPE_COLORRGB:
+                        pixel.red =   static_cast<int>(std::get<double>(numbers[0]) * 255);
+                        pixel.green = static_cast<int>(std::get<double>(numbers[1]) * 255);
+                        pixel.blue =  static_cast<int>(std::get<double>(numbers[2]) * 255);
+                        break;
+                    default:
+                        std::terminate();
+                }
+                ColorPlatePixel triangle_up = (ColorPlatePixel { 255, 255, 255, 255 }).alpha_blend(pixel);
+                ColorPlatePixel triangle_down = (ColorPlatePixel { 0, 0, 0, 255 }).alpha_blend(pixel);
+                std::uint32_t color_up = static_cast<std::uint32_t>(triangle_up.alpha) << 24 | static_cast<std::uint32_t>(triangle_up.red) << 16 | static_cast<std::uint32_t>(triangle_up.green) << 8 | triangle_up.blue;
+                std::uint32_t color_down = static_cast<std::uint32_t>(triangle_down.alpha) << 24 | static_cast<std::uint32_t>(triangle_down.red) << 16 | static_cast<std::uint32_t>(triangle_down.green) << 8 | triangle_down.blue;
+
+                // Copy the pixel colors
+                for(int y = 0; y < height; y++) {
+                    for(int x = 0; x < width; x++) {
+                        colors[x + y * width] = (x > y) ? color_down : color_up;
+                    }
+                }
+
+                // Convert!
+                map.convertFromImage(QImage(reinterpret_cast<unsigned char *>(colors.data()), width, height, QImage::Format::Format_ARGB32));
+
+                scene->addPixmap(map);
+                color_widget->setScene(scene);
+                break;
+            }
+            default:
+                std::terminate();
+        }
     }
 
     void TagEditorEditWidget::on_change() {
@@ -502,6 +595,10 @@ namespace Invader::EditQt {
                 }
                 value->set_values(numbers);
             }
+        }
+
+        if(this->auxiliary_widget) {
+            this->update_auxiliary_widget();
         }
 
         if(this->array_widget) {
