@@ -443,23 +443,6 @@ namespace Invader {
                 oprintf(" done\n");
             }
 
-            // Calculate the CRC32
-            std::uint32_t new_crc = 0;
-            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
-            if(can_calculate_crc) {
-                if(workload.verbose) {
-                    oprintf("Calculating CRC32...");
-                    oflush();
-                }
-                std::uint32_t new_random = 0;
-                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &new_random);
-                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->random_number = new_random;
-                header.crc32 = new_crc;
-                if(workload.verbose) {
-                    oprintf(" done\n");
-                }
-            }
-
             // Check to make sure we aren't too big
             std::size_t uncompressed_size = final_data.size();
             if(static_cast<std::uint64_t>(uncompressed_size) > max_size) {
@@ -475,6 +458,23 @@ namespace Invader {
             if(tag_space_usage > workload.tag_data_size) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size));
                 throw MaximumFileSizeException();
+            }
+
+            // Calculate the CRC32
+            std::uint32_t new_crc = 0;
+            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+            if(can_calculate_crc) {
+                if(workload.verbose) {
+                    oprintf("Calculating CRC32...");
+                    oflush();
+                }
+                std::uint32_t new_random = 0;
+                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &new_random);
+                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->random_number = new_random;
+                header.crc32 = new_crc;
+                if(workload.verbose) {
+                    oprintf(" done\n");
+                }
             }
 
             // Copy it again, this time with the new CRC32
