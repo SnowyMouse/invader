@@ -10,6 +10,7 @@
 #include <QListWidgetItem>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QCheckBox>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "tag_editor_edit_widget.hpp"
@@ -60,9 +61,10 @@ namespace Invader::EditQt {
 
         auto &read_only = this->read_only;
         auto &auxiliary_widget = this->auxiliary_widget;
+        auto &auxiliary_checkbox = this->auxiliary_checkbox;
         auxiliary_widget = nullptr;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget]() {
+        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox]() {
             auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
@@ -112,7 +114,7 @@ namespace Invader::EditQt {
             };
 
             // Make a color widget thing
-            auto make_color_widget = [&auxiliary_widget, &layout]() {
+            auto make_color_widget = [&auxiliary_widget, &layout, &auxiliary_checkbox]() {
                 auto *new_auxiliary_widget = new QGraphicsView();
                 new_auxiliary_widget->setMaximumHeight(QLineEdit().minimumSizeHint().height());
                 new_auxiliary_widget->setMaximumWidth(new_auxiliary_widget->maximumHeight());
@@ -122,6 +124,9 @@ namespace Invader::EditQt {
                 new_auxiliary_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
                 auxiliary_widget = new_auxiliary_widget;
                 layout->addWidget(auxiliary_widget);
+
+                auxiliary_checkbox = new QCheckBox("Ignore alpha");
+                layout->addWidget(auxiliary_checkbox);
             };
 
             switch(value->get_type()) {
@@ -159,6 +164,7 @@ namespace Invader::EditQt {
                     add_single_textbox(1, "g:");
                     add_single_textbox(1, "b:");
                     make_color_widget();
+                    auxiliary_checkbox->setCheckState(Qt::Checked);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                     add_single_textbox(2, "x:");
@@ -430,6 +436,9 @@ namespace Invader::EditQt {
 
         if(this->auxiliary_widget) {
             this->update_auxiliary_widget();
+            if(this->auxiliary_checkbox) {
+                connect(this->auxiliary_checkbox, &QCheckBox::stateChanged, this, &TagEditorEditWidget::update_auxiliary_widget);
+            }
         }
 
         // Add any suffix if needed
@@ -501,6 +510,11 @@ namespace Invader::EditQt {
                     default:
                         std::terminate();
                 }
+
+                if(this->auxiliary_checkbox->checkState() == Qt::Checked) {
+                    pixel.alpha = 255;
+                }
+
                 ColorPlatePixel triangle_up = (ColorPlatePixel { 255, 255, 255, 255 }).alpha_blend(pixel);
                 ColorPlatePixel triangle_down = (ColorPlatePixel { 0, 0, 0, 255 }).alpha_blend(pixel);
                 std::uint32_t color_up = static_cast<std::uint32_t>(triangle_up.alpha) << 24 | static_cast<std::uint32_t>(triangle_up.red) << 16 | static_cast<std::uint32_t>(triangle_up.green) << 8 | triangle_up.blue;

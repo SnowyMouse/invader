@@ -9,6 +9,7 @@
 
 class QLineEdit;
 class QComboBox;
+class QCheckBox;
 
 namespace Invader::EditQt {
     class TagEditorArrayWidget;
@@ -41,6 +42,7 @@ namespace Invader::EditQt {
         bool read_only;
         TagEditorArrayWidget *array_widget;
         QWidget *auxiliary_widget;
+        QCheckBox *auxiliary_checkbox;
         void update_auxiliary_widget();
     };
 }
