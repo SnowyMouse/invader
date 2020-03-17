@@ -4,6 +4,9 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Changed
+- invader: Changed the internal Dark Circlet map format to use 64-bit offsets
+- invader-bitmap: extended_bitmap tags now store compressed color plate data in
+  Zstandard
 - invader-edit-qt: Changed default dimensions of tag windows to scale better
   with larger tags
 - invader-sound: Reduced memory consumption
