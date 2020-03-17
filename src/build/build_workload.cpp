@@ -1316,7 +1316,6 @@ namespace Invader {
             auto &scenario_tag = tags[this->scenario_index];
             auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
             std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
-            std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
             HEK::Pointer bsp_start_pointer;
             std::size_t max_bsp_size;
             if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
