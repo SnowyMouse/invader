@@ -405,6 +405,7 @@ namespace Invader {
                 tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
+                tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
             }
             else {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
@@ -1390,11 +1391,11 @@ namespace Invader {
         // Offset followed by size
         std::vector<std::pair<std::size_t, std::size_t>> all_assets;
 
-        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &file_offset](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
+        auto add_or_dedupe_asset = [&all_assets, &all_raw_data](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
             std::size_t raw_data_size = raw_data.size();
             for(auto &a : all_assets) {
                 if(a.second == raw_data_size && std::memcmp(raw_data.data(), all_raw_data.data() + a.first, raw_data_size) == 0) {
-                    return static_cast<std::uint32_t>(a.first + file_offset);
+                    return static_cast<std::uint32_t>(&a - all_assets.data());
                 }
             }
 
@@ -1403,7 +1404,7 @@ namespace Invader {
             new_asset.second = raw_data_size;
             counter += raw_data_size;
             all_raw_data.insert(all_raw_data.end(), raw_data.begin(), raw_data.end());
-            return static_cast<std::uint32_t>(new_asset.first + file_offset);
+            return static_cast<std::uint32_t>(all_assets.size() - 1);
         };
 
         // Go through each tag
@@ -1424,7 +1425,15 @@ namespace Invader {
                     if(index == static_cast<std::size_t>(~0)) {
                         continue;
                     }
-                    bitmap_data.pixel_data_offset = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
+
+                    // Put it in its place
+                    auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
+                    if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        bitmap_data.pixel_data_offset = resource_index;
+                    }
+                    else {
+                        bitmap_data.pixel_data_offset = all_assets[resource_index].first + file_offset;
+                    }
                 }
             }
             else if(t.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
@@ -1443,10 +1452,28 @@ namespace Invader {
                         if(index == static_cast<std::size_t>(~0)) {
                             continue;
                         }
-                        permutation.samples.file_offset = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
+
+                        // Put it in its place
+                        auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
+                        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                            permutation.samples.file_offset = resource_index;
+                        }
+                        else {
+                            permutation.samples.file_offset = all_assets[resource_index].first + file_offset;
+                        }
                     }
                 }
             }
+        }
+
+        // Put the offsets in an array
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            std::vector<LittleEndian<std::uint64_t>> offsets;
+            for(auto &i : all_assets) {
+                offsets.emplace_back(i.first);
+            }
+            this->raw_data_indices_offset = this->all_raw_data.size() + file_offset;
+            this->all_raw_data.insert(this->all_raw_data.end(), reinterpret_cast<const std::byte *>(offsets.data()), reinterpret_cast<const std::byte *>(offsets.data() + offsets.size()));
         }
     }
 

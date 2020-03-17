@@ -75,7 +75,17 @@ def make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, 
                         else:
                             print("Unknown external_file_offset: {}".format(struct["external_file_offset"]), file=sys.stderr)
                             sys.exit(1)
-                        cpp_read_cache_file_data.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, (l.{}.external & 1) ? Map::DataMapType::{} : Map::DataMapType::DATA_MAP_CACHE);\n".format(name, name, name, where_to))
+
+                        external_in_bitmap_or_sound = (struct["external_file_offset"] == "bitmaps.map") or (struct["external_file_offset"] == "sounds.map")
+
+                        if external_in_bitmap_or_sound:
+                            cpp_read_cache_file_data.write("                if(l.{}.external & 1) {{\n".format(name))
+                        cpp_read_cache_file_data.write("                {}data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size, Map::DataMapType::{});".format("    " if external_in_bitmap_or_sound else "", name, name, where_to))
+                        if external_in_bitmap_or_sound:
+                            cpp_read_cache_file_data.write("                }")
+                            cpp_read_cache_file_data.write("                else {")
+                            cpp_read_cache_file_data.write("                    data = tag.get_map().get_internal_asset(l.{}.file_offset, l_{}_data_size);".format(name, name))
+                            cpp_read_cache_file_data.write("                }")
                         pass
                     else:
                         cpp_read_cache_file_data.write("                data = tag.get_map().get_data_at_offset(l.{}.file_offset, l_{}_data_size);\n".format(name, name))

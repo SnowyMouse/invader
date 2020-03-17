@@ -315,7 +315,9 @@ namespace Invader {
             map.model_index_offset = header.vertex_size;
         };
         if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            set_model_stuff(*reinterpret_cast<const DarkCircletCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(DarkCircletCacheFileTagDataHeader))));
+            auto &dark_header = *reinterpret_cast<const DarkCircletCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(DarkCircletCacheFileTagDataHeader)));
+            set_model_stuff(dark_header);
+            this->asset_indices_offset = dark_header.raw_data_indices;
         }
         else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             set_model_stuff(*reinterpret_cast<const CacheFileTagDataHeaderPC *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC))));
@@ -540,6 +542,7 @@ namespace Invader {
         this->model_data_offset = move.model_data_offset;
         this->model_index_offset = move.model_index_offset;
         this->model_data_size = move.model_data_size;
+        this->asset_indices_offset = move.asset_indices_offset;
 
         if(this->data_m.size()) {
             this->data = this->data_m.data();
@@ -559,5 +562,14 @@ namespace Invader {
 
         this->load_map();
         this->compressed = move.compressed;
+    }
+
+    std::byte *Map::get_internal_asset(std::size_t offset, std::size_t minimum_size) {
+        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            auto *data = reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(this->get_data_at_offset(this->asset_indices_offset, (1 + offset) * sizeof(HEK::LittleEndian<std::uint64_t>))) + offset;
+            offset = *data;
+        }
+
+        return this->get_data_at_offset(offset, minimum_size);
     }
 }

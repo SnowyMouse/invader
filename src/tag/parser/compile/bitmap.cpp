@@ -212,7 +212,12 @@ namespace Invader::Parser {
                 }
             }
             else {
-                bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, bitmap_data.flags.external ? Map::DATA_MAP_BITMAP : Map::DATA_MAP_CACHE);
+                if(bitmap_data.flags.external) {
+                    bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
+                }
+                else {
+                    bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size);
+                }
             }
 
             bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());

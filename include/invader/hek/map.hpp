@@ -156,9 +156,10 @@ namespace Invader::HEK {
         LittleEndian<std::uint64_t> model_data_file_offset;
         LittleEndian<std::uint64_t> vertex_size;
         LittleEndian<std::uint64_t> model_data_size;
+        LittleEndian<std::uint64_t> raw_data_indices;
         LittleEndian<CacheFileLiteral> tags_literal;
     };
-    static_assert(sizeof(DarkCircletCacheFileTagDataHeader) == 0x30);
+    static_assert(sizeof(DarkCircletCacheFileTagDataHeader) == 0x38);
 
     struct CacheFileTagDataTag {
         LittleEndian<TagClassInt> primary_class;

@@ -28,6 +28,24 @@ namespace Invader {
         };
 
         /**
+         * Get the internal bitmap or sound asset
+         * @param  offset       offset or index
+         * @param  minimum_size size of the asset
+         * @return              pointer to asset
+         */
+        std::byte *get_internal_asset(std::size_t offset, std::size_t minimum_size);
+
+        /**
+         * Get the internal bitmap or sound asset
+         * @param  offset       offset or index
+         * @param  minimum_size size of the asset
+         * @return              pointer to asset
+         */
+        const std::byte *get_internal_asset(std::size_t offset, std::size_t minimum_size) const {
+            return const_cast<Map *>(this)->get_internal_asset(offset, minimum_size);
+        }
+
+        /**
          * Get the engine
          * @return engine
          */
@@ -368,6 +386,9 @@ namespace Invader {
 
         /** CRC32 */
         std::uint32_t crc32;
+
+        /** Asset indices offset */
+        std::uint64_t asset_indices_offset;
 
         /** Load the map now */
         void load_map();
