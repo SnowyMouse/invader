@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-edit-qt: Changed default dimensions of tag windows to scale better
   with larger tags
+- invader-sound: Reduced memory consumption
 
 ### Fixed
 - invader-bitmap: Fixed non-power-of-two bitmaps being marked as power-of-two

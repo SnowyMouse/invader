@@ -28,6 +28,9 @@ def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, c
                 cpp_save_hek_data.write("            b.{}.path_size = static_cast<std::uint32_t>({}_size);\n".format(name, name))
                 cpp_save_hek_data.write("            const auto *path_str = reinterpret_cast<const std::byte *>(this->{}.path.c_str());\n".format(name))
                 cpp_save_hek_data.write("            converted_data.insert(converted_data.end(), path_str, path_str + {}_size + 1);\n".format(name))
+                cpp_save_hek_data.write("            if(clear_on_save) {\n")
+                cpp_save_hek_data.write("                this->{}.path = std::string();\n".format(name))
+                cpp_save_hek_data.write("            }\n")
                 cpp_save_hek_data.write("        }\n")
             elif struct["type"] == "TagReflexive":
                 cpp_save_hek_data.write("        auto ref_{}_size = this->{}.size();\n".format(name, name))

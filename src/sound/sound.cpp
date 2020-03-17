@@ -68,10 +68,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         sound_tag.inner_cone_angle = 2 * HALO_PI;
         sound_tag.outer_cone_angle = 2 * HALO_PI;
 
-        if(!sound_options.compression_level.has_value()) {
-            sound_options.compression_level = 1.0F;
-        }
-
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
             std::exit(EXIT_FAILURE);
@@ -191,7 +187,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     sound_tag.pitch_ranges.resize(1, {});
 
     // Initialize a pitch range
-    const auto &old_pitch_range = sound_tag.pitch_ranges[0];
+    auto &old_pitch_range = sound_tag.pitch_ranges[0];
     Parser::SoundPitchRange pitch_range = {};
     if(is_new_pitch_range) {
         pitch_range.natural_pitch = 1.0F;
@@ -212,6 +208,22 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
     else {
         old_actual_permutation_count = old_pitch_range.permutations.size();
+    }
+
+    // Set a default level
+    if(!sound_options.compression_level.has_value()) {
+        sound_options.compression_level = 1.0F;
+    }
+
+    // Error if bullshit compression levels were given
+    if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
+        eprintf_error("Compression level (%.05f) is outside of the allowed range of 0.0 to 1.0", *sound_options.compression_level);
+        std::exit(EXIT_FAILURE);
+    }
+
+    // Clear the old one
+    for(auto &permutation : old_pitch_range.permutations) {
+        permutation.samples = std::vector<std::byte>();
     }
 
     // Same with whether to split
@@ -321,12 +333,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         permutations.insert(permutations.begin() + i, std::move(sound));
     }
     oprintf("done!\n");
-
-    // Error if bullshit compression levels were given
-    if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
-        eprintf_error("Compression level (%.05f) is outside of the allowed range of 0.0 to 1.0", *sound_options.compression_level);
-        std::exit(EXIT_FAILURE);
-    }
 
     // Force channel count
     if(sound_options.channel_count.has_value()) {
@@ -753,7 +759,17 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
     static constexpr char DEFAULT_NAME[] = "default";
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
-    sound_tag.pitch_ranges[0] = std::move(pitch_range);
+
+    // Move it
+    sound_tag.pitch_ranges[0].permutations.clear();
+    sound_tag.pitch_ranges[0].permutations.reserve(pitch_range.permutations.size());
+    for(auto &permutation : pitch_range.permutations) {
+        sound_tag.pitch_ranges[0].permutations.push_back(std::move(permutation));
+        permutation.samples = std::vector<std::byte>();
+        permutation.mouth_data = std::vector<std::byte>();
+    }
+    sound_tag.pitch_ranges[0].name = pitch_range.name;
+
     auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_EXTENDED_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, extended_sound == nullptr ? "" : " [--extended]");
 
@@ -906,7 +922,7 @@ int main(int argc, const char **argv) {
         sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
     }
     else {
-        sound_tag_data= make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
+        sound_tag_data = make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
     }
 
     // Create missing directories if needed
