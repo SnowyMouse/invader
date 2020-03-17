@@ -1470,7 +1470,7 @@ namespace Invader {
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             std::vector<LittleEndian<std::uint64_t>> offsets;
             for(auto &i : all_assets) {
-                offsets.emplace_back(i.first);
+                offsets.emplace_back(i.first + file_offset);
             }
             this->raw_data_indices_offset = this->all_raw_data.size() + file_offset;
             this->all_raw_data.insert(this->all_raw_data.end(), reinterpret_cast<const std::byte *>(offsets.data()), reinterpret_cast<const std::byte *>(offsets.data() + offsets.size()));
