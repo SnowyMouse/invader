@@ -311,16 +311,11 @@ namespace Invader {
         std::size_t bsp_size = 0;
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
-        std::size_t bsp_count = (this->map_data_structs.size() - 1);
 
         bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
 
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            bsp_count /= 2;
-        }
-
         if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            for(std::size_t i = 1; i < 1 + bsp_count; i++) {
+            for(std::size_t i = 1; i < 1 + this->bsp_count; i++) {
                 std::size_t this_bsp_size = this->map_data_structs[i].size();
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
                     this_bsp_size += this->map_data_structs[i + 1].size();
@@ -349,7 +344,7 @@ namespace Invader {
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_count](auto &header, auto max_size) {
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count](auto &header, auto max_size) {
             std::vector<std::byte> final_data;
             header = {};
             std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
@@ -403,7 +398,6 @@ namespace Invader {
             // Add tag data
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
-            workload.map_data_structs.clear();
             if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::DarkCircletCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
@@ -526,18 +520,18 @@ namespace Invader {
                     oprintf(", %zu stubbed", workload.stubbed_tag_count);
                 }
                 oprintf("\n");
-                oprintf("BSPs:              %zu", bsp_count);
+                oprintf("BSPs:              %zu", workload.bsp_count);
                 if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                     oprintf("\n");
                 }
                 else {
                     oprintf(" (%.02f MiB)\n", BYTES_TO_MiB(bsp_size));
                 }
-                if(bsp_size > 0) {
+                if(workload.bsp_count > 0) {
                     auto &scenario_tag_struct = workload.structs[*workload.tags[workload.scenario_index].base_struct];
                     auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
                     auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(workload.map_data_structs[0].data() + *workload.structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
-                    for(std::size_t b = 0; b < bsp_count; b++) {
+                    for(std::size_t b = 0; b < workload.bsp_count; b++) {
                         auto &bsp = scenario_tag_bsps[b];
                         std::size_t bss = bsp.bsp_size.read();
                         oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
@@ -548,12 +542,12 @@ namespace Invader {
                             oprintf(
                                 " (%.02f MiB)%s\n",
                                 BYTES_TO_MiB(bss),
-                                (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
+                                (largest_bsp_count < workload.bsp_count && bss == largest_bsp_size) ? "*" : ""
                             );
                         }
                     }
 
-                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && largest_bsp_count < bsp_count) {
+                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && largest_bsp_count < workload.bsp_count) {
                         if(bsp_size_affects_tag_space) {
                             oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
                         }
@@ -562,7 +556,15 @@ namespace Invader {
                         }
                     }
                 }
-                oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
+
+                oprintf("Tag space:         %.02f ", BYTES_TO_MiB(tag_space_usage));
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
+                }
+                else {
+                    oprintf("MiB\n");
+                }
+
                 oprintf("Models:            %zu (%.02f MiB)\n", workload.part_count, BYTES_TO_MiB(model_data_size));
                 oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(raw_data_size), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
                 if(can_calculate_crc) {
@@ -572,7 +574,15 @@ namespace Invader {
                     std::size_t compressed_size = final_data.size();
                     oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
                 }
-                oprintf("Uncompressed size: %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(UINT32_MAX), 100.0 * uncompressed_size / UINT32_MAX);
+
+                oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    oprintf("/ %.02f MiB (%.02f %%)", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
+                }
+                else {
+                    oprintf("MiB\n");
+                }
+
                 oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - workload.start).count() / 1000.0);
 
                 if(easter_egg) {

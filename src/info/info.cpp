@@ -436,7 +436,13 @@ int main(int argc, const char **argv) {
             }
 
             // Uncompressed size
-            oprintf("Uncompressed size: %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(data_length), BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
+            oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(data_length));
+            if(engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
+            }
+            else {
+                oprintf("MiB\n");
+            }
             break;
         }
         case DISPLAY_COMPRESSED:
