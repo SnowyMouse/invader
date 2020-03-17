@@ -98,11 +98,16 @@ namespace Invader::Extraction {
             EXTRACT_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
 
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
-                HEK::TagFileHeader tag_data_header(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
-                std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1));
-                auto sbsp_header_data = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
-                auto sbsp_header_pointer = sbsp_header_data.pointer.read();
-                return Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer).generate_hek_tag_data(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
+                if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    return Parser::ScenarioStructureBSP::parse_cache_file_data(tag).generate_hek_tag_data(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
+                }
+                else {
+                    HEK::TagFileHeader tag_data_header(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
+                    std::vector<std::byte> data(reinterpret_cast<std::byte *>(&tag_data_header), reinterpret_cast<std::byte *>(&tag_data_header + 1));
+                    auto sbsp_header_data = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
+                    auto sbsp_header_pointer = sbsp_header_data.pointer.read();
+                    return Parser::ScenarioStructureBSP::parse_cache_file_data(tag, sbsp_header_pointer).generate_hek_tag_data(TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP);
+                }
             }
 
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:

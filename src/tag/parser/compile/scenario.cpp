@@ -431,7 +431,9 @@ namespace Invader::Parser {
                 continue;
             }
 
-            auto &bsp_tag_struct = workload.structs[workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()].resolve_pointer(static_cast<std::size_t>(0)).value()];
+            auto &bsp_tag_struct = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET ?
+                workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()] :
+                workload.structs[workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()].resolve_pointer(static_cast<std::size_t>(0)).value()];
             auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
             if(bsp_tag_data.collision_bsp.count == 0) {
                 continue;

@@ -41,20 +41,23 @@ namespace Invader {
 
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
         auto &scenario = scenario_tag.get_base_struct<HEK::Scenario>();
-        std::size_t bsp_count = scenario.structure_bsps.count.read();
-        auto *bsps = scenario_tag.resolve_reflexive(scenario.structure_bsps);
 
-        // Iterate through all BSPs
-        for(std::size_t b = 0; b < bsp_count; b++) {
-            std::size_t start = bsps[b].bsp_start.read();
-            std::size_t end = start + bsps[b].bsp_size.read();
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            std::size_t bsp_count = scenario.structure_bsps.count.read();
+            auto *bsps = scenario_tag.resolve_reflexive(scenario.structure_bsps);
 
-            if(start >= size || end > size) {
-                throw OutOfBoundsException();
+            // Iterate through all BSPs
+            for(std::size_t b = 0; b < bsp_count; b++) {
+                std::size_t start = bsps[b].bsp_start.read();
+                std::size_t end = start + bsps[b].bsp_size.read();
+
+                if(start >= size || end > size) {
+                    throw OutOfBoundsException();
+                }
+
+                // Add it
+                CRC_DATA(start, end);
             }
-
-            // Add it
-            CRC_DATA(start, end);
         }
 
         // Now copy model data

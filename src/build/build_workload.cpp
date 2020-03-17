@@ -229,9 +229,7 @@ namespace Invader {
             }
         }
 
-        auto return_value = workload.build_cache_file();
-
-        return return_value;
+        return workload.build_cache_file();
     }
 
     #define BYTES_TO_MiB(bytes) (bytes / 1024.0 / 1024.0)
@@ -321,19 +319,21 @@ namespace Invader {
             bsp_count /= 2;
         }
 
-        for(std::size_t i = 1; i < 1 + bsp_count; i++) {
-            std::size_t this_bsp_size = this->map_data_structs[i].size();
-            if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                this_bsp_size += this->map_data_structs[i + 1].size();
+        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            for(std::size_t i = 1; i < 1 + bsp_count; i++) {
+                std::size_t this_bsp_size = this->map_data_structs[i].size();
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                    this_bsp_size += this->map_data_structs[i + 1].size();
+                }
+                if(this_bsp_size > largest_bsp_size) {
+                    largest_bsp_size = this_bsp_size;
+                    largest_bsp_count = 1;
+                }
+                else if(this_bsp_size == largest_bsp_size) {
+                    largest_bsp_count++;
+                }
+                bsp_size += this_bsp_size;
             }
-            if(this_bsp_size > largest_bsp_size) {
-                largest_bsp_size = this_bsp_size;
-                largest_bsp_count = 1;
-            }
-            else if(this_bsp_size == largest_bsp_size) {
-                largest_bsp_count++;
-            }
-            bsp_size += this_bsp_size;
         }
 
         // Get the bitmap and sound data in there (anniversary maps do not have this present in the cache file)
@@ -372,7 +372,7 @@ namespace Invader {
                     final_data.insert(final_data.end(), workload.map_data_structs[b * 2 + 2].begin(), workload.map_data_structs[b * 2 + 2].end());
                 }
             }
-            else {
+            else if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -520,7 +520,13 @@ namespace Invader {
                     oprintf(", %zu stubbed", workload.stubbed_tag_count);
                 }
                 oprintf("\n");
-                oprintf("BSPs:              %zu (%.02f MiB)\n", bsp_count, BYTES_TO_MiB(bsp_size));
+                oprintf("BSPs:              %zu", bsp_count);
+                if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    oprintf("\n");
+                }
+                else {
+                    oprintf(" (%.02f MiB)\n", BYTES_TO_MiB(bsp_size));
+                }
                 if(bsp_size > 0) {
                     auto &scenario_tag_struct = workload.structs[*workload.tags[workload.scenario_index].base_struct];
                     auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
@@ -528,15 +534,20 @@ namespace Invader {
                     for(std::size_t b = 0; b < bsp_count; b++) {
                         auto &bsp = scenario_tag_bsps[b];
                         std::size_t bss = bsp.bsp_size.read();
-                        oprintf(
-                            "                   %s (%.02f MiB)%s\n",
-                            File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str(),
-                            BYTES_TO_MiB(bss),
-                            (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
-                        );
+                        oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
+                        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                            oprintf("\n");
+                        }
+                        else {
+                            oprintf(
+                                " (%.02f MiB)%s\n",
+                                BYTES_TO_MiB(bss),
+                                (largest_bsp_count < bsp_count && bss == largest_bsp_size) ? "*" : ""
+                            );
+                        }
                     }
 
-                    if(largest_bsp_count < bsp_count) {
+                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && largest_bsp_count < bsp_count) {
                         if(bsp_size_affects_tag_space) {
                             oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
                         }
@@ -718,25 +729,32 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
-                auto &new_bsp_header_struct = this->structs.emplace_back();
                 std::size_t bsp = this->bsp_count++;
-                new_bsp_header_struct.bsp = bsp;
 
-                // Make the header struct
-                this->tags[tag_index].base_struct = &new_bsp_header_struct - this->structs.data();
-                Parser::ScenarioStructureBSPCompiledHeader::struct_little *bsp_data;
-                new_bsp_header_struct.data.resize(sizeof(*bsp_data), std::byte());
-                bsp_data = reinterpret_cast<decltype(bsp_data)>(new_bsp_header_struct.data.data());
-                auto &new_ptr = new_bsp_header_struct.pointers.emplace_back();
-                new_ptr.limit_to_32_bits = true;
-                new_ptr.offset = reinterpret_cast<std::byte *>(&bsp_data->pointer) - reinterpret_cast<std::byte *>(bsp_data);
-                bsp_data->signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
+                // Next, if we're making a dark circlet map, we need to only do this
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    do_compile_tag(std::move(tag_data_parsed));
+                }
 
-                // Make the new BSP struct thingy and make the header point to it
-                auto &new_bsp_struct = this->structs.emplace_back();
-                new_ptr.struct_index = &new_bsp_struct - this->structs.data();
-                new_bsp_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
-                tag_data_parsed.compile(*this, tag_index, new_ptr.struct_index, bsp);
+                // Otherwise, make the header struct
+                else {
+                    auto &new_bsp_header_struct = this->structs.emplace_back();
+                    new_bsp_header_struct.bsp = bsp;
+                    this->tags[tag_index].base_struct = &new_bsp_header_struct - this->structs.data();
+                    Parser::ScenarioStructureBSPCompiledHeader::struct_little *bsp_data;
+                    new_bsp_header_struct.data.resize(sizeof(*bsp_data), std::byte());
+                    bsp_data = reinterpret_cast<decltype(bsp_data)>(new_bsp_header_struct.data.data());
+                    auto &new_ptr = new_bsp_header_struct.pointers.emplace_back();
+                    new_ptr.limit_to_32_bits = true;
+                    new_ptr.offset = reinterpret_cast<std::byte *>(&bsp_data->pointer) - reinterpret_cast<std::byte *>(bsp_data);
+                    bsp_data->signature = TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP;
+
+                    // Make the new BSP struct thingy and make the header point to it
+                    auto &new_bsp_struct = this->structs.emplace_back();
+                    new_ptr.struct_index = &new_bsp_struct - this->structs.data();
+                    new_bsp_struct.data.resize(sizeof(Parser::ScenarioStructureBSP::struct_little), std::byte());
+                    tag_data_parsed.compile(*this, tag_index, new_ptr.struct_index, bsp);
+                }
                 break;
             }
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
@@ -1073,7 +1091,7 @@ namespace Invader {
         return workload;
     }
 
-    template <typename Tag, HEK::Pointer64 stub_address, bool index_if_needed> static void do_generate_tag_array(std::size_t tag_count, std::vector<BuildWorkload::BuildWorkloadTag> &tags, std::vector<BuildWorkload::BuildWorkloadStruct> &structs) {
+    template <typename Tag, HEK::Pointer64 stub_address, bool dark_circlet> static void do_generate_tag_array(std::size_t tag_count, std::vector<BuildWorkload::BuildWorkloadTag> &tags, std::vector<BuildWorkload::BuildWorkloadStruct> &structs) {
         TAG_ARRAY_STRUCT.data.resize(sizeof(Tag) * tag_count);
 
         // Reserve tag paths
@@ -1112,7 +1130,7 @@ namespace Invader {
 
             // Tag data
             auto primary_class = tag.tag_class_int;
-            if(index_if_needed) {
+            if(!dark_circlet) {
                 reinterpret_cast<HEK::CacheFileTagDataTag *>(&tag_index)->indexed = tag.resource_index.has_value();
             }
 
@@ -1122,7 +1140,7 @@ namespace Invader {
             else if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
             }
-            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP || dark_circlet) {
                 auto &tag_data_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
                 tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
                 tag_data_ptr.struct_index = *tag.base_struct;
@@ -1181,10 +1199,10 @@ namespace Invader {
 
     void BuildWorkload::generate_tag_array() {
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            do_generate_tag_array<HEK::DarkCircletCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_DARK_CIRCLET, false>(this->tags.size(), this->tags, this->structs);
+            do_generate_tag_array<HEK::DarkCircletCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_DARK_CIRCLET, true>(this->tags.size(), this->tags, this->structs);
         }
         else {
-            do_generate_tag_array<HEK::CacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS, true>(this->tags.size(), this->tags, this->structs);
+            do_generate_tag_array<HEK::CacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS, false>(this->tags.size(), this->tags, this->structs);
         }
     }
 
@@ -1274,105 +1292,110 @@ namespace Invader {
             tag_array[t].tag_path = pointer_of_tag_path(t);
         }
 
-        // Get the scenario tag
-        auto &scenario_tag = tags[this->scenario_index];
-        auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
-        std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
+        // Get this set
         std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
-        HEK::Pointer bsp_start_pointer;
-        std::size_t max_bsp_size;
-        if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            bsp_start_pointer = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS;
-            max_bsp_size = bsp_start_pointer;
-        }
-        else {
-            bsp_start_pointer = this->tag_data_address + this->tag_data_size;
-            max_bsp_size = this->tag_data_size;
-        }
 
-        if(bsp_count != this->bsp_count) {
-            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
-            throw InvalidTagDataException();
-        }
-        else if(bsp_count) {
-            auto scenario_bsps_struct_index = *structs[*scenario_tag.base_struct].resolve_pointer(reinterpret_cast<const std::byte *>(&scenario_tag_data.structure_bsps.pointer) - reinterpret_cast<const std::byte *>(&scenario_tag_data));
-            auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(map_data_structs[0].data() + *structs[scenario_bsps_struct_index].offset);
+        // Get the scenario tag (if we're not on a Dark Circlet map)
+        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            auto &scenario_tag = tags[this->scenario_index];
+            auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
+            std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
+            std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
+            HEK::Pointer bsp_start_pointer;
+            std::size_t max_bsp_size;
+            if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                bsp_start_pointer = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS;
+                max_bsp_size = bsp_start_pointer;
+            }
+            else {
+                bsp_start_pointer = this->tag_data_address + this->tag_data_size;
+                max_bsp_size = this->tag_data_size;
+            }
 
-            // Go through each BSP tag
-            for(std::size_t i = 0; i < tag_count; i++) {
-                auto &t = tags[i];
-                if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
-                    continue;
-                }
+            if(bsp_count != this->bsp_count) {
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
+                throw InvalidTagDataException();
+            }
+            else if(bsp_count) {
+                auto scenario_bsps_struct_index = *structs[*scenario_tag.base_struct].resolve_pointer(reinterpret_cast<const std::byte *>(&scenario_tag_data.structure_bsps.pointer) - reinterpret_cast<const std::byte *>(&scenario_tag_data));
+                auto *scenario_bsps_struct_data = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(map_data_structs[0].data() + *structs[scenario_bsps_struct_index].offset);
 
-                // Do it!
-                auto &base_struct = *t.base_struct;
-                if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                    auto &base_struct_data = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(this->structs[base_struct].data.data());
-                    bool found = false;
-                    for(auto &o : this->bsp_vertices) {
-                        if(o.first == i) {
-                            base_struct_data.lightmap_vertices_size = o.second.size();
-                            base_struct_data.lightmap_vertices_start = bsp_end;
-                            bsp_end += this->map_data_structs.emplace_back(o.second).size();
-                            found = true;
-                            break;
+                // Go through each BSP tag
+                for(std::size_t i = 0; i < tag_count; i++) {
+                    auto &t = tags[i];
+                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        continue;
+                    }
+
+                    // Do it!
+                    auto &base_struct = *t.base_struct;
+                    if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                        auto &base_struct_data = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(this->structs[base_struct].data.data());
+                        bool found = false;
+                        for(auto &o : this->bsp_vertices) {
+                            if(o.first == i) {
+                                base_struct_data.lightmap_vertices_size = o.second.size();
+                                base_struct_data.lightmap_vertices_start = bsp_end;
+                                bsp_end += this->map_data_structs.emplace_back(o.second).size();
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) {
+                            this->map_data_structs.emplace_back();
                         }
                     }
+
+                    // Build the tag data for the BSP data now
+                    pointers.clear();
+                    pointers_64_bit.clear();
+                    auto &bsp_data_struct = this->map_data_structs.emplace_back();
+                    recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
+                    std::size_t bsp_size = bsp_data_struct.size();
+
+                    if(bsp_size > max_bsp_size) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
+                        throw InvalidTagDataException();
+                    }
+
+                    HEK::Pointer64 tag_data_base;
+                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
+                    }
+                    else {
+                        tag_data_base = 0;
+                    }
+                    tag_data_b = bsp_data_struct.data();
+
+                    // Chu
+                    for(auto &p : pointers) {
+                        auto &struct_pointed_to = this->structs[p.second];
+                        auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
+                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset);
+                    }
+                    for(auto &p : pointers_64_bit) {
+                        auto &struct_pointed_to = this->structs[p.second];
+                        auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
+                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(base + *struct_pointed_to.offset);
+                    }
+
+                    // Find the BSP in the scenario array thingy
+                    bool found = false;
+                    for(std::size_t b = 0; b < bsp_count; b++) {
+                        if(scenario_bsps_struct_data[b].structure_bsp.tag_id.read().index == i) {
+                            scenario_bsps_struct_data[b].bsp_address = tag_data_base;
+                            scenario_bsps_struct_data[b].bsp_size = bsp_size;
+                            scenario_bsps_struct_data[b].bsp_start = bsp_end;
+                            found = true;
+                        }
+                    }
+
+                    // Add up the size
+                    bsp_end += bsp_size;
+
                     if(!found) {
-                        this->map_data_structs.emplace_back();
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                     }
-                }
-
-                // Build the tag data for the BSP data now
-                pointers.clear();
-                pointers_64_bit.clear();
-                auto &bsp_data_struct = this->map_data_structs.emplace_back();
-                recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
-                std::size_t bsp_size = bsp_data_struct.size();
-
-                if(bsp_size > max_bsp_size) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
-                    throw InvalidTagDataException();
-                }
-
-                HEK::Pointer64 tag_data_base;
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                    tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
-                }
-                else {
-                    tag_data_base = 0;
-                }
-                tag_data_b = bsp_data_struct.data();
-
-                // Chu
-                for(auto &p : pointers) {
-                    auto &struct_pointed_to = this->structs[p.second];
-                    auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
-                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset);
-                }
-                for(auto &p : pointers_64_bit) {
-                    auto &struct_pointed_to = this->structs[p.second];
-                    auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
-                    *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(base + *struct_pointed_to.offset);
-                }
-
-                // Find the BSP in the scenario array thingy
-                bool found = false;
-                for(std::size_t b = 0; b < bsp_count; b++) {
-                    if(scenario_bsps_struct_data[b].structure_bsp.tag_id.read().index == i) {
-                        scenario_bsps_struct_data[b].bsp_address = tag_data_base;
-                        scenario_bsps_struct_data[b].bsp_size = bsp_size;
-                        scenario_bsps_struct_data[b].bsp_start = bsp_end;
-                        found = true;
-                    }
-                }
-
-                // Add up the size
-                bsp_end += bsp_size;
-
-                if(!found) {
-                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                 }
             }
         }

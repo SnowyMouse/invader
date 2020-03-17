@@ -353,7 +353,7 @@ namespace Invader {
                 }
                 catch (Invader::OutOfBoundsException &) {}
 
-                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
+                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                     continue;
                 }
                 else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
@@ -439,9 +439,8 @@ namespace Invader {
         }
         else {
             do_populate_the_array(reinterpret_cast<const CacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
+            this->get_bsps();
         }
-
-        this->get_bsps();
     }
 
     void Map::get_bsps() {
