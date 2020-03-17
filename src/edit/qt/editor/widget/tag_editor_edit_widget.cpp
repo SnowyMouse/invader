@@ -189,6 +189,7 @@ namespace Invader::EditQt {
                     add_single_textbox(3, "g:");
                     add_single_textbox(3, "b:");
                     make_color_widget();
+                    auxiliary_checkbox->setHidden(true);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR2D:
                     add_single_textbox(3, "i:");
