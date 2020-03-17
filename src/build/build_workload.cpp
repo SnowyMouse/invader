@@ -577,7 +577,7 @@ namespace Invader {
 
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                    oprintf("/ %.02f MiB (%.02f %%)", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
+                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
                 else {
                     oprintf("MiB\n");
