@@ -377,6 +377,7 @@ namespace Invader {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
             }
+            workload.map_data_structs.resize(1);
 
             // Now add all the raw data
             final_data.insert(final_data.end(), workload.all_raw_data.begin(), workload.all_raw_data.end());
@@ -400,7 +401,9 @@ namespace Invader {
             final_data.resize(tag_data_offset, std::byte());
 
             // Add tag data
+            std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
+            workload.map_data_structs.clear();
             if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::DarkCircletCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
@@ -423,7 +426,6 @@ namespace Invader {
             }
 
             // Lastly, do the header
-            std::size_t tag_data_size = workload.map_data_structs[0].size();
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
             if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
