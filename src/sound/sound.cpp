@@ -228,6 +228,8 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     std::vector<SoundReader::Sound> permutations;
 
+    oprintf("Loading sounds... ");
+    oflush();
     for(auto &wav : wav_iterator) {
         // Skip directories
         auto path = wav.path();
@@ -318,6 +320,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
         permutations.insert(permutations.begin() + i, std::move(sound));
     }
+    oprintf("done!\n");
 
     // Error if bullshit compression levels were given
     if(sound_options.compression_level > 1.0F || sound_options.compression_level < 0.0F) {
@@ -382,7 +385,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
 
     // Resample permutations when needed
-    oprintf("Loading sounds... ");
+    oprintf("Processing sounds... ");
     oflush();
     for(auto &permutation : permutations) {
         std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
@@ -892,7 +895,7 @@ int main(int argc, const char **argv) {
 
     std::vector<std::byte> sound_tag_data;
     if(!sound_options.extended) {
-        auto tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
+        tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
 
         // Make sure format was set
         if(!sound_options.format.has_value()) {

@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-bitmap: Fixed non-power-of-two bitmaps being marked as power-of-two
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
+- invader-sound: Fixed non-extended sounds being named extended_sound
 
 ## [0.30.1] - 2020-03-15
 ### Fixed
