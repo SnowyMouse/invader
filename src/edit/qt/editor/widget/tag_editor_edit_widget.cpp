@@ -125,7 +125,8 @@ namespace Invader::EditQt {
                 auxiliary_widget = new_auxiliary_widget;
                 layout->addWidget(auxiliary_widget);
 
-                auxiliary_checkbox = new QCheckBox("Ignore alpha");
+                auxiliary_checkbox = new QCheckBox("Preview alpha");
+                auxiliary_checkbox->setCheckState(Qt::Checked);
                 layout->addWidget(auxiliary_checkbox);
             };
 
@@ -164,7 +165,7 @@ namespace Invader::EditQt {
                     add_single_textbox(1, "g:");
                     add_single_textbox(1, "b:");
                     make_color_widget();
-                    auxiliary_checkbox->setCheckState(Qt::Checked);
+                    auxiliary_checkbox->setCheckState(Qt::Unchecked);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                     add_single_textbox(2, "x:");
@@ -511,7 +512,7 @@ namespace Invader::EditQt {
                         std::terminate();
                 }
 
-                if(this->auxiliary_checkbox->checkState() == Qt::Checked) {
+                if(this->auxiliary_checkbox->checkState() != Qt::Checked) {
                     pixel.alpha = 255;
                 }
 
