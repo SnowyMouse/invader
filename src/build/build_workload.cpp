@@ -380,6 +380,8 @@ namespace Invader {
 
             // Now add all the raw data
             final_data.insert(final_data.end(), workload.all_raw_data.begin(), workload.all_raw_data.end());
+            auto raw_data_size = workload.all_raw_data.size();
+            workload.all_raw_data = std::vector<std::byte>();
 
             // Let's get the model data there
             std::size_t model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
@@ -389,6 +391,8 @@ namespace Invader {
             // Now add model indices
             std::size_t vertex_size = workload.model_vertices.size() * sizeof(*workload.model_vertices.data());
             final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
+            workload.model_vertices = decltype(workload.model_vertices)();
+            workload.model_indices = decltype(workload.model_indices)();
 
             // We're almost there
             std::size_t tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
@@ -558,7 +562,7 @@ namespace Invader {
                 }
                 oprintf("Tag space:         %.02f MiB / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
                 oprintf("Models:            %zu (%.02f MiB)\n", workload.part_count, BYTES_TO_MiB(model_data_size));
-                oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(workload.all_raw_data.size()), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
+                oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(raw_data_size), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
                 if(can_calculate_crc) {
                     oprintf("CRC32 checksum:    0x%08X\n", new_crc);
                 }
