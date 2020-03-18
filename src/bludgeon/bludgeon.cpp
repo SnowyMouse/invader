@@ -7,6 +7,7 @@
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
 #include <invader/tag/hek/definition.hpp>
+#include <invader/sound/sound_reader.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/gbxmodel.hpp>
@@ -37,6 +38,9 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
     // WHERE_THE_FUCK_ARE_THE_SCRIPTS      = 1ull << 5, // disabled until we can figure out script decompilation
 
+    /** Fix an incorrect sound buffer size */
+    FUCKED_SOUND_BUFFER                 = 1ull << 6,
+
     // Stuff that Refinery breaks
 
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
@@ -65,6 +69,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define REFINERY_MODEL_MARKERS_FIX "invalid-model-markers"
 #define REFINERY_VERTICES_FIX "invalid-vertices"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
+#define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define EVERYTHING_FIX "everything"
 
 static bool bullshit_enums(Invader::Parser::ParserStruct *s, bool fix) {
@@ -81,6 +86,67 @@ static bool refinery_model_markers(Invader::Parser::ParserStruct *s, bool fix, c
         }
     }
     return return_value;
+}
+
+static bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
+    auto attempt_fix = [&fix](auto *s) -> bool {
+        if(s == nullptr) {
+            return false;
+        }
+        bool fucked = false;
+        for(Invader::Parser::SoundPitchRange &pr : s->pitch_ranges) {
+            for(auto &pe : pr.permutations) {
+                using SoundFormat = Invader::HEK::SoundFormat;
+                auto &samples = pe.samples;
+                auto &buffer_size = pe.buffer_size;
+
+                // Fix depending on how we need to do it
+                switch(pe.format) {
+                    // This one's simple
+                    case SoundFormat::SOUND_FORMAT_16_BIT_PCM: {
+                        if(buffer_size != samples.size()) {
+                            fucked = true;
+                            if(fix) {
+                                buffer_size = samples.size();
+                            }
+                            else {
+                                return fucked;
+                            }
+                        }
+                        break;
+                    }
+
+                    // We need to decode this first
+                    case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
+                        try {
+                            auto decoded = Invader::SoundReader::sound_from_ogg(samples.data(), samples.size());
+                            auto decoded_size_16_bit = decoded.pcm.size() / (decoded.bits_per_sample / 8) * 2;
+                            if(decoded_size_16_bit != buffer_size) {
+                                fucked = true;
+                                if(fix) {
+                                    buffer_size = samples.size();
+                                }
+                                else {
+                                    return fucked;
+                                }
+                            }
+                        }
+                        catch(std::exception &e) {
+                            eprintf_error("Failed to decode: %s", e.what());
+                            throw;
+                        }
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+            }
+        }
+        return fucked;
+    };
+
+    return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s));
 }
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
@@ -109,14 +175,22 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
                 oprintf_success_warn("%s: invalid model markers detected; fix with " REFINERY_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
             }
+            if(sound_buffer(parsed_data.get(), false)) {
+                oprintf_success_warn("%s: incorrect sound buffer size on one or more permutations; fix with " FUCKED_SOUND_BUFFER_FIX, file_path);
+                issues_present = true;
+            }
         }
         else {
             if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed %s", file_path, BULLSHIT_ENUMS_FIX);
+                oprintf_success("%s: Fixed " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
             if((fixes & REFINERY_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true, header)) {
-                oprintf_success("%s: Fixed %s", file_path, REFINERY_MODEL_MARKERS_FIX);
+                oprintf_success("%s: Fixed " REFINERY_MODEL_MARKERS_FIX, file_path);
+                issues_present = true;
+            }
+            if(sound_buffer(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " FUCKED_SOUND_BUFFER_FIX, file_path);
                 issues_present = true;
             }
         }
@@ -132,21 +206,19 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
             return EXIT_SUCCESS;
         }
 
+        // Do it!
         file_data = parsed_data->generate_hek_tag_data(header->tag_class_int, true);
+        if(!Invader::File::save_file(file_path, file_data)) {
+            eprintf_error("Error: Failed to write to %s.", file_path);
+            return EXIT_FAILURE;
+        }
+
+        return EXIT_SUCCESS;
     }
     catch(std::exception &e) {
         eprintf_error("Error: Failed to bludgeon %s: %s", file_path, e.what());
         return EXIT_FAILURE;
     }
-
-    if(!Invader::File::save_file(file_path, file_data)) {
-        eprintf_error("Error: Failed to write to %s.", file_path);
-        return EXIT_FAILURE;
-    }
-
-    oprintf_success("Bludgeoned %s", file_path);
-
-    return EXIT_SUCCESS;
 }
 
 int main(int argc, char * const *argv) {
@@ -157,7 +229,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " REFINERY_MODEL_MARKERS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " REFINERY_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -213,6 +285,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], REFINERY_SOUND_PERMUTATIONS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_SOUND_PERMUTATIONS;
+                }
+                else if(std::strcmp(arguments[0], FUCKED_SOUND_BUFFER_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_SOUND_BUFFER;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;
