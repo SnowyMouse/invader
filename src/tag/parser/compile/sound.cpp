@@ -26,12 +26,12 @@ namespace Invader::Parser {
         if(buffer_size_required) {
             bool stock_halo_wont_play_it = false;
             if(this->buffer_size == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", struct_index);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", offset / sizeof(struct_little));
                 stock_halo_wont_play_it = true;
             }
             // Make sure the value is set
             else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", struct_index);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", offset / sizeof(struct_little));
                 stock_halo_wont_play_it = true;
             }
             if(stock_halo_wont_play_it) {
