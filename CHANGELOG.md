@@ -3,6 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-bludgeon: Added `-T incorrect-sound-buffer` which fixes incorrect
+  sound buffer sizes set in the tag (can fix instances of sounds being the
+  incorrect length when played in-game)
+
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets
 - invader-bitmap: extended_bitmap tags now store compressed color plate data in
@@ -13,6 +18,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-bitmap: Fixed non-power-of-two bitmaps being marked as power-of-two
+- invader-build: Fixed an error message for sound permutations
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
 - invader-sound: Fixed non-extended sounds being named extended_sound
 
