@@ -149,7 +149,9 @@ static bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
     return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::ExtendedSound *>(s));
 }
 
-static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
+static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
+    bludgeoned = false;
+
     // Open the tag
     auto tag = Invader::File::open_file(file_path);
     if(!tag.has_value()) {
@@ -212,6 +214,8 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
             eprintf_error("Error: Failed to write to %s.", file_path);
             return EXIT_FAILURE;
         }
+
+        bludgeoned = true;
 
         return EXIT_SUCCESS;
     }
@@ -318,7 +322,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(i.is_regular_file()) {
                     total++;
-                    success += bludgeon_tag(i.path().string().c_str(), fixes) == EXIT_SUCCESS;
+                    bool bludgeoned;
+                    bludgeon_tag(i.path().string().c_str(), fixes, bludgeoned);
+                    success += bludgeoned;
                 }
             }
         };
@@ -342,6 +348,7 @@ int main(int argc, char * const *argv) {
             file_path = std::filesystem::path(bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
         }
         std::string file_path_str = file_path.string();
-        return bludgeon_tag(file_path_str.c_str(), fixes);
+        bool bludgeoned;
+        return bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);
     }
 }
