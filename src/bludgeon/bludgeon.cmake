@@ -7,6 +7,7 @@ endif()
 if(${INVADER_BLUDGEON})
     add_executable(invader-bludgeon
         src/bludgeon/bludgeon.cpp
+        src/bludgeon/bludgeoner.cpp
     )
     target_link_libraries(invader-bludgeon invader)
 

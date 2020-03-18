@@ -2,6 +2,7 @@
 
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
+#include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/build/build_workload.hpp>
 
 namespace Invader::Parser {
@@ -144,7 +145,84 @@ namespace Invader::Parser {
         }
     }
 
-    void Invader::Parser::ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+    bool regenerate_missing_bsp_vertices(ScenarioStructureBSPMaterial &material, bool fix) {
+        // Lightmap vertices size is incorrect
+        if(material.lightmap_vertices_count != material.rendered_vertices_count && material.lightmap_vertices_count != 0) {
+            eprintf_error("Can't fix: Non-zero lightmap vertex count is wrong (%zu != %zu)", static_cast<std::size_t>(material.lightmap_vertices_count), static_cast<std::size_t>(material.rendered_vertices_count));
+            return false;
+        }
+
+        #define PROCESS_VERTICES(from,to,rendered_type_from,rendered_type_to,lightmap_type_from,lightmap_type_to,convert_rendered,convert_lightmap) \
+            /* Extract vertices */ \
+            std::size_t vertices_size = material.rendered_vertices_count * sizeof(rendered_type_from::struct_little); \
+            std::size_t lightmap_vertices_size = material.lightmap_vertices_count * sizeof(lightmap_type_from::struct_little); \
+            std::size_t total_vertices_size = lightmap_vertices_size + vertices_size; \
+     \
+            /* Make sure it isn't bullshit */ \
+            if(total_vertices_size != material.from.size()) { \
+                eprintf_error("Can't fix: Vertices is an invalid size (%zu != %zu)", total_vertices_size, material.from.size()); \
+                return false; \
+            } \
+            \
+            if(!fix) { \
+                return true; \
+            } \
+     \
+            const std::byte *bsp_vertices_start = material.from.data(); \
+            const std::byte *lightmap_vertices_start = bsp_vertices_start + material.rendered_vertices_count * sizeof(rendered_type_from::struct_little); \
+            const auto *bsp_vertices = reinterpret_cast<const rendered_type_from::struct_little *>(bsp_vertices_start); \
+     \
+            auto *new_bsp_vertices = reinterpret_cast<rendered_type_to::struct_little *>( \
+                material.to.insert( \
+                    material.to.end(), \
+                    material.rendered_vertices_count * sizeof(rendered_type_to::struct_little), \
+                    std::byte() \
+                ).base() \
+            ); \
+            for(std::size_t v = 0; v < material.rendered_vertices_count; v++) { \
+                new_bsp_vertices[v] = convert_rendered(bsp_vertices[v]); \
+            } \
+     \
+            /* Add lightmap vertices */ \
+            if(material.lightmap_vertices_count == material.rendered_vertices_count) { \
+                const auto *bsp_lightmap_vertices = reinterpret_cast<const lightmap_type_from::struct_little *>(lightmap_vertices_start); \
+     \
+                /* Decompress them as well */ \
+                auto *new_bsp_lightmap_vertices = reinterpret_cast<lightmap_type_to::struct_little *>( \
+                    material.to.insert( \
+                        material.to.end(), \
+                        material.lightmap_vertices_count * sizeof(lightmap_type_to::struct_little), \
+                        std::byte() \
+                    ).base() \
+                ); \
+                for(std::size_t v = 0; v < material.lightmap_vertices_count; v++) { \
+                    new_bsp_lightmap_vertices[v] = convert_lightmap(bsp_lightmap_vertices[v]); \
+                } \
+            }
+
+        if(material.uncompressed_vertices.size() == 0 && material.compressed_vertices.size() != 0) {
+            PROCESS_VERTICES(compressed_vertices,uncompressed_vertices,ScenarioStructureBSPMaterialCompressedRenderedVertex,ScenarioStructureBSPMaterialUncompressedRenderedVertex,ScenarioStructureBSPMaterialCompressedLightmapVertex,ScenarioStructureBSPMaterialUncompressedLightmapVertex,decompress_sbsp_rendered_vertex,decompress_sbsp_lightmap_vertex)
+        }
+        else if(material.uncompressed_vertices.size() != 0 && material.compressed_vertices.size() == 0) {
+            PROCESS_VERTICES(uncompressed_vertices,compressed_vertices,ScenarioStructureBSPMaterialUncompressedRenderedVertex,ScenarioStructureBSPMaterialCompressedRenderedVertex,ScenarioStructureBSPMaterialUncompressedLightmapVertex,ScenarioStructureBSPMaterialCompressedLightmapVertex,compress_sbsp_rendered_vertex,compress_sbsp_lightmap_vertex)
+        }
+        else {
+            return false;
+        }
+        return true;
+    }
+
+    bool regenerate_missing_bsp_vertices(ScenarioStructureBSP &bsp, bool fix) {
+        bool return_value = false;
+        for(auto &lightmap : bsp.lightmaps) {
+            for(auto &material : lightmap.materials) {
+                return_value = regenerate_missing_bsp_vertices(material, fix) || return_value;
+            }
+        }
+        return return_value;
+    }
+
+    void ScenarioStructureBSPMaterial::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
         // Do nothing if there is nothing to do
         if(this->rendered_vertices_count == 0) {
             this->lightmap_vertices_count = 0;
@@ -161,44 +239,12 @@ namespace Invader::Parser {
             std::size_t compressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
             std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little);
             std::size_t total_vertices_size = lightmap_vertices_size + compressed_vertices_size;
-
             const std::byte *compressed_bsp_vertices_start = tag.data(bsp_material.compressed_vertices.pointer, total_vertices_size);
-            const std::byte *compressed_lightmap_vertices_start = compressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
-            const auto *compressed_bsp_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little *>(compressed_bsp_vertices_start);
-
-            auto *new_uncompressed_bsp_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(
-                this->uncompressed_vertices.insert(
-                    this->uncompressed_vertices.end(),
-                    this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little),
-                    std::byte()
-                ).base()
-            );
-            for(std::size_t v = 0; v < this->rendered_vertices_count; v++) {
-                new_uncompressed_bsp_vertices[v] = HEK::decompress_sbsp_rendered_vertex(compressed_bsp_vertices[v]);
-            }
-
-            // Add lightmap vertices
-            if(this->lightmap_vertices_count == this->rendered_vertices_count) {
-                const auto *compressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little *>(compressed_lightmap_vertices_start);
-
-                // Decompress them as well
-                auto *new_uncompressed_bsp_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(
-                    this->uncompressed_vertices.insert(
-                        this->uncompressed_vertices.end(),
-                        this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little),
-                        std::byte()
-                    ).base()
-                );
-                for(std::size_t v = 0; v < this->lightmap_vertices_count; v++) {
-                    new_uncompressed_bsp_lightmap_vertices[v] = HEK::decompress_sbsp_lightmap_vertex(compressed_bsp_lightmap_vertices[v]);
-                }
-            }
-            else if(this->lightmap_vertices_count != 0) {
-                eprintf_error("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
+            this->compressed_vertices = std::vector<std::byte>(compressed_bsp_vertices_start, compressed_bsp_vertices_start + total_vertices_size);
+            if(!regenerate_missing_bsp_vertices(*this, true)) {
+                eprintf_error("Failed to decompress vertices");
                 throw InvalidTagDataException();
             }
-
-            this->compressed_vertices = std::vector<std::byte>(compressed_bsp_vertices_start, compressed_bsp_vertices_start + total_vertices_size);
         }
         else {
             // Extract vertices
@@ -212,49 +258,20 @@ namespace Invader::Parser {
             // CE Anniversary stuff!
             if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
                 auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
-
                 uncompressed_bsp_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->rendered_vertices_offset, uncompressed_vertices_size);
                 uncompressed_lightmap_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->lightmap_vertices_offset, lightmap_vertices_size);
             }
+            // Not CE Anniversary stuff
             else {
                 uncompressed_bsp_vertices_start = tag.data(bsp_material.uncompressed_vertices.pointer, total_vertices_size);
                 uncompressed_lightmap_vertices_start = uncompressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
             }
 
-            const auto *uncompressed_bsp_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(uncompressed_bsp_vertices_start);
-            this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_vertices + this->rendered_vertices_count));
+            this->uncompressed_vertices = std::vector<std::byte>(uncompressed_bsp_vertices_start, uncompressed_bsp_vertices_start + uncompressed_vertices_size);
+            this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), uncompressed_lightmap_vertices_start, uncompressed_lightmap_vertices_start + lightmap_vertices_size);
 
-            // Compress the vertices too
-            auto *new_compressed_bsp_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little *>(
-                this->compressed_vertices.insert(
-                    this->compressed_vertices.end(),
-                    this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little),
-                    std::byte()
-                ).base()
-            );
-            for(std::size_t v = 0; v < this->rendered_vertices_count; v++) {
-                new_compressed_bsp_vertices[v] = HEK::compress_sbsp_rendered_vertex(uncompressed_bsp_vertices[v]);
-            }
-
-            // Add lightmap vertices
-            if(this->lightmap_vertices_count == this->rendered_vertices_count) {
-                const auto *uncompressed_bsp_lightmap_vertices = reinterpret_cast<const ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(uncompressed_lightmap_vertices_start);
-                this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices), reinterpret_cast<const std::byte *>(uncompressed_bsp_lightmap_vertices + this->lightmap_vertices_count));
-
-                // Compress them as well
-                auto *new_compressed_bsp_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little *>(
-                    this->compressed_vertices.insert(
-                        this->compressed_vertices.end(),
-                        this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little),
-                        std::byte()
-                    ).base()
-                );
-                for(std::size_t v = 0; v < this->lightmap_vertices_count; v++) {
-                    new_compressed_bsp_lightmap_vertices[v] = HEK::compress_sbsp_lightmap_vertex(uncompressed_bsp_lightmap_vertices[v]);
-                }
-            }
-            else if(this->lightmap_vertices_count != 0) {
-                eprintf_error("non-zero lightmap vertex count (%zu) != rendered vertex count (%zu)", static_cast<std::size_t>(this->lightmap_vertices_count), static_cast<std::size_t>(this->rendered_vertices_count));
+            if(!regenerate_missing_bsp_vertices(*this, true)) {
+                eprintf_error("Failed to compress vertices");
                 throw InvalidTagDataException();
             }
         }

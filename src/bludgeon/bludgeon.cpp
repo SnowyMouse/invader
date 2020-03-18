@@ -7,11 +7,11 @@
 #include <invader/version.hpp>
 #include <invader/tag/hek/header.hpp>
 #include <invader/tag/hek/definition.hpp>
-#include <invader/sound/sound_reader.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include <invader/tag/hek/class/gbxmodel.hpp>
 #include <invader/file/file.hpp>
+
+#include "bludgeoner.hpp"
 
 enum WaysToFuckUpTheTag : std::uint64_t {
     /** Apply no fixes; just see what we can do */
@@ -47,9 +47,8 @@ enum WaysToFuckUpTheTag : std::uint64_t {
         tool.exe) */
     REFINERY_MODEL_MARKERS              = 1ull << 61,
 
-    /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation - why the
-        fuck was this made off by default????) */
-    REFINERY_VERTICES                   = 1ull << 62,
+    /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
+    FUCKED_VERTICES                     = 1ull << 62,
 
     /** Make sound tags that were truncated by Refinery' "safe mode" bullshit valid again (basically Refinery turns
         perfectly valid tags into invalid tags BY DEFAULT; this is a longstanding issue that's been ignored - see
@@ -67,93 +66,20 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define BULLSHIT_SOUND_FORMAT_FIX "invalid-sound-format"
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
 #define REFINERY_MODEL_MARKERS_FIX "invalid-model-markers"
-#define REFINERY_VERTICES_FIX "invalid-vertices"
+#define FUCKED_VERTICES_FIX "missing-vertices"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define EVERYTHING_FIX "everything"
 
-static bool bullshit_enums(Invader::Parser::ParserStruct *s, bool fix) {
-    return s->check_for_broken_enums(fix);
-}
-
-static bool refinery_model_markers(Invader::Parser::ParserStruct *s, bool fix, const Invader::HEK::TagFileHeader *header) {
-    bool return_value = false;
-    if(header->tag_class_int == Invader::TagClassInt::TAG_CLASS_GBXMODEL) {
-        auto *model = dynamic_cast<Invader::Parser::GBXModel *>(s);
-        return_value = model->markers.size() != 0;
-        if(return_value && fix) {
-            Invader::HEK::uncache_model_markers(*model);
-        }
-    }
-    return return_value;
-}
-
-static bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
-    auto attempt_fix = [&fix](auto *s) -> bool {
-        if(s == nullptr) {
-            return false;
-        }
-        bool fucked = false;
-        for(Invader::Parser::SoundPitchRange &pr : s->pitch_ranges) {
-            for(auto &pe : pr.permutations) {
-                using SoundFormat = Invader::HEK::SoundFormat;
-                auto &samples = pe.samples;
-                auto &buffer_size = pe.buffer_size;
-
-                // Fix depending on how we need to do it
-                switch(pe.format) {
-                    // This one's simple
-                    case SoundFormat::SOUND_FORMAT_16_BIT_PCM: {
-                        if(buffer_size != samples.size()) {
-                            fucked = true;
-                            if(fix) {
-                                buffer_size = samples.size();
-                            }
-                            else {
-                                return fucked;
-                            }
-                        }
-                        break;
-                    }
-
-                    // We need to decode this first
-                    case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
-                        try {
-                            auto decoded = Invader::SoundReader::sound_from_ogg(samples.data(), samples.size());
-                            auto decoded_size_16_bit = decoded.pcm.size() / (decoded.bits_per_sample / 8) * 2;
-                            if(decoded_size_16_bit != buffer_size) {
-                                fucked = true;
-                                if(fix) {
-                                    buffer_size = decoded_size_16_bit;
-                                }
-                                else {
-                                    return fucked;
-                                }
-                            }
-                        }
-                        catch(std::exception &e) {
-                            eprintf_error("Failed to decode: %s", e.what());
-                            throw;
-                        }
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-            }
-        }
-        return fucked;
-    };
-
-    return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::ExtendedSound *>(s));
-}
-
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
+    using namespace Invader::Bludgeoner;
+    using namespace Invader::HEK;
+    using namespace Invader::File;
+
     bludgeoned = false;
 
     // Open the tag
-    auto tag = Invader::File::open_file(file_path);
+    auto tag = open_file(file_path);
     if(!tag.has_value()) {
         eprintf_error("Failed to open %s", file_path);
         return EXIT_FAILURE;
@@ -162,7 +88,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
     // Get the header
     std::vector<std::byte> file_data;
     try {
-        const auto *header = reinterpret_cast<const Invader::HEK::TagFileHeader *>(tag->data());
+        const auto *header = reinterpret_cast<const TagFileHeader *>(tag->data());
         Invader::HEK::TagFileHeader::validate_header(header, tag->size());
         auto parsed_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
 
@@ -173,12 +99,16 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success_warn("%s: invalid enums detected; fix with " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
-            if(refinery_model_markers(parsed_data.get(), false, header)) {
+            if(refinery_model_markers(parsed_data.get(), false)) {
                 oprintf_success_warn("%s: invalid model markers detected; fix with " REFINERY_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
             }
             if(sound_buffer(parsed_data.get(), false)) {
                 oprintf_success_warn("%s: incorrect sound buffer size on one or more permutations; fix with " FUCKED_SOUND_BUFFER_FIX, file_path);
+                issues_present = true;
+            }
+            if(fucked_vertices(parsed_data.get(), false)) {
+                oprintf_success_warn("%s: missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX, file_path);
                 issues_present = true;
             }
         }
@@ -187,12 +117,16 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success("%s: Fixed " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
-            if((fixes & REFINERY_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true, header)) {
+            if((fixes & REFINERY_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed " REFINERY_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
             }
             if(sound_buffer(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed " FUCKED_SOUND_BUFFER_FIX, file_path);
+                issues_present = true;
+            }
+            if(fucked_vertices(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " FUCKED_VERTICES_FIX, file_path);
                 issues_present = true;
             }
         }
@@ -284,8 +218,8 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], REFINERY_MODEL_MARKERS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_MODEL_MARKERS;
                 }
-                else if(std::strcmp(arguments[0], REFINERY_VERTICES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_VERTICES;
+                else if(std::strcmp(arguments[0], FUCKED_VERTICES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_VERTICES;
                 }
                 else if(std::strcmp(arguments[0], REFINERY_SOUND_PERMUTATIONS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_SOUND_PERMUTATIONS;
