@@ -45,7 +45,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
         tool.exe) */
-    REFINERY_MODEL_MARKERS              = 1ull << 61,
+    FUCKED_MODEL_MARKERS                = 1ull << 61,
 
     /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
     FUCKED_VERTICES                     = 1ull << 62,
@@ -65,7 +65,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define BULLSHIT_ESCHATON_REFERENCES_FIX "invalid-references"
 #define BULLSHIT_SOUND_FORMAT_FIX "invalid-sound-format"
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
-#define REFINERY_MODEL_MARKERS_FIX "invalid-model-markers"
+#define FUCKED_MODEL_MARKERS_FIX "invalid-model-markers"
 #define FUCKED_VERTICES_FIX "missing-vertices"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
@@ -100,7 +100,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 issues_present = true;
             }
             if(refinery_model_markers(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: invalid model markers detected; fix with " REFINERY_MODEL_MARKERS_FIX, file_path);
+                oprintf_success_warn("%s: invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
             }
             if(sound_buffer(parsed_data.get(), false)) {
@@ -117,8 +117,8 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success("%s: Fixed " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
-            if((fixes & REFINERY_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " REFINERY_MODEL_MARKERS_FIX, file_path);
+            if((fixes & FUCKED_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " FUCKED_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
             }
             if(sound_buffer(parsed_data.get(), true)) {
@@ -167,7 +167,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " REFINERY_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -212,11 +212,8 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], POWER_OF_FUCK_YOU_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::POWER_OF_FUCK_YOU;
                 }
-                else if(std::strcmp(arguments[0], REFINERY_MODEL_MARKERS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_MODEL_MARKERS;
-                }
-                else if(std::strcmp(arguments[0], REFINERY_MODEL_MARKERS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_MODEL_MARKERS;
+                else if(std::strcmp(arguments[0], FUCKED_MODEL_MARKERS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_MODEL_MARKERS;
                 }
                 else if(std::strcmp(arguments[0], FUCKED_VERTICES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_VERTICES;
