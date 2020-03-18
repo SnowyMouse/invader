@@ -17,6 +17,9 @@ namespace Invader::Bludgeoner {
     }
 
     static bool fucked_model_vertices(Parser::GBXModel *model, bool fix) {
+        if(model) {
+            return regenerate_missing_model_vertices(*model, fix);
+        }
         return false;
     }
 

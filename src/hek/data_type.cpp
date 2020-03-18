@@ -279,18 +279,18 @@ namespace Invader::HEK {
 
         decompress_vector(vertex.normal, normal_i, normal_j, normal_k);
         r.normal.i = normal_i;
-        r.normal.i = normal_j;
-        r.normal.i = normal_k;
+        r.normal.j = normal_j;
+        r.normal.k = normal_k;
 
         decompress_vector(vertex.binormal, normal_i, normal_j, normal_k);
         r.binormal.i = normal_i;
-        r.binormal.i = normal_j;
-        r.binormal.i = normal_k;
+        r.binormal.j = normal_j;
+        r.binormal.k = normal_k;
 
         decompress_vector(vertex.tangent, normal_i, normal_j, normal_k);
         r.tangent.i = normal_i;
-        r.tangent.i = normal_j;
-        r.tangent.i = normal_k;
+        r.tangent.j = normal_j;
+        r.tangent.k = normal_k;
         return r;
     }
 

@@ -178,6 +178,114 @@ namespace Invader::Parser {
         }
     }
 
+    bool regenerate_missing_model_vertices(GBXModelGeometryPart &part, bool fix) {
+        if(part.uncompressed_vertices.size() == 0) {
+            if(!fix) {
+                return true;
+            }
+            part.uncompressed_vertices.reserve(part.compressed_vertices.size());
+            for(auto &v : part.compressed_vertices) {
+                auto before_data = v.generate_hek_tag_data();
+                auto after_data = HEK::decompress_model_vertex(*reinterpret_cast<GBXModelVertexCompressed::struct_big *>(before_data.data()));
+                auto &after_data_write = part.uncompressed_vertices.emplace_back();
+                after_data_write.binormal = after_data.binormal;
+                after_data_write.normal = after_data.normal;
+                after_data_write.position = after_data.position;
+                after_data_write.tangent = after_data.tangent;
+                after_data_write.node0_index = after_data.node0_index;
+                after_data_write.node0_weight = after_data.node0_weight;
+                after_data_write.node1_index = after_data.node1_index;
+                after_data_write.node1_weight = after_data.node1_weight;
+                after_data_write.texture_coords = after_data.texture_coords;
+            }
+        }
+        else if(part.compressed_vertices.size() == 0) {
+            if(!fix) {
+                return true;
+            }
+            part.compressed_vertices.reserve(part.uncompressed_vertices.size());
+            for(auto &v : part.uncompressed_vertices) {
+                auto before_data = v.generate_hek_tag_data();
+                auto after_data = HEK::compress_model_vertex(*reinterpret_cast<GBXModelVertexUncompressed::struct_big *>(before_data.data()));
+                auto &after_data_write = part.compressed_vertices.emplace_back();
+                after_data_write.binormal = after_data.binormal;
+                after_data_write.normal = after_data.normal;
+                after_data_write.position = after_data.position;
+                after_data_write.tangent = after_data.tangent;
+                after_data_write.node0_index = after_data.node0_index;
+                after_data_write.node0_weight = after_data.node0_weight;
+                after_data_write.node1_index = after_data.node1_index;
+                after_data_write.texture_coordinate_u = after_data.texture_coordinate_u;
+                after_data_write.texture_coordinate_v = after_data.texture_coordinate_v;
+            }
+        }
+        else if(part.compressed_vertices.size() != part.uncompressed_vertices.size()) {
+            eprintf_error("Can't fix: Compressed vertex and uncompressed vertex counts don't match");
+            throw InvalidTagDataException();
+        }
+        else {
+            return false;
+        }
+        return true;
+    }
+
+    bool regenerate_missing_model_vertices(GBXModel &model, bool fix) {
+        bool result = false;
+        for(auto &g : model.geometries) {
+            for(auto &p : g.parts) {
+                result = regenerate_missing_model_vertices(p, fix) || result;
+            }
+        }
+        return result;
+    }
+
+    void GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
+        const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
+        const auto &map = tag.get_map();
+
+        // Get model vertices
+        std::size_t vertex_count = part.vertex_count.read();
+        auto model_data_offset = map.get_model_data_offset();
+        auto model_index_offset = map.get_model_index_offset() + model_data_offset;
+
+        // Repopulate vertices - PC only has uncompressed vertices
+        if(vertex_count > 0 && tag.get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
+            for(std::size_t v = 0; v < vertex_count; v++) {
+                std::size_t data_read;
+                GBXModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
+                this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
+            }
+            if(!regenerate_missing_model_vertices(*this, true)) {
+                eprintf_error("Failed to regenerate compressed vertices");
+                throw InvalidTagDataException();
+            }
+        }
+
+        // Get model indices
+        std::size_t index_count = part.triangle_count.read() + 2;
+
+        std::size_t triangle_count = (index_count) / 3;
+        std::size_t triangle_modulo = index_count % 3;
+        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
+
+        for(std::size_t t = 0; t < triangle_count; t++) {
+            auto &triangle = this->triangles.emplace_back();
+            auto *triangle_indices = indices + t * 3;
+            triangle.vertex0_index = triangle_indices[0];
+            triangle.vertex1_index = triangle_indices[1];
+            triangle.vertex2_index = triangle_indices[2];
+        }
+
+        if(triangle_modulo) {
+            auto &straggler_triangle = this->triangles.emplace_back();
+            auto *triangle_indices = indices + triangle_count * 3;
+            straggler_triangle.vertex0_index = triangle_indices[0];
+            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1].read() : NULL_INDEX;
+            straggler_triangle.vertex2_index = NULL_INDEX;
+        }
+    }
+
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t region_count = this->regions.size();
         std::size_t geometries_count = this->geometries.size();

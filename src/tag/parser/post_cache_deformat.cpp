@@ -95,49 +95,6 @@ namespace Invader::Parser {
         this->duration /= TICK_RATE;
     }
 
-    void Invader::Parser::GBXModelGeometryPart::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer> pointer) {
-        const auto &part = tag.get_struct_at_pointer<HEK::GBXModelGeometryPart>(*pointer);
-        const auto &map = tag.get_map();
-
-        // Get model vertices
-        std::size_t vertex_count = part.vertex_count.read();
-        auto model_data_offset = map.get_model_data_offset();
-        auto model_index_offset = map.get_model_index_offset() + model_data_offset;
-        const auto *vertices = reinterpret_cast<const GBXModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(GBXModelVertexUncompressed::struct_little) * vertex_count));
-
-        for(std::size_t v = 0; v < vertex_count; v++) {
-            GBXModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
-            GBXModelVertexCompressed::struct_big vertex_compressed = HEK::compress_model_vertex(vertex_uncompressed);
-
-            std::size_t data_read;
-            this->uncompressed_vertices.emplace_back(GBXModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
-            this->compressed_vertices.emplace_back(GBXModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read, true));
-        }
-
-        // Get model indices
-        std::size_t index_count = part.triangle_count.read() + 2;
-
-        std::size_t triangle_count = (index_count) / 3;
-        std::size_t triangle_modulo = index_count % 3;
-        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
-
-        for(std::size_t t = 0; t < triangle_count; t++) {
-            auto &triangle = this->triangles.emplace_back();
-            auto *triangle_indices = indices + t * 3;
-            triangle.vertex0_index = triangle_indices[0];
-            triangle.vertex1_index = triangle_indices[1];
-            triangle.vertex2_index = triangle_indices[2];
-        }
-
-        if(triangle_modulo) {
-            auto &straggler_triangle = this->triangles.emplace_back();
-            auto *triangle_indices = indices + triangle_count * 3;
-            straggler_triangle.vertex0_index = triangle_indices[0];
-            straggler_triangle.vertex1_index = triangle_modulo > 1 ? triangle_indices[1].read() : NULL_INDEX;
-            straggler_triangle.vertex2_index = NULL_INDEX;
-        }
-    }
-
     template <typename A, typename B> static void swap_endian_array(A *to, const B *from, std::size_t count) {
         for(std::size_t i = 0; i < count; i++) {
             to[i] = from[i];
