@@ -124,7 +124,7 @@ static bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
                             if(decoded_size_16_bit != buffer_size) {
                                 fucked = true;
                                 if(fix) {
-                                    buffer_size = samples.size();
+                                    buffer_size = decoded_size_16_bit;
                                 }
                                 else {
                                     return fucked;
@@ -146,7 +146,7 @@ static bool sound_buffer(Invader::Parser::ParserStruct *s, bool fix) {
         return fucked;
     };
 
-    return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s));
+    return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::ExtendedSound *>(s));
 }
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes) {
