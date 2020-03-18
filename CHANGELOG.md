@@ -7,6 +7,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Added `-T incorrect-sound-buffer` which fixes incorrect
   sound buffer sizes set in the tag (can fix instances of sounds being the
   incorrect length when played in-game)
+- invader-bludgeon: Added `-T missing-vertices` which fixes (un)compressed
+  vertices being missing; not having these present in BSP tags can result in
+  errors when performing lightmap generation
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets

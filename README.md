@@ -325,6 +325,7 @@ Options:
                                specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
   -T --type                    Type of bludgeoning. Can be: invalid-enums,
+                               invalid-model-markers, incorrect-sound-buffer,
                                invalid-model-markers, none, everything
                                (default: none)
 ```
