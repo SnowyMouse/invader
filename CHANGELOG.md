@@ -25,6 +25,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Fixed a parsing error with child scenarios
 - invader-bitmap: Fixed non-power-of-two bitmaps being marked as power-of-two
 - invader-build: Fixed an error message for sound permutations
+- invader-build: Fixed a deprecation warning with missing source data even when
+  source data was present
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
 - invader-sound: Fixed non-extended sounds being named extended_sound
 
