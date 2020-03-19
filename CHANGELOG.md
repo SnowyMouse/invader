@@ -16,6 +16,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: extended_bitmap tags now store compressed color plate data in
   Zstandard
 - invader-bludgeon: Now counts bludgeoned tags as tags that were changed
+- invader-bludgeon: No longer shows unaffected tags if using `-a`
 - invader-edit-qt: Changed default dimensions of tag windows to scale better
   with larger tags
 - invader-sound: Reduced memory consumption

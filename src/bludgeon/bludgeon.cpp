@@ -133,7 +133,6 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
 
         // No issues? OK
         if(!issues_present) {
-            oprintf("%s: No issues detected\n", file_path);
             return EXIT_SUCCESS;
         }
 
@@ -280,6 +279,10 @@ int main(int argc, char * const *argv) {
         }
         std::string file_path_str = file_path.string();
         bool bludgeoned;
-        return bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);
+        int result = bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);
+        if(!bludgeoned) {
+            oprintf("%s: No issues detected\n", file_path_str.c_str());
+        }
+        return result;
     }
 }
