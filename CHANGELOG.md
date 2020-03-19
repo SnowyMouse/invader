@@ -22,6 +22,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-sound: Reduced memory consumption
 
 ### Fixed
+- invader: Fixed a parsing error with child scenarios
 - invader-bitmap: Fixed non-power-of-two bitmaps being marked as power-of-two
 - invader-build: Fixed an error message for sound permutations
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
