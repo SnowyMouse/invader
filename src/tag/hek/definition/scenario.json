@@ -598,7 +598,7 @@
             }
         ],
         "title": "child scenario",
-        "size": 16
+        "size": 32
     },
     {
         "name": "ScenarioFunction",
@@ -2982,7 +2982,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
                 "compound": true,
-                "hidden": true,
                 "ignore_cached": true
             },
             {
