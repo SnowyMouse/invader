@@ -712,7 +712,7 @@ namespace Invader::Parser {
     }
 
     bool uncache_model_markers(GBXModel &model, bool fix) {
-        if(model.markers.size()) {
+        if(model.markers.size() == 0) {
             return false;
         }
         else if(!fix) {

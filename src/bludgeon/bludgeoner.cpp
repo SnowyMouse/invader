@@ -32,11 +32,7 @@ namespace Invader::Bludgeoner {
             if(!model) {
                 return false;
             }
-            bool return_value = model->markers.size() != 0;
-            if(return_value && fix) {
-                Parser::uncache_model_markers(*model, fix);
-            }
-            return return_value;
+            return Parser::uncache_model_markers(*model, fix);
         };
         return attempt_fix(dynamic_cast<Invader::Parser::GBXModel *>(s));
     }
