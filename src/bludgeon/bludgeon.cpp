@@ -115,6 +115,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success_warn("%s: missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX, file_path);
                 issues_present = true;
             }
+            if(power_of_two_fix(parsed_data.get(), false)) {
+                oprintf_success_warn("%s: power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX, file_path);
+                issues_present = true;
+            }
         }
         else {
             if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
@@ -135,6 +139,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             }
             if(fucked_vertices(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed " FUCKED_VERTICES_FIX, file_path);
+                issues_present = true;
+            }
+            if(power_of_two_fix(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " POWER_OF_FUCK_YOU_FIX, file_path);
                 issues_present = true;
             }
         }
@@ -174,7 +182,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";

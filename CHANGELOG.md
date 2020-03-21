@@ -12,6 +12,8 @@ This is used for recording Invader's changes. This changelog is based on
   errors when performing lightmap generation
 - invader-bludgeon: Added `-T invalid-reference-classes` which nulls references
   with invalid references; more functionality is planned for this later
+- invader-bludgeon: Added `-T invalid-power-of-two` which marks non-power-of-two
+  bitmaps as power-of-two and vice versa
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets

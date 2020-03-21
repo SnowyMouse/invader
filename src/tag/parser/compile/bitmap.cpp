@@ -409,4 +409,42 @@ namespace Invader::Parser {
         new_tag.bitmap_data = tag.bitmap_data;
         return new_tag;
     }
+    
+    template <typename T> static bool fix_power_of_two_for_tag(T &tag, bool fix) {
+        bool fixed = false;
+        for(auto &d : tag.bitmap_data) {
+            fixed = fix_power_of_two(d, fix) || fixed;
+            if(fixed && !fix) {
+                return true;
+            }
+        }
+        return fixed;
+    }
+    
+    bool fix_power_of_two(ExtendedBitmap &tag, bool fix) {
+        return fix_power_of_two_for_tag(tag, fix);
+    }
+    
+    bool fix_power_of_two(Bitmap &tag, bool fix) {
+        return fix_power_of_two_for_tag(tag, fix);
+    }
+    
+    bool fix_power_of_two(BitmapData &data, bool fix) {
+        bool should_be_power_of_two = power_of_two(data.width) && power_of_two(data.height) && power_of_two(data.width);
+        if(data.flags.power_of_two_dimensions && !should_be_power_of_two) {
+            if(fix) {
+                data.flags.power_of_two_dimensions = 0;
+            }
+            return true;
+        }
+        else if(!data.flags.power_of_two_dimensions && should_be_power_of_two) {
+            if(fix) {
+                data.flags.power_of_two_dimensions = 1;
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
