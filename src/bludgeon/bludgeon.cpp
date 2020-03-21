@@ -25,7 +25,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     BULLSHIT_ENUMS                      = 1ull << 1,
 
     /** Fix bullshit tag references being used (e.g. light tags being referenced in models) */
-    BULLSHIT_ESCHATON_REFERENCES        = 1ull << 2,
+    BULLSHIT_REFERENCE_CLASSES          = 1ull << 2,
 
     /** Fix the incorrect sound format being reported in the header (incorrect format was done to work around Halo not
         allowing 16-bit PCM, but this was fixed in mods, and this is undefined behavior) */
@@ -62,7 +62,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define NO_FIXES_FIX "none"
 #define FUCKED_COLOR_CHANGE_FIX "broken-color-change"
 #define BULLSHIT_ENUMS_FIX "invalid-enums"
-#define BULLSHIT_ESCHATON_REFERENCES_FIX "invalid-references"
+#define BULLSHIT_REFERENCE_CLASSES_FIX "invalid-reference-classes"
 #define BULLSHIT_SOUND_FORMAT_FIX "invalid-sound-format"
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
 #define FUCKED_MODEL_MARKERS_FIX "invalid-model-markers"
@@ -99,6 +99,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success_warn("%s: invalid enums detected; fix with " BULLSHIT_ENUMS_FIX, file_path);
                 issues_present = true;
             }
+            if(bullshit_references(parsed_data.get(), false)) {
+                oprintf_success_warn("%s: invalid reference class detected; fix with " BULLSHIT_REFERENCE_CLASSES_FIX, file_path);
+                issues_present = true;
+            }
             if(refinery_model_markers(parsed_data.get(), false)) {
                 oprintf_success_warn("%s: invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX, file_path);
                 issues_present = true;
@@ -115,6 +119,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         else {
             if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed " BULLSHIT_ENUMS_FIX, file_path);
+                issues_present = true;
+            }
+            if((fixes & BULLSHIT_REFERENCE_CLASSES) && bullshit_references(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " BULLSHIT_REFERENCE_CLASSES_FIX, file_path);
                 issues_present = true;
             }
             if((fixes & FUCKED_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true)) {
@@ -166,7 +174,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -202,8 +210,8 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], BULLSHIT_ENUMS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_ENUMS;
                 }
-                else if(std::strcmp(arguments[0], BULLSHIT_ESCHATON_REFERENCES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_ESCHATON_REFERENCES;
+                else if(std::strcmp(arguments[0], BULLSHIT_REFERENCE_CLASSES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_REFERENCE_CLASSES;
                 }
                 else if(std::strcmp(arguments[0], BULLSHIT_SOUND_FORMAT_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_SOUND_FORMAT;

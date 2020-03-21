@@ -12,6 +12,7 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
@@ -31,6 +32,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-cache-deformat.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
@@ -134,8 +136,6 @@ option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for deb
 add_custom_command(
     OUTPUT ${INVADER_PARSER_FILES}
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator" ${INVADER_PARSER_FILES} ${INVADER_EXTRACT_HIDDEN_VALUES} "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/code_generator/*"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/hek/definition/*"
 )
 
 # Include version script
@@ -151,19 +151,16 @@ add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/retail-getter.cpp" "retail" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/retail/*"
 )
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp" "demo" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/demo/*"
 )
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py" "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp" "custom_edition" "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/generate_index_getter.py"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/tag/index/custom_edition/*"
 )
 
 # Include version script
@@ -178,7 +175,6 @@ add_custom_command(
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py" "${CMAKE_CURRENT_BINARY_DIR}/language.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/json/*"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/info/language/language.py"
 )
 

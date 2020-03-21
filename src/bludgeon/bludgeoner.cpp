@@ -97,4 +97,8 @@ namespace Invader::Bludgeoner {
 
         return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::ExtendedSound *>(s));
     }
+    
+    bool bullshit_references(Parser::ParserStruct *s, bool fix) {
+        return s->check_for_invalid_references(fix);
+    }
 }

@@ -733,6 +733,13 @@ namespace Invader::Parser {
         virtual bool check_for_broken_enums(bool reset_enums) = 0;
 
         /**
+         * Check for invalid references
+         * @param  null_references attempt to fix the references by nulling them out
+         * @return                 true if invalid references were found; false if not
+         */
+        virtual bool check_for_invalid_references(bool null_references) = 0;
+
+        /**
          * Format the tag to be used in HEK tags.
          */
         virtual void cache_deformat() = 0;

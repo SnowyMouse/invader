@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Added `-T missing-vertices` which fixes (un)compressed
   vertices being missing; not having these present in BSP tags can result in
   errors when performing lightmap generation
+- invader-bludgeon: Added `-T invalid-reference-classes` which nulls references
+  with invalid references; more functionality is planned for this later
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets

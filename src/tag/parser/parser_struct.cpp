@@ -146,45 +146,6 @@ namespace Invader::Parser {
         else {
             return NumberFormat::NUMBER_FORMAT_NONE;
         }
-
-        switch(this->type) {
-            case VALUE_TYPE_INT8:
-            case VALUE_TYPE_UINT8:
-            case VALUE_TYPE_INT16:
-            case VALUE_TYPE_INDEX:
-            case VALUE_TYPE_UINT16:
-            case VALUE_TYPE_INT32:
-            case VALUE_TYPE_UINT32:
-            case VALUE_TYPE_COLORARGBINT:
-            case VALUE_TYPE_POINT2DINT:
-            case VALUE_TYPE_RECTANGLE2D:
-                return NumberFormat::NUMBER_FORMAT_INT;
-
-            case VALUE_TYPE_FLOAT:
-            case VALUE_TYPE_FRACTION:
-            case VALUE_TYPE_ANGLE:
-            case VALUE_TYPE_COLORARGB:
-            case VALUE_TYPE_COLORRGB:
-            case VALUE_TYPE_VECTOR2D:
-            case VALUE_TYPE_VECTOR3D:
-            case VALUE_TYPE_EULER2D:
-            case VALUE_TYPE_EULER3D:
-            case VALUE_TYPE_PLANE2D:
-            case VALUE_TYPE_PLANE3D:
-            case VALUE_TYPE_POINT2D:
-            case VALUE_TYPE_POINT3D:
-            case VALUE_TYPE_MATRIX:
-            case VALUE_TYPE_QUATERNION:
-                return NumberFormat::NUMBER_FORMAT_FLOAT;
-
-            case VALUE_TYPE_REFLEXIVE:
-            case VALUE_TYPE_DEPENDENCY:
-            case VALUE_TYPE_BITMASK:
-            case VALUE_TYPE_TAGSTRING:
-            case VALUE_TYPE_TAGDATAOFFSET:
-            case VALUE_TYPE_ENUM:
-                return NumberFormat::NUMBER_FORMAT_NONE;
-        }
     }
 
     std::size_t ParserStructValue::get_value_count() const noexcept {

@@ -11,6 +11,7 @@ namespace Invader::Bludgeoner {
     bool refinery_model_markers(Parser::ParserStruct *s, bool fix);
     bool sound_buffer(Parser::ParserStruct *s, bool fix);
     bool fucked_vertices(Parser::ParserStruct *s, bool fix);
+    bool bullshit_references(Parser::ParserStruct *s, bool fix);
 }
 
 #endif
