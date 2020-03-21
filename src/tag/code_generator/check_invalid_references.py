@@ -32,7 +32,7 @@ def make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_
                             error_line = error_line + " or"
                         error_line = error_line + " {}".format(classes[c])
 
-                cpp_check_invalid_references.write("        if({}) {{\n".format(test_line))
+                cpp_check_invalid_references.write("        if(this->{}.path.size() > 0 && ({})) {{\n".format(name, test_line))
                 cpp_check_invalid_references.write("            if(!null_references) {\n")
                 cpp_check_invalid_references.write("                return true;\n")
                 cpp_check_invalid_references.write("            }\n")
