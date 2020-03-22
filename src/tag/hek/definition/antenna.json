@@ -18,7 +18,7 @@
             {
                 "name": "length",
                 "type": "float",
-                "cache_only": true
+                "unit": "world units"
             },
             {
                 "name": "sequence index",
@@ -96,7 +96,7 @@
             {
                 "name": "length",
                 "type": "float",
-                "unit": "world units"
+                "cache_only": true
             },
             {
                 "type": "pad",
