@@ -82,6 +82,7 @@
             },
             {
                 "name": "position",
+                "unit": "along flare axis",
                 "type": "float"
             },
             {
@@ -94,6 +95,7 @@
             },
             {
                 "name": "radius",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -107,6 +109,8 @@
             },
             {
                 "name": "brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "bounds": true,
                 "type": "Fraction"
             },
@@ -144,10 +148,12 @@
             {
                 "name": "animation period",
                 "type": "float",
+                "unit": "world units",
                 "default": 1.0
             },
             {
                 "name": "animation phase",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -183,6 +189,7 @@
             },
             {
                 "name": "occlusion radius",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -195,10 +202,12 @@
             },
             {
                 "name": "near fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "far fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {

@@ -37,26 +37,32 @@
             },
             {
                 "name": "power transition time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "power acceleration time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "position transition time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "position acceleration time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "depowered position transition time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "depowered position acceleration time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -131,6 +137,7 @@
             },
             {
                 "name": "delay time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -148,6 +155,7 @@
             },
             {
                 "name": "automatic activation radius",
+                "unit": "world units",
                 "type": "float"
             },
             {

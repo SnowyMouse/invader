@@ -130,6 +130,7 @@
             },
             {
                 "name": "look acceleration time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -1138,6 +1139,7 @@
             },
             {
                 "name": "walking speed",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
@@ -1146,42 +1148,52 @@
             },
             {
                 "name": "run forward",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "run backward",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "run sideways",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "run acceleration",
+                "unit": "world units per second squared",
                 "type": "float"
             },
             {
                 "name": "sneak forward",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "sneak backward",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "sneak sideways",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "sneak acceleration",
+                "unit": "world units per second squared",
                 "type": "float"
             },
             {
                 "name": "airborne acceleration",
+                "unit": "world units per second squared",
                 "type": "float"
             },
             {
                 "name": "speed multiplier",
+                "unit": "multiplayer only",
                 "type": "float"
             },
             {
@@ -1211,10 +1223,12 @@
             },
             {
                 "name": "minimum stun time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "maximum stun time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -1223,11 +1237,14 @@
             },
             {
                 "name": "first person idle time",
+                "unit": "seconds",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "first person skip fraction",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
@@ -1330,6 +1347,7 @@
             },
             {
                 "name": "harmful falling distance",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -1347,6 +1365,7 @@
             },
             {
                 "name": "maximum falling distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -1428,6 +1447,7 @@
             },
             {
                 "name": "density",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -1442,6 +1462,7 @@
             {
                 "name": "angular velocity",
                 "bounds": true,
+                "unit": "degrees per second",
                 "type": "float"
             },
             {
@@ -1451,6 +1472,7 @@
             {
                 "name": "radius",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             },
             {

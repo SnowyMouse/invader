@@ -17,6 +17,7 @@
             },
             {
                 "name": "offset from marker",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -26,6 +27,7 @@
             },
             {
                 "name": "length",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -34,10 +36,12 @@
             },
             {
                 "name": "radius hither",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "radius yon",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -99,20 +103,26 @@
             },
             {
                 "name": "near fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "far fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "perpendicular brightness scale",
                 "type": "Fraction",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "default": 1.0
             },
             {
                 "name": "parallel brightness scale",
                 "type": "Fraction",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "default": 1.0
             },
             {

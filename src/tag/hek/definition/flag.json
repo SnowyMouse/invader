@@ -23,6 +23,7 @@
         "fields": [
             {
                 "name": "height to next attachment",
+                "unit": "vertices",
                 "type": "int16"
             },
             {
@@ -55,6 +56,7 @@
             },
             {
                 "name": "trailing edge shape offset",
+                "unit": "vertices",
                 "type": "int16"
             },
             {
@@ -67,18 +69,22 @@
             },
             {
                 "name": "width",
+                "unit": "vertices",
                 "type": "int16"
             },
             {
                 "name": "height",
+                "unit": "vertices",
                 "type": "int16"
             },
             {
                 "name": "cell width",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "cell height",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -99,6 +105,7 @@
             },
             {
                 "name": "wind noise",
+                "unit": "world units per second",
                 "type": "float"
             },
             {

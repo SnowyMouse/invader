@@ -459,10 +459,14 @@
             },
             {
                 "name": "heat generated per round",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "age generated per round",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -471,6 +475,7 @@
             },
             {
                 "name": "overload time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -586,26 +591,38 @@
             },
             {
                 "name": "heat recovery threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "overheated threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "heat detonation threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "heat detonation fraction",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "heat loss per second",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "heat illumination",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -660,10 +677,12 @@
             },
             {
                 "name": "near reticle range",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "far reticle range",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -681,6 +700,7 @@
             {
                 "name": "magnification range",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -689,6 +709,7 @@
             },
             {
                 "name": "autoaim range",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -697,6 +718,7 @@
             },
             {
                 "name": "magnetism range",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -741,10 +763,12 @@
             },
             {
                 "name": "light power on time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "light power off time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -775,10 +799,14 @@
             },
             {
                 "name": "age misfire start",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "age misfire chance",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

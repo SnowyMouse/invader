@@ -41,6 +41,7 @@
             },
             {
                 "name": "lens flare spacing",
+                "unit": "world units",
                 "type": "float"
             },
             {

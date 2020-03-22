@@ -100,6 +100,8 @@
             },
             {
                 "name": "potential skip fraction",
+                "minimum": 0.0,
+                "maximum": 0.0,
                 "type": "Fraction"
             },
             {
@@ -110,6 +112,7 @@
             {
                 "name": "potential and",
                 "bounds": true,
+                "unit": "world units per second",
                 "type": "float"
             },
             {
@@ -138,6 +141,7 @@
             },
             {
                 "name": "velocity noise",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
@@ -220,18 +224,22 @@
             },
             {
                 "name": "ai perception radius",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "collision radius",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "arming time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "danger radius",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -245,14 +253,17 @@
             {
                 "name": "timer",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "minimum velocity",
+                "unit": "world units per seconds",
                 "type": "float"
             },
             {
                 "name": "maximum range",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -261,6 +272,7 @@
             },
             {
                 "name": "air damage range",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -270,19 +282,23 @@
             },
             {
                 "name": "water damage range",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "initial velocity",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "final velocity",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
                 "name": "guided angular velocity",
+                "unit": "degrees per second",
                 "type": "Angle"
             },
             {

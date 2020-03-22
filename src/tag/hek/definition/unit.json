@@ -107,10 +107,12 @@
             },
             {
                 "name": "driver powerup time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "driver powerdown time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -191,10 +193,12 @@
             },
             {
                 "name": "yaw rate",
+                "unit": "degrees per second",
                 "type": "float"
             },
             {
                 "name": "pitch rate",
+                "unit": "degrees per second",
                 "type": "float"
             },
             {
@@ -336,6 +340,7 @@
             },
             {
                 "name": "rider damage fraction",
+                "minimum": 0.0,
                 "type": "float"
             },
             {
@@ -407,38 +412,51 @@
             },
             {
                 "name": "soft ping threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "soft ping interrupt time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "hard ping threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "hard ping interrupt time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "hard death threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "feign death threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "feign death time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "distance of evade anim",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "distance of dive anim",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -447,14 +465,20 @@
             },
             {
                 "name": "stunned movement threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "feign death chance",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
                 "name": "feign repeat chance",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
@@ -476,22 +500,28 @@
             },
             {
                 "name": "aiming velocity maximum",
+                "unit": "degrees per second",
                 "type": "Angle"
             },
             {
                 "name": "aiming acceleration maximum",
+                "unit": "degrees per second squared",
                 "type": "Angle"
             },
             {
                 "name": "casual aiming modifier",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "looking velocity maximum",
+                "unit": "degrees per second",
                 "type": "Angle"
             },
             {
                 "name": "looking acceleration maximum",
+                "unit": "degrees per second squared",
                 "type": "Angle"
             },
             {
@@ -540,6 +570,7 @@
             },
             {
                 "name": "grenade velocity",
+                "unit": "world units per second",
                 "type": "float"
             },
             {

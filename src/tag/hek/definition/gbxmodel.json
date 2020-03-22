@@ -622,47 +622,57 @@
             },
             {
                 "name": "super high detail cutoff",
+                "unit": "pixels",
                 "read_only": false,
                 "type": "float"
             },
             {
                 "name": "high detail cutoff",
+                "unit": "pixels",
                 "read_only": false,
                 "type": "float"
             },
             {
                 "name": "medium detail cutoff",
+                "unit": "pixels",
                 "read_only": false,
                 "type": "float"
             },
             {
                 "name": "low detail cutoff",
+                "unit": "pixels",
                 "read_only": false,
                 "type": "float"
             },
             {
                 "name": "super low detail cutoff",
+                "unit": "pixels",
                 "read_only": false,
                 "type": "float"
             },
             {
                 "name": "super low detail node count",
+                "unit": "nodes",
                 "type": "uint16"
             },
             {
                 "name": "low detail node count",
+                "unit": "nodes",
                 "type": "uint16"
             },
             {
                 "name": "medium detail node count",
+                "unit": "nodes",
                 "type": "uint16"
             },
             {
                 "name": "high detail node count",
+                "unit": "nodes",
                 "type": "uint16"
             },
             {
                 "name": "super high detail node count",
+                "unit": "nodes",
                 "type": "uint16"
             },
             {

@@ -108,6 +108,7 @@
             },
             {
                 "name": "texture animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -128,6 +129,7 @@
             },
             {
                 "name": "yaw period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -141,6 +143,7 @@
             },
             {
                 "name": "roll period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -188,6 +191,7 @@
             },
             {
                 "name": "duration",
+                "unit": "seconds",
                 "type": "float"
             },
             {

@@ -176,10 +176,13 @@
             },
             {
                 "name": "map rotation",
+                "unit": "degrees",
                 "type": "float"
             },
             {
                 "name": "mapmap bias",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -200,6 +203,7 @@
             },
             {
                 "name": "u animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -210,6 +214,7 @@
             {
                 "name": "u animation scale",
                 "type": "float",
+                "unit": "repeats",
                 "default": 1.0
             },
             {
@@ -222,6 +227,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -232,6 +238,7 @@
             {
                 "name": "v animation scale",
                 "type": "float",
+                "unit": "repeats",
                 "default": 1.0
             },
             {
@@ -244,6 +251,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -253,6 +261,7 @@
             },
             {
                 "name": "rotation animation scale",
+                "unit": "degrees",
                 "type": "float",
                 "default": 1.0
             },
@@ -287,6 +296,7 @@
             },
             {
                 "name": "color0 animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -454,6 +464,7 @@
             },
             {
                 "name": "lens flare spacing",
+                "unit": "world units",
                 "type": "float"
             },
             {

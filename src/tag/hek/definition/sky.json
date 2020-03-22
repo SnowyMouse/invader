@@ -37,6 +37,7 @@
             },
             {
                 "name": "period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -154,14 +155,18 @@
             },
             {
                 "name": "outdoor fog maximum density",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "outdoor fog start distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "outdoor fog opaque distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -175,14 +180,18 @@
             },
             {
                 "name": "indoor fog maximum density",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "indoor fog start distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "indoor fog opaque distance",
+                "unit": "world units",
                 "type": "float"
             },
             {

@@ -85,6 +85,7 @@
             {
                 "name": "lifespan",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -115,6 +116,7 @@
             },
             {
                 "name": "minimum size",
+                "unit": "pixels",
                 "type": "float"
             },
             {
@@ -135,6 +137,7 @@
             {
                 "name": "animation rate",
                 "bounds": true,
+                "unit": "frames per second",
                 "type": "float"
             },
             {
@@ -146,11 +149,13 @@
             },
             {
                 "name": "fade start size",
+                "unit": "pixels",
                 "type": "float",
                 "default": 5.0
             },
             {
                 "name": "fade end size",
+                "unit": "pixels",
                 "type": "float",
                 "default": 4.0
             },
@@ -247,6 +252,7 @@
                 "type": "WaveFunction"
             },
             {
+                "unit": "seconds",
                 "name": "u animation period",
                 "type": "float"
             },
@@ -256,6 +262,7 @@
             },
             {
                 "name": "u animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -268,6 +275,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -276,6 +284,7 @@
             },
             {
                 "name": "v animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -288,6 +297,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -296,6 +306,7 @@
             },
             {
                 "name": "rotation animation scale",
+                "unit": "degrees",
                 "type": "float"
             },
             {

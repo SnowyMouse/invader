@@ -43,6 +43,7 @@
             },
             {
                 "name": "density",
+                "unit": "grams per milliliter",
                 "type": "float"
             },
             {

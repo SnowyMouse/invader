@@ -77,11 +77,13 @@
             },
             {
                 "name": "duration bounds",
+                "unit": "second",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "transition time bounds",
+                "unit": "second",
                 "bounds": true,
                 "type": "float"
             },
@@ -116,6 +118,7 @@
             },
             {
                 "name": "particle creation rate",
+                "unit": "particles per second",
                 "type": "float"
             },
             {
@@ -152,11 +155,13 @@
             {
                 "name": "duration bounds",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "transition time bounds",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -182,16 +187,19 @@
             {
                 "name": "scale",
                 "bounds": true,
+                "unit": "world units per pixel",
                 "type": "float"
             },
             {
                 "name": "animation rate",
                 "bounds": true,
+                "unit": "frames per second",
                 "type": "float"
             },
             {
                 "name": "rotation rate",
                 "bounds": true,
+                "unit": "degrees per second",
                 "type": "Angle"
             },
             {
@@ -276,6 +284,7 @@
             },
             {
                 "name": "u animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -284,6 +293,7 @@
             },
             {
                 "name": "u animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -296,6 +306,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -304,6 +315,7 @@
             },
             {
                 "name": "v animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -316,6 +328,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -324,6 +337,7 @@
             },
             {
                 "name": "rotation animation scale",
+                "unit": "degrees",
                 "type": "float"
             },
             {
@@ -385,6 +399,7 @@
             },
             {
                 "name": "radius",
+                "unit": "world units",
                 "type": "float"
             },
             {

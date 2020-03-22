@@ -72,10 +72,14 @@
             },
             {
                 "name": "meter transparency",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "background transparency",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

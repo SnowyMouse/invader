@@ -47,6 +47,8 @@
             },
             {
                 "name": "color override factor",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -55,14 +57,17 @@
             },
             {
                 "name": "near fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "far fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "size",
+                "unit": "world units per pixel",
                 "type": "float"
             },
             {

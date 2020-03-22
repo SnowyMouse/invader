@@ -155,6 +155,7 @@
             {
                 "name": "period",
                 "type": "float",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
@@ -175,10 +176,12 @@
             },
             {
                 "name": "wobble period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "wobble magnitude",
+                "unit": "percent",
                 "type": "float"
             },
             {
@@ -352,6 +355,7 @@
             },
             {
                 "name": "bounding radius",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -366,6 +370,7 @@
             },
             {
                 "name": "acceleration scale",
+                "minimum": 0.0,
                 "type": "float"
             },
             {
@@ -433,6 +438,7 @@
             },
             {
                 "name": "render bounding radius",
+                "unit": "world units",
                 "type": "float"
             },
             {

@@ -29,6 +29,7 @@
             },
             {
                 "name": "decay time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -41,6 +42,7 @@
             },
             {
                 "name": "reflections delay",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -49,6 +51,7 @@
             },
             {
                 "name": "reverb delay",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -61,6 +64,7 @@
             },
             {
                 "name": "hf reference",
+                "unit": "Hz",
                 "type": "float"
             },
             {

@@ -42,10 +42,12 @@
             },
             {
                 "name": "fade in duration",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "fade out duration",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -114,6 +116,7 @@
             {
                 "name": "random period bounds",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -142,6 +145,7 @@
             {
                 "name": "distance bounds",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             }
         ],

@@ -40,6 +40,8 @@
             },
             {
                 "name": "maximum density",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -48,6 +50,7 @@
             },
             {
                 "name": "opaque distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -56,6 +59,7 @@
             },
             {
                 "name": "opaque depth",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -64,6 +68,7 @@
             },
             {
                 "name": "distance to water plane",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -82,15 +87,19 @@
             {
                 "name": "distance gradient",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "density gradient",
                 "bounds": true,
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "start distance from fog plane",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -103,14 +112,20 @@
             },
             {
                 "name": "rotation multiplier",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "strafing multiplier",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "zoom multiplier",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -131,6 +146,7 @@
             },
             {
                 "name": "animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -139,20 +155,26 @@
             },
             {
                 "name": "wind velocity",
+                "unit": "world units per second",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "wind period",
+                "unit": "seconds",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "wind acceleration weight",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "wind perpendicular weight",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

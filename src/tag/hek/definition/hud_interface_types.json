@@ -155,11 +155,13 @@
             {
                 "name": "in bounds",
                 "bounds": true,
+                "unit": "source units",
                 "type": "float"
             },
             {
                 "name": "out bounds",
                 "bounds": true,
+                "unit": "pixels",
                 "type": "float"
             },
             {
@@ -186,10 +188,12 @@
             },
             {
                 "name": "function period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "function phase",
+                "unit": "seconds",
                 "type": "float"
             },
             {

@@ -90,6 +90,7 @@
             {
                 "name": "detonation delay",
                 "bounds": true,
+                "unit": "seconds",
                 "type": "float"
             },
             {

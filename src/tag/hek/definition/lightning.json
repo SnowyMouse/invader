@@ -37,15 +37,18 @@
             },
             {
                 "name": "random position bounds",
+                "unit": "world units",
                 "type": "Vector3D",
                 "compound": true
             },
             {
                 "name": "random jitter",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "thickness",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -141,10 +144,12 @@
             },
             {
                 "name": "near fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "far fade distance",
+                "unit": "world units",
                 "type": "float"
             },
             {

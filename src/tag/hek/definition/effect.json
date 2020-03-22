@@ -164,6 +164,7 @@
             },
             {
                 "name": "velocity bounds",
+                "unit": "world units per second",
                 "bounds": true,
                 "type": "float"
             },
@@ -173,6 +174,7 @@
             },
             {
                 "name": "angular velocity bounds",
+                "unit": "degrees per second",
                 "bounds": true,
                 "type": "Angle"
             },
@@ -273,6 +275,7 @@
             },
             {
                 "name": "distribution radius",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -283,6 +286,7 @@
             {
                 "name": "velocity",
                 "bounds": true,
+                "unit": "world units per second",
                 "type": "float"
             },
             {
@@ -291,6 +295,7 @@
             },
             {
                 "name": "angular velocity",
+                "unit": "degrees per second",
                 "bounds": true,
                 "type": "Angle"
             },
@@ -300,6 +305,7 @@
             },
             {
                 "name": "radius",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -348,11 +354,13 @@
             },
             {
                 "name": "delay bounds",
+                "unit": "seconds",
                 "bounds": true,
                 "type": "float"
             },
             {
                 "name": "duration bounds",
+                "unit": "seconds",
                 "bounds": true,
                 "type": "float"
             },

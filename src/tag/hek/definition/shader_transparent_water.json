@@ -30,6 +30,8 @@
             },
             {
                 "name": "contribution factor",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -95,6 +97,8 @@
             },
             {
                 "name": "view perpendicular brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -104,6 +108,8 @@
             },
             {
                 "name": "view parallel brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction",
                 "default": 1.0
             },
@@ -159,6 +165,8 @@
             },
             {
                 "name": "ripple mipmap fade factor",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

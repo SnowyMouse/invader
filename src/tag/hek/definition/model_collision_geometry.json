@@ -511,6 +511,8 @@
             },
             {
                 "name": "friendly damage resistance",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -531,6 +533,8 @@
             },
             {
                 "name": "area damage effect threshold",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "float"
             },
             {
@@ -615,10 +619,12 @@
             },
             {
                 "name": "stun time",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "recharge time",
+                "unit": "seconds",
                 "type": "float"
             },
             {

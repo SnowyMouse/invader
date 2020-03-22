@@ -103,10 +103,14 @@
             },
             {
                 "name": "skip fraction",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "gain",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction",
                 "default": 1.0
             },
@@ -256,10 +260,12 @@
             },
             {
                 "name": "minimum distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "maximum distance",
+                "unit": "world units",
                 "type": "float"
             },
             {

@@ -5,6 +5,7 @@
             {
                 "name": "velocity",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             },
             {

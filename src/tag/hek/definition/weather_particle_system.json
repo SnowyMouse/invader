@@ -31,34 +31,42 @@
             },
             {
                 "name": "fade in start distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade in end distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade out start distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade out end distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade in start height",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade in end height",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade out start height",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "fade out end height",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -67,6 +75,7 @@
             },
             {
                 "name": "particle count",
+                "unit": "particles per cubic world unit",
                 "bounds": true,
                 "type": "float"
             },
@@ -102,16 +111,19 @@
             {
                 "name": "particle radius",
                 "bounds": true,
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "animation rate",
                 "bounds": true,
+                "unit": "frames per second",
                 "type": "float"
             },
             {
                 "name": "rotation rate",
                 "bounds": true,
+                "unit": "degrees per second",
                 "type": "Angle"
             },
             {
@@ -211,6 +223,7 @@
             },
             {
                 "name": "u animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -219,6 +232,7 @@
             },
             {
                 "name": "u animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -231,6 +245,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -239,6 +254,7 @@
             },
             {
                 "name": "v animation scale",
+                "unit": "repeats",
                 "type": "float"
             },
             {
@@ -251,6 +267,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -259,7 +276,7 @@
             },
             {
                 "name": "rotation animation scale",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "rotation animation center",

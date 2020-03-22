@@ -40,6 +40,7 @@
             },
             {
                 "name": "offset amount",
+                "unit": "world units",
                 "type": "float"
             },
             {
@@ -53,6 +54,8 @@
             },
             {
                 "name": "perpendicular brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -62,6 +65,8 @@
             },
             {
                 "name": "parallel brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -103,6 +108,7 @@
             },
             {
                 "name": "primary animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -132,6 +138,7 @@
             },
             {
                 "name": "secondary animation period",
+                "unit": "seconds",
                 "type": "float"
             },
             {

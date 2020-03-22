@@ -212,11 +212,13 @@
             {
                 "name": "u animation period",
                 "type": "float",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
                 "name": "u animation scale",
                 "type": "float",
+                "unit": "base map repeats",
                 "default": 1.0
             },
             {
@@ -230,11 +232,13 @@
             {
                 "name": "v animation period",
                 "type": "float",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
                 "name": "v animation scale",
                 "type": "float",
+                "unit": "base map repeats",
                 "default": 1.0
             },
             {
@@ -274,10 +278,12 @@
             {
                 "name": "primary animation period",
                 "type": "float",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
                 "name": "primary animation phase",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -304,11 +310,13 @@
             },
             {
                 "name": "secondary animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
             {
                 "name": "secondary animation phase",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -336,10 +344,12 @@
             {
                 "name": "plasma animation period",
                 "type": "float",
+                "unit": "seconds",
                 "default": 1.0
             },
             {
                 "name": "plasma animation phase",
+                "unit": "seconds",
                 "type": "float"
             },
             {
@@ -377,6 +387,8 @@
             },
             {
                 "name": "brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -407,6 +419,8 @@
             },
             {
                 "name": "lightmap brightness scale",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -415,10 +429,14 @@
             },
             {
                 "name": "perpendicular brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
                 "name": "parallel brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

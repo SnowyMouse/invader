@@ -95,6 +95,7 @@
             },
             {
                 "name": "animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -186,6 +187,7 @@
             },
             {
                 "name": "u animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -195,6 +197,7 @@
             },
             {
                 "name": "u animation scale",
+                "unit": "repeats",
                 "type": "float",
                 "default": 1.0
             },
@@ -208,6 +211,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -217,6 +221,7 @@
             },
             {
                 "name": "v animation scale",
+                "unit": "repeats",
                 "type": "float",
                 "default": 1.0
             },
@@ -230,6 +235,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -239,6 +245,7 @@
             },
             {
                 "name": "rotation animation scale",
+                "unit": "degrees",
                 "type": "float",
                 "default": 360.0
             },
@@ -253,14 +260,18 @@
             },
             {
                 "name": "reflection falloff distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "reflection cutoff distance",
+                "unit": "world units",
                 "type": "float"
             },
             {
                 "name": "perpendicular brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -270,6 +281,8 @@
             },
             {
                 "name": "parallel brightness",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

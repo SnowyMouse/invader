@@ -70,6 +70,8 @@
             },
             {
                 "name": "mipmap bias",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -94,6 +96,7 @@
             },
             {
                 "name": "u animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -103,6 +106,7 @@
             },
             {
                 "name": "u animation scale",
+                "unit": "world units",
                 "type": "float",
                 "default": 1.0
             },
@@ -116,6 +120,7 @@
             },
             {
                 "name": "v animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -125,6 +130,7 @@
             },
             {
                 "name": "v animation scale",
+                "unit": "world units",
                 "type": "float",
                 "default": 1.0
             },
@@ -138,6 +144,7 @@
             },
             {
                 "name": "rotation animation period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },
@@ -147,6 +154,7 @@
             },
             {
                 "name": "rotation animation scale",
+                "unit": "degrees",
                 "type": "float",
                 "default": 360.0
             },

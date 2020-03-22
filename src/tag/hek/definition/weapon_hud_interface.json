@@ -349,7 +349,7 @@
                 "endian": null
             },
             {
-                "name": "minumum meter value",
+                "name": "minimum meter value",
                 "type": "int8",
                 "endian": null
             },
@@ -849,12 +849,13 @@
             {
                 "name": "convolution fov in bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "convolution radius out bounds",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "pixels"
             },
             {
                 "type": "pad",
@@ -870,6 +871,8 @@
             },
             {
                 "name": "night vision intensity",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
@@ -886,6 +889,8 @@
             },
             {
                 "name": "desaturation intensity",
+                "minimum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {

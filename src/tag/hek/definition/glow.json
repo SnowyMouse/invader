@@ -184,6 +184,7 @@
             },
             {
                 "name": "particle size bounds",
+                "unit": "world units",
                 "bounds": true,
                 "type": "float"
             },
@@ -231,14 +232,17 @@
             },
             {
                 "name": "particle generation freq",
+                "unit": "Hz",
                 "type": "float"
             },
             {
                 "name": "lifetime of trailing particles",
+                "unit": "seconds",
                 "type": "float"
             },
             {
                 "name": "velocity of trailing particles",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
