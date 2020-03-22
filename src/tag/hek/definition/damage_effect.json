@@ -82,16 +82,16 @@
         "name": "DamageEffect",
         "fields": [
             {
-                "name": "radius from",
-                "type": "float"
-            },
-            {
-                "name": "radius to",
-                "type": "float"
+                "name": "radius",
+                "bounds": true,
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "cutoff scale",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "flags",
@@ -123,7 +123,8 @@
             },
             {
                 "name": "duration",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "fade function",
@@ -143,7 +144,9 @@
             },
             {
                 "name": "maximum intensity",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",
@@ -156,11 +159,14 @@
             },
             {
                 "name": "low frequency vibrate frequency",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "low frequency vibrate duration",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "low frequency vibrate fade function",
@@ -176,11 +182,14 @@
             },
             {
                 "name": "high frequency vibrate frequency",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "high frequency vibrate duration",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "high frequency vibrate fade function",
@@ -204,7 +213,8 @@
             },
             {
                 "name": "temporary camera impulse duration",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "temporary camera impulse fade function",
@@ -220,15 +230,14 @@
             },
             {
                 "name": "temporary camera impulse pushback",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
-                "name": "jitter from",
-                "type": "float"
-            },
-            {
-                "name": "jitter to",
-                "type": "float"
+                "name": "jitter",
+                "bounds": true,
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -248,7 +257,8 @@
             },
             {
                 "name": "camera shaking duration",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "camera shaking falloff function",
@@ -260,7 +270,8 @@
             },
             {
                 "name": "camera shaking random translation",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "camera shaking random rotation",
@@ -284,7 +295,8 @@
             },
             {
                 "name": "camera shaking wobble period",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "camera shaking wobble weight",
@@ -320,11 +332,13 @@
             },
             {
                 "name": "breaking effect forward velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "breaking effect forward radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "breaking effect forward exponent",
@@ -340,11 +354,13 @@
             },
             {
                 "name": "breaking effect outward velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "breaking effect outward radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "breaking effect outward exponent",
@@ -372,7 +388,8 @@
             },
             {
                 "name": "damage aoe core radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "damage lower bound",
@@ -396,15 +413,20 @@
             },
             {
                 "name": "damage stun",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "damage maximum stun",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "damage stun time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",

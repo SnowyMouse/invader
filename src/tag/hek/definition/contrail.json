@@ -61,12 +61,14 @@
             {
                 "name": "duration",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "transition duration",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "physics",
@@ -82,7 +84,8 @@
             },
             {
                 "name": "width",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "color lower bound",
@@ -115,12 +118,14 @@
             },
             {
                 "name": "point generation rate",
-                "type": "float"
+                "type": "float",
+                "unit": "points per second"
             },
             {
                 "name": "point velocity",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "point velocity cone angle",
@@ -140,23 +145,28 @@
             },
             {
                 "name": "texture repeats u",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats"
             },
             {
                 "name": "texture repeats v",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats"
             },
             {
                 "name": "texture animation u",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats per second"
             },
             {
                 "name": "texture animation v",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats per second"
             },
             {
                 "name": "animation rate",
-                "type": "float"
+                "type": "float",
+                "unit": "frames per second"
             },
             {
                 "name": "bitmap",
@@ -237,7 +247,8 @@
             },
             {
                 "name": "u animation period",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "u animation phase",
@@ -245,7 +256,8 @@
             },
             {
                 "name": "u animation scale",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats"
             },
             {
                 "name": "v animation source",
@@ -257,7 +269,8 @@
             },
             {
                 "name": "v animation period",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "v animation phase",
@@ -265,7 +278,8 @@
             },
             {
                 "name": "v animation scale",
-                "type": "float"
+                "type": "float",
+                "unit": "repeats"
             },
             {
                 "name": "rotation animation source",
@@ -285,7 +299,7 @@
             },
             {
                 "name": "rotation animation scale",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "rotation animation center",

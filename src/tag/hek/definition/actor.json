@@ -127,15 +127,16 @@
             },
             {
                 "name": "max vision distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "central vision angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "max vision angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "type": "pad",
@@ -143,11 +144,12 @@
             },
             {
                 "name": "peripheral vision angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "peripheral distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -165,15 +167,20 @@
             },
             {
                 "name": "hearing distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "notice projectile chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "notice vehicle chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",
@@ -181,15 +188,18 @@
             },
             {
                 "name": "combat perception time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "guard perception time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "non combat perception time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "inverse combat perception time",
@@ -215,35 +225,46 @@
             },
             {
                 "name": "dive into cover chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "emerge from cover chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "dive from grenade chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "pathfinding radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "glass ignorance chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "stationary movement dist",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "free flying sidestep",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "begin moving angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "type": "pad",
@@ -261,19 +282,19 @@
             },
             {
                 "name": "noncombat look delta l",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "noncombat look delta r",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "combat look delta l",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "combat look delta r",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "idle aiming range",
@@ -293,47 +314,56 @@
             {
                 "name": "noncombat idle facing",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "noncombat idle aiming",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "noncombat idle looking",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "guard idle facing",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "guard idle aiming",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "guard idle looking",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "combat idle facing",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "combat idle aiming",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "combat idle looking",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -392,7 +422,8 @@
             {
                 "name": "danger trigger time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "friends killed trigger",
@@ -409,7 +440,8 @@
             {
                 "name": "retreat time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -418,11 +450,14 @@
             {
                 "name": "cowering time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "friend killed panic chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "leader type",
@@ -434,15 +469,20 @@
             },
             {
                 "name": "leader killed panic chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "panic damage threshold",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "surprise distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -451,23 +491,31 @@
             {
                 "name": "hide behind cover time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "hide target not visible time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "hide shield fraction",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "attack shield fraction",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "pursue shield fraction",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",
@@ -491,11 +539,13 @@
             },
             {
                 "name": "min stand time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "min crouch time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "defending hide time modifier",
@@ -511,35 +561,44 @@
             },
             {
                 "name": "evasion seek cover chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "evasion delay time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "max seek cover distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "cover damage threshold",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "stalking discovery time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "stalking max distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "stationary facing angle",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "change facing stand time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -548,25 +607,30 @@
             {
                 "name": "uncover delay time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "target search time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "pursuit position time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
-                "name": "num positions",
-                "type": "uint16"
+                "name": "num positions (coord)",
+                "type": "uint16",
+                "minimum": 0.0
             },
             {
-                "name": "num positions 1",
-                "type": "uint16"
+                "name": "num positions (normal)",
+                "type": "uint16",
+                "minimum": 0.0
             },
             {
                 "type": "pad",
@@ -574,52 +638,71 @@
             },
             {
                 "name": "melee attack delay",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "melee fudge factor",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "melee charge time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "melee leap range",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "melee leap velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per tick",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "melee leap chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "melee leap ballistic",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "berserk damage amount",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "berserk damage threshold",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "berserk proximity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "suicide sensing dist",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "berserk grenade chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",
@@ -628,20 +711,24 @@
             {
                 "name": "guard position time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "combat position time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "old position avoid dist",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "friend avoid dist",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -650,12 +737,14 @@
             {
                 "name": "noncombat idle speech time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "combat idle speech time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",

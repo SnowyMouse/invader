@@ -126,17 +126,21 @@
             },
             {
                 "name": "initial crouch chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "crouch time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "run time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "weapon",
@@ -148,7 +152,8 @@
             },
             {
                 "name": "maximum firing distance",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "rate of fire",
@@ -161,32 +166,40 @@
             {
                 "name": "first burst delay time",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "new target firing pattern time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "surprise delay time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "surprise fire wildly time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "death fire wildly chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "death fire wildly time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "desired combat range",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "custom stand gun offset",
@@ -200,11 +213,15 @@
             },
             {
                 "name": "target tracking",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "target leading",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "weapon damage modifier",
@@ -216,7 +233,8 @@
             },
             {
                 "name": "burst origin radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "burst origin angle",
@@ -225,7 +243,8 @@
             {
                 "name": "burst return length",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "burst return angle",
@@ -234,16 +253,19 @@
             {
                 "name": "burst duration",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "burst separation",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "burst angular velocity",
-                "type": "Angle"
+                "type": "Angle",
+                "unit": "degrees per second"
             },
             {
                 "type": "pad",
@@ -251,7 +273,9 @@
             },
             {
                 "name": "special damage modifier",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "special projectile error",
@@ -339,32 +363,40 @@
             },
             {
                 "name": "special fire chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "special fire delay",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "melee range",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "melee abort range",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "berserk firing ranges",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "berserk melee range",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "berserk melee abort range",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -388,7 +420,8 @@
             },
             {
                 "name": "enemy radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -396,28 +429,35 @@
             },
             {
                 "name": "grenade velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "grenade ranges",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "collateral damage radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "grenade chance",
-                "type": "Fraction"
+                "type": "Fraction",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "grenade check time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "encounter grenade timeout",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -438,17 +478,23 @@
             },
             {
                 "name": "don't drop grenades chance",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "drop weapon loaded",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "fractions of clip",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "drop weapon ammo",
                 "bounds": true,
-                "type": "uint16"
+                "type": "uint16",
+                "unit": "rounds"
             },
             {
                 "type": "pad",
@@ -468,7 +514,8 @@
             },
             {
                 "name": "shield sapping radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "forced shader permutation",

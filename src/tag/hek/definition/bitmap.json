@@ -200,15 +200,18 @@
             },
             {
                 "name": "width",
-                "type": "uint16"
+                "type": "uint16",
+                "unit": "pixels"
             },
             {
                 "name": "height",
-                "type": "uint16"
+                "type": "uint16",
+                "unit": "pixels"
             },
             {
                 "name": "depth",
-                "type": "uint16"
+                "type": "uint16",
+                "unit": "pixels"
             },
             {
                 "name": "type",
@@ -294,15 +297,20 @@
             },
             {
                 "name": "detail fade factor",
-                "type": "Fraction"
+                "type": "Fraction",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "sharpen amount",
-                "type": "Fraction"
+                "type": "Fraction",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "name": "bump height",
-                "type": "Fraction"
+                "type": "Fraction",
+                "unit": "repeats"
             },
             {
                 "name": "sprite budget size",
@@ -315,12 +323,14 @@
             {
                 "name": "color plate width",
                 "type": "uint16",
+                "unit": "pixels",
                 "non_cached": true,
                 "read_only": true
             },
             {
                 "name": "color plate height",
                 "type": "uint16",
+                "unit": "pixels",
                 "non_cached": true,
                 "read_only": true
             },
@@ -340,11 +350,16 @@
             },
             {
                 "name": "blur filter size",
-                "type": "float"
+                "type": "float",
+                "unit": "pixels",
+                "minimum": 0.0,
+                "maximum": 10.0
             },
             {
                 "name": "alpha bias",
-                "type": "float"
+                "type": "float",
+                "minimum": -1.0,
+                "maximum": 1.0
             },
             {
                 "name": "mipmap count",

@@ -63,7 +63,8 @@
             },
             {
                 "name": "stationary turning threshold",
-                "type": "Angle"
+                "type": "Angle",
+                "unit": "degrees per second"
             },
             {
                 "type": "pad",
@@ -99,11 +100,13 @@
             },
             {
                 "name": "bank apply time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "bank decay time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "pitch ratio",
@@ -111,31 +114,39 @@
             },
             {
                 "name": "max velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "max sidestep velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "acceleration",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second squared"
             },
             {
                 "name": "deceleration",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second squared"
             },
             {
                 "name": "angular velocity maximum",
-                "type": "Angle"
+                "type": "Angle",
+                "unit": "degrees per second"
             },
             {
                 "name": "angular acceleration maximum",
-                "type": "Angle"
+                "type": "Angle",
+                "unit": "degrees per second squared"
             },
             {
                 "name": "crouch velocity modifier",
-                "type": "float"
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
             },
             {
                 "type": "pad",
@@ -187,7 +198,8 @@
             },
             {
                 "name": "jump velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per tick"
             },
             {
                 "type": "pad",
@@ -195,27 +207,33 @@
             },
             {
                 "name": "maximum soft landing time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "maximum hard landing time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "name": "minimum soft landing velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "minimum hard landing velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "maximum hard landing velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "name": "death hard landing velocity",
-                "type": "float"
+                "type": "float",
+                "unit": "world units per second"
             },
             {
                 "type": "pad",
@@ -223,15 +241,18 @@
             },
             {
                 "name": "standing camera height",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "crouching camera height",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "crouch transition time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds"
             },
             {
                 "type": "pad",
@@ -239,15 +260,18 @@
             },
             {
                 "name": "standing collision height",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "crouching collision height",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "name": "collision radius",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
@@ -255,7 +279,8 @@
             },
             {
                 "name": "autoaim width",
-                "type": "float"
+                "type": "float",
+                "unit": "world units"
             },
             {
                 "type": "pad",
