@@ -14,6 +14,8 @@ This is used for recording Invader's changes. This changelog is based on
   with invalid references; more functionality is planned for this later
 - invader-bludgeon: Added `-T invalid-power-of-two` which marks non-power-of-two
   bitmaps as power-of-two and vice versa
+- invader-bludgeon: Added `-T out-of-range` which clamps values that are outside
+  of their respective ranges
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets
