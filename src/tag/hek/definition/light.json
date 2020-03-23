@@ -157,6 +157,7 @@
             },
             {
                 "name": "pitch period",
+                "unit": "seconds",
                 "type": "float",
                 "default": 1.0
             },

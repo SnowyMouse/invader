@@ -258,7 +258,7 @@
             },
             {
                 "name": "minimum velocity",
-                "unit": "world units per seconds",
+                "unit": "world units per second",
                 "type": "float"
             },
             {
