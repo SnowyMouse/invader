@@ -13,6 +13,7 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-ranges.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
@@ -33,6 +34,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-refactor-reference.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-struct-value.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-references.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/parser-check-invalid-ranges.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-check-broken-enums.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"

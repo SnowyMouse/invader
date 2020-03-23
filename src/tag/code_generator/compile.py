@@ -18,6 +18,8 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
             continue
         name = struct["member_name"]
+        minimum = struct["minimum"] if "minimum" in struct else None
+        maximum = struct["maximum"] if "maximum" in struct else None
         if struct["type"] == "TagDependency":
             cpp_cache_format_data.write("        this->{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
             cpp_cache_format_data.write("        r.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
@@ -66,18 +68,20 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        }\n")
         elif struct["type"] == "TagReflexive":
             cpp_cache_format_data.write("        std::size_t t_{}_count = this->{}.size();\n".format(name, name))
-            if "minimum" in struct:
-                minimum = struct["minimum"]
+            
+            # Make sure we're within bounds in the reflexive
+            if minimum != None:
                 cpp_cache_format_data.write("        if(t_{}_count < {}) {{\n".format(name, minimum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have at least {} block{}\", tag_index);\n".format(struct_name, name, minimum, "" if minimum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
-            if "maximum" in struct:
-                maximum = struct["maximum"]
+            if maximum != None:
                 cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, maximum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have no more than {} block{}\", tag_index);\n".format(struct_name, name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
+                
+            # Now actually work
             cpp_cache_format_data.write("        if(t_{}_count > 0) {{\n".format(name))
             cpp_cache_format_data.write("            r.{}.count = static_cast<std::uint32_t>(t_{}_count);\n".format(name, name))
             cpp_cache_format_data.write("            auto &n = workload.structs.emplace_back();\n")
@@ -108,6 +112,17 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("            r.{}.size = t_{}_size;\n".format(name, name))
             cpp_cache_format_data.write("        }\n")
         elif "bounds" in struct and struct["bounds"]:
+            # Make sure the value is within bounds
+            if minimum != None:
+                cpp_cache_format_data.write("        if(this->{}.from < {} || this->{}.to < {}) {{\n".format(name, minimum, name, minimum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must be at least {}\", tag_index);\n".format(struct_name, name, minimum))
+                cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
+            if maximum != None:
+                cpp_cache_format_data.write("        if(this->{}.from > {} || this->{}.to > {}) {{\n".format(name, maximum, name, maximum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must no more than {}\", tag_index);\n".format(struct_name, name, minimum))
+                cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{}.from = this->{}.from;\n".format(name, name))
             cpp_cache_format_data.write("        r.{}.to = this->{}.to;\n".format(name, name))
         elif "count" in struct and struct["count"] > 1:
@@ -121,6 +136,17 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                     cpp_cache_format_data.write("        }\n")
                     break
+            # Make sure the value is within bounds
+            if minimum != None:
+                cpp_cache_format_data.write("        if(this->{} < {}) {{\n".format(name, minimum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must be at least {}\", tag_index);\n".format(struct_name, name, minimum))
+                cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
+            if maximum != None:
+                cpp_cache_format_data.write("        if(this->{} > {}) {{\n".format(name, maximum))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must no more than {}\", tag_index);\n".format(struct_name, name, maximum))
+                cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
     if post_compile:
         cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))

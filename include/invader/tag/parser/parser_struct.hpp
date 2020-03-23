@@ -738,6 +738,13 @@ namespace Invader::Parser {
          * @return                 true if invalid references were found; false if not
          */
         virtual bool check_for_invalid_references(bool null_references) = 0;
+        
+        /**
+         * Check for invalid ranges
+         * @param clamp attempt to fix the ranges by clamping them
+         * @return      true if invalid ranges were found; false if not
+         */
+        virtual bool check_for_invalid_ranges(bool clamp) = 0;
 
         /**
          * Format the tag to be used in HEK tags.

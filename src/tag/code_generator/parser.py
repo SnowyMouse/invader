@@ -10,8 +10,9 @@ from refactor_reference import make_refactor_reference
 from parser_struct import make_parser_struct
 from check_broken_enums import make_check_broken_enums
 from check_invalid_references import make_check_invalid_references
+from check_invalid_ranges import make_check_invalid_ranges
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -21,6 +22,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_struct_value.write(what)
         cpp_check_broken_enums.write(what)
         cpp_check_invalid_references.write(what)
+        cpp_check_invalid_ranges.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -112,6 +114,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, None if not "title" in s else s["title"])
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
+        make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
 

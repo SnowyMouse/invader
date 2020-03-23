@@ -101,7 +101,7 @@
             {
                 "name": "potential skip fraction",
                 "minimum": 0.0,
-                "maximum": 0.0,
+                "maximum": 1.0,
                 "type": "Fraction"
             },
             {
