@@ -125,4 +125,8 @@ namespace Invader::Bludgeoner {
         };
         return attempt_fix(dynamic_cast<Parser::Bitmap *>(s)) || attempt_fix(dynamic_cast<Parser::ExtendedBitmap *>(s));
     }
+    
+    bool bullshit_range_fix(Parser::ParserStruct *s, bool fix) {
+        return s->check_for_invalid_ranges(fix);
+    }
 }

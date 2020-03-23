@@ -40,6 +40,9 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 
     /** Fix an incorrect sound buffer size */
     FUCKED_SOUND_BUFFER                 = 1ull << 6,
+    
+    /** Fix invalid values that are out of bounds for their ranges */
+    BULLSHIT_RANGE                      = 1ull << 7,
 
     // Stuff that Refinery breaks
 
@@ -67,6 +70,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
 #define FUCKED_MODEL_MARKERS_FIX "invalid-model-markers"
 #define FUCKED_VERTICES_FIX "missing-vertices"
+#define BULLSHIT_RANGE_FIX "out-of-range"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define EVERYTHING_FIX "everything"
@@ -119,6 +123,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
                 oprintf_success_warn("%s: power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX, file_path);
                 issues_present = true;
             }
+            if(bullshit_range_fix(parsed_data.get(), false)) {
+                oprintf_success_warn("%s: value(s) are out of range; fix with " BULLSHIT_RANGE_FIX, file_path);
+                issues_present = true;
+            }
         }
         else {
             if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
@@ -143,6 +151,10 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             }
             if(power_of_two_fix(parsed_data.get(), true)) {
                 oprintf_success("%s: Fixed " POWER_OF_FUCK_YOU_FIX, file_path);
+                issues_present = true;
+            }
+            if(bullshit_range_fix(parsed_data.get(), true)) {
+                oprintf_success("%s: Fixed " BULLSHIT_RANGE_FIX, file_path);
                 issues_present = true;
             }
         }
@@ -182,7 +194,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -238,6 +250,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], FUCKED_SOUND_BUFFER_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_SOUND_BUFFER;
+                }
+                else if(std::strcmp(arguments[0], BULLSHIT_RANGE_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_RANGE;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;

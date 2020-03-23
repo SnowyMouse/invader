@@ -14,6 +14,7 @@ namespace Invader::Bludgeoner {
     bool fucked_vertices(Parser::ParserStruct *s, bool fix);
     bool bullshit_references(Parser::ParserStruct *s, bool fix);
     bool power_of_two_fix(Parser::ParserStruct *s, bool fix);
+    bool bullshit_range_fix(Parser::ParserStruct *s, bool fix);
 }
 
 #endif

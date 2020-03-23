@@ -24,6 +24,7 @@ def make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_inva
                     cpp_check_invalid_ranges.write("                return true;\n")
                     cpp_check_invalid_ranges.write("            }\n")
                     cpp_check_invalid_ranges.write("            {} = {};\n".format(what, minimum))
+                    cpp_check_invalid_ranges.write("            return_value = true;\n")
                     cpp_check_invalid_ranges.write("        }\n")
                 if maximum != None:
                     cpp_check_invalid_ranges.write("        if({} > {}) {{\n".format(what, maximum))
@@ -31,6 +32,7 @@ def make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_inva
                     cpp_check_invalid_ranges.write("                return true;\n")
                     cpp_check_invalid_ranges.write("            }\n")
                     cpp_check_invalid_ranges.write("            {} = {};\n".format(what, maximum))
+                    cpp_check_invalid_ranges.write("            return_value = true;\n")
                     cpp_check_invalid_ranges.write("        }\n")
             
             if ("bounds" in struct) and struct["bounds"]:
