@@ -115,6 +115,22 @@ namespace Invader::Parser {
         const char *get_comment() const noexcept {
             return this->comment;
         }
+        
+        /**
+         * Get the minimum value
+         * @return minimum value or nullopt if there is no minimum
+         */
+        std::optional<Number> get_minimum() const noexcept {
+            return this->minimum;
+        }
+        
+        /**
+         * Get the maximum value
+         * @return maximum value or nullopt if there is no maximum
+         */
+        std::optional<Number> get_maximum() const noexcept {
+            return this->maximum;
+        }
 
         /**
          * Get the dependency
@@ -639,17 +655,21 @@ namespace Invader::Parser {
          * @param count       number of values (if multiple values or bounds)
          * @param bounds      whether or not this is bounds
          * @param read_only   value is read only
+         * @param minimum     optional minimum value
+         * @param maximum     optional maximum value
          */
         ParserStructValue(
-            const char *name,
-            const char *member_name,
-            const char *comment,
-            void *      object,
-            ValueType   type,
-            const char *unit = nullptr,
-            std::size_t count = 1,
-            bool        bounds = false,
-            bool        read_only = false
+            const char *          name,
+            const char *          member_name,
+            const char *          comment,
+            void *                object,
+            ValueType             type,
+            const char *          unit = nullptr,
+            std::size_t           count = 1,
+            bool                  bounds = false,
+            bool                  read_only = false,
+            std::optional<Number> minimum = std::nullopt,
+            std::optional<Number> maximum = std::nullopt
         );
 
     private:
@@ -662,6 +682,8 @@ namespace Invader::Parser {
         std::size_t count = 1;
         bool bounds = false;
         const char *unit = nullptr;
+        std::optional<Number> minimum;
+        std::optional<Number> maximum;
 
         get_object_in_array_fn_type get_object_in_array_fn = nullptr;
         get_array_size_fn_type get_array_size_fn = nullptr;

@@ -25,6 +25,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: No longer shows unaffected tags if using `-a`
 - invader-edit-qt: Changed default dimensions of tag windows to scale better
   with larger tags
+- invader-edit-qt: Minimums/maximum values are now enforced
+- invader-edit-qt: Added overflow protection for values
 - invader-sound: Reduced memory consumption
 
 ### Fixed

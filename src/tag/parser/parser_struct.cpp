@@ -22,15 +22,17 @@ namespace Invader::Parser {
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
-        const char *name,
-        const char *member_name,
-        const char *comment,
-        void *      object,
-        ValueType   type,
-        const char *unit,
-        std::size_t count,
-        bool        bounds,
-        bool        read_only
+        const char *          name,
+        const char *          member_name,
+        const char *          comment,
+        void *                object,
+        ValueType             type,
+        const char *          unit,
+        std::size_t           count,
+        bool                  bounds,
+        bool                  read_only,
+        std::optional<Number> minimum,
+        std::optional<Number> maximum
     ) : name(name),
         member_name(member_name),
         comment(comment),
@@ -39,6 +41,8 @@ namespace Invader::Parser {
         count(count),
         bounds(bounds),
         unit(unit),
+        minimum(minimum),
+        maximum(maximum),
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(

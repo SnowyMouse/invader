@@ -30,6 +30,38 @@ namespace Invader::EditQt {
             event->ignore();
         }
     };
+    
+    static int compare_number(const Parser::ParserStructValue::Number &a, const Parser::ParserStructValue::Number &b) {
+        auto compare_to = [&b](auto a) -> int {
+            auto do_compare = [&a](auto b) -> int {
+                if(a == b) {
+                    return 0;
+                }
+                else if(a > b) {
+                    return 1;
+                }
+                else {
+                    return -1;
+                }
+            };
+            
+            if(auto *b_int = std::get_if<std::int64_t>(&b)) {
+                return do_compare(*b_int);
+            }
+            else {
+                return do_compare(std::get<double>(b));
+            }
+        };
+        
+        if(auto *a_int = std::get_if<std::int64_t>(&a)) {
+            return compare_to(*a_int);
+        }
+        else {
+            return compare_to(std::get<double>(a));
+        }
+    }
+    
+    static void set_bad(QLineEdit *textbox, bool bad);
 
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
         TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
@@ -89,16 +121,22 @@ namespace Invader::EditQt {
                 textbox_widgets.emplace_back(textbox);
                 textbox->setMinimumWidth(width);
                 layout->addWidget(textbox);
+                
+                // Get the minimum and maximum
+                auto min = value->get_minimum();
+                auto max = value->get_maximum();
+                auto &current_value = values[value_index];
+                set_bad(textbox, (min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0));
 
                 // Radians get converted to degrees
                 if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
-                    textbox->setText(QString::number(RADIANS_TO_DEGREES(std::get<double>(values[value_index]))));
+                    textbox->setText(QString::number(RADIANS_TO_DEGREES(std::get<double>(current_value))));
                 }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
-                    textbox->setText(QString::number(std::get<double>(values[value_index])));
+                    textbox->setText(QString::number(std::get<double>(current_value)));
                 }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
-                    textbox->setText(QString::number(std::get<std::int64_t>(values[value_index])));
+                    textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
                 }
                 else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_TAGSTRING) {
                     textbox->setText(value->get_string());
@@ -451,6 +489,43 @@ namespace Invader::EditQt {
         if(unit) {
             layout->addWidget(widgets_array.emplace_back(new QLabel(unit)));
         }
+        
+        // Show the range if needed
+        auto min = value->get_minimum();
+        auto max = value->get_maximum();
+        if(min.has_value() || max.has_value()) {
+            // Get the min/max text
+            auto make_text = [](const std::optional<Parser::ParserStructValue::Number> &number) -> QString {
+                if(number.has_value()) {
+                    // If it's an int, get this
+                    if(auto *get_int = std::get_if<std::int64_t>(&number.value())) {
+                        return QString::number(*get_int);
+                    }
+                    // Otherwise it's a float
+                    else {
+                        return QString::number(std::get<double>(number.value()));
+                    }
+                }
+                return QString();
+            };
+            QString min_text = make_text(min);
+            QString max_text = make_text(max);  
+            
+            // Format the text
+            char min_max_text[256] = {};
+            if(min.has_value() && !max.has_value()) {
+                std::snprintf(min_max_text, sizeof(min_max_text), "[minimum: %s]", min_text.toLatin1().data());
+            }
+            else if(!min.has_value() && max.has_value()) {
+                std::snprintf(min_max_text, sizeof(min_max_text), "[maximum: %s]", max_text.toLatin1().data());
+            }
+            else {
+                std::snprintf(min_max_text, sizeof(min_max_text), "[%s - %s]", min_text.toLatin1().data(), max_text.toLatin1().data());
+            }
+            
+            // Make the label
+            layout->addWidget(reinterpret_cast<QLabel *>(widgets_array.emplace_back(new QLabel(min_max_text))));
+        }
 
         title_label->setMinimumWidth(label_width);
         title_label->setMaximumWidth(title_label->minimumWidth());
@@ -589,27 +664,94 @@ namespace Invader::EditQt {
                 // Set the number value
                 auto widget_count = this->textbox_widgets.size();
                 std::vector<Parser::ParserStructValue::Number> numbers(widget_count);
+                bool can_set = true;
+                
+                // Get the minimum and maximum
+                auto min = value->get_minimum();
+                auto max = value->get_maximum();
+                
+                if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
+                    std::int64_t actual_min = 0, actual_max;
+                    
+                    // Get the theoretical mins and maxes
+                    switch(value->get_type()) {
+                        case Parser::ParserStructValue::VALUE_TYPE_INT8:
+                            actual_min = INT8_MIN;
+                            actual_max = INT8_MAX;
+                            break;
+                            
+                        case Parser::ParserStructValue::VALUE_TYPE_UINT8:
+                            actual_max = UINT8_MAX;
+                            break;
+
+                        case Parser::ParserStructValue::VALUE_TYPE_INT16:
+                            actual_min = INT16_MIN;
+                            actual_max = INT16_MAX;
+                            break;
+                            
+                        case Parser::ParserStructValue::VALUE_TYPE_UINT16:
+                        case Parser::ParserStructValue::VALUE_TYPE_INDEX:
+                            actual_max = UINT16_MAX;
+                            break;
+
+                        case Parser::ParserStructValue::VALUE_TYPE_INT32:
+                            actual_min = INT32_MIN;
+                            actual_max = INT32_MAX;
+                            break;
+                            
+                        case Parser::ParserStructValue::VALUE_TYPE_UINT32:
+                            actual_max = UINT32_MAX;
+                            break;
+                            
+                        default:
+                            std::terminate();
+                    }
+                    
+                    if(!min.has_value()) {
+                        min = actual_min;
+                    }
+                    
+                    if(!max.has_value()) {
+                        max = actual_max;
+                    }
+                }
 
                 // Go through each number
                 for(std::size_t w = 0; w < widget_count; w++) {
                     auto *widget = this->textbox_widgets[w];
+                    bool ok = false;
+                    
+                    // Set the value
+                    auto &number = numbers[w];
                     switch(value->get_number_format()) {
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
-                            double double_value = widget->text().toDouble();
+                            double double_value = widget->text().toDouble(&ok);
                             if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
                                 double_value = DEGREES_TO_RADIANS(double_value);
                             }
-                            numbers[w] = double_value;
+                            number = double_value;
                             break;
                         }
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-                            numbers[w] = static_cast<std::int64_t>(widget->text().toLongLong());
+                            number = static_cast<std::int64_t>(widget->text().toLongLong(&ok));
                             break;
                         default:
                             std::terminate();
                     }
+                    
+                    // Make sure we're within range
+                    ok = ok && !(min.has_value() && compare_number(number, min.value()) < 0);
+                    ok = ok && !(max.has_value() && compare_number(number, max.value()) > 0);
+                    set_bad(widget, !ok);
+                    
+                    // If it's NOT ok, then we shall not save anything.
+                    can_set = can_set && ok;
                 }
-                value->set_values(numbers);
+                
+                // If anything we entered was invalid, don't set. Otherwise, set.
+                if(can_set) {
+                    value->set_values(numbers);
+                }
             }
         }
 
@@ -644,13 +786,7 @@ namespace Invader::EditQt {
         }
 
         // Color based on if we found it or it's empty, or we didn't find it
-        auto *textbox = textbox_widgets[0];
-        if(found) {
-            textbox->setStyleSheet("");
-        }
-        else {
-            textbox->setStyleSheet("color: #FF0000");
-        }
+        set_bad(textbox_widgets[0], !found);
 
         // Set our button as enabled
         this->widgets[3]->setEnabled(found && preferred_path != "");
@@ -672,5 +808,14 @@ namespace Invader::EditQt {
         char path_to_open[1024];
         std::snprintf(path_to_open, sizeof(path_to_open), "%s.%s", this->textbox_widgets[0]->text().toLatin1().data(), reinterpret_cast<QComboBox *>(this->widgets[0])->currentText().toLower().toLatin1().data());
         this->get_editor_window()->get_parent_window()->open_tag(path_to_open, false);
+    }
+    
+    static void set_bad(QLineEdit *textbox, bool bad) {
+        if(!bad) {
+            textbox->setStyleSheet("");
+        }
+        else {
+            textbox->setStyleSheet("color: #FF0000");
+        }
     }
 }
