@@ -193,14 +193,15 @@ Create or modify a bitmap tag.
 
 Options:
   -B --budget <length>         Set max length of sprite sheet. Can be 32, 64,
-                               128, 256, 512, 1024, or 2048. Default (new tag):
-                               32
+                               128, 256, or 512. If --extended, then 1024 or
+                               2048 can be used, too. Default (new tag): 32
   -C --budget-count <count>    Set maximum number of sprite sheets. Setting
                                this to 0 disables budgeting. Default (new tag):
                                0
-  -d --data <path> <path>      Set the data directory.
-  -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
-                               Can be: a, rgb, or argb. Default: none
+  -d --data <dir>              Use the specified data directory.
+  -D --dithering <channels>    [REQUIRES --extended] Apply dithering to 16-bit,
+                               dxtn, or p8 bitmaps. Can be: a, rgb, or argb.
+                               Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
@@ -211,16 +212,16 @@ Options:
   -i --info                    Show license and credits.
   -I --ignore-tag              Ignore the tag data if the tag exists.
   -M --mipmap-count <count>    Set maximum mipmaps. Default (new tag): 32767
-  -p --bump-palettize <val>    Set the bumpmap palettization setting. This will
-                               not work with stock Halo. Can be: off or on.
-                               Default (new tag): off
+  -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
+                               off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
-  -s --mipmap-scale <type>     Mipmap scale type. Can be: linear,
-                               nearest-alpha, nearest. Default (new tag):
-                               linear
-  -t --tags <path>             Set the data directory.
+  -s --mipmap-scale <type>     [REQUIRES --extended] Mipmap scale type. Can be:
+                               linear, nearest-alpha, nearest. Default (new
+                               tag): linear
+  -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d, 3d, cubemap,
                                interface, or sprite. Default (new tag): 2d
+  -x --extended                Create an extended_bitmap tag.
 ```
 
 #### Uncompressed bitmap formats
