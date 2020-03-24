@@ -853,7 +853,7 @@
                 "size": 8
             },
             {
-                "name": "body vitality",
+                "name": "body vitality modifier",
                 "minimum": 0.0,
                 "type": "float"
             },
