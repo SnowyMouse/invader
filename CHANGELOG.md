@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   bitmaps as power-of-two and vice versa
 - invader-bludgeon: Added `-T out-of-range` which clamps values that are outside
   of their respective ranges
+- invader-build: Added a warning for using `-o` and outputting a map that does
+  not match the scenario tag (unless building for MCC)
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets

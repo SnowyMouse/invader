@@ -254,14 +254,37 @@ int main(int argc, const char **argv) {
         else {
             map_name = File::base_name_chars(scenario.c_str());
         }
+        auto map_name_with_extension = std::string(map_name) + ".map";
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
         if(!build_options.output.size()) {
-            final_file = (std::filesystem::path(build_options.maps) / (std::string(map_name) + ".map")).string();
+            final_file = (std::filesystem::path(build_options.maps) / map_name_with_extension).string();
         }
         else {
             final_file = build_options.output;
+            auto final_file_name = std::filesystem::path(final_file).filename();
+            auto final_file_name_string = final_file_name.string();
+            
+            // If we are not building for MCC and the scenario name is mismatched, warn
+            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && final_file_name_string != map_name_with_extension) {
+                eprintf_warn("The file name (%s) does not match the scenario name (%s)", final_file_name_string.c_str(), map_name_with_extension.c_str());
+                eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
+                
+                if(final_file_name.extension() == ".map") {
+                    auto name_without_extension = final_file_name.replace_extension().string();
+                    bool incorrect_case = false;
+                    for(char &c : name_without_extension) {
+                        if(std::tolower(c) != c) {
+                            incorrect_case = true;
+                            break;
+                        }
+                    }
+                    if(!incorrect_case) {
+                        eprintf_warn("Did you intend to use --rename-scenario \"%s\"", name_without_extension.c_str());
+                    }
+                }
+            }
         }
 
         std::FILE *file = std::fopen(final_file.c_str(), "wb");
