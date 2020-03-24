@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.31.0] - 2020-03-24
 ### Added
 - invader-bludgeon: Added `-T incorrect-sound-buffer` which fixes incorrect
   sound buffer sizes set in the tag (can fix instances of sounds being the
