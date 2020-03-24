@@ -307,19 +307,30 @@ namespace Invader {
             oprintf(" done\n");
         }
 
-        // List BSPs
+        // Find the largest BSP
         std::size_t bsp_size = 0;
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
         bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
 
+        // Calculate total BSP size (pointless on Dark Circlet maps)
+        std::vector<std::size_t> bsp_sizes(this->bsp_count);
         if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
-                std::size_t this_bsp_size = this->map_data_structs[i].size();
+                // Determine the index. If it's anniversary, there are two indices per BSP
+                auto actual_index = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY ? i : (i * 2 - 1);
+                auto &this_bsp_size = bsp_sizes[i - 1];
+                
+                // Get the size of the BSP struct
+                this_bsp_size = this->map_data_structs[actual_index].size();
+                
+                // If it's anniversary, we also need to include the size of the vertices
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                    this_bsp_size += this->map_data_structs[i + 1].size();
+                    this_bsp_size += this->map_data_structs[actual_index + 1].size();
                 }
+                
+                // If this is now the largest BSP, mark it as such
                 if(this_bsp_size > largest_bsp_size) {
                     largest_bsp_size = this_bsp_size;
                     largest_bsp_count = 1;
@@ -327,6 +338,8 @@ namespace Invader {
                 else if(this_bsp_size == largest_bsp_size) {
                     largest_bsp_count++;
                 }
+                
+                // Add up
                 bsp_size += this_bsp_size;
             }
         }
@@ -344,7 +357,7 @@ namespace Invader {
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count](auto &header, auto max_size) {
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header, auto max_size) {
             std::vector<std::byte> final_data;
             header = {};
             std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
@@ -500,6 +513,7 @@ namespace Invader {
                     oprintf_success("Built successfully");
                 }
 
+                // Chu
                 bool easter_egg = false;
                 if(ON_COLOR_TERM) {
                     if(new_crc == 0x21706156) {
@@ -512,6 +526,7 @@ namespace Invader {
                     }
                 }
 
+                // Show some useful metadata
                 oprintf("Scenario:          %s\n", workload.scenario_name.string);
                 oprintf("Engine:            %s\n", HEK::engine_name(workload.engine_target));
                 oprintf("Map type:          %s\n", HEK::type_name(*workload.cache_file_type));
@@ -520,6 +535,8 @@ namespace Invader {
                     oprintf(", %zu stubbed", workload.stubbed_tag_count);
                 }
                 oprintf("\n");
+                
+                // Show the BSP count and/or size
                 oprintf("BSPs:              %zu", workload.bsp_count);
                 if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                     oprintf("\n");
@@ -527,55 +544,60 @@ namespace Invader {
                 else {
                     oprintf(" (%.02f MiB)\n", BYTES_TO_MiB(bsp_size));
                 }
+                
+                // If we have BSPs, go through all of them
                 if(workload.bsp_count > 0) {
                     auto &scenario_tag_struct = workload.structs[*workload.tags[workload.scenario_index].base_struct];
                     auto &scenario_tag_data = *reinterpret_cast<Parser::Scenario::struct_little *>(scenario_tag_struct.data.data());
                     auto *scenario_tag_bsps = reinterpret_cast<Parser::ScenarioBSP::struct_little *>(workload.map_data_structs[0].data() + *workload.structs[*scenario_tag_struct.resolve_pointer(&scenario_tag_data.structure_bsps.pointer)].offset);
+                    
+                    // Go through the BSPs and print their names
                     for(std::size_t b = 0; b < workload.bsp_count; b++) {
                         auto &bsp = scenario_tag_bsps[b];
-                        std::size_t bss = bsp.bsp_size.read();
                         oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
-                        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                            oprintf("\n");
-                        }
-                        else {
+                        
+                        // If we're not on a Dark Circlet map, print the size (Dark Circlet maps don't have any meaningful way to get BSP size)
+                        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                            auto &bss = bsp_sizes[b];
                             oprintf(
-                                " (%.02f MiB)%s\n",
+                                " (%.02f MiB)%s",
                                 BYTES_TO_MiB(bss),
                                 (largest_bsp_count < workload.bsp_count && bss == largest_bsp_size) ? "*" : ""
                             );
                         }
+                        oprintf("\n");
                     }
 
+                    // And, if we're not on dark circlet maps and we have different BSP sizes, indicate the largest BSP
                     if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && largest_bsp_count < workload.bsp_count) {
-                        if(bsp_size_affects_tag_space) {
-                            oprintf("                   * = Largest BSP%s (affects final tag space usage)\n", largest_bsp_count == 1 ? "" : "s");
-                        }
-                        else {
-                            oprintf("                   * = Largest BSP%s\n", largest_bsp_count == 1 ? "" : "s");
-                        }
+                        oprintf("                   * = Largest BSP%s%s\n", largest_bsp_count == 1 ? "" : "s", bsp_size_affects_tag_space ? " (affects final tag space usage)" : "");
                     }
                 }
 
-                oprintf("Tag space:         %.02f ", BYTES_TO_MiB(tag_space_usage));
+                // Show the total tag space (if applicable)
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
-                }
-                else {
-                    oprintf("MiB\n");
+                    oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
                 }
 
+                // Show some other data that might be useful
                 oprintf("Models:            %zu (%.02f MiB)\n", workload.part_count, BYTES_TO_MiB(model_data_size));
                 oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(raw_data_size), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
+                
+                // Show our CRC32
                 if(can_calculate_crc) {
                     oprintf("CRC32 checksum:    0x%08X\n", new_crc);
                 }
+                
+                // If we compressed it, how small did we get it?
                 if(workload.compress) {
                     std::size_t compressed_size = final_data.size();
                     oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
                 }
 
+                // Show the original size
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
+                
+                // If we have a 32-bit limit, show the limit
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
@@ -583,10 +605,14 @@ namespace Invader {
                     oprintf("MiB\n");
                 }
 
+                // And how long did we take
                 oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - workload.start).count() / 1000.0);
 
-                if(easter_egg) {
-                    oprintf("\x1B[m");
+                // Chu
+                if(ON_COLOR_TERM) {
+                    if(easter_egg) {
+                        oprintf("\x1B[m");
+                    }
                 }
 
                 oprintf("\n");
@@ -718,6 +744,8 @@ namespace Invader {
             COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+            
+            // For extended sounds and bitmaps, downgrade if necessary
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
                 auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
@@ -742,6 +770,8 @@ namespace Invader {
                 }
                 break;
             }
+            
+            // And, of course, BSP tags
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
@@ -773,6 +803,8 @@ namespace Invader {
                 }
                 break;
             }
+            
+            // We don't have any way of handling these tags
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case TagClassInt::TAG_CLASS_SPHEROID:
             case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
