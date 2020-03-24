@@ -99,64 +99,36 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         // No fixes; try to detect things
         bool issues_present = false;
         if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
-            if(bullshit_enums(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: invalid enums detected; fix with " BULLSHIT_ENUMS_FIX, file_path);
-                issues_present = true;
+            #define check_fix(fix, fix_message) if(fix(parsed_data.get(), false)) { \
+                oprintf_success_warn("%s: " fix_message, file_path); \
+                issues_present = true; \
             }
-            if(bullshit_references(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: invalid reference class detected; fix with " BULLSHIT_REFERENCE_CLASSES_FIX, file_path);
-                issues_present = true;
-            }
-            if(refinery_model_markers(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX, file_path);
-                issues_present = true;
-            }
-            if(sound_buffer(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: incorrect sound buffer size on one or more permutations; fix with " FUCKED_SOUND_BUFFER_FIX, file_path);
-                issues_present = true;
-            }
-            if(fucked_vertices(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX, file_path);
-                issues_present = true;
-            }
-            if(power_of_two_fix(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX, file_path);
-                issues_present = true;
-            }
-            if(bullshit_range_fix(parsed_data.get(), false)) {
-                oprintf_success_warn("%s: value(s) are out of range; fix with " BULLSHIT_RANGE_FIX, file_path);
-                issues_present = true;
-            }
+            
+            check_fix(bullshit_enums, "invalid enums detected; fix with " BULLSHIT_ENUMS_FIX);
+            check_fix(bullshit_references, "invalid reference class detected; fix with " BULLSHIT_REFERENCE_CLASSES_FIX);
+            check_fix(refinery_model_markers, "invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX);
+            check_fix(sound_buffer, "incorrect sound buffer size on one or more permutations; fix with " FUCKED_SOUND_BUFFER_FIX);
+            check_fix(fucked_vertices, "missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX);
+            check_fix(power_of_two_fix, "power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX);
+            check_fix(bullshit_range_fix, "value(s) are out of range; fix with " BULLSHIT_RANGE_FIX);
+            
+            #undef check_fix
         }
         else {
-            if((fixes & BULLSHIT_ENUMS) && bullshit_enums(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " BULLSHIT_ENUMS_FIX, file_path);
-                issues_present = true;
+            #define apply_fix(fix, fix_enum, fix_name) if((fixes & fix_enum) && fix(parsed_data.get(), true)) { \
+                oprintf_success("%s: Fixed " fix_name, file_path); \
+                issues_present = true; \
             }
-            if((fixes & BULLSHIT_REFERENCE_CLASSES) && bullshit_references(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " BULLSHIT_REFERENCE_CLASSES_FIX, file_path);
-                issues_present = true;
-            }
-            if((fixes & FUCKED_MODEL_MARKERS) && refinery_model_markers(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " FUCKED_MODEL_MARKERS_FIX, file_path);
-                issues_present = true;
-            }
-            if(sound_buffer(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " FUCKED_SOUND_BUFFER_FIX, file_path);
-                issues_present = true;
-            }
-            if(fucked_vertices(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " FUCKED_VERTICES_FIX, file_path);
-                issues_present = true;
-            }
-            if(power_of_two_fix(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " POWER_OF_FUCK_YOU_FIX, file_path);
-                issues_present = true;
-            }
-            if(bullshit_range_fix(parsed_data.get(), true)) {
-                oprintf_success("%s: Fixed " BULLSHIT_RANGE_FIX, file_path);
-                issues_present = true;
-            }
+            
+            apply_fix(bullshit_enums, BULLSHIT_ENUMS, BULLSHIT_ENUMS_FIX);
+            apply_fix(bullshit_references, BULLSHIT_REFERENCE_CLASSES, BULLSHIT_REFERENCE_CLASSES_FIX);
+            apply_fix(refinery_model_markers, FUCKED_MODEL_MARKERS, FUCKED_MODEL_MARKERS_FIX);
+            apply_fix(bullshit_range_fix, BULLSHIT_RANGE, BULLSHIT_RANGE_FIX);
+            apply_fix(power_of_two_fix, POWER_OF_FUCK_YOU, POWER_OF_FUCK_YOU_FIX);
+            apply_fix(sound_buffer, FUCKED_SOUND_BUFFER, FUCKED_SOUND_BUFFER_FIX);
+            apply_fix(fucked_vertices, FUCKED_VERTICES, FUCKED_VERTICES_FIX);
+            
+            #undef apply_fix
         }
 
         // No issues? OK
