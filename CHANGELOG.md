@@ -39,6 +39,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed an error message for sound permutations
 - invader-build: Fixed a deprecation warning with missing source data even when
   source data was present
+- invader-build: Fixed BSP sizes not being checked against tag space when
+  building retail/custom/demo maps
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
 - invader-sound: Fixed non-extended sounds being named extended_sound
 
