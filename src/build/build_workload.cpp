@@ -312,10 +312,10 @@ namespace Invader {
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
-        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
 
         if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            for(std::size_t i = 1; i < 1 + this->bsp_count; i++) {
+            for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 std::size_t this_bsp_size = this->map_data_structs[i].size();
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
                     this_bsp_size += this->map_data_structs[i + 1].size();
