@@ -41,6 +41,8 @@ This is used for recording Invader's changes. This changelog is based on
   source data was present
 - invader-build: Fixed BSP sizes not being checked against tag space when
   building retail/custom/demo maps
+- invader-build: Fixed some potential segmentation faults when building maps
+  with `-g dark`
 - invader-edit-qt: Fixed short sounds not playing in sound previewing
 - invader-sound: Fixed non-extended sounds being named extended_sound
 

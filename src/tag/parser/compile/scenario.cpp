@@ -435,16 +435,21 @@ namespace Invader::Parser {
             if(b.structure_bsp.tag_id.is_null()) {
                 continue;
             }
+            
+            // Figure out the base tag struct thing
+            auto *bsp_tag_struct = &workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()];
+            
+            // If we're not on dark circlet, we need to read the pointer at the beginning of the struct
+            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
+            }
 
-            auto &bsp_tag_struct = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET ?
-                workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()] :
-                workload.structs[workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()].resolve_pointer(static_cast<std::size_t>(0)).value()];
-            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
+            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
             if(bsp_tag_data.collision_bsp.count == 0) {
                 continue;
             }
 
-            auto &collision_bsp_struct = workload.structs[bsp_tag_struct.resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
+            auto &collision_bsp_struct = workload.structs[bsp_tag_struct->resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
             auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
 
             bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
@@ -482,7 +487,7 @@ namespace Invader::Parser {
                 bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
             }
             if(bsp_data_s.render_leaf_count) {
-                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
+                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
             }
         }
 
@@ -751,8 +756,15 @@ namespace Invader::Parser {
                 auto &b = this->structure_bsps[bsp];
                 auto &bsp_id = b.structure_bsp.tag_id;
                 if(!bsp_id.is_null()) {
-                    auto &bsp_tag_struct = workload.structs[*workload.structs[*(workload.tags[bsp_id.index].base_struct)].resolve_pointer(static_cast<std::size_t>(0))];
-                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct.data.data());
+                    // Figure out the base tag struct thing
+                    auto *bsp_tag_struct = &workload.structs[workload.tags[bsp_id.index].base_struct.value()];
+                    
+                    // If we're not on dark circlet, we need to read the pointer at the beginning of the struct
+                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
+                    }
+                    
+                    auto &bsp_tag_data = *reinterpret_cast<ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
                     std::size_t bsp_cluster_count = bsp_tag_data.clusters.count.read();
 
                     if(bsp_cluster_count == 0) {
@@ -763,7 +775,7 @@ namespace Invader::Parser {
                     std::vector<bool> used(decal_count, false);
 
                     // Now let's go do stuff
-                    auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct.resolve_pointer(&bsp_tag_data.clusters.pointer)];
+                    auto &bsp_cluster_struct = workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.clusters.pointer)];
                     auto *clusters = reinterpret_cast<ScenarioStructureBSPCluster::struct_little *>(bsp_cluster_struct.data.data());
 
                     // Go through each decal; see what we can come up with
@@ -813,7 +825,7 @@ namespace Invader::Parser {
                     bsp_tag_data.runtime_decals.count = static_cast<std::uint32_t>(runtime_decals.size());
 
                     if(runtime_decals.size() != 0) {
-                        auto &new_struct_ptr = bsp_tag_struct.pointers.emplace_back();
+                        auto &new_struct_ptr = bsp_tag_struct->pointers.emplace_back();
                         new_struct_ptr.offset = reinterpret_cast<const std::byte *>(&bsp_tag_data.runtime_decals.pointer) - reinterpret_cast<const std::byte *>(&bsp_tag_data);
                         new_struct_ptr.struct_index = workload.structs.size();
                         auto &new_struct = workload.structs.emplace_back();
