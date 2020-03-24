@@ -287,7 +287,11 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
                 }
 
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && !workload.hide_pedantic_warnings) {
+                if((
+                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
+                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
+                ) && !workload.hide_pedantic_warnings) {
                     switch(type) {
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
@@ -312,7 +316,7 @@ namespace Invader::Parser {
                             break;
                     }
                     if(exceeded) {
-                        eprintf_warn("Some compliant hardware may not be able to render this bitmap");
+                        eprintf_warn("Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
                     }
                 }
             }
