@@ -167,7 +167,7 @@
             },
             {
                 "name": "minimum angle for vehicle flipping",
-                "type": "float"
+                "type": "Angle"
             },
             {
                 "name": "look function",
