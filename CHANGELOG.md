@@ -21,6 +21,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader: Changed the internal Dark Circlet map format to use 64-bit offsets
+- invader: Removed checking for invalid values when compiling a tag outside of
+  invader-build (i.e. recursion in invader-dependency, invader-extract, etc.)
 - invader-bitmap: extended_bitmap tags now store compressed color plate data in
   Zstandard
 - invader-bludgeon: Now counts bludgeoned tags as tags that were changed
