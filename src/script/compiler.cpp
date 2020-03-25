@@ -8,7 +8,7 @@ namespace Invader::Compiler {
         error_message = "unimplemented";
     }
 
-    static ScriptTree::Object decompile_node(std::size_t index, const Parser::Scenario &scenario);
+    static std::optional<ScriptTree::Object> decompile_node(std::size_t index, const Parser::Scenario &scenario);
 
     static ScriptTree::Object::Block make_block(const ScriptTree::Object &value) {
         if(value.type == ScriptTree::Object::Type::TYPE_BLOCK) {
@@ -41,7 +41,7 @@ namespace Invader::Compiler {
         ScriptTree::Object script_call = {};
         script_call.type = ScriptTree::Object::Type::TYPE_SCRIPT;
         ScriptTree::Object::Script script = {};
-        script.block = make_block(value);
+        script.block = make_block(value.value());
         script.script_name = name;
         script.script_type = script_type;
         script.script_return_type = return_type;
@@ -70,7 +70,7 @@ namespace Invader::Compiler {
         ScriptTree::Object global_call = {};
         global_call.type = ScriptTree::Object::Type::TYPE_GLOBAL;
         ScriptTree::Object::Global global = {};
-        global.block = make_block(value);
+        global.block = make_block(value.value());
         global.global_name = name;
         global.global_type = global_type;
         global_call.value = global;
@@ -78,29 +78,36 @@ namespace Invader::Compiler {
         return global_call;
     }
 
-    static void find_all_required(const ScriptTree::Object::Block &block, std::vector<std::string> &required) {
-        auto add_if_not_present = [&required](const std::string &what) {
+    static void find_all_required(const ScriptTree::Object::Block &block, std::vector<std::string> &required, const std::vector<std::string> &all_required) {
+        auto add_if_not_present = [&required, &all_required](const std::string &what) {
+            // Make sure it isn't present already in our required list
             for(auto &r : required) {
                 if(r == what) {
                     return;
                 }
             }
-
-            required.emplace_back(what);
+            
+            // Then, if it's present in our globals/scripts list, add it here
+            for(auto &r : all_required) {
+                if(r == what) {
+                    required.emplace_back(what);
+                    return;
+                }
+            }
         };
 
         for(auto &b : block) {
             switch(b.type) {
                 case ScriptTree::Object::Type::TYPE_BLOCK:
-                    find_all_required(std::get<ScriptTree::Object::Block>(b.value), required);
+                    find_all_required(std::get<ScriptTree::Object::Block>(b.value), required, all_required);
                     break;
 
                 case ScriptTree::Object::Type::TYPE_SCRIPT:
-                    find_all_required(std::get<ScriptTree::Object::Script>(b.value).block, required);
+                    find_all_required(std::get<ScriptTree::Object::Script>(b.value).block, required, all_required);
                     break;
 
                 case ScriptTree::Object::Type::TYPE_GLOBAL:
-                    find_all_required(std::get<ScriptTree::Object::Global>(b.value).block, required);
+                    find_all_required(std::get<ScriptTree::Object::Global>(b.value).block, required, all_required);
                     break;
 
                 case ScriptTree::Object::Type::TYPE_TOKEN: {
@@ -114,7 +121,7 @@ namespace Invader::Compiler {
                 case ScriptTree::Object::Type::TYPE_FUNCTION_CALL: {
                     const auto &call = std::get<ScriptTree::Object::FunctionCall>(b.value);
                     add_if_not_present(call.function_name);
-                    find_all_required(call.block, required);
+                    find_all_required(call.block, required, all_required);
                     break;
                 }
             }
@@ -123,64 +130,39 @@ namespace Invader::Compiler {
 
     std::vector<ScriptTree::Object> decompile_scenario(const Parser::Scenario &scenario) {
         std::vector<ScriptTree::Object> return_value;
-
         std::vector<std::string> resolved_tokens;
 
         auto add_sorted = [&resolved_tokens, &return_value](const ScriptTree::Object &what, const std::vector<std::string> &required, const std::string &token) {
-            // First, find what we already have
-            std::vector<std::string> present;
-            for(auto &r : required) {
-                if(r == token) {
-                    present.emplace_back(r); // also make sure it's placed after all previous calls if need be
-                }
-                else {
-                    for(auto &t : resolved_tokens) {
-                        if(t == r) {
-                            present.emplace_back(r);
-                            break;
-                        }
+            // Go through all of these until we reach the bottom or run out of requirements
+            auto required_copy = required;
+            std::size_t r;
+            for(r = 0; r < resolved_tokens.size() && required_copy.size(); r++) {
+                for(std::size_t q = 0; q < required_copy.size(); q++) {
+                    if(required_copy[q] == resolved_tokens[r]) {
+                        required_copy.erase(required_copy.begin() + q);
+                        break;
                     }
                 }
             }
 
             // Add this
-            resolved_tokens.emplace_back(token);
-
-            // Now, until present is clear, go through everything
-            for(std::size_t i = 0; i < return_value.size(); i++) {
-                if(present.size() == 0) {
-                    return_value.insert(return_value.begin() + i, what);
-                    return;
-                }
-                else {
-                    const std::string *function = nullptr;
-                    if(return_value[i].type == ScriptTree::Object::Type::TYPE_SCRIPT) {
-                        function = &std::get<ScriptTree::Object::Script>(return_value[i].value).script_name;
-                    }
-                    else if(return_value[i].type == ScriptTree::Object::Type::TYPE_GLOBAL) {
-                        function = &std::get<ScriptTree::Object::Global>(return_value[i].value).global_name;
-                    }
-                    else {
-                        std::terminate();
-                    }
-
-                    // Find it!
-                    for(std::size_t q = 0; q < present.size(); q++) {
-                        if(present[q] == *function) {
-                            present.erase(present.begin() + q);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return_value.emplace_back(what);
+            resolved_tokens.insert(resolved_tokens.begin() + r, token);
+            return_value.insert(return_value.begin() + r, what);
         };
+        
+        // Find all names and scripts so we know what to look for
+        std::vector<std::string> all_required;
+        for(auto &g : scenario.globals) {
+            all_required.emplace_back(g.name.string);
+        }
+        for(auto &s : scenario.scripts) {
+            all_required.emplace_back(s.name.string);
+        }
 
         for(auto &g : scenario.globals) {
             auto value = decompile_scenario_global(scenario, g.name.string);
             std::vector<std::string> required;
-            find_all_required(std::get<ScriptTree::Object::Global>(value.value).block, required);
+            find_all_required(std::get<ScriptTree::Object::Global>(value.value).block, required, all_required);
             add_sorted(value, required, g.name.string);
         }
 
@@ -188,7 +170,7 @@ namespace Invader::Compiler {
         for(auto &s : scenario.scripts) {
             auto value = decompile_scenario_script(scenario, s.name.string);
             std::vector<std::string> required;
-            find_all_required(std::get<ScriptTree::Object::Script>(value.value).block, required);
+            find_all_required(std::get<ScriptTree::Object::Script>(value.value).block, required, all_required);
             add_sorted(value, required, s.name.string);
         }
 
@@ -204,7 +186,7 @@ namespace Invader::Compiler {
         }
     }
 
-    static ScriptTree::Object decompile_node(std::size_t index, const Parser::Scenario &scenario) {
+    static std::optional<ScriptTree::Object> decompile_node(std::size_t index, const Parser::Scenario &scenario) {
         // Get these values
         const auto *script_syntax_data_data = scenario.script_syntax_data.data();
         const auto *table = reinterpret_cast<const Parser::ScenarioScriptNodeTable::struct_big *>(script_syntax_data_data);
@@ -269,10 +251,13 @@ namespace Invader::Compiler {
                 function_call.function_name = function_name;
 
                 // Go through each thing in the function
-                auto next_node_index = node_for_index(n.next_node);
+                auto next_node_index = node_for_index(static_cast<std::uint32_t>(n.next_node.read()));
                 while(next_node_index.has_value()) {
                     auto &nn = nodes[*next_node_index];
-                    block.emplace_back(decompile_node(*next_node_index, scenario));
+                    auto decompiled_node = decompile_node(*next_node_index, scenario);
+                    if(decompiled_node.has_value()) {
+                        block.emplace_back(decompiled_node.value());
+                    }
                     next_node_index = node_for_index(nn.next_node);
                 }
 
@@ -319,6 +304,9 @@ namespace Invader::Compiler {
                 o.value = t;
                 return o;
             }
+            
+            case HEK::ScenarioScriptValueType::SCENARIO_SCRIPT_VALUE_TYPE_UNPARSED:
+                return std::nullopt;
 
             default: {
                 ScriptTree::Object o = {};
