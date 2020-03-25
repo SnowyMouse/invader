@@ -1101,7 +1101,7 @@ namespace Invader::Parser {
     }
     
     bool fix_missing_script_source_data(Scenario &scenario, bool fix) {
-        if(scenario.source_files.size() == 0) {
+        if(scenario.source_files.size() != 0) {
             return false;
         }
         
