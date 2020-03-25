@@ -493,11 +493,11 @@ namespace Invader::Parser {
         }
 
         // If we have scripts, do stuff
-        if(this->scripts.size() > 0) {
+        if(this->scripts.size() > 0 || this->globals.size() > 0) {
             if(this->source_files.size() == 0) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Scenario tag has script data but no source file data", tag_index);
-                eprintf_warn("This is DEPRECATED and will not be allowed in some future version of Invader when tags with scripts are fully supported.");
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
                 eprintf_warn("To fix this, recompile the scripts");
+                throw InvalidTagDataException();
             }
             else {
                 // TODO: Recompile scripts

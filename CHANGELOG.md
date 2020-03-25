@@ -4,10 +4,14 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-bludgeon: Added `-T missing-script-source` which decompiles scripts in
+  scenario tags.
 - invader-build: Added child scenario merging
 
 ### Changed
 - invader-build: Now checks extension separately from scenario name
+- invader-build: Maps with script data can no longer be built without source
+  data. This is due to the fact that such scenario tags are going to be broken.
 - invader-extract: Now always decompiles scripts
 
 ### Fixed
