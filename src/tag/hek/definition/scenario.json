@@ -3050,7 +3050,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioObjectName",
                 "compound": true,
-                "hidden": true,
+                "read_only": true,
                 "maximum": 65534
             },
             {
