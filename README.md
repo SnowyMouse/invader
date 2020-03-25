@@ -326,9 +326,11 @@ Options:
                                specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
   -T --type                    Type of bludgeoning. Can be: invalid-enums,
-                               invalid-model-markers, incorrect-sound-buffer,
-                               invalid-model-markers, none, everything
-                               (default: none)
+                               out-of-range, invalid-reference-classes,
+                               invalid-model-markers, missing-script-source,
+                               incorrect-sound-buffer, missing-vertices,
+                               invalid-power-of-two, none, everything (default:
+                               none)
 ```
 
 ### invader-build
