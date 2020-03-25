@@ -36,7 +36,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     POWER_OF_FUCK_YOU                   = 1ull << 4,
 
     /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
-    // WHERE_THE_FUCK_ARE_THE_SCRIPTS      = 1ull << 5, // disabled until we can figure out script decompilation
+    WHERE_THE_FUCK_ARE_THE_SCRIPTS      = 1ull << 5,
 
     /** Fix an incorrect sound buffer size */
     FUCKED_SOUND_BUFFER                 = 1ull << 6,
@@ -70,6 +70,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define POWER_OF_FUCK_YOU_FIX "invalid-power-of-two"
 #define FUCKED_MODEL_MARKERS_FIX "invalid-model-markers"
 #define FUCKED_VERTICES_FIX "missing-vertices"
+#define WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX "missing-script-source"
 #define BULLSHIT_RANGE_FIX "out-of-range"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
@@ -111,6 +112,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             check_fix(fucked_vertices, "missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX);
             check_fix(power_of_two_fix, "power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX);
             check_fix(bullshit_range_fix, "value(s) are out of range; fix with " BULLSHIT_RANGE_FIX);
+            check_fix(where_the_fuck_are_the_scripts, "script source data is missing; fix with " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             
             #undef check_fix
         }
@@ -127,6 +129,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             apply_fix(power_of_two_fix, POWER_OF_FUCK_YOU, POWER_OF_FUCK_YOU_FIX);
             apply_fix(sound_buffer, FUCKED_SOUND_BUFFER, FUCKED_SOUND_BUFFER_FIX);
             apply_fix(fucked_vertices, FUCKED_VERTICES, FUCKED_VERTICES_FIX);
+            apply_fix(where_the_fuck_are_the_scripts, WHERE_THE_FUCK_ARE_THE_SCRIPTS, WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             
             #undef apply_fix
         }
@@ -166,7 +169,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -204,6 +207,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], BULLSHIT_REFERENCE_CLASSES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_REFERENCE_CLASSES;
+                }
+                else if(std::strcmp(arguments[0], WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::WHERE_THE_FUCK_ARE_THE_SCRIPTS;
                 }
                 else if(std::strcmp(arguments[0], BULLSHIT_SOUND_FORMAT_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_SOUND_FORMAT;

@@ -2,12 +2,21 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/bitmap.hpp>
 #include <invader/tag/parser/compile/gbxmodel.hpp>
+#include <invader/tag/parser/compile/scenario.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/sound/sound_reader.hpp>
 
 namespace Invader::Bludgeoner {
     bool bullshit_enums(Parser::ParserStruct *s, bool fix) {
         return s->check_for_broken_enums(fix);
+    }
+    
+    bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix) {
+        auto *scenario = dynamic_cast<Parser::Scenario *>(s);
+        if(scenario) {
+            return fix_missing_script_source_data(*scenario, fix);
+        }
+        return false;
     }
 
     static bool fucked_bsp_vertices(Parser::ScenarioStructureBSP *bsp, bool fix) {

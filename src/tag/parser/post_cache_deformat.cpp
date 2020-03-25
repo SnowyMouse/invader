@@ -3,61 +3,11 @@
 #include <invader/map/map.hpp>
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include <invader/script/compiler.hpp>
 #include <invader/file/file.hpp>
 
 namespace Invader::Parser {
     void Invader::Parser::ActorVariant::post_cache_deformat() {
         this->grenade_velocity *= TICK_RATE;
-    }
-
-    void Invader::Parser::Scenario::post_cache_deformat() {
-        auto *script_data = this->script_syntax_data.data();
-        auto script_data_size = this->script_syntax_data.size();
-
-        // If we don't have a script node table, give up
-        if(script_data_size < sizeof(ScenarioScriptNodeTable::struct_little)) {
-            eprintf_error("scenario tag has an invalid scenario script node table");
-            throw InvalidTagDataException();
-        }
-
-        // Copy the table header
-        ScenarioScriptNodeTable::struct_big table = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(script_data);
-        *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(script_data) = table;
-
-        // Make sure it's not bullshit
-        auto *script_nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(script_data + sizeof(table));
-        auto table_size = table.maximum_count.read();
-        std::size_t expected_size = (reinterpret_cast<std::byte *>(script_nodes + table_size) - script_data);
-        if(expected_size != script_data_size) {
-            eprintf_error("scenario tag has an invalid scenario script node table (%zu vs %zu)", expected_size, script_data_size);
-            throw InvalidTagDataException();
-        }
-
-        // Copy the rest of the table
-        for(std::size_t i = 0; i < table_size; i++) {
-            ScenarioScriptNode::struct_big big = script_nodes[i];
-            *reinterpret_cast<ScenarioScriptNode::struct_big *>(script_nodes + i) = big;
-        }
-
-        // Put scripts in if need be
-        this->source_files.clear();
-        try {
-            if(this->scripts.size() != 0) {
-                auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
-                const auto *script_data = reinterpret_cast<const std::byte *>(script.c_str());
-                auto &source_file = this->source_files.emplace_back();
-                std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
-                source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
-                File::save_file("extracted.hsc", source_file.source);
-            }
-        }
-        catch(std::exception &e) {
-            eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
-        }
-
-        // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
-        this->postprocess_hek_data();
     }
 
     void Invader::Parser::Effect::post_cache_deformat() {
