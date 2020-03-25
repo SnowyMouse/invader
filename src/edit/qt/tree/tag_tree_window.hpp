@@ -144,6 +144,9 @@ namespace Invader::EditQt {
 
         /** Show the sauce! */
         void show_source_code();
+        
+        /** Set count label */
+        void set_count_label(std::size_t count);
 
         #ifdef SHOW_NIGHTLY_LINK
         /** Nightly build? */

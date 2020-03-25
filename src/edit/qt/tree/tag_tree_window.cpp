@@ -124,12 +124,16 @@ namespace Invader::EditQt {
     const std::vector<std::filesystem::path> &TagTreeWindow::get_tag_directories() const noexcept {
         return this->paths;
     }
+    
+    void TagTreeWindow::set_count_label(std::size_t count) {
+        char tag_count_str[256];
+        std::snprintf(tag_count_str, sizeof(tag_count_str), "%zu tag%s", count, count == 1 ? "" : "s");
+        this->tag_count_label->setText(tag_count_str);
+    }
 
     void TagTreeWindow::tag_count_changed(std::pair<std::mutex, std::size_t> *tag_count) {
         tag_count->first.lock();
-        char tag_count_str[256];
-        std::snprintf(tag_count_str, sizeof(tag_count_str), "%zu tag%s", tag_count->second, tag_count->second == 1 ? "" : "s");
-        this->tag_count_label->setText(tag_count_str);
+        this->set_count_label(tag_count->second);
         tag_count->first.unlock();
     }
 
@@ -231,6 +235,7 @@ namespace Invader::EditQt {
 
     void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result) {
         this->tags_reloading_queued = false;
+        this->set_count_label(result->size());
         all_tags = *result;
         this->tag_loading_label->hide();
         if(this->tags_to_open.size()) {
