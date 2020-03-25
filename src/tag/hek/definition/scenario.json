@@ -768,7 +768,8 @@
             {
                 "name": "desired permutation",
                 "type": "Index",
-                "reflexive": "object names"
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "name": "position",
@@ -2264,7 +2265,8 @@
             {
                 "name": "object name",
                 "type": "Index",
-                "reflexive": "object names"
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "type": "pad",
@@ -2417,12 +2419,14 @@
             {
                 "name": "use this object",
                 "type": "Index",
-                "reflexive": "object names"
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "name": "set new name",
                 "type": "Index",
-                "reflexive": "object names"
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "type": "pad",
@@ -2462,11 +2466,15 @@
             },
             {
                 "name": "addressee",
-                "type": "ScenarioAddressee"
+                "type": "ScenarioAddressee",
+                "struct": "ScenarioAIConversation",
+                "reflexive": "participants"
             },
             {
                 "name": "addressee participant",
-                "type": "Index"
+                "type": "Index",
+                "struct": "ScenarioAIConversation",
+                "reflexive": "participants"
             },
             {
                 "type": "pad",
