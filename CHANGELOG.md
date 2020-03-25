@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-build: Now checks extension separately from scenario name
+- invader-extract: Now always decompiles scripts
 
 ### Fixed
 - invader-build: Fixed the check for child scenarios; these still don't work

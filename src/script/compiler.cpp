@@ -131,47 +131,65 @@ namespace Invader::Compiler {
     std::vector<ScriptTree::Object> decompile_scenario(const Parser::Scenario &scenario) {
         std::vector<ScriptTree::Object> return_value;
         std::vector<std::string> resolved_tokens;
-
-        auto add_sorted = [&resolved_tokens, &return_value](const ScriptTree::Object &what, const std::vector<std::string> &required, const std::string &token) {
-            // Go through all of these until we reach the bottom or run out of requirements
-            auto required_copy = required;
-            std::size_t r;
-            for(r = 0; r < resolved_tokens.size() && required_copy.size(); r++) {
-                for(std::size_t q = 0; q < required_copy.size(); q++) {
-                    if(required_copy[q] == resolved_tokens[r]) {
-                        required_copy.erase(required_copy.begin() + q);
-                        break;
-                    }
-                }
-            }
-
-            // Add this
-            resolved_tokens.insert(resolved_tokens.begin() + r, token);
-            return_value.insert(return_value.begin() + r, what);
-        };
         
-        // Find all names and scripts so we know what to look for
+        // Find all names and scripts so we know what to look for and decompile
         std::vector<std::string> all_required;
+        std::vector<ScriptTree::Object> objects_to_sort;
         for(auto &g : scenario.globals) {
             all_required.emplace_back(g.name.string);
+            objects_to_sort.emplace_back(decompile_scenario_global(scenario, g.name.string));
         }
         for(auto &s : scenario.scripts) {
             all_required.emplace_back(s.name.string);
+            objects_to_sort.emplace_back(decompile_scenario_script(scenario, s.name.string));
         }
 
-        for(auto &g : scenario.globals) {
-            auto value = decompile_scenario_global(scenario, g.name.string);
-            std::vector<std::string> required;
-            find_all_required(std::get<ScriptTree::Object::Global>(value.value).block, required, all_required);
-            add_sorted(value, required, g.name.string);
-        }
-
-        // Go through each script
-        for(auto &s : scenario.scripts) {
-            auto value = decompile_scenario_script(scenario, s.name.string);
-            std::vector<std::string> required;
-            find_all_required(std::get<ScriptTree::Object::Script>(value.value).block, required, all_required);
-            add_sorted(value, required, s.name.string);
+        std::vector<std::string> stuff_added;
+        auto add_object = [&stuff_added, &return_value, &all_required, &objects_to_sort](ScriptTree::Object &object, auto &add_object) {
+            auto add_it_all = [&return_value, &all_required, &objects_to_sort, &object](auto *what, auto &add_object) {
+                std::vector<std::string> required;
+                find_all_required(what->block, required, all_required);
+                
+                // Go through all dependencies first
+                for(auto &r : required) {
+                    for(std::size_t ar = 0; ar < all_required.size(); ar++) {
+                        if(all_required[ar] == r) {
+                            add_object(objects_to_sort[ar], add_object);
+                            break;
+                        }
+                    }
+                }
+                
+                // Add it
+                return_value.emplace_back(object);
+            };
+            
+            auto *script = std::get_if<ScriptTree::Object::Script>(&object.value);
+            if(script) {
+                for(auto &r : stuff_added) {
+                    if(r == script->script_name) {
+                        return;
+                    }
+                }
+                stuff_added.emplace_back(script->script_name);
+                add_it_all(script, add_object);
+                return;
+            }
+            auto *global = std::get_if<ScriptTree::Object::Global>(&object.value);
+            if(global) {
+                for(auto &r : stuff_added) {
+                    if(r == global->global_name) {
+                        return;
+                    }
+                }
+                stuff_added.emplace_back(global->global_name);
+                add_it_all(global, add_object);
+                return;
+            }
+        };
+        
+        for(auto &o : objects_to_sort) {
+            add_object(o, add_object);
         }
 
         return return_value;

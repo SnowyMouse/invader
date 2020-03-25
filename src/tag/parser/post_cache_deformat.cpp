@@ -4,6 +4,7 @@
 #include <invader/map/tag.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/script/compiler.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::Parser {
     void Invader::Parser::ActorVariant::post_cache_deformat() {
@@ -40,7 +41,7 @@ namespace Invader::Parser {
         }
 
         // Put scripts in if need be
-        /*this->source_files.clear();
+        this->source_files.clear();
         try {
             if(this->scripts.size() != 0) {
                 auto script = Tokenizer::detokenize(ScriptTree::decompile_script_tree(Compiler::decompile_scenario(*this)));
@@ -48,11 +49,12 @@ namespace Invader::Parser {
                 auto &source_file = this->source_files.emplace_back();
                 std::snprintf(source_file.name.string, sizeof(source_file.name.string), "extracted");
                 source_file.source = std::vector<std::byte>(script_data, script_data + script.size());
+                File::save_file("extracted.hsc", source_file.source);
             }
         }
         catch(std::exception &e) {
             eprintf_error("Failed to decompile scripts; scenario will not have any source data: %s", e.what());
-        }*/
+        }
 
         // And lastly, for consistency sake, remove all tag IDs and zero out the pointer
         this->postprocess_hek_data();
