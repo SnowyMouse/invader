@@ -3332,26 +3332,30 @@
                 "name": "scripts",
                 "type": "TagReflexive",
                 "struct": "ScenarioScript",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "globals",
                 "type": "TagReflexive",
                 "struct": "ScenarioGlobal",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "references",
                 "type": "TagReflexive",
                 "struct": "ScenarioReference",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "source files",
                 "type": "TagReflexive",
                 "struct": "ScenarioSourceFile",
                 "compound": true,
-                "non_cached": true
+                "non_cached": true,
+                "read_only": true
             },
             {
                 "type": "pad",

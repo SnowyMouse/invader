@@ -224,6 +224,9 @@ namespace Invader {
 
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
+        
+        /** Tag directories */
+        const std::vector<std::string> *tags_directories = nullptr;
 
         /** Recursion is disabled - also disables showing most errors as well as various tags using other tags' data */
         bool disable_recursion = false;
@@ -296,7 +299,6 @@ namespace Invader {
         std::uint32_t tag_data_address;
         std::size_t tag_data_size;
         std::vector<std::byte> build_cache_file();
-        const std::vector<std::string> *tags_directories;
         void add_tags();
         void generate_tag_array();
         bool optimize_space;

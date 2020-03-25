@@ -74,11 +74,272 @@ namespace Invader::Parser {
         this->cluster_index = NULL_INDEX;
         this->surface_index = NULL_INDEX;
     }
+    
+    static void merge_child_scenario(Scenario &base_scenario, const Scenario &scenario_to_merge) {
+        #define MERGE_ARRAY(what, condition) for(auto &merge : scenario_to_merge.what) { \
+            bool can_merge = true; \
+            for([[maybe_unused]] auto &base : base_scenario.what) { \
+                if(!(condition)) { \
+                    can_merge = false; \
+                    break; \
+                } \
+            } \
+            if(can_merge) { \
+                base_scenario.what.push_back(merge); \
+            } \
+        }
+        
+        MERGE_ARRAY(child_scenarios, true);
+        MERGE_ARRAY(functions, true);
+        MERGE_ARRAY(comments, true);
+        MERGE_ARRAY(object_names, merge.name != base.name);
+        MERGE_ARRAY(device_groups, merge.name != base.name);
+        MERGE_ARRAY(player_starting_profile, true);
+        MERGE_ARRAY(player_starting_locations, true);
+        MERGE_ARRAY(trigger_volumes, merge.name != base.name);
+        MERGE_ARRAY(recorded_animations, merge.name != base.name);
+        MERGE_ARRAY(netgame_flags, true);
+        MERGE_ARRAY(netgame_equipment, true);
+        MERGE_ARRAY(starting_equipment, true);
+        MERGE_ARRAY(actor_palette, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        MERGE_ARRAY(ai_animation_references, merge.animation_name != base.animation_name);
+        MERGE_ARRAY(ai_script_references, merge.script_name != base.script_name);
+        MERGE_ARRAY(ai_recording_references, merge.recording_name != base.recording_name);
+        MERGE_ARRAY(references, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        MERGE_ARRAY(cutscene_flags, merge.name != base.name);
+        MERGE_ARRAY(cutscene_camera_points, merge.name != base.name);
+        MERGE_ARRAY(cutscene_titles, merge.name != base.name);
+        MERGE_ARRAY(source_files, merge.name != base.name);
+        MERGE_ARRAY(decal_palette, merge.reference.path != base.reference.path || merge.reference.tag_class_int != base.reference.tag_class_int);
+        
+        // Merge palettes
+        #define MERGE_PALETTE(what) MERGE_ARRAY(what, merge.name.path != base.name.path || merge.name.tag_class_int != base.name.tag_class_int)
+        
+        MERGE_PALETTE(scenery_palette);
+        MERGE_PALETTE(biped_palette);
+        MERGE_PALETTE(vehicle_palette);
+        MERGE_PALETTE(equipment_palette);
+        MERGE_PALETTE(weapon_palette);
+        MERGE_PALETTE(machine_palette);
+        MERGE_PALETTE(control_palette);
+        MERGE_PALETTE(light_fixture_palette);
+        MERGE_PALETTE(sound_scenery_palette);
+        
+        // Make some lambdas for finding stuff quickly
+        #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge](HEK::Index old_index) -> HEK::Index { \
+            /* If we're null, return null */ \
+            if(old_index == NULL_INDEX) { \
+                return NULL_INDEX; \
+            } \
+\
+            /* if we're out of bounds, fail */ \
+            auto old_count = scenario_to_merge.what.size(); \
+            if(old_index >= old_count) { \
+                eprintf_error(# what " index is out of bounds (%zu >= %zu)", static_cast<std::size_t>(old_index), old_count); \
+                throw OutOfBoundsException(); \
+            } \
+\
+            /* Find it */ \
+            auto &merge = scenario_to_merge.what[old_index]; \
+            auto new_count = base_scenario.what.size(); \
+            for(std::size_t name = 0; name < new_count; name++) { \
+                auto &base = base_scenario.what[name]; \
+                if((match_comparison)) { \
+                    if(name >= NULL_INDEX) { \
+                        eprintf_error(# what " exceeded %zu when merging", static_cast<std::size_t>(NULL_INDEX - 1)); \
+                        throw InvalidTagDataException(); \
+                    } \
+                    return name; \
+                } \
+            } \
+            eprintf_error("Failed to find an entry in " # what); \
+            throw OutOfBoundsException(); \
+        }
+        auto translate_object_name = TRANSLATE_PALETTE(object_names, (merge.name == base.name));
+        auto translate_device_group = TRANSLATE_PALETTE(device_groups, (merge.name == base.name));
+        
+        // Merge AI conversations
+        for(auto &aic : scenario_to_merge.ai_conversations) {
+            auto &new_aic = base_scenario.ai_conversations.emplace_back(aic);
+            for(auto &p : new_aic.participants) {
+                p.set_new_name = translate_object_name(p.set_new_name);
+                p.use_this_object = translate_object_name(p.use_this_object);
+            }
+        }
+
+        #undef MERGE_PALETTE
+        #undef MERGE_ARRAY
+        
+        #define MERGE_OBJECTS_ALL(what, what_palette, ...) { \
+            auto object_count = scenario_to_merge.what.size(); \
+            auto translate_palette = TRANSLATE_PALETTE(what_palette, (merge.name.path == base.name.path && merge.name.tag_class_int == base.name.tag_class_int)); \
+            for(std::size_t o = 0; o < object_count; o++) { \
+                auto &new_element = base_scenario.what.emplace_back(scenario_to_merge.what[o]); \
+                new_element.name = translate_object_name(new_element.name); \
+                new_element.type = translate_palette(new_element.type); \
+                __VA_ARGS__ \
+            } \
+        }
+        
+        #define MERGE_OBJECTS(what, what_palette) MERGE_OBJECTS_ALL(what, what_palette, {})
+        #define MERGE_DEVICES(what, what_palette) MERGE_OBJECTS_ALL(what, what_palette, { \
+            new_element.power_group = translate_device_group(new_element.power_group); \
+            new_element.position_group = translate_device_group(new_element.position_group); \
+        })
+        
+        MERGE_OBJECTS(scenery,scenery_palette);
+        MERGE_OBJECTS(bipeds,biped_palette);
+        MERGE_OBJECTS(vehicles,vehicle_palette);
+        MERGE_OBJECTS(equipment,equipment_palette);
+        MERGE_OBJECTS(weapons,weapon_palette);
+        MERGE_DEVICES(machines,machine_palette);
+        MERGE_DEVICES(controls,control_palette);
+        MERGE_DEVICES(light_fixtures,light_fixture_palette);
+        MERGE_OBJECTS(sound_scenery,sound_scenery_palette);
+        
+        #undef MERGE_OBJECTS
+        #undef MERGE_OBJECTS_ALL
+        
+        // Decals
+        auto translate_decal_palette = TRANSLATE_PALETTE(decal_palette, merge.reference.tag_class_int == base.reference.tag_class_int && merge.reference.path == base.reference.path);
+        for(auto &decal : scenario_to_merge.decals) {
+            // Add our new decal
+            auto &new_decal = base_scenario.decals.emplace_back(decal);
+            new_decal.decal_type = translate_decal_palette(new_decal.decal_type);
+        }
+        
+        // AI stuff
+        auto translate_actor_palette = TRANSLATE_PALETTE(actor_palette, (merge.reference.tag_class_int == base.reference.tag_class_int && merge.reference.path == base.reference.path));
+        auto translate_animation_palette = TRANSLATE_PALETTE(ai_animation_references, merge.animation_name == base.animation_name);
+        auto translate_command_list = TRANSLATE_PALETTE(command_lists, merge.name == base.name);
+        auto translate_recording = TRANSLATE_PALETTE(ai_recording_references, merge.recording_name == base.recording_name);
+        auto translate_script_reference = TRANSLATE_PALETTE(ai_script_references, merge.script_name == base.script_name);
+        
+        // Merge command lists
+        for(auto &command_list : scenario_to_merge.command_lists) {
+            // First, make sure we don't have this in here already
+            bool exists = false;
+            for(auto &existing_command_list : base_scenario.command_lists) {
+                if(existing_command_list.name == command_list.name) {
+                    exists = true;
+                    break;
+                }
+            }
+            // Darn
+            if(exists) {
+                continue;
+            }
+            
+            // Add our new list
+            auto &new_command_list = base_scenario.command_lists.emplace_back(command_list);
+            for(auto &command : new_command_list.commands) {
+                command.animation = translate_animation_palette(command.animation);
+                command.recording = translate_recording(command.recording);
+                command.object_name = translate_object_name(command.object_name);
+                command.animation = translate_animation_palette(command.animation);
+                command.script = translate_script_reference(command.script);
+            }
+        }
+        
+        // Merge encounters
+        for(auto &encounter : scenario_to_merge.encounters) {
+            // First, make sure we don't have this in here already
+            bool exists = false;
+            for(auto &existing_encounters : base_scenario.encounters) {
+                if(existing_encounters.name == encounter.name) {
+                    exists = true;
+                    break;
+                }
+            }
+            // Darn
+            if(exists) {
+                continue;
+            }
+            
+            // Add our new encounter
+            auto &new_encounter = base_scenario.encounters.emplace_back(encounter);
+            for(auto &squad : new_encounter.squads) {
+                squad.actor_type = translate_actor_palette(squad.actor_type);
+                for(auto &mp : squad.move_positions) {
+                    mp.animation = translate_animation_palette(mp.animation);
+                }
+                for(auto &sl : squad.starting_locations) {
+                    sl.actor_type = translate_actor_palette(sl.actor_type);
+                    sl.command_list = translate_command_list(sl.command_list);
+                }
+            }
+        }
+        
+        #undef TRANSLATE_PALETTE
+    }
 
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
-        if(this->child_scenarios.size() != 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Tags with child scenarios are not supported at this time", tag_index);
-            this->child_scenarios.clear();
+        // Merge child scenarios
+        if(this->child_scenarios.size() != 0 && !workload.disable_recursion) {
+            // Let's begin by adding this scenario to the list (in case we reference ourself)
+            std::vector<std::string> merged_scenarios;
+            merged_scenarios.emplace_back(workload.tags[tag_index].path);
+            
+            // Take the scenario off the top
+            while(this->child_scenarios.size()) {
+                // Get the scenario
+                auto &first_scenario = this->child_scenarios[0].child_scenario;
+                if(!first_scenario.path.empty()) {
+                    // If this isn't even a scenario tag... what
+                    if(first_scenario.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                        throw InvalidTagDataException();
+                    }
+                    
+                    // Make sure we haven't done it already
+                    for(auto &m : merged_scenarios) {
+                        if(m == first_scenario.path) {
+                            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Duplicate or cyclical child scenario references are present", tag_index);
+                            eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                            throw InvalidTagDataException();
+                        }
+                    }
+                    
+                    // Add it to the list
+                    merged_scenarios.emplace_back(first_scenario.path);
+                    
+                    // Find it
+                    char file_path_cstr[1024];
+                    std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
+                    auto file_path = File::tag_path_to_file_path(file_path_cstr, *workload.tags_directories, true);
+                    if(!file_path.has_value()) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
+                        throw InvalidTagDataException();
+                    }
+                    
+                    // Open it
+                    const auto *found_path = file_path->c_str();
+                    auto data = File::open_file(found_path);
+                    if(!data.has_value()) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", found_path);
+                        throw InvalidTagDataException();
+                    }
+                    
+                    // Parse and merge it
+                    try {
+                        auto scenario = Scenario::parse_hek_tag_file(data->data(), data->size());
+                        data.reset(); // clear it
+                        merge_child_scenario(*this, scenario);
+                    }
+                    catch(std::exception &) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",
+                                            File::halo_path_to_preferred_path(first_scenario.path).c_str(),
+                                            HEK::tag_class_to_extension(first_scenario.tag_class_int),
+                                            workload.tags[tag_index].path.c_str(),
+                                            HEK::tag_class_to_extension(workload.tags[tag_index].tag_class_int)
+                                           );
+                        throw;
+                    }
+                }
+                
+                // Delete the scenario
+                this->child_scenarios.erase(this->child_scenarios.begin());
+            }
         }
 
         if(workload.disable_recursion) {
