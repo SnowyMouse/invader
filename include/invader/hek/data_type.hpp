@@ -123,6 +123,21 @@ namespace Invader::HEK {
         bool operator==(const TagString &other) const noexcept {
             return std::strncmp(other.string, this->string, sizeof(other.string)) == 0;
         }
+        bool operator!=(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) != 0;
+        }
+        bool operator >(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) > 0;
+        }
+        bool operator <(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) < 0;
+        }
+        bool operator>=(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) >= 0;
+        }
+        bool operator<=(const TagString &other) const noexcept {
+            return std::strncmp(other.string, this->string, sizeof(other.string)) <= 0;
+        }
     };
 
     /**
