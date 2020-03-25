@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-build: Now checks extension separately from scenario name
+
 ### Fixed
 - invader-build: Fixed the check for child scenarios; these still don't work
 

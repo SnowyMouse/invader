@@ -254,7 +254,9 @@ int main(int argc, const char **argv) {
         else {
             map_name = File::base_name_chars(scenario.c_str());
         }
-        auto map_name_with_extension = std::string(map_name) + ".map";
+        
+        static const char MAP_EXTENSION[] = ".map"; 
+        auto map_name_with_extension = std::string(map_name) + MAP_EXTENSION;
 
         // Format path to maps/map_name.map if output not specified
         std::string final_file;
@@ -264,25 +266,29 @@ int main(int argc, const char **argv) {
         else {
             final_file = build_options.output;
             auto final_file_name = std::filesystem::path(final_file).filename();
+            auto final_file_name_no_extension = final_file_name.replace_extension();
             auto final_file_name_string = final_file_name.string();
+            auto final_file_name_no_extension_string = final_file_name_no_extension.string();
+            
+            // If it's not a .map, warn
+            if(final_file_name.extension() != MAP_EXTENSION) {
+                eprintf_warn("The base file extension is not \"%s\" which is required by the target engine", MAP_EXTENSION);
+            }
             
             // If we are not building for MCC and the scenario name is mismatched, warn
-            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && final_file_name_string != map_name_with_extension) {
-                eprintf_warn("The file name (%s) does not match the scenario name (%s)", final_file_name_string.c_str(), map_name_with_extension.c_str());
+            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && final_file_name_no_extension_string != map_name) {
+                eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name);
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
                 
-                if(final_file_name.extension() == ".map") {
-                    auto name_without_extension = final_file_name.replace_extension().string();
-                    bool incorrect_case = false;
-                    for(char &c : name_without_extension) {
-                        if(std::tolower(c) != c) {
-                            incorrect_case = true;
-                            break;
-                        }
+                bool incorrect_case = false;
+                for(char &c : final_file_name_no_extension_string) {
+                    if(std::tolower(c) != c) {
+                        incorrect_case = true;
+                        break;
                     }
-                    if(!incorrect_case) {
-                        eprintf_warn("Did you intend to use --rename-scenario \"%s\"", name_without_extension.c_str());
-                    }
+                }
+                if(!incorrect_case) {
+                    eprintf_warn("Did you intend to use --rename-scenario \"%s\"", final_file_name_no_extension_string.c_str());
                 }
             }
         }
