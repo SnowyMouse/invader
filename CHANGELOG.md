@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed the check for child scenarios; these still don't work
+
 ## [0.31.0] - 2020-03-24
 ### Added
 - invader-bludgeon: Added `-T incorrect-sound-buffer` which fixes incorrect

@@ -76,7 +76,7 @@ namespace Invader::Parser {
     }
 
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
-        if(this->child_scenarios.size() == 0) {
+        if(this->child_scenarios.size() != 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "TODO: Tags with child scenarios are not supported at this time", tag_index);
             this->child_scenarios.clear();
         }
