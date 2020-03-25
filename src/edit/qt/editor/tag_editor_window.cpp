@@ -30,7 +30,7 @@ namespace Invader::EditQt {
             auto open_file = File::open_file(tag_file.full_path.string().c_str());
             if(!open_file.has_value()) {
                 char formatted_error[1024];
-                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s. Make sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
+                std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s.\n\nMake sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());
                 QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
                 this->close();
                 return;
@@ -234,9 +234,14 @@ namespace Invader::EditQt {
         // Save; benchmark
         auto start = std::chrono::steady_clock::now();
         auto tag_data = parser_data->generate_hek_tag_data(this->file.tag_class_int);
-        auto result = Invader::File::save_file(this->file.full_path.string().c_str(), tag_data);
+        auto str = this->file.full_path.string();
+        const auto *c_str = str.c_str();
+        auto result = Invader::File::save_file(c_str, tag_data);
         if(!result) {
-            std::fprintf(stderr, "perform_save() failed\n");
+            char formatted_error[1024];
+            std::snprintf(formatted_error, sizeof(formatted_error), "Failed to save %s.\n\nMake sure you have permission here.", c_str);
+            QMessageBox(QMessageBox::Icon::Critical, "Error", formatted_error, QMessageBox::Ok).exec();
+            this->close();
         }
         else {
             this->make_dirty(false);
@@ -250,7 +255,14 @@ namespace Invader::EditQt {
         TagTreeDialog d(this, this->parent_window, this->file.tag_class_int);
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
-            std::filesystem::create_directories(this->file.full_path.parent_path());
+            try {
+                if(!std::filesystem::exists(this->file.full_path.parent_path())) {
+                    std::filesystem::create_directories(this->file.full_path.parent_path());
+                }
+            }
+            catch(std::exception &e) {
+                eprintf_error("Failed to create directories: %s", e.what());
+            }
             auto result = this->perform_save();
             this->parent_window->reload_tags();
             return result;

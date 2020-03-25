@@ -177,16 +177,17 @@ namespace Invader::EditQt {
     }
 
     void TagTreeDialog::do_save_as() {
-        auto potential_final_path_std_str = File::halo_path_to_preferred_path(this->path_to_enter->text().toLower().toLatin1().data());
-        auto potential_final_path = QString(potential_final_path_std_str.c_str());
-        static constexpr char PREFERRED_SEPARATOR[] = { std::filesystem::path::preferred_separator, 0 };
+        auto potential_halo_path_std_str_lower = File::preferred_path_to_halo_path(this->path_to_enter->text().toLower().toLatin1().data());
+        auto potential_halo_path_std_str = File::preferred_path_to_halo_path(this->path_to_enter->text().toLatin1().data());
+        auto potential_halo_path = QString(potential_halo_path_std_str.c_str());
+        static constexpr char HALO_SEPARATOR[] = { '\\', 0 };
 
-        if(potential_final_path.size() == 0 || potential_final_path.endsWith(PREFERRED_SEPARATOR) || potential_final_path.startsWith(PREFERRED_SEPARATOR) || this->path_to_enter->text() != potential_final_path) {
+        if(potential_halo_path.size() == 0 || potential_halo_path.endsWith(HALO_SEPARATOR) || potential_halo_path.startsWith(HALO_SEPARATOR) || potential_halo_path_std_str != potential_halo_path_std_str_lower) {
             QMessageBox(QMessageBox::Icon::Critical, "Invalid path", "The path given was invalid or empty. Paths cannot start or end with a path separator or contain any uppercase characters.", QMessageBox::Cancel).exec();
             return;
         }
 
-        if(!potential_final_path.contains(PREFERRED_SEPARATOR)) {
+        if(!potential_halo_path.contains(HALO_SEPARATOR)) {
             if(QMessageBox(QMessageBox::Icon::Warning, "You think you want it, but you actually don't", "You are creating a tag in the tag directory root. This is not recommended.\n\nAre you sure you want to continue?", QMessageBox::Yes | QMessageBox::Cancel, this).exec() == QMessageBox::Accepted) {
                 return;
             }
@@ -195,13 +196,13 @@ namespace Invader::EditQt {
         // Generate the thing
         char extension[256];
         std::snprintf(extension, sizeof(extension), ".%s", HEK::tag_class_to_extension(*this->save_class));
-        if(!potential_final_path.endsWith(extension)) {
-            potential_final_path_std_str = potential_final_path_std_str + extension;
+        if(!potential_halo_path.endsWith(extension)) {
+            potential_halo_path_std_str = potential_halo_path_std_str + extension;
         }
 
         File::TagFile file;
-        file.tag_path = potential_final_path_std_str;
-        file.full_path = std::filesystem::path(this->tag_paths->currentText().toStdString()) / potential_final_path_std_str;
+        file.tag_path = File::halo_path_to_preferred_path(potential_halo_path_std_str);
+        file.full_path = std::filesystem::path(this->tag_paths->currentText().toStdString()) / file.tag_path;
         file.tag_class_int = *this->save_class;
         file.tag_directory = this->tag_paths->currentIndex();
         this->tag = file;

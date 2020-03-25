@@ -13,6 +13,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed the check for child scenarios; these still don't work
 - invader-edit-qt: Fixed tag count not being updated on the main window if the
   tags directory is empty
+- invader-edit-qt: Fixed an unnecessary warning appearing on Windows when
+  saving newly-created tags
+- invader-edit-qt: Fixed a crash that occurred on creating a tag and directories
+  for the tag failing to be created
 
 ## [0.31.0] - 2020-03-24
 ### Added
