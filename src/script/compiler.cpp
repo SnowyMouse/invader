@@ -235,24 +235,18 @@ namespace Invader::Compiler {
         auto type = n.type.read();
         auto flags = n.flags.read();
 
+        // Globals are just strings
         if(flags.is_global) {
             ScriptTree::Object o = {};
             Tokenizer::Token t = {};
             t.type = Tokenizer::Token::Type::TYPE_STRING;
             o.type = ScriptTree::Object::Type::TYPE_TOKEN;
-            std::size_t global_index = static_cast<std::size_t>(n.data.read().long_int);
-
-            // Check it
-            if(global_index >= scenario.globals.size()) {
-                eprintf_error("Global index is out of bounds (%zu >= %zu)", global_index, scenario.globals.size());
-                throw InvalidTagDataException();
-            }
-
-            t.value = scenario.globals[global_index].name.string;
+            t.value = sanitary_get_string(n.string_offset);
             o.value = t;
-
             return o;
         }
+        
+        // Handle script calls as so
         else if(flags.is_script_call || !flags.is_primitive) {
             return decompile_node(static_cast<std::size_t>(n.data.read().long_int), scenario);
         }
