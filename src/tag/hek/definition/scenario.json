@@ -767,7 +767,8 @@
             },
             {
                 "name": "desired permutation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "object names"
             },
             {
                 "name": "position",
@@ -2262,7 +2263,8 @@
             },
             {
                 "name": "object name",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "object names"
             },
             {
                 "type": "pad",
@@ -2414,11 +2416,13 @@
             },
             {
                 "name": "use this object",
-                "type": "int16"
+                "type": "Index",
+                "reflexive": "object names"
             },
             {
                 "name": "set new name",
-                "type": "int16"
+                "type": "Index",
+                "reflexive": "object names"
             },
             {
                 "type": "pad",
