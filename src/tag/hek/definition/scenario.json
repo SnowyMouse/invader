@@ -759,7 +759,9 @@
             },
             {
                 "name": "name",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "name": "not placed",
@@ -767,9 +769,7 @@
             },
             {
                 "name": "desired permutation",
-                "type": "Index",
-                "reflexive": "object names",
-                "struct": "Scenario"
+                "type": "Index"
             },
             {
                 "name": "position",
