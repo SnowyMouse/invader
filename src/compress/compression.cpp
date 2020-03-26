@@ -148,7 +148,16 @@ namespace Invader::Compression {
             deflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<std::byte *>(data + offset));
             deflate_stream.avail_out = output_size - offset;
             deflate_stream.next_out = reinterpret_cast<Bytef *>(output + offset);
-            if((deflateInit(&deflate_stream, Z_BEST_COMPRESSION) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
+            
+            // Clamp
+            if(compression_level > Z_BEST_COMPRESSION) {
+                compression_level = Z_BEST_COMPRESSION;
+            }
+            else if(compression_level < Z_NO_COMPRESSION) {
+                compression_level = Z_NO_COMPRESSION
+            }
+            
+            if((deflateInit(&deflate_stream, compression_level) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
                 throw DecompressionFailureException();
             }
             return deflate_stream.total_out + HEADER_SIZE;
