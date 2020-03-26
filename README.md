@@ -149,7 +149,7 @@ this project is split into different programs.
 - [invader-edit-qt]
 - [invader-extract]
 - [invader-font]
-- [invader-indexer]
+- [invader-index]
 - [invader-info]
 - [invader-refactor]
 - [invader-resource]
@@ -468,12 +468,12 @@ Options:
   -t --tags <dir>              Set the tags directory.
 ```
 
-### invader-indexer
+### invader-index
 This program builds index files for usage with `--with-index` with
 invader-build.
 
 ```
-Usage: invader-indexer [options] <input-map> <output-txt>
+Usage: invader-index [options] <input-map> <output-txt>
 
 Create a file listing the tags of a map.
 
@@ -888,7 +888,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract
 [invader-font]: #invader-font
-[invader-indexer]: #invader-indexer
+[invader-index]: #invader-index
 [invader-info]: #invader-info
 [invader-refactor]: #invader-refactor
 [invader-resource]: #invader-resource
