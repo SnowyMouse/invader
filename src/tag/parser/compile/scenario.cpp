@@ -993,12 +993,12 @@ namespace Invader::Parser {
                         for(std::size_t fp = 0; fp < firing_position_count; fp++) {
                             // Look for anything we didn't find
                             if(!best_firing_positions_indices[fp].found) {
-                                offset += std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, "%s%zu", listed == 0 ? "" : ", ", fp);
+                                offset += std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, "%s%zu", listed == 0 ? "" : " ", fp);
                                 
                                 // If we're going past 5, we shouldn't list anymore as it's a bit spammy
                                 if(++listed == 5) {
                                     if(missing_firing_positions > listed) {
-                                        std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, ", ...");
+                                        std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, " ...");
                                     }
                                     break;
                                 }
@@ -1016,12 +1016,12 @@ namespace Invader::Parser {
                         for(auto &sp : best_squad_positions_found) {
                             // Look for anything we didn't find
                             if(!sp.found) {
-                                offset += std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, "%s(%zu-%zu)", listed == 0 ? "" : ", ", sp.squad, sp.starting_position);
+                                offset += std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, "%ssq#%zu-sp#%zu", listed == 0 ? "" : " ", sp.squad, sp.starting_position);
                                 
                                 // If we're going past 3, we shouldn't list anymore as it's a bit spammy
                                 if(++listed == 3) {
                                     if(missing_firing_positions > listed) {
-                                        std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, ", ...");
+                                        std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, " ...");
                                     }
                                     break;
                                 }
@@ -1136,12 +1136,12 @@ namespace Invader::Parser {
                     for(std::size_t p = 0; p < point_count; p++) {
                         // Look for anything we didn't find
                         if(best_surface_indices[p] == 0xFFFFFFFF) {
-                            offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : ", ", p);
+                            offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
                             
                             // If we're going past 5, we shouldn't list anymore as it's a bit spammy
                             if(++listed == 5) {
                                 if(missing_points > listed) {
-                                    std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, ", ...");
+                                    std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
                                 }
                                 break;
                             }
