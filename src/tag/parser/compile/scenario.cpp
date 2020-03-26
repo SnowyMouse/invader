@@ -783,13 +783,14 @@ namespace Invader::Parser {
 
         std::size_t bsp_find_warnings = 0;
 
-        auto intersects_directly_below = [&bsp_data](HEK::Point3D<HEK::LittleEndian> &position, std::uint32_t &surface_index, float distance, std::size_t bsp_index) -> bool {
+        auto intersects_directly_below = [&bsp_data](const HEK::Point3D<HEK::LittleEndian> &position, float distance, std::size_t bsp_index, HEK::Point3D<HEK::LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) -> bool {
             auto &bsp = bsp_data[bsp_index];
             auto position_below = position;
             position_below.z = position_below.z - distance;
 
-            std::uint32_t leaf_index;
-            HEK::Point3D<HEK::LittleEndian> intersection_point;
+            std::uint32_t leaf_index_found;
+            std::uint32_t surface_index_found;
+            HEK::Point3D<HEK::LittleEndian> intersection_point_found;
             auto val = check_for_intersection(
                 position, position_below,
                 bsp.bsp3d_nodes,
@@ -808,10 +809,22 @@ namespace Invader::Parser {
                 bsp.edge_count,
                 bsp.vertices,
                 bsp.vertex_count,
-                intersection_point,
-                surface_index,
-                leaf_index
+                intersection_point_found,
+                surface_index_found,
+                leaf_index_found
             );
+            
+            if(intersection_point) {
+                *intersection_point = intersection_point_found;
+            }
+            
+            if(surface_index) {
+                *surface_index = surface_index_found;
+            }
+            
+            if(leaf_index) {
+                *leaf_index = leaf_index_found;
+            }
             
             return val;
         };
@@ -857,10 +870,9 @@ namespace Invader::Parser {
 
                             bool in_bsp = !leaf.is_null();
                             if(in_bsp) {
-                                // If raycasting check for a surface that is 0.5 world units below it
+                                // If raycasting check for a surface that is 2.0 world units below it
                                 if(raycast) {
-                                    std::uint32_t surface_index;
-                                    in_bsp = intersects_directly_below(p.position, surface_index, 2.0F, b);
+                                    in_bsp = intersects_directly_below(p.position, 2.0F, b, nullptr, nullptr, nullptr);
                                 }
 
                                 // Add 1 if still in BSP
@@ -879,7 +891,7 @@ namespace Invader::Parser {
                             // If raycasting check for a surface that is 0.5 world units below it
                             std::uint32_t surface_index = NULL_INDEX;
                             if(raycast) {
-                                in_bsp = intersects_directly_below(f.position, surface_index, 0.5F, b);
+                                in_bsp = intersects_directly_below(f.position, 0.5F, b, nullptr, &surface_index, nullptr);
                             }
 
                             // Add 1 if still in BSP and set cluster index
@@ -934,7 +946,7 @@ namespace Invader::Parser {
                             f.cluster_index = bsp.render_leaves[leaf.int_value()].cluster;
                             std::uint32_t surface_index = NULL_INDEX;
                             if(raycast) {
-                                intersects_directly_below(f.position, surface_index, 0.5F, best_bsp);
+                                intersects_directly_below(f.position, 0.5F, best_bsp, nullptr, &surface_index, nullptr);
                             }
                             f.surface_index = surface_index;
                         }
@@ -983,14 +995,11 @@ namespace Invader::Parser {
                     for(auto &p : command_list.points) {
                         total_hits++;
                         
-                        std::uint32_t surface_index;
-                        if(intersects_directly_below(p.position, surface_index, 2.0F, b)) {
+                        std::uint32_t surface_index = ~0;
+                        if(intersects_directly_below(p.position, 2.0F, b, nullptr, &surface_index, nullptr)) {
                             hits++;
-                            surface_indices.emplace_back(surface_index);
                         }
-                        else {
-                            surface_indices.emplace_back(0xFFFFFFFF);
-                        }
+                        surface_indices.emplace_back(surface_index);
                     }
 
                     if(hits > best_bsp_hits) {
