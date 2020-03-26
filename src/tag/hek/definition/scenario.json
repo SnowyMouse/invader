@@ -1462,16 +1462,22 @@
             {
                 "name": "unknown values",
                 "type": "float",
+                "hidden": true,
                 "count": 9
             },
             {
-                "name": "corners",
+                "name": "starting corner",
                 "type": "Point3D",
-                "compound": true,
-                "count": 2
+                "compound": true
+            },
+            {
+                "name": "ending corner offset",
+                "type": "Point3D",
+                "compound": true
             }
         ],
         "type": "struct",
+        "title": "name",
         "size": 96
     },
     {
