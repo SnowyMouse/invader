@@ -790,7 +790,7 @@ namespace Invader::Parser {
 
             std::uint32_t leaf_index;
             HEK::Point3D<HEK::LittleEndian> intersection_point;
-            return check_for_intersection(
+            auto val = check_for_intersection(
                 position, position_below,
                 bsp.bsp3d_nodes,
                 bsp.bsp3d_node_count,
@@ -812,6 +812,8 @@ namespace Invader::Parser {
                 surface_index,
                 leaf_index
             );
+            
+            return val;
         };
 
         // Determine which BSP the encounters fall in

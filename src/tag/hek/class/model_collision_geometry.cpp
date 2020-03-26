@@ -283,7 +283,7 @@ namespace Invader::HEK {
                 int axis = 0;
                 int sign = 0;
 
-                // This is from <http://www.halomods.com/ips/index.php?/topic/357-collision-bsp-structure/>
+                // This is from <https://web.archive.org/web/20160605164254/http://www.halomods.com/ips/index.php?/topic/357-collision-bsp-structure/>
                 // Get the axis
                 float highest;
                 if (z < y || z < x) {
@@ -320,8 +320,8 @@ namespace Invader::HEK {
                 };
 
                 Point2D<LittleEndian> point;
-                point.x = (&plane_ref.vector.i)[PLANE_INDICES[sign][axis][0]];
-                point.y = (&plane_ref.vector.i)[PLANE_INDICES[sign][axis][1]];
+                point.x = (&intersection.x)[PLANE_INDICES[sign][axis][0]];
+                point.y = (&intersection.x)[PLANE_INDICES[sign][axis][1]];
 
                 if(check_for_intersection_bsp2d_node(node_index, point, surface_index)) {
                     ever_intersected = true;
