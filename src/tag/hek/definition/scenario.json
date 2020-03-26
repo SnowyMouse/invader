@@ -2618,6 +2618,7 @@
         ],
         "type": "struct",
         "title": "name",
+        "read_only": true,
         "size": 92
     },
     {
@@ -2651,6 +2652,7 @@
         ],
         "type": "struct",
         "title": "name",
+        "read_only": true,
         "size": 92
     },
     {
@@ -2671,6 +2673,7 @@
         ],
         "type": "struct",
         "title": "reference",
+        "read_only": true,
         "size": 40
     },
     {
@@ -2689,6 +2692,7 @@
         ],
         "type": "struct",
         "title": "name",
+        "read_only": true,
         "size": 52
     },
     {
