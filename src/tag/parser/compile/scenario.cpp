@@ -841,67 +841,81 @@ namespace Invader::Parser {
                 // Set this to 1 because memes
                 encounter_data.one = 1;
 
+                // If we have a manual BSP index, set this stuff here
+                std::size_t start_bsp = 0;
                 if(encounter.flags.manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
-                    continue;
+                    start_bsp = encounter_data.manual_bsp_index;
                 }
 
+                // Otherwise, we need to look for the best BSP
                 std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
                 std::size_t max_hits = 0;
 
-                std::vector<std::pair<HEK::Index, HEK::Index>> firing_positions_indices;
+                // We also need to find firing position indices
+                struct FiringPositionIndex {
+                    HEK::Index cluster_index;
+                    std::uint32_t surface_index;
+                };
+                
+                std::vector<FiringPositionIndex> best_firing_positions_indices;
                 std::size_t firing_position_count = encounter.firing_positions.size();
-                firing_positions_indices.reserve(firing_position_count);
 
+                // Also, are we raycasting?
                 bool raycast = encounter.flags._3d_firing_positions == 0;
 
-                for(std::size_t b = 0; b < bsp_count; b++) {
+                // Go through each BSP
+                for(std::size_t b = start_bsp; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
 
                     std::size_t hits = 0;
                     std::size_t total_hits = 0;
+                    std::vector<FiringPositionIndex> firing_positions_indices;
 
+                    // Go through each squad; add 1 to hits for every squad we find in the BSP
                     for(auto &s : encounter.squads) {
                         for(auto &p : s.starting_locations) {
                             total_hits++;
-                            auto leaf = leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
-
-                            bool in_bsp = !leaf.is_null();
-                            if(in_bsp) {
-                                // If raycasting check for a surface that is 2.0 world units below it
-                                if(raycast) {
-                                    in_bsp = intersects_directly_below(p.position, 2.0F, b, nullptr, nullptr, nullptr);
-                                }
-
-                                // Add 1 if still in BSP
-                                hits += in_bsp;
+                            
+                            // If raycasting check for a surface that is 2.0 world units below it
+                            if(raycast) {
+                                hits += intersects_directly_below(p.position, 2.0F, b, nullptr, nullptr, nullptr);
+                            }
+                            else {
+                                hits += !leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
                             }
                         }
                     }
-
-                    firing_positions_indices.clear();
+                    
+                    // Go through each firing position
                     for(auto &f : encounter.firing_positions) {
                         total_hits++;
-                        auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
-
-                        bool in_bsp = !leaf.is_null();
+                        
+                        // Here are the indices we'll set
+                        bool in_bsp;
+                        std::uint32_t surface_index = ~0;
+                        std::uint32_t leaf_index = ~0;
+                        
+                        // Raycast stuff
+                        if(raycast) {
+                            in_bsp = intersects_directly_below(f.position, 2.0F, b, nullptr, &surface_index, &leaf_index);
+                        }
+                        else {
+                            auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
+                            if((in_bsp = !leaf.is_null())) {
+                                leaf_index = leaf.int_value();
+                            }
+                        }
+                        
+                        // If we're in the BSP, add it
                         if(in_bsp) {
-                            // If raycasting check for a surface that is 0.5 world units below it
-                            std::uint32_t surface_index = NULL_INDEX;
-                            if(raycast) {
-                                in_bsp = intersects_directly_below(f.position, 0.5F, b, nullptr, &surface_index, nullptr);
-                            }
-
-                            // Add 1 if still in BSP and set cluster index
-                            if(in_bsp) {
-                                hits++;
-                                firing_positions_indices.emplace_back(bsp.render_leaves[leaf.int_value()].cluster, static_cast<HEK::Index>(surface_index));
-                            }
-                            else {
-                                firing_positions_indices.emplace_back(NULL_INDEX, NULL_INDEX);
-                            }
+                            firing_positions_indices.emplace_back(FiringPositionIndex {bsp.render_leaves[leaf_index].cluster, surface_index});
+                            hits++;
+                        }
+                        else {
+                            firing_positions_indices.emplace_back(FiringPositionIndex {NULL_INDEX, static_cast<std::uint32_t>(~0)});
                         }
                     }
 
@@ -911,45 +925,44 @@ namespace Invader::Parser {
                         best_bsp = b;
                         total_best_bsps = 1;
                         max_hits = total_hits;
+                        best_firing_positions_indices = firing_positions_indices;
                     }
                     else if(hits == best_bsp_hits) {
                         total_best_bsps++;
                     }
+                    
+                    // If we have a manual index set, break early
+                    if(encounter.flags.manual_bsp_index_specified) {
+                        break;
+                    }
                 }
 
-                encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
-
-                if(best_bsp_hits == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
-                    bsp_find_warnings++;
-                }
-                else if(best_bsp_hits != max_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, encounter.name.string, best_bsp, best_bsp_hits, max_hits);
-                    bsp_find_warnings++;
-                }
-                else if(total_best_bsps > 1) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
-                    bsp_find_warnings++;
+                // Are we doing the thing?
+                if(!encounter.flags.manual_bsp_index_specified) {
+                    encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                    if(best_bsp_hits == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
+                        bsp_find_warnings++;
+                    }
+                    else if(best_bsp_hits != max_hits) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, encounter.name.string, best_bsp, best_bsp_hits, max_hits);
+                        bsp_find_warnings++;
+                    }
+                    else if(total_best_bsps > 1) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                        bsp_find_warnings++;
+                    }
                 }
 
                 // If we have a BSP, set all the cluster and surface indices
                 if(encounter_data.precomputed_bsp_index != NULL_INDEX && firing_position_count > 0) {
-                    auto &firing_positions_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)];
-                    auto *firing_positions_data = reinterpret_cast<ScenarioFiringPosition::struct_little *>(firing_positions_struct.data.data());
-
-                    auto &bsp = bsp_data[best_bsp];
+                    auto *firing_positions_data = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)].data.data());
                     for(std::size_t fp = 0; fp < firing_position_count; fp++) {
-                        // Get leaf and surface index
                         auto &f = firing_positions_data[fp];
-                        auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
-                        if(!leaf.is_null()) {
-                            f.cluster_index = bsp.render_leaves[leaf.int_value()].cluster;
-                            std::uint32_t surface_index = NULL_INDEX;
-                            if(raycast) {
-                                intersects_directly_below(f.position, 0.5F, best_bsp, nullptr, &surface_index, nullptr);
-                            }
-                            f.surface_index = surface_index;
-                        }
+                        auto &indices = best_firing_positions_indices[fp];
+                        
+                        f.surface_index = indices.surface_index;
+                        f.cluster_index = indices.cluster_index;
                     }
                 }
             }
