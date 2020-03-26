@@ -850,49 +850,70 @@ namespace Invader::Parser {
 
                 // Otherwise, we need to look for the best BSP
                 std::size_t best_bsp = NULL_INDEX;
-                std::size_t best_bsp_hits = 0;
+                std::size_t best_bsp_firing_position_hits = 0;
+                std::size_t best_bsp_squad_hits = 0;
+                std::size_t best_bsp_total_hits = 0;
                 std::size_t total_best_bsps = 0;
-                std::size_t max_hits = 0;
 
                 // We also need to find firing position indices
                 struct FiringPositionIndex {
                     HEK::Index cluster_index = NULL_INDEX;
                     std::uint32_t surface_index = ~0;
+                    bool found = false;
                 };
-                
                 std::size_t firing_position_count = encounter.firing_positions.size();
                 std::vector<FiringPositionIndex> best_firing_positions_indices(firing_position_count);
+                
+                // And we'll hold onto this, too
+                struct SquadPositionFound {
+                    std::size_t squad;
+                    std::size_t starting_position;
+                    bool found;
+                };
+                std::size_t squad_position_count = 0;
+                for(auto &s : encounter.squads) {
+                    squad_position_count += s.starting_locations.size();
+                }
+                std::vector<SquadPositionFound> best_squad_positions_found(squad_position_count);
+                std::size_t squad_count = encounter.squads.size();
 
                 // Also, are we raycasting?
                 bool raycast = encounter.flags._3d_firing_positions == 0;
 
                 // Go through each BSP
+                std::vector<FiringPositionIndex> firing_positions_indices = best_firing_positions_indices;
+                std::vector<SquadPositionFound> squad_positions_found = best_squad_positions_found;
                 for(std::size_t b = start_bsp; b < bsp_count; b++) {
+                    firing_positions_indices.clear();
+                    squad_positions_found.clear();
                     auto &bsp = bsp_data[b];
 
-                    std::size_t hits = 0;
-                    std::size_t total_hits = 0;
-                    std::vector<FiringPositionIndex> firing_positions_indices;
-
                     // Go through each squad; add 1 to hits for every squad we find in the BSP
-                    for(auto &s : encounter.squads) {
-                        for(auto &p : s.starting_locations) {
-                            total_hits++;
+                    std::size_t squad_hits = 0;
+                    for(std::size_t s = 0; s < squad_count; s++) {
+                        auto &squad = encounter.squads[s];
+                        std::size_t location_count = squad.starting_locations.size();
+                        
+                        for(std::size_t l = 0; l < location_count; l++) {
+                            auto &location = squad.starting_locations[l];
                             
                             // If raycasting check for a surface that is 2.0 world units below it
+                            bool found;
                             if(raycast) {
-                                hits += intersects_directly_below(p.position, 2.0F, b, nullptr, nullptr, nullptr);
+                                found = intersects_directly_below(location.position, 2.0F, b, nullptr, nullptr, nullptr);
                             }
                             else {
-                                hits += !leaf_for_point_of_bsp_tree(p.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
+                                found = !leaf_for_point_of_bsp_tree(location.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
                             }
+                            
+                            squad_hits += found;
+                            squad_positions_found.emplace_back(SquadPositionFound { s, l, found });
                         }
                     }
                     
                     // Go through each firing position
+                    std::size_t firing_position_hits = 0;
                     for(auto &f : encounter.firing_positions) {
-                        total_hits++;
-                        
                         // Here are the indices we'll set
                         bool in_bsp;
                         std::uint32_t surface_index = ~0;
@@ -911,28 +932,34 @@ namespace Invader::Parser {
                         
                         // If we're in the BSP, add it
                         if(in_bsp) {
-                            firing_positions_indices.emplace_back(FiringPositionIndex {bsp.render_leaves[leaf_index].cluster, surface_index});
-                            hits++;
+                            firing_positions_indices.emplace_back(FiringPositionIndex {bsp.render_leaves[leaf_index].cluster, surface_index, true});
+                            firing_position_hits++;
                         }
                         else {
                             firing_positions_indices.emplace_back();
                         }
                     }
+                    
+                    // Add it up
+                    auto total_hits = squad_hits + firing_position_hits;
 
                     // If this is the next best BSP, write data
-                    if(hits > best_bsp_hits) {
-                        best_bsp_hits = hits;
+                    if(total_hits > best_bsp_total_hits) {
+                        best_bsp_total_hits = total_hits;
+                        best_bsp_firing_position_hits = firing_position_hits;
+                        best_bsp_squad_hits = squad_hits;
+                        best_firing_positions_indices = firing_positions_indices;
+                        best_squad_positions_found = squad_positions_found;
                         best_bsp = b;
                         total_best_bsps = 1;
-                        max_hits = total_hits;
-                        best_firing_positions_indices = firing_positions_indices;
                     }
-                    else if(hits == best_bsp_hits) {
+                    else if(total_hits && total_hits == best_bsp_total_hits) {
                         total_best_bsps++;
                     }
                     
                     // If we have a manual index set, break early
                     if(encounter.flags.manual_bsp_index_specified) {
+                        total_best_bsps = 1;
                         break;
                     }
                 }
@@ -940,17 +967,68 @@ namespace Invader::Parser {
                 // Are we doing the thing?
                 if(!encounter.flags.manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
-                    if(best_bsp_hits == 0) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
-                        bsp_find_warnings++;
+                }
+                
+                auto best_possible_hits = squad_position_count + firing_position_count;
+                
+                // Ambiguous?
+                if(total_best_bsps > 1) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSPs (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, best_bsp);
+                    bsp_find_warnings++;
+                }
+                
+                // Are we missing stuff?
+                if(total_best_bsps == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
+                }
+                else if(best_bsp_total_hits != best_possible_hits) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    
+                    // Show the firing positions and squad positions that are missing
+                    auto missing_firing_positions = firing_position_count - best_bsp_firing_position_hits;
+                    if(missing_firing_positions) {
+                        int offset = 0;
+                        char missing_firing_positions_list[256] = {};
+                        unsigned int listed = 0;
+                        for(std::size_t fp = 0; fp < firing_position_count; fp++) {
+                            // Look for anything we didn't find
+                            if(!best_firing_positions_indices[fp].found) {
+                                offset += std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, "%s%zu", listed == 0 ? "" : ", ", fp);
+                                
+                                // If we're going past 5, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 5) {
+                                    if(missing_firing_positions > listed) {
+                                        std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, ", ...");
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        eprintf_warn_lesser("    - %zu firing position%s fell out: [%s]", missing_firing_positions, missing_firing_positions == 1 ? "" : "s", missing_firing_positions_list);
                     }
-                    else if(best_bsp_hits != max_hits) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, encounter.name.string, best_bsp, best_bsp_hits, max_hits);
-                        bsp_find_warnings++;
-                    }
-                    else if(total_best_bsps > 1) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, encounter.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
-                        bsp_find_warnings++;
+                    
+                    auto missing_squad_positions = squad_position_count - best_bsp_squad_hits;
+                    if(missing_squad_positions) {
+                        int offset = 0;
+                        char missing_squad_positions_list[256] = {};
+                        unsigned int listed = 0;
+                        for(auto &sp : best_squad_positions_found) {
+                            // Look for anything we didn't find
+                            if(!sp.found) {
+                                offset += std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, "%s(%zu-%zu)", listed == 0 ? "" : ", ", sp.squad, sp.starting_position);
+                                
+                                // If we're going past 3, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 3) {
+                                    if(missing_firing_positions > listed) {
+                                        std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, ", ...");
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        eprintf_warn_lesser("    - %zu squad position%s fell out: [%s]", missing_squad_positions, missing_squad_positions == 1 ? "" : "s", missing_squad_positions_list);
                     }
                 }
 
@@ -1022,12 +1100,13 @@ namespace Invader::Parser {
                         max_hits = total_hits;
                         best_surface_indices = surface_indices;
                     }
-                    else if(hits == best_bsp_hits) {
+                    else if(hits && hits == best_bsp_hits) {
                         total_best_bsps++;
                     }
                     
                     // Since we're just checking one BSP's things, break
                     if(command_list.flags.manual_bsp_index) {
+                        total_best_bsps = 1;
                         break;
                     }
                 }
@@ -1043,28 +1122,41 @@ namespace Invader::Parser {
                 
                 command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 
-                if(!command_list.flags.manual_bsp_index) {
-                    if(best_bsp_hits == 0) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
-                        bsp_find_warnings++;
+                // Show warnings if needed
+                if(total_best_bsps == 0) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
+                }
+                else if(best_bsp_hits != max_hits) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                    
+                    auto missing_points = max_hits - best_bsp_hits;
+                    int offset = 0;
+                    char missing_points_list[256] = {};
+                    unsigned int listed = 0;
+                    for(std::size_t p = 0; p < point_count; p++) {
+                        // Look for anything we didn't find
+                        if(best_surface_indices[p] == 0xFFFFFFFF) {
+                            offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : ", ", p);
+                            
+                            // If we're going past 5, we shouldn't list anymore as it's a bit spammy
+                            if(++listed == 5) {
+                                if(missing_points > listed) {
+                                    std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, ", ...");
+                                }
+                                break;
+                            }
+                        }
                     }
-                    else if(best_bsp_hits != max_hits) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP#%zu (%zu / %zu hits)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits);
-                        bsp_find_warnings++;
-                    }
-                    else if(total_best_bsps > 1) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
-                        bsp_find_warnings++;
-                    }
+                    
+                    eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
+                    
+                }
+                else if(total_best_bsps > 1) {
+                    oprintf("%zu / %zu\n", best_bsp_hits, max_hits);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                    bsp_find_warnings++;
                 }
             }
-        }
-
-        if(bsp_find_warnings == 1) {
-            eprintf_warn("Use manual BSP indices to silence this warning");
-        }
-        else if(bsp_find_warnings > 1) {
-            eprintf_warn("Use manual BSP indices to silence these warnings");
         }
 
         // Decals

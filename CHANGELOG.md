@@ -14,6 +14,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now checks extension separately from scenario name
 - invader-build: Maps with script data can no longer be built without source
   data. This is due to the fact that such scenario tags are going to be broken.
+- invader-build: Firing positions, squads, and command list points that fall out
+  of BSPs are now listed
 - invader-compress: `--level` now applies to MCC/Xbox
 - invader-extract: Now always decompiles scripts
 - invader-index: Renamed invader-indexer to invader-index to be more in line
