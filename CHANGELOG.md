@@ -22,6 +22,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed some command lists not working correctly due to the point
   surface indices not being calculated. This may not fix all of them, so stay
   tuned for more changes.
+- invader-build: Greatly improved the accuracy of firing positions so everything
+  (or nearly everything) firing position related works
 - invader-edit-qt: Fixed tag count not being updated on the main window if the
   tags directory is empty
 - invader-edit-qt: Fixed an unnecessary warning appearing on Windows when
