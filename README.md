@@ -386,7 +386,8 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -l --level <level>           Set the compression level. Must be between 1 and
-                               19. Default: 19
+                               19. If compressing an Xbox or MCC map, this will
+                               be clamped from 1 to 9. Default: 19
   -o --output <file>           Emit the resulting map at the given path. By
                                default, this is the map path (overwrite).
 ```
