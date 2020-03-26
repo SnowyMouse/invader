@@ -856,12 +856,12 @@ namespace Invader::Parser {
 
                 // We also need to find firing position indices
                 struct FiringPositionIndex {
-                    HEK::Index cluster_index;
-                    std::uint32_t surface_index;
+                    HEK::Index cluster_index = NULL_INDEX;
+                    std::uint32_t surface_index = ~0;
                 };
                 
-                std::vector<FiringPositionIndex> best_firing_positions_indices;
                 std::size_t firing_position_count = encounter.firing_positions.size();
+                std::vector<FiringPositionIndex> best_firing_positions_indices(firing_position_count);
 
                 // Also, are we raycasting?
                 bool raycast = encounter.flags._3d_firing_positions == 0;
@@ -915,7 +915,7 @@ namespace Invader::Parser {
                             hits++;
                         }
                         else {
-                            firing_positions_indices.emplace_back(FiringPositionIndex {NULL_INDEX, static_cast<std::uint32_t>(~0)});
+                            firing_positions_indices.emplace_back();
                         }
                     }
 
