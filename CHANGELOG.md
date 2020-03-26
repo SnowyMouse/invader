@@ -7,6 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Added `-T missing-script-source` which decompiles scripts in
   scenario tags.
 - invader-build: Added child scenario merging
+- invader-edit-qt: Left-clicking an array name replaces the combo box with a
+  spin box so you can type an index in directly
 
 ### Changed
 - invader-build: Now checks extension separately from scenario name

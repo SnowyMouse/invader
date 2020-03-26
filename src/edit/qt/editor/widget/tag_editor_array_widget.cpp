@@ -16,26 +16,46 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QApplication>
+#include <QSpinBox>
+#include <QMouseEvent>
 
 namespace Invader::EditQt {
+    // Left-click to toggle the spinbox
+    class TagEditorArrayWidget::ToggleSpinBoxLabel : public QLabel {
+    public:
+        ToggleSpinBoxLabel(TagEditorArrayWidget *array_widget) : QLabel(), array_widget(array_widget) {}
+    private:
+        TagEditorArrayWidget *array_widget;
+        virtual void mousePressEvent(QMouseEvent *event) override {
+            if(event->button() == Qt::LeftButton) {
+                array_widget->toggle_spin_box();
+                event->ignore();
+            }
+        }
+    };
+    
     TagEditorArrayWidget::TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) : TagEditorWidget(parent, value, editor_window) {
         this->vbox_layout = new QVBoxLayout();
         this->vbox_layout->setMargin(8);
         this->vbox_layout->setSpacing(2);
-        this->reflexive_index = new QComboBox();
+        this->reflexive_index = new QComboBox(this);
+        this->spin_box = new QSpinBox(this);
+        this->reflexive_index->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        this->spin_box->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
         this->item_model = nullptr;
         this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
 
         // Set our header stuff
         QFrame *header = new QFrame();
         QHBoxLayout *header_layout = new QHBoxLayout();
-        QLabel *title_label = new QLabel();
+        QLabel *title_label = new ToggleSpinBoxLabel(this);
         title_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         this->setLayout(this->vbox_layout);
         this->vbox_layout->addWidget(header);
         header->setLayout(header_layout);
         header_layout->addWidget(title_label);
         header_layout->addWidget(this->reflexive_index);
+        header_layout->addWidget(this->spin_box);
         header->setFrameStyle(QFrame::Panel | QFrame::Raised);
         header->setLineWidth(2);
         header_layout->setMargin(8);
@@ -54,6 +74,9 @@ namespace Invader::EditQt {
         this->reflexive_index->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
         this->reflexive_index->setMinimumWidth(title_width * 5 / 6);
         this->reflexive_index->setMaximumWidth(title_width * 5 / 6);
+        this->spin_box->setMinimumWidth(title_width * 5 / 6);
+        this->spin_box->setMaximumWidth(title_width * 5 / 6);
+        this->spin_box->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         this->reflexive_index->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         title_label->setText(value->get_name());
 
@@ -123,8 +146,17 @@ namespace Invader::EditQt {
         this->regenerate_enum();
         this->regenerate_widget();
         connect(this->reflexive_index, &QComboBox::currentTextChanged, this, &TagEditorArrayWidget::regenerate_widget);
+        connect(this->spin_box, &QSpinBox::textChanged, this, &TagEditorArrayWidget::spinbox_update);
+        this->spin_box->setVisible(false);
 
         header_layout->addStretch(1);
+    }
+    
+    void TagEditorArrayWidget::spinbox_update() {
+        // If updates are enabled, set index.
+        if(this->reflexive_index->updatesEnabled()) {
+            this->reflexive_index->setCurrentIndex(this->spin_box->value());
+        }
     }
 
     int TagEditorArrayWidget::current_index() const noexcept {
@@ -139,6 +171,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index);
+        this->spin_box->setValue(index);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -151,6 +184,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index);
+        this->spin_box->setValue(index);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -170,6 +204,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index);
+        this->spin_box->setValue(index);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -183,6 +218,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index + 1);
+        this->spin_box->setValue(index + 1);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -197,6 +233,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index);
+        this->spin_box->setValue(index);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -208,6 +245,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(-1);
+        this->spin_box->setValue(-1);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -222,6 +260,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index + 1);
+        this->spin_box->setValue(index + 1);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -236,6 +275,7 @@ namespace Invader::EditQt {
 
         this->reflexive_index->blockSignals(true);
         this->reflexive_index->setCurrentIndex(index - 1);
+        this->spin_box->setValue(index - 1);
         this->reflexive_index->blockSignals(false);
         this->regenerate_widget();
     }
@@ -247,6 +287,13 @@ namespace Invader::EditQt {
 
         // Make sure we got it!
         int index = this->current_index();
+        
+        // Update the spinbox too
+        this->spin_box->blockSignals(true);
+        this->spin_box->setValue(index);
+        this->spin_box->blockSignals(false);
+        
+        // Update this
         std::size_t count = this->get_struct_value()->get_array_size();
         if(index < 0 || static_cast<std::size_t>(index) > count) {
             this->tag_view_widget = nullptr;
@@ -293,7 +340,19 @@ namespace Invader::EditQt {
                 this->item_model->appendRow(new QStandardItem(QString::number(i)));
             }
         }
-
+        
+        // Update our spinner
+        if(count) {
+            this->spin_box->setMinimum(0);
+            this->spin_box->setMaximum(count - 1);
+            this->spin_box->setEnabled(true);
+        }
+        else {
+            this->spin_box->setMinimum(-1);
+            this->spin_box->setMaximum(-1);
+            this->spin_box->setEnabled(false);
+        }
+        
         this->reflexive_index->setModel(this->item_model);
         this->reflexive_index->setEnabled(count > 0);
 
@@ -345,5 +404,10 @@ namespace Invader::EditQt {
         this->reflexive_index->setItemText(this->reflexive_index->currentIndex(), new_title);
 
         this->reflexive_index->blockSignals(false);
+    }
+    
+    void TagEditorArrayWidget::toggle_spin_box() {
+        this->spin_box->setVisible(!this->spin_box->isVisible());
+        this->reflexive_index->setVisible(!this->spin_box->isVisible());
     }
 }

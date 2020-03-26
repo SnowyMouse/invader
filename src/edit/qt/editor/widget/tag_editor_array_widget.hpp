@@ -10,6 +10,7 @@ class QComboBox;
 class QPushButton;
 class QVBoxLayout;
 class QStandardItemModel;
+class QSpinBox;
 
 namespace Invader::EditQt {
     class TagEditorEditWidgetView;
@@ -40,11 +41,15 @@ namespace Invader::EditQt {
         void perform_clear();
         void perform_shift_up();
         void perform_shift_down();
+        void spinbox_update();
 
     private:
+        class ToggleSpinBoxLabel;
+        
         void regenerate_widget();
         void regenerate_enum();
         void set_buttons_enabled();
+        void toggle_spin_box();
 
         int current_index() const noexcept;
 
@@ -62,6 +67,7 @@ namespace Invader::EditQt {
         QPushButton *clear_button;
         QPushButton *shift_up_button;
         QPushButton *shift_down_button;
+        QSpinBox *spin_box;
 
         QStandardItemModel *item_model;
     };
