@@ -265,13 +265,12 @@ int main(int argc, const char **argv) {
         }
         else {
             final_file = build_options.output;
-            auto final_file_name = std::filesystem::path(final_file).filename();
-            auto final_file_name_no_extension = final_file_name.replace_extension();
-            auto final_file_name_string = final_file_name.string();
+            auto final_file_path = std::filesystem::path(final_file);
+            auto final_file_name_no_extension = final_file_path.filename().replace_extension();
             auto final_file_name_no_extension_string = final_file_name_no_extension.string();
             
             // If it's not a .map, warn
-            if(final_file_name.extension() != MAP_EXTENSION) {
+            if(final_file_path.extension() != MAP_EXTENSION) {
                 eprintf_warn("The base file extension is not \"%s\" which is required by the target engine", MAP_EXTENSION);
             }
             
