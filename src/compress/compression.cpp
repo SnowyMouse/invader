@@ -154,7 +154,7 @@ namespace Invader::Compression {
                 compression_level = Z_BEST_COMPRESSION;
             }
             else if(compression_level < Z_NO_COMPRESSION) {
-                compression_level = Z_NO_COMPRESSION
+                compression_level = Z_NO_COMPRESSION;
             }
             
             if((deflateInit(&deflate_stream, compression_level) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
