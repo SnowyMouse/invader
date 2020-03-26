@@ -48,12 +48,12 @@ namespace Invader::EditQt {
 
         // Set size stuff
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        int title_width = title_label->fontMetrics().boundingRect("MMMM").width() * 5;
+        int title_width = title_label->fontMetrics().boundingRect("MMMM").width() * 6;
         title_label->setMinimumWidth(title_width);
         title_label->setMaximumWidth(title_width);
         this->reflexive_index->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-        this->reflexive_index->setMinimumWidth(title_width * 3 / 2);
-        this->reflexive_index->setMaximumWidth(title_width * 3 / 2);
+        this->reflexive_index->setMinimumWidth(title_width * 5 / 6);
+        this->reflexive_index->setMaximumWidth(title_width * 5 / 6);
         this->reflexive_index->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         title_label->setText(value->get_name());
 
