@@ -832,6 +832,10 @@ namespace Invader::Parser {
                 if(val) {
                     positions_found.emplace_back(PositionFound { leaf_index_found, surface_index_found, intersection_point_found });
                     current_position.z = intersection_point_found.z - 0.01F;
+                    
+                    if(current_position.z.read() < position_below.z.read()) {
+                        break;
+                    }
                 }
                 else {
                     break;
