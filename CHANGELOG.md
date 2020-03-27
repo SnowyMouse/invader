@@ -18,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
   of BSPs are now listed
 - invader-compress: `--level` now applies to MCC/Xbox
 - invader-extract: Now always decompiles scripts
+- invader-edit-qt: Invalid values are displayed as red, and missing dependencies
+  are displayed as orange
 - invader-index: Renamed invader-indexer to invader-index to be more in line
   with the naming scheme of Invader tools
 

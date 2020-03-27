@@ -61,7 +61,7 @@ namespace Invader::EditQt {
         }
     }
     
-    static void set_bad(QLineEdit *textbox, bool bad);
+    static void set_error_level_textbox(QLineEdit *textbox, int error);
 
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
         TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
@@ -126,7 +126,7 @@ namespace Invader::EditQt {
                 auto min = value->get_minimum();
                 auto max = value->get_maximum();
                 auto &current_value = values[value_index];
-                set_bad(textbox, (min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0));
+                set_error_level_textbox(textbox, ((min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0)) ? 2 : 0);
 
                 // Radians get converted to degrees
                 if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
@@ -742,7 +742,7 @@ namespace Invader::EditQt {
                     // Make sure we're within range
                     ok = ok && !(min.has_value() && compare_number(number, min.value()) < 0);
                     ok = ok && !(max.has_value() && compare_number(number, max.value()) > 0);
-                    set_bad(widget, !ok);
+                    set_error_level_textbox(widget, ok ? 0 : 2);
                     
                     // If it's NOT ok, then we shall not save anything.
                     can_set = can_set && ok;
@@ -786,7 +786,7 @@ namespace Invader::EditQt {
         }
 
         // Color based on if we found it or it's empty, or we didn't find it
-        set_bad(textbox_widgets[0], !found);
+        set_error_level_textbox(textbox_widgets[0], found ? 0 : 1);
 
         // Set our button as enabled
         this->widgets[3]->setEnabled(found && preferred_path != "");
@@ -810,11 +810,14 @@ namespace Invader::EditQt {
         this->get_editor_window()->get_parent_window()->open_tag(path_to_open, false);
     }
     
-    static void set_bad(QLineEdit *textbox, bool bad) {
-        if(!bad) {
+    static void set_error_level_textbox(QLineEdit *textbox, int error) {
+        if(error == 0) {
             textbox->setStyleSheet("");
         }
-        else {
+        else if(error == 1) {
+            textbox->setStyleSheet("color: #FF7F00");
+        }
+        else if(error == 2) {
             textbox->setStyleSheet("color: #FF0000");
         }
     }
