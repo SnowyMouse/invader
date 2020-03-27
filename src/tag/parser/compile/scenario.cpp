@@ -1303,6 +1303,44 @@ namespace Invader::Parser {
                 }
             }
         }
+        
+        // AI Conversations
+        std::size_t ai_conversation_count = this->ai_conversations.size();
+        if(ai_conversation_count) {
+            auto &ai_conversation_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.ai_conversations.pointer)];
+            auto *ai_conversation_data = reinterpret_cast<Parser::ScenarioAIConversation::struct_little *>(ai_conversation_struct.data.data());
+            for(std::size_t aic = 0; aic < ai_conversation_count; aic++) {
+                auto &convo = ai_conversation_data[aic];
+                std::size_t participation_count = convo.participants.count.read();
+                if(participation_count) {
+                    auto &participation_struct = workload.structs[*ai_conversation_struct.resolve_pointer(&convo.participants.pointer)];
+                    auto *participation_data = reinterpret_cast<Parser::ScenarioAIConversationParticipant::struct_little *>(participation_struct.data.data());
+                    for(std::size_t p = 0; p < participation_count; p++) {
+                        auto &participant = participation_data[p];
+                        std::optional<std::uint32_t> encounter_index;
+                        
+                        // Do we have an encounter to look for?
+                        if(participant.encounter_name.string[0]) {
+                            for(std::size_t e = 0; e < encounter_list_count; e++) {
+                                if(this->encounters[e].name == participant.encounter_name) {
+                                    encounter_index = e;
+                                    break;
+                                }
+                            }
+                            if(!encounter_index.has_value()) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a non-existant encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                            }
+                        }
+                        
+                        participant.encounter_index = encounter_index.value_or(0xFFFFFFFF);
+                        participant.unknown1 = 0;
+                        participant.unknown2 = 0xFFFF;
+                        participant.unknown3 = 0xFFFFFFFF;
+                        participant.unknown4 = 0xFFFFFFFF;
+                    }
+                }
+            }
+        }
     }
     
     bool fix_missing_script_source_data(Scenario &scenario, bool fix) {

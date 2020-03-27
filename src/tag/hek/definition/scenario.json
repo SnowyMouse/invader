@@ -2445,8 +2445,28 @@
                 "size": 12
             },
             {
-                "type": "pad",
-                "size": 12
+                "name": "unknown1",
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown2",
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown3",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "unknown4",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "encounter name",
@@ -2454,8 +2474,10 @@
                 "endian": null
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "encounter index",
+                "type": "uint32",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "type": "pad",
