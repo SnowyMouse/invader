@@ -1874,7 +1874,9 @@
             },
             {
                 "name": "unknown",
-                "type": "uint16"
+                "type": "uint16",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "sequence id",
