@@ -1873,8 +1873,8 @@
                 "type": "Angle"
             },
             {
-                "name": "unknown",
-                "type": "uint16",
+                "name": "cluster index",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },

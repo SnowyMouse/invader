@@ -916,16 +916,22 @@ namespace Invader::Parser {
                 
                 // And we'll hold onto this, too
                 struct SquadPositionFound {
-                    std::size_t squad;
-                    std::size_t starting_position;
-                    bool found;
+                    std::size_t squad = ~0;
+                    std::size_t starting_position = ~0;
+                    HEK::Index cluster_index = NULL_INDEX;
+                    bool found = false;
                 };
-                std::size_t squad_position_count = 0;
-                for(auto &s : encounter.squads) {
-                    squad_position_count += s.starting_locations.size();
-                }
-                std::vector<SquadPositionFound> best_squad_positions_found(squad_position_count);
+                
+                // Get some default data
                 std::size_t squad_count = encounter.squads.size();
+                std::vector<SquadPositionFound> best_squad_positions_found;
+                for(std::size_t s = 0; s < squad_count; s++) {
+                    auto position_count = encounter.squads[s].starting_locations.size();
+                    for(std::size_t p = 0; p < position_count; p++) {
+                        best_squad_positions_found.emplace_back(SquadPositionFound { s, p });
+                    }
+                }
+                std::size_t squad_position_count = best_squad_positions_found.size();
 
                 // Also, are we raycasting?
                 bool raycast = encounter.flags._3d_firing_positions == 0;
@@ -949,15 +955,32 @@ namespace Invader::Parser {
                             
                             // If raycasting check for a surface that is 0.5 world units above/below it
                             bool found;
+                            std::optional<std::uint32_t> leaf_index;
+                            
                             if(raycast) {
-                                found = intersects_vertically(location.position, 0.5F, b, nullptr, nullptr, nullptr);
+                                std::uint32_t leaf;
+                                if((found = intersects_vertically(location.position, 0.5F, b, nullptr, nullptr, &leaf))) {
+                                    leaf_index = leaf;
+                                }
                             }
                             else {
-                                found = !leaf_for_point_of_bsp_tree(location.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
+                                auto potential_leaf = leaf_for_point_of_bsp_tree(location.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
+                                if((found = potential_leaf.is_null())) {
+                                    leaf_index = potential_leaf.int_value();
+                                }
+                            }
+                            
+                            // Set the cluster index
+                            HEK::Index cluster_index;
+                            if(leaf_index.has_value()) {
+                                cluster_index = bsp.render_leaves[*leaf_index].cluster;
+                            }
+                            else {
+                                cluster_index = NULL_INDEX;
                             }
                             
                             squad_hits += found;
-                            squad_positions_found.emplace_back(SquadPositionFound { s, l, found });
+                            squad_positions_found.emplace_back(SquadPositionFound { s, l, cluster_index, found });
                         }
                     }
                     
@@ -1082,8 +1105,8 @@ namespace Invader::Parser {
                     }
                 }
 
-                // If we have a BSP, set all the cluster and surface indices
-                if(encounter_data.precomputed_bsp_index != NULL_INDEX && firing_position_count > 0) {
+                // Set all the cluster and surface indices
+                if(firing_position_count > 0) {
                     auto *firing_positions_data = reinterpret_cast<HEK::ScenarioFiringPosition<HEK::LittleEndian> *>(workload.structs[*encounter_struct.resolve_pointer(&encounter_data.firing_positions.pointer)].data.data());
                     for(std::size_t fp = 0; fp < firing_position_count; fp++) {
                         auto &f = firing_positions_data[fp];
@@ -1091,6 +1114,24 @@ namespace Invader::Parser {
                         
                         f.surface_index = indices.surface_index;
                         f.cluster_index = indices.cluster_index;
+                    }
+                }
+                
+                // Same with squads
+                if(squad_position_count > 0) {
+                    std::size_t position_index_found = 0;
+                    auto &squad_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.squads.pointer)];
+                    auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::struct_little *>(squad_struct.data.data());
+                    for(std::size_t s = 0; s < squad_count; s++) {
+                        auto &squad = squad_data[s];
+                        std::size_t position_count = squad.starting_locations.count.read();
+                        if(position_count) {
+                            auto *position_data = reinterpret_cast<Parser::ScenarioActorStartingLocation::struct_little *>(workload.structs[*squad_struct.resolve_pointer(&squad.starting_locations.pointer)].data.data());
+                            for(std::size_t p = 0; p < position_count; p++) {
+                                auto &found_index = best_squad_positions_found[position_index_found++];
+                                position_data[p].cluster_index = found_index.cluster_index;
+                            }
+                        }
                     }
                 }
             }
