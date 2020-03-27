@@ -1207,7 +1207,6 @@ namespace Invader::Parser {
                     
                 }
                 else if(total_best_bsps > 1) {
-                    oprintf("%zu / %zu\n", best_bsp_hits, max_hits);
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
                     bsp_find_warnings++;
                 }
