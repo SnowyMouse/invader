@@ -783,50 +783,96 @@ namespace Invader::Parser {
 
         std::size_t bsp_find_warnings = 0;
 
-        auto intersects_directly_below = [&bsp_data](const HEK::Point3D<HEK::LittleEndian> &position, float distance, std::size_t bsp_index, HEK::Point3D<HEK::LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) -> bool {
+        auto intersects_vertically = [&bsp_data](const HEK::Point3D<HEK::LittleEndian> &position, float range, std::size_t bsp_index, HEK::Point3D<HEK::LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) -> bool {
             auto &bsp = bsp_data[bsp_index];
+            
+            // Plus or minus distance it
+            auto position_above = position;
+            position_above.z = position_above.z + range;
             auto position_below = position;
-            position_below.z = position_below.z - distance;
-
-            std::uint32_t leaf_index_found;
-            std::uint32_t surface_index_found;
-            HEK::Point3D<HEK::LittleEndian> intersection_point_found;
-            auto val = check_for_intersection(
-                position, position_below,
-                bsp.bsp3d_nodes,
-                bsp.bsp3d_node_count,
-                bsp.planes,
-                bsp.plane_count,
-                bsp.leaves,
-                bsp.leaf_count,
-                bsp.bsp2d_nodes,
-                bsp.bsp2d_node_count,
-                bsp.bsp2d_references,
-                bsp.bsp2d_reference_count,
-                bsp.surfaces,
-                bsp.surface_count,
-                bsp.edges,
-                bsp.edge_count,
-                bsp.vertices,
-                bsp.vertex_count,
-                intersection_point_found,
-                surface_index_found,
-                leaf_index_found
-            );
+            position_below.z = position_below.z - range;
             
-            if(intersection_point) {
-                *intersection_point = intersection_point_found;
+            // Hold any results
+            struct PositionFound {
+                std::uint32_t leaf_index_found;
+                std::uint32_t surface_index_found;
+                HEK::Point3D<HEK::LittleEndian> intersection_point_found;
+            };
+            std::vector<PositionFound> positions_found;
+            
+            auto current_position = position_above;
+            
+            while(true) {
+                std::uint32_t leaf_index_found;
+                std::uint32_t surface_index_found;
+                HEK::Point3D<HEK::LittleEndian> intersection_point_found;
+                auto val = check_for_intersection(
+                    current_position, position_below,
+                    bsp.bsp3d_nodes,
+                    bsp.bsp3d_node_count,
+                    bsp.planes,
+                    bsp.plane_count,
+                    bsp.leaves,
+                    bsp.leaf_count,
+                    bsp.bsp2d_nodes,
+                    bsp.bsp2d_node_count,
+                    bsp.bsp2d_references,
+                    bsp.bsp2d_reference_count,
+                    bsp.surfaces,
+                    bsp.surface_count,
+                    bsp.edges,
+                    bsp.edge_count,
+                    bsp.vertices,
+                    bsp.vertex_count,
+                    intersection_point_found,
+                    surface_index_found,
+                    leaf_index_found
+                );
+                
+                if(val) {
+                    positions_found.emplace_back(PositionFound { leaf_index_found, surface_index_found, intersection_point_found });
+                    current_position.z = intersection_point_found.z - 0.01F;
+                }
+                else {
+                    break;
+                }
             }
             
-            if(surface_index) {
-                *surface_index = surface_index_found;
+            // Find the closest
+            PositionFound *closest = nullptr;
+            float closest_distance_squared = 100.0F;
+            for(auto &i : positions_found) {
+                bool should_replace = true;
+                if(closest) {
+                    float new_distance = i.intersection_point_found.distance_from_point_squared(closest->intersection_point_found);
+                    if(new_distance < closest_distance_squared) {
+                        closest_distance_squared = new_distance;
+                    }
+                    else {
+                        should_replace = false;
+                    }
+                }
+                if(should_replace) {
+                    closest = &i; 
+                }
             }
             
-            if(leaf_index) {
-                *leaf_index = leaf_index_found;
+            if(closest) {
+                if(intersection_point) {
+                    *intersection_point = closest->intersection_point_found;
+                }
+                
+                if(surface_index) {
+                    *surface_index = closest->surface_index_found;
+                }
+                
+                if(leaf_index) {
+                    *leaf_index = closest->leaf_index_found;
+                }
+                
+                return true;
             }
-            
-            return val;
+            return false;
         };
 
         // Determine which BSP the encounters fall in
@@ -858,7 +904,7 @@ namespace Invader::Parser {
                 // We also need to find firing position indices
                 struct FiringPositionIndex {
                     HEK::Index cluster_index = NULL_INDEX;
-                    std::uint32_t surface_index = ~0;
+                    std::uint32_t surface_index = 0;
                     bool found = false;
                 };
                 std::size_t firing_position_count = encounter.firing_positions.size();
@@ -897,10 +943,10 @@ namespace Invader::Parser {
                         for(std::size_t l = 0; l < location_count; l++) {
                             auto &location = squad.starting_locations[l];
                             
-                            // If raycasting check for a surface that is 2.0 world units below it
+                            // If raycasting check for a surface that is 0.5 world units above/below it
                             bool found;
                             if(raycast) {
-                                found = intersects_directly_below(location.position, 2.0F, b, nullptr, nullptr, nullptr);
+                                found = intersects_vertically(location.position, 0.5F, b, nullptr, nullptr, nullptr);
                             }
                             else {
                                 found = !leaf_for_point_of_bsp_tree(location.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count).is_null();
@@ -916,12 +962,12 @@ namespace Invader::Parser {
                     for(auto &f : encounter.firing_positions) {
                         // Here are the indices we'll set
                         bool in_bsp;
-                        std::uint32_t surface_index = ~0;
-                        std::uint32_t leaf_index = ~0;
+                        std::uint32_t surface_index = 0;
+                        std::uint32_t leaf_index = 0;
                         
                         // Raycast stuff
                         if(raycast) {
-                            in_bsp = intersects_directly_below(f.position, 2.0F, b, nullptr, &surface_index, &leaf_index);
+                            in_bsp = intersects_vertically(f.position, 0.5F, b, nullptr, &surface_index, &leaf_index);
                         }
                         else {
                             auto leaf = leaf_for_point_of_bsp_tree(f.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
@@ -995,8 +1041,8 @@ namespace Invader::Parser {
                             if(!best_firing_positions_indices[fp].found) {
                                 offset += std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, "%s%zu", listed == 0 ? "" : " ", fp);
                                 
-                                // If we're going past 5, we shouldn't list anymore as it's a bit spammy
-                                if(++listed == 5) {
+                                // If we're going past 7, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 7) {
                                     if(missing_firing_positions > listed) {
                                         std::snprintf(missing_firing_positions_list + offset, sizeof(missing_firing_positions_list) - offset, " ...");
                                     }
@@ -1016,10 +1062,10 @@ namespace Invader::Parser {
                         for(auto &sp : best_squad_positions_found) {
                             // Look for anything we didn't find
                             if(!sp.found) {
-                                offset += std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, "%ssq#%zu-sp#%zu", listed == 0 ? "" : " ", sp.squad, sp.starting_position);
+                                offset += std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, "%s%zu-%zu", listed == 0 ? "" : " ", sp.squad, sp.starting_position);
                                 
-                                // If we're going past 3, we shouldn't list anymore as it's a bit spammy
-                                if(++listed == 3) {
+                                // If we're going past 5, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 5) {
                                     if(missing_firing_positions > listed) {
                                         std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, " ...");
                                     }
@@ -1074,23 +1120,26 @@ namespace Invader::Parser {
                 }
                 
                 auto point_count = command_list.points.size();
-                std::vector<std::uint32_t> best_surface_indices(point_count, 0xFFFFFFFF);
+                std::vector<std::optional<std::uint32_t>> best_surface_indices(point_count);
                 
                 for(std::size_t b = start; b < bsp_count; b++) {
                     std::size_t hits = 0;
                     std::size_t total_hits = 0;
-                    std::vector<std::uint32_t> surface_indices;
+                    std::vector<std::optional<std::uint32_t>> surface_indices;
                     surface_indices.reserve(point_count);
 
                     // Basically, add 1 for every time we find it in here
                     for(auto &p : command_list.points) {
                         total_hits++;
                         
-                        std::uint32_t surface_index = ~0;
-                        if(intersects_directly_below(p.position, 2.0F, b, nullptr, &surface_index, nullptr)) {
+                        std::uint32_t surface_index = 0;
+                        if(intersects_vertically(p.position, 0.5F, b, nullptr, &surface_index, nullptr)) {
                             hits++;
+                            surface_indices.emplace_back(surface_index);
                         }
-                        surface_indices.emplace_back(surface_index);
+                        else {
+                            surface_indices.emplace_back();
+                        }
                     }
 
                     if(hits > best_bsp_hits) {
@@ -1116,11 +1165,17 @@ namespace Invader::Parser {
                     auto &points_struct = workload.structs[*command_list_struct.resolve_pointer(&command_list_data.points.pointer)];
                     auto *points_array = reinterpret_cast<ScenarioCommandPoint::struct_little *>(points_struct.data.data());
                     for(std::size_t p = 0; p < point_count; p++) {
-                        points_array[p].surface_index = best_surface_indices[p];
+                        points_array[p].surface_index = best_surface_indices[p].value_or(0);
                     }
                 }
                 
-                command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                // Command lists are all-or-nothing here
+                if(command_list.flags.manual_bsp_index || max_hits == best_bsp_hits) {
+                    command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
+                }
+                else {
+                    command_list_data.precomputed_bsp_index = NULL_INDEX;
+                }
                 
                 // Show warnings if needed
                 if(total_best_bsps == 0) {
@@ -1135,11 +1190,11 @@ namespace Invader::Parser {
                     unsigned int listed = 0;
                     for(std::size_t p = 0; p < point_count; p++) {
                         // Look for anything we didn't find
-                        if(best_surface_indices[p] == 0xFFFFFFFF) {
+                        if(!best_surface_indices[p].has_value()) {
                             offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
                             
-                            // If we're going past 5, we shouldn't list anymore as it's a bit spammy
-                            if(++listed == 5) {
+                            // If we're going past 7, we shouldn't list anymore as it's a bit spammy
+                            if(++listed == 7) {
                                 if(missing_points > listed) {
                                     std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
                                 }
