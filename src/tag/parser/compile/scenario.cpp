@@ -846,18 +846,10 @@ namespace Invader::Parser {
             PositionFound *closest = nullptr;
             float closest_distance_squared = 100.0F;
             for(auto &i : positions_found) {
-                bool should_replace = true;
-                if(closest) {
-                    float new_distance = i.intersection_point_found.distance_from_point_squared(closest->intersection_point_found);
-                    if(new_distance < closest_distance_squared) {
-                        closest_distance_squared = new_distance;
-                    }
-                    else {
-                        should_replace = false;
-                    }
-                }
-                if(should_replace) {
-                    closest = &i; 
+                float new_distance = i.intersection_point_found.distance_from_point_squared(position);
+                if(!closest || new_distance < closest_distance_squared) {
+                    closest_distance_squared = new_distance;
+                    closest = &i;
                 }
             }
             
