@@ -85,6 +85,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/item_collection.cpp
     src/tag/parser/compile/lens_flare.cpp
     src/tag/parser/compile/light.cpp
+    src/tag/parser/compile/lightning.cpp
     src/tag/parser/compile/meter.cpp
     src/tag/parser/compile/model_animations.cpp
     src/tag/parser/compile/model_collision_geometry.cpp
