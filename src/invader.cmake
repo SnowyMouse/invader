@@ -66,7 +66,8 @@ set(INVADER_SOURCE_FILES
     src/sound/adpcm_xq/adpcm-lib.c
     src/tag/hek/header.cpp
     src/tag/hek/class/bitmap.cpp
-    src/tag/hek/class/model_collision_geometry.cpp
+    src/tag/hek/class/model_collision_geometry/intersection_check.cpp
+    src/tag/hek/class/model_collision_geometry/model_collision_geometry.cpp
     src/extract/extraction.cpp
     src/tag/parser/parser_struct.cpp
     src/tag/parser/post_cache_deformat.cpp
@@ -91,7 +92,10 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/particle.cpp
     src/tag/parser/compile/point_physics.cpp
     src/tag/parser/compile/physics.cpp
-    src/tag/parser/compile/scenario.cpp
+    src/tag/parser/compile/scenario/decompile.cpp
+    src/tag/parser/compile/scenario/post_compile.cpp
+    src/tag/parser/compile/scenario/postprocess.cpp
+    src/tag/parser/compile/scenario/pre_compile.cpp
     src/tag/parser/compile/scenario_structure_bsp.cpp
     src/tag/parser/compile/shader.cpp
     src/tag/parser/compile/sound.cpp
