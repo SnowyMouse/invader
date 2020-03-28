@@ -4,7 +4,7 @@
 #include "intersection_check.hpp"
 
 namespace Invader::HEK {
-    bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point_a, const Point3D<LittleEndian> &point_b, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) {
+    bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point_a, const Point3D<LittleEndian> &point_b, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) const {
         // Set our variables up
         Point3D<LittleEndian> new_intersection_point;
         std::uint32_t new_surface_index, new_leaf_index;
@@ -31,7 +31,7 @@ namespace Invader::HEK {
         return false;
     }
     
-    bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point, float range, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) {
+    bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point, float range, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) const {
         // Plus or minus distance it
         auto position_above = point;
         position_above.z = position_above.z + range;
@@ -104,7 +104,7 @@ namespace Invader::HEK {
         return false;
     }
     
-    bool BSPData::check_if_point_inside_bsp(const Point3D<LittleEndian> &point, std::uint32_t *leaf_index) {
+    bool BSPData::check_if_point_inside_bsp(const Point3D<LittleEndian> &point, std::uint32_t *leaf_index) const {
         auto result = HEK::leaf_for_point_of_bsp_tree(point, this->bsp3d_nodes, this->bsp3d_node_count, this->planes, this->plane_count);
         
         // If null, then we don't have anything

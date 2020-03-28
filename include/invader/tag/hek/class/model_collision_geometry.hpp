@@ -39,7 +39,7 @@ namespace Invader::HEK {
          * @param leaf_index         if non-null and this function returns true, this will be set to the leaf index where the intersection was found
          * @return                   true if an intersection was found
          */
-        bool check_for_intersection(const Point3D<LittleEndian> &point_a, const Point3D<LittleEndian> &point_b, Point3D<LittleEndian> *intersection_point = nullptr, std::uint32_t *surface_index = nullptr, std::uint32_t *leaf_index = nullptr);
+        bool check_for_intersection(const Point3D<LittleEndian> &point_a, const Point3D<LittleEndian> &point_b, Point3D<LittleEndian> *intersection_point = nullptr, std::uint32_t *surface_index = nullptr, std::uint32_t *leaf_index = nullptr) const;
         
         /**
          * Determine if a point intersects vertically with the BSP.
@@ -50,14 +50,14 @@ namespace Invader::HEK {
          * @param leaf_index         if non-null and this function returns true, this will be set to the leaf index where the intersection was found
          * @return                   true if an intersection was found
          */
-        bool check_for_intersection(const Point3D<LittleEndian> &point, float range, Point3D<LittleEndian> *intersection_point = nullptr, std::uint32_t *surface_index = nullptr, std::uint32_t *leaf_index = nullptr);
+        bool check_for_intersection(const Point3D<LittleEndian> &point, float range, Point3D<LittleEndian> *intersection_point = nullptr, std::uint32_t *surface_index = nullptr, std::uint32_t *leaf_index = nullptr) const;
         
         /**
          * Determine if a point lays inside of a BSP.
          * @param point      point to check
          * @param leaf_index if non-null and this function returns true, this will be set to the leaf index where the point is located
          */
-        bool check_if_point_inside_bsp(const Point3D<LittleEndian> &point, std::uint32_t *leaf_index = nullptr);
+        bool check_if_point_inside_bsp(const Point3D<LittleEndian> &point, std::uint32_t *leaf_index = nullptr) const;
     };
 }
 #endif

@@ -10,7 +10,12 @@
 namespace Invader::Parser {
     using BSPData = HEK::BSPData;
     
+    // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
+    static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data);
+    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
 
     void Scenario::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset) {
         if(workload.disable_recursion) {
@@ -51,16 +56,101 @@ namespace Invader::Parser {
 
         FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioScenery, scenery);
         FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures);
+        
+        #undef FIND_BSP_INDICES_FOR_OBJECT_ARRAY
 
+        // Find what we need
         std::size_t bsp_find_warnings = 0;
+        find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
+        find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
+        find_decals(*this, workload, bsp_data);
+        find_conversations(*this, workload, tag_index, scenario_struct, scenario_data);
+        
+        if(bsp_find_warnings) {
+            eprintf_warn_lesser("Use manual BSP indices to silence %s.", bsp_find_warnings == 1 ? "this warning" : "these warnings");
+        }
+    }
+    
+    static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload) {
+        std::vector<BSPData> bsp_data;
+        std::size_t bsp_count = scenario.structure_bsps.size();
+        bsp_data.reserve(bsp_count);
+        for(auto &b : scenario.structure_bsps) {
+            auto &bsp_data_s = bsp_data.emplace_back();
+            if(b.structure_bsp.tag_id.is_null()) {
+                continue;
+            }
+            
+            // Figure out the base tag struct thing
+            auto *bsp_tag_struct = &workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()];
+            
+            // If we're not on dark circlet, we need to read the pointer at the beginning of the struct
+            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
+            }
 
+            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
+            if(bsp_tag_data.collision_bsp.count == 0) {
+                continue;
+            }
+
+            auto &collision_bsp_struct = workload.structs[bsp_tag_struct->resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
+            auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
+
+            bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
+            bsp_data_s.plane_count = collision_bsp_data.planes.count;
+            bsp_data_s.leaf_count = collision_bsp_data.leaves.count;
+            bsp_data_s.bsp2d_node_count = collision_bsp_data.bsp2d_nodes.count;
+            bsp_data_s.bsp2d_reference_count = collision_bsp_data.bsp2d_references.count;
+            bsp_data_s.surface_count = collision_bsp_data.surfaces.count;
+            bsp_data_s.edge_count = collision_bsp_data.edges.count;
+            bsp_data_s.vertex_count = collision_bsp_data.vertices.count;
+            bsp_data_s.render_leaf_count = bsp_tag_data.leaves.count;
+
+            if(bsp_data_s.bsp3d_node_count) {
+                bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
+            }
+            if(bsp_data_s.plane_count) {
+                bsp_data_s.planes = reinterpret_cast<const ModelCollisionGeometryBSPPlane::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.planes.pointer)].data.data());
+            }
+            if(bsp_data_s.leaf_count) {
+                bsp_data_s.leaves = reinterpret_cast<const ModelCollisionGeometryBSPLeaf::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.leaves.pointer)].data.data());
+            }
+            if(bsp_data_s.bsp2d_node_count) {
+                bsp_data_s.bsp2d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP2DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_nodes.pointer)].data.data());
+            }
+            if(bsp_data_s.bsp2d_reference_count) {
+                bsp_data_s.bsp2d_references = reinterpret_cast<const ModelCollisionGeometryBSP2DReference::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_references.pointer)].data.data());
+            }
+            if(bsp_data_s.surface_count) {
+                bsp_data_s.surfaces = reinterpret_cast<const ModelCollisionGeometryBSPSurface::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.surfaces.pointer)].data.data());
+            }
+            if(bsp_data_s.edge_count) {
+                bsp_data_s.edges = reinterpret_cast<const ModelCollisionGeometryBSPEdge::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.edges.pointer)].data.data());
+            }
+            if(bsp_data_s.vertex_count) {
+                bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
+            }
+            if(bsp_data_s.render_leaf_count) {
+                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
+            }
+        }
+        
+        return bsp_data;
+    }
+    
+    
+    
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
         // Determine which BSP the encounters fall in
-        std::size_t encounter_list_count = this->encounters.size();
+        std::size_t encounter_list_count = scenario.encounters.size();
         if(encounter_list_count != 0) {
             auto &encounter_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.encounters.pointer)];
             auto *encounter_array = reinterpret_cast<ScenarioEncounter::struct_little *>(encounter_struct.data.data());
+            auto bsp_count = bsp_data.size();
+            
             for(std::size_t i = 0; i < encounter_list_count; i++) {
-                auto &encounter = this->encounters[i];
+                auto &encounter = scenario.encounters[i];
                 auto &encounter_data = encounter_array[i];
 
                 // Set this to 1 because memes
@@ -311,14 +401,16 @@ namespace Invader::Parser {
                 }
             }
         }
-
-        // Determine which BSP the command lists fall in
-        std::size_t command_list_count = this->command_lists.size();
+    }
+    
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
+        std::size_t command_list_count = scenario.command_lists.size();
         if(command_list_count != 0) {
             auto &command_list_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.command_lists.pointer)];
             auto *command_list_array = reinterpret_cast<ScenarioCommandList::struct_little *>(command_list_struct.data.data());
+            auto bsp_count = bsp_data.size();
             for(std::size_t i = 0; i < command_list_count; i++) {
-                auto &command_list = this->command_lists[i];
+                auto &command_list = scenario.command_lists[i];
                 auto &command_list_data = command_list_array[i];
 
                 // If there are no points, set to a null BSP
@@ -433,12 +525,13 @@ namespace Invader::Parser {
                 }
             }
         }
-
-        // Decals
-        std::size_t decal_count = decals.size();
+    }
+    
+    static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data) {
+        std::size_t decal_count = scenario.decals.size();
         if(decal_count > 0) {
-            for(std::size_t bsp = 0; bsp < this->structure_bsps.size(); bsp++) {
-                auto &b = this->structure_bsps[bsp];
+            for(std::size_t bsp = 0; bsp < scenario.structure_bsps.size(); bsp++) {
+                auto &b = scenario.structure_bsps[bsp];
                 auto &bsp_id = b.structure_bsp.tag_id;
                 if(!bsp_id.is_null()) {
                     // Figure out the base tag struct thing
@@ -466,7 +559,7 @@ namespace Invader::Parser {
                     // Go through each decal; see what we can come up with
                     std::vector<std::pair<std::size_t, std::size_t>> cluster_decals;
                     for(std::size_t d = 0; d < decal_count; d++) {
-                        auto &decal = this->decals[d];
+                        auto &decal = scenario.decals[d];
                         auto &bd = bsp_data[bsp];
                         std::uint32_t leaf;
                         if(!bd.check_if_point_inside_bsp(decal.position, &leaf)) {
@@ -485,7 +578,7 @@ namespace Invader::Parser {
                         std::size_t first_decal = runtime_decals.size();
                         for(auto &cd : cluster_decals) {
                             if(cd.first == c) {
-                                auto &decal = this->decals[cd.second];
+                                auto &decal = scenario.decals[cd.second];
                                 auto &d = runtime_decals.emplace_back();
                                 d.decal_type = decal.decal_type;
                                 d.pitch = decal.pitch;
@@ -520,12 +613,14 @@ namespace Invader::Parser {
                 }
             }
         }
-        
-        // AI Conversations
-        std::size_t ai_conversation_count = this->ai_conversations.size();
+    }
+    
+    static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data) {
+        std::size_t ai_conversation_count = scenario.ai_conversations.size();
         if(ai_conversation_count) {
             auto &ai_conversation_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.ai_conversations.pointer)];
             auto *ai_conversation_data = reinterpret_cast<Parser::ScenarioAIConversation::struct_little *>(ai_conversation_struct.data.data());
+            auto encounter_list_count = scenario.encounters.size();
             for(std::size_t aic = 0; aic < ai_conversation_count; aic++) {
                 auto &convo = ai_conversation_data[aic];
                 std::size_t participation_count = convo.participants.count.read();
@@ -539,7 +634,7 @@ namespace Invader::Parser {
                         // Do we have an encounter to look for?
                         if(participant.encounter_name.string[0]) {
                             for(std::size_t e = 0; e < encounter_list_count; e++) {
-                                if(this->encounters[e].name == participant.encounter_name) {
+                                if(scenario.encounters[e].name == participant.encounter_name) {
                                     encounter_index = e;
                                     break;
                                 }
@@ -558,73 +653,5 @@ namespace Invader::Parser {
                 }
             }
         }
-    }
-    
-    static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload) {
-        std::vector<BSPData> bsp_data;
-        std::size_t bsp_count = scenario.structure_bsps.size();
-        bsp_data.reserve(bsp_count);
-        for(auto &b : scenario.structure_bsps) {
-            auto &bsp_data_s = bsp_data.emplace_back();
-            if(b.structure_bsp.tag_id.is_null()) {
-                continue;
-            }
-            
-            // Figure out the base tag struct thing
-            auto *bsp_tag_struct = &workload.structs[workload.tags[b.structure_bsp.tag_id.index].base_struct.value()];
-            
-            // If we're not on dark circlet, we need to read the pointer at the beginning of the struct
-            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                bsp_tag_struct = &workload.structs[bsp_tag_struct->resolve_pointer(static_cast<std::size_t>(0)).value()];
-            }
-
-            auto &bsp_tag_data = *reinterpret_cast<const ScenarioStructureBSP::struct_little *>(bsp_tag_struct->data.data());
-            if(bsp_tag_data.collision_bsp.count == 0) {
-                continue;
-            }
-
-            auto &collision_bsp_struct = workload.structs[bsp_tag_struct->resolve_pointer(&bsp_tag_data.collision_bsp.pointer).value()];
-            auto &collision_bsp_data = *reinterpret_cast<const ModelCollisionGeometryBSP::struct_little *>(collision_bsp_struct.data.data());
-
-            bsp_data_s.bsp3d_node_count = collision_bsp_data.bsp3d_nodes.count;
-            bsp_data_s.plane_count = collision_bsp_data.planes.count;
-            bsp_data_s.leaf_count = collision_bsp_data.leaves.count;
-            bsp_data_s.bsp2d_node_count = collision_bsp_data.bsp2d_nodes.count;
-            bsp_data_s.bsp2d_reference_count = collision_bsp_data.bsp2d_references.count;
-            bsp_data_s.surface_count = collision_bsp_data.surfaces.count;
-            bsp_data_s.edge_count = collision_bsp_data.edges.count;
-            bsp_data_s.vertex_count = collision_bsp_data.vertices.count;
-            bsp_data_s.render_leaf_count = bsp_tag_data.leaves.count;
-
-            if(bsp_data_s.bsp3d_node_count) {
-                bsp_data_s.bsp3d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP3DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp3d_nodes.pointer)].data.data());
-            }
-            if(bsp_data_s.plane_count) {
-                bsp_data_s.planes = reinterpret_cast<const ModelCollisionGeometryBSPPlane::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.planes.pointer)].data.data());
-            }
-            if(bsp_data_s.leaf_count) {
-                bsp_data_s.leaves = reinterpret_cast<const ModelCollisionGeometryBSPLeaf::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.leaves.pointer)].data.data());
-            }
-            if(bsp_data_s.bsp2d_node_count) {
-                bsp_data_s.bsp2d_nodes = reinterpret_cast<const ModelCollisionGeometryBSP2DNode::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_nodes.pointer)].data.data());
-            }
-            if(bsp_data_s.bsp2d_reference_count) {
-                bsp_data_s.bsp2d_references = reinterpret_cast<const ModelCollisionGeometryBSP2DReference::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.bsp2d_references.pointer)].data.data());
-            }
-            if(bsp_data_s.surface_count) {
-                bsp_data_s.surfaces = reinterpret_cast<const ModelCollisionGeometryBSPSurface::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.surfaces.pointer)].data.data());
-            }
-            if(bsp_data_s.edge_count) {
-                bsp_data_s.edges = reinterpret_cast<const ModelCollisionGeometryBSPEdge::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.edges.pointer)].data.data());
-            }
-            if(bsp_data_s.vertex_count) {
-                bsp_data_s.vertices = reinterpret_cast<const ModelCollisionGeometryBSPVertex::struct_little *>(workload.structs[*collision_bsp_struct.resolve_pointer(&collision_bsp_data.vertices.pointer)].data.data());
-            }
-            if(bsp_data_s.render_leaf_count) {
-                bsp_data_s.render_leaves = reinterpret_cast<const ScenarioStructureBSPLeaf::struct_little *>(workload.structs[*bsp_tag_struct->resolve_pointer(&bsp_tag_data.leaves.pointer)].data.data());
-            }
-        }
-        
-        return bsp_data;
     }
 }
