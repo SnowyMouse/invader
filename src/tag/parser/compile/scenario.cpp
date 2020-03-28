@@ -957,7 +957,7 @@ namespace Invader::Parser {
                             }
                             else {
                                 auto potential_leaf = leaf_for_point_of_bsp_tree(location.position, bsp.bsp3d_nodes, bsp.bsp3d_node_count, bsp.planes, bsp.plane_count);
-                                if((found = potential_leaf.is_null())) {
+                                if((found = !potential_leaf.is_null())) {
                                     leaf_index = potential_leaf.int_value();
                                 }
                             }

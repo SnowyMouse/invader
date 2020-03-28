@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.32.1] - 2020-03-27
+### Fixed
+- invader-build: Fixed a segfault issue with 3D firing positions
+
 ## [0.32.0] - 2020-03-27
 ### Added
 - invader-bludgeon: Added `-T missing-script-source` which decompiles scripts in
