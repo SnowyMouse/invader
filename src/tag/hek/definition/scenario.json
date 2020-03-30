@@ -2180,7 +2180,9 @@
             },
             {
                 "name": "manual bsp index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "structure bsps",
+                "struct": "Scenario"
             },
             {
                 "name": "respawn delay",
@@ -2248,27 +2250,39 @@
             },
             {
                 "name": "point 1",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "points",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "point 2",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "points",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "ai animation references",
+                "struct": "Scenario"
             },
             {
                 "name": "script",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "ai script references",
+                "struct": "Scenario"
             },
             {
                 "name": "recording",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "ai recording references",
+                "struct": "Scenario"
             },
             {
                 "name": "command",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "commands",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "object name",
@@ -2324,7 +2338,9 @@
             },
             {
                 "name": "manual bsp index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "structure bsps",
+                "struct": "Scenario"
             },
             {
                 "name": "precomputed bsp index",

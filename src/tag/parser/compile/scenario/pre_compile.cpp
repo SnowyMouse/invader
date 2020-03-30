@@ -325,6 +325,33 @@ namespace Invader::Parser {
                 bsp_switch_trigger_volume.unknown = 0xFFFF;
             }
         }
+        
+        // Make sure command lists aren't screwed up
+        auto cmd_list_count = this->command_lists.size();
+        auto ai_animation_count = this->ai_animation_references.size();
+        auto ai_recording_count = this->ai_recording_references.size();
+        auto ai_script_count = this->ai_script_references.size();
+        for(std::size_t l = 0; l < cmd_list_count; l++) {
+            auto &list = this->command_lists[l];
+            auto cmd_count = list.commands.size();
+            auto point_count = list.points.size();
+            for(std::size_t c = 0; c < cmd_count; c++) {
+                auto &cmd = list.commands[c];
+                
+                #define INVALID_CHECK_FOR_COMMAND_LIST(ref, count) if(cmd.ref != NULL_INDEX && cmd.ref >= count) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Command #%zu in list #%zu (%s) references an invalid index", c, l, list.name.string); \
+                }
+                
+                INVALID_CHECK_FOR_COMMAND_LIST(point_1, point_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(point_2, point_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(animation, ai_animation_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(recording, ai_recording_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(script, ai_script_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(command, cmd_count);
+                
+                #undef INVALID_CHECK_FOR_COMMAND_LIST
+            }
+        }
     }
     
     static void merge_child_scenario(Scenario &base_scenario, const Scenario &scenario_to_merge) {
