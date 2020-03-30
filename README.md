@@ -580,7 +580,7 @@ the entire tag, and if that is not 22050 Hz or 44100 Hz, then it will
 automatically be resampled.
 
 ```
-Usage: invader-sound [options] -F <fmt> <sound-tag>
+Usage: invader-sound [options] <sound-tag>
 
 Create or modify a sound tag.
 
@@ -600,24 +600,27 @@ Options:
                                vehicle-engine, weapon-charge, weapon-empty,
                                weapon-fire, weapon-idle, weapon-overheat,
                                weapon-ready, weapon-reload
-  -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
-                               default, this is determined based on the input
-                               audio.
+  -C --channel-count <#>       [REQUIRES --extended] Set the channel count. Can
+                               be: mono, stereo. By default, this is determined
+                               based on the input audio.
   -d --data <dir>              Use the specified data directory.
-  -f --flac-level <lvl>        Set the FLAC compression level. This can be
-                               between 0 and 8, with higher levels taking
-                               longer but offering slightly better ratios.
-                               Default: 5
   -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               xbox-adpcm, or flac. Setting this is required.
+                               or xbox-adpcm. Using flac requires --extended.
+                               Setting this is required unless creating an
+                               extended tag, in which case it defaults to
+                               16-bit-pcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
+  -l --compress-level <lvl>    Set the compression level. This can be between
+                               0.0 and 1.0. For Ogg Vorbis, higher levels
+                               result in better quality but worse sizes. For
+                               FLAC, higher levels result in better sizes but
+                               longer compression time, clamping from 0.0 to
+                               0.8 (FLAC 0 to FLAC 8). Default: 1.0
   -P --fs-path                 Use a filesystem path for the data.
-  -q --vorbis-quality <qlty>   Set the Vorbis quality. This can be between -0.1
-                               and 1.0. Default: 1.0
-  -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
-                               and 44100. By default, this is determined based
-                               on the input audio.
+  -r --sample-rate <Hz>        [REQUIRES --extended] Set the sample rate in Hz.
+                               Halo supports 22050 and 44100. By default, this
+                               is determined based on the input audio.
   -s --split                   Split permutations into 227.5 KiB chunks. This
                                is necessary for longer sounds (e.g. music) when
                                being played in the original Halo engine.
@@ -625,7 +628,7 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-
+  -x --extended                Create an extended_sound tag.
 ```
 
 #### What is splitting?
@@ -647,29 +650,62 @@ Note that you cannot use splitting for dialogue. The original Halo engine has
 issues playing back this type of dialogue.
 
 #### Audio formats
-These are the different audio formats that invader-sound supports.
+These are the different audio formats that invader-sound supports, assuming a
+16-bit, 44.1 kHz stereo input.
 
 Format                | Bitrate (44100 Hz stereo) | Type
 --------------------- | ------------------------- | ---------------------------
-16-bit PCM            | 1411.2 kbps               | Lossless if input is 16-bit
-Ogg Vorbis (`-q 1`)   | ~500.0 kbps (on average)  | Lossy; Max quality
-Ogg Vorbis (`-q 0.5`) | ~160.0 kbps (on average)  | Lossy; Transparent quality
-Ogg Vorbis (`-q 0.3`) | ~112.0 kbps (on average)  | Lossy; Oggenc default
+16-bit PCM            | 1411.2 kbps               | Lossless
+FLAC       (`-l 0.8`) | ~875   kbps (on average)  | Lossless; FLAC 8 (best)
+FLAC       (`-l 0.5`) | ~900   kbps (on average)  | Lossless; FLAC 5 (faster)
+Ogg Vorbis (`-l 1`)   | ~500   kbps (on average)  | Lossy; Max quality
+Ogg Vorbis (`-l 0.5`) | ~160   kbps (on average)  | Lossy; Transparent quality
+Ogg Vorbis (`-l 0.3`) | ~112   kbps (on average)  | Lossy; Oggenc default
 Xbox ADPCM            | ~390.8 kbps               | Lossy
 
 #### Which audio format should I use?
-The only lossless format available is 16-bit PCM. This will, however, result in
-a drastic increase in map size, so it is not recommended to use this with long
-sounds.
+There are two options: lossless and lossy. Both have their pros and cons.
+
+#### Lossless
+Lossless means that the output is the same quality as the input. Of course, this
+is only true if your input bit depth, sample rate, and channel count matches your
+output. Halo only supports 22.05 kHz and 44.1 kHz, so supplying a 48 kHz input
+will require resampling which is lossy. And, of course, if your input is 24-bit
+PCM, then encoding to 16-bit PCM will be lossy, too.
+
+There are two lossless formats available: 16-bit PCM and FLAC. 
+
+Using 16-bit PCM requires little to no processing, making it the fastest, but it
+does have a very high bitrate. This can make maps become massive really quickly.
+
+FLAC is compressed and supports up to 32-bit integer PCM samples. This makes it
+more flexible and better in bitrate. However, the actual compression ratio you
+get will vary sound-to-sound.
+
+Also, unmodified Halo PC, as released by Gearbox, does not support tags that
+have lossless data. The game can handle 16-bit PCM sounds, but you need a mod to
+enable this behavior.
+
+FLAC, on the other hand, cannot be decoded by Halo and will require modding to
+use it. Therefore, if your goal is to ensure compatibility across all versions
+of the game without mods, it is not recommended to use either format.
+
+#### Lossy
+Lossy means that the output may not be the same quality as the input. Discarding
+information means that the sound can be smaller, but it also means that it will
+never be exactly the same.
 
 Ogg Vorbis provides a good tradeoff in terms of bitrate and quality. Using 0.5
 is considered "transparent" (unnoticeable quality loss) provided you use a
 lossless audio input (if not, then you may need to use a higher quality value),
-and this also gives you lower bitrate and better quality than Xbox ADPCM.
+and this also gives you lower bitrate and better quality than Xbox ADPCM. Like
+FLAC, the bitrate varies sound-to-sound.
 
 Xbox ADPCM does not compress as efficiently as Ogg Vorbis, but it decodes
-considerably faster, so this may be beneficial for firing effects. However, we
-instead recommend using uncompressed 16-bit PCM if possible.
+faster. Even so, we don't recommend you use this for anything in newer assets.
+Unlike FLAC and Ogg Vorbis, the bitrate is constant.
+
+Both of these formats are supported by the game.
 
 ### invader-string
 This program generates string tags. If building a unicode or latin-1 tag,
