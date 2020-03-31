@@ -25,6 +25,12 @@ def make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, 
                 continue
             if struct["type"] == "TagDependency":
                 cpp_read_cache_file_data.write("        r.{}.tag_class_int = l.{}.tag_class_int.read();\n".format(name, name))
+                
+                if struct["classes"][0] != "*":
+                    cpp_read_cache_file_data.write("        if(r.{}.tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
+                    cpp_read_cache_file_data.write("            r.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_read_cache_file_data.write("        }\n")
+                    
                 cpp_read_cache_file_data.write("        r.{}.tag_id = l.{}.tag_id.read();\n".format(name, name))
                 cpp_read_cache_file_data.write("        if(!r.{}.tag_id.is_null()) {{\n".format(name))
                 cpp_read_cache_file_data.write("            try {\n")

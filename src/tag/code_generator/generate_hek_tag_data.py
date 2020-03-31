@@ -22,7 +22,17 @@ def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, c
                 continue
             if struct["type"] == "TagDependency":
                 cpp_save_hek_data.write("        std::size_t {}_size = static_cast<std::uint32_t>(this->{}.path.size());\n".format(name,name))
-                cpp_save_hek_data.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                
+                if struct["classes"][0] != "*":
+                    cpp_save_hek_data.write("        if(this->{}.tag_class_int != HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
+                    cpp_save_hek_data.write("            b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                    cpp_save_hek_data.write("        }\n")
+                    cpp_save_hek_data.write("        else {\n")
+                    cpp_save_hek_data.write("            b.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_save_hek_data.write("        }\n")
+                else:
+                    cpp_save_hek_data.write("        b.{}.tag_class_int = this->{}.tag_class_int;\n".format(name, name))
+                    
                 cpp_save_hek_data.write("        b.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
                 cpp_save_hek_data.write("        if({}_size > 0) {{\n".format(name))
                 cpp_save_hek_data.write("            b.{}.path_size = static_cast<std::uint32_t>({}_size);\n".format(name, name))
