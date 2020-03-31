@@ -354,7 +354,7 @@ namespace Invader::Parser {
         }
     }
     
-    static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> override_value = std::nullopt) {
+    static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> collision_radius = std::nullopt) {
         // Get our object
         auto &object_struct = workload.structs[struct_index];
         auto &object_data = *reinterpret_cast<Object::struct_little *>(object_struct.data.data());
@@ -377,10 +377,14 @@ namespace Invader::Parser {
         
         // Start finding the thing, then
         float x = 0.0F, y = 0.0F, z = 0.0F;
-        HEK::Index node_index = NULL_INDEX;
+        HEK::Index node_index;
         
         // If we don't have a value set, set one.
-        if(!override_value.has_value()) {
+        float sphere_radius;
+        if(!collision_radius.has_value()) {
+            // Pathfinding sphere radius:
+            //     2^(log4(bounding_radius)) * 3 / 4   if bounding_radius > 1
+            //     bounding_radius * 3 / 4             if bounding_radius > 0 and bounding_radius <= 1
             float v = object_data.bounding_radius.read();
             if(v > 1.0) {
                 v = std::pow(2.0, std::log(v) / std::log(4));
@@ -388,15 +392,19 @@ namespace Invader::Parser {
             else if(v <= 0.0) {
                 return; // no pathfinding sphere
             }
-            override_value = static_cast<float>(v * 3.0 / 4.0);
+            sphere_radius = static_cast<float>(v * 3.0 / 4.0);
             node_index = 0;
             
+            // Set the offset to the bounding offset of the object
             x = object_data.bounding_offset.x.read();
             y = object_data.bounding_offset.y.read();
             z = object_data.bounding_offset.z.read();
         }
         else {
-            z = override_value.value();
+            // Bounding offset is not used with bipeds when making pathfinding spheres; the z value and sphere radius is set to the bounding radius.
+            z = collision_radius.value();
+            sphere_radius = z;
+            node_index = NULL_INDEX;
             if(z <= 0.0) {
                 return; // no pathfinding sphere
             }
@@ -411,11 +419,10 @@ namespace Invader::Parser {
         auto &pathfinding_struct = workload.structs.emplace_back();
         pathfinding_struct.data.resize(sizeof(ModelCollisionGeometrySphere::struct_little));
         auto &sphere = *reinterpret_cast<ModelCollisionGeometrySphere::struct_little *>(pathfinding_struct.data.data());
-        sphere.radius = override_value.value();
+        sphere.radius = sphere_radius;
         sphere.center.x = x;
         sphere.center.y = y;
         sphere.center.z = z;
-        sphere.radius = *override_value;
         sphere.node = node_index;
     }
 
@@ -461,7 +468,6 @@ namespace Invader::Parser {
         }
 
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index);
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // Make sure zoom levels aren't too high for the HUD interface
@@ -533,11 +539,9 @@ namespace Invader::Parser {
     }
     void Placeholder::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index);
     }
     void SoundScenery::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index);
     }
     void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
@@ -545,10 +549,8 @@ namespace Invader::Parser {
     }
     void DeviceControl::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index);
     }
     void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index);
     }
 }
