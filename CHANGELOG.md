@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.32.4] - 2020-03-31
 ### Changed
 - invader: Dependencies with zero-length paths now get defaulted to the default
   tag class if one is present
