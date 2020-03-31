@@ -2,7 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.23.2] - 2020-03-28
+## [0.32.3] - 2020-03-30
+### Fixed
+- invader-build: Fixed pathfinding spheres not being generated on build for some
+  tags
+
+## [0.32.2] - 2020-03-28
 ### Fixed
 - invader-build: Fixed an issue with lightning tags not rendering
 
