@@ -390,6 +390,10 @@ namespace Invader::Parser {
             }
             override_value = static_cast<float>(v * 3.0 / 4.0);
             node_index = 0;
+            
+            x = object_data.bounding_offset.x.read();
+            y = object_data.bounding_offset.y.read();
+            z = object_data.bounding_offset.z.read();
         }
         else {
             z = override_value.value();

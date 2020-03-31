@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-build: Fixed pathfinding sphere offsets not being set correctly
+
 ## [0.32.3] - 2020-03-30
 ### Fixed
 - invader-build: Fixed pathfinding spheres not being generated on build for some
