@@ -36,12 +36,6 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
                 cpp_read_hek_data.write("        std::size_t h_{}_expected_length = h.{}.path_size;\n".format(name,name))
                 
                 cpp_read_hek_data.write("        r.{}.tag_class_int = h.{}.tag_class_int;\n".format(name, name))
-                
-                if struct["classes"][0] != "*":
-                    cpp_read_hek_data.write("        if(r.{}.tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
-                    cpp_read_hek_data.write("            r.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
-                    cpp_read_hek_data.write("        }\n")
-                
                 cpp_read_hek_data.write("        if(h_{}_expected_length > 0) {{\n".format(name))
                 cpp_read_hek_data.write("            if(h_{}_expected_length + 1 > data_size) {{\n".format(name))
                 cpp_read_hek_data.write("                eprintf_error(\"Failed to read dependency {}::{}: %zu bytes needed > %zu bytes available\", h_{}_expected_length, data_size);\n".format(struct_name, name, name))
@@ -63,6 +57,10 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
                 cpp_read_hek_data.write("            data_read += h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("            data += h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("        }\n")
+                if struct["classes"][0] != "*":
+                    cpp_read_hek_data.write("        else if(r.{}.tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL) {{\n".format(name))
+                    cpp_read_hek_data.write("            r.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
+                    cpp_read_hek_data.write("        }\n")
             elif struct["type"] == "TagReflexive":
                 cpp_read_hek_data.write("        std::size_t h_{}_count = h.{}.count;\n".format(name,name))
                 cpp_read_hek_data.write("        if(h_{}_count > 0) {{\n".format(name))
