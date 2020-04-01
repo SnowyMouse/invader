@@ -2,6 +2,15 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-bludgeon: Added `-T invalid-indices` which nulls various invalid
+  indices. Note that this may result in various Bungie assets working slightly
+  differently, as these have several errors that tool does not check.
+
+### Changed
+- invader-build: Now errors on more invalid indices
+
 ## [0.32.4] - 2020-03-31
 ### Changed
 - invader: Dependencies with zero-length paths now get defaulted to the default
