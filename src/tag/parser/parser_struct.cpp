@@ -822,11 +822,11 @@ namespace Invader::Parser {
         return classes;
     }
 
-    bool ParserStruct::has_title() {
+    bool ParserStruct::has_title() const {
         return false;
     }
 
-    const char *ParserStruct::title() {
+    const char *ParserStruct::title() const {
         return nullptr;
     }
 }

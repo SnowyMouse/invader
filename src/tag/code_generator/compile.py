@@ -1,9 +1,21 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums):
+def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged):
     # compile()
-    hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0) override;\n")
-    cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset) {{\n".format(struct_name))
+    hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0, std::deque<const ParserStruct *> *stack = nullptr) override;\n")
+    cpp_cache_format_data.write("    void {}::compile(BuildWorkload &workload, [[maybe_unused]] std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp, std::size_t offset, std::deque<const ParserStruct *> *stack) {{\n".format(struct_name))
+    
+    # Make the stack if we need it
+    cpp_cache_format_data.write("        std::optional<std::deque<const ParserStruct *>> new_stack;\n")
+    cpp_cache_format_data.write("        if(!stack) {\n")
+    cpp_cache_format_data.write("            new_stack = std::deque<const ParserStruct *>();\n")
+    cpp_cache_format_data.write("            stack = &*new_stack;\n")
+    cpp_cache_format_data.write("        }\n")
+    
+    ## Add our struct to the stack
+    cpp_cache_format_data.write("        stack->push_front(this);\n")
+    
+    # Zero out the base struct
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].unsafe_to_dedupe = {};\n".format("true" if ("unsafe_to_dedupe" in s and s["unsafe_to_dedupe"]) else "false"))
@@ -12,8 +24,10 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         cpp_cache_format_data.write("            this->pre_compile(workload, tag_index, struct_index, offset);\n")
         cpp_cache_format_data.write("        }\n")
         cpp_cache_format_data.write("        this->cache_formatted = true;\n")
-    cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset + tag_index * 0);\n")
+    cpp_cache_format_data.write("        auto &r = *reinterpret_cast<struct_little *>(start + offset);\n")
     cpp_cache_format_data.write("        std::fill(reinterpret_cast<std::byte *>(&r), reinterpret_cast<std::byte *>(&r), std::byte());\n")
+    
+    # Go through each field
     for struct in all_used_structs:
         if ("non_cached" in struct and struct["non_cached"]) or ("compile_ignore" in struct and struct["compile_ignore"]):
             continue
@@ -92,7 +106,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("            p.offset = reinterpret_cast<std::byte *>(&r.{}.pointer) - start;\n".format(name))
             cpp_cache_format_data.write("            for(std::size_t i = 0; i < t_{}_count; i++) {{\n".format(name))
             cpp_cache_format_data.write("                try {\n")
-            cpp_cache_format_data.write("                    this->{}[i].compile(workload, tag_index, p.struct_index, bsp, i * STRUCT_SIZE);\n".format(name))
+            cpp_cache_format_data.write("                    this->{}[i].compile(workload, tag_index, p.struct_index, bsp, i * STRUCT_SIZE, stack);\n".format(name))
             cpp_cache_format_data.write("                }\n")
             cpp_cache_format_data.write("                catch(std::exception &) {\n")
             cpp_cache_format_data.write("                    eprintf(\"Failed to compile {}::{} #%zu\\n\", i);\n".format(struct_name, name))
@@ -127,6 +141,43 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        r.{}.to = this->{}.to;\n".format(name, name))
         elif "count" in struct and struct["count"] > 1:
             cpp_cache_format_data.write("        std::copy(this->{}, this->{} + {}, r.{});\n".format(name, name, struct["count"], name))
+        elif struct["type"] == "Index":
+            reflexive_to_check = struct["reflexive"] if "reflexive" in struct else None
+            struct_to_check = struct["struct"] if "struct" in struct else None
+            if reflexive_to_check != None and struct_to_check != None:
+                member_to_check = None
+                for i in all_structs_arranged:
+                    if i["name"] == struct_to_check:
+                        for p in i["fields"]:
+                            if "name" in p and p["name"] == reflexive_to_check:
+                                member_to_check = p["member_name"]
+                                break
+                        break
+                
+                if member_to_check is None:
+                    print("Cannot resolve {} in {}".format(reflexive_to_check, struct_to_check), file=sys.stderr)
+                    sys.exit(1)
+                
+                cpp_cache_format_data.write("        if(this->{} != NULL_INDEX) {{\n".format(name))
+                cpp_cache_format_data.write("            [[maybe_unused]] bool found = false;\n")
+                cpp_cache_format_data.write("            for(auto *p : *stack) {\n")
+                cpp_cache_format_data.write("                auto *s = dynamic_cast<const {} *>(p);\n".format(struct_to_check))
+                cpp_cache_format_data.write("                if(s) {\n")
+                cpp_cache_format_data.write("                    if(this->{} >= s->{}.size()) {{\n".format(name, member_to_check))
+                cpp_cache_format_data.write("                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} references an invalid index in {}::{}\", tag_index);\n".format(struct_name, name, struct_to_check, member_to_check))
+                cpp_cache_format_data.write("                        throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("                    }\n")
+                cpp_cache_format_data.write("                    found = true;\n")
+                cpp_cache_format_data.write("                    break;\n")
+                cpp_cache_format_data.write("                }\n")
+                cpp_cache_format_data.write("            }\n")
+                cpp_cache_format_data.write("            #ifndef NDEBUG\n")
+                cpp_cache_format_data.write("            if(!found) {\n")
+                cpp_cache_format_data.write("                eprintf_warn(\"DEBUG: {} was not found in the stack when checking {}::{}'s index.\");\n".format(struct_to_check, struct_name, name))
+                cpp_cache_format_data.write("            }\n")
+                cpp_cache_format_data.write("            #endif\n")
+                cpp_cache_format_data.write("        }\n")
+            cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         else:
             for e in all_enums:
                 if e["name"] == struct["type"]:
@@ -150,4 +201,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
     if post_compile:
         cpp_cache_format_data.write("        this->post_compile(workload, tag_index, struct_index, offset);\n".format(name, name))
+    
+    ## Remove our struct from the top of the stack
+    cpp_cache_format_data.write("        stack->erase(stack->begin());\n")
     cpp_cache_format_data.write("    }\n")

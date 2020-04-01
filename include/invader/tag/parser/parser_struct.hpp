@@ -796,8 +796,9 @@ namespace Invader::Parser {
          * @param struct_index struct index to use in the workload
          * @param bsp          BSP index to use
          * @param offset       struct offset
+         * @param stack        stack of structs to use
          */
-        virtual void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0) = 0;
+        virtual void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0, std::deque<const ParserStruct *> *stack = nullptr) = 0;
 
         /**
          * Convert the struct into HEK tag data to be built into a cache file.
@@ -827,13 +828,19 @@ namespace Invader::Parser {
          * Get whether or not the struct has a title
          * @return true if struct has title
          */
-        virtual bool has_title();
+        virtual bool has_title() const;
 
         /**
          * Get the title of the struct
          * @return title of the struct
          */
-        virtual const char *title();
+        virtual const char *title() const;
+
+        /**
+         * Get the name of the struct
+         * @return name of the struct
+         */
+        virtual const char *struct_name() const = 0;
 
         virtual ~ParserStruct() = default;
     protected:

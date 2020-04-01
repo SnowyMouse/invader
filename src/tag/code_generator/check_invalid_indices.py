@@ -40,6 +40,7 @@ def make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_inv
                 sys.exit(1)
         
             cpp_check_invalid_indices.write("        if(this->{} != NULL_INDEX) {{\n".format(name))
+            cpp_check_invalid_indices.write("            [[maybe_unused]] bool found = false;\n")
             cpp_check_invalid_indices.write("            for(auto *s : stack) {\n")
             cpp_check_invalid_indices.write("                auto *p = dynamic_cast<const {} *>(s);\n".format(struct_to_check))
             cpp_check_invalid_indices.write("                if(p) {\n")
@@ -53,8 +54,15 @@ def make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_inv
             cpp_check_invalid_indices.write("                            return true;\n")
             cpp_check_invalid_indices.write("                        }\n")
             cpp_check_invalid_indices.write("                    }\n")
+            cpp_check_invalid_indices.write("                    found = true;\n")
+            cpp_check_invalid_indices.write("                    break;\n")
             cpp_check_invalid_indices.write("                }\n")
             cpp_check_invalid_indices.write("            }\n")
+            cpp_check_invalid_indices.write("            #ifndef NDEBUG\n")
+            cpp_check_invalid_indices.write("            if(!found) {\n")
+            cpp_check_invalid_indices.write("                eprintf_warn(\"DEBUG: {} was not found in the stack when checking {}::{}'s index.\");\n".format(struct_to_check, struct_name, name))
+            cpp_check_invalid_indices.write("            }\n")
+            cpp_check_invalid_indices.write("            #endif\n")
             cpp_check_invalid_indices.write("        }\n")
         
     cpp_check_invalid_indices.write("        stack.erase(stack.begin());\n")

@@ -75,14 +75,19 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
 
     cpp_struct_value.write("    return values;\n")
     cpp_struct_value.write("}\n")
+    
+    hpp.write("        const char *struct_name() const override;\n")
+    cpp_struct_value.write("const char *{}::struct_name() const {{\n".format(struct_name))
+    cpp_struct_value.write("    return \"{}\";\n".format(struct_name))
+    cpp_struct_value.write("}\n")
 
     if not struct_title is None:
-        hpp.write("        bool has_title() override;\n")
-        cpp_struct_value.write("bool {}::has_title() {{\n".format(struct_name))
+        hpp.write("        bool has_title() const override;\n")
+        cpp_struct_value.write("bool {}::has_title() const {{\n".format(struct_name))
         cpp_struct_value.write("    return true;\n")
         cpp_struct_value.write("}\n")
-        hpp.write("        const char *title() override;\n")
-        cpp_struct_value.write("const char *{}::title() {{\n".format(struct_name))
+        hpp.write("        const char *title() const override;\n")
+        cpp_struct_value.write("const char *{}::title() const {{\n".format(struct_name))
         for struct in all_used_structs:
             if "name" in struct and struct["name"] == struct_title:
                 if struct["type"] == "TagString":
