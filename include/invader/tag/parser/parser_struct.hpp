@@ -768,7 +768,7 @@ namespace Invader::Parser {
          * @param  stack        stack to check
          * @return              true if broken indices were found; false if not
          */
-        virtual bool check_for_invalid_indices(bool null_indices, std::deque<const ParserStruct *> &stack) = 0;
+        virtual bool check_for_invalid_indices(bool null_indices, std::deque<std::tuple<const ParserStruct *, std::size_t, const char *>> &stack) = 0;
 
         /**
          * Check for invalid references

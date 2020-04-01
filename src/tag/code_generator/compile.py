@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+import sys
+
 def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged):
     # compile()
     hpp.write("        void compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::optional<std::size_t> bsp = std::nullopt, std::size_t offset = 0, std::deque<const ParserStruct *> *stack = nullptr) override;\n")
