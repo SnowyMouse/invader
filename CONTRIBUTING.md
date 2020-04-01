@@ -17,8 +17,10 @@ using a program like [7-Zip] or [p7zip].
 You should always test using the latest [Git master branch] build when
 testing Invader. It is not recommended to test even slightly outdated versions
 of Invader, regardless of if it was a release or not. Note that Invader, in its
-current state, has no concept of a "stable" release, though the tools,
-themselves, may possibly be more stable than the Halo Editing Kit counterparts.
+current state, has no concept of a "stable" release (i.e. a version you don't
+need to update for a long period of time), though the tools, themselves, may
+possibly be more stable than the Halo Editing Kit counterparts (i.e. less error
+prone).
 
 # Conventions
 These conventions apply only for contributing to the official Invader
