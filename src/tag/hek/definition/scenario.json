@@ -2352,12 +2352,14 @@
                 "name": "commands",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommand",
+                "maximum": 65534,
                 "compound": true
             },
             {
                 "name": "points",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommandPoint",
+                "maximum": 65534,
                 "compound": true
             },
             {
@@ -3161,7 +3163,6 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
                 "compound": true,
-                "maximum": 65534,
                 "maximum": 65535
             },
             {
