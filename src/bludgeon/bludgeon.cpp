@@ -43,6 +43,9 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     
     /** Fix invalid values that are out of bounds for their ranges */
     BULLSHIT_RANGE                      = 1ull << 7,
+    
+    /** Fix indices that are out of bounds */
+    FUCKED_INDICES                      = 1ull << 8,
 
     // Stuff that Refinery breaks
 
@@ -74,6 +77,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define BULLSHIT_RANGE_FIX "out-of-range"
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
+#define FUCKED_INDICES_FIX "invalid-indices"
 #define EVERYTHING_FIX "everything"
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
@@ -113,6 +117,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             check_fix(power_of_two_fix, "power-of-two flag is wrong; fix with " POWER_OF_FUCK_YOU_FIX);
             check_fix(bullshit_range_fix, "value(s) are out of range; fix with " BULLSHIT_RANGE_FIX);
             check_fix(where_the_fuck_are_the_scripts, "script source data is missing; fix with " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
+            check_fix(fucked_indices_fix, "indices are out of bounds; fix with " FUCKED_INDICES_FIX);
             
             #undef check_fix
         }
@@ -130,6 +135,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             apply_fix(sound_buffer, FUCKED_SOUND_BUFFER, FUCKED_SOUND_BUFFER_FIX);
             apply_fix(fucked_vertices, FUCKED_VERTICES, FUCKED_VERTICES_FIX);
             apply_fix(where_the_fuck_are_the_scripts, WHERE_THE_FUCK_ARE_THE_SCRIPTS, WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
+            apply_fix(fucked_indices_fix, FUCKED_INDICES, FUCKED_INDICES_FIX);
             
             #undef apply_fix
         }
@@ -231,6 +237,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], BULLSHIT_RANGE_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_RANGE;
+                }
+                else if(std::strcmp(arguments[0], FUCKED_INDICES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_INDICES;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;

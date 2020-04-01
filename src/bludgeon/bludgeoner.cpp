@@ -138,4 +138,8 @@ namespace Invader::Bludgeoner {
     bool bullshit_range_fix(Parser::ParserStruct *s, bool fix) {
         return s->check_for_invalid_ranges(fix);
     }
+    
+    bool fucked_indices_fix(Parser::ParserStruct *s, bool fix) {
+        return s->check_for_invalid_indices(fix);
+    }
 }

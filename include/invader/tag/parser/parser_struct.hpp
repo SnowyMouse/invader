@@ -4,6 +4,7 @@
 #define INVADER__TAG__PARSER__PARSER_STRUCT_HPP
 
 #include <vector>
+#include <deque>
 #include <cstddef>
 #include <optional>
 #include <variant>
@@ -753,6 +754,21 @@ namespace Invader::Parser {
          * @return             true if broken enums were found; false if not
          */
         virtual bool check_for_broken_enums(bool reset_enums) = 0;
+
+        /**
+         * Check for broken indices
+         * @param  null_indices attempt to fix the enums by setting them to a null index (65535)
+         * @return              true if broken indices were found; false if not
+         */
+        virtual bool check_for_invalid_indices(bool null_indices) = 0;
+
+        /**
+         * Check for broken indices
+         * @param  null_indices attempt to fix the enums by setting them to a null index (65535)
+         * @param  stack        stack to check
+         * @return              true if broken indices were found; false if not
+         */
+        virtual bool check_for_invalid_indices(bool null_indices, std::deque<const ParserStruct *> &stack) = 0;
 
         /**
          * Check for invalid references

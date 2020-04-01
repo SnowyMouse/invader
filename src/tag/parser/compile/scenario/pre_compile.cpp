@@ -342,13 +342,12 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, # ref " in command #%zu in list #%zu (%s) references an invalid index", c, l, list.name.string); \
                 }
                 
-                // TODO: Make invader-bludgeon fix indices, since stock Bungie assets break these, too
-                // INVALID_CHECK_FOR_COMMAND_LIST(point_1, point_count);
-                // INVALID_CHECK_FOR_COMMAND_LIST(point_2, point_count);
-                // INVALID_CHECK_FOR_COMMAND_LIST(animation, ai_animation_count);
-                // INVALID_CHECK_FOR_COMMAND_LIST(recording, ai_recording_count);
-                // INVALID_CHECK_FOR_COMMAND_LIST(script, ai_script_count);
-                // INVALID_CHECK_FOR_COMMAND_LIST(command, cmd_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(point_1, point_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(point_2, point_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(animation, ai_animation_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(recording, ai_recording_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(script, ai_script_count);
+                INVALID_CHECK_FOR_COMMAND_LIST(command, cmd_count);
                 
                 #undef INVALID_CHECK_FOR_COMMAND_LIST
             }
