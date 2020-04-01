@@ -130,7 +130,9 @@
             },
             {
                 "name": "location",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "locations",
+                "struct": "Effect"
             },
             {
                 "name": "flags",
@@ -221,7 +223,9 @@
             },
             {
                 "name": "location",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "locations",
+                "struct": "Effect"
             },
             {
                 "type": "pad",
@@ -393,11 +397,15 @@
             },
             {
                 "name": "loop start event",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "events",
+                "struct": "Effect"
             },
             {
                 "name": "loop stop event",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "events",
+                "struct": "Effect"
             },
             {
                 "type": "pad",

@@ -105,15 +105,21 @@
             },
             {
                 "name": "next sibling node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "name": "first child node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "name": "parent node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "type": "pad",
@@ -173,7 +179,9 @@
             },
             {
                 "name": "node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "type": "pad",
@@ -228,23 +236,33 @@
             },
             {
                 "name": "super low",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "geometries",
+                "struct": "GBXModel"
             },
             {
                 "name": "low",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "geometries",
+                "struct": "GBXModel"
             },
             {
                 "name": "medium",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "geometries",
+                "struct": "GBXModel"
             },
             {
                 "name": "high",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "geometries",
+                "struct": "GBXModel"
             },
             {
                 "name": "super high",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "geometries",
+                "struct": "GBXModel"
             },
             {
                 "type": "pad",
@@ -319,11 +337,15 @@
             },
             {
                 "name": "node0 index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "name": "node1 index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "GBXModel"
             },
             {
                 "name": "node0 weight",
@@ -390,15 +412,21 @@
         "fields": [
             {
                 "name": "vertex0 index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "GBXModelGeometryPart"
             },
             {
                 "name": "vertex1 index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "GBXModelGeometryPart"
             },
             {
                 "name": "vertex2 index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "GBXModelGeometryPart"
             }
         ],
         "type": "struct",
@@ -414,7 +442,9 @@
             },
             {
                 "name": "shader index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "shaders",
+                "struct": "GBXModel"
             },
             {
                 "name": "prev filthy part index",

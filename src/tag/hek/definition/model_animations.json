@@ -162,7 +162,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "function",
@@ -189,7 +191,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -217,7 +221,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -228,7 +234,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -404,7 +412,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -432,7 +442,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -447,7 +459,9 @@
             },
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "full extension ground depth",
@@ -525,7 +539,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -553,7 +569,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -564,7 +582,9 @@
         "fields": [
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             }
         ],
         "type": "struct",
@@ -617,15 +637,21 @@
             },
             {
                 "name": "next sibling node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "first child node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "parent node index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelAnimations"
             },
             {
                 "type": "pad",
@@ -703,7 +729,9 @@
             },
             {
                 "name": "next animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "animations",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "flags",
@@ -711,7 +739,9 @@
             },
             {
                 "name": "sound",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "sound references",
+                "struct": "ModelAnimations"
             },
             {
                 "name": "sound frame index",

@@ -1111,11 +1111,15 @@
             },
             {
                 "name": "power group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "position group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "device flags",
@@ -1163,11 +1167,15 @@
             },
             {
                 "name": "power group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "position group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "device flags",
@@ -1229,11 +1237,15 @@
             },
             {
                 "name": "power group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "position group",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "device groups",
+                "struct": "Scenario"
             },
             {
                 "name": "device flags",
@@ -1416,7 +1428,9 @@
             },
             {
                 "name": "bsp index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "structure bsps",
+                "struct": "Scenario"
             },
             {
                 "name": "type 0",
@@ -1716,15 +1730,21 @@
         "fields": [
             {
                 "name": "trigger volume",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "trigger volumes",
+                "struct": "Scenario"
             },
             {
                 "name": "source",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "structure bsps",
+                "struct": "Scenario"
             },
             {
                 "name": "destination",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "structure bsps",
+                "struct": "Scenario"
             },
             {
                 "name": "unknown",
@@ -1740,7 +1760,9 @@
         "fields": [
             {
                 "name": "decal type",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "decal palette",
+                "struct": "Scenario"
             },
             {
                 "name": "yaw",
@@ -1837,7 +1859,9 @@
             },
             {
                 "name": "animation",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "ai animation references",
+                "struct": "Scenario"
             },
             {
                 "name": "sequence id",
@@ -1897,11 +1921,15 @@
             },
             {
                 "name": "actor type",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "actor palette",
+                "struct": "Scenario"
             },
             {
                 "name": "command list",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "command lists",
+                "struct": "Scenario"
             }
         ],
         "type": "struct",
@@ -1917,11 +1945,15 @@
             },
             {
                 "name": "actor type",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "actor palette",
+                "struct": "Scenario"
             },
             {
                 "name": "platoon",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "platoons",
+                "struct": "ScenarioEncounter"
             },
             {
                 "name": "Tinitial state",
@@ -2080,7 +2112,9 @@
             },
             {
                 "name": "happens to",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "platoons",
+                "struct": "ScenarioEncounter"
             },
             {
                 "type": "pad",
@@ -2096,7 +2130,9 @@
             },
             {
                 "name": "happens to 1",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "platoons",
+                "struct": "ScenarioEncounter"
             },
             {
                 "type": "pad",
@@ -2516,7 +2552,9 @@
             },
             {
                 "name": "participant",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "participants",
+                "struct": "ScenarioAIConversation"
             },
             {
                 "name": "addressee",

@@ -123,12 +123,8 @@ namespace Invader::Parser {
                 auto &region = fog_regions[region_index];
 
                 // Lastly get the fog tag
-                std::size_t palette_index = region.fog_palette;
+                std::size_t palette_index = region.fog;
                 if(palette_index == NULL_INDEX) {
-                    continue;
-                }
-                if(palette_index >= fog_palette_count) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "BSP fog palette index exceeds fog palette count (%zu >= %zu)", palette_index, fog_palette_count);
                     continue;
                 }
 

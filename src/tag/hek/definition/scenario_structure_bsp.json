@@ -790,14 +790,18 @@
                 "size": 36
             },
             {
-                "name": "fog palette",
+                "name": "fog",
                 "read_only": false,
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "fog palette",
+                "struct": "ScenarioStructureBSP"
             },
             {
                 "name": "weather palette",
                 "read_only": false,
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "weather palette",
+                "struct": "ScenarioStructureBSP"
             }
         ],
         "type": "struct",

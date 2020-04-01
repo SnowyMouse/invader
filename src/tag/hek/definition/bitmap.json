@@ -122,7 +122,9 @@
         "fields": [
             {
                 "name": "bitmap index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "bitmap data",
+                "struct": "Bitmap"
             },
             {
                 "type": "pad",

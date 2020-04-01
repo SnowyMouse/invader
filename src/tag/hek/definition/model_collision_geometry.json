@@ -178,7 +178,9 @@
         "fields": [
             {
                 "name": "node",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelCollisionGeometry"
             },
             {
                 "type": "pad",
@@ -453,15 +455,21 @@
             },
             {
                 "name": "parent node",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelCollisionGeometry"
             },
             {
                 "name": "next sibling node",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelCollisionGeometry"
             },
             {
                 "name": "first child node",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "ModelCollisionGeometry"
             },
             {
                 "type": "pad",

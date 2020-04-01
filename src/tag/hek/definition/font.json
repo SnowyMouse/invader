@@ -4,7 +4,9 @@
         "fields": [
             {
                 "name": "character index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "characters",
+                "struct": "Font"
             }
         ],
         "type": "struct",
@@ -28,7 +30,7 @@
         "fields": [
             {
                 "name": "character",
-                "type": "Index"
+                "type": "uint16"
             },
             {
                 "name": "character width",
@@ -52,7 +54,7 @@
             },
             {
                 "name": "hardware character index",
-                "type": "Index"
+                "type": "uint16"
             },
             {
                 "type": "pad",

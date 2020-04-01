@@ -122,7 +122,9 @@
             {
                 "name": "next permutation index",
                 "type": "Index",
-                "read_only": true
+                "read_only": true,
+                "reflexive": "permutations",
+                "struct": "SoundPitchRange"
             },
             {
                 "name": "samples pointer",
