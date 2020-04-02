@@ -1648,6 +1648,9 @@ namespace Invader {
 
                                             // Make sure it's not bullshit
                                             if(raw_data_other_data < bitmap_tag_struct_other_raw_data || raw_data_other_data > (bitmap_tag_struct_other_raw_data + bitmap_tag_struct_other_raw_data_size)) {
+                                                oprintf("Range is 0x%08zX - 0x%08zX; needed 0x%08zX - 0x%08zX\n", bitmap_tag_struct_raw_data_translation, bitmap_tag_struct_raw_data_translation + bitmap_tag_struct_other_raw_data_size, static_cast<std::size_t>(bitmap_data_other.pixel_data_offset), static_cast<std::size_t>(bitmap_data_other.pixel_data_offset) + raw_data_size);
+                                                
+                                                
                                                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
                                                 match = false;
                                                 break;

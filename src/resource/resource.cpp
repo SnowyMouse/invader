@@ -11,6 +11,7 @@
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/resource/list/resource_list.hpp>
 #include <invader/command_line_option.hpp>
+#include <invader/file/file.hpp>
 #include <invader/printf.hpp>
 
 int main(int argc, const char **argv) {
@@ -32,7 +33,7 @@ int main(int argc, const char **argv) {
         std::vector<std::string> tags;
 
         // Maps directory
-        const char *maps = "maps/";
+        const char *maps = "maps";
 
         // Resource map type
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
@@ -113,18 +114,12 @@ int main(int argc, const char **argv) {
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
 
-    for(const std::string &tag : tags_list) {
+    for(const std::string &listed_tag : tags_list) {
         // First let's open it
         TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
-
-        // Convert backslashes if needed
-        std::string tag_path = tag;
-        for(char &c : tag_path) {
-            if(c == '\\') {
-                c = std::filesystem::path::preferred_separator;
-            }
-        }
+        auto tag_path = File::halo_path_to_preferred_path(listed_tag);
+        auto halo_tag_path = File::preferred_path_to_halo_path(listed_tag);
 
         // Function to open a file
         auto open_tag = [&resource_options, &tag_path](const char *extension) -> std::FILE * {
@@ -198,7 +193,7 @@ int main(int argc, const char **argv) {
 
         // Compile the tags
         try {
-            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag.c_str(), tag_class_int, resource_options.tags);
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag_path.c_str(), tag_class_int, resource_options.tags);
             auto &compiled_tag_tag = compiled_tag.tags[0];
             auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
             auto *compiled_tag_data = compiled_tag_struct.data.data();
@@ -206,18 +201,21 @@ int main(int argc, const char **argv) {
 
             std::vector<std::byte> data;
             std::vector<std::size_t> structs;
-            for(auto &s : compiled_tag.structs) {
-                structs.push_back(data.size());
-                data.insert(data.end(), s.data.begin(), s.data.end());
-            }
-
+            
             // Pointers are stored as offsets here
-            std::size_t sound_offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
-            for(auto &s : compiled_tag.structs) {
-                for(auto &ptr : compiled_tag_struct.pointers) {
-                    *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - sound_offset;
+            auto write_pointers = [&data, &structs, &compiled_tag, &resource_options]() {
+                for(auto &s : compiled_tag.structs) {
+                    structs.push_back(data.size());
+                    data.insert(data.end(), s.data.begin(), s.data.end());
                 }
-            }
+                
+                std::size_t sound_offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
+                for(auto &s : compiled_tag.structs) {
+                    for(auto &ptr : s.pointers) {
+                        *reinterpret_cast<LittleEndian<Pointer> *>(data.data() + structs[&s - compiled_tag.structs.data()] + ptr.offset) = structs[ptr.struct_index] - sound_offset;
+                    }
+                }
+            };
 
             // Now, adjust stuff for pointers
             switch(resource_options.type) {
@@ -228,16 +226,16 @@ int main(int argc, const char **argv) {
                     if(bitmap_count) {
                         auto *bitmaps = reinterpret_cast<BitmapData<LittleEndian> *>(compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&bitmap.bitmap_data.pointer)].data.data());
                         for(std::size_t b = 0; b < bitmap_count; b++) {
-                            auto *bitmap = bitmaps + b;
+                            auto *bitmap_data = bitmaps + b;
 
                             // If we're on retail, push the pixel data
                             if(resource_options.retail) {
                                 // Generate the path to add
-                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", tag.c_str(), b);
+                                std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", halo_tag_path.c_str(), b);
 
                                 // Push it good
                                 paths.push_back(path_temp);
-                                std::size_t size = bitmap->pixel_data_size.read();
+                                std::size_t size = bitmap_data->pixel_data_size.read();
                                 sizes.push_back(size);
                                 offsets.push_back(resource_data.size());
                                 resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
@@ -246,13 +244,15 @@ int main(int argc, const char **argv) {
                             }
                             // Otherwise set the sizes
                             else {
-                                bitmap->pixel_data_offset = resource_data.size() + bitmap->pixel_data_offset;
-                                auto flags = bitmap->flags.read();
+                                bitmap_data->pixel_data_offset = resource_data.size() + bitmap_data->pixel_data_offset;
+                                auto flags = bitmap_data->flags.read();
                                 flags.external = 1;
-                                bitmap->flags = flags;
+                                bitmap_data->flags = flags;
                             }
                         }
                     }
+                    
+                    write_pointers();
 
                     // Push the asset data and tag data if we aren't on retail
                     if(!resource_options.retail) {
@@ -262,7 +262,7 @@ int main(int argc, const char **argv) {
                             total_size += r.size();
                             resource_data.insert(resource_data.end(), r.begin(), r.end());
                         }
-                        paths.push_back(tag + "__pixels");
+                        paths.push_back(halo_tag_path + "__pixels");
                         sizes.push_back(total_size);
 
                         PAD_RESOURCES_32_BIT
@@ -270,7 +270,7 @@ int main(int argc, const char **argv) {
                         // Push the tag data
                         offsets.push_back(resource_data.size());
                         resource_data.insert(resource_data.end(), data.begin(), data.end());
-                        paths.push_back(tag);
+                        paths.push_back(halo_tag_path);
                         sizes.push_back(data.size());
 
                         PAD_RESOURCES_32_BIT
@@ -295,7 +295,7 @@ int main(int argc, const char **argv) {
                                     auto *permutation = permutations + p;
                                     if(resource_options.retail) {
                                         // Generate the path to add
-                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", tag.c_str(), pr, p);
+                                        std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", halo_tag_path.c_str(), pr, p);
 
                                         // Push it REAL good
                                         paths.push_back(path_temp);
@@ -316,6 +316,8 @@ int main(int argc, const char **argv) {
                             }
                         }
                     }
+                    
+                    write_pointers();
 
                     // If we're not on retail, push asset and tag data
                     if(!resource_options.retail) {
@@ -326,7 +328,7 @@ int main(int argc, const char **argv) {
                             total_size += r.size();
                             resource_data.insert(resource_data.end(), r.begin(), r.end());
                         }
-                        paths.push_back(tag + "__permutations");
+                        paths.push_back(halo_tag_path + "__permutations");
                         sizes.push_back(total_size);
 
                         PAD_RESOURCES_32_BIT
@@ -334,7 +336,7 @@ int main(int argc, const char **argv) {
                         // Push the tag data
                         offsets.push_back(resource_data.size());
                         resource_data.insert(resource_data.end(), data.begin(), data.end());
-                        paths.push_back(tag);
+                        paths.push_back(halo_tag_path);
                         sizes.push_back(data.size());
 
                         PAD_RESOURCES_32_BIT
@@ -343,9 +345,10 @@ int main(int argc, const char **argv) {
                     break;
                 }
                 case ResourceMapType::RESOURCE_MAP_LOC:
+                    write_pointers();
                     offsets.push_back(resource_data.size());
                     resource_data.insert(resource_data.end(), data.begin(), data.end());
-                    paths.push_back(tag);
+                    paths.push_back(halo_tag_path);
                     sizes.push_back(data.size());
 
                     PAD_RESOURCES_32_BIT
