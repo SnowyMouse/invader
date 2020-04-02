@@ -72,34 +72,13 @@ some of these dependencies may have their own dependencies.
 - LibTIFF 3.6 or newer
 - libvorbis 1.3.6 or newer
 - libsamplerate 0.1.9 or newer
+- Qt5
 - zlib
 
 ##### Optional dependencies
 - LibArchive ([invader-archive])
 - freetype ([invader-font])
 - git (git commit hash in version - build only)
-
-#### Compiling (Windows)
-You can compile Invader using MSYS2 and MinGW. Make sure that you install all
-of the required dependencies through MSYS2 and not their respective Windows
-installers. See README.md for a list of the requirements. You can use the
-`pacman` command to install these dependencies. Also, make sure that when you
-compile Invader, you are using the 64-bit MSYS2 shell (or 32-bit if you need
-a 32-bit build).
-
-The rest of the instructions are the same as POSIX, except that when you go to
-use the `make` command, you specify that you want CMake to generate MSYS
-Makefiles. You can do so using `-G "MSYS Makefiles"` like this:
-
-```
-cmake ../invader -DCMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
-```
-
-If you forget to do this, then CMake may create a Microsoft Visual Studio
-solution, instead. Invader will probably work if built for MSVC, but the
-dependencies will have to be obtained differently, and the command to compile
-is different. If you accidentally do this, delete all of the files in
-`invader-build` and re-run the `cmake` command.
 
 #### Compiling (POSIX)
 First, you will need to download the Invader repository onto your computer. You
