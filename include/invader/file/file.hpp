@@ -12,6 +12,7 @@
 #include "../hek/class_int.hpp"
 
 namespace Invader::File {
+
     /**
      * Attempt to open the file and read it all into a buffer
      * @param path path to the file
@@ -178,6 +179,12 @@ namespace Invader::File {
      * @return                base name
      */
     std::string base_name(const std::string &tag_path, bool drop_extension = false);
+    
+    /**
+     * Check working directory (April Fools)
+     * @param file file to look for
+     */
+    void check_working_directory(const char *file);
 }
 
 #endif

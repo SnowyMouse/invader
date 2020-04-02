@@ -58,6 +58,8 @@ int main(int argc, char **argv) {
             return EXIT_FAILURE;
         }
     }
+    
+    File::check_working_directory("./guerillabeta.map");
 
     // Instantiate the application
     QApplication a(argc, argv);
