@@ -1,4 +1,3 @@
-210
 ui\small_ui
 ui\large_ui
 ui\hud\hud_item_messages
@@ -175,37 +174,3 @@ ui\shell\main_menu\map_list_short
 ui\shell\solo_game\pause_game\pause_game_options
 ui\shell\multiplayer_game\pause_game\pause_game_options
 ui\shell\main_menu\settings_select\multiplayer_setup\playlist_edit\slayer_edit\var_kill_penalty
-levels\a30\hud messages
-levels\c10\hud messages
-levels\a10\hud messages
-levels\b40\hud messages
-levels\d20\hud messages
-levels\b30\hud messages
-levels\a50\hud messages
-levels\c20\hud messages
-levels\c40\hud messages
-levels\d40\hud messages
-levels\a30\custom_object_names
-levels\c10\custom object names
-levels\c10\ingame help text
-levels\b40\custom object names
-levels\d20\ingame help text
-levels\b30\custom_object_names
-levels\a50\custom object names
-levels\a50\ingame help text
-levels\c20\ingame help text
-levels\c40\custom object names
-levels\d40\custom object names
-levels\d40\ingame help text
-ui\shell\strings\temp_strings
-ui\shell\solo_game\player_help\player_help_text_c20
-ui\shell\solo_game\player_help\player_help_text_d40
-ui\shell\solo_game\player_help\player_help_text_a10
-ui\shell\solo_game\player_help\gameplay_tip
-ui\shell\solo_game\player_help\player_help_text_b40
-ui\shell\solo_game\player_help\player_help_text_d20
-ui\shell\solo_game\player_help\player_help_text_b30
-ui\shell\solo_game\player_help\player_help_text_a30
-ui\shell\solo_game\player_help\player_help_text_a50
-ui\shell\solo_game\player_help\player_help_text_c40
-ui\shell\solo_game\player_help\player_help_text_c10
