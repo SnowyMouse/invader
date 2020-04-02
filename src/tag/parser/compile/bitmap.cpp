@@ -280,11 +280,11 @@ namespace Invader::Parser {
                 }
 
                 if(data.flags.power_of_two_dimensions && non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu) but that flag is set", data_index, width, height, depth);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu) but that flag is set", data_index, width, height, depth);
                 }
 
                 if(!data.flags.power_of_two_dimensions && !non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
                 }
 
                 if((
@@ -413,7 +413,7 @@ namespace Invader::Parser {
         new_tag.bitmap_data = tag.bitmap_data;
         return new_tag;
     }
-    
+
     template <typename T> static bool fix_power_of_two_for_tag(T &tag, bool fix) {
         bool fixed = false;
         for(auto &d : tag.bitmap_data) {
@@ -424,15 +424,15 @@ namespace Invader::Parser {
         }
         return fixed;
     }
-    
+
     bool fix_power_of_two(ExtendedBitmap &tag, bool fix) {
         return fix_power_of_two_for_tag(tag, fix);
     }
-    
+
     bool fix_power_of_two(Bitmap &tag, bool fix) {
         return fix_power_of_two_for_tag(tag, fix);
     }
-    
+
     bool fix_power_of_two(BitmapData &data, bool fix) {
         bool should_be_power_of_two = power_of_two(data.width) && power_of_two(data.height) && power_of_two(data.width);
         if(data.flags.power_of_two_dimensions && !should_be_power_of_two) {
