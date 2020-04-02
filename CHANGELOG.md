@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.32.5] - 2020-04-01
 ### Added
 - invader-bludgeon: Added `-T invalid-indices` which nulls various invalid
   indices. Note that this may result in various Bungie assets working slightly
