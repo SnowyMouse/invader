@@ -160,7 +160,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     print("Cannot resolve {} in {}".format(reflexive_to_check, struct_to_check), file=sys.stderr)
                     sys.exit(1)
                 
-                cpp_cache_format_data.write("        if(this->{} != NULL_INDEX) {{\n".format(name))
+                cpp_cache_format_data.write("        if(!workload.disable_recursion && this->{} != NULL_INDEX) {{\n".format(name))
                 cpp_cache_format_data.write("            [[maybe_unused]] bool found = false;\n")
                 cpp_cache_format_data.write("            for(auto *p : *stack) {\n")
                 cpp_cache_format_data.write("                auto *s = dynamic_cast<const {} *>(p);\n".format(struct_to_check))

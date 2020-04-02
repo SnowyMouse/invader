@@ -117,14 +117,14 @@ namespace Invader::Parser {
 
                 // Find what region this fog is in
                 std::size_t region_index = plane.front_region;
-                if(region_index > fog_region_count) {
+                if(region_index >= fog_region_count) {
                     continue;
                 }
                 auto &region = fog_regions[region_index];
 
                 // Lastly get the fog tag
                 std::size_t palette_index = region.fog;
-                if(palette_index == NULL_INDEX) {
+                if(palette_index >= fog_palette_count) {
                     continue;
                 }
 
