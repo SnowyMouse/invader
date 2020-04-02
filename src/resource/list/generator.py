@@ -8,19 +8,7 @@ if len(sys.argv) != 5:
 
 def read_indices(fname):
     with open(fname, "r") as f:
-        # Get the first line, the count
-        count = int(f.readline())
-
-        # Get the rest
-        lines = [line for line in f]
-
-        # Verify that it is, indeed, an index file
-        if count != len(lines):
-            print("Invalid index file {} ({} count != {} tags on file)".format(fname, count, len(lines)))
-            exit(1)
-
-        # Return what we got
-        return lines
+        return [line for line in f]
 
 bitmaps = read_indices(sys.argv[1])
 sounds = read_indices(sys.argv[2])
