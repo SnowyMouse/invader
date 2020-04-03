@@ -515,7 +515,7 @@ namespace Invader {
 
                 // Chu
                 bool easter_egg = false;
-                if(ON_COLOR_TERM) {
+                if(ON_COLOR_TERM(stdout)) {
                     if(new_crc == 0x21706156) {
                         oprintf("\x1B[38;5;51m");
                         easter_egg = true;
@@ -609,7 +609,7 @@ namespace Invader {
                 oprintf("Time:              %.03f ms", std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - workload.start).count() / 1000.0);
 
                 // Chu
-                if(ON_COLOR_TERM) {
+                if(ON_COLOR_TERM(stdout)) {
                     if(easter_egg) {
                         oprintf("\x1B[m");
                     }

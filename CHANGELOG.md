@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Fixed
+- invader: Fixed color codes being used on Linux if stdout/stderr is not a TTY
 - invader-build: Fixed a segmentation fault when using certain corrupt
   bitmaps.map and sounds.map files when building a Custom Edition map without
   `-a`

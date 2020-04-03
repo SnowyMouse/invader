@@ -5,16 +5,17 @@
 
 #ifndef NO_OUTPUT
 
+#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
 
 // If NO_OUTPUT is not enabled, then we have eprintf and oprintf as a macro for, basically, printf
 #include <cstdio>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <windows.h>
 
-#define ON_COLOR_TERM true
+#define ON_COLOR_TERM(fd) true
 
 #define output_colored(color, fn, ...) { \
     CONSOLE_SCREEN_BUFFER_INFO info = {}; \
@@ -34,11 +35,11 @@
 #define oprintf_success_lesser_warn(...) output_colored(0xD, oprintf, __VA_ARGS__);
 #define oprintf_fail(...) output_colored(0xC, oprintf, __VA_ARGS__);
 
-#else
+#elif defined(__linux__)
 
-#define ON_COLOR_TERM (std::getenv("TERM") && ((std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)))
+#define ON_COLOR_TERM(fd) (isatty(fileno(fd)) && std::getenv("TERM") && ((std::strcmp(std::getenv("TERM"), "xterm-256color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-color") == 0 || std::strcmp(std::getenv("TERM"), "xterm-16color") == 0)))
 
-#define eprintf_error(...) if(ON_COLOR_TERM) {\
+#define eprintf_error(...) if(ON_COLOR_TERM(stderr)) {\
     eprintf("\x1B[1;38;5;1m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
@@ -48,7 +49,7 @@ else {\
     eprintf("\n"); \
 }
 
-#define eprintf_warn(...) if(ON_COLOR_TERM) {\
+#define eprintf_warn(...) if(ON_COLOR_TERM(stderr)) {\
     eprintf("\x1B[1;38;5;3m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
@@ -58,7 +59,7 @@ else {\
     eprintf("\n"); \
 }
 
-#define eprintf_warn_lesser(...) if(ON_COLOR_TERM) {\
+#define eprintf_warn_lesser(...) if(ON_COLOR_TERM(stderr)) {\
     eprintf("\x1B[1;38;5;5m"); \
     eprintf(__VA_ARGS__); \
     eprintf("\x1B[m\n"); \
@@ -68,7 +69,7 @@ else {\
     eprintf("\n"); \
 }
 
-#define oprintf_success(...) if(ON_COLOR_TERM) {\
+#define oprintf_success(...) if(ON_COLOR_TERM(stdout)) {\
     oprintf("\x1B[38;5;2m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
@@ -78,7 +79,7 @@ else {\
     oprintf("\n"); \
 }
 
-#define oprintf_success_warn(...) if(ON_COLOR_TERM) {\
+#define oprintf_success_warn(...) if(ON_COLOR_TERM(stdout)) {\
     oprintf("\x1B[1;38;5;3m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
@@ -87,7 +88,7 @@ else {\
     oprintf(__VA_ARGS__); \
     oprintf("\n"); \
 }
-#define oprintf_success_lesser_warn(...) if(ON_COLOR_TERM) {\
+#define oprintf_success_lesser_warn(...) if(ON_COLOR_TERM(stdout)) {\
     oprintf("\x1B[1;38;5;5m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
@@ -96,7 +97,7 @@ else {\
     oprintf(__VA_ARGS__); \
     oprintf("\n"); \
 }
-#define oprintf_fail(...) if(ON_COLOR_TERM) {\
+#define oprintf_fail(...) if(ON_COLOR_TERM(stdout)) {\
     oprintf("\x1B[1;38;5;1m"); \
     oprintf(__VA_ARGS__); \
     oprintf("\x1B[m\n"); \
@@ -106,6 +107,16 @@ else {\
     oprintf("\n"); \
 }
 
+#else
+
+#define eprintf_error(...) eprintf(__VA_ARGS__);
+#define eprintf_warn(...) eprintf(__VA_ARGS__);
+#define eprintf_warn_lesser(...) eprintf(__VA_ARGS__);
+#define oprintf_success(...) oprintf(__VA_ARGS__);
+#define oprintf_success_warn(...) oprintf(__VA_ARGS__);
+#define oprintf_success_lesser_warn(...) oprintf(__VA_ARGS__);
+#define oprintf_fail(...) oprintf(__VA_ARGS__);
+
 #endif
 
 #define eprintf(...) std::fprintf(stderr, __VA_ARGS__)
@@ -114,7 +125,7 @@ else {\
 
 #else
 
-#define ON_COLOR_TERM false
+#define ON_COLOR_TERM(fd) false
 
 // Otherwise, we have eprintf and oprintf as an inline, variadic function that does nothing. This is so we don't get any unused variable warnings.
 static inline int eprintf(...) {}
