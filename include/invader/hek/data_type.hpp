@@ -75,6 +75,14 @@ namespace Invader::HEK {
         static TagID null_tag_id() {
             return { NULL_ID };
         }
+        
+        operator==(const TagID &other) const noexcept {
+            return other.index == this->index && other.is_null() == this->is_null();
+        }
+        
+        operator!=(const TagID &other) const noexcept {
+            return other.index != this->index || other.is_null() != this->is_null();
+        }
     };
 
     /**
@@ -835,6 +843,14 @@ namespace Invader::HEK {
 
         void operator=(TagID v) {
             this->tag_id = v;
+        }
+        
+        bool operator==(const ScenarioScriptNodeValue &other) const noexcept {
+            return this->long_int == other.long_int;
+        }
+        
+        bool operator!=(const ScenarioScriptNodeValue &other) const noexcept {
+            return this->long_int != other.long_int;
         }
     };
 

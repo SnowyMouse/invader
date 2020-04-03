@@ -22,6 +22,14 @@ namespace Invader::Parser {
         TagClassInt tag_class_int;
         std::string path;
         HEK::TagID tag_id = HEK::TagID::null_tag_id();
+        
+        bool operator==(const Dependency &other) const {
+            return this->path == other.path && (this->path.size() == 0 || this->tag_class_int == other.tag_class_int);
+        }
+        
+        bool operator!=(const Dependency &other) const {
+            return !(*this != other);
+        }
     };
 
     class ParserStructValue {
@@ -841,6 +849,21 @@ namespace Invader::Parser {
          * @return name of the struct
          */
         virtual const char *struct_name() const = 0;
+        
+        /**
+         * Compare the struct against another struct
+         * @param what      struct to compare against
+         * @param precision allow small differences for floats (can account for minor precision differences but may slightly increase false positives)
+         */
+        virtual bool compare(const ParserStruct *what, bool precision = false) const = 0;
+        
+        bool operator==(const ParserStruct &other) const {
+            return this->compare(&other);
+        }
+        
+        bool operator!=(const ParserStruct &other) const {
+            return !this->compare(&other);
+        }
 
         virtual ~ParserStruct() = default;
     protected:

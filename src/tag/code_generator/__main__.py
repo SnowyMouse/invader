@@ -7,7 +7,7 @@ import os
 from definition import make_definitions
 from parser import make_parser
 
-bitfield_cpp = 14
+bitfield_cpp = 15
 
 if len(sys.argv) < bitfield_cpp+4:
     print("Usage: {} <definition.hpp> <parser.hpp> <parser-save-hek-data.cpp> <parser-read-hek-data.cpp> <parser-read-cache-file-data.cpp> <parser-cache-format.cpp> <parser-cache-deformat.cpp> <parser-refactor-reference.cpp> <parser-struct-value.cpp> <parser-check-broken-enums.cpp> <parser-check-invalid-references.cpp> <parser-check-invalid-ranges.cpp> <bitfield.cpp> <enum.cpp> <extract-hidden> <json> [json [...]]".format(sys.argv[0]), file=sys.stderr)
@@ -131,4 +131,5 @@ with open(sys.argv[2], "w") as hpp:
                                     with open(sys.argv[11], "w") as cpp_check_invalid_references:
                                         with open(sys.argv[12], "w") as cpp_check_invalid_ranges:
                                             with open(sys.argv[13], "w") as cpp_check_invalid_indices:
-                                                make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices)
+                                                with open(sys.argv[14], "w") as cpp_compare:
+                                                    make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare)
