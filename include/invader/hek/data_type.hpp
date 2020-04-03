@@ -76,11 +76,11 @@ namespace Invader::HEK {
             return { NULL_ID };
         }
         
-        operator==(const TagID &other) const noexcept {
+        bool operator==(const TagID &other) const noexcept {
             return other.index == this->index && other.is_null() == this->is_null();
         }
         
-        operator!=(const TagID &other) const noexcept {
+        bool operator!=(const TagID &other) const noexcept {
             return other.index != this->index || other.is_null() != this->is_null();
         }
     };
