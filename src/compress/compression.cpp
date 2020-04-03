@@ -9,7 +9,7 @@
 #include <zlib.h>
 
 namespace Invader::Compression {
-    static void compress_header(const Map &map, std::byte *header_output, std::size_t decompressed_size) {
+    template <typename T> static void compress_header(const Map &map, std::byte *header_output, std::size_t decompressed_size) {
         auto new_engine_version = map.get_engine();
         switch(new_engine_version) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
@@ -39,7 +39,7 @@ namespace Invader::Compression {
         }
 
         // Write the header
-        auto &header_out = *reinterpret_cast<HEK::CacheFileHeader *>(header_output);
+        auto &header_out = *reinterpret_cast<T *>(header_output);
         header_out = {};
         header_out.crc32 = map.get_header_crc32();
         std::strncpy(header_out.build.string, map.get_build(), sizeof(header_out.build));
@@ -125,7 +125,7 @@ namespace Invader::Compression {
         auto engine = map.get_engine();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
             std::vector<std::byte> modifiable_input_data(data, data + data_size);
-            compress_header(map, modifiable_input_data.data(), data_size);
+            compress_header<HEK::CacheFileHeader>(map, modifiable_input_data.data(), data_size);
 
             // Immediately compress it
             if(!Ceaflate::compress_file(modifiable_input_data.data(), data_size, output, output_size)) {
@@ -136,7 +136,7 @@ namespace Invader::Compression {
             return output_size;
         }
         else if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            compress_header(map, output, data_size);
+            compress_header<HEK::CacheFileHeader>(map, output, data_size);
 
             // Compress that!
             z_stream deflate_stream = {};
@@ -163,7 +163,12 @@ namespace Invader::Compression {
             return deflate_stream.total_out + HEADER_SIZE;
         }
         else {
-            compress_header(map, output, data_size);
+            if(engine == HEK::CACHE_FILE_DARK_CIRCLET) {
+                compress_header<HEK::DarkCircletCacheFileHeader>(map, output, data_size);
+            }
+            else {
+                compress_header<HEK::CacheFileHeader>(map, output, data_size);
+            }
 
             // Immediately compress it
             auto compressed_size = ZSTD_compress(output + HEADER_SIZE, output_size - HEADER_SIZE, data + HEADER_SIZE, data_size - HEADER_SIZE, compression_level);
