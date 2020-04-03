@@ -112,7 +112,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
         make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
-        make_refactor_reference(all_used_structs, struct_name, hpp, cpp_read_hek_data)
+        make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_reference)
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, None if not "title" in s else s["title"])
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
