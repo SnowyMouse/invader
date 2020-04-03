@@ -7,6 +7,12 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed a segmentation fault when using certain corrupt
   bitmaps.map and sounds.map files when building a Custom Edition map without
   `-a`
+- invader-resource: Fixed generated Custom Edition bitmaps.map being corrupted
+- invader-resource: Fixed generating Custom Edition sounds.map segfaulting
+
+### Removed
+- invader-resource: Removed campaign assets from the internal list of tags to
+  put in resource maps
 
 ## [0.32.5] - 2020-04-01
 ### Added
