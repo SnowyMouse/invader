@@ -393,7 +393,7 @@ int main(int argc, const char **argv) {
             extracted++;
         }
         else {
-            oprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
+            eprintf("Skipped %s.%s\n", Invader::File::halo_path_to_preferred_path(tag_map.get_path()).c_str(), HEK::tag_class_to_extension(tag_map.get_tag_class_int()));
         }
     }
 
