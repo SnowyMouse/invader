@@ -280,26 +280,26 @@ int main(int argc, const char **argv) {
                 }
                 case ResourceMapType::RESOURCE_MAP_SOUND: {
                     // Do stuff to the tag data
-                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(data.data());
-                    auto *the_real_battle_begins = reinterpret_cast<std::byte *>(&sound + 1);
+                    auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag_struct.data.data());
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     std::size_t b = 0;
                     if(pitch_range_count) {
-                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(the_real_battle_begins);
+                        auto &pitch_range_struct = compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&sound.pitch_ranges.pointer)];
+                        auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(pitch_range_struct.data.data());
                         for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
-                            auto *pitch_range = pitch_ranges + pr;
-                            std::size_t permutation_count = pitch_range->permutations.count;
+                            auto &pitch_range = pitch_ranges[pr];
+                            std::size_t permutation_count = pitch_range.permutations.count;
                             if(permutation_count) {
-                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(the_real_battle_begins + pitch_range->permutations.pointer);
+                                auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
                                 for(std::size_t p = 0; p < permutation_count; p++) {
-                                    auto *permutation = permutations + p;
+                                    auto &permutation = permutations[p];
                                     if(resource_options.retail) {
                                         // Generate the path to add
                                         std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", halo_tag_path.c_str(), pr, p);
 
                                         // Push it REAL good
                                         paths.push_back(path_temp);
-                                        std::size_t size = permutation->samples.size.read();
+                                        std::size_t size = permutation.samples.size.read();
                                         sizes.push_back(size);
                                         offsets.push_back(resource_data.size());
                                         resource_data.insert(resource_data.end(), compiled_tag.raw_data[b].begin(), compiled_tag.raw_data[b].end());
@@ -309,8 +309,8 @@ int main(int argc, const char **argv) {
                                         PAD_RESOURCES_32_BIT
                                     }
                                     else {
-                                        permutation->samples.external = 1;
-                                        permutation->samples.file_offset = resource_data.size() + permutation->samples.file_offset;
+                                        permutation.samples.external = 1;
+                                        permutation.samples.file_offset = resource_data.size() + permutation.samples.file_offset;
                                     }
                                 }
                             }
