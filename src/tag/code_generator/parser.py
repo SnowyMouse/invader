@@ -24,6 +24,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_check_broken_enums.write(what)
         cpp_check_invalid_references.write(what)
         cpp_check_invalid_ranges.write(what)
+        cpp_refactor_reference.write(what)
         cpp_check_invalid_indices.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
