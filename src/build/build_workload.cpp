@@ -1664,9 +1664,6 @@ namespace Invader {
                                         match = false;
                                     }
                                 }
-                                else {
-                                    match = false;
-                                }
 
                                 if(match) {
                                     t.resource_index = index;

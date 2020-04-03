@@ -7,6 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed a segmentation fault when using certain corrupt
   bitmaps.map and sounds.map files when building a Custom Edition map without
   `-a`
+- invader-build: Fixed `-a` rejecting all bitmaps instead of matching them all
 - invader-resource: Fixed generated Custom Edition bitmaps.map being corrupted
 - invader-resource: Fixed generating Custom Edition sounds.map segfaulting
 
