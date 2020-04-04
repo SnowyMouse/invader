@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare):
-    hpp.write("        bool compare(const ParserStruct *what, bool precision) const override;\n")
-    cpp_compare.write("    bool {}::compare(const ParserStruct *what, [[maybe_unused]] bool precision) const {{\n".format(struct_name))
+    hpp.write("        bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false) const override;\n")
+    cpp_compare.write("    bool {}::compare(const ParserStruct *what, [[maybe_unused]] bool precision, [[maybe_unused]] bool ignore_volatile) const {{\n".format(struct_name))
     cpp_compare.write("        auto *what_value = dynamic_cast<const {} *>(what);\n".format(struct_name))
     cpp_compare.write("        if(!what_value) {\n")
     cpp_compare.write("            return false;\n")
@@ -11,19 +11,20 @@ def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
         if "cache_only" in struct and struct["cache_only"]:
             continue
         name = struct["member_name"]
+        volatile = "volatile" in struct and struct["volatile"]
         
         def write_float_check(what):
-            cpp_compare.write("        if(this->{} != what_value->{} && (!precision || std::fabs(this->{}) - std::fabs(what_value->{}) > 0.000001)) {{\n".format(what,what,what,what))
+            cpp_compare.write("        if({}this->{} != what_value->{} && (!precision || std::fabs(this->{}) - std::fabs(what_value->{}) > 0.000001)) {{\n".format("!ignore_volatile && " if volatile else "", what,what,what,what))
             cpp_compare.write("            return false;\n");
             cpp_compare.write("        }\n")
             
         def write_regular_check(what):
-            cpp_compare.write("        if(this->{} != what_value->{}) {{\n".format(what,what))
+            cpp_compare.write("        if({}this->{} != what_value->{}) {{\n".format("!ignore_volatile && " if volatile else "", what,what))
             cpp_compare.write("            return false;\n");
             cpp_compare.write("        }\n")
              
         def write_memcmp_check(what):
-            cpp_compare.write("        if(std::memcmp(&this->{}, &what_value->{}, sizeof(this->{}) != 0)) {{\n".format(what,what,what))
+            cpp_compare.write("        if({}std::memcmp(&this->{}, &what_value->{}, sizeof(this->{})) != 0) {{\n".format("!ignore_volatile && " if volatile else "", what,what,what))
             cpp_compare.write("            return false;\n");
             cpp_compare.write("        }\n")
         
@@ -37,7 +38,7 @@ def make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
             cpp_compare.write("            return false;\n")
             cpp_compare.write("        }\n")
             cpp_compare.write("        for(std::size_t i = 0; i < this_{}_count; i++) {{\n".format(name))
-            cpp_compare.write("            if(!this->{}[i].compare(&what_value->{}[i], precision)) {{\n".format(name, name))
+            cpp_compare.write("            if(!this->{}[i].compare(&what_value->{}[i], precision, ignore_volatile)) {{\n".format(name, name))
             cpp_compare.write("                return false;\n")
             cpp_compare.write("            }\n")
             cpp_compare.write("        }\n")

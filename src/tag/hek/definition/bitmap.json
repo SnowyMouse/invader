@@ -327,21 +327,24 @@
                 "type": "uint16",
                 "unit": "pixels",
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "volatile": true
             },
             {
                 "name": "color plate height",
                 "type": "uint16",
                 "unit": "pixels",
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "volatile": true
             },
             {
                 "name": "compressed color plate data",
                 "type": "TagDataOffset",
                 "compound": true,
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "volatile": true
             },
             {
                 "name": "processed pixel data",

@@ -3450,7 +3450,8 @@
                 "struct": "ScenarioSourceFile",
                 "compound": true,
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "volatile": true
             },
             {
                 "type": "pad",

@@ -63,6 +63,16 @@ namespace Invader::File {
 
         /** Class of the tag */
         TagClassInt class_int;
+        
+        TagFilePath() = default;
+        TagFilePath(const TagFilePath &copy) = default;
+        TagFilePath(const std::string &path, TagClassInt class_int) : path(path), class_int(class_int) {}
+        bool operator==(const TagFilePath &other) const noexcept {
+            return other.class_int == this->class_int && other.path == this->path;
+        }
+        bool operator!=(const TagFilePath &other) const noexcept {
+            return other.class_int != this->class_int || other.path != this->path;
+        }
     };
 
     /**

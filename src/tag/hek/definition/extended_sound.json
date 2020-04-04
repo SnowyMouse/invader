@@ -81,7 +81,8 @@
                 "compound": true,
                 "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC",
                 "non_cached": true,
-                "read_only": true
+                "read_only": true,
+                "volatile": true
             },
             {
                 "type": "pad",

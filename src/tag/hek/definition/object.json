@@ -347,7 +347,8 @@
                 "name": "object type",
                 "type": "ObjectType",
                 "endian": "little",
-                "hidden": true
+                "hidden": true,
+                "volatile": true
             },
             {
                 "name": "flags",

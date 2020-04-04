@@ -260,7 +260,8 @@
                 "struct": "PhysicsInertialMatrix",
                 "compound": true,
                 "minimum": 2,
-                "maximum": 2
+                "maximum": 2,
+                "volatile": true
             },
             {
                 "name": "powered mass points",
