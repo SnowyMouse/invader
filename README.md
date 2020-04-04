@@ -363,6 +363,7 @@ Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> .
 Create a file listing the tags of a map.
 
 Options:
+  -a --all                     Only match if tags are in all inputs
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
   -h --help                    Show this list of options.
