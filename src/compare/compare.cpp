@@ -39,7 +39,7 @@ template <typename T> static void close_input(T &options) {
     options.top_input = nullptr;
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -50,6 +50,7 @@ int main(int argc, const char **argv) {
         std::vector<Input> inputs;
         bool exhaustive = false;
         bool precision = false;
+        bool match_all = false;
         Show show = Show::SHOW_ALL;
     } compare_options;
 
@@ -62,6 +63,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
+    options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
     static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
     static constexpr char USAGE[] = "[options] <-I <options>> <-I <options>> [<-I <options>> ...]";
@@ -139,6 +141,10 @@ int main(int argc, const char **argv) {
                 
             case 'p':
                 compare_options.precision = true;
+                break;
+                
+            case 'a':
+                compare_options.match_all = true;
                 break;
                 
             case 's':
@@ -247,34 +253,69 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all) {
     // Find all tags we have in common first
-    auto &first_input = inputs[0];
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
-    tags.reserve(first_input.tag_paths.size());
-    for(auto &tag : first_input.tag_paths) {
-        bool not_found = false;
-        for(std::size_t i = 1; i < input_count; i++) {
-            bool found = false;
-            for(auto &tag2 : inputs[i].tag_paths) {
-                if(tag2 == tag) {
-                    found = true;
+    
+    // Do this thing
+    if(match_all) {
+        auto &first_input = inputs[0];
+        auto input_count = inputs.size();
+        tags.reserve(first_input.tag_paths.size());
+        for(auto &tag : first_input.tag_paths) {
+            bool not_found = false;
+            for(std::size_t i = 1; i < input_count; i++) {
+                bool found = false;
+                for(auto &tag2 : inputs[i].tag_paths) {
+                    if(tag2 == tag) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    not_found = true;
                     break;
                 }
             }
-            if(!found) {
-                not_found = true;
-                break;
+            if(not_found) {
+                continue;
+            }
+            tags.push_back(tag);
+        }
+    }
+    else {
+        for(std::size_t i = 0; i < input_count; i++) {
+            auto &input = inputs[i];
+            for(std::size_t j = i + 1; j < input_count; j++) {
+                auto &input2 = inputs[j];
+                for(auto &tag : input.tag_paths) {
+                    bool found = false;
+                    for(auto &otag : tags) {
+                        if(otag == tag) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found) {
+                        break;
+                    }
+                    
+                    for(auto &tag2 : input2.tag_paths) {
+                        if(tag2 == tag) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found) {
+                        tags.push_back(tag);
+                    }
+                }
             }
         }
-        if(not_found) {
-            continue;
-        }
-        tags.push_back(tag);
     }
     tags.shrink_to_fit();
     
@@ -286,18 +327,15 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             // If it's a map, do this
             if(i.map.has_value()) {
                 // First, extract it
-                std::vector<std::byte> extracted_data;
                 auto tag_count = i.map_data->get_tag_count();
                 for(std::size_t t = 0; t < tag_count; t++) {
                     auto &map_tag = i.map_data->get_tag(t);
                     if(map_tag.get_tag_class_int() == tag.class_int && map_tag.get_path() == tag.path) {
-                        extracted_data = Invader::Extraction::extract_tag(i.map_data->get_tag(t));
+                        auto extracted_data = Invader::Extraction::extract_tag(i.map_data->get_tag(t));
+                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         break;
                     }
                 }
-                
-                // Next, parse it
-                structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
             }
             
             // If it's a tag, do this
@@ -315,13 +353,14 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             }
         }
         
-        if(structs.size() != input_count) {
+        auto found_count = structs.size();
+        if(found_count < 2) {
             std::terminate();
         }
         
         auto &first_struct = structs[0];
         bool matched = true;
-        for(std::size_t i = 1; i < input_count; i++) {
+        for(std::size_t i = 1; i < found_count; i++) {
             if(!first_struct->compare(structs[i].get(), precision, true)) {
                 matched = false;
                 break;
