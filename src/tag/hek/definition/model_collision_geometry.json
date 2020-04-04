@@ -729,7 +729,8 @@
                 "name": "pathfinding spheres",
                 "type": "TagReflexive",
                 "struct": "ModelCollisionGeometrySphere",
-                "compound": true
+                "compound": true,
+                "volatile": true
             },
             {
                 "name": "nodes",

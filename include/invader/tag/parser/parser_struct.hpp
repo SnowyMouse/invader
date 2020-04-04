@@ -28,7 +28,7 @@ namespace Invader::Parser {
         }
         
         bool operator!=(const Dependency &other) const {
-            return !(*this != other);
+            return !(*this == other);
         }
     };
 
@@ -852,10 +852,11 @@ namespace Invader::Parser {
         
         /**
          * Compare the struct against another struct
-         * @param what      struct to compare against
-         * @param precision allow small differences for floats (can account for minor precision differences but may slightly increase false positives)
+         * @param what            struct to compare against
+         * @param precision       allow small differences for floats (can account for minor precision differences but may slightly increase false positives)
+         * @param ignore_volatile ignore data that can be added or removed when a map is compiled
          */
-        virtual bool compare(const ParserStruct *what, bool precision = false) const = 0;
+        virtual bool compare(const ParserStruct *what, bool precision = false, bool ignore_volatile = false) const = 0;
         
         bool operator==(const ParserStruct &other) const {
             return this->compare(&other);

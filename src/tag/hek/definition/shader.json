@@ -142,7 +142,8 @@
             {
                 "name": "shader type",
                 "type": "ShaderType",
-                "endian": "little"
+                "endian": "little",
+                "volatile": true
             },
             {
                 "type": "pad",
