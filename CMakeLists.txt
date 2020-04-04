@@ -80,6 +80,7 @@ include(src/strip/strip.cmake)
 include(src/refactor/refactor.cmake)
 include(src/collection/collection.cmake)
 include(src/bludgeon/bludgeon.cmake)
+include(src/compare/compare.cmake)
 
 # Qt stuff
 include(src/edit/qt/qt.cmake)
