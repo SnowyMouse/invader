@@ -123,6 +123,7 @@ this project is split into different programs.
     - [Which bitmap format should I use?]
 - [invader-bludgeon]
 - [invader-build]
+- [invader-compare]
 - [invader-compress]
 - [invader-dependency]
 - [invader-edit-qt]
@@ -350,6 +351,37 @@ Options:
                                for demo, retail, and custom engines.
   -w --with-index <file>       Use an index file for the tags, ensuring the
                                map's tags are ordered in the same way.
+```
+
+### invader-compare
+This program compares tags against maps, maps against maps, and tags against
+tags.
+
+```
+Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
+
+Create a file listing the tags of a map.
+
+Options:
+  -c --class                   Add a tag class to check. If no tag classes are
+                               specified, all tag classes will be checked.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -I --input                   Add an input directory
+  -m --maps                    Add a maps directory to the input to specify
+                               where to find resource files for a map. This
+                               cannot be used with --tags.
+  -M --map                     Add a map to the input. Only one map can be
+                               specified per input. If a maps directory isn't
+                               specified, then the map's directory will be
+                               used. This cannot be used with --tags.
+  -p --precision               Allow for slight differences in floats to
+                               account for precision loss.
+  -s --show                    Can be: all, matched, or mismatched. Default:
+                               all
+  -t --tags                    Add a tags directory to the input. Specify
+                               multiple tag directories in order of precedence
+                               for the input.
 ```
 
 ### invader-compress
@@ -899,6 +931,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-bitmap]: #invader-bitmap
 [invader-bludgeon]: #invader-bludgeon
 [invader-build]: #invader-build
+[invader-compare]: #invader-compare
 [invader-compress]: #invader-compress
 [invader-dependency]: #invader-dependency
 [invader-edit-qt]: #invader-edit-qt

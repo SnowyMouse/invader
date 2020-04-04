@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- New tool: invader-compare: Compares tags between maps and/or tags directories
+
 ### Fixed
 - invader: Fixed color codes being used on Linux if stdout/stderr is not a TTY
 - invader-build: Fixed a segmentation fault when using certain corrupt
