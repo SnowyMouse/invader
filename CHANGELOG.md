@@ -2,9 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.33.0] - 2020-04-05
 ### Added
 - New tool: invader-compare: Compares tags between maps and/or tags directories
+
+### Changed
+- invader-build: More hidden values are now set
 
 ### Fixed
 - invader: Fixed color codes being used on Linux if stdout/stderr is not a TTY
