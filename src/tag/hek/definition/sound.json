@@ -367,7 +367,8 @@
                 "size": 2
             },
             {
-                "name": "unknown int",
+                "name": "longest permutation length",
+                "comment": "natural pitch * seconds * 1100; not set if pitch modifier is set to anything besides 1; not accurate since increasing natural pitch decreases the length\nuses the 'buffer size' value for 16-bit PCM and Ogg Vorbis (divide by 2 * channel count to get sample count);\nuses entire size of samples for ADPCM (multiply by 130 / 36 * channel count to get sample count)",
                 "type": "uint32",
                 "hidden": true,
                 "cache_only": true

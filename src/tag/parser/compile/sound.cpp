@@ -182,6 +182,31 @@ namespace Invader::Parser {
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
+        
+        // Find the song length
+        if(this->zero_pitch_modifier == 1.0F && this->one_pitch_modifier == 1.0F) {
+            double seconds = 0.0F;
+            for(auto &pr : this->pitch_ranges) {
+                for(auto &p : pr.permutations) {
+                    std::size_t sample_count = 0;
+                    switch(p.format) {
+                        case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                            sample_count = (p.samples.size() / 36 * 130) / sizeof(std::uint16_t);
+                            break;
+                        default:
+                            sample_count = p.buffer_size / 2;
+                            break;
+                    }
+                    
+                    double potential_seconds = sample_count / (this->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO ? 1.0 : 2.0) / (this->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ ? 44100.0 : 22050.0) * pr.natural_pitch;
+                    
+                    if(potential_seconds > seconds) {
+                        seconds = potential_seconds;
+                    }
+                }
+            }
+            this->longest_permutation_length = seconds * 1100;
+        }
     }
 
     void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
@@ -245,7 +270,7 @@ namespace Invader::Parser {
         s.format = sound.format;
         s.promotion_sound = sound.promotion_sound;
         s.promotion_count = sound.promotion_count;
-        s.unknown_int = sound.unknown_int;
+        s.longest_permutation_length = sound.longest_permutation_length;
         s.unknown_ffffffff_0 = sound.unknown_ffffffff_0;
         s.unknown_ffffffff_1 = sound.unknown_ffffffff_1;
         s.pitch_ranges = sound.pitch_ranges;
