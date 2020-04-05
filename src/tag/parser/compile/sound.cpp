@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <algorithm>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/compile/sound.hpp>
@@ -240,11 +241,89 @@ namespace Invader::Parser {
         }
 
         this->unknown_int = 0xFFFFFFFF; // this is probably a pointer, but we should check to make sure it isn't something important
-        this->unknown_float = 15.0F; // TODO: Figure this out
 
         std::fill(this->one_detail_unknown_floats, this->one_detail_unknown_floats + 2, 1.0F);
         std::fill(this->zero_detail_unknown_floats, this->zero_detail_unknown_floats + 2, 1.0F);
     }
+
+    void SoundLooping::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        auto &maximum_distance = reinterpret_cast<SoundLooping::struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->maximum_distance;
+        
+        auto get_max_distance_of_sound_tag = [&workload](const Dependency &tag) {
+            if(tag.tag_id.is_null()) {
+                return 0.0F;
+            }
+            
+            auto &sound_tag_data = *reinterpret_cast<const Sound::struct_little *>(workload.structs[*workload.tags[tag.tag_id.index].base_struct].data.data());
+            float max = sound_tag_data.maximum_distance.read();
+            if(max == 0.0F) {
+                switch(sound_tag_data.sound_class) {
+                    case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
+                    case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
+                    case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
+                    case HEK::SoundClass::SOUND_CLASS_DEVICE_COMPUTERS:
+                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
+                    case HEK::SoundClass::SOUND_CLASS_FIRST_PERSON_DAMAGE:
+                        return 3.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_DEVICE_DOOR:
+                    case HEK::SoundClass::SOUND_CLASS_DEVICE_FORCE_FIELD:
+                    case HEK::SoundClass::SOUND_CLASS_DEVICE_MACHINERY:
+                    case HEK::SoundClass::SOUND_CLASS_DEVICE_NATURE:
+                    case HEK::SoundClass::SOUND_CLASS_MUSIC:
+                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
+                    case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
+                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
+                        return 5.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_IMPACT:
+                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_COLLISION:
+                    case HEK::SoundClass::SOUND_CLASS_VEHICLE_ENGINE:
+                        return 8.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_READY:
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_RELOAD:
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_EMPTY:
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_CHARGE:
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_OVERHEAT:
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_IDLE:
+                        return 9.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_UNIT_FOOTSTEPS:
+                        return 10.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+                    case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                    case HEK::SoundClass::SOUND_CLASS_GAME_EVENT:
+                    case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
+                        return 20.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_WEAPON_FIRE:
+                        return 70.0F;
+
+                    case HEK::SoundClass::SOUND_CLASS_PROJECTILE_DETONATION:
+                        return 120.0F;
+                        
+                    default:
+                        break;
+                }
+            }
+            
+            return max;
+        };
+        
+        for(auto &i : this->tracks) {
+            maximum_distance = std::max(std::max(std::initializer_list<float> {
+                get_max_distance_of_sound_tag(i.loop),
+                get_max_distance_of_sound_tag(i.alternate_end),
+                get_max_distance_of_sound_tag(i.alternate_loop),
+                get_max_distance_of_sound_tag(i.start),
+                get_max_distance_of_sound_tag(i.end)
+            }), maximum_distance.read());
+        }
+    }
+        
 
     Sound downgrade_extended_sound(const ExtendedSound &sound) {
         Sound s = {};

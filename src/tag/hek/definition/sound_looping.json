@@ -187,7 +187,7 @@
                 "cache_only": true
             },
             {
-                "name": "unknown float",
+                "name": "maximum distance",
                 "type": "float",
                 "endian": "little",
                 "cache_only": true
@@ -219,6 +219,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "post_compile": true,
         "size": 84
     }
 ]
