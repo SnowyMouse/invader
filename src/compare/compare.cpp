@@ -232,7 +232,13 @@ int main(int argc, const char **argv) {
             }
         }
         else {
-            i.virtual_directory = File::load_virtual_tag_folder(i.tags);
+            try {
+                i.virtual_directory = File::load_virtual_tag_folder(i.tags);
+            }
+            catch(std::exception &e) {
+                eprintf_error("Failed to load the tag directory for an input: %s", e.what());
+                return EXIT_FAILURE;
+            }
             i.tag_paths.reserve(i.virtual_directory.size());
             for(auto &t : i.virtual_directory) {
                 if(compare_options.class_to_check.size()) {
@@ -293,6 +299,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             for(std::size_t j = i + 1; j < input_count; j++) {
                 auto &input2 = inputs[j];
                 for(auto &tag : input.tag_paths) {
+                    // Make sure we don't add any duplicates
                     bool found = false;
                     for(auto &otag : tags) {
                         if(otag == tag) {
@@ -301,17 +308,16 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         }
                     }
                     if(found) {
-                        break;
+                        continue;
                     }
                     
+                    // Add it if it's present!
                     for(auto &tag2 : input2.tag_paths) {
                         if(tag2 == tag) {
                             found = true;
+                            tags.push_back(tag);
                             break;
                         }
-                    }
-                    if(found) {
-                        tags.push_back(tag);
                     }
                 }
             }
