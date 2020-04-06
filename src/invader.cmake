@@ -27,6 +27,7 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/demo-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/custom-edition-getter.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/resource-list.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
 
     "${CMAKE_CURRENT_BINARY_DIR}/parser-save-hek-data.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/parser-read-hek-data.cpp"
@@ -142,6 +143,12 @@ add_library(invader-bitmap-p8-palette STATIC
 
 # This is fun
 option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for debugging Invader ONLY - this WILL break tags")
+
+# Include color code script
+add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/color_code/color_codes_generator.py" "${CMAKE_CURRENT_SOURCE_DIR}/src/bitmap/color_code/color_codes" "${CMAKE_CURRENT_BINARY_DIR}/color_code.cpp"
+)
 
 # Include definition script
 add_custom_command(

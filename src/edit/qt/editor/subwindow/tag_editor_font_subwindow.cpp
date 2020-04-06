@@ -50,9 +50,24 @@ namespace Invader::EditQt {
         width = 0;
         std::size_t advance = 0;
         std::size_t line_count = 1;
+        bool last_character_was_color_thing = false;
         
         // Go through each character
         for(auto *t = text; *t; t++) {
+            if(*t == '^') {
+                if(!last_character_was_color_thing) {
+                    last_character_was_color_thing = true;
+                    continue;
+                }
+                else {
+                    last_character_was_color_thing = false;
+                }
+            }
+            else if(last_character_was_color_thing) {
+                last_character_was_color_thing = false;
+                continue;
+            }
+            
             if(*t == '\n') {
                 advance = 0;
                 line_count++;
@@ -81,9 +96,32 @@ namespace Invader::EditQt {
         const auto *font_bitmap_data = reinterpret_cast<const std::uint8_t *>(font_data.pixels.data());
         std::size_t font_bitmap_data_length = font_data.pixels.size();
         auto font_pixel = ColorPlatePixel::convert_from_32_bit(color);
+        auto original_color = ColorPlatePixel::convert_from_32_bit(color);
+        bool last_character_was_color_thing = false;
         
         // Go through each character
         for(auto *t = text; *t; t++) {
+            if(*t == '^') {
+                if(!last_character_was_color_thing) {
+                    last_character_was_color_thing = true;
+                    continue;
+                }
+                else {
+                    last_character_was_color_thing = false;
+                }
+            }
+            else if(last_character_was_color_thing) {
+                last_character_was_color_thing = false;
+                auto new_color_maybe = ColorPlatePixel::convert_from_color_code(*t);
+                if(new_color_maybe.has_value()) {
+                    font_pixel = *new_color_maybe;
+                }
+                else {
+                    font_pixel = original_color;
+                }
+                continue;
+            }
+            
             if(*t == '\n') {
                 line++;
                 horizontal_advance = 0;

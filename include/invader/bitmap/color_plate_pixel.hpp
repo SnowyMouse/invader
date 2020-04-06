@@ -151,6 +151,22 @@ namespace Invader {
         }
 
         /**
+         * Convert the color from a color code
+         * @param  code color code
+         * @return      color
+         */
+        static std::optional<ColorPlatePixel> convert_from_color_code(std::int16_t code) {
+            extern std::optional<std::uint32_t> color_from_color_code(std::int16_t);
+            auto color_maybe = color_from_color_code(code);
+            if(color_maybe.has_value()) {
+                return convert_from_32_bit(*color_maybe);
+            }
+            else {
+                return std::nullopt;
+            }
+        }
+
+        /**
          * Conver the color to alpha
          * @return alpha of the color
          */
