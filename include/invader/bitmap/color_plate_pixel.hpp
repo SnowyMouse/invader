@@ -134,6 +134,23 @@ namespace Invader {
         }
 
         /**
+         * Convert the color from 32-bit color (0xAARRGGBB)
+         * @param  color color
+         * @return       color
+         */
+        static ColorPlatePixel convert_from_32_bit(std::uint32_t color) {
+            return ColorPlatePixel { static_cast<std::uint8_t>(color & 0xFF), static_cast<std::uint8_t>((color >> 8) & 0xFF), static_cast<std::uint8_t>((color >> 16) & 0xFF), static_cast<std::uint8_t>((color >> 24) & 0xFF) };
+        }
+
+        /**
+         * Convert the color to 32-bit color (0xAARRGGBB)
+         * @return color
+         */
+        std::uint32_t convert_to_32_bit() {
+            return static_cast<std::uint32_t>(this->alpha << 24) | static_cast<std::uint32_t>(this->red << 16) | static_cast<std::uint32_t>(this->green << 8) | static_cast<std::uint32_t>(this->blue);
+        }
+
+        /**
          * Conver the color to alpha
          * @return alpha of the color
          */

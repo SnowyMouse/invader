@@ -377,11 +377,7 @@ namespace Invader::EditQt {
                         auto luminosity = static_cast<std::uint8_t>(((x / 4) % 2) ^ !((y / 4) % 2) ? 0x5F : 0x3F);
                         ColorPlatePixel checkerboard = { luminosity, luminosity, luminosity, 0xFF };
                         auto &pixel_output = data[x + y * real_width];
-
-                        ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
-                        auto resulting_pixel = checkerboard.alpha_blend(pixel);
-
-                        pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
+                        pixel_output = checkerboard.alpha_blend(ColorPlatePixel::convert_from_32_bit(pixel_output)).convert_to_32_bit();
                     }
                 }
                 break;
@@ -501,11 +497,7 @@ namespace Invader::EditQt {
                     for(int y = top; y < bottom; y++) {
                         for(int x = left; x < right; x++) {
                             auto &pixel_output = data[GET_PIXEL(x,y)];
-
-                            ColorPlatePixel pixel = { static_cast<std::uint8_t>(pixel_output), static_cast<std::uint8_t>(pixel_output >> 8), static_cast<std::uint8_t>(pixel_output >> 16), static_cast<std::uint8_t>(pixel_output >> 24) };
-                            auto resulting_pixel = pixel.alpha_blend(red);
-
-                            pixel_output = ((static_cast<std::uint32_t>(resulting_pixel.alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(resulting_pixel.red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(resulting_pixel.green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(resulting_pixel.blue) & 0xFF);
+                            pixel_output = ColorPlatePixel::convert_from_32_bit(pixel_output).alpha_blend(red).convert_to_32_bit();
                         }
                     }
                 }
@@ -594,12 +586,12 @@ namespace Invader::EditQt {
 
                         // Average
                         if(total_pixel) {
-                            auto average_red = total_red / total_pixel;
-                            auto average_green = total_green / total_pixel;
-                            auto average_blue = total_blue / total_pixel;
-                            auto average_alpha = total_alpha / total_pixel;
+                            std::uint8_t average_red = total_red / total_pixel;
+                            std::uint8_t average_green = total_green / total_pixel;
+                            std::uint8_t average_blue = total_blue / total_pixel;
+                            std::uint8_t average_alpha = total_alpha / total_pixel;
 
-                            scaled[xs + ys * new_width] = ((static_cast<std::uint32_t>(average_alpha) << 24) & 0xFF000000) | ((static_cast<std::uint32_t>(average_red) << 16) & 0xFF0000) | ((static_cast<std::uint32_t>(average_green) << 8) & 0xFF00) | (static_cast<std::uint32_t>(average_blue) & 0xFF);
+                            scaled[xs + ys * new_width] = (ColorPlatePixel { average_blue, average_green, average_red, average_alpha }).convert_to_32_bit();
                         }
                     }
                 }
