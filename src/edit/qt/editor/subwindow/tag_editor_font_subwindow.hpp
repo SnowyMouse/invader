@@ -5,7 +5,7 @@
 
 #include "tag_editor_subwindow.hpp"
 
-class QLineEdit;
+class QPlainTextEdit;
 class QScrollArea;
 class QGraphicsView;
 
@@ -32,7 +32,7 @@ namespace Invader::EditQt {
     private:
         friend TagEditorWindow;
         
-        QLineEdit *text_to_render;
+        QPlainTextEdit *text_to_render;
         QScrollArea *scroll_area;
         
         void draw_text();

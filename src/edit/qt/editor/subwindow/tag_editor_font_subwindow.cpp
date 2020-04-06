@@ -3,7 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QLineEdit>
+#include <QPlainTextEdit>
 #include <QImage>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -22,12 +22,18 @@ namespace Invader::EditQt {
         // Set up the layout
         QHBoxLayout *header = new QHBoxLayout();
         QWidget *header_widget = new QWidget();
-        header->addWidget((this->text_to_render = new QLineEdit("A quick brown fox jumped over the lazy dog.")));
+        header->addWidget((this->text_to_render = new QPlainTextEdit("A quick brown fox jumped over the lazy dog.")));
         header_widget->setLayout(header);
+        
+        // Move cursor to end
+        QTextCursor new_cursor = this->text_to_render->textCursor();
+        new_cursor.movePosition(QTextCursor::End);
+        this->text_to_render->setTextCursor(new_cursor);
         
         QVBoxLayout *layout = new QVBoxLayout();
         layout->addWidget(header_widget);
         layout->addWidget((this->scroll_area = new QScrollArea()));
+        this->scroll_area->setStyleSheet("background-color: #000");
         QWidget *center_widget = new QWidget();
         center_widget->setLayout(layout);
         this->setCentralWidget(center_widget);
@@ -37,18 +43,29 @@ namespace Invader::EditQt {
         this->draw_text();
         
         // Set up drawing text
-        connect(this->text_to_render, &QLineEdit::textChanged, this, &TagEditorFontSubwindow::draw_text);
+        connect(this->text_to_render, &QPlainTextEdit::textChanged, this, &TagEditorFontSubwindow::draw_text);
     }
     
     static QGraphicsView *draw_text_to_widget(const Parser::Font &font_data, const QString &text) {
         std::vector<const Parser::FontCharacter *> characters;
         std::size_t advance = 0;
         std::size_t width = 0;
-        std::size_t height = (font_data.ascending_height + font_data.descending_height);
+        std::size_t line_count = 1;
         auto text_data = text.toStdU16String();
         
         // Grab our characters. Figure out the width, too
+        
+        Parser::FontCharacter line_ending = {};
+        line_ending.character = '\n';
+        
         for(auto c : text_data) {
+            if(c == '\n') {
+                advance = 0;
+                line_count++;
+                characters.emplace_back(&line_ending);
+                continue;
+            }
+            
             bool added = false;
             for(auto &i : font_data.characters) {
                 if(i.character == c) {
@@ -67,14 +84,24 @@ namespace Invader::EditQt {
             }
         }
         
+        std::size_t line_height = (font_data.ascending_height + font_data.descending_height);
+        std::size_t height = line_count * line_height;
+        
         // Generate our bitmap
         std::vector<std::uint32_t> pixels(width * height, 0xFF000000);
         
         // Go through each character
+        std::size_t line = 0;
         std::size_t horizontal_advance = 0;
         const auto *font_bitmap_data = reinterpret_cast<const std::uint8_t *>(font_data.pixels.data());
         std::size_t font_bitmap_data_length = font_data.pixels.size();
         for(auto *c : characters) {
+            if(c->character == '\n') {
+                line++;
+                horizontal_advance = 0;
+                continue;
+            }
+            
             if(!c) {
                 continue;
             }
@@ -82,7 +109,7 @@ namespace Invader::EditQt {
             // ColorPlatePixel pixel;
             
             std::size_t bx = horizontal_advance - (c->bitmap_origin_x - font_data.leading_width);
-            std::size_t by = font_data.ascending_height - (c->bitmap_origin_y + font_data.leading_height);
+            std::size_t by = font_data.ascending_height - (c->bitmap_origin_y + font_data.leading_height) + line_height * line;
             
             horizontal_advance += c->character_width;
             auto bitmap_width = c->bitmap_width;
@@ -127,7 +154,7 @@ namespace Invader::EditQt {
         auto *data = this->get_parent_window()->get_parser_data();
         auto *font_data = dynamic_cast<const Parser::Font *>(data);
         if(font_data) {
-            this->scroll_area->setWidget(draw_text_to_widget(*font_data, this->text_to_render->text()));
+            this->scroll_area->setWidget(draw_text_to_widget(*font_data, this->text_to_render->toPlainText()));
         }
     }
 }
