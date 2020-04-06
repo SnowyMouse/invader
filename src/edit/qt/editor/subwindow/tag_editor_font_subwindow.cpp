@@ -22,7 +22,7 @@ namespace Invader::EditQt {
         // Set up the layout
         QHBoxLayout *header = new QHBoxLayout();
         QWidget *header_widget = new QWidget();
-        header->addWidget((this->text_to_render = new QPlainTextEdit("A quick brown fox jumped over the lazy dog.")));
+        header->addWidget((this->text_to_render = new QPlainTextEdit("A quick brown fox jumps over the lazy dog.")));
         header_widget->setLayout(header);
         
         // Move cursor to end
@@ -75,15 +75,15 @@ namespace Invader::EditQt {
             }
             for(auto &i : font_data.characters) {
                 if(i.character == *t) {
-                    std::size_t actual_right = advance - (i.bitmap_origin_x - font_data.leading_width) + i.bitmap_width;
-                    if(actual_right > width) {
-                        width = actual_right;
-                    }
                     advance += i.character_width;
+                    if(advance > width) {
+                        width = advance;
+                    }
                     break;
                 }
             }
         }
+        width += font_data.leading_width;
         
         // Set the height
         height = line_count * (font_data.ascending_height + font_data.descending_height);
