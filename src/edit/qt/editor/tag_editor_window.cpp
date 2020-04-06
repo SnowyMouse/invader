@@ -21,6 +21,7 @@
 #include "subwindow/tag_editor_subwindow.hpp"
 #include "subwindow/tag_editor_bitmap_subwindow.hpp"
 #include "subwindow/tag_editor_sound_subwindow.hpp"
+#include "subwindow/tag_editor_font_subwindow.hpp"
 
 namespace Invader::EditQt {
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
@@ -103,8 +104,11 @@ namespace Invader::EditQt {
                 break;
             case TagClassInt::TAG_CLASS_SOUND:
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
-                 extra_widget = new QPushButton("Preview sound");
-                 break;
+                extra_widget = new QPushButton("Preview sound");
+                break;
+            case TagClassInt::TAG_CLASS_FONT:
+                extra_widget = new QPushButton("Preview font");
+                break;
             // case TagClassInt::TAG_CLASS_GBXMODEL:
             // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
             //     extra_widget = new QPushButton("Preview model");
@@ -327,6 +331,9 @@ namespace Invader::EditQt {
                 case TagClassInt::TAG_CLASS_SOUND:
                 case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
+                    break;
+                case TagClassInt::TAG_CLASS_FONT:
+                    this->subwindow = new TagEditorFontSubwindow(this);
                     break;
                 default:
                     std::terminate();

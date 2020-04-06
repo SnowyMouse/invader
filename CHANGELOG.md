@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-edit-qt: Added font previewing
+
 ## [0.33.0] - 2020-04-05
 ### Added
 - New tool: invader-compare: Compares tags between maps and/or tags directories
