@@ -14,7 +14,7 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
     if len(all_used_structs) > 0:
         cpp_save_hek_data.write("        struct_big b = {};\n")
         for struct in all_used_structs:
-            if "cache_only" in struct and struct["cache_only"] and not extract_hidden:
+            if (("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"])) and not extract_hidden:
                 continue
             name = struct["member_name"]
             if "drop_on_extract_hidden" in struct and struct["drop_on_extract_hidden"]:

@@ -21,7 +21,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
             if struct["type"] == "TagID":
                 cpp_read_cache_file_data.write("        r.{} = HEK::TagID::null_tag_id();\n".format(name))
                 continue
-            if ("non_cached" in struct and struct["non_cached"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
+            if ("non_cached" in struct and struct["non_cached"]) or ("unused" in struct and struct["unused"]) or ("ignore_cached" in struct and struct["ignore_cached"]):
                 continue
             if struct["type"] == "TagDependency":
                 cpp_read_cache_file_data.write("        r.{}.tag_class_int = l.{}.tag_class_int.read();\n".format(name, name))

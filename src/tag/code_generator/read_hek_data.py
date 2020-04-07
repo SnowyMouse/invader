@@ -28,8 +28,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
         cpp_read_hek_data.write("        [[maybe_unused]] const auto &h = *reinterpret_cast<const HEK::{}<HEK::BigEndian> *>(data_this);\n".format(struct_name))
         for struct in all_used_structs:
             name = struct["member_name"]
-            cache_only = "cache_only" in struct and struct["cache_only"]
-            if cache_only and struct["type"] != "TagReflexive":
+            unread = ("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"])
+            if unread and struct["type"] != "TagReflexive" and struct["type"] != "TagDependency":
                 continue
             default_sign = "<=" if "default_sign" in struct and struct["default_sign"] else "=="
             if struct["type"] == "TagDependency":
@@ -52,7 +52,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
                 cpp_read_hek_data.write("                eprintf_error(\"Failed to read dependency {}::{}: missing null terminator\");\n".format(struct_name, name))
                 cpp_read_hek_data.write("                throw InvalidTagDataException();\n")
                 cpp_read_hek_data.write("            }\n")
-                cpp_read_hek_data.write("            r.{}.path = Invader::File::remove_duplicate_slashes(std::string(reinterpret_cast<const char *>(data)));\n".format(name))
+                if not unread:
+                    cpp_read_hek_data.write("            r.{}.path = Invader::File::remove_duplicate_slashes(std::string(reinterpret_cast<const char *>(data)));\n".format(name))
                 cpp_read_hek_data.write("            data_size -= h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("            data_read += h_{}_expected_length + 1;\n".format(name))
                 cpp_read_hek_data.write("            data += h_{}_expected_length + 1;\n".format(name))
@@ -73,12 +74,12 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
                 cpp_read_hek_data.write("            data_size -= total_size;\n")
                 cpp_read_hek_data.write("            data_read += total_size;\n")
                 cpp_read_hek_data.write("            data += total_size;\n")
-                if not cache_only:
+                if not unread:
                     cpp_read_hek_data.write("            r.{}.reserve(h_{}_count);\n".format(name, name))
                 cpp_read_hek_data.write("            for(std::size_t ref = 0; ref < h_{}_count; ref++) {{\n".format(name))
                 cpp_read_hek_data.write("                std::size_t ref_data_read = 0;\n")
                 call = "{}::parse_hek_tag_data(data, data_size, ref_data_read, postprocess, reinterpret_cast<const std::byte *>(array + ref))".format(struct["struct"])
-                if not cache_only:
+                if not unread:
                     cpp_read_hek_data.write("                r.{}.emplace_back({});\n".format(name, call))
                 else:
                     cpp_read_hek_data.write("                {};\n".format(call))
