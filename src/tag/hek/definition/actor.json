@@ -389,6 +389,7 @@
                 "classes": [
                     "weapon"
                 ],
+                "unused": true,
                 "compound": true
             },
             {
@@ -401,6 +402,7 @@
                 "classes": [
                     "projectile"
                 ],
+                "unused": true,
                 "compound": true
             },
             {
@@ -760,6 +762,7 @@
                 "classes": [
                     "actor"
                 ],
+                "unused": true,
                 "compound": true
             },
             {

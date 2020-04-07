@@ -3071,7 +3071,7 @@
                 "classes": [
                     "scenario_structure_bsp"
                 ],
-                "hidden": true,
+                "unused": true,
                 "compound": true
             },
             {
@@ -3080,7 +3080,7 @@
                 "classes": [
                     "scenario_structure_bsp"
                 ],
-                "hidden": true,
+                "unused": true,
                 "compound": true
             },
             {
@@ -3089,7 +3089,7 @@
                 "classes": [
                     "sky"
                 ],
-                "hidden": true,
+                "unused": true,
                 "compound": true
             },
             {

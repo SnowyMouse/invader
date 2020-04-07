@@ -92,6 +92,7 @@
                 "classes": [
                     "damage_effect"
                 ],
+                "unused": true,
                 "compound": true
             },
             {
