@@ -2,6 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader-edit-qt: Changed the default text for font previewing
+
+### Fixed
+- invader-edit-qt: Fixed characters not appearing if they're cut off
+- invader-edit-qt: Fixed font preview not being updated if font tag is modified
+
 ## [0.33.1] - 2020-04-06
 ### Added
 - invader-edit-qt: Added font previewing

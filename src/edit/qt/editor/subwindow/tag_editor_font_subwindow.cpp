@@ -44,12 +44,12 @@ namespace Invader::EditQt {
         connect(this->text_to_render, &QPlainTextEdit::textChanged, this, &TagEditorFontSubwindow::draw_text);
     }
     
-    static void get_dimensions(std::size_t &width, std::size_t &height, const char16_t *text, const Parser::Font &font_data) {
+    static void get_dimensions(std::int32_t &width, std::int32_t &height, const char16_t *text, const Parser::Font &font_data) {
         // Initialize everything
         height = 0;
         width = 0;
-        std::size_t advance = 0;
-        std::size_t line_count = 1;
+        std::int32_t advance = 0;
+        std::int32_t line_count = 1;
         bool last_character_was_color_thing = false;
         
         // Go through each character
@@ -87,12 +87,19 @@ namespace Invader::EditQt {
         
         // Set the height
         height = line_count * (font_data.ascending_height + font_data.descending_height);
+        
+        if(width < 0) {
+            width = 0;
+        }
+        if(height < 0) {
+            height = 0;
+        }
     }
     
-    static void draw_text(std::uint32_t *pixels, std::size_t width, std::size_t height, const char16_t *text, const Parser::Font &font_data, std::uint32_t color = 0xFFFFFFFF) {
+    static void draw_text(std::uint32_t *pixels, std::int32_t width, std::int32_t height, const char16_t *text, const Parser::Font &font_data, std::uint32_t color = 0xFFFFFFFF) {
         std::size_t line = 0;
-        std::size_t line_height = font_data.ascending_height + font_data.descending_height;
-        std::size_t horizontal_advance = 0;
+        std::int32_t line_height = font_data.ascending_height + font_data.descending_height;
+        std::int32_t horizontal_advance = 0;
         const auto *font_bitmap_data = reinterpret_cast<const std::uint8_t *>(font_data.pixels.data());
         std::size_t font_bitmap_data_length = font_data.pixels.size();
         auto font_pixel = ColorPlatePixel::convert_from_32_bit(color);
@@ -133,13 +140,14 @@ namespace Invader::EditQt {
                     continue;
                 }
                 
-                std::size_t bx = horizontal_advance - (c.bitmap_origin_x - font_data.leading_width);
-                std::size_t by = font_data.ascending_height - (c.bitmap_origin_y + font_data.leading_height) + line_height * line;
+                // Get the x offset
+                std::int32_t bx = horizontal_advance - (c.bitmap_origin_x - font_data.leading_width);
+                std::int32_t by = font_data.ascending_height - (c.bitmap_origin_y + font_data.leading_height) + line_height * line;
                 
                 horizontal_advance += c.character_width;
                 auto bitmap_width = c.bitmap_width;
-                std::size_t bxw = bx + bitmap_width;
-                std::size_t byh = by + c.bitmap_height;
+                std::int32_t bxw = bx + bitmap_width;
+                std::int32_t byh = by + c.bitmap_height;
                 
                 std::size_t pixels_required = bitmap_width * c.bitmap_height;
                 std::size_t pixels_start = c.pixels_offset;
@@ -148,8 +156,11 @@ namespace Invader::EditQt {
                     continue;
                 }
                 
-                for(std::size_t y = by; y < byh && y < height; y++) {
-                    for(std::size_t x = bx; x < bxw && x < width; x++) {
+                std::int32_t start_x = bx < 0 ? 0 : bx;
+                std::int32_t start_y = by < 0 ? 0 : by;
+                
+                for(std::int32_t y = start_y; y < byh && y < height; y++) {
+                    for(std::int32_t x = start_x; x < bxw && x < width; x++) {
                         auto &resulting_pixel = pixels[x + y * width];
                         font_pixel.alpha = font_bitmap_data[x - bx + (y - by) * bitmap_width + pixels_start];
                         resulting_pixel = ColorPlatePixel::convert_from_32_bit(resulting_pixel).alpha_blend(font_pixel).convert_to_32_bit();
@@ -161,7 +172,7 @@ namespace Invader::EditQt {
     
     static QGraphicsView *draw_text_to_widget(const Parser::Font &font_data, const QString &text) {
         // Draw it
-        std::size_t width, height;
+        std::int32_t width, height;
         auto text_data = text.toStdU16String();
         get_dimensions(width, height, text_data.c_str(), font_data);
         std::vector<std::uint32_t> pixels(width * height);
