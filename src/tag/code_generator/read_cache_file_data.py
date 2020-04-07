@@ -114,7 +114,16 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 for b in all_bitfields:
                     if b["name"] == struct["type"]:
                         added = True
-                        cpp_read_cache_file_data.write("        r.{} = static_cast<std::uint{}_t>(l.{}) & static_cast<std::uint{}_t>(0x{:X});\n".format(name, b["width"], name, b["width"], (1 << len(b["fields"])) - 1))
+                        negate = ""
+                        if "cache_only" in b:
+                            added = True
+                            negate = ""
+                            for c in b["cache_only"]:
+                                for i in range(0,len(b["fields"])):
+                                    if b["fields"][i] == c:
+                                        negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], 1 << i)
+                                        break
+                        cpp_read_cache_file_data.write("        r.{} = static_cast<std::uint{}_t>(l.{}) & static_cast<std::uint{}_t>(0x{:X}){};\n".format(name, b["width"], name, b["width"], (1 << len(b["fields"])) - 1, negate))
                         break
                 if not added:
                     cpp_read_cache_file_data.write("        r.{} = l.{};\n".format(name, name))

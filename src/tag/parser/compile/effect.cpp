@@ -34,8 +34,4 @@ namespace Invader::Parser {
             this->flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
         }
     }
-
-    void Invader::Parser::Effect::post_cache_deformat() {
-        this->flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
-    }
 }

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, cpp_save_hek_data):
+def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data):
     hpp.write("        std::vector<std::byte> generate_hek_tag_data(std::optional<TagClassInt> generate_header_class = std::nullopt, bool clear_on_save = false) override;\n")
     cpp_save_hek_data.write("    std::vector<std::byte> {}::generate_hek_tag_data(std::optional<TagClassInt> generate_header_class, bool clear_on_save) {{\n".format(struct_name))
     cpp_save_hek_data.write("        this->cache_deformat();\n")
@@ -74,7 +74,21 @@ def make_cpp_save_hek_data(extract_hidden, all_used_structs, struct_name, hpp, c
             elif "count" in struct and struct["count"] > 1:
                 cpp_save_hek_data.write("        std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
             else:
-                cpp_save_hek_data.write("        b.{} = this->{};\n".format(name, name))
+                added = False
+                for b in all_bitfields:
+                    if b["name"] == struct["type"]:
+                        if "cache_only" in b:
+                            added = True
+                            negate = ""
+                            for c in b["cache_only"]:
+                                for i in range(0,len(b["fields"])):
+                                    if b["fields"][i] == c:
+                                        negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], 1 << i)
+                                        break
+                            cpp_save_hek_data.write("        b.{} = this->{}{};\n".format(name, name, negate))
+                        break
+                if not added:
+                    cpp_save_hek_data.write("        b.{} = this->{};\n".format(name, name))
         cpp_save_hek_data.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")
     cpp_save_hek_data.write("        if(generate_header_class.has_value()) {\n")
     cpp_save_hek_data.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(clear_on_save ^ clear_on_save, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")

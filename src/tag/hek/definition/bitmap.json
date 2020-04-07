@@ -104,6 +104,11 @@
             "make it actually work",
             "external"
         ],
+        "cache_only": [
+            "unused",
+            "make it actually work",
+            "external"
+        ],
         "width": 16
     },
     {

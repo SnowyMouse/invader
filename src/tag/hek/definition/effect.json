@@ -48,6 +48,10 @@
             "unused",
             "make effect work"
         ],
+        "cache_only": [
+            "unused",
+            "make effect work"
+        ],
         "width": 16
     },
     {
@@ -100,6 +104,9 @@
         "fields": [
             "deleted when attachment deactivates",
             "required for gameplay cannot optimize out",
+            "do not cull"
+        ],
+        "cache_only": [
             "do not cull"
         ],
         "width": 32
@@ -426,7 +433,6 @@
         ],
         "type": "struct",
         "pre_compile": true,
-        "post_cache_deformat": true,
         "size": 64
     }
 ]
