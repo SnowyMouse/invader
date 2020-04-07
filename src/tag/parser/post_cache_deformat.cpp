@@ -10,10 +10,6 @@ namespace Invader::Parser {
         this->grenade_velocity *= TICK_RATE;
     }
 
-    void Invader::Parser::Effect::post_cache_deformat() {
-        this->flags.do_not_cull = 0;
-    }
-
     void Invader::Parser::DamageEffect::post_cache_deformat() {
         this->camera_shaking_wobble_period /= TICK_RATE;
     }
@@ -54,6 +50,8 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::ModelAnimationsAnimation::post_cache_deformat() {
+        // Get whether or not it's compressed
+        bool compressed = this->flags & HEK::ModelAnimationsAnimationFlagsFlag::MODEL_ANIMATIONS_ANIMATION_FLAGS_FLAG_COMPRESSED_DATA;
         std::vector<std::byte> frame_data = this->frame_data;
         std::vector<std::byte> frame_info = this->frame_info;
         std::vector<std::byte> default_data = this->default_data;
@@ -174,7 +172,7 @@ namespace Invader::Parser {
 
         // Do default data
         std::size_t expected_default_data_size = (max_frame_size - total_frame_size);
-        if(!this->flags.compressed_data) {
+        if(!compressed) {
             std::size_t default_data_size = default_data.size();
             if(default_data_size > 0) {
                 if(default_data.size() != expected_default_data_size) {
@@ -217,9 +215,6 @@ namespace Invader::Parser {
             this->default_data.clear();
             this->default_data.resize(expected_default_data_size, std::byte());
         }
-
-        // Get whether or not it's compressed
-        bool compressed = flags.compressed_data;
 
         if(compressed) {
             this->offset_to_compressed_data = static_cast<std::uint32_t>(frame_data_size_expected);

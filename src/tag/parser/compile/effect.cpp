@@ -27,6 +27,15 @@ namespace Invader::Parser {
             }
         }
 
-        this->flags.do_not_cull = do_not_cull;
+        if(do_not_cull) {
+            this->flags |= HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
+        }
+        else {
+            this->flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
+        }
+    }
+
+    void Invader::Parser::Effect::post_cache_deformat() {
+        this->flags &= ~HEK::EffectFlagsFlag::EFFECT_FLAGS_FLAG_DO_NOT_CULL;
     }
 }

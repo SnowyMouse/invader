@@ -134,7 +134,7 @@ namespace Invader::Parser {
                 }
 
                 auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
-                if(fog.flags.read().is_water) {
+                if(fog.flags & HEK::FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
                     plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;
                 }
             }

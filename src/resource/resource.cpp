@@ -245,9 +245,7 @@ int main(int argc, const char **argv) {
                             // Otherwise set the sizes
                             else {
                                 bitmap_data->pixel_data_offset = resource_data.size() + bitmap_data->pixel_data_offset;
-                                auto flags = bitmap_data->flags.read();
-                                flags.external = 1;
-                                bitmap_data->flags = flags;
+                                bitmap_data->flags = bitmap_data->flags.read() | BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
                             }
                         }
                     }

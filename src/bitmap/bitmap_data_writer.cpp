@@ -461,9 +461,15 @@ namespace Invader {
             bitmap.mipmap_count = mipmap_count;
 
             BitmapDataFlags flags = {};
-            flags.compressed = compressed;
-            flags.power_of_two_dimensions = is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height);
-            flags.palettized = palettized;
+            if(compressed) {
+                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+            }
+            if(is_power_of_two(bitmap.width) && is_power_of_two(bitmap.height)) {
+                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
+            }
+            if(palettized) {
+                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_PALETTIZED;
+            }
             bitmap.flags = flags;
 
             bitmap.registration_point.x = bitmap_color_plate.registration_point_x;

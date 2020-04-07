@@ -2072,7 +2072,7 @@ namespace Invader {
                                             this->delete_raw_data(raw_data_index);
                                             bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
                                             auto flags = bitmap_data.flags.read();
-                                            flags.external = 1;
+                                            flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
                                             bitmap_data.flags = flags;
                                             break;
                                         }

@@ -146,7 +146,7 @@ namespace Invader::Parser {
         }
 
         // If we didn't split long sounds into permutations, go through each permutation and Jason Jones it
-        if(!sound->flags.split_long_sound_into_permutations) {
+        if(!(sound->flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS)) {
             for(auto &pr : sound->pitch_ranges) {
                 pr.actual_permutation_count = static_cast<std::uint16_t>(pr.permutations.size());
                 for(auto &p : pr.permutations) {

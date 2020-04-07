@@ -241,7 +241,10 @@ namespace Invader::Parser {
             if(tag_class.has_value()) {
                 // Check if we should leave it alone
                 auto flags = node.flags.read();
-                if(flags.is_global || flags.is_script_call) {
+                if(
+                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) ||
+                    (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL)
+                ) {
                     continue;
                 }
 

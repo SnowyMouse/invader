@@ -504,7 +504,7 @@ namespace Invader::Parser {
                             // if this is false, the HUD interface tag will error on building anyway - no need to make multiple errors that are the same thing if we can help it
                             else if(overlay.sequence_index < sequence_count) {
                                 auto &sequence = sequences[overlay.sequence_index];
-                                bool not_a_sprite = overlay.flags.read().not_a_sprite;
+                                bool not_a_sprite = overlay.flags.read() & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
                                 std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
                                 if(this->magnification_levels > max_zoom_levels) {
                                     const char *noun;

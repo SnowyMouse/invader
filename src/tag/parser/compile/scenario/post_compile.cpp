@@ -158,7 +158,8 @@ namespace Invader::Parser {
 
                 // If we have a manual BSP index, set this stuff here
                 std::size_t start_bsp = 0;
-                if(encounter.flags.manual_bsp_index_specified) {
+                bool manual_bsp_index_specified = encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_MANUAL_BSP_INDEX_SPECIFIED;
+                if(manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     start_bsp = encounter_data.manual_bsp_index;
                 }
@@ -199,7 +200,7 @@ namespace Invader::Parser {
                 std::size_t squad_position_count = best_squad_positions_found.size();
 
                 // Also, are we raycasting?
-                bool raycast = encounter.flags._3d_firing_positions == 0;
+                bool raycast = !(encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG__3D_FIRING_POSITIONS);
 
                 // Go through each BSP
                 std::vector<FiringPositionIndex> firing_positions_indices = best_firing_positions_indices;
@@ -296,14 +297,14 @@ namespace Invader::Parser {
                     }
                     
                     // If we have a manual index set, break early
-                    if(encounter.flags.manual_bsp_index_specified) {
+                    if(manual_bsp_index_specified) {
                         total_best_bsps = 1;
                         break;
                     }
                 }
 
                 // Are we doing the thing?
-                if(!encounter.flags.manual_bsp_index_specified) {
+                if(!manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 }
                 
@@ -425,9 +426,10 @@ namespace Invader::Parser {
                 std::size_t total_best_bsps = 0;
                 std::size_t max_hits = 0;
                 std::size_t start = 0;
+                bool manual_bsp_index_specified = command_list.flags & HEK::ScenarioCommandListFlagsFlag::SCENARIO_COMMAND_LIST_FLAGS_FLAG_MANUAL_BSP_INDEX;
 
                 // If manually specifying a BSP, don't bother checking every BSP
-                if(command_list.flags.manual_bsp_index) {
+                if(manual_bsp_index_specified) {
                     start = command_list.manual_bsp_index;
                 }
                 
@@ -467,7 +469,7 @@ namespace Invader::Parser {
                     }
                     
                     // Since we're just checking one BSP's things, break
-                    if(command_list.flags.manual_bsp_index) {
+                    if(manual_bsp_index_specified) {
                         total_best_bsps = 1;
                         break;
                     }
@@ -483,7 +485,7 @@ namespace Invader::Parser {
                 }
                 
                 // Command lists are all-or-nothing here
-                if(command_list.flags.manual_bsp_index || max_hits == best_bsp_hits) {
+                if(manual_bsp_index_specified || max_hits == best_bsp_hits) {
                     command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 }
                 else {

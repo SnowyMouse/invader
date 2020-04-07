@@ -51,7 +51,7 @@ namespace Invader::Parser {
         std::size_t height = data.height;
         std::size_t width = data.width;
         std::size_t depth = data.depth;
-        bool should_be_compressed = data.flags.compressed;
+        bool should_be_compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
         std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
 
         // Do it
@@ -91,8 +91,10 @@ namespace Invader::Parser {
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
         this->pointer = 0xFFFFFFFF;
-        this->flags.external = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY; // anniversary is always external
-        this->flags.make_it_actually_work = 1;
+        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            this->flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL; // anniversary is always external
+        }
+        this->flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_MAKE_IT_ACTUALLY_WORK;
 
         // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
         auto &d = s.dependencies.emplace_back();
@@ -121,7 +123,7 @@ namespace Invader::Parser {
             auto &bitmap_data = bitmap->bitmap_data[bd];
 
             // TODO: Generate last two mipmaps if needed
-            if(bitmap_data.flags.compressed && xbox) {
+            if((bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED) && xbox) {
                 eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
                 throw InvalidTagDataException();
             }
@@ -175,7 +177,9 @@ namespace Invader::Parser {
                         bitmap_data.width = header.width;
                         bitmap_data.depth = header.depth;
                         bitmap_data.mipmap_count = header.mipmap_count - 1;
-                        bitmap_data.flags.power_of_two_dimensions = power_of_two(header.width.read()) && power_of_two(header.height.read());
+                        if(power_of_two(header.width.read()) && power_of_two(header.height.read())) {
+                            bitmap_data.flags |= power_of_two(header.width.read()) && power_of_two(header.height.read());
+                        }
 
                         // The format might be wrong for whatever reason
                         switch(header.format) {
@@ -212,7 +216,7 @@ namespace Invader::Parser {
                 }
             }
             else {
-                if(bitmap_data.flags.external) {
+                if(bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                     bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
                 }
                 else {
@@ -224,8 +228,8 @@ namespace Invader::Parser {
             bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
 
             // Unset these flags
-            bitmap_data.flags.external = 0;
-            bitmap_data.flags.make_it_actually_work = 0;
+            bitmap_data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
+            bitmap_data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_MAKE_IT_ACTUALLY_WORK;
         }
     }
 
@@ -247,20 +251,23 @@ namespace Invader::Parser {
         auto *pixel_data = bitmap->processed_pixel_data.data();
 
         for(auto &data : bitmap->bitmap_data) {
+            bool swizzled = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+            bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+            bool power_of_two_dimensions = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
+            
             // DXTn bitmaps cannot be swizzled
-            if(data.flags.swizzled && data.flags.compressed) {
+            if(swizzled && compressed) {
                 eprintf_error("Swizzled bitmaps are not supported for compressed bitmaps");
                 throw InvalidTagDataException();
             }
 
             // TODO: Swizzle bitmaps for Dark Circlet, deswizzle for Gearbox
-            if(data.flags.swizzled) {
+            if(swizzled) {
                 eprintf_error("Swizzled bitmaps are not currently supported");
                 throw InvalidTagDataException();
             }
 
             std::size_t data_index = &data - bitmap->bitmap_data.data();
-            bool compressed = data.flags.compressed;
             auto format = data.format;
             auto type = data.type;
             bool should_be_compressed = (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3) || (format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5);
@@ -279,11 +286,11 @@ namespace Invader::Parser {
                     exceeded = true;
                 }
 
-                if(data.flags.power_of_two_dimensions && non_power_of_two) {
+                if(power_of_two_dimensions && non_power_of_two) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu) but that flag is set", data_index, width, height, depth);
                 }
 
-                if(!data.flags.power_of_two_dimensions && !non_power_of_two) {
+                if(!power_of_two_dimensions && !non_power_of_two) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
                 }
 
@@ -329,7 +336,7 @@ namespace Invader::Parser {
             if(compressed != should_be_compressed) {
                 const char *format_name = HEK::bitmap_data_format_name(format);
                 if(compressed) {
-                    data.flags.compressed = 0;
+                    data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
                     //REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
                 }
                 else {
@@ -435,15 +442,17 @@ namespace Invader::Parser {
 
     bool fix_power_of_two(BitmapData &data, bool fix) {
         bool should_be_power_of_two = power_of_two(data.width) && power_of_two(data.height) && power_of_two(data.width);
-        if(data.flags.power_of_two_dimensions && !should_be_power_of_two) {
+        bool power_of_two_dimensions = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
+        
+        if(power_of_two_dimensions && !should_be_power_of_two) {
             if(fix) {
-                data.flags.power_of_two_dimensions = 0;
+                data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             }
             return true;
         }
-        else if(!data.flags.power_of_two_dimensions && should_be_power_of_two) {
+        else if(!power_of_two_dimensions && should_be_power_of_two) {
             if(fix) {
-                data.flags.power_of_two_dimensions = 1;
+                data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             }
             return true;
         }

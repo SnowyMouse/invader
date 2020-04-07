@@ -31,7 +31,7 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
     def write_enum(name, fields, fields_pretty, type, cpp):
         f.write("    enum {} : {} {{\n".format(name, type))
         prefix = ""
-        name_to_consider = name.replace("HUD", "Hud").replace("UI", "Ui")
+        name_to_consider = name.replace("HUD", "Hud").replace("UI", "Ui").replace("GBX", "Gbx")
         for i in name_to_consider:
             if prefix != "" and i.isupper():
                 prefix += "_"
@@ -97,13 +97,10 @@ def make_definitions(f, ecpp, bcpp, all_enums, all_bitfields, all_structs_arrang
     # Write enums at the top first, then bitfields
     for e in all_enums:
         write_enum(e["name"], e["options_formatted"], e["options"], "TagEnum", ecpp)
-
+        
     for b in all_bitfields:
-        f.write("    struct {} {{\n".format(b["name"]))
-        for q in b["fields_formatted"]:
-            f.write("        std::uint{}_t {} : 1;\n".format(b["width"], q))
-        f.write("    };\n")
-        write_enum("{}Enum".format(b["name"]), b["fields_formatted"], b["fields"], "std::uint{}_t".format(b["width"]), bcpp)
+        f.write("    using {} = std::uint{}_t;\n".format(b["name"], b["width"]))
+        write_enum("{}Flag".format(b["name"]), b["fields_formatted"], b["fields"], "std::uint{}_t".format(b["width"]), bcpp)
 
     ecpp.write("}\n")
     bcpp.write("}\n")

@@ -17,11 +17,14 @@ namespace Invader::Parser {
         }
         this->crosshair_types = crosshair_types.flaggy;
 
-        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && this->crosshair_types.zoom == 0) {
+        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && !(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
             std::size_t zooms = 0;
             for(auto &c : this->crosshairs) {
                 for(auto &o : c.crosshair_overlays) {
-                    if(o.flags.dont_show_when_zoomed || o.flags.show_only_when_zoomed) {
+                    if(
+                        (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_DONT_SHOW_WHEN_ZOOMED) ||
+                        (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_SHOW_ONLY_WHEN_ZOOMED)
+                    ) {
                         zooms++;
                     }
                 }
@@ -63,11 +66,11 @@ namespace Invader::Parser {
         if(!workload.disable_recursion) {
             for(std::size_t i = 0; i < overlay_count; i++) {
                 auto &overlay = this->crosshair_overlays[i];
-
-                if(overlay.flags.not_a_sprite && bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                bool not_a_sprite = overlay.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
+                if(not_a_sprite && bitmap_type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is marked as not a sprite, but %s is a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
                 }
-                else if(!overlay.flags.not_a_sprite && bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+                else if(!not_a_sprite && bitmap_type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Overlay #%zu of crosshair #%zu is not marked as not a sprite, but %s is not a sprite sheet", i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little), bitmap_tag_path);
                 }
 
@@ -77,7 +80,7 @@ namespace Invader::Parser {
                     }
                     else {
                         auto &sequence = sequences[overlay.sequence_index];
-                        if(overlay.flags.not_a_sprite) {
+                        if(not_a_sprite) {
                             if(sequence.bitmap_count == 0) {
                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sequence #%zu in %s referenced in overlay #%zu of crosshair #%zu has 0 bitmaps", static_cast<std::size_t>(overlay.sequence_index), bitmap_tag_path, i, struct_offset / sizeof(WeaponHUDInterfaceCrosshair::struct_little));
                             }

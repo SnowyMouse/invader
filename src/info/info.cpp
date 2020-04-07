@@ -254,7 +254,7 @@ int main(int argc, const char **argv) {
                     bool found_it_this_bitmap = false;
                     for(std::size_t b = 0; b < bitmap_data_count; b++) {
                         auto &bd = bitmap_data[b];
-                        if(bd.flags.read().external) {
+                        if(bd.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                             found_it_this_bitmap = true;
                             bitmaps_offsets.emplace_back(bd.pixel_data_offset.read());
                             bitmaps_sizes.emplace_back(bd.pixel_data_size.read());

@@ -24,7 +24,7 @@ namespace Invader::Parser {
                         std::uint16_t node1 = v.node1_index;
 
                         // If zoner, use local nodes
-                        if(p.flags.zoner) {
+                        if(p.flags & HEK::GBXModelGeometryPartFlagsFlag::GBX_MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER) {
                             constexpr const std::size_t LOCAL_NODE_COUNT = sizeof(p.local_node_indices) / sizeof(p.local_node_indices[0]);
                             node0 = (node0 < LOCAL_NODE_COUNT) ? p.local_node_indices[node0] : NULL_INDEX;
                             node1 = (node1 < LOCAL_NODE_COUNT) ? p.local_node_indices[node1] : NULL_INDEX;
@@ -335,7 +335,7 @@ namespace Invader::Parser {
                     std::size_t node0_index = static_cast<std::size_t>(v.node0_index);
                     std::size_t node1_index = static_cast<std::size_t>(v.node1_index);
 
-                    if(p.flags.zoner) {
+                    if(p.flags & HEK::GBXModelGeometryPartFlagsFlag::GBX_MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER) {
                         auto get_local_node = [&workload, &tag_index, &p](std::size_t index) -> std::size_t {
                             if(index != NULL_INDEX) {
                                 constexpr const std::size_t LOCAL_NODE_COUNT = sizeof(p.local_node_indices) / sizeof(p.local_node_indices[0]);
@@ -505,7 +505,7 @@ namespace Invader::Parser {
         for(auto &g : this->geometries) {
             for(auto &p : g.parts) {
                 // exodux compatibility bit; AND zoner flag with the value from the tag data and XOR with the auxiliary rainbow bitmask
-                std::uint32_t zoner = p.flags.zoner;
+                std::uint32_t zoner = p.flags & HEK::GBXModelGeometryPartFlagsFlag::GBX_MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
                 std::uint32_t exodux_value = (p.bullshit & zoner) ^ 0x7F7F7F7F;
                 if(exodux_handler) {
                     // Since the exodux handler is active, we don't need to use the binary rainbow table for this value.
@@ -694,7 +694,7 @@ namespace Invader::Parser {
     }
 
     void Invader::Parser::GBXModel::post_cache_deformat() {
-        this->flags.blend_shared_normals = 0; // prevent generational loss
+        this->flags &= ~HEK::GBXModelFlagsFlag::GBX_MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS; // prevent generational loss
 
         uncache_model_markers(*this, true);
 

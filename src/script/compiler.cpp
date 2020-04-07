@@ -236,7 +236,7 @@ namespace Invader::Compiler {
         auto flags = n.flags.read();
 
         // Globals are just strings
-        if(flags.is_global) {
+        if(flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_GLOBAL) {
             ScriptTree::Object o = {};
             Tokenizer::Token t = {};
             t.type = Tokenizer::Token::Type::TYPE_STRING;
@@ -247,7 +247,9 @@ namespace Invader::Compiler {
         }
         
         // Handle script calls as so
-        else if(flags.is_script_call || !flags.is_primitive) {
+        else if(
+            (flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_SCRIPT_CALL) || 
+            !(flags & HEK::ScenarioScriptNodeFlagsFlag::SCENARIO_SCRIPT_NODE_FLAGS_FLAG_IS_PRIMITIVE)) {
             return decompile_node(static_cast<std::size_t>(n.data.read().long_int), scenario);
         }
 

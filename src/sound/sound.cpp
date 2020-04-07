@@ -60,7 +60,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
     else {
         sound_tag.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
-        sound_tag.flags.split_long_sound_into_permutations = 0;
         sound_tag.random_pitch_bounds.from = 1.0F;
         sound_tag.random_pitch_bounds.to = 1.0F;
         sound_tag.outer_cone_gain = 1.0F;
@@ -198,8 +197,11 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         pitch_range.bend_bounds.from = old_pitch_range.bend_bounds.from;
         pitch_range.bend_bounds.to = old_pitch_range.bend_bounds.to;
     }
+    
     std::size_t old_actual_permutation_count;
-    if(sound_tag.flags.split_long_sound_into_permutations) {
+    bool old_split = sound_tag.flags | HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+    
+    if(old_split) {
         old_actual_permutation_count = old_pitch_range.actual_permutation_count;
         if(old_actual_permutation_count > old_pitch_range.permutations.size()) {
             eprintf_error("Existing sound tag has an invalid actual permutation count");
@@ -227,11 +229,15 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
 
     // Same with whether to split
-    bool old_split = sound_tag.flags.split_long_sound_into_permutations;
     if(sound_options.split.has_value()) {
-        sound_tag.flags.split_long_sound_into_permutations = *sound_options.split;
+        if(*sound_options.split) {
+            sound_tag.flags |= HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+        }
+        else {
+            sound_tag.flags &= ~HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+        }
     }
-    bool split = sound_tag.flags.split_long_sound_into_permutations;
+    bool split = sound_tag.flags | HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
 
     auto wav_iterator = std::filesystem::directory_iterator(data_path);
 

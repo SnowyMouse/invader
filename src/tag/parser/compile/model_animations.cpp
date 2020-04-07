@@ -226,7 +226,7 @@ namespace Invader::Parser {
         }
 
         // Get whether or not it's compressed
-        bool compressed = this->flags.compressed_data;
+        bool compressed = this->flags & HEK::ModelAnimationsAnimationFlagsFlag::MODEL_ANIMATIONS_ANIMATION_FLAGS_FLAG_COMPRESSED_DATA;
         std::size_t compressed_data_offset = this->offset_to_compressed_data;
         this->offset_to_compressed_data = 0;
 

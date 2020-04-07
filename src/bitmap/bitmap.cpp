@@ -136,7 +136,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bitmap_options.usage = bitmap_tag_data.usage;
         }
         if(!bitmap_options.palettize.has_value()) {
-            bitmap_options.palettize = !bitmap_tag_data.flags.disable_height_map_compression;
+            bitmap_options.palettize = !(bitmap_tag_data.flags & HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
         }
         if(!bitmap_options.bump_height.has_value()) {
             bitmap_options.bump_height = bitmap_tag_data.bump_height;
@@ -154,8 +154,8 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
                 bitmap_options.mipmap_scale_type = extended_bitmap->mipmap_scaling;
             }
             if(!bitmap_options.dithering.has_value()) {
-                bitmap_options.dither_alpha = extended_bitmap->extended_flags.dither_alpha == 1;
-                bitmap_options.dither_color = extended_bitmap->extended_flags.dither_color == 1;
+                bitmap_options.dither_alpha = extended_bitmap->extended_flags & HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+                bitmap_options.dither_color = extended_bitmap->extended_flags & HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
                 bitmap_options.dithering = *bitmap_options.dither_alpha || *bitmap_options.dither_color;
             }
         }
@@ -392,8 +392,18 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     if(sizeof(T) == sizeof(Parser::ExtendedBitmap)) {
         auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
         extended_bitmap->data_metadata.resize(bitmap_tag_data.bitmap_data.size());
-        extended_bitmap->extended_flags.dither_alpha = *bitmap_options.dither_alpha;
-        extended_bitmap->extended_flags.dither_color = *bitmap_options.dither_color;
+        if(*bitmap_options.dither_alpha) {
+            extended_bitmap->extended_flags |= HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+        }
+        else {
+            extended_bitmap->extended_flags &= ~HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+        }
+        if(*bitmap_options.dither_color) {
+            extended_bitmap->extended_flags |= HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+        }
+        else {
+            extended_bitmap->extended_flags &= ~HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+        }
         extended_bitmap->mipmap_scaling = *bitmap_options.mipmap_scale_type;
     }
 
