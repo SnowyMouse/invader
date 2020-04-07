@@ -2,8 +2,9 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.33.2] - 2020-04-07
 ### Changed
+- invader: Unknown flags are now stripped on load
 - invader-edit-qt: Changed the default text for font previewing
 
 ### Fixed
