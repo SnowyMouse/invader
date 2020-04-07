@@ -216,6 +216,9 @@ int main(int argc, const char **argv) {
             for(std::size_t t = 0; t < tag_count; t++) {
                 auto &tag = map.get_tag(t);
                 auto tag_class_int = tag.get_tag_class_int();
+                if(!tag.data_is_available() || std::strcmp(tag_class_to_extension(tag_class_int), "unknown") == 0) {
+                    continue;
+                }
                 if(compare_options.class_to_check.size()) {
                     bool should_add = false;
                     for(auto c : compare_options.class_to_check) {
