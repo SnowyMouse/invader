@@ -15,14 +15,14 @@
 
 namespace Invader::EditQt {
     void TagEditorFontSubwindow::update() {
-        
+        this->draw_text();
     }
     
     TagEditorFontSubwindow::TagEditorFontSubwindow(TagEditorWindow *parent_window) : TagEditorSubwindow(parent_window) {
         // Set up the layout
         QHBoxLayout *header = new QHBoxLayout();
         QWidget *header_widget = new QWidget();
-        header->addWidget((this->text_to_render = new QPlainTextEdit("A quick brown fox jumps over the lazy dog.")));
+        header->addWidget((this->text_to_render = new QPlainTextEdit("This cave is not a natural formation.")));
         header_widget->setLayout(header);
         
         // Move cursor to end
