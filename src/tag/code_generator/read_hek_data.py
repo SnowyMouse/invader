@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs, hpp, cpp_read_hek_data):
+def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, all_used_structs, hpp, cpp_read_hek_data):
     hpp.write("\n        /**\n")
     hpp.write("         * Parse the HEK tag data.\n")
     hpp.write("         * @param data        Data to read from for structs, tag references, and reflexives; if data_this is nullptr, this must point to the struct\n")
@@ -140,13 +140,20 @@ def make_parse_hek_tag_data(postprocess_hek_data, struct_name, all_used_structs,
                         cpp_read_hek_data.write("            r.{}[{}] = {}{};\n".format(name, q, default[q], suffix))
                         cpp_read_hek_data.write("        }\n")
             else:
-                cpp_read_hek_data.write("        r.{} = h.{};\n".format(name, name))
-                if "default" in struct:
-                    default = struct["default"]
-                    suffix = "F" if isinstance(default, float) else ""
-                    cpp_read_hek_data.write("        if(postprocess && r.{} {} 0) {{\n".format(name, default_sign))
-                    cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
-                    cpp_read_hek_data.write("        }\n")
+                added = False
+                for b in all_bitfields:
+                    if b["name"] == struct["type"]:
+                        added = True
+                        cpp_read_hek_data.write("        r.{} = static_cast<std::uint{}_t>(h.{}) & static_cast<std::uint{}_t>(0x{:X});\n".format(name, b["width"], name, b["width"], (1 << len(b["fields"])) - 1))
+                        break
+                if not added:
+                    cpp_read_hek_data.write("        r.{} = h.{};\n".format(name, name))
+                    if "default" in struct:
+                        default = struct["default"]
+                        suffix = "F" if isinstance(default, float) else ""
+                        cpp_read_hek_data.write("        if(postprocess && r.{} {} 0) {{\n".format(name, default_sign))
+                        cpp_read_hek_data.write("            r.{} = {}{};\n".format(name, default, suffix))
+                        cpp_read_hek_data.write("        }\n")
     if postprocess_hek_data:
         cpp_read_hek_data.write("        if(postprocess) {\n")
         cpp_read_hek_data.write("            r.postprocess_hek_data();\n")

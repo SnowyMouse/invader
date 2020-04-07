@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, hpp, cpp_read_cache_file_data):
+def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs, struct_name, hpp, cpp_read_cache_file_data):
     hpp.write("\n        /**\n")
     hpp.write("         * Parse the cache file tag data.\n")
     hpp.write("         * @param tag     Tag to read data from\n")
@@ -110,7 +110,14 @@ def make_parse_cache_file_data(post_cache_parse, all_used_structs, struct_name, 
             elif "count" in struct and struct["count"] > 1:
                 cpp_read_cache_file_data.write("        std::copy(l.{}, l.{} + {}, r.{});\n".format(name, name, struct["count"], name))
             else:
-                cpp_read_cache_file_data.write("        r.{} = l.{};\n".format(name, name))
+                added = False
+                for b in all_bitfields:
+                    if b["name"] == struct["type"]:
+                        added = True
+                        cpp_read_cache_file_data.write("        r.{} = static_cast<std::uint{}_t>(l.{}) & static_cast<std::uint{}_t>(0x{:X});\n".format(name, b["width"], name, b["width"], (1 << len(b["fields"])) - 1))
+                        break
+                if not added:
+                    cpp_read_cache_file_data.write("        r.{} = l.{};\n".format(name, name))
     if post_cache_parse:
         cpp_read_cache_file_data.write("        r.post_cache_parse(tag, pointer);\n")
     cpp_read_cache_file_data.write("        return r;\n")
