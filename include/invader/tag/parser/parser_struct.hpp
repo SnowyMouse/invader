@@ -450,11 +450,16 @@ namespace Invader::Parser {
          * Return a list of all of the possible enums
          * @return vector of all possible enums
          */
-        template <typename T, const char *(*convert_fn)(T), std::size_t count>
+        template <typename T, const char *(*convert_fn)(T), std::size_t count, std::size_t mask>
         static std::vector<const char *> list_bitmask_template() {
-            std::vector<const char *> out(count);
+            std::vector<const char *> out;
+            out.reserve(count);
             for(std::size_t i = 0; i < count; i++) {
-                out[i] = convert_fn(static_cast<T>(static_cast<std::size_t>(1) << i));
+                auto bit = static_cast<std::size_t>(1) << i;
+                if(!(bit & mask)) {
+                    continue;
+                }
+                out.emplace_back(convert_fn(static_cast<T>(bit)));
             }
             return out;
         }
