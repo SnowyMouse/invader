@@ -287,6 +287,11 @@ namespace Invader::Compiler {
                         block = std::get<ScriptTree::Object::FunctionCall>(block[0].value).block;
                     }
                 }
+                
+                // Return the first object of the block if that is all there is
+                if(function_call.function_name == "begin" && block.size() == 1) {
+                    return block[0];
+                }
 
                 // Set the function call stuff
                 function_call.block = block;
