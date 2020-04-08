@@ -33,28 +33,27 @@ Issues and pull requests must remain in the scope of Invader. Here are some
 things to keep in mind:
 
 - Invader targets the base Halo Combat Evolved game as released on PC.
-- Invader is cross-platform and does not target any single operating system.
-- Invader does not (usually) care about the limitations of the original Halo
-Editing Kit.
 
 Forks that support other mods, such as Open Sauce, or other releases of the
 game, such as the original Xbox version of the game, are certainly welcome, but
 code or definitions for functionality provided by these mods will not be
 accepted upstream.
 
-Also, the standard library should be used whenever possible. Do not use any
-platform-specific types or functions such as the Windows API's `DWORD` or
-`fopen_s` or the Linux API when writing platform-independent code. If and when
+- Invader is cross-platform and does not target any single operating system.
+
+The C/C++ standard library should be used whenever possible. Do not use any
+platform-specific types or functions such as the Windows API's `DWORD`,
+`fopen_s`, or the Linux API when writing platform-independent code. If and when
 it is necessary to write platform-specific code, use `#ifdef`s to isolate the
 code so it doesn't compile on incompatible systems.
 
+- Invader does not (usually) care about the limitations of the original Halo
+Editing Kit.
+
 Lastly, it is well known that the Halo Editing Kit imposes limitations on
-structures. For example:
-- tool.exe limits the maximum size of a bitmap to 16 MiB
-- tool.exe limits the maximum number of structs in most tags
-- tool.exe limits the file size of maps to 128 MiB in multiplayer and 384 MiB
-in singleplayer
-- and so on...
+structures. For example, tool.exe limits the maximum size of a bitmap to 16 MiB,
+it limits the number of structs for some tags, it limits map size to 384 MiB,
+and so on.
 
 As long as it is otherwise valid data that can be handled sanely, then Invader
 should not prevent the user from creating it, even if such assets would not work
@@ -63,6 +62,14 @@ with the original Halo Editing Kit.
 Invader should not be expected to warn the user if such assets will not work
 with the original Halo Editing Kit (or anyone else's tools). Usage of the
 original Halo Editing Kit should be discouraged whenever possible.
+
+- Invader may not allow some things that the original Halo Editing Kit allows
+
+A feature of Invader is more powerful error checking that isn't available on the
+Halo Editing Kit. This can even result in original Bungie and Gearbox maps not
+being rebuildable, as some tags contain invalid data such as invalid enum values
+or invalid indices. For those cases, we have invader-bludgeon which removes such
+anomalies.
 
 ## Text conventions
 These are general conventions used for writing comments, issues, documentation,
