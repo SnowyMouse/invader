@@ -445,6 +445,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
+    options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: default, bumpmap, detail. Default: default", "<usage>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("extended", 'x', 0, "Create an extended_bitmap tag.");
 
