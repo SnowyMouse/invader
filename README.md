@@ -201,6 +201,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d, 3d, cubemap,
                                interface, or sprite. Default (new tag): 2d
+  -u --usage <usage>           Set the bitmap usage. Can be: default, bumpmap,
+                               detail. Default: default
   -x --extended                Create an extended_bitmap tag.
 ```
 
