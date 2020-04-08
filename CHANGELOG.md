@@ -2,9 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.33.3] - 2020-04-07
 ### Fixed
 - invader-bitmap: Fixed `--usage` being missing
+- invader-edit-qt: Fixed hidden, cache-only options being visible in flags
 
 ## [0.33.2] - 2020-04-07
 ### Changed
