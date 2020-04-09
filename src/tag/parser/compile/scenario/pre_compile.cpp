@@ -86,6 +86,19 @@ namespace Invader::Parser {
         CHECK_PALETTE_AND_SPAWNS("Sound scenery", sound_scenery, sound_scenery_palette, OBJECT_TYPE_SOUND_SCENERY);
 
         #undef CHECK_PALETTE_AND_SPAWNS
+        
+        // Next, let's make sure "set new name" is used
+        for(auto &c : this->ai_conversations) {
+            for(auto &p : c.participants) {
+                auto new_name = p.set_new_name;
+                if(new_name > name_count || new_name == NULL_INDEX) {
+                    continue;
+                }
+                else if(name_used[new_name] == 0) {
+                    name_used[new_name] = 1; 
+                }
+            }
+        }
 
         // Make sure we don't have any fun stuff with object names going on
         for(std::size_t i = 0; i < name_count; i++) {

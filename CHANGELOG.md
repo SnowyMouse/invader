@@ -2,6 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- invader: Extraneous `begin` blocks are now removed on script decompilation
+
+### Fixed
+- invader-build: Object names referenced only by "set new name" are no longer
+  warned for being unused
+
 ## [0.33.3] - 2020-04-07
 ### Fixed
 - invader-bitmap: Fixed `--usage` being missing
