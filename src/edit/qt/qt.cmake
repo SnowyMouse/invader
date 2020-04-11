@@ -15,6 +15,7 @@ if(${INVADER_EDIT_QT})
         src/edit/qt/editor/subwindow/tag_editor_bitmap_subwindow.cpp
         src/edit/qt/editor/subwindow/tag_editor_font_subwindow.cpp
         src/edit/qt/editor/subwindow/tag_editor_sound_subwindow.cpp
+        src/edit/qt/editor/subwindow/tag_editor_string_subwindow.cpp
         src/edit/qt/editor/subwindow/tag_editor_subwindow.cpp
         src/edit/qt/editor/widget/tag_editor_array_widget.cpp
         src/edit/qt/editor/widget/tag_editor_edit_widget_view.cpp

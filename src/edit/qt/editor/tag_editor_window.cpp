@@ -21,6 +21,7 @@
 #include "subwindow/tag_editor_subwindow.hpp"
 #include "subwindow/tag_editor_bitmap_subwindow.hpp"
 #include "subwindow/tag_editor_sound_subwindow.hpp"
+#include "subwindow/tag_editor_string_subwindow.hpp"
 #include "subwindow/tag_editor_font_subwindow.hpp"
 
 namespace Invader::EditQt {
@@ -108,6 +109,10 @@ namespace Invader::EditQt {
                 break;
             case TagClassInt::TAG_CLASS_FONT:
                 extra_widget = new QPushButton("Preview font");
+                break;
+            case TagClassInt::TAG_CLASS_STRING_LIST:
+            case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                extra_widget = new QPushButton("Preview string list");
                 break;
             // case TagClassInt::TAG_CLASS_GBXMODEL:
             // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
@@ -334,6 +339,10 @@ namespace Invader::EditQt {
                     break;
                 case TagClassInt::TAG_CLASS_FONT:
                     this->subwindow = new TagEditorFontSubwindow(this);
+                    break;
+                case TagClassInt::TAG_CLASS_STRING_LIST:
+                case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                    this->subwindow = new TagEditorStringSubwindow(this);
                     break;
                 default:
                     std::terminate();
