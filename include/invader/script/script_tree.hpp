@@ -49,6 +49,8 @@ namespace Invader::ScriptTree {
 
         Type type = {};
         Value value = {};
+        std::size_t line = 0;
+        std::size_t column = 0;
     };
 
     /**

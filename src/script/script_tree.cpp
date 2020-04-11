@@ -181,6 +181,8 @@ namespace Invader::ScriptTree {
         auto &script_object = r.value();
         script_object.type = Object::Type::TYPE_SCRIPT;
         script_object.value = script;
+        r->column = first_token->column;
+        r->line = first_token->line;
 
         return r;
     }
@@ -247,6 +249,8 @@ namespace Invader::ScriptTree {
         auto &global_object = r.value();
         global_object.type = Object::Type::TYPE_GLOBAL;
         global_object.value = global;
+        r->column = first_token->column;
+        r->line = first_token->line;
 
         return r;
     }
@@ -301,12 +305,16 @@ namespace Invader::ScriptTree {
                 auto &value = block.emplace_back();
                 value.value = call;
                 value.type = Object::Type::TYPE_FUNCTION_CALL;
+                value.column = token.column;
+                value.line = token.line;
             }
 
             else {
                 auto &value = block.emplace_back();
                 value.value = token;
                 value.type = Object::Type::TYPE_TOKEN;
+                value.column = token.column;
+                value.line = token.line;
             }
         }
 
