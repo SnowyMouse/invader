@@ -29,7 +29,9 @@ namespace Invader {
         map.loc_data_m.insert(map.loc_data_m.end(), loc_data, loc_data + loc_data_size);
         map.loc_data = map.loc_data_m.data();
         map.loc_data_length = loc_data_size;
+        oprintf("A1\n");
         map.load_map();
+        oprintf("B1\n");
         return map;
     }
 
@@ -255,9 +257,9 @@ namespace Invader {
                     break;
                 case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                     map.base_memory_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
-                    if(map.bitmap_data_length && map.ipak_data.size() == 0) {
-                        map.ipak_data = load_compressed_ipak(map.bitmap_data, map.bitmap_data_length);
-                    }
+                    // if(map.bitmap_data_length && map.ipak_data.size() == 0) {
+                    //     map.ipak_data = load_compressed_ipak(map.bitmap_data, map.bitmap_data_length);
+                    // }
                     break;
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
