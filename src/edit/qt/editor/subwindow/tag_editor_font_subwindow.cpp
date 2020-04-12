@@ -11,10 +11,12 @@
 #include <QLabel>
 #include "tag_editor_font_subwindow.hpp"
 #include "../../../../bitmap/color_plate_scanner.hpp"
+#include <invader/tag/parser/compile/font.hpp>
 #include "../tag_editor_window.hpp"
 
 namespace Invader::EditQt {
     void TagEditorFontSubwindow::update() {
+        Parser::generate_character_tables(dynamic_cast<Parser::Font &>(*this->get_parent_window()->get_parser_data()));
         this->draw_text();
     }
     
@@ -38,10 +40,42 @@ namespace Invader::EditQt {
         
         this->update();
         this->center_window();
-        this->draw_text();
         
         // Set up drawing text
         connect(this->text_to_render, &QPlainTextEdit::textChanged, this, &TagEditorFontSubwindow::draw_text);
+    }
+    
+    static std::optional<std::size_t> get_font_character(const Parser::Font &font_data, char16_t c) {
+        // Look it up in the character table if we have one present
+        auto character_table_count = font_data.character_tables.size();
+        if(character_table_count > 0) {
+            auto unsigned_version = static_cast<std::uint16_t>(c);
+            auto character_table = static_cast<std::uint8_t>(unsigned_version >> 8);
+            auto &table = font_data.character_tables[character_table];
+            auto ctb_size = table.character_table.size();
+            auto character_table_index = static_cast<std::uint8_t>(unsigned_version);
+            if(ctb_size > character_table_index) {
+                auto index = table.character_table[character_table_index].character_index;
+                if(index == NULL_INDEX) {
+                    return std::nullopt;
+                }
+                else {
+                    return index;
+                }
+            }
+            return std::nullopt;
+        }
+        
+        // Otherwise, look through each character new_color_maybe
+        auto character_count = font_data.characters.size();
+        for(std::size_t i = 0; i < character_count; i++) {
+            auto &c_other = font_data.characters[i];
+            if(c_other.character == c) {
+                return i;
+            }
+        }
+        
+        return std::nullopt;
     }
     
     static void get_dimensions(std::int32_t &width, std::int32_t &height, const char16_t *text, const Parser::Font &font_data) {
@@ -73,13 +107,12 @@ namespace Invader::EditQt {
                 line_count++;
                 continue;
             }
-            for(auto &i : font_data.characters) {
-                if(i.character == *t) {
-                    advance += i.character_width;
-                    if(advance > width) {
-                        width = advance;
-                    }
-                    break;
+            
+            auto ci = get_font_character(font_data, *t);
+            if(ci.has_value()) {
+                advance += font_data.characters[*ci].character_width;
+                if(advance > width) {
+                    width = advance;
                 }
             }
         }
@@ -135,10 +168,9 @@ namespace Invader::EditQt {
                 continue;
             }
             
-            for(auto &c : font_data.characters) {
-                if(c.character != *t) {
-                    continue;
-                }
+            auto ci = get_font_character(font_data, *t);
+            if(ci.has_value()) {
+                auto &c = font_data.characters[*ci];
                 
                 // Get the x offset
                 std::int32_t bx = horizontal_advance - (c.bitmap_origin_x - font_data.leading_width);
