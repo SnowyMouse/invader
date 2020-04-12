@@ -94,7 +94,7 @@ namespace Invader {
 
         // Attempt to open the resource map
         auto open_resource_map = [&maps_directory, &workload](const char *map) -> std::vector<Resource> {
-            if(workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+            if(workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL || workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
                 return std::vector<Resource>();
             }
             else {
