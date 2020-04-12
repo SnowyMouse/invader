@@ -267,6 +267,56 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
+        
+        // Invalidate the raw data if we're removing everything
+        if(this->raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
+            for(auto &t : this->tags) {
+                switch(t.tag_class_int) {
+                    case TagClassInt::TAG_CLASS_BITMAP:
+                    case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
+                        auto &main_struct = this->structs[t.base_struct.value()];
+                        auto &data = *reinterpret_cast<Parser::Bitmap::struct_little *>(main_struct.data.data());
+                        std::size_t bitmap_data_count = data.bitmap_data.count.read();
+                        if(bitmap_data_count) {
+                            auto *bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(this->structs[*main_struct.resolve_pointer(&data.bitmap_data.pointer)].data.data());
+                            for(std::size_t bd = 0; bd < bitmap_data_count; bd++) {
+                                auto &bds = bitmap_data[bd];
+                                bds.pixel_data_offset = 0xFFFFFFFF;
+                                bds.flags = bds.flags.read() | HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
+                            }
+                        }
+                        break;
+                    }
+                    
+                    case TagClassInt::TAG_CLASS_SOUND:
+                    case TagClassInt::TAG_CLASS_EXTENDED_SOUND: {
+                        auto &main_struct = this->structs[*t.base_struct];
+                        auto &data = *reinterpret_cast<Parser::Sound::struct_little *>(main_struct.data.data());
+                        std::size_t pitch_range_count = data.pitch_ranges.count.read();
+                        if(pitch_range_count) {
+                            auto &pitch_range_struct = this->structs[*main_struct.resolve_pointer(&data.pitch_ranges.pointer)];
+                            auto *pitch_ranges = reinterpret_cast<Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
+                            for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+                                auto &prs = pitch_ranges[pr];
+                                std::size_t permutation_count = prs.permutations.count.read();
+                                if(permutation_count) {
+                                    auto *permutations = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->structs[*pitch_range_struct.resolve_pointer(&prs.permutations.pointer)].data.data());
+                                    for(std::size_t p = 0; p < permutation_count; p++) {
+                                        auto &ps = permutations[p];
+                                        ps.samples.file_offset = 0xFFFFFFFF;
+                                        ps.samples.external = 1;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                        
+                    default:
+                        break;
+                }
+            }
+        }
 
         // If we have resource maps to check, check them
         if(this->bitmaps.size() != 0) {
@@ -357,7 +407,7 @@ namespace Invader {
             }
         }
 
-        // Get the bitmap and sound data in there (anniversary maps do not have this present in the cache file)
+        // Get the bitmap and sound data in there
         if(this->raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
             if(this->verbose) {
                 oprintf("Building raw data...");
