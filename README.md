@@ -330,13 +330,16 @@ Options:
                                and dark engines.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
+  -d --discard                 Discard all raw data. This will result in a map
+                               that is invalid for use with game clients
+                               (except MCC) and tag extractors.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
                                retail, mcc, dark
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
-  -m --maps <dir>              Use a specific maps directory.
+  -m --maps <dir>              Use the specified maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
   -N --rename-scenario <name>  Rename the scenario.
@@ -360,7 +363,7 @@ This program compares tags against maps, maps against maps, and tags against
 tags.
 
 ```
-Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
+Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <opts>> ...]
 
 Create a file listing the tags of a map.
 
