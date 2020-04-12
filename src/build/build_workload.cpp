@@ -134,6 +134,7 @@ namespace Invader {
                     use_index = retail_indices(workload.scenario_name.string);
                     break;
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                     use_index = demo_indices(workload.scenario_name.string);
                     break;
                 default:
