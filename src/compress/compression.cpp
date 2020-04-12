@@ -62,6 +62,7 @@ namespace Invader::Compression {
 
         // Figure out the new engine version
         auto new_engine_version = header_copy.engine.read();
+        bool invader_compression = false;
         switch(header_copy.engine.read()) {
             case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY_COMPRESSED:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
@@ -71,6 +72,8 @@ namespace Invader::Compression {
                 throw MapNeedsCompressedException();
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                invader_compression = true;
+                // fallthrough
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                 if(header_copy.decompressed_file_size.read() == 0) {
                     throw MapNeedsCompressedException();
@@ -78,12 +81,15 @@ namespace Invader::Compression {
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                invader_compression = true;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                invader_compression = true;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                invader_compression = true;
                 break;
             default:
                 // Check if it's an uncompressed demo map?
@@ -96,7 +102,7 @@ namespace Invader::Compression {
         }
 
         // Determine if the file size isn't set correctly
-        if(header_copy.decompressed_file_size < sizeof(header_copy) || !header_copy.valid()) {
+        if((invader_compression && header_copy.decompressed_file_size < sizeof(header_copy)) || !header_copy.valid()) {
             throw InvalidMapException();
         }
 
