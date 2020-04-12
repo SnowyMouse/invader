@@ -559,6 +559,7 @@ namespace Invader {
         this->ipak_data_m = std::move(move.ipak_data_m);
         this->ipak_data = move.ipak_data;
         this->ipak_data_length = move.ipak_data_length;
+        this->ipak_data_arr = std::move(move.ipak_data_arr);
         this->engine = move.engine;
         this->type = move.type;
         this->model_data_offset = move.model_data_offset;
@@ -580,7 +581,6 @@ namespace Invader {
         }
 
         move.tags.clear();
-        this->ipak_data = move.ipak_data;
 
         this->load_map();
         this->compressed = move.compressed;

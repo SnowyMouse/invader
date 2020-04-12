@@ -208,8 +208,13 @@ int main(int argc, const char **argv) {
         // Get the tag path
         const auto &tag = map->get_tag(tag_index);
 
-        if(cannot_extract_resources && (tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND || tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP)) {
-            eprintf_warn("CE Anniversary bitmaps and sounds cannot be extracted at this time");
+        if(cannot_extract_resources && (tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND)) {
+            eprintf_warn("CE Anniversary sounds cannot be extracted at this time");
+            return false;
+        }
+        
+        if(cannot_extract_resources && tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP && !extract_options.ipak.has_value()) {
+            eprintf_warn("CE Anniversary bitmaps require an ipak to successfully extract");
             return false;
         }
 

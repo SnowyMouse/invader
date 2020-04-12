@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-extract: Readded extraction via ipaks for MCC maps
+
 ### Fixed
 - invader-extract: Fixed an issue with decompression errors if loading an MCC
   map with a bitmaps.map file present
