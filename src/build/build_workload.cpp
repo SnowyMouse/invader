@@ -217,35 +217,34 @@ namespace Invader {
         }
 
         // Set the tag data address
+        switch(engine_target) {
+            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
+                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
+                break;
+            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
+                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY;
+                break;
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                workload.bitmaps = open_resource_map("bitmaps.map");
+                workload.sounds = open_resource_map("sounds.map");
+                break;
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                workload.loc = open_resource_map("loc.map");
+                // fallthrough
+            default:
+                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                workload.bitmaps = open_resource_map("bitmaps.map");
+                workload.sounds = open_resource_map("sounds.map");
+                break;
+        }
+        
         if(tag_data_address.has_value()) {
             workload.tag_data_address = *tag_data_address;
-        }
-        else {
-            switch(engine_target) {
-                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
-                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
-                    break;
-                case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-                    workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
-                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY;
-                    break;
-                case CacheFileEngine::CACHE_FILE_DEMO:
-                    workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
-                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-                    workload.bitmaps = open_resource_map("bitmaps.map");
-                    workload.sounds = open_resource_map("sounds.map");
-                    break;
-                case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    workload.loc = open_resource_map("loc.map");
-                    // fallthrough
-                default:
-                    workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                    workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-                    workload.bitmaps = open_resource_map("bitmaps.map");
-                    workload.sounds = open_resource_map("sounds.map");
-                    break;
-            }
         }
 
         return workload.build_cache_file();
