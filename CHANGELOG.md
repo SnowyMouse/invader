@@ -2,11 +2,21 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.34.0] - 2020-04-12
+### Added
+- invader-build: Added `-d` which discards all raw data. This will make the map
+  unusable in clients (except MCC), but it can be used for saving space.
+
 ### Changed
 - invader: Optimized font rendering to utilize character tables
 - invader: Improved accuracy for how MCC maps are loaded
-- invader-build: Changed how BSP vertices are stored for MCC maps
+- invader-build: Building MCC maps now includes all resources in the map again.
+  Use `-d` to change this behavior to what it was before. This was done for
+  consistency reasons.
+
+### Fixed
+- invader-build: Changed how BSP vertices are stored for MCC maps, fixing how
+  some maps with multiple BSPs are loaded
 
 ## [0.33.4] - 2020-04-11
 ### Added
