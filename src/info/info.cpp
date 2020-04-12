@@ -344,9 +344,6 @@ int main(int argc, const char **argv) {
             if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 oprintf_success_warn("CRC32:             Unknown");
             }
-            else if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                oprintf_success_warn("CRC32:             Unknown");
-            }
             else {
                 crc = Invader::calculate_map_crc(map->get_data(), data_length);
                 if(crc != header_crc32) {
@@ -358,7 +355,7 @@ int main(int argc, const char **argv) {
             }
             auto dirty = crc != header_crc32 || memed_by_refinery() || map->is_protected() || (unsupported_external_data && external_data_used);
 
-            if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 if(memed_by_refinery() || map->is_protected()) {
                     oprintf_success_warn("Integrity:         Dirty");
                 }
@@ -454,9 +451,6 @@ int main(int argc, const char **argv) {
         case DISPLAY_DIRTY:
             if(memed_by_refinery() || map->is_protected()) {
                 oprintf("yes\n");
-            }
-            else if(map->get_engine() == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                oprintf("unknown\n");
             }
             else {
                 oprintf("%s\n", (Invader::calculate_map_crc(map->get_data(), data_length) != map->get_header_crc32()) ? "yes" : "no");

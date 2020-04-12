@@ -23,7 +23,7 @@ namespace Invader {
         // Parse the map
         Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
         auto engine = map.get_engine();
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }
 
@@ -53,6 +53,14 @@ namespace Invader {
 
                 if(start >= size || end > size) {
                     throw OutOfBoundsException();
+                }
+                
+                // If we're anniversary, CRC32 these too
+                if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+                    auto *bsp_info = reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(map.get_data_at_offset(start, sizeof(HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian>)));
+                    auto bs = bsp_info->lightmap_vertices_start.read();
+                    auto be = bs + bsp_info->lightmap_vertices_size.read();
+                    CRC_DATA(bs, be);
                 }
 
                 // Add it

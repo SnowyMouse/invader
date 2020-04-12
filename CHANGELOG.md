@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-build: Now calculates the CRC32 of MCC maps
+- invader-info: Now calculates the CRC32 of MCC maps
+
 ## [0.34.1] - 2020-04-12
 ### Changed
 - invader-extract: Readded extraction via ipaks for MCC maps

@@ -526,7 +526,7 @@ namespace Invader {
 
             // Calculate the CRC32
             std::uint32_t new_crc = 0;
-            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_ANNIVERSARY;
+            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_XBOX;
             if(can_calculate_crc) {
                 if(workload.verbose) {
                     oprintf("Calculating CRC32...");
