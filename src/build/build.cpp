@@ -34,10 +34,9 @@ int main(int argc, const char **argv) {
         std::string last_argument;
         std::string index;
         std::optional<HEK::CacheFileEngine> engine;
-        bool no_external_tags = false;
         bool handled = true;
         bool quiet = false;
-        bool always_index_tags = false;
+        BuildWorkload::RawDataHandling raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
         std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
@@ -49,6 +48,7 @@ int main(int argc, const char **argv) {
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
+    options.emplace_back("discard", 'd', 0, "Discard all raw data. This will result in a map that is invalid for use with game clients (except MCC) and tag extractors.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, mcc, dark", "<id>");
@@ -70,7 +70,13 @@ int main(int argc, const char **argv) {
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
             case 'n':
-                build_options.no_external_tags = true;
+                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                break;
+            case 'a':
+                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+                break;
+            case 'd':
+                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL;
                 break;
             case 'q':
                 build_options.quiet = true;
@@ -86,9 +92,6 @@ int main(int argc, const char **argv) {
                 break;
             case 'm':
                 build_options.maps = std::string(arguments[0]);
-                break;
-            case 'a':
-                build_options.always_index_tags = true;
                 break;
             case 'g':
                 if(std::strcmp(arguments[0], "custom") == 0) {
@@ -156,11 +159,6 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-
-    if(build_options.always_index_tags && build_options.no_external_tags) {
-        eprintf_error("--no-index-tags conflicts with --always-index-tags.");
-        return EXIT_FAILURE;
-    }
 
     std::string scenario;
 
@@ -234,8 +232,7 @@ int main(int argc, const char **argv) {
             build_options.tags,
             build_options.engine.value(),
             build_options.maps,
-            build_options.no_external_tags,
-            build_options.always_index_tags,
+            build_options.raw_data_handling,
             !build_options.quiet,
             with_index,
             build_options.forged_crc,

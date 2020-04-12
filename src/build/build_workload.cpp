@@ -41,8 +41,7 @@ namespace Invader {
         const std::vector<std::string> &tags_directories,
         HEK::CacheFileEngine engine_target,
         std::string maps_directory,
-        bool no_external_tags,
-        bool always_index_tags,
+        RawDataHandling raw_data_handling,
         bool verbose,
         const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index,
         const std::optional<std::uint32_t> &forge_crc,
@@ -60,11 +59,6 @@ namespace Invader {
         // Hide these?
         workload.hide_pedantic_warnings = hide_pedantic_warnings;
 
-        // Don't allow two things to be used at once
-        if(no_external_tags && always_index_tags) {
-            throw std::exception();
-        }
-
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
         workload.scenario = scenario_name_fixed.c_str();
         workload.tags_directories = &tags_directories;
@@ -72,11 +66,35 @@ namespace Invader {
         workload.optimize_space = optimize_space;
         workload.verbose = verbose;
         workload.compress = compress;
-        workload.always_index_tags = always_index_tags;
+        
+        // Set defaults
+        if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_DEFAULT) {
+            switch(engine_target) {
+                case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
+        
+        // Dark Circlet maps can only use these
+        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL && engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            throw InvalidArgumentException();
+        }
+        
+        // Only Custom Edition can use this
+        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX && engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            throw InvalidArgumentException();
+        }
+        
+        workload.raw_data_handling = raw_data_handling;
 
         // Attempt to open the resource map
-        auto open_resource_map = [&maps_directory, &no_external_tags, &workload](const char *map) -> std::vector<Resource> {
-            if(no_external_tags) {
+        auto open_resource_map = [&maps_directory, &workload](const char *map) -> std::vector<Resource> {
+            if(workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
                 return std::vector<Resource>();
             }
             else {
@@ -339,7 +357,7 @@ namespace Invader {
         }
 
         // Get the bitmap and sound data in there (anniversary maps do not have this present in the cache file)
-        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+        if(this->raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
             if(this->verbose) {
                 oprintf("Building raw data...");
                 oflush();
@@ -1535,6 +1553,8 @@ namespace Invader {
     }
 
     void BuildWorkload::externalize_tags() noexcept {
+        bool always_index_tags = this->raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+        
         switch(this->engine_target) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 for(auto &t : this->tags) {
@@ -1568,7 +1588,7 @@ namespace Invader {
                                 }
                                 
                                 bool match = true;
-                                if(!this->always_index_tags) {
+                                if(!always_index_tags) {
                                     const auto &bitmap_tag_struct = this->structs[*t.base_struct];
                                     const auto &bitmap_tag = *reinterpret_cast<const Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
                                     const auto &bitmap_tag_struct_other = this->bitmaps[*index];
@@ -1655,7 +1675,7 @@ namespace Invader {
                                 }
                                     
                                 bool match = true;
-                                if(!this->always_index_tags) {
+                                if(!always_index_tags) {
                                     const auto &sound_tag_struct = this->structs[*t.base_struct];
                                     const auto &sound_tag = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct.data.data());
                                     const auto &sound_tag_struct_other = this->sounds[*index];

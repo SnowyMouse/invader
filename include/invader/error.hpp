@@ -13,6 +13,11 @@ namespace Invader {
     }
 
     /**
+     * This is thrown when invalid parameters were given to a function.
+     */
+    DEFINE_EXCEPTION(InvalidArgumentException, "invalid arguments were given");
+
+    /**
      * This is thrown when a map has an invalid name.
      */
     DEFINE_EXCEPTION(InvalidScenarioNameException, "scenario name is invalid");

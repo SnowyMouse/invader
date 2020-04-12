@@ -16,14 +16,30 @@ namespace Invader {
     class BuildWorkload {
     public:
         /**
+         * Select how raw data is handled
+         */
+        enum RawDataHandling {
+            /** Do it based on the engine */
+            RAW_DATA_HANDLING_DEFAULT = 0,
+            
+            /** Remove all raw data from the map (raw data will not be valid for extraction) */
+            RAW_DATA_HANDLING_REMOVE_ALL,
+            
+            /** Retain all raw data in the map */
+            RAW_DATA_HANDLING_RETAIN_ALL,
+            
+            /** (Custom Edition only) Always assume resource files' assets match */
+            RAW_DATA_HANDLING_ALWAYS_INDEX
+        };
+        
+        /**
          * Compile a map
          * @param scenario               scenario tag to use
          * @param tags_directories       tags directories to use
          * @param engine_target          target a specific engine
          * @param maps_directory         maps directory to use; ignored if building a Dark Circlet map
          * @param with_index             tag index to use
-         * @param no_external_tags       do not use cached tags; ignored if building a Dark Circlet map
-         * @param always_index_tags      always use cached tags; ignored if building a Dark Circlet map
+         * @param raw_data_handling      select how to handle raw data
          * @param verbose                output non-error messages to console
          * @param forge_crc              forge the CRC32 of the map
          * @param tag_data_address       address the tag data will be loaded to
@@ -37,8 +53,7 @@ namespace Invader {
             const std::vector<std::string> &tags_directories,
             HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET,
             std::string maps_directory = std::string(),
-            bool no_external_tags = false,
-            bool always_index_tags = false,
+            RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT,
             bool verbose = false,
             const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index = std::nullopt,
             const std::optional<std::uint32_t> &forge_crc = std::nullopt,
@@ -313,12 +328,12 @@ namespace Invader {
         std::size_t raw_bitmap_size = 0;
         std::size_t raw_sound_size = 0;
         bool compress = false;
-        bool always_index_tags = false;
         void externalize_tags() noexcept;
         void delete_raw_data(std::size_t index);
         std::size_t stubbed_tag_count = 0;
         std::size_t indexed_data_amount = 0;
         std::size_t raw_data_indices_offset;
+        RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
     };
 
     #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
