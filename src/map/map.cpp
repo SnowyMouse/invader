@@ -13,7 +13,8 @@ namespace Invader {
     Map Map::map_with_copy(const std::byte *data, std::size_t data_size,
                            const std::byte *bitmaps_data, std::size_t bitmaps_data_size,
                            const std::byte *loc_data, std::size_t loc_data_size,
-                           const std::byte *sounds_data, std::size_t sounds_data_size) {
+                           const std::byte *sounds_data, std::size_t sounds_data_size,
+                           const std::byte *ipak_data, std::size_t ipak_data_size) {
         Map map;
         if(!map.decompress_if_needed(data, data_size)) {
             map.data_m.insert(map.data_m.end(), data, data + data_size);
@@ -29,16 +30,18 @@ namespace Invader {
         map.loc_data_m.insert(map.loc_data_m.end(), loc_data, loc_data + loc_data_size);
         map.loc_data = map.loc_data_m.data();
         map.loc_data_length = loc_data_size;
-        oprintf("A1\n");
+        map.ipak_data_m.insert(map.ipak_data_m.end(), ipak_data, ipak_data + ipak_data_size);
+        map.ipak_data = map.loc_data_m.data();
+        map.ipak_data_length = ipak_data_size;
         map.load_map();
-        oprintf("B1\n");
         return map;
     }
 
     Map Map::map_with_move(std::vector<std::byte> &&data,
                            std::vector<std::byte> &&bitmaps_data,
                            std::vector<std::byte> &&loc_data,
-                           std::vector<std::byte> &&sounds_data) {
+                           std::vector<std::byte> &&sounds_data,
+                           std::vector<std::byte> &&ipak_data) {
         Map map;
         if(map.decompress_if_needed(data.data(), data.size())) {
             data.clear();
@@ -60,6 +63,11 @@ namespace Invader {
         map.loc_data_m = loc_data;
         map.loc_data = map.loc_data_m.data();
         map.loc_data_length = map.loc_data_m.size();
+
+        map.ipak_data_m = ipak_data;
+        map.ipak_data = map.ipak_data_m.data();
+        map.ipak_data_length = map.ipak_data_m.size();
+        
         map.load_map();
         return map;
     }
@@ -67,7 +75,8 @@ namespace Invader {
     Map Map::map_with_pointer(std::byte *data, std::size_t data_size,
                               std::byte *bitmaps_data, std::size_t bitmaps_data_size,
                               std::byte *loc_data, std::size_t loc_data_size,
-                              std::byte *sounds_data, std::size_t sounds_data_size) {
+                              std::byte *sounds_data, std::size_t sounds_data_size,
+                              std::byte *ipak_data, std::size_t ipak_data_size) {
         Map map;
         map.data = data;
         map.data_length = data_size;
@@ -77,6 +86,8 @@ namespace Invader {
         map.loc_data_length = loc_data_size;
         map.sound_data = sounds_data;
         map.sound_data_length = sounds_data_size;
+        map.ipak_data = ipak_data;
+        map.ipak_data_length = ipak_data_size;
         map.load_map();
         return map;
     }
@@ -257,9 +268,12 @@ namespace Invader {
                     break;
                 case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                     map.base_memory_address = HEK::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
-                    // if(map.bitmap_data_length && map.ipak_data.size() == 0) {
-                    //     map.ipak_data = load_compressed_ipak(map.bitmap_data, map.bitmap_data_length);
-                    // }
+                    if(map.ipak_data_length) {
+                        map.ipak_data_arr = load_compressed_ipak(map.ipak_data, map.ipak_data_length);
+                        map.ipak_data = nullptr;
+                        map.ipak_data_length = 0;
+                        map.ipak_data_m = {};
+                    }
                     break;
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     map.base_memory_address = HEK::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
@@ -542,6 +556,9 @@ namespace Invader {
         this->sound_data_m = std::move(move.sound_data_m);
         this->sound_data = move.sound_data;
         this->sound_data_length = move.sound_data_length;
+        this->ipak_data_m = std::move(move.ipak_data_m);
+        this->ipak_data = move.ipak_data;
+        this->ipak_data_length = move.ipak_data_length;
         this->engine = move.engine;
         this->type = move.type;
         this->model_data_offset = move.model_data_offset;

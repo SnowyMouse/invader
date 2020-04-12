@@ -115,7 +115,7 @@ int main(int argc, const char **argv) {
     }
 
     auto start = std::chrono::steady_clock::now();
-    std::vector<std::byte> loc, bitmaps, sounds;
+    std::vector<std::byte> loc, bitmaps, sounds, ipak;
 
     // Find the asset data
     if(extract_options.ipak.has_value()) {
@@ -125,7 +125,7 @@ int main(int argc, const char **argv) {
             eprintf_error("Failed to open %s", extract_options.ipak->c_str());
             return EXIT_FAILURE;
         }
-        bitmaps = *potential_file;
+        ipak = *potential_file;
     }
     else {
         if(!extract_options.maps_directory.has_value()) {
@@ -158,7 +158,7 @@ int main(int argc, const char **argv) {
     std::unique_ptr<Map> map;
     try {
         auto file = File::open_file(remaining_arguments[0]).value();
-        map = std::make_unique<Map>(Map::map_with_move(std::move(file), std::move(bitmaps), std::move(loc), std::move(sounds)));
+        map = std::make_unique<Map>(Map::map_with_move(std::move(file), std::move(bitmaps), std::move(loc), std::move(sounds), std::move(ipak)));
     }
     catch (std::exception &e) {
         eprintf_error("Failed to parse %s: %s", remaining_arguments[0], e.what());
