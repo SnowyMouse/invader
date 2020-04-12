@@ -39,26 +39,6 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
             throw InvalidTagDataException();
         }
-
-        // If we're building anniversary maps, we handle vertices a lil' differently o-o
-        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            std::vector<std::byte> *vertices_vec = nullptr;
-            for(auto &v : workload.bsp_vertices) {
-                if(v.first == tag_index) {
-                    vertices_vec = &v.second;
-                }
-            }
-            if(!vertices_vec) {
-                vertices_vec = &workload.bsp_vertices.emplace_back(tag_index, std::vector<std::byte>()).second;
-            }
-
-            this->rendered_vertices_offset = vertices_vec->size();
-            vertices_vec->insert(vertices_vec->end(), reinterpret_cast<std::byte *>(lightmap_rendered_vertices), reinterpret_cast<std::byte *>(lightmap_rendered_vertices + this->rendered_vertices_count));
-            this->lightmap_vertices_offset = vertices_vec->size();
-            vertices_vec->insert(vertices_vec->end(), reinterpret_cast<std::byte *>(lightmap_lightmap_vertices), reinterpret_cast<std::byte *>(lightmap_lightmap_vertices + this->lightmap_vertices_count));
-
-            this->uncompressed_vertices.clear();
-        }
     }
 
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
@@ -252,7 +232,7 @@ namespace Invader::Parser {
             const std::byte *uncompressed_lightmap_vertices_start;
 
             // CE Anniversary stuff!
-            if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            if(bsp_material.uncompressed_vertices.pointer == 0) {
                 auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
                 uncompressed_bsp_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->rendered_vertices_offset, uncompressed_vertices_size);
                 uncompressed_lightmap_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->lightmap_vertices_offset, lightmap_vertices_size);

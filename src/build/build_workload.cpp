@@ -319,16 +319,10 @@ namespace Invader {
         if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 // Determine the index. If it's anniversary, there are two indices per BSP
-                auto actual_index = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY ? i : (i * 2 - 1);
                 auto &this_bsp_size = bsp_sizes[i - 1];
                 
                 // Get the size of the BSP struct
-                this_bsp_size = this->map_data_structs[actual_index].size();
-                
-                // If it's anniversary, we also need to include the size of the vertices
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                    this_bsp_size += this->map_data_structs[actual_index + 1].size();
-                }
+                this_bsp_size = this->map_data_structs[i].size();
                 
                 // If this is now the largest BSP, mark it as such
                 if(this_bsp_size > largest_bsp_size) {
@@ -374,13 +368,7 @@ namespace Invader {
             final_data.resize(sizeof(HEK::CacheFileHeader));
 
             // Go through each BSP and add that stuff
-            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                for(std::size_t b = 0; b < workload.bsp_count; b++) {
-                    final_data.insert(final_data.end(), workload.map_data_structs[b * 2 + 1].begin(), workload.map_data_structs[b * 2 + 1].end());
-                    final_data.insert(final_data.end(), workload.map_data_structs[b * 2 + 2].begin(), workload.map_data_structs[b * 2 + 2].end());
-                }
-            }
-            else if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -1376,22 +1364,6 @@ namespace Invader {
 
                     // Do it!
                     auto &base_struct = *t.base_struct;
-                    if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                        auto &base_struct_data = *reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(this->structs[base_struct].data.data());
-                        bool found = false;
-                        for(auto &o : this->bsp_vertices) {
-                            if(o.first == i) {
-                                base_struct_data.lightmap_vertices_size = o.second.size();
-                                base_struct_data.lightmap_vertices_start = bsp_end;
-                                bsp_end += this->map_data_structs.emplace_back(o.second).size();
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(!found) {
-                            this->map_data_structs.emplace_back();
-                        }
-                    }
 
                     // Build the tag data for the BSP data now
                     pointers.clear();

@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Changed
 - invader: Optimized font rendering to utilize character tables
+- invader: Improved accuracy for how MCC maps are loaded
+- invader-build: Changed how BSP vertices are stored for MCC maps
 
 ## [0.33.4] - 2020-04-11
 ### Added

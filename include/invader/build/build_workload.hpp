@@ -213,9 +213,6 @@ namespace Invader {
         /** Tags being worked with */
         std::vector<BuildWorkloadTag> tags;
 
-        /** Data for BSPs */
-        std::vector<std::pair<std::size_t, std::vector<std::byte>>> bsp_vertices;
-
         /** BSP struct */
         std::optional<std::size_t> bsp_struct;
 

@@ -298,7 +298,11 @@ namespace Invader {
 
         auto &map = *this;
 
+        // Determine the tag data address based on the base memory address if MCC, since that's how it does it
         const auto &header = *reinterpret_cast<const CacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeader)));
+        if(map.engine == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            map.base_memory_address = header.tag_array_address - sizeof(CacheFileTagDataHeaderPC);
+        }
 
         std::size_t tag_count = header.tag_count;
         this->tags.reserve(tag_count);
