@@ -86,7 +86,7 @@ namespace Invader {
         }
         
         // Only Custom Edition can use this
-        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX && engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+        if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX && engine_target != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
             throw InvalidArgumentException();
         }
         
