@@ -251,7 +251,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         auto extension = path.extension().string();
 
         // Get the sound
-        SoundReader::Sound sound;
+        SoundReader::Sound sound = {};
         try {
             if(extension == ".wav") {
                 sound = SoundReader::sound_from_wav_file(path_str_cstr);
@@ -267,6 +267,32 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         catch(std::exception &e) {
             eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
             std::exit(EXIT_FAILURE);
+        }
+
+        // Get the permutation name
+        auto filename = path.filename().string();
+        sound.name = filename.substr(0, filename.size() - extension.size());
+        if(sound.name.size() >= sizeof(HEK::TagString)) {
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
+            std::exit(EXIT_FAILURE);
+        }
+
+        // Lowercase it
+        for(char &c : sound.name) {
+            c = std::tolower(c);
+        }
+
+        // Add it to the source list
+        if(extended_sound) {
+            auto &source = extended_sound->source_FLACs.emplace_back();
+            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
+            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
+            if(extension == ".flac") {
+                source.compressed_audio_data = *File::open_file(path_str_cstr);
+            }
+            else {
+                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
+            }
         }
 
         // Use the highest channel count and sample rate
@@ -286,35 +312,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
             std::exit(EXIT_FAILURE);
         }
-        auto filename = path.filename().string();
-
-        // Get the permutation name
-        sound.name = filename.substr(0, filename.size() - extension.size());
-        if(sound.name.size() >= sizeof(HEK::TagString)) {
-            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
-            std::exit(EXIT_FAILURE);
-        }
-
-        // Lowercase it
-        for(char &c : sound.name) {
-            c = std::tolower(c);
-        }
 
         // Make it small
         sound.pcm.shrink_to_fit();
-
-        // Add it to the source list
-        if(extended_sound) {
-            auto &source = extended_sound->source_FLACs.emplace_back();
-            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
-            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
-            if(extension == ".flac") {
-                source.compressed_audio_data = *File::open_file(path_str_cstr);
-            }
-            else {
-                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
-            }
-        }
 
         // Add it
         std::size_t i;
