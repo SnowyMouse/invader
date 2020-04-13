@@ -219,12 +219,17 @@ int main(int argc, char * const *argv) {
         case STRING_LIST_FORMAT_UNICODE:
             final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
-        case STRING_LIST_FORMAT_HMT:
+        case STRING_LIST_FORMAT_LATIN1:
             final_data = generate_string_list_tag<char, Invader::Parser::StringList, Invader::TagClassInt::TAG_CLASS_STRING_LIST>(text);
             break;
-        case STRING_LIST_FORMAT_LATIN1:
+        case STRING_LIST_FORMAT_HMT:
             final_data = generate_hud_message_text_tag(text);
             break;
+    }
+    
+    if(final_data.size() == 0) {
+        eprintf_error("String list was empty. Make sure your text file ends with a newline.");
+        return EXIT_FAILURE;
     }
 
     // Write it all
