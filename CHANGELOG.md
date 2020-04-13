@@ -7,6 +7,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now calculates the CRC32 of MCC maps
 - invader-info: Now calculates the CRC32 of MCC maps
 
+### Changed
+- invader-string: Empty string list tags can no longer be created
+
 ### Fixed
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
