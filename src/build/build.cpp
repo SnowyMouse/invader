@@ -23,7 +23,7 @@ enum ReturnValue : int {
     RETURN_FAILED_INVALID_ARGUMENT = 6
 };
 
-static std::uint32_t read_str32(const char *s, const char *err) {
+static std::uint32_t read_str32(const char *err, const char *s) {
     std::size_t given_crc32_length = std::strlen(s);
     if(given_crc32_length > 8 || given_crc32_length < 1) {
         eprintf_error("%s %s (must be 1-8 digits)", err, s);
