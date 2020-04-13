@@ -13,6 +13,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
+- invader-sound: Fixed an issue with generating split sound tags not setting the
+  actual permutation count correctly as a result of a past optimization
 
 ## [0.34.1] - 2020-04-12
 ### Changed

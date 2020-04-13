@@ -188,15 +188,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     // Initialize a pitch range
     auto &old_pitch_range = sound_tag.pitch_ranges[0];
     Parser::SoundPitchRange pitch_range = {};
-    if(is_new_pitch_range) {
-        pitch_range.natural_pitch = 1.0F;
-        pitch_range.bend_bounds.to = 1.0F;
-    }
-    else {
-        pitch_range.natural_pitch = old_pitch_range.natural_pitch;
-        pitch_range.bend_bounds.from = old_pitch_range.bend_bounds.from;
-        pitch_range.bend_bounds.to = old_pitch_range.bend_bounds.to;
-    }
     
     std::size_t old_actual_permutation_count;
     bool old_split = sound_tag.flags | HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
@@ -357,7 +348,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         eprintf_error("Maximum number of actual permutations (%zu > %zu) exceeded", actual_permutation_count, MAX_PERMUTATIONS);
         std::exit(EXIT_FAILURE);
     }
-    pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     // Sound tags currently only support 22.05 kHz and 44.1 kHz
     if(!sound_options.sample_rate.has_value()) {
@@ -767,14 +757,27 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
 
     // Move it
-    sound_tag.pitch_ranges[0].permutations.clear();
-    sound_tag.pitch_ranges[0].permutations.reserve(pitch_range.permutations.size());
+    auto &new_pitch_range = sound_tag.pitch_ranges[0];
+    new_pitch_range.permutations.clear();
+    new_pitch_range.permutations.reserve(pitch_range.permutations.size());
     for(auto &permutation : pitch_range.permutations) {
-        sound_tag.pitch_ranges[0].permutations.push_back(std::move(permutation));
+        new_pitch_range.permutations.push_back(std::move(permutation));
         permutation.samples = std::vector<std::byte>();
         permutation.mouth_data = std::vector<std::byte>();
     }
-    sound_tag.pitch_ranges[0].name = pitch_range.name;
+    new_pitch_range.name = pitch_range.name;
+    
+    // Set this stuff up last
+    if(is_new_pitch_range) {
+        new_pitch_range.natural_pitch = 1.0F;
+        new_pitch_range.bend_bounds.to = 1.0F;
+    }
+    else {
+        new_pitch_range.natural_pitch = old_pitch_range.natural_pitch;
+        new_pitch_range.bend_bounds.from = old_pitch_range.bend_bounds.from;
+        new_pitch_range.bend_bounds.to = old_pitch_range.bend_bounds.to;
+    }
+    new_pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_EXTENDED_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, extended_sound == nullptr ? "" : " [--extended]");
