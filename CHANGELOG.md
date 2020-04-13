@@ -7,6 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now calculates the CRC32 of MCC maps
 - invader-info: Now calculates the CRC32 of MCC maps
 
+### Fixed
+- invader-extract: Fixed an issue with some sound tags not extracting correctly
+  when extracting from specifically modified Custom Edition maps
+
 ## [0.34.1] - 2020-04-12
 ### Changed
 - invader-extract: Readded extraction via ipaks for MCC maps

@@ -52,7 +52,10 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                 cpp_read_cache_file_data.write("        std::size_t l_{}_count = l.{}.count.read();\n".format(name, name))
                 cpp_read_cache_file_data.write("        r.{}.reserve(l_{}_count);\n".format(name, name))
                 cpp_read_cache_file_data.write("        if(l_{}_count > 0) {{\n".format(name))
-                cpp_read_cache_file_data.write("            auto l_{}_ptr = l.{}.pointer;\n".format(name, name))
+                if "zero_on_index" in struct and struct["zero_on_index"]:
+                    cpp_read_cache_file_data.write("            auto l_{}_ptr = tag.is_indexed() ? 0 : l.{}.pointer.read();\n".format(name, name))
+                else:
+                    cpp_read_cache_file_data.write("            auto l_{}_ptr = l.{}.pointer;\n".format(name, name))
                 cpp_read_cache_file_data.write("            for(std::size_t i = 0; i < l_{}_count; i++) {{\n".format(name))
                 cpp_read_cache_file_data.write("                try {\n")
                 cpp_read_cache_file_data.write("                    r.{}.emplace_back({}::parse_cache_file_data(tag, l_{}_ptr + i * sizeof({}::struct_little)));\n".format(name, struct["struct"], name, struct["struct"]))
@@ -99,7 +102,7 @@ def make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs
                     cpp_read_cache_file_data.write("                data = tag.data(l.{}.pointer, l_{}_data_size);\n".format(name, name))
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            catch (std::exception &) {\n")
-                cpp_read_cache_file_data.write("                eprintf_error(\"Failed to read tag data for {}::{} in %s.%s\", File::preferred_path_to_halo_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
+                cpp_read_cache_file_data.write("                eprintf_error(\"Failed to read tag data for {}::{} in %s.%s\", File::halo_path_to_preferred_path(tag.get_path()).c_str(), HEK::tag_class_to_extension(tag.get_tag_class_int()));\n".format(struct_name, name))
                 cpp_read_cache_file_data.write("                throw;\n")
                 cpp_read_cache_file_data.write("            }\n")
                 cpp_read_cache_file_data.write("            r.{}.insert(r.{}.begin(), data, data + l_{}_data_size);\n".format(name, name, name))

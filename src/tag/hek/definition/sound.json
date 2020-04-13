@@ -394,7 +394,8 @@
                 "type": "TagReflexive",
                 "struct": "SoundPitchRange",
                 "compound": true,
-                "read_only": true
+                "read_only": true,
+                "zero_on_index": true
             }
         ],
         "type": "struct",

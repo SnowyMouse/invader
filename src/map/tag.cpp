@@ -41,7 +41,7 @@ namespace Invader {
 
         // Indexed sound tags can use data in both the sound tag in the cache file and the sound tag in sounds.map
         if(this->tag_class_int == TagClassInt::TAG_CLASS_SOUND && this->indexed) {
-            if(pointer > this->get_map().base_memory_address) {
+            if(pointer == this->base_struct_pointer) {
                 return this->map.resolve_tag_data_pointer(pointer, minimum);
             }
             else {
