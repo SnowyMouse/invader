@@ -246,6 +246,11 @@ namespace Invader {
         if(tag_data_address.has_value()) {
             workload.tag_data_address = *tag_data_address;
         }
+        
+        if(engine_target != CacheFileEngine::CACHE_FILE_DARK_CIRCLET && (0x100000000ull - workload.tag_data_address) < workload.tag_data_size) {
+            eprintf_error("Specified tag data address cannot contain the entire tag space");
+            throw InvalidArgumentException();
+        }
 
         return workload.build_cache_file();
     }
