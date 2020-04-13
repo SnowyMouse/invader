@@ -15,7 +15,7 @@ namespace Invader::HEK {
         CACHE_FILE_CUSTOM_EDITION = 0x261,
         CACHE_FILE_DARK_CIRCLET = 0x1A86,
 
-        CACHE_FILE_ANNIVERSARY = 0x233, // CEA actually uses "7" like CACHE_FILE_RETAIL but doing that while supporting retail maps is insane
+        CACHE_FILE_ANNIVERSARY = 0x157, // CEA actually uses "7" like CACHE_FILE_RETAIL but doing that while supporting retail maps is insane
         CACHE_FILE_ANNIVERSARY_COMPRESSED = 0x7,
 
         CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
