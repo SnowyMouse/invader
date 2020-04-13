@@ -23,16 +23,16 @@ enum ReturnValue : int {
     RETURN_FAILED_INVALID_ARGUMENT = 6
 };
 
-static std::uint32_t read_str32(const char *s) {
+static std::uint32_t read_str32(const char *s, const char *err) {
     std::size_t given_crc32_length = std::strlen(s);
     if(given_crc32_length > 8 || given_crc32_length < 1) {
-        eprintf_error("Invalid CRC32 %s (must be 1-8 digits)", s);
+        eprintf_error("%s %s (must be 1-8 digits)", err, s);
         std::exit(RETURN_FAILED_INVALID_ARGUMENT);
     }
     for(std::size_t i = 0; i < given_crc32_length; i++) {
         char c = std::tolower(s[i]);
         if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
-            eprintf_error("Invalid CRC32 %s (must be hexadecimal)", s);
+            eprintf_error("%s %s (must be hexadecimal)", err, s);
             std::exit(RETURN_FAILED_INVALID_ARGUMENT);
         }
     }
@@ -139,10 +139,10 @@ int main(int argc, const char **argv) {
                 }
                 break;
             case 'C':
-                build_options.forged_crc = read_str32(arguments[0]);
+                build_options.forged_crc = read_str32("Invalid CRC32", arguments[0]);
                 break;
             case 'b':
-                build_options.base_memory_address = read_str32(arguments[0]);
+                build_options.base_memory_address = read_str32("Invalid base address", arguments[0]);
                 break;
             case 'c':
                 build_options.compress = true;
