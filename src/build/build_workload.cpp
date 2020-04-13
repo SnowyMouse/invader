@@ -1084,10 +1084,14 @@ namespace Invader {
         bool found_something = true;
         std::size_t total_savings = 0;
         std::size_t struct_count = this->structs.size();
-        std::size_t total_struct_size = 0;
 
-        for(auto &s : this->structs) {
-            total_struct_size += s.data.size();
+        // Deduplicating BSP data with tag data does NOT work with anniversary maps
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
+            for(auto &s : this->structs) {
+                if(s.bsp.has_value()) {
+                    s.unsafe_to_dedupe = true;
+                }
+            }
         }
 
         oprintf("Optimizing tag space...");
