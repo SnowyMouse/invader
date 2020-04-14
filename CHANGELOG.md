@@ -3,14 +3,15 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-### Added
+### Changed
+- invader-build: Now warns if scenery and light fixtures were found outside of
+  the BSP, as they won't spawn if they were
 - invader-build: Now calculates the CRC32 of MCC maps
 - invader-info: Now calculates the CRC32 of MCC maps
-
-### Changed
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
+- invader-build: Fixed some issues with scenery not spawning on MCC
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-sound: Fixed an issue with generating split sound tags not setting the
