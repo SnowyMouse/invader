@@ -35,6 +35,8 @@ namespace Invader {
 
         return false;
     }
+    
+    BuildWorkload::BuildWorkload() : ErrorHandler() {}
 
     std::vector<std::byte> BuildWorkload::compile_map (
         const char *scenario,
@@ -57,7 +59,9 @@ namespace Invader {
         workload.start = std::chrono::steady_clock::now();
 
         // Hide these?
-        workload.hide_pedantic_warnings = hide_pedantic_warnings;
+        if((workload.hide_pedantic_warnings = hide_pedantic_warnings)) {
+            workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_PEDANTIC_WARNINGS);
+        }
 
         auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
         workload.scenario = scenario_name_fixed.c_str();
@@ -125,7 +129,8 @@ namespace Invader {
         auto use_index = with_index.value_or(std::vector<std::pair<TagClassInt, std::string>>());
 
         // If no index was provided, see if we can get one
-        if(use_index.size() == 0) {
+        auto index_size = use_index.size();
+        if(index_size == 0) {
             switch(engine_target) {
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     use_index = custom_edition_indices(workload.scenario_name.string);
@@ -143,12 +148,16 @@ namespace Invader {
         }
 
         // If we have one, continue on
-        if(use_index.size() > 0) {
+        if(index_size) {
+            auto &error_reporter_tags = workload.get_tag_paths();
+            error_reporter_tags.reserve(index_size);
+            workload.tags.reserve(index_size);
             for(auto &tag : use_index) {
                 auto &new_tag = workload.tags.emplace_back();
                 new_tag.path = tag.second;
                 new_tag.tag_class_int = tag.first;
                 new_tag.stubbed = true;
+                error_reporter_tags.emplace_back(tag.second, tag.first);
             }
         }
 
@@ -353,13 +362,15 @@ namespace Invader {
                 break;
         }
 
-        if(this->errors) {
+        auto errors = this->get_errors();
+        if(errors) {
+            auto warnings = this->get_warnings();
             if(this->verbose) {
-                if(this->warnings) {
-                    oprintf_fail("Build failed with %zu error%s and %zu warning%s", this->errors, this->errors == 1 ? "" : "s", this->warnings, this->warnings == 1 ? "" : "s");
+                if(warnings) {
+                    oprintf_fail("Build failed with %zu error%s and %zu warning%s", errors, errors == 1 ? "" : "s", warnings, warnings == 1 ? "" : "s");
                 }
                 else {
-                    oprintf_fail("Build failed with %zu error%s", this->errors, this->errors == 1 ? "" : "s");
+                    oprintf_fail("Build failed with %zu error%s", errors, errors == 1 ? "" : "s");
                 }
             }
             throw InvalidTagDataException();
@@ -567,8 +578,9 @@ namespace Invader {
 
             // Display the scenario name and information
             if(workload.verbose) {
-                if(workload.warnings) {
-                    oprintf_success_warn("Built successfully with %zu warning%s", workload.warnings, workload.warnings == 1 ? "" : "s");
+                auto warnings = workload.get_warnings();
+                if(warnings) {
+                    oprintf_success_warn("Built successfully with %zu warning%s", warnings, warnings == 1 ? "" : "s");
                 }
                 else {
                     oprintf_success("Built successfully");
@@ -961,6 +973,7 @@ namespace Invader {
             auto &tag = this->tags.emplace_back();
             tag.path = tag_path;
             tag.tag_class_int = tag_class_int;
+            this->get_tag_paths().emplace_back(tag_path, tag_class_int);
         }
 
         // And we're done! Maybe?
@@ -1146,45 +1159,9 @@ namespace Invader {
         oprintf(" done; reduced tag space usage by %.02f MiB\n", BYTES_TO_MiB(total_savings));
     }
 
-    void BuildWorkload::report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index) {
-        switch(type) {
-            case ErrorType::ERROR_TYPE_WARNING_PEDANTIC:
-                if(this->hide_pedantic_warnings || this->disable_recursion) {
-                    return;
-                }
-                eprintf_warn_lesser("WARNING (minor): %s", error);
-                this->warnings++;
-                break;
-            case ErrorType::ERROR_TYPE_WARNING:
-                if(this->disable_recursion) {
-                    return;
-                }
-                eprintf_warn("WARNING: %s", error);
-                this->warnings++;
-                break;
-            case ErrorType::ERROR_TYPE_ERROR:
-                if(this->disable_recursion) {
-                    return;
-                }
-                eprintf_error("ERROR: %s", error);
-                this->errors++;
-                break;
-            case ErrorType::ERROR_TYPE_FATAL_ERROR:
-                if(this->disable_recursion) {
-                    return;
-                }
-                eprintf_error("FATAL ERROR: %s", error);
-                this->errors++;
-                break;
-        }
-        if(tag_index.has_value()) {
-            auto &tag = this->tags[*tag_index];
-            eprintf("...in %s.%s\n", File::halo_path_to_preferred_path(tag.path).c_str(), tag_class_to_extension(tag.tag_class_int));
-        }
-    }
-
     BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::string> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
+        workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
@@ -1196,6 +1173,7 @@ namespace Invader {
 
     BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::string> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
+        workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
@@ -1700,7 +1678,6 @@ namespace Invader {
                                             // Make sure it's not bullshit
                                             if(raw_data_other_data < bitmap_tag_struct_other_raw_data || raw_data_other_data > (bitmap_tag_struct_other_raw_data + bitmap_tag_struct_other_raw_data_size)) {
                                                 oprintf("Range is 0x%08zX - 0x%08zX; needed 0x%08zX - 0x%08zX\n", bitmap_tag_struct_raw_data_translation, bitmap_tag_struct_raw_data_translation + bitmap_tag_struct_other_raw_data_size, static_cast<std::size_t>(bitmap_data_other.pixel_data_offset), static_cast<std::size_t>(bitmap_data_other.pixel_data_offset) + raw_data_size);
-                                                
                                                 
                                                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
                                                 match = false;

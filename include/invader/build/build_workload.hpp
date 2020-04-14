@@ -11,9 +11,10 @@
 #include "../hek/map.hpp"
 #include "../resource/resource_map.hpp"
 #include "../tag/parser/parser.hpp"
+#include "../error_handler/error_handler.hpp"
 
 namespace Invader {
-    class BuildWorkload {
+    class BuildWorkload : public ErrorHandler {
     public:
         /**
          * Select how raw data is handled
@@ -271,39 +272,11 @@ namespace Invader {
          * @param tag_class_int explicitly give a tag class
          */
         void compile_tag_data_recursively(const std::byte *tag_data, std::size_t tag_data_size, std::size_t tag_index, std::optional<TagClassInt> tag_class_int = std::nullopt);
-
-        enum ErrorType {
-            /**
-             * These are warnings that can be turned off. They report issues that don't affect the game, but the user may want to be made aware of them.
-             */
-            ERROR_TYPE_WARNING_PEDANTIC,
-
-            /**
-             * These are warnings that cannot be turned off. They report issues that do affect the game but still result in a valid cache file.
-             */
-            ERROR_TYPE_WARNING,
-
-            /**
-             * These are errors that prevent saving the cache file. They report issues that result in a potentially unplayable yet still technically valid cache file.
-             */
-            ERROR_TYPE_ERROR,
-
-            /**
-             * These are errors that halt building the cache file. They report issues that result in invalid and/or unusable cache files.
-             */
-            ERROR_TYPE_FATAL_ERROR
-        };
-
-        /**
-         * Report an error
-         * @param type      error type
-         * @param error     error message
-         * @param tag_index tag index
-         */
-        void report_error(ErrorType type, const char *error, std::optional<std::size_t> tag_index = std::nullopt);
+        
+        ~BuildWorkload() override = default;
 
     private:
-        BuildWorkload() = default;
+        BuildWorkload();
 
         std::chrono::steady_clock::time_point start;
         const char *scenario;
@@ -314,8 +287,6 @@ namespace Invader {
         void add_tags();
         void generate_tag_array();
         bool optimize_space;
-        std::size_t warnings = 0;
-        std::size_t errors = 0;
         void dedupe_structs();
         std::vector<std::vector<std::byte>> map_data_structs;
         std::vector<std::byte> all_raw_data;
@@ -335,12 +306,6 @@ namespace Invader {
         std::size_t raw_data_indices_offset;
         RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
     };
-
-    #define REPORT_ERROR_PRINTF(workload, type, tag_index, ...) { \
-        char report_error_message[2048]; \
-        std::snprintf(report_error_message, sizeof(report_error_message), __VA_ARGS__); \
-        (workload).report_error(Invader::BuildWorkload::ErrorType::type, report_error_message, tag_index); \
-    }
 }
 
 #endif
