@@ -64,6 +64,11 @@ namespace Invader::File {
         /** Class of the tag */
         TagClassInt class_int;
         
+        /** Join the path and class into one path */
+        std::string join() {
+            return path + "." + HEK::tag_class_to_extension(class_int);
+        }
+        
         TagFilePath() = default;
         TagFilePath(const TagFilePath &copy) = default;
         TagFilePath(const std::string &path, TagClassInt class_int) : path(path), class_int(class_int) {}

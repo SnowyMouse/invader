@@ -3,6 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/parser_struct.hpp>
 #include <invader/tag/hek/header.hpp>
+#include <invader/file/file.hpp>
 
 namespace Invader::Parser {
     ParserStructValue::ParserStructValue(
@@ -828,5 +829,17 @@ namespace Invader::Parser {
 
     const char *ParserStruct::title() const {
         return nullptr;
+    }
+    
+    std::size_t ParserStruct::refactor_reference(const File::TagFilePath &from, const File::TagFilePath &to) {
+        return this->refactor_reference(from.path.c_str(), from.class_int, to.path.c_str(), to.class_int);
+    }
+    
+    std::size_t ParserStruct::refactor_references(const std::vector<std::pair<File::TagFilePath, File::TagFilePath>> &replacements) {
+        std::size_t total = 0;
+        for(auto &i : replacements) {
+            total += this->refactor_reference(i.first, i.second);
+        }
+        return total;
     }
 }

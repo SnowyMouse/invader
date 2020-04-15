@@ -15,6 +15,10 @@ namespace Invader {
     class BuildWorkload;
 }
 
+namespace Invader::File {
+    struct TagFilePath;
+}
+
 namespace Invader::Parser {
     struct ParserStruct;
 
@@ -830,6 +834,21 @@ namespace Invader::Parser {
          * @return           number of references replaced
          */
         virtual std::size_t refactor_reference(const char *from_path, TagClassInt from_class, const char *to_path, TagClassInt to_class) = 0;
+
+        /**
+         * Refactor the tag reference, replacing all references with the given reference. Paths must use Halo path separators.
+         * @param from  Path to look for
+         * @param to    Path to replace with
+         * @return      number of references replaced
+         */
+        std::size_t refactor_reference(const File::TagFilePath &from, const File::TagFilePath &to);
+
+        /**
+         * Refactor the tag references, replacing all references with the given reference. Paths must use Halo path separators.
+         * @param changes Changes to make (first is from, second is to)
+         * @return        number of references replaced
+         */
+        std::size_t refactor_references(const std::vector<std::pair<File::TagFilePath, File::TagFilePath>> &replacements);
 
         /**
          * Get the values in the struct
