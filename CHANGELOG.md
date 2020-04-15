@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
 - invader-build: Now calculates the CRC32 of MCC maps
+- invader-compress: Now shows the compression format used
 - invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
   can use it multiple times in a single invocation
