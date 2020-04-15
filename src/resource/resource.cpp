@@ -24,6 +24,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
     options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
+    options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";
@@ -41,6 +42,7 @@ int main(int argc, const char **argv) {
         bool resource_map_set = false;
 
         bool retail = false;
+        std::size_t padding = 0;
     } resource_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
@@ -59,6 +61,10 @@ int main(int argc, const char **argv) {
 
             case 'R':
                 resource_options.retail = true;
+                break;
+
+            case 'P':
+                resource_options.padding = std::stoull(arguments[0]);
                 break;
 
             case 'T':
@@ -109,7 +115,7 @@ int main(int argc, const char **argv) {
     header.resource_count = tags_list.size();
 
     // Read the amazing fun happy stuff
-    std::vector<std::byte> resource_data(sizeof(ResourceMapHeader));
+    std::vector<std::byte> resource_data(sizeof(ResourceMapHeader) + resource_options.padding);
     std::vector<std::size_t> offsets;
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;

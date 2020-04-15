@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-edit-qt: Added an error message for if a subdirectory could not be
   queried
+- invader-resource: Added `-p` to specify a number of extra bytes to add after
+  the header when generating resource maps
 
 ### Changed
 - invader-build: Now warns if scenery and light fixtures were found outside of
