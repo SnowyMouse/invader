@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <filesystem>
+#include <fstream>
 #include <invader/version.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/hek/definition.hpp>
@@ -25,6 +26,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
     options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
     options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
+    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";
@@ -40,7 +42,7 @@ int main(int argc, const char **argv) {
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
         const char **(*default_fn)() = get_default_bitmap_resources;
         bool resource_map_set = false;
-
+        std::optional<const char *> index;
         bool retail = false;
         std::size_t padding = 0;
     } resource_options;
@@ -65,6 +67,10 @@ int main(int argc, const char **argv) {
 
             case 'p':
                 resource_options.padding = std::stoull(arguments[0]);
+                break;
+
+            case 'w':
+                resource_options.index = arguments[0];
                 break;
 
             case 'T':
@@ -105,9 +111,18 @@ int main(int argc, const char **argv) {
     }
 
     // Get all the tags
-    std::vector<std::string> tags_list;
-    for(const char **i = resource_options.default_fn(); *i; i++) {
-        tags_list.insert(tags_list.end(), *i);
+    std::vector<File::TagFilePath> tags_list;
+    if(resource_options.index.has_value()) {
+        std::fstream index_file(*resource_options.index, std::ios_base::in);
+        std::string tag;
+        while(std::getline(index_file, tag)) {
+            tags_list.emplace_back(File::split_tag_class_extension(tag).value());
+        }
+    }
+    else {
+        for(const char **i = resource_options.default_fn(); *i; i++) {
+            tags_list.emplace_back(File::split_tag_class_extension(*i).value());
+        }
     }
 
     ResourceMapHeader header = {};
@@ -120,86 +135,56 @@ int main(int argc, const char **argv) {
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
 
-    for(const std::string &listed_tag : tags_list) {
+    for(const auto &listed_tag : tags_list) {
         // First let's open it
         TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
-        auto tag_path = File::halo_path_to_preferred_path(listed_tag);
-        auto halo_tag_path = File::preferred_path_to_halo_path(listed_tag);
-
-        // Function to open a file
-        auto open_tag = [&resource_options, &tag_path](const char *extension) -> std::FILE * {
-            for(auto &tags_folder : resource_options.tags) {
-                auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string() + extension;
-                std::FILE *f = std::fopen(tag_path_str.c_str(), "rb");
-                if(f) {
-                    return f;
-                }
-            }
-            return nullptr;
-        };
-
-        #define ATTEMPT_TO_OPEN(extension) { \
-            std::FILE *f = open_tag(extension); \
-            if(!f) { \
-                eprintf_error("Failed to open %s" extension, tag_path.c_str()); \
-                return EXIT_FAILURE; \
-            } \
-            std::fseek(f, 0, SEEK_END); \
-            tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
-            std::fseek(f, 0, SEEK_SET); \
-            if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
-                return EXIT_FAILURE; \
-            } \
-            std::fclose(f); \
-        }
+        auto tag_path = File::halo_path_to_preferred_path(listed_tag.join());
+        auto halo_tag_path = File::preferred_path_to_halo_path(tag_path);
 
         switch(resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
                 tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
-                ATTEMPT_TO_OPEN(".bitmap")
                 break;
             case ResourceMapType::RESOURCE_MAP_SOUND:
                 tag_class_int = TagClassInt::TAG_CLASS_SOUND;
-                ATTEMPT_TO_OPEN(".sound")
                 break;
             case ResourceMapType::RESOURCE_MAP_LOC:
-                tag_class_int = TagClassInt::TAG_CLASS_FONT;
-                #define DO_THIS_FOR_ME_PLEASE(tci, extension) if(tag_data.size() == 0) { \
-                    tag_class_int = tci; \
-                    std::FILE *f = open_tag(extension); \
-                    if(f) { \
-                        std::fseek(f, 0, SEEK_END); \
-                        tag_data.insert(tag_data.end(), std::ftell(f), std::byte()); \
-                        std::fseek(f, 0, SEEK_SET); \
-                        if(std::fread(tag_data.data(), tag_data.size(), 1, f) != 1) { \
-                            eprintf_error("Failed to read %s" extension, tag_path.c_str()); \
-                            return EXIT_FAILURE; \
-                        } \
-                        std::fclose(f); \
-                    } \
+                switch(listed_tag.class_int) {
+                    case TagClassInt::TAG_CLASS_FONT:
+                    case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                    case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+                        tag_class_int = listed_tag.class_int;
+                        break;
+                    default:
+                        eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.class_int));
+                        return EXIT_FAILURE;
                 }
-                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_FONT, ".font")
-                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT, ".hud_message_text")
-                DO_THIS_FOR_ME_PLEASE(TagClassInt::TAG_CLASS_UNICODE_STRING_LIST, ".unicode_string_list")
-                #undef DO_THIS_FOR_ME_PLEASE
-
-                if(tag_data.size() == 0) {
-                    eprintf_error("Failed to open %s.\nNo such font, hud_message_text, or unicode_string_list were found.", tag_path.c_str());
-                }
-
                 break;
         }
+        
+        if(tag_class_int != listed_tag.class_int) {
+            eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_class_int), tag_class_to_extension(listed_tag.class_int));
+        }
 
-        #undef ATTEMPT_TO_OPEN
+        for(auto &tags_folder : resource_options.tags) {
+            auto tag_path_str = std::filesystem::path(tags_folder) / tag_path;
+            tag_data = Invader::File::open_file(tag_path_str.c_str()).value_or(std::vector<std::byte>());
+            if(tag_data.size()) {
+                break;
+            }
+        }
+
+        if(tag_data.size() == 0) {
+            eprintf_error("Failed to open %s.", tag_path.c_str());
+        }
 
         // This may be needed
         #define PAD_RESOURCES_32_BIT resource_data.insert(resource_data.end(), REQUIRED_PADDING_32_BIT(resource_data.size()), std::byte());
 
         // Compile the tags
         try {
-            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(tag_path.c_str(), tag_class_int, resource_options.tags);
+            auto compiled_tag = Invader::BuildWorkload::compile_single_tag(listed_tag.path.c_str(), tag_class_int, resource_options.tags);
             auto &compiled_tag_tag = compiled_tag.tags[0];
             auto &compiled_tag_struct = compiled_tag.structs[*compiled_tag_tag.base_struct];
             auto *compiled_tag_data = compiled_tag_struct.data.data();

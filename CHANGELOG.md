@@ -8,6 +8,8 @@ This is used for recording Invader's changes. This changelog is based on
   queried
 - invader-resource: Added `-p` to specify a number of extra bytes to add after
   the header when generating resource maps
+- invader-resource: Added `-w` to specify resource indices rather than the
+  default Custom Edition resource indices
 
 ### Changed
 - invader-build: Now warns if scenery and light fixtures were found outside of
