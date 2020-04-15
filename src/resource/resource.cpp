@@ -63,7 +63,7 @@ int main(int argc, const char **argv) {
                 resource_options.retail = true;
                 break;
 
-            case 'P':
+            case 'p':
                 resource_options.padding = std::stoull(arguments[0]);
                 break;
 
@@ -207,14 +207,14 @@ int main(int argc, const char **argv) {
 
             std::vector<std::byte> data;
             std::vector<std::size_t> structs;
-            
+
             // Pointers are stored as offsets here
             auto write_pointers = [&data, &structs, &compiled_tag, &resource_options]() {
                 for(auto &s : compiled_tag.structs) {
                     structs.push_back(data.size());
                     data.insert(data.end(), s.data.begin(), s.data.end());
                 }
-                
+
                 std::size_t sound_offset = resource_options.type == ResourceMapType::RESOURCE_MAP_SOUND ? sizeof(Invader::Parser::Sound::struct_little) : 0;
                 for(auto &s : compiled_tag.structs) {
                     for(auto &ptr : s.pointers) {
@@ -255,7 +255,7 @@ int main(int argc, const char **argv) {
                             }
                         }
                     }
-                    
+
                     write_pointers();
 
                     // Push the asset data and tag data if we aren't on retail
@@ -320,7 +320,7 @@ int main(int argc, const char **argv) {
                             }
                         }
                     }
-                    
+
                     write_pointers();
 
                     // If we're not on retail, push asset and tag data
