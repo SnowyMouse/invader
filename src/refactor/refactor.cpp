@@ -13,7 +13,7 @@
 
 using namespace Invader::File;
 
-std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePath, TagFilePath>> replacements, bool check_only, bool dry_run) {
+std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
@@ -30,9 +30,7 @@ std::size_t refactor_tags(const char *file_path, std::vector<std::pair<TagFilePa
         Invader::HEK::TagFileHeader::validate_header(header, tag->size());
 
         auto tag_data = Invader::Parser::ParserStruct::parse_hek_tag_file(tag->data(), tag->size());
-        for (auto &r : replacements) {
-            count += tag_data->refactor_reference(r.first.path.c_str(), r.first.class_int, r.second.path.c_str(), r.second.class_int);
-        }
+        count = tag_data->refactor_references(replacements);
         if(count) {
             file_data = tag_data->generate_hek_tag_data(header->tag_class_int);
         }
@@ -65,22 +63,25 @@ int main(int argc, char * const *argv) {
     options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This cannot be set with --move or --no-move.");
     options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move or --dry-run.");
     options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
-    options.emplace_back("recursive", 'r', 0, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, and it cannot be used with --no-move.");
+    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with --no-move. This can only be specified once per operation and cannot be used with -T.", "<f> <t>");
+    options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with -r.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >";
+    static constexpr char USAGE[] = "[options] <-M|-N |-D> <-T <from> <to> [...] | -r <from-dir> <to-dir> >";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
         bool no_move = false;
-        bool recursive = false;
         bool set_move_or_no_move = false;
         bool dry_run = false;
         const char *single_tag = nullptr;
+        
+        std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
+        std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
-    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 2, 2, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
+    auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
         switch(opt) {
             case 't':
                 refactor_options.tags.emplace_back(arguments[0]);
@@ -105,7 +106,16 @@ int main(int argc, char * const *argv) {
                 refactor_options.set_move_or_no_move = true;
                 break;
             case 'r':
-                refactor_options.recursive = true;
+                refactor_options.recursive = { arguments[0], arguments[1] };
+                break;
+            case 'T':
+                try {
+                    refactor_options.replacements.emplace_back(split_tag_class_extension(preferred_path_to_halo_path(arguments[0])).value(), split_tag_class_extension(preferred_path_to_halo_path(arguments[1])).value());
+                }
+                catch(std::bad_optional_access &) {
+                    eprintf_error("Invalid path pair: \"%s\" and \"%s\"", arguments[0], arguments[1]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
             case 'D':
                 if(refactor_options.set_move_or_no_move) {
@@ -119,6 +129,12 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    
+    auto &replacements = refactor_options.replacements;
+    if(replacements.size() && refactor_options.recursive) {
+        eprintf_error("Error: --recursive and --tag cannot be used at the same time");
+        return EXIT_FAILURE;
+    }
 
     if(refactor_options.no_move && refactor_options.recursive) {
         eprintf_error("Error: --no-move and --recursive cannot be used at the same time");
@@ -135,7 +151,6 @@ int main(int argc, char * const *argv) {
     }
 
     // Figure out what we need to do
-    std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
     std::vector<TagFile *> replacements_files;
     std::vector<TagFile> all_tags = load_virtual_tag_folder(refactor_options.tags);
     std::vector<TagFile> single_tag;
@@ -179,10 +194,10 @@ int main(int argc, char * const *argv) {
     };
 
     // If recursive, we need to go through each tag in the tag directory for a match
-    if(refactor_options.recursive) {
-        auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[0]));
+    if(refactor_options.recursive.has_value()) {
+        auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(refactor_options.recursive->first));
         auto from_halo_size = from_halo.size();
-        auto to_halo = remove_trailing_slashes(preferred_path_to_halo_path(remaining_arguments[1]));
+        auto to_halo = remove_trailing_slashes(preferred_path_to_halo_path(refactor_options.recursive->second));
 
         // Go through each tag to find a match
         for(auto &t : all_tags) {
@@ -201,34 +216,33 @@ int main(int argc, char * const *argv) {
         }
     }
     else {
-        auto from_halo_path = preferred_path_to_halo_path(remaining_arguments[0]);
-        auto from_maybe = split_tag_class_extension(from_halo_path);
-        auto to_maybe = split_tag_class_extension(preferred_path_to_halo_path(remaining_arguments[1]));
-
-        auto &from = unmaybe(from_maybe, remaining_arguments[0]);
-        auto &to = unmaybe(to_maybe, remaining_arguments[1]);
-        replacements.emplace_back(from, to);
-
         if(!refactor_options.no_move) {
-            bool added = false;
-            for(auto &t : all_tags) {
-                if(preferred_path_to_halo_path(t.tag_path) == from_halo_path) {
-                    replacements_files.emplace_back(&t);
-                    added = true;
-                    break;
+            for(auto &i : replacements) {
+                bool added = false;
+                auto joined = i.first.join();
+                for(auto &t : all_tags) {
+                    if(preferred_path_to_halo_path(t.tag_path) == joined) {
+                        replacements_files.emplace_back(&t);
+                        added = true;
+                        break;
+                    }
                 }
-            }
 
-            if(!added) {
-                eprintf_error("Error: %s was not found.", remaining_arguments[0]);
-                return EXIT_FAILURE;
+                if(!added) {
+                    eprintf_error("Error: %s was not found.", joined.c_str());
+                    return EXIT_FAILURE;
+                }
             }
         }
 
         // If we're moving tags, we can't change tag classes
-        if(!refactor_options.no_move && !refactor_options.dry_run && to.class_int != from.class_int) {
-            eprintf_error("Error: Tag class cannot be changed if moving tags.");
-            return EXIT_FAILURE;
+        if(!refactor_options.no_move && !refactor_options.dry_run) {
+            for(auto &i : replacements) {
+                if(i.first.class_int != i.second.class_int) {
+                    eprintf_error("Error: Tag class cannot be changed if moving tags.");
+                    return EXIT_FAILURE;
+                }
+            }
         }
     }
 
