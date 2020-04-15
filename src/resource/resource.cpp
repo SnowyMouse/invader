@@ -24,7 +24,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("type", 'T', 1, "Set the resource map. This option is required. Can be: bitmaps, sounds, or loc.", "<type>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
-    options.emplace_back("retail", 'R', 0, "Build a retail resource map (bitmaps/sounds only)");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail", "<id>");
     options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
 
@@ -40,10 +40,13 @@ int main(int argc, const char **argv) {
 
         // Resource map type
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
+        
+        // Engine target
+        std::optional<HEK::CacheFileEngine> engine_target;
+        
         const char **(*default_fn)() = get_default_bitmap_resources;
         bool resource_map_set = false;
         std::optional<const char *> index;
-        bool retail = false;
         std::size_t padding = 0;
     } resource_options;
 
@@ -61,8 +64,17 @@ int main(int argc, const char **argv) {
                 resource_options.maps = arguments[0];
                 break;
 
-            case 'R':
-                resource_options.retail = true;
+            case 'g':
+                if(std::strcmp(arguments[0], "custom") == 0) {
+                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                }
+                else if(std::strcmp(arguments[0], "retail") == 0 || std::strcmp(arguments[0], "demo") == 0) {
+                    resource_options.engine_target = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                }
+                else {
+                    eprintf_error("Invalid engine %s. Use --help for more information.", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'p':
@@ -99,9 +111,15 @@ int main(int argc, const char **argv) {
         eprintf_error("No resource map type was given. Use -h for more information.");
         return EXIT_FAILURE;
     }
+    
+    if(!resource_options.engine_target.has_value()) {
+        eprintf_error("No game engine was set. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
 
-    if(resource_options.retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
-        eprintf_error("Only bitmaps.map and sounds.map can be made for retail.");
+    bool retail = *resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+    if(retail && resource_options.type == ResourceMapType::RESOURCE_MAP_LOC) {
+        eprintf_error("Only bitmaps.map and sounds.map can be made for retail/demo engines.");
         return EXIT_FAILURE;
     }
 
@@ -220,7 +238,7 @@ int main(int argc, const char **argv) {
                             auto *bitmap_data = bitmaps + b;
 
                             // If we're on retail, push the pixel data
-                            if(resource_options.retail) {
+                            if(retail) {
                                 // Generate the path to add
                                 std::snprintf(path_temp, sizeof(path_temp), "%s_%zu", halo_tag_path.c_str(), b);
 
@@ -244,7 +262,7 @@ int main(int argc, const char **argv) {
                     write_pointers();
 
                     // Push the asset data and tag data if we aren't on retail
-                    if(!resource_options.retail) {
+                    if(!retail) {
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;
                         for(auto &r : compiled_tag.raw_data) {
@@ -282,7 +300,7 @@ int main(int argc, const char **argv) {
                                 auto *permutations = reinterpret_cast<SoundPermutation<LittleEndian> *>(compiled_tag.structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
                                 for(std::size_t p = 0; p < permutation_count; p++) {
                                     auto &permutation = permutations[p];
-                                    if(resource_options.retail) {
+                                    if(retail) {
                                         // Generate the path to add
                                         std::snprintf(path_temp, sizeof(path_temp), "%s__%zu__%zu", halo_tag_path.c_str(), pr, p);
 
@@ -309,7 +327,7 @@ int main(int argc, const char **argv) {
                     write_pointers();
 
                     // If we're not on retail, push asset and tag data
-                    if(!resource_options.retail) {
+                    if(!retail) {
                         // Push the asset data first
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;
