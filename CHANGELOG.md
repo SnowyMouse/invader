@@ -13,7 +13,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader: Help menus will adapt to the user's terminal width if the user is on
-  either Linux or Windows
+  either Linux or Windows and their terminal width is at least 80 characters
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
 - invader-build: Now calculates the CRC32 of MCC maps
