@@ -3,6 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-edit-qt: Added an error message for if a subdirectory could not be
+  queried
+
 ### Changed
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
@@ -14,6 +18,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Fixed some issues with scenery not spawning on MCC
+- invader-edit-qt: Fixed crashing if a tag directory contained files that could
+  not be accessed in the filesystem
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-sound: Fixed an issue with generating split sound tags not setting the

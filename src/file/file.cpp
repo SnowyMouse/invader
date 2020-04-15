@@ -275,8 +275,10 @@ namespace Invader::File {
         }
     }
 
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status) {
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status, std::size_t *errors) {
         std::vector<TagFile> all_tags;
+        
+        std::size_t new_errors = 0;
 
         std::pair<std::mutex, std::size_t> status_r;
         if(status == nullptr) {
@@ -285,8 +287,16 @@ namespace Invader::File {
         status->first.lock();
         status->second = 0;
         status->first.unlock();
+        
+        #define maybe_iterate_directories(file_path, ...) try { \
+            iterate_directories(__VA_ARGS__); \
+        } \
+        catch(std::exception &e) { \
+            eprintf_error("Error listing %s: %s", file_path, e.what()); \
+            new_errors++; \
+        }
 
-        auto iterate_directories = [&all_tags, &status](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::string> &main_dir) -> void {
+        auto iterate_directories = [&all_tags, &status, &new_errors](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::string> &main_dir) -> void {
             if(++depth == 256) {
                 return;
             }
@@ -296,7 +306,7 @@ namespace Invader::File {
                 auto file_path = d.path();
                 add_dir.emplace_back(file_path.filename().string());
                 if(d.is_directory()) {
-                    iterate_directories(add_dir, d, iterate_directories, depth, priority, main_dir);
+                    maybe_iterate_directories(file_path.string().c_str(), add_dir, d, iterate_directories, depth, priority, main_dir);
                 }
                 else if(file_path.has_extension()) {
                     auto extension = file_path.extension().string();
@@ -326,7 +336,12 @@ namespace Invader::File {
         for(std::size_t i = 0; i < dir_count; i++) {
             auto &d = tags[i];
             auto dir_str = d.c_str();
-            iterate_directories(std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::string>(&dir_str, &dir_str + 1));
+            maybe_iterate_directories(dir_str, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::string>(&dir_str, &dir_str + 1));
+        }
+        
+        // Change error count if errors was specified
+        if(errors) {
+            *errors = new_errors;
         }
 
         return all_tags;

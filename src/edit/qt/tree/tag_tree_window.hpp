@@ -27,7 +27,7 @@ namespace Invader::EditQt {
 
     signals:
         void tag_count_changed(std::pair<std::mutex, std::size_t> *new_count);
-        void fetch_finished(const std::vector<File::TagFile> *tags);
+        void fetch_finished(const std::vector<File::TagFile> *tags, int errors);
 
     private:
         void run() override;
@@ -137,7 +137,7 @@ namespace Invader::EditQt {
         void show_context_menu(const QPoint &point);
 
         /** We're done */
-        void tags_reloaded_finished(const std::vector<File::TagFile> *result);
+        void tags_reloaded_finished(const std::vector<File::TagFile> *result, int error_count);
 
         /** We're done */
         void tag_count_changed(std::pair<std::mutex, std::size_t> *count);
@@ -181,6 +181,8 @@ namespace Invader::EditQt {
         bool opening_tag = false;
 
         TagFetcherThread *fetcher_thread;
+        
+        std::size_t listing_errors = 0;
     };
 }
 
