@@ -129,7 +129,7 @@ namespace Invader {
     #define REPORT_ERROR_PRINTF(handler, type, tag_index, ...) { \
         char report_error_message[2048]; \
         std::snprintf(report_error_message, sizeof(report_error_message), __VA_ARGS__); \
-        (handler).report_error(Invader::BuildWorkload::ErrorType::type, report_error_message, tag_index); \
+        (handler).report_error(Invader::ErrorHandler::ErrorType::type, report_error_message, tag_index); \
     }
 }
 

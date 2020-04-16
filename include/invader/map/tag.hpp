@@ -62,6 +62,14 @@ namespace Invader {
         }
 
         /**
+         * Get the tag index
+         * @return tag index
+         */
+        std::size_t get_tag_index() const noexcept {
+            return this->tag_index;
+        }
+
+        /**
          * Get whether or not the tag data is available
          * @return true if the tag data is available
          */
