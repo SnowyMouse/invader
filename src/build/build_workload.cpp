@@ -676,7 +676,7 @@ namespace Invader {
                 
                 // If we have a 32-bit limit, show the limit
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
+                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * uncompressed_size / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
                 else {
                     oprintf("MiB\n");

@@ -26,6 +26,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-build: Fixed some issues with scenery not spawning on MCC
+- invader-build: Fixed uncompressed size having the wrong percentage
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
