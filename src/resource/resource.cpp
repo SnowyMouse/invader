@@ -158,7 +158,7 @@ int main(int argc, const char **argv) {
         TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
         auto tag_path = File::halo_path_to_preferred_path(listed_tag.join());
-        auto halo_tag_path = File::preferred_path_to_halo_path(tag_path);
+        auto halo_tag_path = File::preferred_path_to_halo_path(listed_tag.path.c_str());
 
         switch(resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
