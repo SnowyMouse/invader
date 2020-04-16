@@ -340,7 +340,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 for(std::size_t t = 0; t < tag_count; t++) {
                     auto &map_tag = i.map_data->get_tag(t);
                     if(map_tag.get_tag_class_int() == tag.class_int && map_tag.get_path() == tag.path) {
-                        auto extracted_data = Invader::Extraction::extract_tag(i.map_data->get_tag(t));
+                        auto extracted_data = Invader::ExtractionWorkload::extract_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         break;
                     }

@@ -4,12 +4,12 @@
 #include <invader/tag/hek/header.hpp>
 #include <invader/tag/parser/parser.hpp>
 
-namespace Invader::Extraction {
+namespace Invader {
     /**
      * Extract the tag into an HEK tag file
      * @param tag tag to extract
      */
-    std::vector<std::byte> extract_tag(const Tag &tag) {
+    std::vector<std::byte> ExtractionWorkload::extract_tag(const Tag &tag) {
         auto tag_class_int = tag.get_tag_class_int();
 
         #define EXTRACT_TAG_CLASS(class_struct, class_int) case TagClassInt::class_int: { \

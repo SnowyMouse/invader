@@ -5,14 +5,25 @@
 
 #include <vector>
 #include "../map/tag.hpp"
+#include "../error_handler/error_handler.hpp"
 
-namespace Invader::Extraction {
-    /**
-     * Extract the tag into an HEK tag file
-     * @param tag tag to extract
-     * @return    tag data extracted
-     */
-    std::vector<std::byte> extract_tag(const Tag &tag);
+namespace Invader::Parser {
+    struct ParserStruct;
+}
+
+namespace Invader {
+    class ExtractionWorkload : public ErrorHandler {
+    public:
+        /**
+         * Extract a single tag from a map
+         * @param tag tag from a loaded map to extract
+         * @return    extracted tag
+         */
+        static std::vector<std::byte> extract_tag(const Tag &tag);
+    private:
+        ExtractionWorkload() = default;
+        ~ExtractionWorkload() override = default;
+    };
 }
 
 #endif

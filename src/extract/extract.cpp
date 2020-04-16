@@ -259,7 +259,7 @@ int main(int argc, const char **argv) {
         // Get the tag data
         std::vector<std::byte> new_tag;
         try {
-            new_tag = Invader::Extraction::extract_tag(tag);
+            new_tag = Invader::ExtractionWorkload::extract_tag(tag);
 
             // If we're recursive, we want to also get that stuff, too
             if(extract_options.recursive) {
