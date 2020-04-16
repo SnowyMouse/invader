@@ -97,7 +97,7 @@ namespace Invader::EditQt {
         // Next, set up the status bar
         QStatusBar *status_bar = new QStatusBar();
         this->tag_count_label = new QLabel();
-        this->tag_loading_label = new QLabel("Loading tags...");
+        this->tag_loading_label = new QLabel();
         this->tag_opening_label = new QLabel();
         this->tag_opening_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
         this->tag_loading_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -183,8 +183,9 @@ namespace Invader::EditQt {
 
     void TagFetcherThread::run() {
         // Function for loading it
-        auto load_it = [](std::vector<File::TagFile> *to, std::vector<std::string> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
-            *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser);
+        std::size_t error_count;
+        auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::string> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
+            *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser, &error_count);
         };
 
         // Run this in parallel
@@ -202,7 +203,7 @@ namespace Invader::EditQt {
         delete t;
 
         // Emit one last signal
-        emit fetch_finished(&this->all_tags);
+        emit fetch_finished(&this->all_tags, static_cast<int>(error_count));
     }
 
     TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths) : QThread(parent), all_paths(all_paths) {}
@@ -213,6 +214,8 @@ namespace Invader::EditQt {
             return;
         }
         this->tags_reloading_queued = true;
+        this->tag_loading_label->setText("Listing tags...");
+        this->tag_loading_label->setStyleSheet("");
         this->tag_loading_label->show();
 
         // Clear all tags
@@ -233,11 +236,20 @@ namespace Invader::EditQt {
         this->fetcher_thread->start();
     }
 
-    void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result) {
+    void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result, int error_count) {
         this->tags_reloading_queued = false;
         this->set_count_label(result->size());
         all_tags = *result;
-        this->tag_loading_label->hide();
+        if(error_count) {
+            char error_message[256];
+            std::snprintf(error_message,sizeof(error_message),"Failed to list %i subdirector%s. Check stderr for more information.", error_count, error_count == 1 ? "y" : "ies");
+            this->tag_loading_label->show();
+            this->tag_loading_label->setStyleSheet("color: red;");
+            this->tag_loading_label->setText(error_message);
+        }
+        else {
+            this->tag_loading_label->hide();
+        }
         if(this->tags_to_open.size()) {
             for(auto &t : this->tags_to_open) {
                 this->open_tag(t.c_str(), this->tags_to_open_full_path);

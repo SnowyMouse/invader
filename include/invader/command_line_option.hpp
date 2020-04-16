@@ -8,6 +8,15 @@
 #include <vector>
 #include <optional>
 
+#ifdef __linux__
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace Invader {
     /**
      * Header only command line option handler
@@ -126,13 +135,36 @@ namespace Invader {
                     const char *description = option.description.value().c_str();
 
                     // Print the right column (description)
+                    std::size_t terminal_width = 80;
+                    
+                    // Resize based on console width
+                    #ifdef __linux__
+                    struct winsize w;
+                    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);   
+                    std::size_t new_width = static_cast<std::size_t>(w.ws_col);
+                    if(terminal_width < new_width) {
+                        terminal_width = new_width;
+                    }
+                    #endif
+                    
+                    #ifdef _WIN32
+                    CONSOLE_SCREEN_BUFFER_INFO w;
+                    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &w);
+                    std::size_t new_width = w.srWindow.Right - w.srWindow.Left + 1;
+                    if(terminal_width < new_width) {
+                        terminal_width = new_width;
+                    }
+                    #endif
+                    
                     std::size_t r = 0;
-                    char right_column[80 - sizeof(left_column)] = {};
+                    std::vector<char> right_column_v(terminal_width - sizeof(left_column), 0);
+                    auto right_column_size = right_column_v.size();
+                    auto *right_column = right_column_v.data();
                     const char *word_start = nullptr;
                     bool first_line = true;
 
                     // Print and then purge the right column buffer to make way for a new line
-                    auto purge_right_column = [&right_column, &r, &first_line]() {
+                    auto purge_right_column = [&right_column, &r, &first_line, &right_column_size]() {
                         if(r) {
                             if(first_line) {
                                 first_line = false;
@@ -141,7 +173,7 @@ namespace Invader {
                                 std::printf("%" INV_COMMAND_LINE_ARGUMENT_SIZE_STR "s", "");
                             }
                             std::printf("%s\n", right_column);
-                            std::fill(right_column, right_column + sizeof(right_column), 0);
+                            std::fill(right_column, right_column + right_column_size, 0);
                             r = 0;
                         }
                     };
@@ -151,10 +183,10 @@ namespace Invader {
                         if(*w == ' ' || *w == 0) {
                             if(word_start) {
                                 std::size_t word_length = w - word_start;
-                                if(r + 1 + word_length >= sizeof(right_column)) {
+                                if(r + 1 + word_length >= right_column_size) {
                                     purge_right_column();
                                 }
-                                if(word_length + 1 > sizeof(right_column)) {
+                                if(word_length + 1 > right_column_size) {
                                     std::fprintf(stderr, "Right column exceeded!\n");
                                     std::terminate();
                                 }

@@ -3,17 +3,32 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-edit-qt: Added an error message for if a subdirectory could not be
+  queried
+- invader-resource: Added `-p` to specify a number of extra bytes to add after
+  the header when generating resource maps
+- invader-resource: Added `-w` to specify resource indices rather than the
+  default Custom Edition resource indices
+
 ### Changed
+- invader: Help menus will adapt to the user's terminal width if the user is on
+  either Linux or Windows and their terminal width is at least 80 characters
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
 - invader-build: Now calculates the CRC32 of MCC maps
+- invader-compress: Now shows the compression format used
 - invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
   can use it multiple times in a single invocation
+- invader-resource: Replace `-R` with `-g` which is now required
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
 - invader-build: Fixed some issues with scenery not spawning on MCC
+- invader-build: Fixed uncompressed size having the wrong percentage
+- invader-edit-qt: Fixed crashing if a tag directory contained files that could
+  not be accessed in the filesystem
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-sound: Fixed an issue with generating split sound tags not setting the

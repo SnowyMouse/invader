@@ -65,7 +65,7 @@ namespace Invader::File {
         TagClassInt class_int;
         
         /** Join the path and class into one path */
-        std::string join() {
+        std::string join() const {
             return path + "." + HEK::tag_class_to_extension(class_int);
         }
         
@@ -117,9 +117,10 @@ namespace Invader::File {
      * Read a tags directory
      * @param  tags   tag directories
      * @param  status optional pointer to a size_t to store the current number of tags loaded (for status bars)
+     * @param  errors optional pointer to hold the number of errors
      * @return        all tags in the folder
      */
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status = nullptr);
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status = nullptr, std::size_t *errors = nullptr);
 
     /**
      * Convert the tag path to a path using the system's preferred separators

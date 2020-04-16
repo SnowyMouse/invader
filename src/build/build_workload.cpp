@@ -125,12 +125,9 @@ namespace Invader {
             workload.set_scenario_name(scenario_name_fixed.c_str());
         }
 
-        // Use indexing
-        auto use_index = with_index.value_or(std::vector<std::pair<TagClassInt, std::string>>());
-
         // If no index was provided, see if we can get one
-        auto index_size = use_index.size();
-        if(index_size == 0) {
+        auto use_index = with_index.value_or(std::vector<std::pair<TagClassInt, std::string>>());
+        if(with_index.has_value()) {
             switch(engine_target) {
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     use_index = custom_edition_indices(workload.scenario_name.string);
@@ -145,7 +142,11 @@ namespace Invader {
                 default:
                     break;
             }
+            if(use_index.size()) {
+                oprintf_success_lesser_warn("Using built-in indices for %s...", workload.scenario_name.string);
+            }
         }
+        auto index_size = use_index.size();
 
         // If we have one, continue on
         if(index_size) {
@@ -219,6 +220,9 @@ namespace Invader {
             }
             else if(std::strcmp(workload.scenario_name.string, "wizard") == 0) {
                 workload.forge_crc = 0xCF3359B1;
+            }
+            if(workload.forge_crc.has_value()) {
+                oprintf_success_lesser_warn("Using built-in CRC32 for %s...", workload.scenario_name.string);
             }
         }
         else {
@@ -672,7 +676,7 @@ namespace Invader {
                 
                 // If we have a 32-bit limit, show the limit
                 if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * tag_space_usage / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
+                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * uncompressed_size / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
                 else {
                     oprintf("MiB\n");

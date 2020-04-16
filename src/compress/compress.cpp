@@ -9,6 +9,10 @@
 #include <invader/file/file.hpp>
 #include <invader/compress/compression.hpp>
 
+#define COMPRESSION_FORMAT_CEAFLATE "cea-deflate"
+#define COMPRESSION_FORMAT_DEFLATE "deflate"
+#define COMPRESSION_FORMAT_ZSTANDARD "zstandard"
+
 int main(int argc, const char **argv) {
     using namespace Invader;
 
@@ -64,6 +68,8 @@ int main(int argc, const char **argv) {
     auto input_file_data = input_file.value();
 
     #define TIME_ELAPSED_MS std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
+    
+    const char *compression_format;
 
     if(compress_options.decompress) {
         std::vector<std::byte> decompressed_data;
@@ -83,7 +89,21 @@ int main(int argc, const char **argv) {
             return EXIT_FAILURE;
         }
         auto finished = TIME_ELAPSED_MS;
-        oprintf("Decompressed %s (%zu -> %zu, %zu ms)\n", input, input_file_data.size(), decompressed_data.size(), finished);
+        
+        // Determine the compression format used
+        auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
+        switch(header.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                compression_format = COMPRESSION_FORMAT_CEAFLATE;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                compression_format = COMPRESSION_FORMAT_DEFLATE;
+                break;
+            default:
+                compression_format = COMPRESSION_FORMAT_ZSTANDARD;
+        }
+        
+        oprintf("Decompressed %s (%s, %zu -> %zu, %zu ms)\n", input, compression_format, input_file_data.size(), decompressed_data.size(), finished);
     }
     else {
         std::vector<std::byte> compressed_data;
@@ -102,7 +122,21 @@ int main(int argc, const char **argv) {
             eprintf_error("Failed to save %s", compress_options.output);
             return EXIT_FAILURE;
         }
+        
+        // Determine the compression format used
+        auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
+        switch(header.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
+                compression_format = COMPRESSION_FORMAT_CEAFLATE;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                compression_format = COMPRESSION_FORMAT_DEFLATE;
+                break;
+            default:
+                compression_format = COMPRESSION_FORMAT_ZSTANDARD;
+        }
+        
         auto finished = TIME_ELAPSED_MS;
-        oprintf("Compressed %s (%zu -> %zu, %.02f%%, %zu ms)\n", input, input_file_data.size(), compressed_data.size(), compressed_data.size() * 100.0 / input_file_data.size(), finished);
+        oprintf("Compressed %s (%s, %zu -> %zu, %.02f%%, %zu ms)\n", input, compression_format, input_file_data.size(), compressed_data.size(), compressed_data.size() * 100.0 / input_file_data.size(), finished);
     }
 }
