@@ -221,6 +221,9 @@ namespace Invader {
             else if(std::strcmp(workload.scenario_name.string, "wizard") == 0) {
                 workload.forge_crc = 0xCF3359B1;
             }
+            if(workload.forge_crc.has_value()) {
+                oprintf_success_lesser_warn("Using built-in CRC32 for %s...", workload.scenario_name.string);
+            }
         }
         else {
             workload.forge_crc = forge_crc;
