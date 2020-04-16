@@ -38,6 +38,7 @@ namespace Invader::Parser {
                 auto *object_array = reinterpret_cast<array_type::struct_little *>(object_struct.data.data()); \
                 for(std::size_t o = 0; o < object_count; o++) { \
                     std::uint32_t bsp_indices = 0; \
+                    std::uint32_t bsp_indices_technically_inside = 0; \
                     auto &object = object_array[o]; \
                     if(object.type != NULL_INDEX) { \
                         auto &type = this->palette[object.type].name; \
@@ -46,16 +47,24 @@ namespace Invader::Parser {
                         for(std::size_t b = 0; b < bsp_count; b++) { \
                             /* Check if we're inside this BSP */ \
                             auto &bsp = bsp_data[b]; \
+                            if(bsp.check_if_point_inside_bsp(object.position)) { \
+                                bsp_indices_technically_inside |= 1 << b; \
+                            } \
                             if(bsp.check_if_point_inside_bsp(position_to_check)) { \
                                 bsp_indices |= 1 << b; \
                             } \
                         } \
-                        if(bsp_indices == 0) { \
+                        if(bsp_indices == 0 && bsp_indices_technically_inside == 0) { \
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu was found in 0 BSPs, so it will not spawn", o); \
+                        } \
+                        /* If it's technically outside of a BSP due to bounding offset, warn */ \
+                        auto partially_outside = (bsp_indices ^ bsp_indices_technically_inside) & bsp_indices_technically_inside; \
+                        if(partially_outside) { \
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu is inside a BSP but offset outside, so it will be fullbright", o); \
                         } \
                     } \
                     /* Set to the result */ \
-                    object.bsp_indices = bsp_indices; \
+                    object.bsp_indices = bsp_indices | bsp_indices_technically_inside; \
                 } \
             } \
         }
