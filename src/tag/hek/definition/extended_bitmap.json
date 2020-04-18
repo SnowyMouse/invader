@@ -20,33 +20,6 @@
         "type": "enum"
     },
     {
-        "name": "ExtendedBitmapMetadataFlags",
-        "fields": [
-            "stubbed",
-            "xbox format",
-            "uses xbox multipurpose channel order",
-            "zstandard compressed"
-        ],
-        "type": "bitfield",
-        "width": 32
-    },
-    {
-        "name": "ExtendedBitmapDataMetadata",
-        "fields": [
-            {
-                "name": "flags",
-                "type": "ExtendedBitmapMetadataFlags"
-            },
-            {
-                "type": "pad",
-                "size": 124
-            }
-        ],
-        "type": "struct",
-        "size": 128,
-        "read_only": true
-    },
-    {
         "name": "ExtendedBitmap",
         "groups": [
             {
@@ -65,15 +38,8 @@
                 "type": "ExtendedBitmapMipmapScaling"
             },
             {
-                "name": "data metadata",
-                "type": "TagReflexive",
-                "struct": "ExtendedBitmapDataMetadata",
-                "compound": true,
-                "read_only": true
-            },
-            {
                 "type": "pad",
-                "size": 48
+                "size": 60
             }
         ],
         "type": "struct",

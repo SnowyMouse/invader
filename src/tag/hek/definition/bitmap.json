@@ -102,7 +102,10 @@
             "v16u16",
             "unused",
             "make it actually work",
-            "external"
+            "external",
+            "stubbed (extended)",
+            "uses xbox multipurpose channel order (extended)",
+            "zstandard compressed (extended)"
         ],
         "cache_only": [
             "unused",
