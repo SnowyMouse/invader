@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
         const char *tags = "tags/";
         int pixel_size = 14;
         bool use_filesystem_path = false;
-        int characters = 16384;
     } font_options;
 
     // Command line options
@@ -60,7 +59,6 @@ int main(int argc, char *argv[]) {
     options.emplace_back("font-size", 's', 1, "Set the font size in pixels.", "<px>");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the font file.");
-    options.emplace_back("characters", 'c', 1, "Set the number of characters to rasterize in the font. Default: 16384", "<amt>");
 
     static constexpr char DESCRIPTION[] = "Create font tags from OTF/TTF files.";
     static constexpr char USAGE[] = "[options] <font-tag>";
@@ -74,10 +72,6 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 font_options.tags = args[0];
-                break;
-
-            case 'c':
-                font_options.characters = std::stoi(args[0]);
                 break;
 
             case 'P':
@@ -175,7 +169,7 @@ int main(int argc, char *argv[]) {
 
     // Render the characters in a range
     std::vector<RenderedCharacter> characters;
-    for(int i = 0; i < font_options.characters; i++) {
+    for(int i = 0; i < 16384; i++) {
         auto index = FT_Get_Char_Index(face, i);
         if(FT_Load_Glyph(face, index, FT_LOAD_DEFAULT)) {
             eprintf_error("Failed to load glyph %i", i);

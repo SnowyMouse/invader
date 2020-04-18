@@ -6,8 +6,6 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-edit-qt: Added an error message for if a subdirectory could not be
   queried
-- invader-font: Added `-c` which allows you to specify the number of characters
-  to rasterize in the font tag
 - invader-resource: Added `-p` to specify a number of extra bytes to add after
   the header when generating resource maps
 - invader-resource: Added `-w` to specify resource indices rather than the
