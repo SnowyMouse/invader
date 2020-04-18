@@ -391,7 +391,6 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Make sure data metadata is correctly sized and other stuff is in place
     if(sizeof(T) == sizeof(Parser::ExtendedBitmap)) {
         auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
-        extended_bitmap->data_metadata.resize(bitmap_tag_data.bitmap_data.size());
         if(*bitmap_options.dither_alpha) {
             extended_bitmap->extended_flags |= HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
         }
