@@ -73,6 +73,7 @@ namespace Invader::Parser {
         auto &particle = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
         this->sprite_size = get_bitmap_tag_pixel_size(workload, this->sprite_bitmap.tag_id.index);
         particle.sprite_size = this->sprite_size;
+        particle.not_broken = 1;
     }
     void ParticleSystemTypeParticleState::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->unknown_int = 1;
