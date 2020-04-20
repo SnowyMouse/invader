@@ -26,6 +26,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
+- invader: Added an enum in the actor_variant tags for choosing the object type
+  when built for MCC and scoring is used
 - invader-build: Fixed some issues with scenery not spawning on MCC
 - invader-build: Fixed uncompressed size having the wrong percentage
 - invader-build: Fixed an issue with rain not appearing in some maps
@@ -33,6 +35,8 @@ This is used for recording Invader's changes. This changelog is based on
   not be accessed in the filesystem
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
+- invader-extract: Fixed all enemies being treated as brutes in MCC in regards
+  to scoring (you will need to re-extract your actor_variant tags)
 - invader-sound: Fixed an issue with generating split sound tags not setting the
   actual permutation count correctly as a result of a past optimization
 
