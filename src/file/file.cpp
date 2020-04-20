@@ -408,4 +408,35 @@ namespace Invader::File {
             }
         }
     }
+    
+    bool path_matches(const char *path, const char *pattern) {
+        for(const char *p = pattern;; p++) {
+            if(*p == *path && *p == 0) {
+                return true;
+            }
+            else if(
+                (*p == '?' || *p == *path) || 
+                ((*p == '/' || *p == '\\' || *p == std::filesystem::path::preferred_separator) && (*path == '\\' || *path == '/' || *path == std::filesystem::path::preferred_separator))
+            ) {
+                path++;
+                continue;
+            }
+            else if(*p == '*') {
+                p++;
+                if(*p == 0) {
+                    return true;
+                }
+                for(const char *s = path; *s; s++) {
+                    if(path_matches(s, p)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    }
 }

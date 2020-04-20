@@ -181,8 +181,13 @@ namespace Invader::EditQt {
         bool opening_tag = false;
 
         TagFetcherThread *fetcher_thread;
+        QWidget *filter_widget;
+        QLineEdit *filter_textbox;
         
         std::size_t listing_errors = 0;
+        
+        void set_filter(const QString &filter);
+        void toggle_filter_visible();
     };
 }
 

@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-edit-qt: Added an error message for if a subdirectory could not be
   queried
+- invader-edit-qt: Added a filter option in the View menu to filter out tags
+  that don't match a given expression
 - invader-font: Added `-l` to limit to the first 256 characters
 - invader-resource: Added `-p` to specify a number of extra bytes to add after
   the header when generating resource maps

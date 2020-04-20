@@ -201,6 +201,14 @@ namespace Invader::File {
      * @param file file to look for
      */
     void check_working_directory(const char *file);
+    
+    /**
+     * Check if the path matches (? matches any character, * matches any number of characters, / and \ match any path separator
+     * @param path    path to check
+     * @param pattern pattern to check
+     * @return        true if a match was found
+     */
+    bool path_matches(const char *path, const char *pattern);
 }
 
 #endif

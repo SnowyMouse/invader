@@ -64,6 +64,11 @@ namespace Invader::EditQt {
         refresh->setShortcut(QKeySequence::Refresh);
         refresh->setIcon(QIcon::fromTheme(QStringLiteral("view-refresh")));
         connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
+        
+        auto *filter = view_menu->addAction("Toggle Filter");
+        filter->setShortcut(QKeySequence::Find);
+        filter->setIcon(QIcon::fromTheme(QStringLiteral("edit-find")));
+        connect(filter, &QAction::triggered, this, &TagTreeWindow::toggle_filter_visible);
 
         // Help menu
         auto *help_menu = bar->addMenu("Help");
@@ -90,6 +95,21 @@ namespace Invader::EditQt {
         connect(this->tag_view, &TagTreeWidget::customContextMenuRequested, this, &TagTreeWindow::show_context_menu);
         vbox_layout->addWidget(this->tag_view);
         vbox_layout->setMargin(0);
+        
+        // Add a filter thing
+        this->filter_widget = new QWidget(this);
+        auto *filter_layout = new QHBoxLayout(filter_widget);
+        this->filter_widget->setVisible(false);
+        this->filter_widget->setLayout(filter_layout);
+        auto *filter_text = new QLabel("Filter:");
+        filter_layout->addWidget(filter_text);
+        this->filter_textbox = new QLineEdit();
+        this->filter_textbox->setPlaceholderText("Example: *.scenario (shows all scenario tags)");
+        filter_layout->addWidget(this->filter_textbox);
+        vbox_layout->addWidget(this->filter_widget);
+        connect(this->filter_textbox, &QLineEdit::textChanged, this, &TagTreeWindow::set_filter);
+        
+        // Finally set the layout
         central_widget->setLayout(vbox_layout);
         this->setCentralWidget(central_widget);
         connect(this->tag_view, &TagTreeWidget::itemDoubleClicked, this, &TagTreeWindow::on_double_click);
@@ -491,4 +511,23 @@ namespace Invader::EditQt {
         QDesktopServices::openUrl(QUrl::fromUserInput("https://invader.opencarnage.net/builds/nightly/download-latest.html"));
     }
     #endif
+    
+    void TagTreeWindow::set_filter(const QString &filter) {
+        if(filter.length() == 0) {
+            this->tag_view->set_filter();
+        }
+        else {
+            std::vector<std::string> filters;
+            filters.emplace_back(filter.toLatin1().data());
+            this->tag_view->set_filter(std::nullopt, std::nullopt, filters);
+        }
+    }
+    
+    void TagTreeWindow::toggle_filter_visible() {
+        this->filter_widget->setVisible(!this->filter_widget->isVisible());
+        this->filter_textbox->setText("");
+        if(this->filter_widget->isVisible()) {
+            this->filter_textbox->setFocus();
+        }
+    }
 }

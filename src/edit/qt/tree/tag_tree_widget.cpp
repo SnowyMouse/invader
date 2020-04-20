@@ -20,6 +20,7 @@ namespace Invader::EditQt {
 
     void TagTreeWidget::refresh_view(TagTreeWindow *window) {
         this->clear();
+        this->last_window = window;
 
         // Get the tags we have
         const auto &all_tags = window->get_all_tags();
@@ -47,6 +48,17 @@ namespace Invader::EditQt {
                 remove = true;
                 for(auto f : *this->filter) {
                     if(tag.tag_class_int == f) {
+                        remove = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Also, do we have this in our filters list?
+            if(!remove && this->expressions.has_value()) {
+                remove = true;
+                for(auto &f : *this->expressions) {
+                    if(File::path_matches(tag.tag_path.c_str(), f.c_str())) {
                         remove = false;
                         break;
                     }
@@ -233,9 +245,11 @@ namespace Invader::EditQt {
         return this->total_tags;
     }
 
-    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories) {
+    void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
         this->filter = classes;
         this->tag_arrays_to_show = tags_directories;
+        this->expressions = expression_filters;
+        this->refresh_view(this->last_window);
     }
 
     const File::TagFile *TagTreeWidget::get_selected_tag() const noexcept {

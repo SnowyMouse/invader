@@ -6,34 +6,6 @@
 #include <invader/tag/hek/header.hpp>
 #include <invader/tag/parser/parser.hpp>
 
-static bool string_matches(const char *string, const char *pattern) {
-    for(const char *p = pattern;; p++) {
-        if(*p == *string && *p == 0) {
-            return true;
-        }
-        else if(*p == '?' || *p == *string) {
-            string++;
-            continue;
-        }
-        else if(*p == '*') {
-            p++;
-            if(*p == 0) {
-                return true;
-            }
-            for(const char *s = string; *s; s++) {
-                if(string_matches(s, p)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        else {
-            return false;
-        }
-    }
-    return true;
-}
-
 namespace Invader {
     void ExtractionWorkload::extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, bool recursive, bool overwrite, bool non_mp_globals, ReportingLevel reporting_level) {
         // There's no need to extract recursively if we're extracting all tags
@@ -268,7 +240,7 @@ namespace Invader {
                 auto full_tag_path = Invader::File::halo_path_to_preferred_path(tag.get_path()) + "." + HEK::tag_class_to_extension(tag.get_tag_class_int());
 
                 for(auto &query : queries) {
-                    if(string_matches(full_tag_path.c_str(), query.c_str())) {
+                    if(File::path_matches(full_tag_path.c_str(), query.c_str())) {
                         all_tags_to_extract.emplace_back(t);
                         break;
                     }

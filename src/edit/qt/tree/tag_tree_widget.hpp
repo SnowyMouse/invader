@@ -25,9 +25,11 @@ namespace Invader::EditQt {
 
         /**
          * Set the filter, limiting the view to those classes and directories that contain the given classes
-         * @param classes an optional array of classes; if none is given, then the filter is cleared
+         * @param classes            an optional array of classes; if none is given, then the filter is cleared
+         * @param tags_directories   tag directories to list
+         * @param expression_filters expressions to show
          */
-        void set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt);
+        void set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes = std::nullopt, const std::optional<std::vector<std::size_t>> &tags_directories = std::nullopt, const std::optional<std::vector<std::string>> &expression_filters = std::nullopt);
 
         /**
          * Get the total tags found
@@ -49,6 +51,8 @@ namespace Invader::EditQt {
         std::size_t total_tags = 0;
         std::optional<std::vector<HEK::TagClassInt>> filter;
         std::optional<std::vector<std::size_t>> tag_arrays_to_show;
+        std::optional<std::vector<std::string>> expressions;
+        TagTreeWindow *last_window;
         bool show_directories;
         void refresh_view(TagTreeWindow *window);
     };
