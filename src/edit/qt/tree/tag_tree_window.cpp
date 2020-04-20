@@ -94,11 +94,12 @@ namespace Invader::EditQt {
         this->tag_view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(this->tag_view, &TagTreeWidget::customContextMenuRequested, this, &TagTreeWindow::show_context_menu);
         vbox_layout->addWidget(this->tag_view);
-        vbox_layout->setMargin(0);
+        vbox_layout->setMargin(2);
         
         // Add a filter thing
         this->filter_widget = new QWidget(this);
         auto *filter_layout = new QHBoxLayout(filter_widget);
+        filter_layout->setMargin(0);
         this->filter_widget->setVisible(false);
         this->filter_widget->setLayout(filter_layout);
         auto *filter_text = new QLabel("Filter:");
