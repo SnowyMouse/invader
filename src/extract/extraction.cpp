@@ -36,6 +36,11 @@ static bool string_matches(const char *string, const char *pattern) {
 
 namespace Invader {
     void ExtractionWorkload::extract_map(const Map &map, const std::string &tags, const std::vector<std::string> &queries, bool recursive, bool overwrite, bool non_mp_globals, ReportingLevel reporting_level) {
+        // There's no need to extract recursively if we're extracting all tags
+        if(queries.size() == 0) {
+            recursive = false;
+        }
+        
         ExtractionWorkload workload(map, reporting_level);
         auto start = std::chrono::steady_clock::now();
         auto success = workload.perform_extraction(queries, tags, recursive, overwrite, non_mp_globals);
