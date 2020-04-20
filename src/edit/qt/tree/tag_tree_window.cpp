@@ -64,7 +64,7 @@ namespace Invader::EditQt {
         refresh->setShortcut(QKeySequence::Refresh);
         refresh->setIcon(QIcon::fromTheme(QStringLiteral("view-refresh")));
         connect(refresh, &QAction::triggered, this, &TagTreeWindow::refresh_view);
-        
+        view_menu->addSeparator();
         auto *filter = view_menu->addAction("Toggle Filter");
         filter->setShortcut(QKeySequence::Find);
         filter->setIcon(QIcon::fromTheme(QStringLiteral("edit-find")));
