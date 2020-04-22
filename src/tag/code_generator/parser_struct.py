@@ -19,6 +19,8 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
             comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"].replace("\"", "\\\"").replace("\n", "\\n\\n"))
             struct_read_only = "true" if ((read_only or ("read_only" in struct and struct["read_only"])) and not ("read_only" in struct and struct["read_only"] == False)) else "false"
             unit = "nullptr" if "unit" not in struct else "\"{}\"".format(struct["unit"].replace("\"", "\\\""))
+            ref_struct = "nullptr" if "struct" not in struct else "\"{}\"".format(struct["struct"].replace("\"", "\\\""))
+            reflexive = "nullptr" if "reflexive" not in struct else "\"{}\"".format(struct["reflexive"].replace("\"", "\\\""))
 
             first_arguments = "{},{},{},&this->{}".format(name, member_name_q, comment, struct["member_name"])
             type = struct["type"]
@@ -47,6 +49,8 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 cpp_struct_value.write("    values.emplace_back({}, {});\n".format(first_arguments, struct_read_only))
             elif type == "ScenarioScriptNodeValue" or type == "ScenarioStructureBSPArrayVertex":
                 pass
+            elif type == "Index":
+                cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::ValueType::VALUE_TYPE_{}, {}, {}, 1, false, {}, {});\n".format(first_arguments, type.upper(), unit, struct_read_only, ref_struct, reflexive))
             else:
                 found = False
                 for b in all_bitfields:

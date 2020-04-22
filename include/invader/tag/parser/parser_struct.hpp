@@ -533,6 +533,22 @@ namespace Invader::Parser {
         }
 
         /**
+         * Get the field name of the index
+         * @return field name of the index
+         */
+        bool get_field_name() const noexcept {
+            return this->field_name;
+        }
+
+        /**
+         * Get the field's base struct name
+         * @return field's base struct name
+         */
+        bool get_base_struct() const noexcept {
+            return this->base_struct;
+        }
+
+        /**
          * Instantiate a ParserStructValue with a dependency
          * @param name            name of the dependency
          * @param member_name     variable name of the dependency
@@ -690,6 +706,34 @@ namespace Invader::Parser {
             std::optional<Number> maximum = std::nullopt
         );
 
+        /**
+         * Instantiate a ParserStructValue with a value
+         * @param name        name of the value
+         * @param member_name variable name of the value
+         * @param comment     comments
+         * @param object      pointer to the object
+         * @param type        type of value
+         * @param unit        unit to use
+         * @param count       number of values (if multiple values or bounds)
+         * @param bounds      whether or not this is bounds
+         * @param read_only   value is read only
+         * @param base_struct name of the struct the field is in
+         * @param field_name  name of the field the index refers to
+         */
+        ParserStructValue(
+            const char *          name,
+            const char *          member_name,
+            const char *          comment,
+            void *                object,
+            ValueType             type,
+            const char *          unit = nullptr,
+            std::size_t           count = 1,
+            bool                  bounds = false,
+            bool                  read_only = false,
+            const char *          base_struct = nullptr,
+            const char *          field_name = nullptr
+        );
+
     private:
         const char *name;
         const char *member_name;
@@ -720,6 +764,9 @@ namespace Invader::Parser {
         std::size_t max_array_size;
 
         bool read_only = false;
+        
+        const char *base_struct = nullptr;
+        const char *field_name = nullptr;
 
         template <typename T>
         static void assert_range_exists(std::size_t index, std::size_t count, const T &array) {

@@ -47,6 +47,30 @@ namespace Invader::Parser {
         read_only(read_only) {}
 
     ParserStructValue::ParserStructValue(
+        const char *          name,
+        const char *          member_name,
+        const char *          comment,
+        void *                object,
+        ValueType             type,
+        const char *          unit,
+        std::size_t           count,
+        bool                  bounds,
+        bool                  read_only,
+        const char *          base_struct,
+        const char *          field_name
+    ) : name(name),
+        member_name(member_name),
+        comment(comment),
+        type(type),
+        address(object),
+        count(count),
+        bounds(bounds),
+        unit(unit),
+        read_only(read_only),
+        base_struct(base_struct),
+        field_name(field_name) {}
+
+    ParserStructValue::ParserStructValue(
         const char *                        name,
         const char *                        member_name,
         const char *                        comment,
