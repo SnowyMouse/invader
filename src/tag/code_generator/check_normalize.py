@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_normalize(all_used_structs, struct_name, hpp, cpp_normalize):
+def make_normalize(all_used_structs, struct_name, hpp, cpp_normalize, normalize):
     hpp.write("        bool check_for_nonnormal_vectors(bool normalize) override;\n")
     cpp_normalize.write("    bool {}::check_for_nonnormal_vectors([[maybe_unused]] bool normalize) {{\n".format(struct_name))
     cpp_normalize.write("        bool return_value = false;\n")
@@ -33,6 +33,12 @@ def make_normalize(all_used_structs, struct_name, hpp, cpp_normalize):
             cpp_normalize.write("                return_value = true;\n")
             cpp_normalize.write("            }\n")
             cpp_normalize.write("        }\n")
+    
+    if normalize:
+        hpp.write("        bool check_for_nonnormal_vectors_more(bool normalize);\n")
+        cpp_normalize.write("        return_value = this->check_for_nonnormal_vectors_more(normalize) || return_value;\n")
+        
         
     cpp_normalize.write("        return return_value;\n")
+    
     cpp_normalize.write("    }\n")

@@ -9,6 +9,39 @@ namespace Invader::Parser {
     void ScenarioStructureBSP::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->runtime_decals.clear(); // delete these in case this tag was extracted improperly
     }
+    
+    bool ScenarioStructureBSPMaterial::check_for_nonnormal_vectors_more(bool normalize) {
+        auto *vertices = this->uncompressed_vertices.data();
+        auto uncompressed_vertices_size = this->uncompressed_vertices.size();
+
+        auto *lightmap_rendered_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(vertices);
+        auto *lightmap_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(lightmap_rendered_vertices + this->rendered_vertices_count);
+        
+        auto *lightmap_vertices_end = lightmap_lightmap_vertices + this->lightmap_vertices_count;
+        std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
+        if(expected_size != uncompressed_vertices_size) {
+            return false; // stuff's messed up. we can't do anything
+        }
+        
+        bool return_value = false;
+        
+        if(this->rendered_vertices_count) {
+            for(std::size_t i = 0; i < this->rendered_vertices_count; i++) {
+                auto &rv = lightmap_rendered_vertices[i];
+                if(!rv.normal.is_normalized()) {
+                    if(!normalize) {
+                        return true;
+                    }
+                    else {
+                        return_value = true;
+                        rv.normal = rv.normal.normalize();
+                    }
+                }
+            }
+        }
+        
+        return return_value;
+    }
 
     void ScenarioStructureBSPCollisionMaterial::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         auto *data = workload.structs[struct_index].data.data();

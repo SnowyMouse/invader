@@ -380,6 +380,7 @@
         "type": "struct",
         "post_cache_parse": true,
         "pre_compile": true,
+        "normalize": true,
         "read_only": true,
         "size": 256
     },

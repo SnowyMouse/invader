@@ -63,6 +63,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         pre_compile = "pre_compile" in s and s["pre_compile"]
         post_compile = "post_compile" in s and s["post_compile"]
         postprocess_hek_data = "postprocess_hek_data" in s and s["postprocess_hek_data"]
+        normalize = "normalize" in s and s["normalize"]
         read_only = "read_only" in s and s["read_only"]
         private_functions = post_cache_deformat
 
@@ -123,7 +124,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
         make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)
         make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_invalid_indices, all_structs_arranged)
-        make_normalize(all_used_structs, struct_name, hpp, cpp_normalize)
+        make_normalize(all_used_structs, struct_name, hpp, cpp_normalize, normalize)
         make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
