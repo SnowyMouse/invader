@@ -47,6 +47,9 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     /** Fix indices that are out of bounds */
     FUCKED_INDICES                      = 1ull << 8,
 
+    /** Fix normals (broken normals crashes tool.exe and sapien when generating lightmaps) */
+    FUCKED_NORMALS                      = 1ull << 9,
+
     // Stuff that Refinery breaks
 
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
@@ -78,6 +81,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define FUCKED_INDICES_FIX "invalid-indices"
+#define FUCKED_NORMALS_FIX "nonnormal-vectors"
 #define EVERYTHING_FIX "everything"
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
@@ -118,6 +122,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             check_fix(bullshit_range_fix, "value(s) are out of range; fix with " BULLSHIT_RANGE_FIX);
             check_fix(where_the_fuck_are_the_scripts, "script source data is missing; fix with " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             check_fix(fucked_indices_fix, "indices are out of bounds; fix with " FUCKED_INDICES_FIX);
+            check_fix(fucked_normals, "problematic nonnormal vectors detected; fix with " FUCKED_NORMALS_FIX);
             
             #undef check_fix
         }
@@ -136,6 +141,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             apply_fix(fucked_vertices, FUCKED_VERTICES, FUCKED_VERTICES_FIX);
             apply_fix(where_the_fuck_are_the_scripts, WHERE_THE_FUCK_ARE_THE_SCRIPTS, WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             apply_fix(fucked_indices_fix, FUCKED_INDICES, FUCKED_INDICES_FIX);
+            apply_fix(fucked_normals, FUCKED_NORMALS, FUCKED_NORMALS_FIX);
             
             #undef apply_fix
         }
@@ -175,7 +181,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " POWER_OF_FUCK_YOU_FIX ", " FUCKED_NORMALS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -240,6 +246,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], FUCKED_INDICES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_INDICES;
+                }
+                else if(std::strcmp(arguments[0], FUCKED_NORMALS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_NORMALS;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;

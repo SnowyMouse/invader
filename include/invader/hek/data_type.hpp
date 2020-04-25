@@ -344,6 +344,31 @@ namespace Invader::HEK {
             COPY_THIS(w);
             return copy;
         }
+        
+        bool is_normalized() const noexcept {
+            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k + w*w)) < 0.005;
+        }
+
+        Quaternion<EndianType> normalize() const noexcept {
+            // First let's get the distance
+            float distance = std::sqrt(i*i + j*j + k*k + w*w);
+
+            // If it's 0, we can't normalize it
+            if(distance == 0.0F) {
+                return { 0.0F, 0.0F, 0.0F, 1.0F };
+            }
+
+            // Find what we must multiply to get
+            float m_distance = 1.0F / distance;
+
+            // Now write and return the new values
+            Quaternion<EndianType> copy;
+            copy.i = i * m_distance;
+            copy.j = j * m_distance;
+            copy.k = k * m_distance;
+            copy.w = w * m_distance;
+            return copy;
+        }
     };
     static_assert(sizeof(Quaternion<BigEndian>) == 0x10);
 
@@ -481,14 +506,18 @@ namespace Invader::HEK {
             copy.k = this->k + add.k;
             return copy;
         }
+        
+        bool is_normalized() const noexcept {
+            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k)) < 0.005;
+        }
 
-        Vector3D<EndianType> normalize() const {
+        Vector3D<EndianType> normalize() const noexcept {
             // First let's get the distance
             float distance = std::sqrt(i*i + j*j + k*k);
 
             // If it's 0, we can't normalize it
             if(distance == 0.0F) {
-                return {};
+                return { 0.0F, 0.0F, 1.0F };
             }
 
             // Find what we must multiply to get
@@ -523,6 +552,29 @@ namespace Invader::HEK {
             COPY_THIS(i);
             COPY_THIS(j);
             copy.k = 0.0F;
+            return copy;
+        }
+        
+        bool is_normalized() const noexcept {
+            return std::fabs(1.0 - std::sqrt(i*i + j*j)) < 0.005;
+        }
+
+        Vector2D<EndianType> normalize() const noexcept {
+            // First let's get the distance
+            float distance = std::sqrt(i*i + j*j);
+
+            // If it's 0, we can't normalize it
+            if(distance == 0.0F) {
+                return { 0.0F, 1.0F };
+            }
+
+            // Find what we must multiply to get
+            float m_distance = 1.0F / distance;
+
+            // Now write and return the new values
+            Vector2D<EndianType> copy;
+            copy.i = i * m_distance;
+            copy.j = j * m_distance;
             return copy;
         }
     };

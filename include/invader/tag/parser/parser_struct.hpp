@@ -793,6 +793,13 @@ namespace Invader::Parser {
          * @return                 true if invalid references were found; false if not
          */
         virtual bool check_for_invalid_references(bool null_references) = 0;
+
+        /**
+         * Check for nonnormal vectors
+         * @param  normalize normalize vectors if they aren't normalized
+         * @return           true if nonnormal vectors were found
+         */
+        virtual bool check_for_nonnormal_vectors(bool normalize) = 0;
         
         /**
          * Check for invalid ranges

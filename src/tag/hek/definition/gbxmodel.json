@@ -56,6 +56,7 @@
             {
                 "name": "rotation",
                 "type": "Quaternion",
+                "normalize": true,
                 "compound": true
             }
         ],
@@ -132,6 +133,7 @@
             },
             {
                 "name": "default rotation",
+                "normalize": true,
                 "type": "Quaternion",
                 "compound": true
             },
@@ -190,6 +192,7 @@
             {
                 "name": "rotation",
                 "type": "Quaternion",
+                "normalize": true,
                 "compound": true
             },
             {

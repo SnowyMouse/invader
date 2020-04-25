@@ -11,6 +11,10 @@ namespace Invader::Bludgeoner {
         return s->check_for_broken_enums(fix);
     }
     
+    bool fucked_normals(Parser::ParserStruct *s, bool fix) {
+        return s->check_for_nonnormal_vectors(fix);
+    }
+    
     bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix) {
         auto *scenario = dynamic_cast<Parser::Scenario *>(s);
         if(scenario) {

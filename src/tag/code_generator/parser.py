@@ -12,9 +12,10 @@ from check_broken_enums import make_check_broken_enums
 from check_invalid_references import make_check_invalid_references
 from check_invalid_ranges import make_check_invalid_ranges
 from check_invalid_indices import make_check_invalid_indices
+from check_normalize import make_normalize
 from compare import make_compare
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -28,6 +29,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_refactor_reference.write(what)
         cpp_check_invalid_indices.write(what)
         cpp_compare.write(what)
+        cpp_normalize.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -121,6 +123,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
         make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)
         make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_invalid_indices, all_structs_arranged)
+        make_normalize(all_used_structs, struct_name, hpp, cpp_normalize)
         make_compare(all_used_structs, struct_name, all_bitfields, hpp, cpp_compare)
 
         hpp.write("        ~{}() override = default;\n".format(struct_name))
