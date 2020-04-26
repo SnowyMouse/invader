@@ -197,8 +197,10 @@ int main(int argc, const char **argv) {
 
     try {
         // Get the index
-        std::vector<std::pair<TagClassInt, std::string>> with_index;
+        std::optional<std::vector<std::pair<TagClassInt, std::string>>> with_index;
         if(build_options.index.size()) {
+            with_index = std::vector<std::pair<TagClassInt, std::string>>();
+            
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
             while(std::getline(index_file, tag)) {
@@ -230,7 +232,7 @@ int main(int argc, const char **argv) {
                     c = std::tolower(c);
                 }
 
-                with_index.emplace_back(extension_to_tag_class(extension), substr_v.data());
+                with_index->emplace_back(extension_to_tag_class(extension), substr_v.data());
             }
         }
 

@@ -126,8 +126,11 @@ namespace Invader {
         }
 
         // If no index was provided, see if we can get one
-        auto use_index = with_index.value_or(std::vector<std::pair<TagClassInt, std::string>>());
-        if(!with_index.has_value()) {
+        std::vector<std::pair<TagClassInt, std::string>> use_index;
+        if(with_index.has_value()) {
+            use_index = *with_index;
+        }
+        else {
             switch(engine_target) {
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     use_index = custom_edition_indices(workload.scenario_name.string);
