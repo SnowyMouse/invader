@@ -594,7 +594,8 @@
                 "compound": true,
                 "classes": [
                     "scenario"
-                ]
+                ],
+                "comment": "This scenario tag will be merged into the main scenario tag (and dereferenced) on map build."
             },
             {
                 "type": "pad",

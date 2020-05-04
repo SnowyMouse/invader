@@ -33,7 +33,8 @@
                 ],
                 "compound": true,
                 "hidden": true,
-                "non_cached": true
+                "non_cached": true,
+                "comment": "Don't use this! This gets dereferenced on map build."
             },
             {
                 "name": "source bitmap",
@@ -43,7 +44,8 @@
                 ],
                 "compound": true,
                 "hidden": true,
-                "non_cached": true
+                "non_cached": true,
+                "comment": "Don't use this! This gets dereferenced on map build."
             },
             {
                 "name": "stencil sequence index",
@@ -108,6 +110,7 @@
         "type": "struct",
         "pre_compile": true,
         "postprocess_hek_data": true,
+        "comment": "This is probably a leftover from pre-CE development. I don't think this tag does anything in modern CE.",
         "size": 172
     }
 ]
