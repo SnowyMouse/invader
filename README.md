@@ -766,6 +766,7 @@ Options:
 These are a selection of questions that have been asked over the course of
 Invader's development.
 - [What operating systems are supported?]
+- [Who owns my map when I build it?]
 - [Why GPL and not MIT or BSD?]
 - [How can I get Invader under a different license?]
 - [Are there any GUI tools?]
@@ -779,6 +780,19 @@ Invader's development.
 ### What operating systems are supported?
 Invader does not support any one operating system, but Invader is developed on
 Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
+
+### Who owns my map when I build it?
+There is a commonly-spread myth that, once you build a map with tool.exe, your
+map belongs to Microsoft. Likewise, people may think that, if you build a map
+with Invader, then your map belongs to us. However, this is like saying once you
+print a document with an HP printer, your document belongs to HP. That's not how
+it works.
+
+The only "ownership" that applies to your map is to the tags and assets in the
+map, as a map is effectively an archive of a tag directory intended to be loaded
+by the game. You own your BSP, Microsoft owns the assault rifle, etc. Not one
+person owns your map unless you made *all* of the tags to your map, in which
+case *you* would certainly own it.
 
 ### Why GPL and not MIT or BSD?
 Invader uses version 3 of the GNU GPL because we feel that Invader and all
@@ -936,6 +950,7 @@ to a point where it can be a solid replacement to tool.exe.
 [Frequently asked questions]: #frequently-asked-questions
 
 [What operating systems are supported?]: #what-operating-systems-are-supported
+[Who owns my map when I build it?]: #who-owns-my-map-when-i-build-it
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
 [How can I get Invader under a different license?]: #how-can-i-get-invader-under-a-different-license
 [Are there any GUI tools?]: #are-there-any-gui-tools
