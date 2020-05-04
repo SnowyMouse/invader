@@ -784,7 +784,7 @@ Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
 ### Who owns my map when I build it?
 There is a commonly-spread myth that, once you build a map with tool.exe, your
 map belongs to Microsoft. Likewise, people may think that, if you build a map
-with Invader, then your map belongs to us. However, this is like saying once you
+with Invader, your map belongs to us. However, this is like saying once you
 print a document with an HP printer, your document belongs to HP. That's not how
 it works.
 
