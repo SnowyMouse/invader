@@ -119,7 +119,10 @@
             },
             {
                 "name": "type",
-                "type": "ActorType"
+                "type": "ActorType",
+                "engine": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
