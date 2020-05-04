@@ -767,6 +767,7 @@ These are a selection of questions that have been asked over the course of
 Invader's development.
 - [What operating systems are supported?]
 - [Why GPL and not MIT or BSD?]
+- [How can I get Invader under a different license?]
 - [Are there any GUI tools?]
 - [Are 32-bit Windows builds available?]
 - [Can invader-build create .yelo maps?]
@@ -816,6 +817,17 @@ as this ensures that modding stays free and open instead of left to stagnation
 behind closed groups and obfuscation as modding this game has been in the past.
 
 That is why Invader uses version 3 of the GNU GPL.
+
+### How can I get Invader under a different license?
+Officially, the only way to obtain Invader is through version 3.0 of the GNU
+General Public License. We will not provide exception to anyone - not even
+Bungie, Microsoft, or our own mothers.
+
+In order to get Invader under a different license, you will need to write to
+*both* [Kavawuvi] and [Vaporeon], and you will need *unanimous* approval.
+
+[Kavawuvi]: https://githib.com/Kavawuvi
+[Vaporeon]: https://github.com/Vaporeon
 
 ### Are there any GUI tools?
 Officially, only one of these tools has a graphical user interface,
@@ -925,6 +937,7 @@ to a point where it can be a solid replacement to tool.exe.
 
 [What operating systems are supported?]: #what-operating-systems-are-supported
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
+[How can I get Invader under a different license?]: #how-can-i-get-invader-under-a-different-license
 [Are there any GUI tools?]: #are-there-any-gui-tools
 [Are 32-bit Windows builds available?]: #are-32-bit-windows-builds-available
 [Can invader-build create .yelo maps?]: #can-invader-build-create-yelo-maps
