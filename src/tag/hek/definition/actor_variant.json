@@ -165,7 +165,10 @@
             {
                 "name": "mcc actor type",
                 "type": "MCCActorType",
-                "comment": "only used for scoring in Halo: CE Anniversary (MCC)"
+                "comment": "only used for scoring in Halo: CE Anniversary (MCC only)",
+                "engine": [
+                    "mcc"
+                ]
             },
             {
                 "type": "pad",
