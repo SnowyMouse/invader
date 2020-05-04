@@ -1,6 +1,6 @@
 # Invader
 Invader is an open source toolkit for creating maps and assets for Halo: Combat
-Evolved on the PC.
+Evolved.
 
 Our Discord server is https://discord.gg/RCX3nvw
 
@@ -210,8 +210,8 @@ Options:
 These formats are uncompressed and use explicit (not interpolated) RGB and/or
 alpha values. This results in higher quality bitmaps than using any of the
 block compressed formats, but it comes with a file size tradeoff. Note that
-32-bit bitmaps are slightly buggy on stock Halo PC without a mod (e.g.
-[Chimera]).
+32-bit bitmaps are slightly buggy on stock Halo: Combat Evolved without a mod
+(e.g. [Chimera]).
 
 If you use 16-bit, then using dithering (`-D rgb` or `-D argb` if you want
 dithered alpha) may help with banding.
@@ -321,7 +321,7 @@ This program builds cache files.
 ```
 Usage: invader-build [options] -g <target> <scenario>
 
-Build cache files for Halo Combat Evolved on the PC.
+Build a cache file for a version of Halo: Combat Evolved.
 
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
@@ -855,17 +855,22 @@ made today come with a 64-bit operating system.
 
 ### Can invader-build create .yelo maps?
 Officially, invader-build only creates maps for officially-released versions of
-the PC game. The .yelo file format is specific to Open Sauce, a mod of Halo
+the game. The .yelo file format is specific to Open Sauce, a *mod* of Halo
 Custom Edition. Therefore, the Invader project does not support it. However,
 this does not mean that you can't make a fork of Invader that supports it, and
 there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Officially, invader-build only creates maps for officially-released versions of
-the PC game. While Xbox maps are very similar in format to PC maps, there
-exists enough differences to make supporting the Xbox version non-trivial.
-Kavawuvi also does not have a modded Xbox or a retail copy of the Xbox version
- of the game, so there is no means to debug or test.
+Xbox support is **planned** but not yet implemented.
+
+Previously, we decided to not do Xbox map compilation because there are enough
+differences to make supporting the Xbox version non-trivial. Kavawuvi also does
+not have a modded Xbox or retail copy to the Xbox version of the game, so there
+is no means to debug or test yet.
+
+However, we have changed our stance as the Xbox version is an accurate baseline
+for reverse engineering Halo's graphics and sound engine, and being able to
+build maps for it would be extremely helpful for progress on this front.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this

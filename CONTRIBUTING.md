@@ -32,18 +32,18 @@ subject to change.*
 Issues and pull requests must remain in the scope of Invader. Here are some
 things to keep in mind:
 
-- Invader targets the base Halo Combat Evolved game as released on PC.
+- Invader targets official releases of the base Halo: Combat Evolved game.
 
-Forks that support other mods, such as Open Sauce, or other releases of the
-game, such as the original Xbox version of the game, are certainly welcome, but
-code or definitions for functionality provided by these mods will not be
-accepted upstream.
+We do not support mods such as Open Sauce. Any code or definitions for
+functionality provided by these mods will not be accepted upstream. Instead, we
+recommend creating a fork. Invader's license permits you to do so provided you
+do so under the same terms.
 
 - Invader is cross-platform and does not target any single operating system.
 
-The C/C++ standard library should be used whenever possible. Do not use any
-platform-specific types or functions such as the Windows API's `DWORD`,
-`fopen_s`, or the Linux API when writing platform-independent code. If and when
+The C/C++ standard library should be used whenever possible, as it is a mostly
+universal platform to target. Usage of platform-specific code (e.g. Windows API,
+Linux API, x86 assembly) should be avoided when possible. If and when
 it is necessary to write platform-specific code, use `#ifdef`s to isolate the
 code so it doesn't compile on incompatible systems.
 
@@ -66,7 +66,7 @@ original Halo Editing Kit should be discouraged whenever possible.
 - Invader may not allow some things that the original Halo Editing Kit allows
 
 A feature of Invader is more powerful error checking that isn't available on the
-Halo Editing Kit. This can even result in original Bungie and Gearbox maps not
+Halo Editing Kit. This will even result in original Bungie and Gearbox maps not
 being rebuildable, as some tags contain invalid data such as invalid enum values
 or invalid indices. For those cases, we have invader-bludgeon which removes such
 anomalies.

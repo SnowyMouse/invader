@@ -83,7 +83,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
 
-    static constexpr char DESCRIPTION[] = "Build cache files for Halo Combat Evolved on the PC.";
+    static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
 
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
