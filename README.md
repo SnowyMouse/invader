@@ -783,7 +783,7 @@ Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
 
 ### Who owns my map when I build it?
 There is a commonly-spread myth that, once you build a map with tool.exe, your
-map belongs to Microsoft. Likewise, people may think that, if you build a map
+map belongs to Microsoft. Likewise, people may assume that, if you build a map
 with Invader, your map belongs to us. However, this is like saying that, once
 you print a document with an HP printer, your document belongs to HP. That's not
 how it works.
@@ -793,6 +793,12 @@ map, as a map is effectively an archive of a tag directory intended to be loaded
 by the game. You own your BSP, Microsoft owns the assault rifle, etc. Not one
 person owns your map unless you made *all* of the tags to your map, in which
 case *you* would certainly own it.
+
+Note, however, that you may be subjected to additional license(s) if you choose
+to use assets you don't own (assuming you even have permission to use them),
+including the assets that came with the Halo Editing Kit. Using Invader does not
+give you permission to use any of these assets. Consult a legal expert if you
+need assurance on your rights.
 
 ### Why GPL and not MIT or BSD?
 Invader uses version 3 of the GNU GPL because we feel that Invader and all
