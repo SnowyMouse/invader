@@ -25,7 +25,7 @@ namespace Invader::Parser {
 
         // Check for unused stuff
         std::size_t name_count = this->object_names.size();
-        std::vector<std::uint32_t> name_used(name_count);
+        std::vector<std::vector<std::pair<const char *, std::size_t>>> name_used(name_count);
 
         #define CHECK_PALETTE_AND_SPAWNS(object_type_str, scenario_object_type, scenario_palette_type, object_type_int) { \
             std::size_t type_count = this->scenario_palette_type.size(); \
@@ -41,7 +41,7 @@ namespace Invader::Parser {
                     } \
                     /* If it is, increment the used counter and assign everything */ \
                     else { \
-                        name_used[name_index]++; \
+                        name_used[name_index].emplace_back(object_type_str, i); \
                         auto &name = this->object_names[name_index]; \
                         name.object_index = static_cast<HEK::Index>(i); \
                         name.object_type = HEK::ObjectType::object_type_int; \
@@ -94,15 +94,16 @@ namespace Invader::Parser {
                 if(new_name > name_count || new_name == NULL_INDEX) {
                     continue;
                 }
-                else if(name_used[new_name] == 0) {
-                    name_used[new_name] = 1; 
+                else if(name_used[new_name].size() == 0) {
+                    name_used[new_name].emplace_back(); 
                 }
             }
         }
 
         // Make sure we don't have any fun stuff with object names going on
         for(std::size_t i = 0; i < name_count; i++) {
-            std::size_t used = name_used[i];
+            auto &used_arr = name_used[i];
+            auto used = used_arr.size();
             auto &name = this->object_names[i];
             const char *name_str = name.name.string;
             if(used == 0) {
@@ -110,6 +111,28 @@ namespace Invader::Parser {
             }
             else if(used > 1) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
+                
+                // Put together a list to help the user track everything down
+                char found[1024] = {};
+                std::size_t p = 0;
+                
+                std::size_t f = 0;
+                for(auto &u : used_arr) {
+                    // Don't show more than 3 elements
+                    if(f++ == 3) {
+                        std::snprintf(found + p, sizeof(found) - p, ", ...");
+                        break;
+                    }
+                    else {
+                        p += std::snprintf(found + p, sizeof(found) - p, "%s%s #%zu", f == 1 ? "" : ", ", u.first, u.second);
+                        if(p > sizeof(found)) {
+                            break;
+                        }
+                    }
+                }
+                
+                // List everything off
+                eprintf_warn_lesser("    - objects with this name: [%s]", found);
             }
         }
 
