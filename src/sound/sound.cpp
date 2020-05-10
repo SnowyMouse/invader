@@ -190,7 +190,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     Parser::SoundPitchRange pitch_range = {};
     
     std::size_t old_actual_permutation_count;
-    bool old_split = sound_tag.flags | HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+    bool old_split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
     
     if(old_split) {
         old_actual_permutation_count = old_pitch_range.actual_permutation_count;
@@ -228,7 +228,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             sound_tag.flags &= ~HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
         }
     }
-    bool split = sound_tag.flags | HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
+    bool split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
 
     auto wav_iterator = std::filesystem::directory_iterator(data_path);
 
