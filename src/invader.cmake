@@ -120,6 +120,7 @@ if(NOT DEFINED ${INVADER_STATIC_BUILD})
     set(INVADER_STATIC_BUILD false CACHE BOOL "Create a static build of libinvader.a (NOTE: Does not remove external dependencies)")
 endif()
 
+# Build both static and shared using the same name, but have the "invader" target be the one we link against
 if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
         ${INVADER_SOURCE_FILES}
