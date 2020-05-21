@@ -124,9 +124,21 @@ if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
         ${INVADER_SOURCE_FILES}
     )
+    add_library(invader-shared SHARED
+        ${INVADER_SOURCE_FILES}
+    )
+    set_target_properties(invader-shared
+        PROPERTIES OUTPUT_NAME invader
+    )
 else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
+    )
+    add_library(invader-static STATIC
+        ${INVADER_SOURCE_FILES}
+    )
+    set_target_properties(invader-static
+        PROPERTIES OUTPUT_NAME invader
     )
 endif()
 
