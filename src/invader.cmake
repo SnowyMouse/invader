@@ -128,10 +128,9 @@ if(${INVADER_STATIC_BUILD})
     add_library(invader-shared SHARED
         ${INVADER_SOURCE_FILES}
     )
-    set_target_properties(invader-shared
-        PROPERTIES OUTPUT_NAME invader
-    )
-    set(TARGETS_LIST ${TARGETS_LIST} invader-shared)
+    set(ALTERNATE_INVADER_BUILD invader-shared)
+    set(SHARED_INVADER_BUILD invader-shared)
+    set(STATIC_INVADER_BUILD invader)
 else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
@@ -139,11 +138,16 @@ else()
     add_library(invader-static STATIC
         ${INVADER_SOURCE_FILES}
     )
-    set_target_properties(invader-static
-        PROPERTIES OUTPUT_NAME invader
-    )
-    set(TARGETS_LIST ${TARGETS_LIST} invader-static)
+    set(ALTERNATE_INVADER_BUILD invader-static)
+    set(SHARED_INVADER_BUILD invader)
+    set(STATIC_INVADER_BUILD invader-static)
 endif()
+
+# Set our alternative Invader library (the one we aren't linking)
+set_target_properties(${ALTERNATE_INVADER_BUILD}
+    PROPERTIES OUTPUT_NAME invader
+)
+set(TARGETS_LIST ${TARGETS_LIST} ${ALTERNATE_INVADER_BUILD})
 
 # Do this
 add_custom_target(invader-header-version
@@ -237,5 +241,5 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 # Include that
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
-# Add libraries
-target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+# Link against everything
+target_link_libraries(${SHARED_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
