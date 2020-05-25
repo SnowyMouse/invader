@@ -21,6 +21,25 @@ set(INVADER_PARSER_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
 )
 
+# Sound stuff
+if(${INVADER_USE_AUDIO})
+    SET(INVADER_AUDIO_FILES
+        src/sound/sound_encoder_flac.cpp
+        src/sound/sound_encoder_ogg_vorbis.cpp
+        src/sound/sound_encoder_wav.cpp
+        src/sound/sound_encoder_xbox_adpcm.cpp
+        src/sound/sound_encoder.cpp
+        src/sound/sound_reader_16_bit_pcm_big_endian.cpp
+        src/sound/sound_reader_flac.cpp
+        src/sound/sound_reader_ogg.cpp
+        src/sound/sound_reader_wav.cpp
+        src/sound/sound_reader_xbox_adpcm.cpp
+        src/sound/adpcm_xq/adpcm-lib.c
+    )
+else()
+    SET(INVADER_AUDIO_FILES "")
+endif()
+
 # Invader library
 set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/language.cpp"
@@ -45,6 +64,8 @@ set(INVADER_SOURCE_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/parser-normalize.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bitfield.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/enum.cpp"
+    
+    ${INVADER_AUDIO_FILES}
 
     src/hek/class_int.cpp
     src/hek/data_type.cpp
@@ -61,17 +82,6 @@ set(INVADER_SOURCE_FILES
     src/script/tokenizer.cpp
     src/compress/ceaflate.cpp
     src/compress/compression.cpp
-    src/sound/sound_encoder_flac.cpp
-    src/sound/sound_encoder_ogg_vorbis.cpp
-    src/sound/sound_encoder_wav.cpp
-    src/sound/sound_encoder_xbox_adpcm.cpp
-    src/sound/sound_encoder.cpp
-    src/sound/sound_reader_16_bit_pcm_big_endian.cpp
-    src/sound/sound_reader_flac.cpp
-    src/sound/sound_reader_ogg.cpp
-    src/sound/sound_reader_wav.cpp
-    src/sound/sound_reader_xbox_adpcm.cpp
-    src/sound/adpcm_xq/adpcm-lib.c
     src/tag/hek/header.cpp
     src/tag/hek/class/bitmap.cpp
     src/tag/hek/class/model_collision_geometry/intersection_check.cpp
@@ -162,6 +172,7 @@ add_dependencies(invader invader-header-gen invader-header-version)
 add_library(invader-bitmap-p8-palette STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
 )
+        
 
 # This is fun
 option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for debugging Invader ONLY - this WILL break tags")
@@ -242,4 +253,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Link against everything
-target_link_libraries(${SHARED_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} FLAC ogg vorbis vorbisenc samplerate)
+target_link_libraries(${SHARED_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})

@@ -4,7 +4,11 @@ if(NOT DEFINED ${INVADER_SOUND})
     set(INVADER_SOUND true CACHE BOOL "Build invader-sound (builds sound tags)")
 endif()
 
-if(${INVADER_RESOURCE})
+if(${INVADER_SOUND})
+    if(NOT ${INVADER_USE_AUDIO})
+        message(FATAL_ERROR "invader-sound requires audio")
+    endif()
+
     add_executable(invader-sound
         src/sound/sound.cpp
     )

@@ -8,13 +8,19 @@ if(${INVADER_EDIT_QT})
     find_package(Qt5 COMPONENTS Core Widgets Multimedia REQUIRED)
 
     set(CMAKE_AUTOMOC ON)
+    
+    if(${INVADER_USE_AUDIO})
+        SET(INVADER_EDIT_QT_AUDIO_SUBWINDOW "src/edit/qt/editor/subwindow/tag_editor_sound_subwindow.cpp")
+    else()
+        SET(INVADER_EDIT_QT_AUDIO_SUBWINDOW "")
+    endif()
 
     add_executable(invader-edit-qt
         src/edit/qt/qt.cpp
         src/edit/qt/editor/subwindow/s3tc/s3tc.cpp
         src/edit/qt/editor/subwindow/tag_editor_bitmap_subwindow.cpp
         src/edit/qt/editor/subwindow/tag_editor_font_subwindow.cpp
-        src/edit/qt/editor/subwindow/tag_editor_sound_subwindow.cpp
+        ${INVADER_EDIT_QT_AUDIO_SUBWINDOW}
         src/edit/qt/editor/subwindow/tag_editor_string_subwindow.cpp
         src/edit/qt/editor/subwindow/tag_editor_subwindow.cpp
         src/edit/qt/editor/widget/tag_editor_array_widget.cpp

@@ -239,7 +239,12 @@ int main(int argc, char * const *argv) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_SOUND_PERMUTATIONS;
                 }
                 else if(std::strcmp(arguments[0], FUCKED_SOUND_BUFFER_FIX) == 0) {
+                    #ifndef DISABLE_AUDIO
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_SOUND_BUFFER;
+                    #else
+                    eprintf_error("invader was not compiled with audio support, so " FUCKED_SOUND_BUFFER_FIX " is not available");
+                    std::exit(EXIT_FAILURE);
+                    #endif
                 }
                 else if(std::strcmp(arguments[0], BULLSHIT_RANGE_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BULLSHIT_RANGE;
