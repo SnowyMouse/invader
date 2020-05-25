@@ -6,6 +6,10 @@ if(NOT DEFINED ${INVADER_BITMAP})
 endif()
 
 if(${INVADER_BITMAP})
+    if((NOT ${INVADER_USE_ZLIB}) OR (NOT ${ZLIB_FOUND}))
+        message(FATAL_ERROR "invader-bitmap requires zlib")
+    endif()
+
     find_package(TIFF REQUIRED)
 
     add_executable(invader-bitmap

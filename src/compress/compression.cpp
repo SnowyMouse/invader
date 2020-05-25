@@ -6,7 +6,10 @@
 #include <cstdio>
 #include <filesystem>
 #include <invader/compress/ceaflate.hpp>
+
+#ifndef DISABLE_ZLIB
 #include <zlib.h>
+#endif
 
 namespace Invader::Compression {
     template <typename T> static void compress_header(const Map &map, std::byte *header_output, std::size_t decompressed_size) {
@@ -142,6 +145,7 @@ namespace Invader::Compression {
             return output_size;
         }
         else if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            #ifndef DISABLE_ZLIB
             compress_header<HEK::CacheFileHeader>(map, output, data_size);
 
             // Compress that!
@@ -167,6 +171,10 @@ namespace Invader::Compression {
                 throw DecompressionFailureException();
             }
             return deflate_stream.total_out + HEADER_SIZE;
+            
+            #else
+            std::terminate();
+            #endif
         }
         else {
             if(engine == HEK::CACHE_FILE_DARK_CIRCLET) {
@@ -219,6 +227,7 @@ namespace Invader::Compression {
 
             // If it's Xbox, do this
             if(header->engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                #ifndef DISABLE_ZLIB
                 z_stream inflate_stream = {};
                 inflate_stream.zalloc = Z_NULL;
                 inflate_stream.zfree = Z_NULL;
@@ -231,6 +240,9 @@ namespace Invader::Compression {
                     throw DecompressionFailureException();
                 }
                 return inflate_stream.total_out + HEADER_SIZE;
+                #else
+                std::terminate();
+                #endif
             }
         }
 

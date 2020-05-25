@@ -2,8 +2,17 @@
 
 # Find some packages
 find_package(Python3 REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
+find_package(ZLIB)
 find_package(LibArchive)
 find_package(Freetype)
 find_package(Git)
+
+option(INVADER_USE_ZLIB "set whether or not to use zlib - required for invader-bitmap and MCC map compatibility" ${ZLIB_FOUND})
+
+if(${ZLIB_FOUND} AND ${INVADER_USE_ZLIB})
+    set(DEP_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
+else()
+    set(DEP_ZLIB_LIBRARIES "")
+    add_definitions(-DDISABLE_ZLIB)
+endif()

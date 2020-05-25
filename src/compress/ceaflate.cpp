@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#ifndef DISABLE_ZLIB
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -10,9 +12,18 @@
 #include <thread>
 #include <zlib.h>
 #include <invader/printf.hpp>
+
+#else
+
+#include <exception>
+
+#endif
+
 #include <invader/compress/ceaflate.hpp>
 
 namespace Invader::Compression::Ceaflate {
+    #ifndef DISABLE_ZLIB
+    
     #define CHUNK_SIZE static_cast<std::size_t>(0x20000)
 
     struct CompressedMapHeader {
@@ -301,4 +312,19 @@ namespace Invader::Compression::Ceaflate {
         return nullptr;
     }
 
+    #else
+
+    std::size_t find_decompressed_file_size(const std::byte *, std::size_t) noexcept {
+        std::terminate();
+    }
+
+    bool decompress_file(const std::byte *, std::size_t , std::byte *, std::size_t &) {
+        std::terminate();
+    }
+
+    bool compress_file(const std::byte *, std::size_t , std::byte *, std::size_t &) {
+        std::terminate();
+    }
+
+    #endif
 }
