@@ -452,14 +452,12 @@
             {
                 "name": "prev filthy part index",
                 "type": "uint8",
-                "endian": null,
-                "cache_only": true
+                "endian": null
             },
             {
                 "name": "next filthy part index",
                 "type": "uint8",
-                "endian": null,
-                "cache_only": true
+                "endian": null
             },
             {
                 "name": "centroid primary node",

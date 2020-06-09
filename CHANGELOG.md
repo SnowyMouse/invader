@@ -34,6 +34,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader: Added an enum in the actor_variant tags for choosing the object type
   when built for MCC and scoring is used
+- invader-build: Fixed an issue where filthy parts were not saved, resulting in
+  the FP needler core not glowing (you will need to re-extract any GBXModel tags
+  that were affected by this issue)
 - invader-build: Fixed some issues with scenery not spawning on MCC
 - invader-build: Fixed uncompressed size having the wrong percentage
 - invader-build: Fixed an issue with rain not appearing in some maps
