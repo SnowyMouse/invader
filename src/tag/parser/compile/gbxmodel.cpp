@@ -52,6 +52,12 @@ namespace Invader::Parser {
             }
         }
     }
+    
+    void GBXModelGeometryPart::postprocess_hek_data() {
+        // No clue how this works, but it's responsible for making the needler core not messed up
+        this->prev_filthy_part_index = this->prev_filthy_part_index == 0 ? -1 : this->prev_filthy_part_index;
+        this->next_filthy_part_index = this->next_filthy_part_index == 0 ? -1 : this->next_filthy_part_index;
+    }
 
     void GBXModel::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
         // Put all of the markers in the marker array
@@ -661,10 +667,6 @@ namespace Invader::Parser {
         // Don't forget to set these memes
         this->do_not_crash_the_game = 1;
         this->do_not_screw_up_the_model = 4;
-        
-        // Not sure what this does, but it keeps the needler from being broken
-        this->prev_filthy_part_index = this->prev_filthy_part_index == 0 ? -1 : this->prev_filthy_part_index;
-        this->next_filthy_part_index = this->next_filthy_part_index == 0 ? -1 : this->next_filthy_part_index;
     }
 
     void GBXModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {

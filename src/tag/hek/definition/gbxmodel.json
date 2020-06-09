@@ -586,6 +586,7 @@
         "type": "struct",
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
+        "postprocess_hek_data": true,
         "pre_compile": true,
         "read_only": true,
         "size": 132
