@@ -254,3 +254,4 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Link against everything
 target_link_libraries(${SHARED_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
+target_link_libraries(${STATIC_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
