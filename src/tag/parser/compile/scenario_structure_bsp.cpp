@@ -155,7 +155,7 @@ namespace Invader::Parser {
     }
     
     void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
-        this->bullshit = 1;
+        this->bullshit = this->instances.size() != 0;
     }
 
     bool regenerate_missing_bsp_vertices(ScenarioStructureBSPMaterial &material, bool fix) {
