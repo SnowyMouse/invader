@@ -452,11 +452,13 @@
             {
                 "name": "prev filthy part index",
                 "type": "uint8",
+                "default": 255,
                 "endian": null
             },
             {
                 "name": "next filthy part index",
                 "type": "uint8",
+                "default": 255,
                 "endian": null
             },
             {
@@ -586,7 +588,6 @@
         "type": "struct",
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
-        "postprocess_hek_data": true,
         "pre_compile": true,
         "read_only": true,
         "size": 132
