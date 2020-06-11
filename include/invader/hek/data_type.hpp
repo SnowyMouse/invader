@@ -413,13 +413,13 @@ namespace Invader::HEK {
     static_assert(sizeof(Rectangle2D<BigEndian>) == 0x8);
 
     /**
-     * RGB Color with alpha
+     * RGB Color with alpha - This is stored as a 32-bit integer, so we're ordering it from lowest 8 bits to highest 8 bits
      */
     struct ColorARGBInt {
-        std::uint8_t alpha;
-        std::uint8_t red;
-        std::uint8_t green;
         std::uint8_t blue;
+        std::uint8_t green;
+        std::uint8_t red;
+        std::uint8_t alpha;
     };
     static_assert(sizeof(ColorARGBInt) == 0x4);
 
