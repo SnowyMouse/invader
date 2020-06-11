@@ -34,6 +34,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader: Added an enum in the actor_variant tags for choosing the object type
   when built for MCC and scoring is used
+- invader: Fixed the ColorARGBInt definition (you do not need to re-extract tags
+  or rebuild maps for this - it effectively only impacted invader-edit-qt)
 - invader-build: Fixed an issue where filthy parts were not saved, resulting in
   the FP needler core not glowing (you will need to re-extract any GBXModel tags
   that were affected by this issue)
@@ -42,6 +44,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed an issue with rain not appearing in some maps
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
+- invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-extract: Fixed all enemies being treated as brutes in MCC in regards
