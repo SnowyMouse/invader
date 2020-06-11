@@ -1186,6 +1186,7 @@
             {
                 "name": "bullshit",
                 "type": "uint8",
+                "cache_only": true,
                 "endian": null
             },
             {
@@ -1198,6 +1199,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 64
     },
     {

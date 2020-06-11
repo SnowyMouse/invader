@@ -153,6 +153,10 @@ namespace Invader::Parser {
             }
         }
     }
+    
+    void ScenarioStructureBSPDetailObjectData::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        this->bullshit = 1;
+    }
 
     bool regenerate_missing_bsp_vertices(ScenarioStructureBSPMaterial &material, bool fix) {
         // Lightmap vertices size is incorrect

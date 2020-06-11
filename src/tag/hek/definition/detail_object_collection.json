@@ -43,6 +43,7 @@
             {
                 "name": "sprite count",
                 "type": "uint8",
+                "cache_only": true,
                 "endian": null
             },
             {
@@ -122,6 +123,7 @@
                 "classes": [
                     "bitmap"
                 ],
+                "non_null": true,
                 "compound": true
             },
             {
@@ -136,6 +138,7 @@
             }
         ],
         "type": "struct",
+        "post_compile": true,
         "size": 128
     }
 ]

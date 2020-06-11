@@ -94,6 +94,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/bitmap.cpp
     src/tag/parser/compile/contrail.cpp
     src/tag/parser/compile/damage_effect.cpp
+    src/tag/parser/compile/detail_object_collection.cpp
     src/tag/parser/compile/effect.cpp
     src/tag/parser/compile/font.cpp
     src/tag/parser/compile/gbxmodel.cpp
