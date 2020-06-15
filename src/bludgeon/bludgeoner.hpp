@@ -13,7 +13,6 @@ namespace Invader::Bludgeoner {
     bool sound_buffer(Parser::ParserStruct *s, bool fix);
     bool fucked_vertices(Parser::ParserStruct *s, bool fix);
     bool bullshit_references(Parser::ParserStruct *s, bool fix);
-    bool power_of_two_fix(Parser::ParserStruct *s, bool fix);
     bool bullshit_range_fix(Parser::ParserStruct *s, bool fix);
     bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix);
     bool fucked_indices_fix(Parser::ParserStruct *s, bool fix);

@@ -1,6 +1,5 @@
 #include "bludgeoner.hpp"
 #include <invader/tag/parser/parser.hpp>
-#include <invader/tag/parser/compile/bitmap.hpp>
 #include <invader/tag/parser/compile/gbxmodel.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
@@ -135,18 +134,6 @@ namespace Invader::Bludgeoner {
     
     bool bullshit_references(Parser::ParserStruct *s, bool fix) {
         return s->check_for_invalid_references(fix);
-    }
-    
-    bool power_of_two_fix(Parser::ParserStruct *s, bool fix) {
-        auto attempt_fix = [&fix](auto *s) {
-            if(s) {
-                return fix_power_of_two(*s, fix);
-            }
-            else {
-                return false;
-            }
-        };
-        return attempt_fix(dynamic_cast<Parser::Bitmap *>(s)) || attempt_fix(dynamic_cast<Parser::ExtendedBitmap *>(s));
     }
     
     bool bullshit_range_fix(Parser::ParserStruct *s, bool fix) {

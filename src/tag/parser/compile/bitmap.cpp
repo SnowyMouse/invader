@@ -256,7 +256,6 @@ namespace Invader::Parser {
         for(auto &data : bitmap->bitmap_data) {
             bool swizzled = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
             bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-            bool power_of_two_dimensions = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
             
             // DXTn bitmaps cannot be swizzled
             if(swizzled && compressed) {
@@ -284,24 +283,17 @@ namespace Invader::Parser {
             if(!workload.hide_pedantic_warnings) {
                 bool exceeded = false;
                 bool non_power_of_two = (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth));
-                if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
-                    exceeded = true;
-                }
-
-                if(power_of_two_dimensions && non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is non-power-of-two (%zux%zux%zu) but that flag is set", data_index, width, height, depth);
-                }
-
-                if(!power_of_two_dimensions && !non_power_of_two) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Data #%zu is power-of-two (%zux%zux%zu) but that flag is not set", data_index, width, height, depth);
-                }
 
                 if((
                     workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
                     workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
                     workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
                 ) && !workload.hide_pedantic_warnings) {
+                    if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
+                        exceeded = true;
+                    }
+                
                     switch(type) {
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
@@ -325,6 +317,7 @@ namespace Invader::Parser {
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_ENUM_COUNT:
                             break;
                     }
+                    
                     if(exceeded) {
                         eprintf_warn("Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
                     }
@@ -338,9 +331,9 @@ namespace Invader::Parser {
             // Make sure these are equal
             if(compressed != should_be_compressed) {
                 const char *format_name = HEK::bitmap_data_format_name(format);
+                data.flags ^= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED; // invert the flag in case we need to do any math on it (though it's screwed up either way)
                 if(compressed) {
-                    data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-                    //REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
                 }
                 else {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is not marked as compressed", data_index, format_name);

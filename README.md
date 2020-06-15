@@ -311,8 +311,7 @@ Options:
                                out-of-range, invalid-reference-classes,
                                invalid-model-markers, missing-script-source,
                                incorrect-sound-buffer, missing-vertices,
-                               invalid-power-of-two, none, everything (default:
-                               none)
+                               none, everything (default: none)
 ```
 
 ### invader-build

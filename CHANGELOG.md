@@ -24,6 +24,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Now calculates the CRC32 of MCC maps
 - invader-build: Maps that error due to multiple objects sharing the same name
   now list the objects with the name to help you track them down
+- invader-build: Non-power-of-two bitmaps now result in a pedantic warning
+  instead of an error
 - invader-compress: Now shows the compression format used
 - invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
@@ -43,6 +45,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed uncompressed size having the wrong percentage
 - invader-build: Fixed an issue with rain not appearing in some maps
 - invader-build: Fixed an issue with detail objects not appearing in some maps
+- invader-build: Uncompressed bitmaps marked as compressed now error
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
@@ -52,6 +55,9 @@ This is used for recording Invader's changes. This changelog is based on
   to scoring (you will need to re-extract your actor_variant tags)
 - invader-sound: Fixed an issue with generating split sound tags not setting the
   actual permutation count correctly as a result of a past optimization
+
+### Removed
+- invader-bludgeon: Removed invalid-power-of-two
 
 ## [0.34.1] - 2020-04-12
 ### Changed
