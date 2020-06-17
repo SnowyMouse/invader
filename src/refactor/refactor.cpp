@@ -76,7 +76,7 @@ int main(int argc, char * const *argv) {
         bool set_move_or_no_move = false;
         bool dry_run = false;
         const char *single_tag = nullptr;
-        
+
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
@@ -85,29 +85,27 @@ int main(int argc, char * const *argv) {
         switch(opt) {
             case 't':
                 refactor_options.tags.emplace_back(arguments[0]);
-                break;
+                return;
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
+                return;
             case 'N':
                 if(refactor_options.set_move_or_no_move) {
-                    // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
-                    SPAGHETTI_CODE_VELOCIRAPTOR:
-                    eprintf_error("Error: -D, -M, or -N can only be set once.");
-                    std::exit(EXIT_FAILURE);
+                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
                 }
                 refactor_options.no_move = true;
                 refactor_options.set_move_or_no_move = true;
-                break;
+                return;
             case 'M':
                 if(refactor_options.set_move_or_no_move) {
                     goto SPAGHETTI_CODE_VELOCIRAPTOR;
                 }
                 refactor_options.set_move_or_no_move = true;
-                break;
+                return;
             case 'r':
                 refactor_options.recursive = { arguments[0], arguments[1] };
-                break;
+                return;
             case 'T':
                 try {
                     refactor_options.replacements.emplace_back(split_tag_class_extension(preferred_path_to_halo_path(arguments[0])).value(), split_tag_class_extension(preferred_path_to_halo_path(arguments[1])).value());
@@ -116,20 +114,25 @@ int main(int argc, char * const *argv) {
                     eprintf_error("Invalid path pair: \"%s\" and \"%s\"", arguments[0], arguments[1]);
                     std::exit(EXIT_FAILURE);
                 }
-                break;
+                return;
             case 'D':
                 if(refactor_options.set_move_or_no_move) {
                     goto SPAGHETTI_CODE_VELOCIRAPTOR;
                 }
                 refactor_options.dry_run = true;
                 refactor_options.set_move_or_no_move = true;
-                break;
+                return;
             case 's':
                 refactor_options.single_tag = arguments[0];
-                break;
+                return;
         }
+
+        // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
+        SPAGHETTI_CODE_VELOCIRAPTOR:
+            eprintf_error("Error: -D, -M, or -N can only be set once.");
+            std::exit(EXIT_FAILURE);
     });
-    
+
     auto &replacements = refactor_options.replacements;
     if(replacements.size() && refactor_options.recursive) {
         eprintf_error("Error: --recursive and --tag cannot be used at the same time");
