@@ -120,7 +120,6 @@ namespace Invader {
                 auto map_data = Invader::File::open_file(map_path_str.c_str());
                 if(!map_data.has_value() && map_alt) {
                     map_data = Invader::File::open_file(map_path_alt_str.c_str());
-                    oprintf("Reading %s instead...\n", map_path_alt_str.c_str());
                 }
 
                 if(!map_data.has_value()) {
