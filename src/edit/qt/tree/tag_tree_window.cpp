@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QStatusBar>
 #include <QCloseEvent>
+#include <QClipboard>
 #include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QInputDialog>
@@ -330,6 +331,20 @@ namespace Invader::EditQt {
         }
     }
 
+    void TagTreeWindow::perform_copy_virtual_path() {
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(tag) {
+            QGuiApplication::clipboard()->setText(Invader::File::halo_path_to_preferred_path(tag->tag_path).c_str());
+        }
+    }
+
+    void TagTreeWindow::perform_copy_file_path() {
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(tag) {
+            QGuiApplication::clipboard()->setText(std::filesystem::absolute(tag->full_path).string().c_str());
+        }
+    }
+
     void TagTreeWindow::open_tag(const char *path, bool full_path) {
         // See if we can figure out this path
         File::TagFile tag;
@@ -472,6 +487,16 @@ namespace Invader::EditQt {
     void TagTreeWindow::show_context_menu(const QPoint &point) {
         if(this->tag_view->get_selected_tag()) {
             QMenu right_click_menu(this);
+
+            auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");
+            copy_virtual_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
+            connect(copy_virtual_path, &QAction::triggered, this, &TagTreeWindow::perform_copy_virtual_path);
+
+            auto *copy_file_path = right_click_menu.addAction("Copy file path");
+            copy_file_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
+            connect(copy_file_path, &QAction::triggered, this, &TagTreeWindow::perform_copy_file_path);
+
+            right_click_menu.addSeparator();
 
             auto *open = right_click_menu.addAction("Open...");
             open->setIcon(QIcon::fromTheme(QStringLiteral("document-open")));

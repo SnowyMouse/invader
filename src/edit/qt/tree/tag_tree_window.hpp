@@ -118,6 +118,12 @@ namespace Invader::EditQt {
         /** Close all open tags and then cleanup */
         bool close_all_open_tags();
 
+        /** Copy the file path */
+        void perform_copy_file_path();
+
+        /** Copy the virtual path */
+        void perform_copy_virtual_path();
+
         /** Open an existing document */
         void perform_open();
 
