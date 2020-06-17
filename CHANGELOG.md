@@ -26,7 +26,13 @@ This is used for recording Invader's changes. This changelog is based on
   now list the objects with the name to help you track them down
 - invader-build: Non-power-of-two bitmaps now result in a pedantic warning
   instead of an error
+- invader-build: Now looks for custom_bitmaps.map, custom_sounds.map, and
+  custom_loc.map and uses those if present when building Custom Edition maps
 - invader-compress: Now shows the compression format used
+- invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
+  custom_loc.map and uses those if present when extracting Custom Edition maps
+- invader-extract: No longer attempts to open resource map files when attempting
+  to extract a map that doesn't support them
 - invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
   can use it multiple times in a single invocation

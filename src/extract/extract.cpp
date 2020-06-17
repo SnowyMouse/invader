@@ -108,20 +108,65 @@ int main(int argc, const char **argv) {
         }
         if(extract_options.maps_directory.has_value()) {
             std::filesystem::path maps_directory(*extract_options.maps_directory);
-            auto open_map_possibly = [&maps_directory](const char *map) -> std::vector<std::byte> {
+            auto open_map_possibly = [&maps_directory](const char *map, const char *map_alt, auto &open_map_possibly) -> std::vector<std::byte> {
                 auto potential_map_path = (maps_directory / map).string();
                 auto potential_map = Invader::File::open_file(potential_map_path.c_str());
                 if(potential_map.has_value()) {
                     return *potential_map;
+                }
+                else if(map_alt) {
+                    return open_map_possibly(map_alt, nullptr, open_map_possibly);
                 }
                 else {
                     return std::vector<std::byte>();
                 }
             };
 
-            loc = open_map_possibly("loc.map");
-            bitmaps = open_map_possibly("bitmaps.map");
-            sounds = open_map_possibly("sounds.map");
+            // Get its header
+            Invader::HEK::CacheFileHeader header;
+            std::FILE *f = std::fopen(remaining_arguments[0], "rb");
+            if(!f) {
+                eprintf_error("Failed to open %s to determine its version", remaining_arguments[0]);
+                return EXIT_FAILURE;
+            }
+            if(!std::fread(&header, sizeof(header), 1, f)) {
+                eprintf_error("Failed to read %s to determine its version", remaining_arguments[0]);
+                std::fclose(f);
+                return EXIT_FAILURE;
+            }
+            std::fclose(f);
+
+            // Check if we can do things to it
+            if(header.valid()) {
+                switch(header.engine.read()) {
+                    case HEK::CACHE_FILE_DEMO:
+                    case HEK::CACHE_FILE_DEMO_COMPRESSED:
+                    case HEK::CACHE_FILE_RETAIL:
+                    case HEK::CACHE_FILE_RETAIL_COMPRESSED:
+                        bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
+                        sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
+                        break;
+                    case HEK::CACHE_FILE_CUSTOM_EDITION:
+                    case HEK::CACHE_FILE_CUSTOM_EDITION_COMPRESSED: {
+                        loc = open_map_possibly("custom_loc.map", "loc.map", open_map_possibly);
+                        bitmaps = open_map_possibly("custom_bitmaps.map", "bitmaps.map", open_map_possibly);
+                        sounds = open_map_possibly("custom_sounds.map", "sounds.map", open_map_possibly);
+                        break;
+                    }
+                    default:
+                        break; // nothing else gets resource maps
+                }
+            }
+            // Maybe it's a demo map?
+            else if(reinterpret_cast<Invader::HEK::CacheFileDemoHeader *>(&header)->valid()) {
+                bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
+                sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
+            }
+            // I have no idea what it is
+            else {
+                eprintf_error("Failed to parse %s's header to determine its version", remaining_arguments[0]);
+                return EXIT_FAILURE;
+            }
         }
     }
 
