@@ -60,7 +60,7 @@ int main(int argc, char * const *argv) {
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This cannot be set with --move or --no-move.");
+    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes.");
     options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move or --dry-run.");
     options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
     options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with --no-move. This can only be specified once per operation and cannot be used with -T.", "<f> <t>");
@@ -68,7 +68,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <-M|-N |-D> <-T <from> <to> [...] | -r <from-dir> <to-dir> >";
+    static constexpr char USAGE[] = "[options] <-M|-N> <-T <from> <to> [...] | -r <from-dir> <to-dir> >";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
@@ -116,11 +116,7 @@ int main(int argc, char * const *argv) {
                 }
                 return;
             case 'D':
-                if(refactor_options.set_move_or_no_move) {
-                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
-                }
                 refactor_options.dry_run = true;
-                refactor_options.set_move_or_no_move = true;
                 return;
             case 's':
                 refactor_options.single_tag = arguments[0];

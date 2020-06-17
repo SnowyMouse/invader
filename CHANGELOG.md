@@ -36,6 +36,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
   can use it multiple times in a single invocation
+- invader-refactor: -D must now be specified with -N or -M
 - invader-resource: Replace `-R` with `-g` which is now required
 - invader-string: Empty string list tags can no longer be created
 

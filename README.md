@@ -531,13 +531,12 @@ Options:
 This program renames and moves tag references.
 
 ```
-Usage: invader-refactor [options] <-M | -N | -D> < <from.class> <to.class> | -r <from-dir> <to-dir> >
+Usage: invader-refactor [options] <-M|-N> < <from.class> <to.class> | -r <from-dir> <to-dir> >
 
 Find and replace tag references.
 
 Options:
-  -D --dry-run                 Do not actually make any changes. This cannot be
-                               set with --move or --no-move.
+  -D --dry-run                 Do not actually make any changes.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -M --move                    Move files that are being refactored. This can
@@ -690,7 +689,7 @@ output. Halo only supports 22.05 kHz and 44.1 kHz, so supplying a 48 kHz input
 will require resampling which is lossy. And, of course, if your input is 24-bit
 PCM, then encoding to 16-bit PCM will be lossy, too.
 
-There are two lossless formats available: 16-bit PCM and FLAC. 
+There are two lossless formats available: 16-bit PCM and FLAC.
 
 Using 16-bit PCM requires little to no processing, making it the fastest, but it
 does have a very high bitrate. This can make maps become massive really quickly.
