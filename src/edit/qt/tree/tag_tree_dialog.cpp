@@ -287,7 +287,7 @@ namespace Invader::EditQt {
 
         // Clicked a directory
         else if(item) {
-            static constexpr char PREFERRED_SEPARATOR[] = { std::filesystem::path::preferred_separator, 0 };
+            static constexpr char PREFERRED_SEPARATOR[] = { INVADER_PREFERRED_PATH_SEPARATOR, 0 };
             std::string name;
 
             while(item) {

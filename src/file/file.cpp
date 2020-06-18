@@ -112,7 +112,7 @@ namespace Invader::File {
 
         for(auto &tags_directory_string : tags) {
             // Get the absolute path
-            bool ends_with_separator = tags_directory_string[tags_directory_string.size() - 1] == '/' || tags_directory_string[tags_directory_string.size() - 1] == std::filesystem::path::preferred_separator;
+            bool ends_with_separator = tags_directory_string[tags_directory_string.size() - 1] == '/' || tags_directory_string[tags_directory_string.size() - 1] == '\\' || tags_directory_string[tags_directory_string.size() - 1] == INVADER_PREFERRED_PATH_SEPARATOR;
             auto tags_directory = std::filesystem::absolute(ends_with_separator ? tags_directory_string.substr(0,tags_directory_string.size() - 1) : tags_directory_string);
 
             // Go back until we get something that's the same
@@ -163,23 +163,21 @@ namespace Invader::File {
         return std::nullopt;
     }
 
-    constexpr char SYSTEM_PATH_SEPARATOR = std::filesystem::path::preferred_separator;
+    constexpr char SYSTEM_PATH_SEPARATOR = INVADER_PREFERRED_PATH_SEPARATOR;
     constexpr char HALO_PATH_SEPARATOR = '\\';
     constexpr char PORTABLE_PATH_SEPARATOR = '/';
 
     void halo_path_to_preferred_path_chars(char *tag_path) noexcept {
-        if(SYSTEM_PATH_SEPARATOR != HALO_PATH_SEPARATOR) {
-            for(char *c = tag_path; *c != 0; c++) {
-                if(*c == HALO_PATH_SEPARATOR) {
-                    *c = SYSTEM_PATH_SEPARATOR;
-                }
+        for(char *c = tag_path; *c != 0; c++) {
+            if(*c == HALO_PATH_SEPARATOR || *c == SYSTEM_PATH_SEPARATOR || *c == PORTABLE_PATH_SEPARATOR) {
+                *c = SYSTEM_PATH_SEPARATOR;
             }
         }
     }
 
     void preferred_path_to_halo_path_chars(char *tag_path) noexcept {
         for(char *c = tag_path; *c != 0; c++) {
-            if(*c == SYSTEM_PATH_SEPARATOR || *c == PORTABLE_PATH_SEPARATOR) {
+            if(*c == HALO_PATH_SEPARATOR || *c == SYSTEM_PATH_SEPARATOR || *c == PORTABLE_PATH_SEPARATOR) {
                 *c = HALO_PATH_SEPARATOR;
             }
         }
@@ -202,7 +200,7 @@ namespace Invader::File {
     const char *base_name_chars(const char *tag_path) noexcept {
         const char *base_name = tag_path;
         while(*tag_path) {
-            if(*tag_path == '\\' || *tag_path == '/' || *tag_path == std::filesystem::path::preferred_separator) {
+            if(*tag_path == '\\' || *tag_path == '/' || *tag_path == INVADER_PREFERRED_PATH_SEPARATOR) {
                 base_name = tag_path + 1;
             }
             tag_path++;
@@ -242,7 +240,7 @@ namespace Invader::File {
     void remove_trailing_slashes_chars(char *path) {
         long path_length = static_cast<long>(std::strlen(path));
         for(long i = path_length - 1; i >= 0; i++) {
-            if(path[i] == '/' || path[i] == std::filesystem::path::preferred_separator) {
+            if(path[i] == '/' || path[i] == INVADER_PREFERRED_PATH_SEPARATOR || path[i] == '\\') {
                 path[i] = 0;
             }
             else {
@@ -385,7 +383,7 @@ namespace Invader::File {
         for(char *i = path; *i; i++) {
             char this_i = i[0];
             char next_i = i[1];
-            if((this_i == '\\' || this_i == '/' || this_i == std::filesystem::path::preferred_separator) && (next_i == '\\' || next_i == '/' || next_i == std::filesystem::path::preferred_separator)) {
+            if((this_i == '\\' || this_i == '/' || this_i == INVADER_PREFERRED_PATH_SEPARATOR) && (next_i == '\\' || next_i == '/' || next_i == INVADER_PREFERRED_PATH_SEPARATOR)) {
                 for(char *j = i + 1; *j; j++) {
                     j[0] = j[1];
                 }
@@ -416,7 +414,7 @@ namespace Invader::File {
             }
             else if(
                 (*p == '?' || *p == *path) || 
-                ((*p == '/' || *p == '\\' || *p == std::filesystem::path::preferred_separator) && (*path == '\\' || *path == '/' || *path == std::filesystem::path::preferred_separator))
+                ((*p == '/' || *p == '\\' || *p == INVADER_PREFERRED_PATH_SEPARATOR) && (*path == '\\' || *path == '/' || *path == INVADER_PREFERRED_PATH_SEPARATOR))
             ) {
                 path++;
                 continue;

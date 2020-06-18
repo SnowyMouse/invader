@@ -173,7 +173,12 @@ add_dependencies(invader invader-header-gen invader-header-version)
 add_library(invader-bitmap-p8-palette STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/p8_palette.cpp"
 )
-        
+
+# This is just for memes
+option(INVADER_FORCE_PORTABLE_PREFERRED_PATHS "Use forward slashes for all preferred paths (does nothing if it's already a forward slash)")
+if(${INVADER_FORCE_PORTABLE_PREFERRED_PATHS})
+    add_definitions(-DINVADER_FORCE_PORTABLE_PREFERRED_PATHS)
+endif()
 
 # This is fun
 option(INVADER_EXTRACT_HIDDEN_VALUES "Extract (most) hidden values; used for debugging Invader ONLY - this WILL break tags")

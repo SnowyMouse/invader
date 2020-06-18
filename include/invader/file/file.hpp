@@ -12,7 +12,12 @@
 #include "../hek/class_int.hpp"
 
 namespace Invader::File {
-
+    #ifdef INVADER_FORCE_PORTABLE_PREFERRED_PATHS
+    #define INVADER_PREFERRED_PATH_SEPARATOR '/'
+    #else
+    #define INVADER_PREFERRED_PATH_SEPARATOR std::filesystem::path::preferred_separator
+    #endif
+    
     /**
      * Attempt to open the file and read it all into a buffer
      * @param path path to the file
