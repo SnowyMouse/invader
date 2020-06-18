@@ -415,8 +415,7 @@ namespace Invader {
 
                                         // Alpha is stored in order from the first ones being the least significant bytes, and the last ones being the most significant bytes
                                         for(int i = 0; i < BLOCK_LENGTH * BLOCK_LENGTH; i++) {
-                                            dxt3_alpha <<= 4;
-                                            dxt3_alpha |= (block[BLOCK_LENGTH * BLOCK_LENGTH - i - 1].alpha * 15 + UINT8_MAX + 1) / UINT8_MAX / 2;
+                                            dxt3_alpha = (dxt3_alpha << 4) | (block[BLOCK_LENGTH * BLOCK_LENGTH - i - 1].alpha >> 4);
                                         }
 
                                         auto &compressed_alpha = *reinterpret_cast<LittleEndian<std::uint64_t> *>(compressed_pixel);
