@@ -162,11 +162,6 @@ int main(int argc, const char **argv) {
                 bitmaps = open_map_possibly("bitmaps.map", nullptr, open_map_possibly);
                 sounds = open_map_possibly("sounds.map", nullptr, open_map_possibly);
             }
-            // I have no idea what it is
-            else {
-                eprintf_error("Failed to parse %s's header to determine its version", remaining_arguments[0]);
-                return EXIT_FAILURE;
-            }
         }
     }
 
