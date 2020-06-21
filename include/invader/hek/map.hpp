@@ -137,7 +137,7 @@ namespace Invader::HEK {
     struct CacheFileTagDataHeader {
         LittleEndian<HEK::Pointer> tag_array_address;
         LittleEndian<TagID> scenario_tag;
-        LittleEndian<std::uint32_t> random_number;
+        LittleEndian<std::uint32_t> tag_file_checksums;
         LittleEndian<std::uint32_t> tag_count;
         LittleEndian<std::uint32_t> model_part_count;
     };

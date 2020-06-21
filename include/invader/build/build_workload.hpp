@@ -304,6 +304,7 @@ namespace Invader {
         std::size_t stubbed_tag_count = 0;
         std::size_t indexed_data_amount = 0;
         std::size_t raw_data_indices_offset;
+        std::uint32_t tag_file_checksums = 0;
         RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
     };
 }

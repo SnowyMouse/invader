@@ -28,6 +28,8 @@ This is used for recording Invader's changes. This changelog is based on
   instead of an error
 - invader-build: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when building Custom Edition maps
+- invader-build: The final CRC32 now factors in bitmap/sound data (unless you
+  decide to forge the CRC32)
 - invader-compress: Now shows the compression format used
 - invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when extracting Custom Edition maps
@@ -66,7 +68,7 @@ This is used for recording Invader's changes. This changelog is based on
   actual permutation count correctly as a result of a past optimization
 
 ### Removed
-- invader-bludgeon: Removed invalid-power-of-two
+- invader-bludgeon: Removed `-T invalid-power-of-two`
 
 ## [0.34.1] - 2020-04-12
 ### Changed

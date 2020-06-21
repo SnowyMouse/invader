@@ -85,17 +85,17 @@ namespace Invader {
         }
 
         // Find out where we're going to be doing CRC32 stuff
-        auto *random_number = &reinterpret_cast<HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->random_number;
-        const std::byte *random_number_ptr = reinterpret_cast<const std::byte *>(random_number);
-        std::size_t random_number_offset_in_memory = random_number_ptr - tag_data + data_crc.size();
+        auto *tag_file_checksums = &reinterpret_cast<HEK::CacheFileTagDataHeader *>(map.get_tag_data_at_offset(0, sizeof(HEK::CacheFileTagDataHeader)))->tag_file_checksums;
+        const std::byte *tag_file_checksums_ptr = reinterpret_cast<const std::byte *>(tag_file_checksums);
+        std::size_t tag_file_checksums_offset_in_memory = tag_file_checksums_ptr - tag_data + data_crc.size();
         CRC_DATA(tag_data_start, tag_data_end);
 
         // Overwrite with new CRC32
         if(new_crc) {
             FakeFileHandle handle = { reinterpret_cast<std::uint8_t *>(data_crc.data()), data_crc.size(), 0 };
             std::uint32_t newcrc = ~crc_spoof_reverse_bits(*new_crc);
-            crc_spoof_modify_file_crc32(&handle, random_number_offset_in_memory, newcrc, false);
-            *new_random = *reinterpret_cast<std::uint32_t *>(data_crc.data() + random_number_offset_in_memory);
+            crc_spoof_modify_file_crc32(&handle, tag_file_checksums_offset_in_memory, newcrc, false);
+            *new_random = *reinterpret_cast<std::uint32_t *>(data_crc.data() + tag_file_checksums_offset_in_memory);
 
             // We have no way of knowing if the map was dirty or not because we just forged the CRC
             if(check_dirty) {

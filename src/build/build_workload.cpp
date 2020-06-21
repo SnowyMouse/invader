@@ -523,6 +523,7 @@ namespace Invader {
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
                 tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
+                tag_data_struct.tag_file_checksums = workload.tag_file_checksums;
             }
             else {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
@@ -533,6 +534,7 @@ namespace Invader {
                 tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
+                tag_data_struct.tag_file_checksums = workload.tag_file_checksums;
             }
 
             // Lastly, do the header
@@ -578,9 +580,9 @@ namespace Invader {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
-                std::uint32_t new_random = 0;
-                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &new_random);
-                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->random_number = new_random;
+                std::uint32_t checksum_delta = 0;
+                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &checksum_delta);
+                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->tag_file_checksums = checksum_delta;
                 header.crc32 = new_crc;
                 if(workload.verbose) {
                     oprintf(" done\n");
@@ -750,14 +752,20 @@ namespace Invader {
         // Set this in case it's not set yet
         this->tags[tag_index].tag_class_int = *tag_class_int;
 
-        // Check CRC32
-        if(!this->hide_pedantic_warnings) {
-            HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
-            std::uint32_t expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
-            if(expected_crc != header->crc32) {
-                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));
-            }
+        // Check header and CRC32
+        HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
+        HEK::BigEndian<std::uint32_t> expected_crc = ~crc32(0, header + 1, tag_data_size - sizeof(*header));
+        
+        // Make sure the header's CRC32 matches the calculated CRC32
+        if(expected_crc != header->crc32) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s's CRC32 is incorrect. Tag may have been improperly modified.", File::halo_path_to_preferred_path(this->tags[tag_index].path).c_str(), tag_class_to_extension(tag_class_int.value()));
         }
+        
+        // Calculate checksums. This is to prevent collisions when bitmap/sound data is modified but nothing else, since this data isn't directly factored into the map checksum.
+        // Also, unlike tool.exe, we're actually recalculating the CRC32 rather than just taking the CRC32 in the header (in case the tag is improperly modified).
+        //
+        // TODO: Although it accomplishes the same task, this is NOT the algorithm tool.exe uses.
+        this->tag_file_checksums = crc32(this->tag_file_checksums, &expected_crc, sizeof(expected_crc)); 
 
         auto &structs = this->structs;
         auto &tags = this->tags;
