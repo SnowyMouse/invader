@@ -523,7 +523,6 @@ namespace Invader {
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
                 tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
-                tag_data_struct.tag_file_checksums = workload.tag_file_checksums;
             }
             else {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
@@ -534,7 +533,6 @@ namespace Invader {
                 tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
-                tag_data_struct.tag_file_checksums = workload.tag_file_checksums;
             }
 
             // Lastly, do the header
@@ -572,7 +570,11 @@ namespace Invader {
                 throw MaximumFileSizeException();
             }
 
-            // Calculate the CRC32
+            // Hold this here, of course
+            auto &tag_file_checksums = reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->tag_file_checksums;
+            tag_file_checksums = workload.tag_file_checksums;
+            
+            // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
             bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_XBOX;
             if(can_calculate_crc) {
@@ -580,9 +582,17 @@ namespace Invader {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
-                std::uint32_t checksum_delta = 0;
-                new_crc = calculate_map_crc(final_data.data(), final_data.size(), workload.forge_crc.has_value() ? &workload.forge_crc.value() : nullptr, &checksum_delta);
-                reinterpret_cast<HEK::CacheFileTagDataHeader *>(final_data.data() + tag_data_offset)->tag_file_checksums = checksum_delta;
+                
+                // Calculate the CRC32 and/or forge one if we must
+                if(workload.forge_crc.has_value()) {
+                    std::uint32_t checksum_delta = 0;
+                    new_crc = calculate_map_crc(final_data.data(), final_data.size(), &workload.forge_crc.value(), &checksum_delta);
+                    tag_file_checksums = checksum_delta;
+                }
+                else {
+                    new_crc = calculate_map_crc(final_data.data(), final_data.size());
+                }
+                
                 header.crc32 = new_crc;
                 if(workload.verbose) {
                     oprintf(" done\n");
