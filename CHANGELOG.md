@@ -30,6 +30,8 @@ This is used for recording Invader's changes. This changelog is based on
   custom_loc.map and uses those if present when building Custom Edition maps
 - invader-build: The final CRC32 now factors in bitmap/sound data (unless you
   decide to forge the CRC32)
+- invader-build: The commit hash is no longer included in cache files due to low
+  space
 - invader-compress: Now shows the compression format used
 - invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when extracting Custom Edition maps

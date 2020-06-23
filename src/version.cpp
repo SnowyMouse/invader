@@ -36,7 +36,7 @@ namespace Invader {
     }
 
     const char *full_version_and_credits() {
-        return INVADER_FULL_VERSION_STRING "\n\n"
+        return INVADER_FULL_VERSION_STRING "." INVADER_VERSION_COMMIT_HASH "\n\n"
                "This program is licensed under the GNU General Public License v3.0.\n"
                "\n"
                "Credits:\n"
