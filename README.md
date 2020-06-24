@@ -36,8 +36,9 @@ Next, go to the [commits](https://github.com/Kavawuvi/invader/commits/master)
 and check the commit hash against the topmost commit. If it is the same, then
 you are using the latest version of Invader.
 
-Make sure to stay up-to-date, as newer version have more features while
-addressing more issues.
+Invader is not finished, so it is important to stay up-to-date to obtain the
+latest features and fixes. Staying on an old version means staying on unfinished
+software that likely has known issues.
 
 ## Contributing
 See CONTRIBUTING.md.
