@@ -23,23 +23,5 @@ namespace Invader {
      * @throws      if failed
      */
     std::vector<Resource> load_resource_map(const std::byte *data, std::size_t size);
-
-    /**
-     * Return an array of containers for the given ipak
-     * @param  data data pointer to ipak
-     * @param  size size of ipak
-     * @return      array of containers
-     * @throws      if failed
-     */
-    std::vector<Resource> load_ipak(const std::byte *data, std::size_t size);
-
-    /**
-     * Return an array of containers for the given compressed ipak
-     * @param  data data pointer to ipak
-     * @param  size size of ipak
-     * @return      array of containers
-     * @throws      if failed
-     */
-    std::vector<Resource> load_compressed_ipak(const std::byte *data, std::size_t size);
 }
 #endif

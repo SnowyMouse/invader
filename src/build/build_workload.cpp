@@ -74,7 +74,6 @@ namespace Invader {
         // Set defaults
         if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_DEFAULT) {
             switch(engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                 case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                     raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                     break;
@@ -159,7 +158,6 @@ namespace Invader {
                     use_index = retail_indices(workload.scenario_name.string);
                     break;
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
                     use_index = demo_indices(workload.scenario_name.string);
                     break;
                 default:
@@ -257,10 +255,6 @@ namespace Invader {
             case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
                 workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
                 workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
-                break;
-            case CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY;
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
                 workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
@@ -427,13 +421,13 @@ namespace Invader {
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
-        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
 
         // Calculate total BSP size (pointless on Dark Circlet maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
         if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
-                // Determine the index. If it's anniversary, there are two indices per BSP
+                // Determine the index.
                 auto &this_bsp_size = bsp_sizes[i - 1];
 
                 // Get the size of the BSP struct
@@ -1152,15 +1146,6 @@ namespace Invader {
         std::size_t total_savings = 0;
         std::size_t struct_count = this->structs.size();
 
-        // Deduplicating BSP data with tag data does NOT work with anniversary maps
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            for(auto &s : this->structs) {
-                if(s.bsp.has_value()) {
-                    s.unsafe_to_dedupe = true;
-                }
-            }
-        }
-
         oprintf("Optimizing tag space...");
         oflush();
 
@@ -1440,16 +1425,7 @@ namespace Invader {
             auto &scenario_tag = tags[this->scenario_index];
             auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
             std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
-            HEK::Pointer bsp_start_pointer;
-            std::size_t max_bsp_size;
-            if(this->engine_target == CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                bsp_start_pointer = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS;
-                max_bsp_size = bsp_start_pointer;
-            }
-            else {
-                bsp_start_pointer = this->tag_data_address + this->tag_data_size;
-                max_bsp_size = this->tag_data_size;
-            }
+            std::size_t max_bsp_size = this->tag_data_size;
 
             if(bsp_count != this->bsp_count) {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);

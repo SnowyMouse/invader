@@ -91,9 +91,6 @@ namespace Invader::Parser {
         auto *data = s.data.data();
         std::size_t bitmap_data_offset = reinterpret_cast<std::byte *>(&(reinterpret_cast<BitmapData::struct_little *>(data + offset)->bitmap_tag_id)) - data;
         this->pointer = 0xFFFFFFFF;
-        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-            this->flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL; // anniversary is always external
-        }
         this->flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_MAKE_IT_ACTUALLY_WORK;
 
         // Add itself as a dependency. I don't know why but apparently we need to remind ourselves that we're still ourselves.
@@ -109,7 +106,6 @@ namespace Invader::Parser {
         auto &map = tag.get_map();
         auto engine = map.get_engine();
         auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
-        auto mcc = engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
 
         // TODO: Deal with cubemaps and stuff
@@ -118,9 +114,8 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        const auto *path_cstr = tag.get_path().c_str();
+        // Do we have bitmap data?
         auto bd_count = bitmap->bitmap_data.size();
-        
         if(bd_count) {
             auto *bitmap_data_le_array = tag.resolve_reflexive(base_struct.bitmap_data);
             
@@ -135,99 +130,12 @@ namespace Invader::Parser {
                 }
 
                 // MCC has meme matching (e.g. hce_ltb_bloodgulch = levels/test/bloodgulch/bloodgulch)
-                const std::byte *bitmap_data_ptr = nullptr;
-                if(mcc) {
-                    const auto &ipak_data = map.get_ipak_data();
-                    char path[0x100] = {};
-                    auto offset = std::snprintf(path, sizeof(path), "hce_");
-                    const char *i = path_cstr;
-                    const char *last_backslash = i;
-
-                    // Get the shortened bit
-                    for(; *i != 0; i++) {
-                        if(*i == '\\') {
-                            if(offset == sizeof(path)) {
-                                break;
-                            }
-                            path[offset++] = *(last_backslash);
-                            last_backslash = i + 1;
-                        }
-                    }
-                    path[offset++] = '_';
-
-                    // Get the rest of the path
-                    if(last_backslash) {
-                        for(i = last_backslash; *i; i++) {
-                            if(offset == sizeof(path)) {
-                                break;
-                            }
-
-                            if(*i == ' ' || *i == '-' || *i == '_') {
-                                path[offset++] = '_';
-                            }
-                            else {
-                                path[offset++] = *i;
-                            }
-                        }
-                    }
-
-                    // And lastly, the index
-                    std::snprintf(path + offset, sizeof(path) - offset, "_%zu", bd);
-
-                    for(auto &d : ipak_data) {
-                        if(d.path == path) {
-                            auto &header = *reinterpret_cast<const HEK::IPAKBitmapHeader *>(d.data.data());
-
-                            // The bitmap data is often times bullshit, so we have to fix it
-                            bitmap_data.height = header.height;
-                            bitmap_data.width = header.width;
-                            bitmap_data.depth = header.depth;
-                            bitmap_data.mipmap_count = header.mipmap_count - 1;
-                            if(power_of_two(header.width.read()) && power_of_two(header.height.read())) {
-                                bitmap_data.flags |= power_of_two(header.width.read()) && power_of_two(header.height.read());
-                            }
-
-                            // The format might be wrong for whatever reason
-                            switch(header.format) {
-                                case 0x0:
-                                case 0x16:
-                                    bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
-                                    break;
-                                case 0xD:
-                                    bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
-                                    break;
-                                case 0x3:
-                                    bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
-                                    break;
-                                case 0x11:
-                                    bitmap_data.format = HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
-                                    break;
-                            }
-
-                            bitmap_data.pixel_data_size = size_of_bitmap(bitmap_data);
-                            auto remaining_size = d.data.size() - sizeof(header);
-                            if(bitmap_data.pixel_data_size <= remaining_size) {
-                                bitmap_data_ptr = reinterpret_cast<const std::byte *>(&header + 1);
-                            }
-                            else {
-                                eprintf_error("Size check fail: %zu expected > %zu remaining", static_cast<std::size_t>(bitmap_data.pixel_data_size), remaining_size);
-                            }
-                            break;
-                        }
-                    }
-
-                    if(!bitmap_data_ptr) {
-                        eprintf_error("Failed to find %s in the ipak", path);
-                        throw std::exception();
-                    }
+                const std::byte *bitmap_data_ptr;
+                if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
+                    bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
                 }
                 else {
-                    if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
-                        bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
-                    }
-                    else {
-                        bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size);
-                    }
+                    bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size);
                 }
 
                 bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());

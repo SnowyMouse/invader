@@ -55,7 +55,6 @@ int main(int argc, const char **argv) {
         bool quiet = false;
         BuildWorkload::RawDataHandling raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
         std::optional<std::uint32_t> forged_crc;
-        std::optional<std::uint32_t> base_memory_address;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
         bool compress = false;
@@ -69,16 +68,15 @@ int main(int argc, const char **argv) {
     options.emplace_back("discard", 'd', 0, "Discard all raw data. This will result in a map that is invalid for use with game clients (except MCC) and tag extractors.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, mcc, dark", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, dark", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
-    options.emplace_back("base-address", 'b', 1, "Set the base address (MCC only)", "<addr>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
-    options.emplace_back("compress", 'c', 0, "Compress the cache file. This is default for mcc and dark engines.");
+    options.emplace_back("compress", 'c', 0, "Compress the cache file.");
     options.emplace_back("uncompressed", 'u', 0, "Do not compress the cache file. This is default for demo, retail, and custom engines.");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
@@ -129,10 +127,6 @@ int main(int argc, const char **argv) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
                     build_options.compress = true; // there is no reason to not have this default since it always supports it
                 }
-                else if(std::strcmp(arguments[0], "mcc") == 0) {
-                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY;
-                    build_options.compress = true; // CEA does not support uncompressed maps
-                }
                 else {
                     eprintf_error("Unknown engine type %s.", arguments[0]);
                     std::exit(RETURN_FAILED_INVALID_ARGUMENT);
@@ -140,9 +134,6 @@ int main(int argc, const char **argv) {
                 break;
             case 'C':
                 build_options.forged_crc = read_str32("Invalid CRC32", arguments[0]);
-                break;
-            case 'b':
-                build_options.base_memory_address = read_str32("Invalid base address", arguments[0]);
                 break;
             case 'c':
                 build_options.compress = true;
@@ -174,11 +165,6 @@ int main(int argc, const char **argv) {
     // By default, just use tags
     if(build_options.tags.size() == 0) {
         build_options.tags.emplace_back("tags");
-    }
-    
-    if(build_options.base_memory_address.has_value() && build_options.engine != CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-        eprintf_error("-b only works in MCC maps");
-        return RETURN_FAILED_INVALID_ARGUMENT;
     }
 
     if(build_options.use_filesystem_path) {
@@ -252,7 +238,7 @@ int main(int argc, const char **argv) {
             !build_options.quiet,
             with_index,
             build_options.forged_crc,
-            build_options.base_memory_address,
+            std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
             build_options.optimize_space,
             build_options.compress,
@@ -288,7 +274,7 @@ int main(int argc, const char **argv) {
             }
             
             // If we are not building for MCC and the scenario name is mismatched, warn
-            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY && final_file_name_no_extension_string != map_name) {
+            if(final_file_name_no_extension_string != map_name) {
                 eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name);
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
                 

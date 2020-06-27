@@ -53,12 +53,11 @@ namespace Invader {
         auto engine = map->get_engine();
         auto type = map->get_type();
         auto tag_count = map->get_tag_count();
-        bool using_ipak = map->get_ipak_data().size();
         std::vector<bool> extracted_tags(tag_count);
         std::deque<std::size_t> all_tags_to_extract;
         auto &workload = *this;
 
-        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &engine, &type, &using_ipak, &recursive, &overwrite, &non_mp_globals, &workload](std::size_t tag_index) -> bool {
+        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &engine, &type, &recursive, &overwrite, &non_mp_globals, &workload](std::size_t tag_index) -> bool {
             // Used for bad paths
             static const std::regex BAD_PATH_DIRECTORY("(^|.*(\\\\|\\/))\\.{1,2}(\\\\|\\/).*");
 
@@ -67,18 +66,6 @@ namespace Invader {
 
             // Get the tag path
             const auto &tag = map->get_tag(tag_index);
-
-            if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                if(tag.get_tag_class_int() == TagClassInt::TAG_CLASS_SOUND) {
-                    eprintf_warn("CE Anniversary sounds cannot be extracted at this time");
-                    return false;
-                }
-                
-                if(tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP && !using_ipak) {
-                    eprintf_warn("CE Anniversary bitmaps require an ipak to successfully extract");
-                    return false;
-                }
-            }
 
             if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP) {
                 eprintf_warn("Xbox bitmaps cannot be extracted at this time");

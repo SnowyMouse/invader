@@ -9,7 +9,6 @@
 #include <invader/file/file.hpp>
 #include <invader/compress/compression.hpp>
 
-#define COMPRESSION_FORMAT_CEAFLATE "cea-deflate"
 #define COMPRESSION_FORMAT_DEFLATE "deflate"
 #define COMPRESSION_FORMAT_ZSTANDARD "zstandard"
 
@@ -25,7 +24,7 @@ int main(int argc, const char **argv) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
-    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 19. If compressing an Xbox or MCC map, this will be clamped from 1 to 9. Default: 19", "<level>");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 19. If compressing an Xbox map, this will be clamped from 1 to 9. Default: 19", "<level>");
     options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
 
     static constexpr char DESCRIPTION[] = "Compress cache files.";
@@ -93,9 +92,6 @@ int main(int argc, const char **argv) {
         // Determine the compression format used
         auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
         switch(header.engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-                compression_format = COMPRESSION_FORMAT_CEAFLATE;
-                break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                 compression_format = COMPRESSION_FORMAT_DEFLATE;
                 break;
@@ -126,9 +122,6 @@ int main(int argc, const char **argv) {
         // Determine the compression format used
         auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
         switch(header.engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY:
-                compression_format = COMPRESSION_FORMAT_CEAFLATE;
-                break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                 compression_format = COMPRESSION_FORMAT_DEFLATE;
                 break;

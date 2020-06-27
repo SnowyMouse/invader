@@ -326,17 +326,15 @@ Build a cache file for a version of Halo: Combat Evolved.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
-  -b --base-address <addr>     Set the base address (MCC only)
-  -c --compress                Compress the cache file. This is default for mcc
-                               and dark engines.
+  -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
   -d --discard                 Discard all raw data. This will result in a map
-                               that is invalid for use with game clients
-                               (except MCC) and tag extractors.
+                               that is invalid for use with game clients and
+                               tag extractors.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               retail, mcc, dark
+                               retail, dark
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
@@ -404,8 +402,8 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -l --level <level>           Set the compression level. Must be between 1 and
-                               19. If compressing an Xbox or MCC map, this will
-                               be clamped from 1 to 9. Default: 19
+                               19. If compressing an Xbox map, this will be
+                               clamped from 1 to 9. Default: 19
   -o --output <file>           Emit the resulting map at the given path. By
                                default, this is the map path (overwrite).
 ```
@@ -463,7 +461,6 @@ Options:
   -m --maps <dir>              Set the maps directory
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
-  -p --use-ipak <ipak>         Use the inplace1.ipak file
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards); use
                                multiple times for multiple queries

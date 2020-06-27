@@ -129,15 +129,12 @@ namespace Invader {
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
          * @param sounds_data_size  length of sounds data
-         * @param ipak_data         pointer to ipak data
-         * @param ipak_data_size    length of ipak data
          * @return                  map
          */
         static Map map_with_copy(const std::byte *data, std::size_t data_size,
                                  const std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
                                  const std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
-                                 const std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0,
-                                 const std::byte *ipak_data = nullptr, std::size_t ipak_data_size = 0);
+                                 const std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
 
         /**
          * Create a Map by moving the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this way.
@@ -145,14 +142,12 @@ namespace Invader {
          * @param  bitmaps_data bitmap data vector or ipak vector
          * @param  loc_data     loc data vector
          * @param  sounds_data  sound data vector
-         * @param  ipak_data    ipak data vector
          * @return              map
          */
         static Map map_with_move(std::vector<std::byte> &&data,
                                  std::vector<std::byte> &&bitmaps_data = std::vector<std::byte>(),
                                  std::vector<std::byte> &&loc_data = std::vector<std::byte>(),
-                                 std::vector<std::byte> &&sounds_data = std::vector<std::byte>(),
-                                 std::vector<std::byte> &&ipak_data = std::vector<std::byte>());
+                                 std::vector<std::byte> &&sounds_data = std::vector<std::byte>());
 
         /**
          * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
@@ -167,15 +162,12 @@ namespace Invader {
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
          * @param sounds_data_size  length of sounds data
-         * @param ipak_data         pointer to ipak data
-         * @param ipak_data_size    length of ipak data
          * @return                  map
          */
         static Map map_with_pointer(std::byte *data, std::size_t data_size,
                                     std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
                                     std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
-                                    std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0,
-                                    std::byte *ipak_data = nullptr, std::size_t ipak_data_size = 0);
+                                    std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
 
         /**
          * Get the data at the specified offset
@@ -289,14 +281,6 @@ namespace Invader {
         std::size_t get_scenario_tag_id() const noexcept;
 
         /**
-         * Get the ipak data
-         * @return ipak data
-         */
-        const std::vector<Resource> &get_ipak_data() const {
-            return this->ipak_data_arr;
-        }
-
-        /**
          * Get whether the map was originally compressed
          * @return true if the map was compressed
          */
@@ -348,16 +332,6 @@ namespace Invader {
 
         /** Sounds data length */
         std::size_t sound_data_length = 0;
-
-
-        /** ipak data if managed */
-        std::vector<std::byte> ipak_data_m;
-
-        /** ipak data */
-        std::byte *ipak_data = nullptr;
-
-        /** ipak data length */
-        std::size_t ipak_data_length = 0;
         
 
         /** Model data offset */
@@ -387,9 +361,6 @@ namespace Invader {
 
         /** Map is compressed */
         bool compressed = false;
-
-        /** ipak data */
-        std::vector<Resource> ipak_data_arr;
 
         /** Engine */
         HEK::CacheFileEngine engine;

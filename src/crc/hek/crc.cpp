@@ -55,14 +55,6 @@ namespace Invader {
                     throw OutOfBoundsException();
                 }
                 
-                // If we're anniversary, CRC32 these too
-                if(engine == HEK::CacheFileEngine::CACHE_FILE_ANNIVERSARY) {
-                    auto *bsp_info = reinterpret_cast<HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian> *>(map.get_data_at_offset(start, sizeof(HEK::ScenarioStructureBSPCompiledHeader<HEK::LittleEndian>)));
-                    auto bs = bsp_info->lightmap_vertices_start.read();
-                    auto be = bs + bsp_info->lightmap_vertices_size.read();
-                    CRC_DATA(bs, be);
-                }
-
                 // Add it
                 CRC_DATA(start, end);
             }

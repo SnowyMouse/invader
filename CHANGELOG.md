@@ -21,7 +21,6 @@ This is used for recording Invader's changes. This changelog is based on
   either Linux or Windows and their terminal width is at least 80 characters
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
-- invader-build: Now calculates the CRC32 of MCC maps
 - invader-build: Maps that error due to multiple objects sharing the same name
   now list the objects with the name to help you track them down
 - invader-build: Non-power-of-two bitmaps now result in a pedantic warning
@@ -37,7 +36,6 @@ This is used for recording Invader's changes. This changelog is based on
   custom_loc.map and uses those if present when extracting Custom Edition maps
 - invader-extract: No longer attempts to open resource map files when attempting
   to extract a map that doesn't support them
-- invader-info: Now calculates the CRC32 of MCC maps
 - invader-refactor: -T is now required for refactoring individual tags, but you
   can use it multiple times in a single invocation
 - invader-refactor: -D must now be specified with -N or -M
@@ -64,12 +62,11 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
-- invader-extract: Fixed all enemies being treated as brutes in MCC in regards
-  to scoring (you will need to re-extract your actor_variant tags)
 - invader-sound: Fixed an issue with generating split sound tags not setting the
   actual permutation count correctly as a result of a past optimization
 
 ### Removed
+- invader: Removed MCC support
 - invader-bludgeon: Removed `-T invalid-power-of-two`
 
 ## [0.34.1] - 2020-04-12

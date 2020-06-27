@@ -264,21 +264,9 @@ namespace Invader::Parser {
             std::size_t uncompressed_vertices_size = this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
             std::size_t lightmap_vertices_size = this->lightmap_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little);
             std::size_t total_vertices_size = lightmap_vertices_size + uncompressed_vertices_size;
-
-            const std::byte *uncompressed_bsp_vertices_start;
-            const std::byte *uncompressed_lightmap_vertices_start;
-
-            // CE Anniversary stuff!
-            if(bsp_material.uncompressed_vertices.pointer == 0) {
-                auto &base_struct = tag.get_base_struct<HEK::ScenarioStructureBSPCompiledHeader>();
-                uncompressed_bsp_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->rendered_vertices_offset, uncompressed_vertices_size);
-                uncompressed_lightmap_vertices_start = tag.get_map().get_data_at_offset(base_struct.lightmap_vertices_start + this->lightmap_vertices_offset, lightmap_vertices_size);
-            }
-            // Not CE Anniversary stuff
-            else {
-                uncompressed_bsp_vertices_start = tag.data(bsp_material.uncompressed_vertices.pointer, total_vertices_size);
-                uncompressed_lightmap_vertices_start = uncompressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
-            }
+            
+            const std::byte *uncompressed_bsp_vertices_start = tag.data(bsp_material.uncompressed_vertices.pointer, total_vertices_size);
+            const std::byte *uncompressed_lightmap_vertices_start = uncompressed_bsp_vertices_start + this->rendered_vertices_count * sizeof(ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
 
             this->uncompressed_vertices = std::vector<std::byte>(uncompressed_bsp_vertices_start, uncompressed_bsp_vertices_start + uncompressed_vertices_size);
             this->uncompressed_vertices.insert(this->uncompressed_vertices.end(), uncompressed_lightmap_vertices_start, uncompressed_lightmap_vertices_start + lightmap_vertices_size);
