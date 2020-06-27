@@ -4,7 +4,6 @@
 #include <invader/tag/hek/definition.hpp>
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/compress/compression.hpp>
-#include <invader/compress/ceaflate.hpp>
 #include <invader/resource/resource_map.hpp>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>

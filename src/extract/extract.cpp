@@ -10,7 +10,6 @@
 #include <invader/extract/extraction.hpp>
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
-#include <invader/compress/ceaflate.hpp>
 #include <regex>
 
 int main(int argc, const char **argv) {
