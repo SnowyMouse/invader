@@ -197,13 +197,14 @@
             {
                 "name": "natural pitch",
                 "type": "float",
-                "default": 1.0
+                "default": 1.0,
+                "default_sign": true
             },
             {
                 "name": "bend bounds",
                 "bounds": true,
                 "type": "float",
-                "default": [ 0.0, 1.0 ]
+                "comment": "If the lower bound is higher than natural pitch, then it will be set to natural pitch. Also, if the higher bound is lower than natural pitch, then it will be set to natural pitch."
             },
             {
                 "name": "actual permutation count",

@@ -69,7 +69,20 @@ namespace Invader::Parser {
     void SoundPitchRange::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t struct_offset) {
         this->unknown_ffffffff_0 = 0xFFFFFFFF;
         this->unknown_ffffffff_1 = 0xFFFFFFFF;
-        this->playback_rate = 1.0f / (this->natural_pitch == 0.0F ? 1.0F : this->natural_pitch);
+        auto actual_natural_pitch = this->natural_pitch <= 0.0F ? 1.0F : this->natural_pitch;
+        this->playback_rate = 1.0f / actual_natural_pitch;
+        
+        // Make sure our bend bounds are valid for the natural pitch
+        auto old_bend_bounds = this->bend_bounds;
+        
+        // Set the new bend bounds, ensuring natural pitch falls within it
+        this->bend_bounds.from = std::min(actual_natural_pitch, old_bend_bounds.from);
+        this->bend_bounds.to = std::max(actual_natural_pitch, old_bend_bounds.to);
+        
+        // If our bend bounds was changed, but they weren't zero, then that means bullshit happened
+        if((old_bend_bounds.from != 0.0F || old_bend_bounds.to != 0.0F) && ((this->bend_bounds.from != old_bend_bounds.from) || (this->bend_bounds.to != old_bend_bounds.to))) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Natural pitch (%f) in pitch range #%zu falls outside of bend bounds (%f - %f) so the bounds were changed to %f - %f", actual_natural_pitch, struct_offset / sizeof(struct_little), old_bend_bounds.from, old_bend_bounds.to, this->bend_bounds.from, this->bend_bounds.to);
+        }
 
         // Make sure all of the permutations are valid
         std::size_t permutation_count = this->permutations.size();
