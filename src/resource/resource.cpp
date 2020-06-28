@@ -259,10 +259,10 @@ int main(int argc, const char **argv) {
                         }
                     }
 
-                    write_pointers();
-
                     // Push the asset data and tag data if we aren't on retail
                     if(!retail) {
+                        write_pointers();
+                        
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;
                         for(auto &r : compiled_tag.raw_data) {
@@ -290,6 +290,7 @@ int main(int argc, const char **argv) {
                     auto &sound = *reinterpret_cast<Sound<LittleEndian> *>(compiled_tag_struct.data.data());
                     std::size_t pitch_range_count = sound.pitch_ranges.count;
                     std::size_t b = 0;
+                    std::size_t expected_offset = 0;
                     if(pitch_range_count) {
                         auto &pitch_range_struct = compiled_tag.structs[*compiled_tag_struct.resolve_pointer(&sound.pitch_ranges.pointer)];
                         auto *pitch_ranges = reinterpret_cast<SoundPitchRange<LittleEndian> *>(pitch_range_struct.data.data());
@@ -317,17 +318,18 @@ int main(int argc, const char **argv) {
                                     }
                                     else {
                                         permutation.samples.external = 1;
-                                        permutation.samples.file_offset = resource_data.size() + permutation.samples.file_offset;
+                                        permutation.samples.file_offset = resource_data.size() + expected_offset;
+                                        expected_offset += permutation.samples.size;
                                     }
                                 }
                             }
                         }
                     }
 
-                    write_pointers();
-
                     // If we're not on retail, push asset and tag data
                     if(!retail) {
+                        write_pointers();
+                    
                         // Push the asset data first
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;

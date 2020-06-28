@@ -62,6 +62,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
+- invader-resource: Fixed building Custom Edition sounds.map files having
+  partially cut off sounds in sounds with multiple permutations
 - invader-sound: Fixed an issue with generating split sound tags not setting the
   actual permutation count correctly as a result of a past optimization
 
