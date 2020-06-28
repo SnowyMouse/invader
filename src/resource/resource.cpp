@@ -27,6 +27,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail", "<id>");
     options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
+    options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
     static constexpr char USAGE[] = "[options] -T <type>";
@@ -40,14 +41,15 @@ int main(int argc, const char **argv) {
 
         // Resource map type
         ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
-        
+
         // Engine target
         std::optional<HEK::CacheFileEngine> engine_target;
-        
+
         const char **(*default_fn)() = get_default_bitmap_resources;
         bool resource_map_set = false;
         std::optional<const char *> index;
         std::size_t padding = 0;
+        bool no_prefix = false;
     } resource_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<ResourceOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, resource_options, [](char opt, const std::vector<const char *> &arguments, auto &resource_options) {
@@ -62,6 +64,10 @@ int main(int argc, const char **argv) {
 
             case 'm':
                 resource_options.maps = arguments[0];
+                break;
+
+            case 'n':
+                resource_options.no_prefix = true;
                 break;
 
             case 'g':
@@ -111,7 +117,7 @@ int main(int argc, const char **argv) {
         eprintf_error("No resource map type was given. Use -h for more information.");
         return EXIT_FAILURE;
     }
-    
+
     if(!resource_options.engine_target.has_value()) {
         eprintf_error("No game engine was set. Use -h for more information.");
         return EXIT_FAILURE;
@@ -180,7 +186,7 @@ int main(int argc, const char **argv) {
                 }
                 break;
         }
-        
+
         if(tag_class_int != listed_tag.class_int) {
             eprintf_error("Expected %s. Got %s instead.", tag_class_to_extension(tag_class_int), tag_class_to_extension(listed_tag.class_int));
         }
@@ -262,7 +268,7 @@ int main(int argc, const char **argv) {
                     // Push the asset data and tag data if we aren't on retail
                     if(!retail) {
                         write_pointers();
-                        
+
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;
                         for(auto &r : compiled_tag.raw_data) {
@@ -329,7 +335,7 @@ int main(int argc, const char **argv) {
                     // If we're not on retail, push asset and tag data
                     if(!retail) {
                         write_pointers();
-                    
+
                         // Push the asset data first
                         offsets.push_back(resource_data.size());
                         std::size_t total_size = 0;
@@ -375,6 +381,7 @@ int main(int argc, const char **argv) {
 
     // Get the final path of the map
     const char *map;
+    std::string prefix = (!retail && !resource_options.no_prefix) ? "custom_" : "";
     switch(resource_options.type) {
         case ResourceMapType::RESOURCE_MAP_BITMAP:
             map = "bitmaps.map";
@@ -388,7 +395,7 @@ int main(int argc, const char **argv) {
         default:
             std::terminate();
     }
-    auto map_path = std::filesystem::path(resource_options.maps) / map;
+    auto map_path = std::filesystem::path(resource_options.maps) / (prefix + map);
 
     // Finish up building up the map
     std::size_t resource_count = paths.size();

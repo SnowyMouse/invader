@@ -40,6 +40,9 @@ This is used for recording Invader's changes. This changelog is based on
   can use it multiple times in a single invocation
 - invader-refactor: -D must now be specified with -N or -M
 - invader-resource: Replace `-R` with `-g` which is now required
+- invader-resource: Custom Edition maps are now prefixed with "custom_" by
+  default for the purpose of extracting both Custom Edition and retail Halo PC
+  maps w/in the same maps directory; use `-n` to disable this behavior
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
