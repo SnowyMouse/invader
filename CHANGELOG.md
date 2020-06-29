@@ -31,6 +31,9 @@ This is used for recording Invader's changes. This changelog is based on
   decide to forge the CRC32)
 - invader-build: The commit hash is no longer included in cache files due to low
   space
+- invader-build: If building a Halo Custom Edition map and tags are detected to
+  not match a tag found in a resource map with the same path, then a minor
+  warning will be emitted (does not apply if using `-a` or `-n`)
 - invader-compress: Now shows the compression format used
 - invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when extracting Custom Edition maps

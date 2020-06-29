@@ -1724,6 +1724,9 @@ namespace Invader {
                                     t.base_struct = std::nullopt;
                                     break;
                                 }
+                                else {
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in bitmaps.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                                }
                             }
                             break;
                         }
@@ -1837,6 +1840,9 @@ namespace Invader {
                                     this->indexed_data_amount += this->sounds[*index].data.size() - sizeof(Sound<LittleEndian>);
                                     this->structs[*t.base_struct].pointers.clear(); // clear the pointers rather than null out the base struct since Halo still requires it for sounds
                                     break;
+                                }
+                                else {
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in sounds.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                                 }
                             }
                             break;
@@ -2085,6 +2091,9 @@ namespace Invader {
                                     this->indexed_data_amount += this->loc[*index].data.size();
                                     t.base_struct = std::nullopt;
                                     break;
+                                }
+                                else {
+                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_WARNING_PEDANTIC, &t - this->tags.data(), "%s.%s does not match the one found in loc.map, so it will NOT be indexed out", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                                 }
                             }
                             break;
