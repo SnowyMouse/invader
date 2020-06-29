@@ -11,6 +11,17 @@ namespace Invader {
             throw OutOfBoundsException();
         }
         const auto &header = *reinterpret_cast<const ResourceMapHeader *>(data);
+        
+        // Check if it's valid
+        switch(header.type) {
+            case ResourceMapType::RESOURCE_MAP_BITMAP:
+            case ResourceMapType::RESOURCE_MAP_SOUND:
+            case ResourceMapType::RESOURCE_MAP_LOC:
+                break;
+            default:
+                throw InvalidMapException();
+        }
+        
         std::size_t resource_count = header.resource_count;
         std::size_t resource_offset = header.resources;
         std::size_t path_offset = header.paths;
