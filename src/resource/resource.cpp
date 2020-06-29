@@ -140,7 +140,15 @@ int main(int argc, const char **argv) {
         std::fstream index_file(*resource_options.index, std::ios_base::in);
         std::string tag;
         while(std::getline(index_file, tag)) {
-            tags_list.emplace_back(File::split_tag_class_extension(tag).value());
+            auto split_path_maybe = File::split_tag_class_extension(tag);
+            if(split_path_maybe.has_value()) {
+                tags_list.emplace_back(*split_path_maybe);
+            }
+            else {
+                auto &new_path = tags_list.emplace_back();
+                new_path.path = tag;
+                new_path.class_int = TagClassInt::TAG_CLASS_NONE;
+            }
         }
     }
     else {
@@ -159,10 +167,35 @@ int main(int argc, const char **argv) {
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
 
-    for(const auto &listed_tag : tags_list) {
+    for(auto &listed_tag : tags_list) {
         // First let's open it
         TagClassInt tag_class_int = TagClassInt::TAG_CLASS_NONE;
         std::vector<std::byte> tag_data;
+        
+        // But if we don't know the extension, we need to find that first!
+        if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+            auto pref_path = File::halo_path_to_preferred_path(listed_tag.path.c_str());
+            for(auto &tags_folder : resource_options.tags) {
+                if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".font"))) {
+                    listed_tag.class_int = TagClassInt::TAG_CLASS_FONT;
+                    break;
+                }
+                else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".hud_message_text"))) {
+                    listed_tag.class_int = TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT;
+                    break;
+                }
+                else if(std::filesystem::exists(std::filesystem::path(tags_folder) / (pref_path + ".unicode_string_list"))) {
+                    listed_tag.class_int = TagClassInt::TAG_CLASS_UNICODE_STRING_LIST;
+                    break;
+                }
+            }
+            if(listed_tag.class_int == TagClassInt::TAG_CLASS_NONE) {
+                eprintf_error("No font, hud message text, or unicode string list was found at %s.", pref_path.c_str());
+                return EXIT_FAILURE;
+            }
+        }
+        
+        // Now, then!
         auto tag_path = File::halo_path_to_preferred_path(listed_tag.join());
         auto halo_tag_path = File::preferred_path_to_halo_path(listed_tag.path.c_str());
 
@@ -180,6 +213,8 @@ int main(int argc, const char **argv) {
                     case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                         tag_class_int = listed_tag.class_int;
                         break;
+                        
+                    // Okay, we didn't find anything
                     default:
                         eprintf_error("Expected a font, hud message text, or unicode string list. Got %s instead.", tag_class_to_extension(listed_tag.class_int));
                         return EXIT_FAILURE;

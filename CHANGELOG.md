@@ -43,6 +43,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-resource: Custom Edition maps are now prefixed with "custom_" by
   default for the purpose of extracting both Custom Edition and retail Halo PC
   maps w/in the same maps directory; use `-n` to disable this behavior
+- invader-resource: Building loc files with an index no longer requires an
+  explicit extension in the index, and if one isn't present, then it will search
+  for the tag to find the extension
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
@@ -68,6 +71,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
+- invader-index: Fixed not including .bitmap or .sound in bitmaps.map or
+  sounds.map, respectively
 - invader-resource: Fixed building Custom Edition sounds.map files having
   partially cut off sounds in sounds with multiple permutations
 - invader-sound: Fixed an issue with generating split sound tags not setting the
