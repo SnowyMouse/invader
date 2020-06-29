@@ -3,7 +3,6 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/build/build_workload.hpp>
-#include <invader/resource/hek/ipak.hpp>
 
 namespace Invader::Parser {
     template <typename T> static bool power_of_two(T value) {

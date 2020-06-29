@@ -123,8 +123,8 @@ namespace Invader {
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data or ipak data
-         * @param bitmaps_data_size length of bitmaps data or ipak data
+         * @param bitmaps_data      pointer to bitmaps data
+         * @param bitmaps_data_size length of bitmaps data
          * @param loc_data          pointer to loc data
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
@@ -139,7 +139,7 @@ namespace Invader {
         /**
          * Create a Map by moving the given data, bitmaps, loc, and sound data. Compressed maps can be loaded this way.
          * @param  data         map data vector
-         * @param  bitmaps_data bitmap data vector or ipak vector
+         * @param  bitmaps_data bitmap data vector
          * @param  loc_data     loc data vector
          * @param  sounds_data  sound data vector
          * @return              map
@@ -156,8 +156,8 @@ namespace Invader {
          *
          * @param data              pointer to map data
          * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data or ipak data
-         * @param bitmaps_data_size length of bitmaps data or ipak data
+         * @param bitmaps_data      pointer to bitmaps data
+         * @param bitmaps_data_size length of bitmaps data
          * @param loc_data          pointer to loc data
          * @param loc_data_size     length of loc data
          * @param sounds_data       pointer to sounds data
