@@ -9,6 +9,7 @@
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
+#include <invader/resource/hek/resource_map.hpp>
 #include <invader/command_line_option.hpp>
 
 enum ReturnValue : int {
@@ -52,6 +53,24 @@ int main(int argc, const char **argv) {
     if(input_map.size() >= 4 && *reinterpret_cast<std::uint32_t *>(input_map.data()) <= 3) {
         try {
             auto map = load_resource_map(input_map.data(), input_map.size());
+            auto &header = *reinterpret_cast<ResourceMapHeader *>(input_map.data());
+            
+            // Get our extension
+            const char *extension;
+            switch(header.type) {
+                case ResourceMapType::RESOURCE_MAP_BITMAP:
+                    extension = ".bitmap";
+                    break;
+                case ResourceMapType::RESOURCE_MAP_SOUND:
+                    extension = ".sound";
+                    break;
+                case ResourceMapType::RESOURCE_MAP_LOC:
+                    extension = "";
+                    break;
+                default:
+                    std::terminate();
+            }
+            
             auto tag_count = map.size();
             int skip = *reinterpret_cast<std::uint32_t *>(input_map.data()) != 3 ? 1 : 0;
 
@@ -62,7 +81,7 @@ int main(int argc, const char **argv) {
             try {
                 for(std::size_t i = skip; i < tag_count; i+= 1 + skip) {
                     auto &tag = map[i];
-                    std::fprintf(f, "%s\n", tag.path.c_str());
+                    std::fprintf(f, "%s%s\n", tag.path.c_str(), extension);
                 }
             }
             catch(std::exception &) {
