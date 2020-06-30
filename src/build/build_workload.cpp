@@ -1836,9 +1836,21 @@ namespace Invader {
                                 }
 
                                 if(match) {
+                                    // Index it. Unlike other indexed tags, the header remains (probably for the promotion sound dependencies?)
                                     t.resource_index = index;
                                     this->indexed_data_amount += this->sounds[*index].data.size() - sizeof(Sound<LittleEndian>);
-                                    this->structs[*t.base_struct].pointers.clear(); // clear the pointers rather than null out the base struct since Halo still requires it for sounds
+                                    
+                                    // Strip these values since they'll be replaced on load anyway
+                                    auto &sound_tag_struct = this->structs[*t.base_struct];
+                                    auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
+                                    sound_tag.channel_count = {};
+                                    sound_tag.sample_rate = {};
+                                    sound_tag.format = {};
+                                    sound_tag.longest_permutation_length = {};
+                                    
+                                    // Clear the pointers so that way we only include this stuff
+                                    sound_tag_struct.pointers.clear();
+                                    
                                     break;
                                 }
                                 else {
