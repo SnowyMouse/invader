@@ -15,7 +15,7 @@ from check_invalid_indices import make_check_invalid_indices
 from check_normalize import make_normalize
 from compare import make_compare
 
-def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize):
+def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, extract_hidden, hpp, cpp_save_hek_data, cpp_read_cache_file_data, cpp_read_hek_data, cpp_cache_format_data, cpp_cache_deformat_data, cpp_refactor_reference, cpp_struct_value, cpp_check_broken_enums, cpp_check_invalid_references, cpp_check_invalid_ranges, cpp_check_invalid_indices, cpp_compare, cpp_normalize, cpp_read_hek_file):
     def write_for_all_cpps(what):
         cpp_save_hek_data.write(what)
         cpp_read_cache_file_data.write(what)
@@ -30,6 +30,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         cpp_check_invalid_indices.write(what)
         cpp_compare.write(what)
         cpp_normalize.write(what)
+        cpp_read_hek_file.write(what)
 
     hpp.write("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
     write_for_all_cpps("// SPDX-License-Identifier: GPL-3.0-only\n\n// This file was auto-generated.\n// If you want to edit this, edit the .json definitions and rerun the generator script, instead.\n\n")
@@ -117,7 +118,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data)
         make_parse_cache_file_data(post_cache_parse, all_bitfields, all_used_structs, struct_name, hpp, cpp_read_cache_file_data)
         make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, all_used_structs, hpp, cpp_read_hek_data)
-        make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data)
+        make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_file)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_reference)
         make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, None if not "title" in s else s["title"])
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)

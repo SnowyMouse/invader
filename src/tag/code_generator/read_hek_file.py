@@ -15,7 +15,7 @@ def make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_data):
     cpp_read_hek_data.write("        std::size_t expected_data_read = data_size - sizeof(HEK::TagFileHeader);\n")
     cpp_read_hek_data.write("        auto r = parse_hek_tag_data(data + sizeof(HEK::TagFileHeader), expected_data_read, data_read, postprocess);\n")
     cpp_read_hek_data.write("        if(data_read != expected_data_read) {\n")
-    cpp_read_hek_data.write("            eprintf_error(\"invalid tag file; tag data was left over\");")
+    cpp_read_hek_data.write("            eprintf_error(\"invalid tag file; tag data was left over\");\n")
     cpp_read_hek_data.write("            throw InvalidTagDataException();\n")
     cpp_read_hek_data.write("        }\n")
     cpp_read_hek_data.write("        return r;\n")
