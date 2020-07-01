@@ -58,8 +58,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("input", 'I', 0, "Add an input directory");
     options.emplace_back("tags", 't', 1, "Add a tags directory to the input. Specify multiple tag directories in order of precedence for the input.");
-    options.emplace_back("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map. This cannot be used with --tags.");
-    options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used. This cannot be used with --tags.");
+    options.emplace_back("maps", 'm', 1, "Add a maps directory to the input to specify where to find resource files for a map.");
+    options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used.");
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
@@ -69,6 +69,17 @@ int main(int argc, const char **argv) {
     static constexpr char USAGE[] = "[options] <-I <options>> <-I <options>> [<-I <options>> ...]";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CompareOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, compare_options, [](char opt, const auto &args, CompareOptions &compare_options) {
+        static const char *CAN_ONLY_BE_USED_WITH_TAG_INPUT = "This option can only be used with a tag input.";
+        static const char *CAN_ONLY_BE_USED_WITH_MAP_INPUT = "This option can only be used with a map input.";
+        
+        bool top_option_is_tag_input = false;
+        bool top_option_is_map_input = false;
+        
+        if(compare_options.top_input) {
+            top_option_is_tag_input = !compare_options.top_input->maps.has_value() && !compare_options.top_input->map.has_value();
+            top_option_is_map_input = !compare_options.top_input->tags.size();
+        }
+        
         switch(opt) {
             case 'i':
                 Invader::show_version_info();
@@ -84,6 +95,10 @@ int main(int argc, const char **argv) {
                     eprintf_error("An input is required before setting a maps directory.");
                     std::exit(EXIT_FAILURE);
                 }
+                if(!top_option_is_tag_input) {
+                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
+                    std::exit(EXIT_FAILURE);
+                }
                 if(compare_options.top_input->maps.has_value()) {
                     eprintf_error("A maps directory was already specified for this input.");
                     std::exit(EXIT_FAILURE);
@@ -96,8 +111,8 @@ int main(int argc, const char **argv) {
                     eprintf_error("An input is required before setting a maps directory.");
                     std::exit(EXIT_FAILURE);
                 }
-                if(compare_options.top_input->tags.size() > 0) {
-                    eprintf_error("A tags directory was already specified for this input.");
+                if(!top_option_is_map_input) {
+                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_MAP_INPUT);
                     std::exit(EXIT_FAILURE);
                 }
                 if(compare_options.top_input->map.has_value()) {
@@ -112,12 +127,8 @@ int main(int argc, const char **argv) {
                     eprintf_error("An input is required before setting a tags directory.");
                     std::exit(EXIT_FAILURE);
                 }
-                if(compare_options.top_input->map.has_value()) {
-                    eprintf_error("A map was already specified for this input.");
-                    std::exit(EXIT_FAILURE);
-                }
-                if(compare_options.top_input->maps.has_value()) {
-                    eprintf_error("A maps directory was already specified for this input.");
+                if(!top_option_is_map_input) {
+                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
                     std::exit(EXIT_FAILURE);
                 }
                 compare_options.top_input->tags.emplace_back(args[0]);
