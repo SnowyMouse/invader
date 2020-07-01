@@ -29,6 +29,8 @@ struct Input {
     std::vector<File::TagFilePath> tag_paths;
     std::vector<File::TagFile> virtual_directory;
     std::unique_ptr<Map> map_data;
+    
+    bool functional = false;
 };
 
 template <typename T> static void close_input(T &options) {
@@ -62,6 +64,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used.");
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
+    options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences. This can only be used with a tag input.");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
@@ -104,6 +107,18 @@ int main(int argc, const char **argv) {
                     std::exit(EXIT_FAILURE);
                 }
                 compare_options.top_input->maps = args[0];
+                break;
+                
+            case 'f':
+                if(!compare_options.top_input) {
+                    eprintf_error("An input is required before setting a maps directory.");
+                    std::exit(EXIT_FAILURE);
+                }
+                if(!top_option_is_tag_input) {
+                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
+                    std::exit(EXIT_FAILURE);
+                }
+                compare_options.top_input->functional = true;
                 break;
                 
             case 'M':

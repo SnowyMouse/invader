@@ -69,6 +69,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed bend bounds defaulting to 0-1 rather than being based on
   natural pitch (you will get a pedantic warning if it does this and your bend
   bounds are not 0)
+- invader-build: Fixed decal radius upper bound not being defaulted correctly
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
