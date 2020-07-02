@@ -354,6 +354,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     }
     tags.shrink_to_fit();
     
+    // Hold this for when we start outputting stuff
+    bool show_all = (show & Show::SHOW_ALL) == Show::SHOW_ALL;
+    
     // Next, compare each tag
     std::size_t matched_count = 0;
     for(auto &tag : tags) {
@@ -403,13 +406,16 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         }
         
         if(matched && (show & Show::SHOW_MATCHED)) {
-            oprintf_success("Matched: %s.%s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+            oprintf_success("%s%s.%s", show_all ? "Matched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
             matched_count++;
         }
         else if(!matched && (show & Show::SHOW_MISMATCHED)) {
-            oprintf_success_warn("Mismatched: %s.%s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+            oprintf_success_warn("%s%s.%s", show_all ? "Mismatched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
         }
     }
     
-    oprintf("Matched %zu / %zu tag%s\n", matched_count, tags.size(), tags.size() == 1 ? "" : "s");
+    // Show the total matched if we are showing both
+    if(show_all) {
+        oprintf("Matched %zu / %zu tag%s\n", matched_count, tags.size(), tags.size() == 1 ? "" : "s");
+    }
 }
