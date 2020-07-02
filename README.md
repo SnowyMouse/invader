@@ -362,7 +362,7 @@ This program compares tags against maps, maps against maps, and tags against
 tags.
 
 ```
-Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <opts>> ...]
+Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
 
 Create a file listing the tags of a map.
 
@@ -370,16 +370,17 @@ Options:
   -a --all                     Only match if tags are in all inputs
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
+  -f --functional              Precompile the tags before comparison to check
+                               for only functional differences.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -I --input                   Add an input directory
   -m --maps                    Add a maps directory to the input to specify
-                               where to find resource files for a map. This
-                               cannot be used with --tags.
+                               where to find resource files for a map.
   -M --map                     Add a map to the input. Only one map can be
                                specified per input. If a maps directory isn't
                                specified, then the map's directory will be
-                               used. This cannot be used with --tags.
+                               used.
   -p --precision               Allow for slight differences in floats to
                                account for precision loss.
   -s --show                    Can be: all, matched, or mismatched. Default:

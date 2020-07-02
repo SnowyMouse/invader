@@ -938,11 +938,6 @@ namespace Invader {
     }
 
     std::size_t BuildWorkload::compile_tag_recursively(const char *tag_path, TagClassInt tag_class_int) {
-        // Change this before doing anything
-        if(tag_class_int == TagClassInt::TAG_CLASS_MODEL) {
-            tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
-        }
-
         // Remove duplicate slashes
         auto fixed_path = Invader::File::remove_duplicate_slashes(tag_path);
         tag_path = fixed_path.c_str();

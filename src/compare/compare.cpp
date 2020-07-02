@@ -6,12 +6,14 @@
 
 #include <invader/map/map.hpp>
 #include <invader/resource/resource_map.hpp>
+#include <invader/build/build_workload.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include <invader/file/file.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/command_line_option.hpp>
+#include "../crc/picosha2.hpp"
 
 using namespace Invader;
 
@@ -29,8 +31,6 @@ struct Input {
     std::vector<File::TagFilePath> tag_paths;
     std::vector<File::TagFile> virtual_directory;
     std::unique_ptr<Map> map_data;
-    
-    bool functional = false;
 };
 
 template <typename T> static void close_input(T &options) {
@@ -41,7 +41,7 @@ template <typename T> static void close_input(T &options) {
     options.top_input = nullptr;
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -53,6 +53,7 @@ int main(int argc, const char **argv) {
         bool exhaustive = false;
         bool precision = false;
         bool match_all = false;
+        bool functional = false;
         Show show = Show::SHOW_ALL;
     } compare_options;
 
@@ -64,7 +65,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("map", 'M', 1, "Add a map to the input. Only one map can be specified per input. If a maps directory isn't specified, then the map's directory will be used.");
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
-    options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences. This can only be used with a tag input.");
+    options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
@@ -118,7 +119,7 @@ int main(int argc, const char **argv) {
                     eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
                     std::exit(EXIT_FAILURE);
                 }
-                compare_options.top_input->functional = true;
+                compare_options.functional = true;
                 break;
                 
             case 'M':
@@ -288,10 +289,10 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
@@ -385,6 +386,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
+                        
                         break;
                     }
                 }
@@ -398,10 +400,71 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         
         auto &first_struct = structs[0];
         bool matched = true;
-        for(std::size_t i = 1; i < found_count; i++) {
-            if(!first_struct->compare(structs[i].get(), precision, true)) {
+        if(functional) {
+            try {
+                auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
+                    auto data = struct_v.generate_hek_tag_data(tag.class_int);
+                    
+                    // Compile it
+                    auto compiled = BuildWorkload::compile_single_tag(data.data(), data.size());
+                    
+                    // Start hashing
+                    picosha2::hash256_one_by_one hasher;
+                    
+                    // Process each struct
+                    for(auto &s : compiled.structs) {
+                        // Process struct data
+                        hasher.process(reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
+                        
+                        // Process each dependency
+                        for(auto &d : s.dependencies) {
+                            char o[1024];
+                            auto len = std::snprintf(o, sizeof(o), "%zu-%zu", d.offset, d.tag_index);
+                            hasher.process(o, o + len);
+                        }
+                        
+                        // Process each pointer
+                        for(auto &p : s.pointers) {
+                            char o[1024];
+                            auto len = std::snprintf(o, sizeof(o), "%zu-%zu", p.offset, p.struct_index);
+                            hasher.process(o, o + len);
+                        }
+                    }
+                    
+                    // Process each tag
+                    for(auto &t : compiled.tags) {
+                        char o[1024];
+                        auto len = std::snprintf(o, sizeof(o), "%s.%s", t.path.c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                        hasher.process(o, o + len);
+                    }
+                    
+                    // Done
+                    hasher.finish();
+                    std::vector<std::uint8_t> hash(picosha2::k_digest_size);
+                    hasher.get_hash_bytes(hash.begin(), hash.end());
+                    
+                    return hash;
+                };
+                
+                auto first_meme = meme_up_struct(*first_struct);
+                for(std::size_t i = 1; i < found_count; i++) {
+                    if(first_meme != meme_up_struct(*structs[i])) {
+                        matched = false;
+                        break;
+                    }
+                }
+            }
+            catch(std::exception &e) {
+                eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int), e.what());
                 matched = false;
-                break;
+            }
+        }
+        else {
+            for(std::size_t i = 1; i < found_count; i++) {
+                if(!first_struct->compare(structs[i].get(), precision, true)) {
+                    matched = false;
+                    break;
+                }
             }
         }
         

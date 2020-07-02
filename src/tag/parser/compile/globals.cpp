@@ -66,4 +66,8 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", SOUND_COUNT, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT), offset / sizeof(struct_little));
         }
     }
+    void GlobalsFirstPersonInterface::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+        // Jason Jones the FP hands reference
+        this->first_person_hands.tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
+    }
 }

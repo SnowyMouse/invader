@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-bludgeon: Added `-T nonnormal-vectors` which can detect and fix
   potential vectors that tool.exe does not like when building lightmaps
+- invader-compare: Added `-f` which will check if tags are functionally
+  identical by compiling the tag beforehand (this will be slower)
 - invader-edit-qt: Added an error message for if a subdirectory could not be
   queried
 - invader-edit-qt: Added a filter option in the View menu to filter out tags
