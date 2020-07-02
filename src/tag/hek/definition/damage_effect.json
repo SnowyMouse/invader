@@ -146,7 +146,8 @@
                 "name": "maximum intensity",
                 "type": "float",
                 "minimum": 0.0,
-                "maximum": 1.0
+                "maximum": 1.0,
+                "default": 1.0
             },
             {
                 "type": "pad",
@@ -296,7 +297,8 @@
             {
                 "name": "camera shaking wobble period",
                 "type": "float",
-                "unit": "seconds"
+                "unit": "seconds",
+                "default": 1.0
             },
             {
                 "name": "camera shaking wobble weight",
