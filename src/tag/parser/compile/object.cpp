@@ -24,9 +24,6 @@ namespace Invader::Parser {
         if(tag.model.path.size() == 0 && tag.animation_graph.path.size() != 0) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Object tag has a model tag but no animation graph", tag_index);
         }
-        
-        // Jason Jones the model reference
-        tag.model.tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
     }
 
     void ObjectChangeColors::postprocess_hek_data() {
@@ -174,9 +171,6 @@ namespace Invader::Parser {
     void Weapon::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_WEAPON;
         compile_object(*this, workload, tag_index);
-        
-        // Jason Jones the FP model reference
-        this->first_person_model.tag_class_int = TagClassInt::TAG_CLASS_GBXMODEL;
 
         // Jason jones autoaim for the rocket warthog
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {

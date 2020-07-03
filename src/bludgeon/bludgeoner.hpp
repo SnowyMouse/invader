@@ -17,6 +17,7 @@ namespace Invader::Bludgeoner {
     bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix);
     bool fucked_indices_fix(Parser::ParserStruct *s, bool fix);
     bool fucked_normals(Parser::ParserStruct *s, bool fix);
+    bool old_model_references(Parser::ParserStruct *s, bool fix);
 }
 
 #endif
