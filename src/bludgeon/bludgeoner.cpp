@@ -70,6 +70,7 @@ namespace Invader::Bludgeoner {
                    fix_model(dynamic_cast<Parser::DeviceMachine *>(s)) ||
                    fix_model(dynamic_cast<Parser::DeviceControl *>(s)) ||
                    fix_model(dynamic_cast<Parser::DeviceLightFixture *>(s)) ||
+                   fix_model(dynamic_cast<Parser::Projectile *>(s)) ||
                    fix_model(dynamic_cast<Parser::Scenery *>(s)) ||
                    fix_model(dynamic_cast<Parser::SoundScenery *>(s)) ||
                    fix_model(dynamic_cast<Parser::Placeholder *>(s));
