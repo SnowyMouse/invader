@@ -16,6 +16,14 @@ namespace Invader::Parser {
         }
         auto *types = reinterpret_cast<DetailObjectCollectionObjectType::struct_little *>(workload.structs[*this_struct.resolve_pointer(&struct_data.types.pointer)].data.data());
         
+        // Just set the sprite counts to 0 if we're not actually building a map
+        if(workload.disable_recursion) {
+            for(std::size_t t = 0; t < type_count; t++) {
+                types[t].sprite_count = 0;
+            }
+            return;
+        }
+        
         // Get sprite plate stuff
         auto &sprite_plate_tag = workload.tags[struct_data.sprite_plate.tag_id.read().index];
         auto sprite_plate_struct = workload.structs[*sprite_plate_tag.base_struct];
