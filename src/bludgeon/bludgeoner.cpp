@@ -33,7 +33,7 @@ namespace Invader::Bludgeoner {
         };
         
         // Object tag?
-        auto object_tag = [&s, &fix]() {
+        auto object_fix = [&s, &fix]() {
             auto fix_model = [&fix](auto *what) {
                 if(!what) {
                     return false;
@@ -75,7 +75,22 @@ namespace Invader::Bludgeoner {
                    fix_model(dynamic_cast<Parser::Placeholder *>(s));
         };
         
-        return object_tag() || globals_fix();
+        // Sky tag?
+        auto sky_fix = [&s, &fix]() {
+            auto *sky = dynamic_cast<Parser::Sky *>(s);
+            if(!sky) {
+                return false;
+            }
+            if(sky->model.tag_class_int == HEK::TagClassInt::TAG_CLASS_MODEL) {
+                if(fix) {
+                    sky->model.tag_class_int = HEK::TagClassInt::TAG_CLASS_GBXMODEL;
+                }
+                return true;
+            }
+            return false;
+        };
+        
+        return object_fix() || globals_fix() || sky_fix();
     }
     
     bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix) {
