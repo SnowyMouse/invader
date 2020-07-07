@@ -6,8 +6,6 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-bludgeon: Added `-T nonnormal-vectors` which can detect and fix
   potential vectors that tool.exe does not like when building lightmaps
-- invader-bludgeon: Added `-T old-model-references` which can detect `model`
-  references being used instead of `gbxmodel` references
 - invader-compare: Added `-f` which will check if tags are functionally
   identical by compiling the tag beforehand (this will be slower)
 - invader-edit-qt: Added an error message for if a subdirectory could not be
@@ -97,8 +95,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Removed
 - invader: Removed MCC support
 - invader-bludgeon: Removed `-T invalid-power-of-two`
-- invader-build: Removed automatically converting `model` references to
-  `gbxmodel`
+- invader-build: Removed automatically converting model references to gbxmodel
+  (required to support Xbox maps and assets which don't use gbxmodel)
 
 ## [0.34.1] - 2020-04-12
 ### Changed

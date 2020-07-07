@@ -31,8 +31,8 @@ enum WaysToFuckUpTheTag : std::uint64_t {
         allowing 16-bit PCM, but this was fixed in mods, and this is undefined behavior) */
     BULLSHIT_SOUND_FORMAT               = 1ull << 3,
 
-    /** Fix .model references when .gbxmodel should be referenced (primarily present in unextracted Bungie tags) */
-    OLD_MODEL_REFERENCES                = 1ull << 4,
+    /** Unused again (sad Vulpix noises) ;-; */
+    // UNUSED                           = 1ull << 4,
 
     /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
     WHERE_THE_FUCK_ARE_THE_SCRIPTS      = 1ull << 5,
@@ -80,7 +80,6 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define FUCKED_INDICES_FIX "invalid-indices"
 #define FUCKED_NORMALS_FIX "nonnormal-vectors"
-#define OLD_MODEL_REFERENCES_FIX "old-model-references"
 #define EVERYTHING_FIX "everything"
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
@@ -121,7 +120,6 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             check_fix(where_the_fuck_are_the_scripts, "script source data is missing; fix with " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             check_fix(fucked_indices_fix, "indices are out of bounds; fix with " FUCKED_INDICES_FIX);
             check_fix(fucked_normals, "problematic nonnormal vectors detected; fix with " FUCKED_NORMALS_FIX);
-            check_fix(old_model_references, "old model references detected; fix with " OLD_MODEL_REFERENCES_FIX);
             
             #undef check_fix
         }
@@ -140,7 +138,6 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             apply_fix(where_the_fuck_are_the_scripts, WHERE_THE_FUCK_ARE_THE_SCRIPTS, WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             apply_fix(fucked_indices_fix, FUCKED_INDICES, FUCKED_INDICES_FIX);
             apply_fix(fucked_normals, FUCKED_NORMALS, FUCKED_NORMALS_FIX);
-            apply_fix(old_model_references, OLD_MODEL_REFERENCES, OLD_MODEL_REFERENCES_FIX);
             
             #undef apply_fix
         }
@@ -180,7 +177,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " OLD_MODEL_REFERENCES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " FUCKED_NORMALS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BULLSHIT_ENUMS_FIX ", " BULLSHIT_RANGE_FIX ", " BULLSHIT_REFERENCE_CLASSES_FIX ", " FUCKED_MODEL_MARKERS_FIX ", " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX ", " FUCKED_SOUND_BUFFER_FIX ", " FUCKED_VERTICES_FIX ", " FUCKED_NORMALS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
