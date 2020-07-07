@@ -248,9 +248,6 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], FUCKED_NORMALS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_NORMALS;
                 }
-                else if(std::strcmp(arguments[0], OLD_MODEL_REFERENCES_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::OLD_MODEL_REFERENCES;
-                }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;
                 }
