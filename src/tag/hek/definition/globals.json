@@ -1275,8 +1275,8 @@
                 "name": "first person hands",
                 "type": "TagDependency",
                 "classes": [
-                    "gbxmodel",
-                    "model"
+                    "model",
+                    "gbxmodel"
                 ],
                 "compound": true
             },

@@ -819,8 +819,8 @@
                 "name": "first person model",
                 "type": "TagDependency",
                 "classes": [
-                    "gbxmodel",
-                    "model"
+                    "model",
+                    "gbxmodel"
                 ],
                 "compound": true
             },
