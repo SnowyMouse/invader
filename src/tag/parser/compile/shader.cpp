@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 
 namespace Invader::Parser {
@@ -20,7 +21,12 @@ namespace Invader::Parser {
     void ShaderTransparentChicago::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO;
     }
-    void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        // Error if the target engine can't use it
+        if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "shader_transparent_chicago_extended tags do not exist on the target engine", tag_index);
+        }
+        
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
     }
     void ShaderTransparentWater::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
@@ -35,7 +41,17 @@ namespace Invader::Parser {
     void ShaderTransparentPlasma::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_PLASMA;
     }
-    void ShaderTransparentGeneric::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ShaderTransparentGeneric::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        // Warn if the target engine can't render it
+        switch(workload.engine_target) {
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "shader_transparent_generic tags will not render on the target engine", tag_index);
+                break;
+            default: break;
+        }
+        
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC;
     }
 }

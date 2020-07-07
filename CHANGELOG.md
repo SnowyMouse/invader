@@ -39,6 +39,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: If building a Halo Custom Edition map and tags are detected to
   not match a tag found in a resource map with the same path, then a minor
   warning will be emitted (does not apply if using `-a` or `-n`)
+- invader-build: Now warns if shader_transparent_generic tags are used upon
+  building for the Gearbox port
 - invader-compare: Using `-s matched` or `-s mismatched` no longer prints the
   `Matched: ` or `Mismatched: ` prefixes, nor does it show the count matched or
   mismatched. This should make it useful for piping to a program or text file.
