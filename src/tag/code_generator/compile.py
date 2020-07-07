@@ -163,7 +163,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("        if(!workload.disable_recursion && this->{} != NULL_INDEX) {{\n".format(name))
                 cpp_cache_format_data.write("            [[maybe_unused]] bool found = false;\n")
                 
-                def do_it_for_sam(member_to_check):
+                def do_it_for_sam(struct_to_check):
                     cpp_cache_format_data.write("            for(auto *p : *stack) {\n")
                     cpp_cache_format_data.write("                auto *s = dynamic_cast<const {} *>(p);\n".format(struct_to_check))
                     cpp_cache_format_data.write("                if(s) {\n")
@@ -177,10 +177,10 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     cpp_cache_format_data.write("                }\n")
                     cpp_cache_format_data.write("            }\n")
                     
-                do_it_for_sam(member_to_check)
+                do_it_for_sam(struct_to_check)
                 
                 # Also check GBXModel too if necessary
-                if member_to_check == "Model":
+                if struct_to_check == "Model":
                     do_it_for_sam("GBXModel")
                     
                 cpp_cache_format_data.write("            #ifndef NDEBUG\n")
