@@ -925,14 +925,17 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_SPHEROID:
             case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
             case TagClassInt::TAG_CLASS_MODEL:
-            case TagClassInt::TAG_CLASS_NONE:
-            case TagClassInt::TAG_CLASS_NULL:
             case TagClassInt::TAG_CLASS_NEW_FONT:
             case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_class_int));
+                throw UnimplementedTagClassException();
+                
+            // And this, of course, we don't know
+            default:
                 throw UnknownTagClassException();
         }
     }

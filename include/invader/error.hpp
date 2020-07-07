@@ -68,6 +68,11 @@ namespace Invader {
     DEFINE_EXCEPTION(UnknownTagClassException, "unknown tag class");
 
     /**
+     * This is thrown when a tag cannot be compiled because it's not fully implemented
+     */
+    DEFINE_EXCEPTION(UnimplementedTagClassException, "unimplemented tag class");
+
+    /**
      * This is thrown when a file cannot be compiled because it's not found or could not be opened
      */
     DEFINE_EXCEPTION(FailedToOpenFileException, "failed to open a file");

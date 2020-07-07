@@ -89,6 +89,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed decal radius upper bound not being defaulted correctly
 - invader-build: Fixed damage effect maximum intensity and camera shaking wobble
   period not defaulting to 1
+- invader-build: If a tag class is unimplemented, a more descriptive error is
+  shown
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
