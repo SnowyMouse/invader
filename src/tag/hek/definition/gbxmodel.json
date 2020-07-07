@@ -1,105 +1,5 @@
 [
     {
-        "name": "GBXModelRegionPermutation",
-        "fields": [
-            {
-                "name": "name",
-                "type": "TagString",
-                "endian": null
-            },
-            {
-                "name": "flags",
-                "read_only": false,
-                "type": "ModelRegionPermutationFlags"
-            },
-            {
-                "name": "permutation number",
-                "type": "uint16",
-                "endian": "Index",
-                "cache_only": true
-            },
-            {
-                "type": "pad",
-                "size": 2
-            },
-            {
-                "type": "pad",
-                "size": 24
-            },
-            {
-                "name": "super low",
-                "type": "Index",
-                "reflexive": "geometries",
-                "struct": "GBXModel"
-            },
-            {
-                "name": "low",
-                "type": "Index",
-                "reflexive": "geometries",
-                "struct": "GBXModel"
-            },
-            {
-                "name": "medium",
-                "type": "Index",
-                "reflexive": "geometries",
-                "struct": "GBXModel"
-            },
-            {
-                "name": "high",
-                "type": "Index",
-                "reflexive": "geometries",
-                "struct": "GBXModel"
-            },
-            {
-                "name": "super high",
-                "type": "Index",
-                "reflexive": "geometries",
-                "struct": "GBXModel"
-            },
-            {
-                "type": "pad",
-                "size": 2
-            },
-            {
-                "name": "markers",
-                "type": "TagReflexive",
-                "struct": "ModelRegionPermutationMarker",
-                "compound": true,
-                "compile_ignore": true
-            }
-        ],
-        "type": "struct",
-        "pre_compile": true,
-        "read_only": true,
-        "title": "name",
-        "size": 88
-    },
-    {
-        "name": "GBXModelRegion",
-        "fields": [
-            {
-                "name": "name",
-                "type": "TagString",
-                "endian": null
-            },
-            {
-                "type": "pad",
-                "size": 32
-            },
-            {
-                "name": "permutations",
-                "type": "TagReflexive",
-                "struct": "GBXModelRegionPermutation",
-                "compound": true,
-                "maximum": 255
-            }
-        ],
-        "type": "struct",
-        "read_only": true,
-        "title": "name",
-        "size": 76
-    },
-    {
         "name": "GBXModelGeometryPart",
         "fields": [
             {
@@ -388,7 +288,7 @@
             {
                 "name": "regions",
                 "type": "TagReflexive",
-                "struct": "GBXModelRegion",
+                "struct": "ModelRegion",
                 "compound": true,
                 "maximum": 255
             },

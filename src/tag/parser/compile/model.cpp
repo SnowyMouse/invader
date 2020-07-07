@@ -745,21 +745,21 @@ namespace Invader::Parser {
     void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         pre_compile_model_geometry_part(*this, workload, tag_index);
     }
-    
-    template<class P> static void pre_compile_model_region_permutation(P &what, BuildWorkload &workload, std::size_t tag_index) {
+
+    void ModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         const char *last_hyphen = nullptr;
-        for(const char &c : what.name.string) {
+        for(const char &c : this->name.string) {
             if(c == '-') {
                 last_hyphen = &c + 1;
             }
         }
-        what.permutation_number = 0;
+        this->permutation_number = 0;
         if(last_hyphen && *last_hyphen) {
             unsigned long permutation_number = ~0;
             try {
                 permutation_number = std::stoul(last_hyphen, nullptr, 10);
                 if(permutation_number < static_cast<std::size_t>(NULL_INDEX)) {
-                    what.permutation_number = static_cast<HEK::Index>(permutation_number);
+                    this->permutation_number = static_cast<HEK::Index>(permutation_number);
                 }
             }
             catch(std::out_of_range &) {
@@ -769,17 +769,9 @@ namespace Invader::Parser {
                 return;
             }
             if(permutation_number >= NULL_INDEX) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation %s has an index that is out of range (%lu >= %zu)", what.name.string, permutation_number, static_cast<std::size_t>(NULL_INDEX));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Permutation %s has an index that is out of range (%lu >= %zu)", this->name.string, permutation_number, static_cast<std::size_t>(NULL_INDEX));
             }
         }
-    }
-
-    void GBXModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_region_permutation(*this, workload, tag_index);
-    }
-
-    void ModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_region_permutation(*this, workload, tag_index);
     }
     
     template <typename M> static void post_cache_deformat_model(M &what) {
