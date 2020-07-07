@@ -411,21 +411,15 @@
         "fields": [
             {
                 "name": "vertex0 index",
-                "type": "Index",
-                "reflexive": "uncompressed vertices",
-                "struct": "ModelGeometryPart"
+                "type": "Index"
             },
             {
                 "name": "vertex1 index",
-                "type": "Index",
-                "reflexive": "uncompressed vertices",
-                "struct": "ModelGeometryPart"
+                "type": "Index"
             },
             {
                 "name": "vertex2 index",
-                "type": "Index",
-                "reflexive": "uncompressed vertices",
-                "struct": "ModelGeometryPart"
+                "type": "Index"
             }
         ],
         "type": "struct",
