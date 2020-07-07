@@ -45,7 +45,11 @@ namespace Invader {
                     long file_size = std::ftell(f);
                     std::fseek(f, 0, SEEK_SET);
                     auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                    std::fread(tag_data.get(), file_size, 1, f);
+                    if(!std::fread(tag_data.get(), file_size, 1, f)) {
+                        std::fclose(f);
+                        eprintf_error("Failed to read file %s", tag_path.string().c_str());
+                        continue;
+                    }
                     std::fclose(f);
 
                     try {
@@ -159,7 +163,11 @@ namespace Invader {
                             long file_size = std::ftell(f);
                             std::fseek(f, 0, SEEK_SET);
                             auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                            std::fread(tag_data.get(), file_size, 1, f);
+                            if(!std::fread(tag_data.get(), file_size, 1, f)) {
+                                std::fclose(f);
+                                eprintf_error("Failed to read file %s", file.path().string().c_str());
+                                continue;
+                            }
                             std::fclose(f);
 
                             // Attempt to parse
