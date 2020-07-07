@@ -73,6 +73,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Fixed an issue where it would warn about model nodes missing
   compressed vertices if a part node exceeds 42 (it is impossible to compress
   vertices with more than 42 parts)
+- invader-bludgeon: Fixed printing "no issues detected" after printing issues
+  that were detected
 - invader-build: Fixed an issue where filthy parts were not saved, resulting in
   the FP needler core not glowing (you will need to re-extract any GBXModel tags
   that were affected by this issue)

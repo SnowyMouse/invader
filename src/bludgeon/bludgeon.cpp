@@ -146,6 +146,8 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         if(!issues_present) {
             return EXIT_SUCCESS;
         }
+        
+        bludgeoned = true;
 
         // Exit out of here
         if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
@@ -158,8 +160,6 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             eprintf_error("Error: Failed to write to %s.", file_path);
             return EXIT_FAILURE;
         }
-
-        bludgeoned = true;
 
         return EXIT_SUCCESS;
     }
@@ -305,7 +305,7 @@ int main(int argc, char * const *argv) {
         std::string file_path_str = file_path.string();
         bool bludgeoned;
         int result = bludgeon_tag(file_path_str.c_str(), fixes, bludgeoned);
-        if(!bludgeoned) {
+        if(result == EXIT_SUCCESS && !bludgeoned) {
             oprintf("%s: No issues detected\n", file_path_str.c_str());
         }
         return result;
