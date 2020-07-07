@@ -703,6 +703,7 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(Lightning, TAG_CLASS_LIGHTNING) \
                                   DO_TAG_CLASS(MaterialEffects, TAG_CLASS_MATERIAL_EFFECTS) \
                                   DO_TAG_CLASS(Meter, TAG_CLASS_METER) \
+                                  DO_TAG_CLASS(Model, TAG_CLASS_MODEL) \
                                   DO_TAG_CLASS(ModelAnimations, TAG_CLASS_MODEL_ANIMATIONS) \
                                   DO_TAG_CLASS(ModelCollisionGeometry, TAG_CLASS_MODEL_COLLISION_GEOMETRY) \
                                   DO_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION) \
@@ -760,7 +761,6 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
             case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
@@ -788,7 +788,6 @@ namespace Invader::Parser {
             case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
             case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_MODEL:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:

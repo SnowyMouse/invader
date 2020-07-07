@@ -18,6 +18,8 @@ namespace Invader::HEK {
      */
     template <typename T> class SwappedEndian {
     public:
+        using struct_type = T;
+        
         std::byte value[sizeof(T)] = {};
 
         /**
@@ -70,6 +72,8 @@ namespace Invader::HEK {
      */
     template <typename T> class NativeEndian {
     public:
+        using struct_type = T;
+        
         std::byte value[sizeof(T)] = {};
 
         /**

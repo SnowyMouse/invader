@@ -446,7 +446,7 @@ namespace Invader::Parser {
             auto &model_tag_header_struct = *reinterpret_cast<GBXModel::struct_little *>(model_tag_header.data.data());
             std::size_t node_count = model_tag_header_struct.nodes.count.read();
             if(node_count) {
-                auto *nodes = reinterpret_cast<GBXModelNode::struct_little *>(workload.structs[*model_tag_header.resolve_pointer(&model_tag_header_struct.nodes.pointer)].data.data());
+                auto *nodes = reinterpret_cast<ModelNode::struct_little *>(workload.structs[*model_tag_header.resolve_pointer(&model_tag_header_struct.nodes.pointer)].data.data());
                 for(std::size_t n = 0; n < node_count; n++) {
                     auto &node = nodes[n];
                     if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {

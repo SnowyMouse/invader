@@ -99,7 +99,6 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/detail_object_collection.cpp
     src/tag/parser/compile/effect.cpp
     src/tag/parser/compile/font.cpp
-    src/tag/parser/compile/gbxmodel.cpp
     src/tag/parser/compile/globals.cpp
     src/tag/parser/compile/glow.cpp
     src/tag/parser/compile/hud_interface.cpp
@@ -108,6 +107,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/light.cpp
     src/tag/parser/compile/lightning.cpp
     src/tag/parser/compile/meter.cpp
+    src/tag/parser/compile/model.cpp
     src/tag/parser/compile/model_animations.cpp
     src/tag/parser/compile/model_collision_geometry.cpp
     src/tag/parser/compile/object.cpp

@@ -218,7 +218,7 @@ namespace Invader {
         std::vector<BuildWorkloadStruct> structs;
 
         /** Vertices for models */
-        std::vector<Parser::GBXModelVertexUncompressed::struct_little> model_vertices;
+        std::vector<Parser::ModelVertexUncompressed::struct_little> model_vertices;
 
         /** Indices for models */
         std::vector<HEK::LittleEndian<HEK::Index>> model_indices;

@@ -1,6 +1,6 @@
 #include "bludgeoner.hpp"
 #include <invader/tag/parser/parser.hpp>
-#include <invader/tag/parser/compile/gbxmodel.hpp>
+#include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
 #include <invader/sound/sound_reader.hpp>

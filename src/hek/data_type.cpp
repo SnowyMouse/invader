@@ -251,8 +251,8 @@ namespace Invader::HEK {
         k = decompress_float<10>(v >> 22);
     }
 
-    GBXModelVertexCompressed<NativeEndian> compress_model_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept {
-        GBXModelVertexCompressed<NativeEndian> r;
+    ModelVertexCompressed<NativeEndian> compress_model_vertex(const ModelVertexUncompressed<NativeEndian> &vertex) noexcept {
+        ModelVertexCompressed<NativeEndian> r;
         r.position = vertex.position;
         r.node0_index = vertex.node0_index * 3;
         r.node0_weight = static_cast<std::int16_t>(compress_float<16>(vertex.node0_weight));
@@ -265,8 +265,8 @@ namespace Invader::HEK {
         return r;
     }
 
-    GBXModelVertexUncompressed<NativeEndian> decompress_model_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept {
-        GBXModelVertexUncompressed<NativeEndian> r;
+    ModelVertexUncompressed<NativeEndian> decompress_model_vertex(const ModelVertexCompressed<NativeEndian> &vertex) noexcept {
+        ModelVertexUncompressed<NativeEndian> r;
         r.position = vertex.position;
         r.node0_index = vertex.node0_index / 3;
         r.node0_weight = decompress_float<16>(vertex.node0_weight);

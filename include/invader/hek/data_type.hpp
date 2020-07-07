@@ -921,8 +921,8 @@ namespace Invader::HEK {
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Quaternion<NativeEndian> &rotation) noexcept;
     Vector3D<NativeEndian> rotate_vector(const Vector3D<NativeEndian> &vector, const Matrix<NativeEndian> &rotation) noexcept;
 
-    ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexCompressed;
-    ENDIAN_TEMPLATE(EndianType) struct GBXModelVertexUncompressed;
+    ENDIAN_TEMPLATE(EndianType) struct ModelVertexCompressed;
+    ENDIAN_TEMPLATE(EndianType) struct ModelVertexUncompressed;
 
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialCompressedRenderedVertex;
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedRenderedVertex;
@@ -930,8 +930,8 @@ namespace Invader::HEK {
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialCompressedLightmapVertex;
     ENDIAN_TEMPLATE(EndianType) struct ScenarioStructureBSPMaterialUncompressedLightmapVertex;
 
-    GBXModelVertexCompressed<NativeEndian> compress_model_vertex(const GBXModelVertexUncompressed<NativeEndian> &vertex) noexcept;
-    GBXModelVertexUncompressed<NativeEndian> decompress_model_vertex(const GBXModelVertexCompressed<NativeEndian> &vertex) noexcept;
+    ModelVertexCompressed<NativeEndian> compress_model_vertex(const ModelVertexUncompressed<NativeEndian> &vertex) noexcept;
+    ModelVertexUncompressed<NativeEndian> decompress_model_vertex(const ModelVertexCompressed<NativeEndian> &vertex) noexcept;
 
     ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> compress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> &vertex) noexcept;
     ScenarioStructureBSPMaterialUncompressedRenderedVertex<NativeEndian> decompress_sbsp_rendered_vertex(const ScenarioStructureBSPMaterialCompressedRenderedVertex<NativeEndian> &vertex) noexcept;

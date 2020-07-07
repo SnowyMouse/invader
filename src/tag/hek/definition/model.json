@@ -1,6 +1,217 @@
 [
     {
-        "name": "GBXModelRegionPermutation",
+        "name": "ModelRegionPermutationFlags",
+        "type": "bitfield",
+        "fields": [
+            "cannot be chosen randomly"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelGeometryPartFlags",
+        "type": "bitfield",
+        "fields": [
+            "stripped internal",
+            "zoner"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelFlags",
+        "type": "bitfield",
+        "fields": [
+            "blend shared normals",
+            "parts have local nodes",
+            "ignore skinning"
+        ],
+        "width": 32
+    },
+    {
+        "name": "ModelMarkerInstance",
+        "fields": [
+            {
+                "name": "region index",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "permutation index",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "name": "node index",
+                "type": "uint8",
+                "endian": null
+            },
+            {
+                "type": "pad",
+                "size": 1
+            },
+            {
+                "name": "translation",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "rotation",
+                "type": "Quaternion",
+                "normalize": true,
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "size": 32
+    },
+    {
+        "name": "ModelMarker",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "magic identifier",
+                "type": "int16"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 16
+            },
+            {
+                "name": "instances",
+                "type": "TagReflexive",
+                "struct": "ModelMarkerInstance",
+                "compound": true
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "title": "name",
+        "size": 64
+    },
+    {
+        "name": "ModelNode",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "next sibling node index",
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "Model"
+            },
+            {
+                "name": "first child node index",
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "Model"
+            },
+            {
+                "name": "parent node index",
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "Model"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "default translation",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "default rotation",
+                "normalize": true,
+                "type": "Quaternion",
+                "compound": true
+            },
+            {
+                "name": "node distance from parent",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 32
+            },
+            {
+                "name": "scale",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "rotation",
+                "type": "Matrix",
+                "compound": true,
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "translation",
+                "type": "Point3D",
+                "compound": true,
+                "endian": "little",
+                "cache_only": true
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "title": "name",
+        "size": 156
+    },
+    {
+        "name": "ModelRegionPermutationMarker",
+        "fields": [
+            {
+                "name": "name",
+                "type": "TagString",
+                "endian": null
+            },
+            {
+                "name": "node index",
+                "type": "Index",
+                "reflexive": "nodes",
+                "struct": "Model"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "rotation",
+                "type": "Quaternion",
+                "normalize": true,
+                "compound": true
+            },
+            {
+                "name": "translation",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "type": "pad",
+                "size": 16
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "title": "name",
+        "size": 80
+    },
+    {
+        "name": "ModelRegionPermutation",
         "fields": [
             {
                 "name": "name",
@@ -30,31 +241,31 @@
                 "name": "super low",
                 "type": "Index",
                 "reflexive": "geometries",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "name": "low",
                 "type": "Index",
                 "reflexive": "geometries",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "name": "medium",
                 "type": "Index",
                 "reflexive": "geometries",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "name": "high",
                 "type": "Index",
                 "reflexive": "geometries",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "name": "super high",
                 "type": "Index",
                 "reflexive": "geometries",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "type": "pad",
@@ -75,7 +286,7 @@
         "size": 88
     },
     {
-        "name": "GBXModelRegion",
+        "name": "ModelRegion",
         "fields": [
             {
                 "name": "name",
@@ -89,7 +300,7 @@
             {
                 "name": "permutations",
                 "type": "TagReflexive",
-                "struct": "GBXModelRegionPermutation",
+                "struct": "ModelRegionPermutation",
                 "compound": true,
                 "maximum": 255
             }
@@ -100,7 +311,129 @@
         "size": 76
     },
     {
-        "name": "GBXModelGeometryPart",
+        "name": "ModelVertexUncompressed",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "normal",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "binormal",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "tangent",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "texture coords",
+                "type": "Point2D",
+                "compound": true
+            },
+            {
+                "name": "node0 index",
+                "type": "Index"
+            },
+            {
+                "name": "node1 index",
+                "type": "Index"
+            },
+            {
+                "name": "node0 weight",
+                "type": "float"
+            },
+            {
+                "name": "node1 weight",
+                "type": "float"
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "size": 68
+    },
+    {
+        "name": "ModelVertexCompressed",
+        "fields": [
+            {
+                "name": "position",
+                "type": "Point3D",
+                "compound": true
+            },
+            {
+                "name": "normal",
+                "type": "uint32"
+            },
+            {
+                "name": "binormal",
+                "type": "uint32"
+            },
+            {
+                "name": "tangent",
+                "type": "uint32"
+            },
+            {
+                "name": "texture coordinate u",
+                "type": "int16"
+            },
+            {
+                "name": "texture coordinate v",
+                "type": "int16"
+            },
+            {
+                "name": "node0 index",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "node1 index",
+                "type": "int8",
+                "endian": null
+            },
+            {
+                "name": "node0 weight",
+                "type": "uint16"
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "size": 32
+    },
+    {
+        "name": "ModelTriangle",
+        "fields": [
+            {
+                "name": "vertex0 index",
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "ModelGeometryPart"
+            },
+            {
+                "name": "vertex1 index",
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "ModelGeometryPart"
+            },
+            {
+                "name": "vertex2 index",
+                "type": "Index",
+                "reflexive": "uncompressed vertices",
+                "struct": "ModelGeometryPart"
+            }
+        ],
+        "type": "struct",
+        "read_only": true,
+        "size": 6
+    },
+    {
+        "name": "ModelGeometryPart",
         "fields": [
             {
                 "name": "flags",
@@ -110,7 +443,7 @@
                 "name": "shader index",
                 "type": "Index",
                 "reflexive": "shaders",
-                "struct": "GBXModel"
+                "struct": "Model"
             },
             {
                 "name": "prev filthy part index",
@@ -223,34 +556,6 @@
                 "name": "vertex offset",
                 "type": "uint32",
                 "drop_on_extract_hidden": true
-            },
-            {
-                "type": "pad",
-                "size": 1
-            },
-            {
-                "type": "pad",
-                "size": 1
-            },
-            {
-                "type": "pad",
-                "size": 1
-            },
-            {
-                "name": "local node count",
-                "type": "uint8",
-                "maximum": 22,
-                "endian": null
-            },
-            {
-                "name": "local node indices",
-                "type": "uint8",
-                "endian": null,
-                "count": 22
-            },
-            {
-                "type": "pad",
-                "size": 2
             }
         ],
         "type": "struct",
@@ -258,10 +563,10 @@
         "unsafe_to_dedupe": true,
         "pre_compile": true,
         "read_only": true,
-        "size": 132
+        "size": 104
     },
     {
-        "name": "GBXModelGeometry",
+        "name": "ModelGeometry",
         "fields": [
             {
                 "name": "flags",
@@ -274,7 +579,7 @@
             {
                 "name": "parts",
                 "type": "TagReflexive",
-                "struct": "GBXModelGeometryPart",
+                "struct": "ModelGeometryPart",
                 "compound": true
             }
         ],
@@ -283,7 +588,35 @@
         "size": 48
     },
     {
-        "name": "GBXModel",
+        "name": "ModelShaderReference",
+        "fields": [
+            {
+                "name": "shader",
+                "type": "TagDependency",
+                "classes": [
+                    "shader"
+                ],
+                "compound": true
+            },
+            {
+                "name": "permutation",
+                "type": "Index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 12
+            }
+        ],
+        "type": "struct",
+        "title": "shader",
+        "size": 32
+    },
+    {
+        "name": "Model",
         "fields": [
             {
                 "name": "flags",
@@ -388,14 +721,14 @@
             {
                 "name": "regions",
                 "type": "TagReflexive",
-                "struct": "GBXModelRegion",
+                "struct": "ModelRegion",
                 "compound": true,
                 "maximum": 255
             },
             {
                 "name": "geometries",
                 "type": "TagReflexive",
-                "struct": "GBXModelGeometry",
+                "struct": "ModelGeometry",
                 "compound": true,
                 "maximum": 65535
             },
