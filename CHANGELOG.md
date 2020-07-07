@@ -64,8 +64,15 @@ This is used for recording Invader's changes. This changelog is based on
   when built for MCC and scoring is used
 - invader: Fixed the ColorARGBInt definition (you do not need to re-extract tags
   or rebuild maps for this - it effectively only impacted invader-edit-qt)
+- invader: Fixed a couple issues with compressed vertex generation, including an
+  issue with null part indices as well as an issue with part indices exceeding
+  42 (so if it exceeds 42, Invader will not attempt to generate compressed
+  vertices)
 - invader-bitmap: Fixed an issue with DXT3 making some fully opaque bitmaps
   semi-transparent
+- invader-bludgeon: Fixed an issue where it would warn about model nodes missing
+  compressed vertices if a part node exceeds 42 (it is impossible to compress
+  vertices with more than 42 parts)
 - invader-build: Fixed an issue where filthy parts were not saved, resulting in
   the FP needler core not glowing (you will need to re-extract any GBXModel tags
   that were affected by this issue)

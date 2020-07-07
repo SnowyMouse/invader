@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <invader/hek/data_type.hpp>
+#include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/hek/definition.hpp>
 
 namespace Invader::HEK {
@@ -254,9 +255,9 @@ namespace Invader::HEK {
     ModelVertexCompressed<NativeEndian> compress_model_vertex(const ModelVertexUncompressed<NativeEndian> &vertex) noexcept {
         ModelVertexCompressed<NativeEndian> r;
         r.position = vertex.position;
-        r.node0_index = vertex.node0_index * 3;
+        r.node0_index = vertex.node0_index > Invader::Parser::MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX ? -3 : vertex.node0_index * 3;
         r.node0_weight = static_cast<std::int16_t>(compress_float<16>(vertex.node0_weight));
-        r.node1_index = vertex.node1_index * 3;
+        r.node1_index = vertex.node1_index > Invader::Parser::MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX ? -3 : vertex.node1_index * 3;
         r.texture_coordinate_u = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.x));
         r.texture_coordinate_v = static_cast<std::int16_t>(compress_float<16>(vertex.texture_coords.y));
         r.normal = compress_vector(vertex.normal.i, vertex.normal.j, vertex.normal.k);
@@ -268,9 +269,9 @@ namespace Invader::HEK {
     ModelVertexUncompressed<NativeEndian> decompress_model_vertex(const ModelVertexCompressed<NativeEndian> &vertex) noexcept {
         ModelVertexUncompressed<NativeEndian> r;
         r.position = vertex.position;
-        r.node0_index = vertex.node0_index / 3;
+        r.node0_index = vertex.node0_index < 0 ? 65535 : vertex.node0_index / 3;
         r.node0_weight = decompress_float<16>(vertex.node0_weight);
-        r.node1_index = vertex.node1_index / 3;
+        r.node1_index = vertex.node1_index < 0 ? 65535 : vertex.node1_index / 3;
         r.node1_weight = 0;
         r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_u);
         r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_v);

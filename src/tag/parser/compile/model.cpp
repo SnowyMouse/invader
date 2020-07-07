@@ -223,7 +223,7 @@ namespace Invader::Parser {
         else if(part.compressed_vertices.size() == 0 && part.uncompressed_vertices.size() > 0) {
             // Can we even do this?
             for(auto &v : part.uncompressed_vertices) {
-                if(v.node0_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX || v.node1_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX) {
+                if((v.node0_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && v.node0_index < NULL_INDEX) || (v.node1_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && v.node1_index < NULL_INDEX)) {
                     return false;
                 }
             }
