@@ -116,8 +116,15 @@ namespace Invader::Bludgeoner {
         return false;
     }
 
+    static bool fucked_model_vertices(Parser::Model *model, bool fix) {
+        if(model) {
+            return regenerate_missing_model_vertices(*model, fix);
+        }
+        return false;
+    }
+
     bool fucked_vertices(Parser::ParserStruct *s, bool fix) {
-        return fucked_bsp_vertices(dynamic_cast<Parser::ScenarioStructureBSP *>(s), fix) || fucked_model_vertices(dynamic_cast<Parser::GBXModel *>(s), fix);
+        return fucked_bsp_vertices(dynamic_cast<Parser::ScenarioStructureBSP *>(s), fix) || fucked_model_vertices(dynamic_cast<Parser::GBXModel *>(s), fix) || fucked_model_vertices(dynamic_cast<Parser::Model *>(s), fix);
     }
 
     bool refinery_model_markers(Parser::ParserStruct *s, bool fix) {
@@ -127,7 +134,7 @@ namespace Invader::Bludgeoner {
             }
             return Parser::uncache_model_markers(*model, fix);
         };
-        return attempt_fix(dynamic_cast<Invader::Parser::GBXModel *>(s));
+        return attempt_fix(dynamic_cast<Invader::Parser::GBXModel *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::Model *>(s));
     }
     
     #ifndef DISABLE_AUDIO
