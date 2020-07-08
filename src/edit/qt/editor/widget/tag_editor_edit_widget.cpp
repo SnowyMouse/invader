@@ -703,6 +703,11 @@ namespace Invader::EditQt {
                             actual_max = UINT32_MAX;
                             break;
                             
+                        case Parser::ParserStructValue::VALUE_TYPE_RECTANGLE2D:
+                            actual_max = INT16_MAX;
+                            actual_min = INT16_MIN;
+                            break;
+                            
                         default:
                             std::terminate();
                     }
