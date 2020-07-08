@@ -52,7 +52,7 @@ namespace Invader {
         static std::vector<std::byte> compile_map (
             const char *scenario,
             const std::vector<std::string> &tags_directories,
-            HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET,
+            HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_NATIVE,
             std::string maps_directory = std::string(),
             RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT,
             bool verbose = false,

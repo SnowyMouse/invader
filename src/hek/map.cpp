@@ -5,8 +5,8 @@
 namespace Invader::HEK {
     const char *engine_name(CacheFileEngine engine) noexcept {
         switch(engine) {
-            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                return "Dark Circlet";
+            case CacheFileEngine::CACHE_FILE_NATIVE:
+                return "Invader (native)";
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 return "Halo Custom Edition";
             case CacheFileEngine::CACHE_FILE_RETAIL:
@@ -79,7 +79,7 @@ namespace Invader::HEK {
         return true;
     }
 
-    bool DarkCircletCacheFileHeader::valid() const noexcept {
+    bool NativeCacheFileHeader::valid() const noexcept {
         // Ensure the name and build don't overflow
         if(this->name.overflows() || this->build.overflows()) {
             return false;

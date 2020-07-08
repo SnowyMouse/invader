@@ -13,7 +13,7 @@ namespace Invader::HEK {
         CACHE_FILE_DEMO = 0x6,
         CACHE_FILE_RETAIL = 0x7,
         CACHE_FILE_CUSTOM_EDITION = 0x261,
-        CACHE_FILE_DARK_CIRCLET = 0x1A86,
+        CACHE_FILE_NATIVE = 0x1A86,
 
         CACHE_FILE_DEMO_COMPRESSED = 0x861A0006,
         CACHE_FILE_RETAIL_COMPRESSED = 0x861A0007,
@@ -36,7 +36,7 @@ namespace Invader::HEK {
     enum CacheFileTagDataBaseMemoryAddress : HEK::Pointer64 {
         CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
-        CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS = 0x00000000,
+        CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS = 0x00000000,
 
         CACHE_FILE_ANNIVERSARY_BASE_MEMORY_ADDRESS = 0x40448000,
         CACHE_FILE_ANNIVERSARY_BSP_MEMORY_ADDRESS = 0x41448000,
@@ -44,15 +44,15 @@ namespace Invader::HEK {
         CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS = 0x803A6000,
 
         CACHE_FILE_STUB_MEMORY_ADDRESS = 0xFFFFFFFF,
-        CACHE_FILE_STUB_MEMORY_ADDRESS_DARK_CIRCLET = 0xFFFFFFFFFFFFFFFF
+        CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE = 0xFFFFFFFFFFFFFFFF
     };
 
     enum CacheFileLimits : HEK::Pointer64 {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
         CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
 
-        CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET = 0xFFFFFFFFFFFFFFFF,
-        CACHE_FILE_MAXIMUM_FILE_LENGTH_DARK_CIRCLET = 0xFFFFFFFFFFFFFFFF,
+        CACHE_FILE_MEMORY_LENGTH_NATIVE = 0xFFFFFFFFFFFFFFFF,
+        CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE = 0xFFFFFFFFFFFFFFFF,
 
         CACHE_FILE_MEMORY_LENGTH_ANNIVERSARY = 0x1F00000,
 
@@ -86,7 +86,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileHeader) == 0x800);
 
-    struct DarkCircletCacheFileHeader {
+    struct NativeCacheFileHeader {
         LittleEndian<CacheFileLiteral> head_literal;
         LittleEndian<CacheFileEngine> engine;
         LittleEndian<std::uint64_t> decompressed_file_size;
@@ -102,7 +102,7 @@ namespace Invader::HEK {
 
         bool valid() const noexcept;
     };
-    static_assert(sizeof(DarkCircletCacheFileHeader) == 0x800);
+    static_assert(sizeof(NativeCacheFileHeader) == 0x800);
 
     struct CacheFileDemoHeader {
         PAD(0x2);
@@ -149,14 +149,14 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileTagDataHeaderPC) == 0x28);
 
-    struct DarkCircletCacheFileTagDataHeader : CacheFileTagDataHeader {
+    struct NativeCacheFileTagDataHeader : CacheFileTagDataHeader {
         LittleEndian<std::uint64_t> model_data_file_offset;
         LittleEndian<std::uint64_t> vertex_size;
         LittleEndian<std::uint64_t> model_data_size;
         LittleEndian<std::uint64_t> raw_data_indices;
         LittleEndian<CacheFileLiteral> tags_literal;
     };
-    static_assert(sizeof(DarkCircletCacheFileTagDataHeader) == 0x38);
+    static_assert(sizeof(NativeCacheFileTagDataHeader) == 0x38);
 
     struct CacheFileTagDataTag {
         LittleEndian<TagClassInt> primary_class;
@@ -170,7 +170,7 @@ namespace Invader::HEK {
     };
     static_assert(sizeof(CacheFileTagDataTag) == 0x20);
 
-    struct DarkCircletCacheFileTagDataTag {
+    struct NativeCacheFileTagDataTag {
         LittleEndian<TagClassInt> primary_class;
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
@@ -178,6 +178,6 @@ namespace Invader::HEK {
         LittleEndian<HEK::Pointer64> tag_path;
         LittleEndian<HEK::Pointer64> tag_data;
     };
-    static_assert(sizeof(DarkCircletCacheFileTagDataTag) == 0x20);
+    static_assert(sizeof(NativeCacheFileTagDataTag) == 0x20);
 }
 #endif

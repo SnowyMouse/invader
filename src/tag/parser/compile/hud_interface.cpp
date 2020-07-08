@@ -17,7 +17,7 @@ namespace Invader::Parser {
         }
         this->crosshair_types = crosshair_types.flaggy;
 
-        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && !(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
+        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && !(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
             std::size_t zooms = 0;
             for(auto &c : this->crosshairs) {
                 for(auto &o : c.crosshair_overlays) {

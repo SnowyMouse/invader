@@ -24,7 +24,7 @@ namespace Invader::Compression {
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-            case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 if(map.is_compressed()) {
                     throw MapNeedsDecompressedException();
                 }
@@ -67,7 +67,7 @@ namespace Invader::Compression {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 throw MapNeedsCompressedException();
                 break;
-            case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 invader_compression = true;
                 // fallthrough
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
@@ -159,8 +159,8 @@ namespace Invader::Compression {
         }
         // Otherwise, we use zstandard
         else {
-            if(engine == HEK::CACHE_FILE_DARK_CIRCLET) {
-                compress_header<HEK::DarkCircletCacheFileHeader>(map, output, data_size);
+            if(engine == HEK::CACHE_FILE_NATIVE) {
+                compress_header<HEK::NativeCacheFileHeader>(map, output, data_size);
             }
             else {
                 compress_header<HEK::CacheFileHeader>(map, output, data_size);
@@ -190,8 +190,8 @@ namespace Invader::Compression {
             throw InvalidMapException();
         }
 
-        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            decompress_header<HEK::DarkCircletCacheFileHeader>(data, output);
+        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            decompress_header<HEK::NativeCacheFileHeader>(data, output);
         }
         else {
             decompress_header<HEK::CacheFileHeader>(data, output);
@@ -251,8 +251,8 @@ namespace Invader::Compression {
         const auto *header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
         std::vector<std::byte> new_data = std::vector<std::byte>(header->decompressed_file_size);
 
-        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            decompress_header<HEK::DarkCircletCacheFileHeader>(data, new_data.data());
+        if(header->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            decompress_header<HEK::NativeCacheFileHeader>(data, new_data.data());
         }
         else {
             decompress_header<HEK::CacheFileHeader>(data, new_data.data());
@@ -301,8 +301,8 @@ namespace Invader::Compression {
              // Make the output header and write it
              std::byte header_output[HEADER_SIZE];
              try {
-                 if(header_input.engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                     decompress_header<HEK::DarkCircletCacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);
+                 if(header_input.engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                     decompress_header<HEK::NativeCacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);
                  }
                  else {
                      decompress_header<HEK::CacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);

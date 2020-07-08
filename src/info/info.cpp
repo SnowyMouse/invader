@@ -338,7 +338,7 @@ int main(int argc, const char **argv) {
             // Get CRC
             std::uint32_t crc = 0;
             bool external_data_used = uses_external_data();
-            bool unsupported_external_data = engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
+            bool unsupported_external_data = engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE || engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
             auto header_crc32 = map->get_header_crc32();
 
             if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
@@ -434,7 +434,7 @@ int main(int argc, const char **argv) {
 
             // Uncompressed size
             oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(data_length));
-            if(engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), static_cast<float>(data_length) / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH * 100.0F);
             }
             else {

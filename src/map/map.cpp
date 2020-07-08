@@ -86,7 +86,7 @@ namespace Invader {
             // Check if it needs decompressed based on header
             if(potential_header->valid()) {
                 switch(potential_header->engine.read()) {
-                    case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                    case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                     case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                         if(potential_header->decompressed_file_size != 0) {
                             needs_decompressed = true;
@@ -222,7 +222,7 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_RETAIL:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     break;
-                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                case CacheFileEngine::CACHE_FILE_NATIVE:
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     if(header.decompressed_file_size != 0) {
                         throw MapNeedsDecompressedException();
@@ -243,8 +243,8 @@ namespace Invader {
 
             // Get tag data
             switch(map.engine) {
-                case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                    map.base_memory_address = HEK::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
+                case CacheFileEngine::CACHE_FILE_NATIVE:
+                    map.base_memory_address = HEK::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
                     break;
                 case CacheFileEngine::CACHE_FILE_DEMO:
                     map.base_memory_address = HEK::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
@@ -273,8 +273,8 @@ namespace Invader {
             }
             continue_loading_map(*this, *demo_header_maybe);
         }
-        else if(header_maybe->engine == CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            continue_loading_map(*this, *reinterpret_cast<const DarkCircletCacheFileHeader *>(header_maybe));
+        else if(header_maybe->engine == CacheFileEngine::CACHE_FILE_NATIVE) {
+            continue_loading_map(*this, *reinterpret_cast<const NativeCacheFileHeader *>(header_maybe));
         }
         else {
             continue_loading_map(*this, *header_maybe);
@@ -305,10 +305,10 @@ namespace Invader {
             map.model_data_size = header.model_data_size;
             map.model_index_offset = header.vertex_size;
         };
-        if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            auto &dark_header = *reinterpret_cast<const DarkCircletCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(DarkCircletCacheFileTagDataHeader)));
-            set_model_stuff(dark_header);
-            this->asset_indices_offset = dark_header.raw_data_indices;
+        if(this->get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            auto &native_header = *reinterpret_cast<const NativeCacheFileTagDataHeader *>(this->get_tag_data_at_offset(0, sizeof(NativeCacheFileTagDataHeader)));
+            set_model_stuff(native_header);
+            this->asset_indices_offset = native_header.raw_data_indices;
         }
         else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             set_model_stuff(*reinterpret_cast<const CacheFileTagDataHeaderPC *>(this->get_tag_data_at_offset(0, sizeof(CacheFileTagDataHeaderPC))));
@@ -344,7 +344,7 @@ namespace Invader {
                 }
                 catch (Invader::OutOfBoundsException &) {}
 
-                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;
                 }
                 else if(sizeof(tags->tag_data) == sizeof(HEK::Pointer) && reinterpret_cast<const CacheFileTagDataTag *>(tags)[i].indexed) {
@@ -425,8 +425,8 @@ namespace Invader {
             }
         };
 
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            do_populate_the_array(reinterpret_cast<const DarkCircletCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
+        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            do_populate_the_array(reinterpret_cast<const NativeCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
         }
         else {
             do_populate_the_array(reinterpret_cast<const CacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
@@ -554,7 +554,7 @@ namespace Invader {
     }
 
     std::byte *Map::get_internal_asset(std::size_t offset, std::size_t minimum_size) {
-        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto *data = reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(this->get_data_at_offset(this->asset_indices_offset, (1 + offset) * sizeof(HEK::LittleEndian<std::uint64_t>))) + offset;
             offset = *data;
         }

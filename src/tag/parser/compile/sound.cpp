@@ -154,7 +154,7 @@ namespace Invader::Parser {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound format does not match %zu permutation%s.", errors, errors == 1 ? "" : "s");
         }
 
-        if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound is 44.1 kHz AND mono. The target engine will not play this.");
         }
 

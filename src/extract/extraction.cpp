@@ -380,7 +380,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
 
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
-                if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     return std::make_unique<Parser::ScenarioStructureBSP>(Parser::ScenarioStructureBSP::parse_cache_file_data(tag));
                 }
                 else {

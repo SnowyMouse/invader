@@ -35,7 +35,7 @@ namespace Invader {
         using namespace HEK;
 
         // Limit the pointer to 32-bit
-        if(this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             pointer &= UINT32_MAX;
         }
 
@@ -49,7 +49,7 @@ namespace Invader {
             }
         }
 
-        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
+        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 

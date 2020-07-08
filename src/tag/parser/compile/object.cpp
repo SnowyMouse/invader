@@ -174,9 +174,9 @@ namespace Invader::Parser {
 
         // Jason jones autoaim for the rocket warthog
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\rwarthog\\rwarthog_gun")) {
-            bool dark_circlet_or_custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
-            float new_autoaim_angle = dark_circlet_or_custom_edition ? DEGREES_TO_RADIANS(6.0F) : DEGREES_TO_RADIANS(1.0F);
-            float new_deviation_angle = dark_circlet_or_custom_edition ? DEGREES_TO_RADIANS(12.0F) : DEGREES_TO_RADIANS(1.0F);
+            bool native_or_custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+            float new_autoaim_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(6.0F) : DEGREES_TO_RADIANS(1.0F);
+            float new_deviation_angle = native_or_custom_edition ? DEGREES_TO_RADIANS(12.0F) : DEGREES_TO_RADIANS(1.0F);
 
             if(new_autoaim_angle != this->autoaim_angle || new_deviation_angle != this->deviation_angle) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING_PEDANTIC, "Autoaim angles were changed due to building a stock scenario", tag_index);

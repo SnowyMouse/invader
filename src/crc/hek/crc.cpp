@@ -42,7 +42,7 @@ namespace Invader {
         auto &scenario_tag = map.get_tag(map.get_scenario_tag_id());
         auto &scenario = scenario_tag.get_base_struct<HEK::Scenario>();
 
-        if(engine != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             std::size_t bsp_count = scenario.structure_bsps.count.read();
             auto *bsps = scenario_tag.resolve_reflexive(scenario.structure_bsps);
 

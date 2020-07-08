@@ -74,7 +74,7 @@ namespace Invader {
         // Set defaults
         if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_DEFAULT) {
             switch(engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
+                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                     raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                     break;
 
@@ -83,8 +83,8 @@ namespace Invader {
             }
         }
 
-        // Dark Circlet maps can only use these
-        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL && engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        // Native maps can only use these
+        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL && engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             throw InvalidArgumentException();
         }
 
@@ -252,9 +252,9 @@ namespace Invader {
 
         // Set the tag data address
         switch(engine_target) {
-            case CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DARK_CIRCLET_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_DARK_CIRCLET;
+            case CacheFileEngine::CACHE_FILE_NATIVE:
+                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
+                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
                 workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
@@ -281,7 +281,7 @@ namespace Invader {
             workload.tag_data_address = *tag_data_address;
         }
 
-        if(engine_target != CacheFileEngine::CACHE_FILE_DARK_CIRCLET && (0x100000000ull - workload.tag_data_address) < workload.tag_data_size) {
+        if(engine_target != CacheFileEngine::CACHE_FILE_NATIVE && (0x100000000ull - workload.tag_data_address) < workload.tag_data_size) {
             eprintf_error("Specified tag data address cannot contain the entire tag space");
             throw InvalidArgumentException();
         }
@@ -379,8 +379,8 @@ namespace Invader {
         };
 
         switch(this->engine_target) {
-            case HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET:
-                make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::DarkCircletCacheFileTagDataHeader));
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+                make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::NativeCacheFileTagDataHeader));
                 break;
             default:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::CacheFileTagDataHeaderPC));
@@ -421,11 +421,11 @@ namespace Invader {
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
-        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET;
+        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE;
 
-        // Calculate total BSP size (pointless on Dark Circlet maps)
+        // Calculate total BSP size (pointless on native maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
-        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 // Determine the index.
                 auto &this_bsp_size = bsp_sizes[i - 1];
@@ -477,7 +477,7 @@ namespace Invader {
             final_data.resize(sizeof(HEK::CacheFileHeader));
 
             // Go through each BSP and add that stuff
-            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -508,8 +508,8 @@ namespace Invader {
             // Add tag data
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
-            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-                auto &tag_data_struct = *reinterpret_cast<HEK::DarkCircletCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
+            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                auto &tag_data_struct = *reinterpret_cast<HEK::NativeCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
                 tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
@@ -648,7 +648,7 @@ namespace Invader {
 
                 // Show the BSP count and/or size
                 oprintf("BSPs:              %zu", workload.bsp_count);
-                if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("\n");
                 }
                 else {
@@ -666,8 +666,8 @@ namespace Invader {
                         auto &bsp = scenario_tag_bsps[b];
                         oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
 
-                        // If we're not on a Dark Circlet map, print the size (Dark Circlet maps don't have any meaningful way to get BSP size)
-                        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        // If we're not on a native map, print the size (native maps don't have any meaningful way to get BSP size)
+                        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             auto &bss = bsp_sizes[b];
                             oprintf(
                                 " (%.02f MiB)%s",
@@ -678,14 +678,14 @@ namespace Invader {
                         oprintf("\n");
                     }
 
-                    // And, if we're not on dark circlet maps and we have different BSP sizes, indicate the largest BSP
-                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET && largest_bsp_count < workload.bsp_count) {
+                    // And, if we're not on native maps and we have different BSP sizes, indicate the largest BSP
+                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && largest_bsp_count < workload.bsp_count) {
                         oprintf("                   * = Largest BSP%s%s\n", largest_bsp_count == 1 ? "" : "s", bsp_size_affects_tag_space ? " (affects final tag space usage)" : "");
                     }
                 }
 
                 // Show the total tag space (if applicable)
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
                 }
 
@@ -708,7 +708,7 @@ namespace Invader {
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
 
                 // If we have a 32-bit limit, show the limit
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * uncompressed_size / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
                 else {
@@ -731,8 +731,8 @@ namespace Invader {
             return final_data;
         };
 
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            HEK::DarkCircletCacheFileHeader header;
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            HEK::NativeCacheFileHeader header;
             return generate_final_data(header, UINT64_MAX);
         }
         else {
@@ -864,7 +864,7 @@ namespace Invader {
             // For extended sounds and bitmaps, downgrade if necessary
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
                 auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
                 else {
@@ -876,7 +876,7 @@ namespace Invader {
             }
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND: {
                 auto tag_data_parsed = Parser::ExtendedSound::parse_hek_tag_file(tag_data, tag_data_size, true);
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
                 else {
@@ -893,8 +893,8 @@ namespace Invader {
                 auto tag_data_parsed = Parser::ScenarioStructureBSP::parse_hek_tag_file(tag_data, tag_data_size, true);
                 std::size_t bsp = this->bsp_count++;
 
-                // Next, if we're making a dark circlet map, we need to only do this
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                // Next, if we're making a native map, we need to only do this
+                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
 
@@ -1214,7 +1214,7 @@ namespace Invader {
         return workload;
     }
 
-    template <typename Tag, HEK::Pointer64 stub_address, bool dark_circlet> static void do_generate_tag_array(std::size_t tag_count, std::vector<BuildWorkload::BuildWorkloadTag> &tags, std::vector<BuildWorkload::BuildWorkloadStruct> &structs) {
+    template <typename Tag, HEK::Pointer64 stub_address, bool native> static void do_generate_tag_array(std::size_t tag_count, std::vector<BuildWorkload::BuildWorkloadTag> &tags, std::vector<BuildWorkload::BuildWorkloadStruct> &structs) {
         TAG_ARRAY_STRUCT.data.resize(sizeof(Tag) * tag_count);
 
         // Reserve tag paths
@@ -1253,7 +1253,7 @@ namespace Invader {
 
             // Tag data
             auto primary_class = tag.tag_class_int;
-            if(!dark_circlet) {
+            if(!native) {
                 reinterpret_cast<HEK::CacheFileTagDataTag *>(&tag_index)->indexed = tag.resource_index.has_value();
             }
 
@@ -1263,7 +1263,7 @@ namespace Invader {
             else if(tag.resource_index.has_value() && !tag.base_struct.has_value()) {
                 tag_index.tag_data = *tag.resource_index;
             }
-            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP || dark_circlet) {
+            else if(primary_class != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP || native) {
                 auto &tag_data_ptr = TAG_ARRAY_STRUCT.pointers.emplace_back();
                 tag_data_ptr.offset = reinterpret_cast<std::byte *>(&tag_index.tag_data) - reinterpret_cast<std::byte *>(tag_array);
                 tag_data_ptr.struct_index = *tag.base_struct;
@@ -1321,8 +1321,8 @@ namespace Invader {
     }
 
     void BuildWorkload::generate_tag_array() {
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
-            do_generate_tag_array<HEK::DarkCircletCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_DARK_CIRCLET, true>(this->tags.size(), this->tags, this->structs);
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            do_generate_tag_array<HEK::NativeCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE, true>(this->tags.size(), this->tags, this->structs);
         }
         else {
             do_generate_tag_array<HEK::CacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS, false>(this->tags.size(), this->tags, this->structs);
@@ -1364,7 +1364,7 @@ namespace Invader {
             for(auto &pointer : s.pointers) {
                 recursively_generate_data(data, pointer.struct_index, recursively_generate_data);
                 PointerInternal pointer_internal(pointer.offset + offset, pointer.struct_index);
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET || pointer.limit_to_32_bits) {
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE || pointer.limit_to_32_bits) {
                     pointers.emplace_back(pointer_internal);
                 }
                 else {
@@ -1385,7 +1385,7 @@ namespace Invader {
                     auto &dependency_struct = *reinterpret_cast<HEK::TagDependency<HEK::LittleEndian> *>(data.data() + offset + dependency.offset);
                     dependency_struct.tag_class_int = tags[tag_index].tag_class_int;
                     dependency_struct.tag_id = new_tag_id;
-                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         dependency_struct.path_pointer = pointer_of_tag_path(tag_index);
                     }
                 }
@@ -1418,8 +1418,8 @@ namespace Invader {
         // Get this set
         std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
 
-        // Get the scenario tag (if we're not on a Dark Circlet map)
-        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        // Get the scenario tag (if we're not on a native map)
+        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto &scenario_tag = tags[this->scenario_index];
             auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
             std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
@@ -1436,7 +1436,7 @@ namespace Invader {
                 // Go through each BSP tag
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &t = tags[i];
-                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         continue;
                     }
 
@@ -1456,7 +1456,7 @@ namespace Invader {
                     }
 
                     HEK::Pointer64 tag_data_base;
-                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
                     }
                     else {
@@ -1548,7 +1548,7 @@ namespace Invader {
 
                     // Put it in its place
                     auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
-                    if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                    if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         bitmap_data.pixel_data_offset = resource_index;
                     }
                     else {
@@ -1575,7 +1575,7 @@ namespace Invader {
 
                         // Put it in its place
                         auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
-                        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+                        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             permutation.samples.file_offset = resource_index;
                         }
                         else {
@@ -1587,7 +1587,7 @@ namespace Invader {
         }
 
         // Put the offsets in an array
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_DARK_CIRCLET) {
+        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             std::vector<LittleEndian<std::uint64_t>> offsets;
             for(auto &i : all_assets) {
                 offsets.emplace_back(i.first + file_offset);
