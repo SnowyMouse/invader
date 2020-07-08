@@ -227,13 +227,18 @@ namespace Invader::EditQt {
             accept = true;
         }
 
+        event->setAccepted(accept);
+        
+        // If we denied closing the window, stop
+        if(!accept) {
+            return;
+        }
+
         // Delete subwindow
-        if(accept && this->subwindow) {
+        if(this->subwindow) {
             this->subwindow->deleteLater();
             this->subwindow = nullptr;
         }
-
-        event->setAccepted(accept);
 
         // Clean up
         this->parent_window->cleanup_windows(this);
