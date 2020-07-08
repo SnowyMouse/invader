@@ -95,6 +95,8 @@ This is used for recording Invader's changes. This changelog is based on
   not be accessed in the filesystem
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
 - invader-edit-qt: Fixed 2D rectangle edits crashing
+- invader-edit-qt: Fixed a segmentation fault when failing to open a tag
+- invader-edit-qt: Fixed "Cancel" discarding when closing a modified file
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-index: Fixed not including .bitmap or .sound in bitmaps.map or

@@ -77,7 +77,7 @@ namespace Invader::EditQt {
         bool perform_save_as();
         File::TagFile file;
 
-        Parser::ParserStruct *parser_data;
+        Parser::ParserStruct *parser_data = nullptr;
         std::vector<std::unique_ptr<QWidget>> widgets_to_remove;
         TagEditorSubwindow *subwindow = nullptr;
 
