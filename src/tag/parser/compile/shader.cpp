@@ -14,10 +14,55 @@ namespace Invader::Parser {
             this->material_color.blue = 1.0F;
         }
     }
-    void ShaderModel::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_MODEL;
         this->unknown = 1.0F;
+        
+        // Do we have a multipurpose? If so, what type of flag?
+        if(this->multipurpose_map.path.size()) {
+            bool uses_xbox_multi_order = this->shader_model_flags & HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
+            bool clear_flag = false;
+            
+            switch(workload.engine_target) {
+                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                    if(!uses_xbox_multi_order) {
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Xbox maps require Xbox multipurpose channel order to be set", tag_index);
+                    }
+                    clear_flag = true;
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    if(!uses_xbox_multi_order) {
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Gearbox maps require Xbox multipurpose channel order to be unset", tag_index);
+                    }
+                    clear_flag = true;
+                    break;
+                default:
+                    break;
+            }
+        
+            // Clear the flag when putting it in a map if we need to
+            if(clear_flag) {
+                this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
+            }
+        }
     }
+    void ShaderModel::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        switch(tag.get_map().get_engine()) {
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                this->shader_model_flags |= HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
+                break;
+            default:
+                break;
+        }
+    }
+    
     void ShaderTransparentChicago::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO;
     }
