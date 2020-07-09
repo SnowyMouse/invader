@@ -396,7 +396,7 @@ namespace Invader::Parser {
                 bool uses_local_part_nodes = p.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
                 
                 // CAN we use local part nodes
-                if(sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) {
+                if(uses_local_part_nodes && sizeof(typename std::remove_reference<decltype(p)>::type::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Part #%zu of geometry #%zu uses local part nodes, but they aren't supported for non-gbxmodels", &p - g.parts.data(), &g - what.geometries.data());
                     eprintf_warn("To fix this, rebuild the model tag");
                     throw InvalidTagDataException();
