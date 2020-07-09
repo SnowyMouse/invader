@@ -287,32 +287,44 @@ namespace Invader::Parser {
     template <class P, typename PS> static void post_cache_parse_model_part(P &what, const PS &part, const Invader::Tag &tag) {
         const auto &map = tag.get_map();
 
-        // Get model vertices
+        // Get model vertices and indices count
         std::size_t vertex_count = part.vertex_count.read();
-        auto model_data_offset = map.get_model_data_offset();
-        auto model_index_offset = map.get_model_index_offset() + model_data_offset;
+        std::size_t index_count = part.triangle_count.read() + 2;
+        std::size_t triangle_count = (index_count) / 3;
+        std::size_t triangle_modulo = index_count % 3;
+        const HEK::LittleEndian<HEK::Index> *indices = nullptr;
 
-        // Repopulate vertices - PC only has uncompressed vertices
-        if(vertex_count > 0 && tag.get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            const auto *vertices = reinterpret_cast<const ModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(ModelVertexUncompressed::struct_little) * vertex_count));
-            for(std::size_t v = 0; v < vertex_count; v++) {
-                std::size_t data_read;
-                ModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
-                what.uncompressed_vertices.emplace_back(ModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
+        // Get vertices
+        if(vertex_count > 0) {
+            // Xbox maps use compressed vertices at a given address
+            if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                const auto *vertex_pointer = reinterpret_cast<const HEK::LittleEndian<HEK::Pointer> *>(tag.data(what.vertex_offset, sizeof(HEK::LittleEndian<HEK::Pointer>) * 2) + sizeof(HEK::LittleEndian<HEK::Pointer>));
+                const auto *vertices = reinterpret_cast<const ModelVertexCompressed::struct_little *>(tag.data(*vertex_pointer, sizeof(ModelVertexCompressed::struct_little) * vertex_count));
+                for(std::size_t v = 0; v < vertex_count; v++) {
+                    std::size_t data_read;
+                    ModelVertexCompressed::struct_big vertex_compressed = vertices[v];
+                    what.compressed_vertices.emplace_back(ModelVertexCompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_compressed), sizeof(vertex_compressed), data_read, true));
+                }
+                indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(tag.data(what.triangle_offset, sizeof(std::uint16_t) * index_count));
             }
-            if(!regenerate_missing_model_vertices(what, true)) {
-                eprintf_error("Failed to regenerate compressed vertices");
-                throw InvalidTagDataException();
+            // Other maps use uncompressed vertices at an offset
+            else {
+                auto model_data_offset = map.get_model_data_offset();
+                auto model_index_offset = map.get_model_index_offset() + model_data_offset;
+                const auto *vertices = reinterpret_cast<const ModelVertexUncompressed::struct_little *>(map.get_data_at_offset(model_data_offset + part.vertex_offset.read(), sizeof(ModelVertexUncompressed::struct_little) * vertex_count));
+                for(std::size_t v = 0; v < vertex_count; v++) {
+                    std::size_t data_read;
+                    ModelVertexUncompressed::struct_big vertex_uncompressed = vertices[v];
+                    what.uncompressed_vertices.emplace_back(ModelVertexUncompressed::parse_hek_tag_data(reinterpret_cast<const std::byte *>(&vertex_uncompressed), sizeof(vertex_uncompressed), data_read, true));
+                }
+                indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
             }
+            
+            // Regenerate vertices
+            regenerate_missing_model_vertices(what, true);
         }
 
         // Get model indices
-        std::size_t index_count = part.triangle_count.read() + 2;
-
-        std::size_t triangle_count = (index_count) / 3;
-        std::size_t triangle_modulo = index_count % 3;
-        const auto *indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
-
         for(std::size_t t = 0; t < triangle_count; t++) {
             auto &triangle = what.triangles.emplace_back();
             auto *triangle_indices = indices + t * 3;

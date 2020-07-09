@@ -339,6 +339,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(Meter, TAG_CLASS_METER)
             EXTRACT_TAG_CLASS(LightVolume, TAG_CLASS_LIGHT_VOLUME)
             EXTRACT_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
+            EXTRACT_TAG_CLASS(Model, TAG_CLASS_MODEL)
             EXTRACT_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
             EXTRACT_TAG_CLASS(Object, TAG_CLASS_OBJECT)
             EXTRACT_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
@@ -395,7 +396,6 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case TagClassInt::TAG_CLASS_SPHEROID:
             case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
-            case TagClassInt::TAG_CLASS_MODEL:
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
