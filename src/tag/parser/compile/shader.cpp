@@ -26,7 +26,7 @@ namespace Invader::Parser {
             switch(workload.engine_target) {
                 case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                     if(!uses_xbox_multi_order) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Xbox maps require Xbox multipurpose channel order to be set", tag_index);
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine requires Xbox multipurpose channel order; the resulting shader may not appear as intended", tag_index);
                     }
                     clear_flag = true;
                     break;
@@ -34,7 +34,7 @@ namespace Invader::Parser {
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     if(!uses_xbox_multi_order) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Gearbox maps require Xbox multipurpose channel order to be unset", tag_index);
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support Xbox multipurpose channel order; the resulting shader may not appear as intended", tag_index);
                     }
                     clear_flag = true;
                     break;
