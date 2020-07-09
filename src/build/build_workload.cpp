@@ -822,6 +822,7 @@ namespace Invader {
             COMPILE_TAG_CLASS(Meter, TAG_CLASS_METER)
             COMPILE_TAG_CLASS(LightVolume, TAG_CLASS_LIGHT_VOLUME)
             COMPILE_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
+            COMPILE_TAG_CLASS(Model, TAG_CLASS_MODEL)
             COMPILE_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
             COMPILE_TAG_CLASS(Object, TAG_CLASS_OBJECT)
             COMPILE_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
@@ -924,7 +925,6 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case TagClassInt::TAG_CLASS_SPHEROID:
             case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
-            case TagClassInt::TAG_CLASS_MODEL:
             case TagClassInt::TAG_CLASS_NEW_FONT:
             case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
             case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
