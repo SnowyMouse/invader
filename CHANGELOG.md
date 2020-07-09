@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-bludgeon: Added `-T nonnormal-vectors` which can detect and fix
   potential vectors that tool.exe does not like when building lightmaps
+- invader-build: Added word wrapping for most error messages when on Linux or
+  Windows
 - invader-compare: Added `-f` which will check if tags are functionally
   identical by compiling the tag beforehand (this will be slower)
 - invader-edit-qt: Added an error message for if a subdirectory could not be
@@ -14,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   that don't match a given expression
 - invader-edit-qt: Added support for model tags (as opposed to gbxmodel)
 - invader-extract: Xbox model tags now extract
+- invader-extract: Added word wrapping for most error messages when on Linux or
+  Windows
 - invader-font: Added `-l` to limit to the first 256 characters
 - invader-resource: Added `-p` to specify a number of extra bytes to add after
   the header when generating resource maps
