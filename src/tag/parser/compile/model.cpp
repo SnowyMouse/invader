@@ -612,7 +612,7 @@ namespace Invader::Parser {
 
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "gbxmodel tags do not exist on the target engine", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
         }
         
         pre_compile_model(*this, workload, tag_index);
@@ -623,7 +623,7 @@ namespace Invader::Parser {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "non-gbx model tags are unsupported on the target engine", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Non-Gearbox model tags are unsupported on the target engine", tag_index);
                 break;
             default: break;
         }
