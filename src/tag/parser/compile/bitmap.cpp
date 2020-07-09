@@ -107,12 +107,6 @@ namespace Invader::Parser {
         auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
 
-        // TODO: Deal with cubemaps and stuff
-        if(xbox && bitmap->type != HEK::BitmapType::BITMAP_TYPE_2D_TEXTURES) {
-            eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
-            throw InvalidTagDataException();
-        }
-
         // Do we have bitmap data?
         auto bd_count = bitmap->bitmap_data.size();
         if(bd_count) {
@@ -122,6 +116,12 @@ namespace Invader::Parser {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 bool compressed = bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+
+                // TODO: Deal with cubemaps and stuff
+                if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
+                    eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
+                    throw InvalidTagDataException();
+                }
                 
                 // Change mipmap count to be correct (if necessary)
                 while(xbox && compressed && size_of_bitmap(bitmap_data) > bitmap_data.pixel_data_size) {
