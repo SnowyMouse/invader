@@ -121,14 +121,13 @@ namespace Invader::Parser {
             for(std::size_t bd = 0; bd < bd_count; bd++) {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
-
-                // TODO: Generate last two mipmaps if needed
-                if((bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED) && xbox) {
-                    eprintf_error("Compressed bitmaps from Xbox maps are not currently supported");
-                    throw InvalidTagDataException();
+                bool compressed = bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+                
+                // Change mipmap count to be correct (if necessary)
+                while(xbox && compressed && size_of_bitmap(bitmap_data) > bitmap_data.pixel_data_size) {
+                    bitmap_data.mipmap_count--; // TODO: Regenerate the missing mipmaps instead
                 }
 
-                // MCC has meme matching (e.g. hce_ltb_bloodgulch = levels/test/bloodgulch/bloodgulch)
                 const std::byte *bitmap_data_ptr;
                 if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                     bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);

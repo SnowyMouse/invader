@@ -67,11 +67,6 @@ namespace Invader {
             // Get the tag path
             const auto &tag = map->get_tag(tag_index);
 
-            if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX && tag.get_tag_class_int() == TagClassInt::TAG_CLASS_BITMAP) {
-                eprintf_warn("Xbox bitmaps cannot be extracted at this time");
-                return false;
-            }
-
             // See if we can extract this
             auto tag_class_int = tag.get_tag_class_int();
             const char *tag_extension = Invader::HEK::tag_class_to_extension(tag_class_int);
