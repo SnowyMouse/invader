@@ -4,7 +4,6 @@
         "fields": [
             "dither alpha",
             "dither color",
-            "swap to Xbox multipurpose channel order",
             "use zstandard compression"
         ],
         "type": "bitfield",

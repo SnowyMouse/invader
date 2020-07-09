@@ -103,14 +103,14 @@
             "unused",
             "make it actually work",
             "external",
-            "stubbed (extended)",
-            "uses xbox multipurpose channel order (extended)",
+            "stubbed",
             "zstandard compressed (extended)"
         ],
         "cache_only": [
             "unused",
             "make it actually work",
-            "external"
+            "external",
+            "stubbed"
         ],
         "width": 16
     },
