@@ -169,10 +169,22 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
 
-            // TODO: Swizzle bitmaps for Dark Circlet, deswizzle for Gearbox
-            if(swizzled) {
-                eprintf_error("Swizzled bitmaps are not currently supported");
-                throw InvalidTagDataException();
+            // Check if we can or must use swizzled stuff
+            switch(workload.engine_target) {
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    if(swizzled) {
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support swizzled bitmaps; it may not appear as intended", tag_index);
+                    }
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                    if(!compressed && !swizzled) {
+                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support unswizzled uncompressed bitmaps; it may not appear as intended", tag_index);
+                    }
+                    break;
+                default:
+                    break;
             }
 
             std::size_t data_index = &data - bitmap->bitmap_data.data();
