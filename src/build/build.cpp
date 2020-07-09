@@ -68,7 +68,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("discard", 'd', 0, "Discard all raw data. This will result in a map that is invalid for use with game clients (except MCC) and tag extractors.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, native", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
