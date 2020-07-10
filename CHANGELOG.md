@@ -75,6 +75,8 @@ This is used for recording Invader's changes. This changelog is based on
   issue with null part indices as well as an issue with part indices exceeding
   42 (so if it exceeds 42, Invader will not attempt to generate compressed
   vertices)
+- invader: Fixed Xbox compression not aligning to a 4096-byte boundary. This
+  would result in Halo refusing to load the map.
 - invader-bitmap: Fixed an issue with DXT3 making some fully opaque bitmaps
   semi-transparent
 - invader-bludgeon: Fixed an issue where it would warn about model nodes missing

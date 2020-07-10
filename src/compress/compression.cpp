@@ -151,7 +151,14 @@ namespace Invader::Compression {
             if((deflateInit(&deflate_stream, compression_level) != Z_OK) || (deflate(&deflate_stream, Z_FINISH) != Z_STREAM_END) || (deflateEnd(&deflate_stream) != Z_OK)) {
                 throw DecompressionFailureException();
             }
-            return deflate_stream.total_out + HEADER_SIZE;
+            
+            // Align to 4096 bytes
+            std::size_t padding_required = 4096 - ((deflate_stream.total_out + HEADER_SIZE) % 4096);
+            if(padding_required) {
+                reinterpret_cast<HEK::CacheFileHeader *>(output)->compressed_padding = static_cast<std::uint32_t>(padding_required);
+            }
+            
+            return deflate_stream.total_out + HEADER_SIZE + padding_required;
             
             #else
             std::terminate();
