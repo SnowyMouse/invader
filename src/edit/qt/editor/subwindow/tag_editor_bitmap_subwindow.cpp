@@ -14,6 +14,7 @@
 #include "../../../../bitmap/color_plate_scanner.hpp"
 #include "s3tc/s3tc.hpp"
 #include <invader/tag/parser/parser.hpp>
+#include <invader/bitmap/swizzle.hpp>
 
 #define GET_PIXEL(x,y) (x + y * real_width)
 
@@ -327,6 +328,12 @@ namespace Invader::EditQt {
         // Decode bitmap
         const auto *bytes = pixel_data->data() + offset;
         std::vector<std::uint32_t> data = this->decode_bitmap(real_width, real_height, width, height, pixels_required, pixel_count, bytes, bitmap_data);
+        
+        // Deswizzle if necessary
+        if(bitmap_data->flags & Invader::HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
+            auto deswizzled = Invader::Swizzle::swizzle(reinterpret_cast<std::byte *>(data.data()), 32, real_width, real_height, true);
+            std::memcpy(data.data(), deswizzled.data(), deswizzled.size());
+        }
 
         // Scale if needed
         if(scale != 0) {
