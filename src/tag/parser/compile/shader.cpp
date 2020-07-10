@@ -33,7 +33,7 @@ namespace Invader::Parser {
                 case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    if(!uses_xbox_multi_order) {
+                    if(uses_xbox_multi_order) {
                         workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support Xbox multipurpose channel order; the resulting shader may not appear as intended", tag_index);
                     }
                     clear_flag = true;
