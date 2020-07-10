@@ -49,17 +49,12 @@ namespace Invader::Parser {
         }
     }
     void ShaderModel::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        switch(tag.get_map().get_engine()) {
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                this->shader_model_flags |= HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-                break;
-            default:
-                break;
+        // If we have a multipurpose and we're Xbox, set the flag. Otherwise, negate it.
+        if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_XBOX && this->multipurpose_map.path.size() > 0) {
+            this->shader_model_flags |= HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
+        }
+        else {
+            this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
         }
     }
     
