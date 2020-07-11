@@ -50,17 +50,13 @@ namespace Invader {
     std::size_t ExtractionWorkload::perform_extraction(const std::vector<std::string> &queries, const std::filesystem::path &tags, bool recursive, bool overwrite, bool non_mp_globals) {
         // Set these variables up
         auto *map = &this->map;
-        auto engine = map->get_engine();
         auto type = map->get_type();
         auto tag_count = map->get_tag_count();
         std::vector<bool> extracted_tags(tag_count);
         std::deque<std::size_t> all_tags_to_extract;
         auto &workload = *this;
 
-        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &engine, &type, &recursive, &overwrite, &non_mp_globals, &workload](std::size_t tag_index) -> bool {
-            // Used for bad paths
-            static const std::regex BAD_PATH_DIRECTORY("(^|.*(\\\\|\\/))\\.{1,2}(\\\\|\\/).*");
-
+        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload](std::size_t tag_index) -> bool {
             // Do it
             extracted_tags[tag_index] = true;
 
@@ -80,12 +76,6 @@ namespace Invader {
             // Lowercase everything
             for(char &c : path) {
                 c = std::tolower(c);
-            }
-
-            // Make sure we don't have any dot slashes (i.e. ../ or ./) to prevent a potential directory traversal attack
-            if(std::regex_match(path, BAD_PATH_DIRECTORY)) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "%s.%s contains an unsafe path", path.c_str(), tag_extension);
-                return false;
             }
 
             // Figure out the path we're writing to

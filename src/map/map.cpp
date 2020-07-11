@@ -328,18 +328,29 @@ namespace Invader {
                 try {
                     auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
 
-                    // Make sure the path is null-terminated
-                    bool zeroed = false;
+                    // Make sure the path is null-terminated and it doesn't contain whitespace that isn't an ASCII space (0x20) or forward slash characters
+                    bool null_terminated = false;
                     for(auto *path_test = path; path < tag_data_end; path_test++) {
                         if(*path_test == 0) {
-                            zeroed = true;
+                            null_terminated = true;
                             break;
+                        }
+                        else if(*path_test < ' ') {
+                            eprintf_error("Tag #%zu has an invalid path (contains invalid characters)", i);
+                            throw InvalidTagPathException();
+                        }
+                        else if(*path_test == '/') {
+                            eprintf_error("Tag #%zu has an invalid path (contains forward slashes)", i);
+                            throw InvalidTagPathException();
                         }
                     }
 
-                    // If it was null terminated, use it. Otherwise, don't.
-                    if(zeroed) {
+                    // If it was null terminated and it does NOT start with a dot, use it. Otherwise, don't.
+                    if(null_terminated && *path != '.') {
                         tag.path = Invader::File::remove_duplicate_slashes(path);
+                    }
+                    else {
+                        throw InvalidTagPathException();
                     }
                 }
                 catch (Invader::OutOfBoundsException &) {}
