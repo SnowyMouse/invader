@@ -102,13 +102,16 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                     non_type = True
                 else:
                     type_to_write = "HEK::{}".format(type_to_write)
+                    
+                initializer = " = NULL_INDEX" if type_to_write == "HEK::Index" else ""
+                
                 if "flagged" in t and t["flagged"]:
                     type_to_write = "HEK::FlaggedInt<{}>".format(type_to_write)
                 if "compound" in t and t["compound"] and not non_type:
                     type_to_write = "{}<HEK::NativeEndian>".format(type_to_write)
                 if "bounds" in t and t["bounds"]:
                     type_to_write = "HEK::Bounds<{}>".format(type_to_write)
-                hpp.write("        {} {}{};\n".format(type_to_write, t["member_name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"])))
+                hpp.write("        {} {}{}{};\n".format(type_to_write, t["member_name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"]), initializer))
                 all_used_structs.append(t)
                 continue
         add_structs_from_struct(s)
