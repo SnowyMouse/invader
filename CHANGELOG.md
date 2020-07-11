@@ -29,6 +29,8 @@ This is used for recording Invader's changes. This changelog is based on
   either Linux or Windows and their terminal width is at least 80 characters
 - invader: "dark" and "Dark Circlet" have been renamed to "native" and
   "Invader (native)", respectively
+- invader: Invalid indices in command lists are no longer considered an error,
+  as "fixing" them can result in unintended consequences on some campaign maps
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
 - invader-build: Maps that error due to multiple objects sharing the same name
