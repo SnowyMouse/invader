@@ -625,13 +625,14 @@ namespace Invader::EditQt {
 
     void TagEditorEditWidget::on_change() {
         auto *value = this->get_struct_value();
+        auto value_type = value->get_type();
 
         // Don't worry about it
         if(this->read_only) {
             return;
         }
 
-        switch(value->get_type()) {
+        switch(value_type) {
             case Parser::ParserStructValue::ValueType::VALUE_TYPE_TAGSTRING:
                 value->set_string(this->textbox_widgets[0]->text().toLatin1().data());
                 break;
@@ -676,9 +677,9 @@ namespace Invader::EditQt {
                 // Get the minimum and maximum
                 auto min = value->get_minimum();
                 auto max = value->get_maximum();
-                auto value_type = value->get_type();
+                auto number_format = value->get_number_format();
                 
-                if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
+                if(number_format == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                     std::int64_t actual_min = 0, actual_max;
                     
                     // Get the theoretical mins and maxes
@@ -734,12 +735,12 @@ namespace Invader::EditQt {
                     auto *widget = this->textbox_widgets[w];
                     bool ok = false;
                     
-                    // Set the value
+                    // Set the value based on bass
                     auto &number = numbers[w];
-                    switch(value->get_number_format()) {
+                    switch(number_format) {
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
                             double double_value = widget->text().toDouble(&ok);
-                            if(value->get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
+                            if(value_type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
                                 double_value = DEGREES_TO_RADIANS(double_value);
                             }
                             number = double_value;
@@ -752,9 +753,13 @@ namespace Invader::EditQt {
                             }
                             else {
                                 number = static_cast<std::int64_t>(widget->text().toLongLong(&ok));
+                                if(!ok && widget->text().startsWith("0x")) {
+                                    number = static_cast<std::int64_t>(widget->text().toLongLong(&ok, 16)); // try hexadecimal
+                                }
                             }
                             break;
                         default:
+                            // What???
                             std::terminate();
                     }
                     

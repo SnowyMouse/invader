@@ -15,6 +15,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added a filter option in the View menu to filter out tags
   that don't match a given expression
 - invader-edit-qt: Added support for model tags (as opposed to gbxmodel)
+- invader-edit-qt: Added support for hexadecimal input (integers only)
 - invader-extract: Xbox model tags now extract
 - invader-extract: Added word wrapping for most error messages when on Linux or
   Windows
