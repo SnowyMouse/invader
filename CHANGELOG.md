@@ -57,6 +57,7 @@ This is used for recording Invader's changes. This changelog is based on
   mismatched. This should make it useful for piping to a program or text file.
 - invader-compress: Now shows the compression format used
 - invader-edit-qt: Indices now default to 65535 on initialization
+- invader-edit-qt: Null indices now use placeholder text
 - invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when extracting Custom Edition maps
 - invader-extract: No longer attempts to open resource map files when attempting

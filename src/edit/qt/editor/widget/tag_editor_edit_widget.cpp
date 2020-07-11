@@ -135,6 +135,13 @@ namespace Invader::EditQt {
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
                     textbox->setText(QString::number(std::get<double>(current_value)));
                 }
+                // Indices can be blank (null)
+                else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_INDEX) {
+                    if(std::get<std::int64_t>(current_value) != NULL_INDEX) {
+                        textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
+                    }
+                    textbox->setPlaceholderText("NULL");
+                }
                 else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                     textbox->setText(QString::number(std::get<std::int64_t>(current_value)));
                 }
@@ -669,12 +676,13 @@ namespace Invader::EditQt {
                 // Get the minimum and maximum
                 auto min = value->get_minimum();
                 auto max = value->get_maximum();
+                auto value_type = value->get_type();
                 
                 if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT) {
                     std::int64_t actual_min = 0, actual_max;
                     
                     // Get the theoretical mins and maxes
-                    switch(value->get_type()) {
+                    switch(value_type) {
                         case Parser::ParserStructValue::VALUE_TYPE_INT8:
                             actual_min = INT8_MIN;
                             actual_max = INT8_MAX;
@@ -738,7 +746,13 @@ namespace Invader::EditQt {
                             break;
                         }
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
-                            number = static_cast<std::int64_t>(widget->text().toLongLong(&ok));
+                            if(value_type == Parser::ParserStructValue::ValueType::VALUE_TYPE_INDEX && (widget->text().isEmpty() || widget->text().toLower() == "null")) {
+                                number = static_cast<std::int64_t>(NULL_INDEX);
+                                ok = true;
+                            }
+                            else {
+                                number = static_cast<std::int64_t>(widget->text().toLongLong(&ok));
+                            }
                             break;
                         default:
                             std::terminate();
