@@ -31,6 +31,7 @@ This is used for recording Invader's changes. This changelog is based on
   "Invader (native)", respectively
 - invader: Invalid indices in command lists are no longer considered an error,
   as "fixing" them can result in unintended consequences on some campaign maps
+- invader: Maps will no longer load if they contain invalid paths
 - invader-build: Now warns if scenery and light fixtures were found outside of
   the BSP, as they won't spawn if they were
 - invader-build: Maps that error due to multiple objects sharing the same name
@@ -48,6 +49,9 @@ This is used for recording Invader's changes. This changelog is based on
   warning will be emitted (does not apply if using `-a` or `-n`)
 - invader-build: Now warns if shader_transparent_generic tags are used upon
   building for the Gearbox port
+- invader-build: Elements in weapon HUD interfaces now set the zoom bit even if
+  no crosshair in the tag is a zoom crosshair and it uses one of the three zoom
+  flags (the respective warning is removed)
 - invader-compare: Using `-s matched` or `-s mismatched` no longer prints the
   `Matched: ` or `Mismatched: ` prefixes, nor does it show the count matched or
   mismatched. This should make it useful for piping to a program or text file.

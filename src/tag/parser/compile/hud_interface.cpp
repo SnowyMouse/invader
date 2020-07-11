@@ -7,7 +7,7 @@
 #include "hud_interface.hpp"
 
 namespace Invader::Parser {
-    void WeaponHUDInterface::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void WeaponHUDInterface::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         union {
             std::uint32_t inty;
             HEK::WeaponHUDInterfaceCrosshairTypeFlags flaggy;
@@ -17,20 +17,29 @@ namespace Invader::Parser {
         }
         this->crosshair_types = crosshair_types.flaggy;
 
-        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && !(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
-            std::size_t zooms = 0;
+        // Check for zoom flags if we don't have any zoom crosshairs
+        if(!(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
+            auto &crosshair_types = this->crosshair_types;
+            
+            // If any zoom flags are set, pretend we do have zoom crosshairs
             for(auto &c : this->crosshairs) {
-                for(auto &o : c.crosshair_overlays) {
-                    if(
-                        (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_DONT_SHOW_WHEN_ZOOMED) ||
-                        (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_SHOW_ONLY_WHEN_ZOOMED)
-                    ) {
-                        zooms++;
+                auto set_hud_for_zoom_flags = [&c, &crosshair_types]() {
+                    for(auto &o : c.crosshair_overlays) {
+                        if(
+                            (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_DONT_SHOW_WHEN_ZOOMED) ||
+                            (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_SHOW_ONLY_WHEN_ZOOMED) ||
+                            (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_ONE_ZOOM_LEVEL)
+                        ) {
+                            crosshair_types |= HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM;
+                            return true;
+                        }
                     }
+                    return false;
+                };
+                
+                if(set_hud_for_zoom_flags()) {
+                    break;
                 }
-            }
-            if(zooms) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "%zu overlay%s set to change on zoom, but no zoom crosshairs exist.", zooms, zooms == 1 ? " is" : "s are");
             }
         }
     }
