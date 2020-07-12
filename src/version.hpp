@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+#ifndef INVADER__VERSION_HPP
+#include <invader/version.hpp>
+
+#ifndef INVADER_VERSION_MAJOR
+#define INVADER_VERSION_MAJOR 0
+#define INVADER_VERSION_MINOR 0
+#define INVADER_VERSION_PATCH 0
+#define INVADER_VERSION_COMMIT_COUNT 0
+#else
+#ifndef INVADER_VERSION_STRING
+#include "version_str.hpp"
+#endif
+#endif
+
+#ifndef INVADER_FORK
+#define INVADER_FORK "Invader"
+#endif
+
+#ifndef INVADER_VERSION_STRING
+#define INVADER_VERSION_STRING TOSTR(INVADER_VERSION_MAJOR) "." TOSTR(INVADER_VERSION_MINOR) "." TOSTR(INVADER_VERSION_PATCH) ".unknown"
+#endif
+
+#define INVADER_FULL_VERSION_STRING INVADER_FORK " " INVADER_VERSION_STRING
+
+#endif
