@@ -8,11 +8,15 @@ if(${INVADER_EDIT_QT})
     find_package(Qt5 COMPONENTS Core Widgets Multimedia REQUIRED)
 
     set(CMAKE_AUTOMOC ON)
-    
+
     if(${INVADER_USE_AUDIO})
         SET(INVADER_EDIT_QT_AUDIO_SUBWINDOW "src/edit/qt/editor/subwindow/tag_editor_sound_subwindow.cpp")
     else()
         SET(INVADER_EDIT_QT_AUDIO_SUBWINDOW "")
+    endif()
+
+    if(WIN32)
+        set(INVADER_EDIT_QT_RC "src/edit/qt/qt.rc")
     endif()
 
     add_executable(invader-edit-qt
@@ -31,6 +35,7 @@ if(${INVADER_EDIT_QT})
         src/edit/qt/tree/tag_tree_dialog.cpp
         src/edit/qt/tree/tag_tree_widget.cpp
         src/edit/qt/tree/tag_tree_window.cpp
+        ${INVADER_EDIT_QT_RC}
     )
     target_link_libraries(invader-edit-qt invader Qt5::Widgets Qt5::Multimedia)
     target_include_directories(invader-edit-qt PUBLIC ${Qt5Widgets_INCLUDE_DIRS})
