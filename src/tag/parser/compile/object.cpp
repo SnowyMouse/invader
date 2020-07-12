@@ -276,10 +276,16 @@ namespace Invader::Parser {
         
         // Warn if we have rounds per shot set but no magazine
         if(this->rounds_per_shot != 0 && this->magazine == NULL_INDEX) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set rounds per shot to 0 to silence this warning.", offset / sizeof(WeaponTrigger));
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set it to 0 or set a magazine to silence this warning.", offset / sizeof(WeaponTrigger));
         }
         
-        
+        // Warn if the weapon doesn't fire automatically but we have projectiles per contrail set or we have a meme value.
+        if(this->projectiles_between_contrails < 0) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles between contrails, thus all projectiles will have contrails. Set it to 0 to silence this warning.", offset / sizeof(WeaponTrigger));
+        }
+        else if(this->projectiles_between_contrails > 0 && (this->flags & HEK::WeaponTriggerFlagsFlag::WEAPON_TRIGGER_FLAGS_FLAG_DOES_NOT_REPEAT_AUTOMATICALLY)) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a nonzero number of projectiles between contrails, but this is ignored because the trigger is set to not fire automatically. Set it to 0 to silence this warning.", offset / sizeof(WeaponTrigger));
+        }
     }
 
     static void recursively_get_all_predicted_resources_from_struct(const BuildWorkload &workload, std::size_t struct_index, std::vector<std::size_t> &resources, bool ignore_shader_resources) {
