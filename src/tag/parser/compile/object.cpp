@@ -268,6 +268,18 @@ namespace Invader::Parser {
                 this->error_angle.to = DEGREES_TO_RADIANS(2.5F);
             }
         }
+        
+        // Warn if we're trying to fire a negative number of projectiles per shot
+        if(this->projectiles_per_shot < 0) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has a negative number of projectiles per shot, thus no projectiles will spawn. Set it to 0 to silence this warning.", offset / sizeof(WeaponTrigger));
+        }
+        
+        // Warn if we have rounds per shot set but no magazine
+        if(this->rounds_per_shot != 0 && this->magazine == NULL_INDEX) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Trigger #%zu has rounds per shot set with no magazine, thus it will not actually use any rounds per shot. Set rounds per shot to 0 to silence this warning.", offset / sizeof(WeaponTrigger));
+        }
+        
+        
     }
 
     static void recursively_get_all_predicted_resources_from_struct(const BuildWorkload &workload, std::size_t struct_index, std::vector<std::size_t> &resources, bool ignore_shader_resources) {

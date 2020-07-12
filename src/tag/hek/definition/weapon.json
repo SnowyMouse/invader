@@ -309,17 +309,23 @@
                 "type": "WeaponTriggerFlags"
             },
             {
-                "name": "rounds per second",
+                "name": "maximum rate of fire",
                 "bounds": true,
-                "type": "float"
+                "type": "float",
+                "unit": "per second",
+                "comment": "This determines the maximum number of times this trigger can be fired per second.\nThe first value is initial rate of fire and the second value is the final rate of fire.\nWeapons cannot fire faster than once per tick, and non-positive (0 or less) rate of fire results in firing once per tick.\nBecause weapons cannot fire in between ticks, fire rate is also effectively rounded down to the nearest tickrate/n for any positive integer n (so at 30 ticks per second: 30, 15, 10, 7.5, 6, 5, 4.288, 3.75, 3.333, 3, etc.)"
             },
             {
                 "name": "acceleration time",
-                "type": "float"
+                "type": "float",
+                "unit": "seconds",
+                "comment": "This is the number of seconds required to hold the trigger in order to reach the final rate of fire.\n0 acceleration time means the trigger will always use the final rate of fire."
             },
             {
                 "name": "deceleration time",
-                "type": "float"
+                "unit": "seconds",
+                "type": "float",
+                "comment": "This is the number of seconds required to release the trigger in order to reach the initial rate of fire.\n0 deceleration time means the trigger will revert to the initial rate of fire the moment the trigger is released."
             },
             {
                 "name": "blurred rate of fire",
@@ -333,19 +339,23 @@
                 "name": "magazine",
                 "type": "Index",
                 "reflexive": "magazines",
-                "struct": "Weapon"
+                "struct": "Weapon",
+                "comment": "This is the index of the magazine used for drawing ammunition for this trigger.\nIf no magazine is given (null), then the weapon effectively has an unlimited amount of rounds."
             },
             {
                 "name": "rounds per shot",
-                "type": "uint16"
+                "type": "int16",
+                "comment": "This is the amount of ammo each trigger fire uses.\nUnless the \"can fire with partial ammo\" flag is set, the trigger cannot be fired if there is less than this much ammo remaining and will, instead, reload automatically.\nFiring with partial ammo with the partial ammo flag will result in the loaded ammo reaching 0 rather than a negative amount.\nA negative value results in the magazine gaining loaded rounds upon firing."
             },
             {
                 "name": "minimum rounds loaded",
-                "type": "uint16"
+                "type": "int16",
+                "comment": "The magazine will automatically reload if less than this much ammo remains in the magazine, and the weapon cannot fire unless this much ammo is loaded.\nUnlike \"rounds per shot\", this ignores the \"can fire with partial ammo\" flag."
             },
             {
-                "name": "rounds between tracers",
-                "type": "uint16"
+                "name": "projectiles between contrails",
+                "type": "int16",
+                "comment": "Contrails will not be created until this many projectiles have been fired.\nThis resets every time the trigger is released, and the first projectile will always have a contrail."
             },
             {
                 "type": "pad",
@@ -353,7 +363,8 @@
             },
             {
                 "name": "firing noise",
-                "type": "ObjectNoise"
+                "type": "ObjectNoise",
+                "comment": "This determines how AI will respond to the trigger being fired, if at all."
             },
             {
                 "name": "error",
@@ -411,10 +422,12 @@
             },
             {
                 "name": "projectiles per shot",
-                "type": "uint16"
+                "type": "int16",
+                "comment": "This is the number of projectiles that spawn when the trigger is fired."
             },
             {
                 "name": "distribution angle",
+                "unit": "degrees",
                 "type": "float"
             },
             {
@@ -428,12 +441,14 @@
             {
                 "name": "error angle",
                 "bounds": true,
-                "type": "Angle"
+                "type": "Angle",
+                "comment": "This determines the maximum angle the projectile can deviate from the first person camera.\nThe first value is the initial error angle and the second value is the final error angle. "
             },
             {
                 "name": "first person offset",
                 "type": "Point3D",
-                "compound": true
+                "compound": true,
+                "comment": "This is the relative offset from the first person camera the projectile spawns.\nX is front (+) and back (-), Y is left (+) and right (-), Z is up (+) and down (-)."
             },
             {
                 "type": "pad",
@@ -445,7 +460,8 @@
                 "classes": [
                     "object"
                 ],
-                "compound": true
+                "compound": true,
+                "comment": "This is the object that spawns when firing the weapon.\nThe object will spawn facing the same direction as the first person camera (along with any error angle applied, if necessary) with the velocity of the shooter."
             },
             {
                 "name": "ejection port recovery time",

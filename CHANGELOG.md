@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
   potential vectors that tool.exe does not like when building lightmaps
 - invader-build: Added word wrapping for most error messages when on Linux or
   Windows
+- invader-build: Added some minor warnings for weapons
 - invader-compare: Added `-f` which will check if tags are functionally
   identical by compiling the tag beforehand (this will be slower)
 - invader-edit-qt: Added an error message for if a subdirectory could not be
@@ -16,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
   that don't match a given expression
 - invader-edit-qt: Added support for model tags (as opposed to gbxmodel)
 - invader-edit-qt: Added support for hexadecimal input (integers only)
+- invader-edit-qt: Added comments for some fields in weapons.
 - invader-extract: Xbox model tags now extract
 - invader-extract: Added word wrapping for most error messages when on Linux or
   Windows
@@ -58,7 +60,9 @@ This is used for recording Invader's changes. This changelog is based on
   mismatched. This should make it useful for piping to a program or text file.
 - invader-compress: Now shows the compression format used
 - invader-edit-qt: Indices now default to 65535 on initialization
-- invader-edit-qt: Null indices now use placeholder text
+- invader-edit-qt: Null indices now have placeholder text, and null indices can
+  be empty
+- invader-edit-qt: Changed the name of some fields in triggers for consistency
 - invader-extract: Now looks for custom_bitmaps.map, custom_sounds.map, and
   custom_loc.map and uses those if present when extracting Custom Edition maps
 - invader-extract: No longer attempts to open resource map files when attempting
@@ -115,6 +119,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed 2D rectangle edits crashing
 - invader-edit-qt: Fixed a segmentation fault when failing to open a tag
 - invader-edit-qt: Fixed "Cancel" discarding when closing a modified file
+- invader-edit-qt: Fixed "acceleration time" and "deceleration time" having
+  missing units
 - invader-extract: Fixed an issue with some sound tags not extracting correctly
   when extracting from specifically modified Custom Edition maps
 - invader-index: Fixed not including .bitmap or .sound in bitmaps.map or
