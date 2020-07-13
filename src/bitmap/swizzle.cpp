@@ -75,21 +75,21 @@ namespace Invader::Swizzle {
         }
     }
 
-    std::vector<std::byte> swizzle(const std::byte *data, std::size_t bits_per_pixel, std::size_t height, std::size_t width, bool deswizzle) {
+    std::vector<std::byte> swizzle(const std::byte *data, std::size_t bits_per_pixel, std::size_t width, std::size_t height, bool deswizzle) {
         std::vector<std::byte> output(width*height*(bits_per_pixel/8));
 
         switch(bits_per_pixel) {
             case 8:
-                swizzle(reinterpret_cast<const std::uint8_t *>(data), reinterpret_cast<std::uint8_t *>(output.data()), height, width, deswizzle);
+                swizzle(reinterpret_cast<const std::uint8_t *>(data), reinterpret_cast<std::uint8_t *>(output.data()), width, height, deswizzle);
                 break;
             case 16:
-                swizzle(reinterpret_cast<const std::uint16_t *>(data), reinterpret_cast<std::uint16_t *>(output.data()), height, width, deswizzle);
+                swizzle(reinterpret_cast<const std::uint16_t *>(data), reinterpret_cast<std::uint16_t *>(output.data()), width, height, deswizzle);
                 break;
             case 32:
-                swizzle(reinterpret_cast<const std::uint32_t *>(data), reinterpret_cast<std::uint32_t *>(output.data()), height, width, deswizzle);
+                swizzle(reinterpret_cast<const std::uint32_t *>(data), reinterpret_cast<std::uint32_t *>(output.data()), width, height, deswizzle);
                 break;
             case 64:
-                swizzle(reinterpret_cast<const std::uint64_t *>(data), reinterpret_cast<std::uint64_t *>(output.data()), height, width, deswizzle);
+                swizzle(reinterpret_cast<const std::uint64_t *>(data), reinterpret_cast<std::uint64_t *>(output.data()), width, height, deswizzle);
                 break;
         }
         return output;
