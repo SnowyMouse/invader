@@ -3,5 +3,6 @@
 <qresource>
     <file alias="icon/invader-edit-qt.ico">../../../icon/invader-edit-qt.ico</file>
     <file alias="icon/invader-edit-qt.png">../../../icon/invader-edit-qt.png</file>
+    <file alias="icon/roboto-mono.ttf">../../../icon/roboto-mono.ttf</file>
 </qresource>
 </RCC>

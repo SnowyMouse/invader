@@ -186,8 +186,27 @@ namespace Invader::EditQt {
 
         // Show the version
         QLabel *label = new QLabel(full_version_and_credits());
-        label->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+        int id = QFontDatabase::addApplicationFont(":icon/roboto-mono.ttf");
+        QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+        QFont monospace(family);
+        label->setFont(monospace);
+        label->setTextFormat(Qt::RichText);
         label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        label->setOpenExternalLinks(true);
+        
+        // Replace line breaks with <br>s
+        label->setText(label->text().replace("  ", "&nbsp;&nbsp;"));
+        label->setText(label->text().replace("\n", "<br />"));
+        
+        // Replace the hyperlinks
+        #define REPLACE_HL(what) label->setText(label->text().replace(what, "<a href=\"" what "\">" what "</a>"));
+        REPLACE_HL("https://invader.opencarnage.net")
+        REPLACE_HL("https://github.com/nothings/stb");
+        REPLACE_HL("https://www.freetype.org/");
+        REPLACE_HL("https://github.com/Kavawuvi/invader");
+        #undef REPLACE_HL
+        
         vbox_layout->addWidget(icon_label_widget);
         vbox_layout->addWidget(label);
 

@@ -17,6 +17,8 @@ The ADPCM encoder and MosesofEgypt's Xbox ADPCM modifications are BSD and MIT,
 respectively. Licenses can be found at `src/sound/adpcm_xq/license.txt` and
 `src/sound/reclaimer-license.txt`.
 
+Roboto Mono is from Google Fonts under [Apache License, Version 2.0].
+
 ## Getting started
 This readme addresses a few topics:
 - [Staying up-to-date]
@@ -969,6 +971,8 @@ to a point where it can be a solid replacement to tool.exe.
 [Writing closed source software]: http://halo.isimaginary.com/
 [Keeping helpful information locked behind secret forums and groups]: http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948
 [it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
+
+[Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0
 
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap
