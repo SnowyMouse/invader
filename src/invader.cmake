@@ -140,14 +140,14 @@ if(${INVADER_STATIC_BUILD})
         ${INVADER_SOURCE_FILES}
     )
     add_library(invader-shared SHARED
-        ${INVADER_SOURCE_FILES}
+        src/null.cpp
     )
     set(ALTERNATE_INVADER_BUILD invader-shared)
     set(SHARED_INVADER_BUILD invader-shared)
     set(STATIC_INVADER_BUILD invader)
 else()
     add_library(invader SHARED
-        ${INVADER_SOURCE_FILES}
+        src/null.cpp
     )
     add_library(invader-static STATIC
         ${INVADER_SOURCE_FILES}
@@ -156,6 +156,9 @@ else()
     set(SHARED_INVADER_BUILD invader)
     set(STATIC_INVADER_BUILD invader-static)
 endif()
+
+# Link the static library to the shared library so we only have to compile once
+add_dependencies(${SHARED_INVADER_BUILD} ${STATIC_INVADER_BUILD})
 
 # Set our alternative Invader library (the one we aren't linking)
 set_target_properties(${ALTERNATE_INVADER_BUILD}
