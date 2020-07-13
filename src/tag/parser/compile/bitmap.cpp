@@ -61,15 +61,10 @@ namespace Invader::Parser {
         for(std::size_t i = 0; i <= data.mipmap_count; i++) {
             size += width * height * depth * multiplier * bits_per_pixel / 8;
             
-            // Divide by 2, resetting back to 1 when needed
-            width /= 2;
-            height /= 2;
-            depth /= 2;
-            
-            // But make sure we don't go below the block length (4x4 if DXT, else 1x1)
-            width = std::max(width, block_length);
-            height = std::max(height, block_length);
-            depth = std::max(depth, static_cast<std::size_t>(1));
+            // Divide by 2, resetting back to 1 when needed, but make sure we don't go below the block length (4x4 if DXT, else 1x1)
+            width = std::max(width / 2, block_length);
+            height = std::max(height / 2, block_length);
+            depth = std::max(depth / 2, static_cast<std::size_t>(1));
         }
 
         return size;
