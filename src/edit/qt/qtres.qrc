@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+    <file alias="icon/invader-edit-qt.ico">../../../icon/invader-edit-qt.ico</file>
+</qresource>
+</RCC>

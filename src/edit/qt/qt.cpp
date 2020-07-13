@@ -60,9 +60,10 @@ int main(int argc, char **argv) {
     }
     
     File::check_working_directory("./guerillabeta.map");
-
+    
     // Instantiate the application
     QApplication a(argc, argv);
+    a.setWindowIcon(QIcon(":icon/invader-edit-qt.ico"));
 
     // Instantiate the window
     Invader::EditQt::TagTreeWindow w;
