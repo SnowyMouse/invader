@@ -59,7 +59,7 @@ namespace Invader::Parser {
         // Do it
         for(std::size_t i = 0; i <= data.mipmap_count; i++) {
             size += width * height * depth * multiplier * bits_per_pixel / 8;
-
+            
             // Divide by 2, resetting back to 1 when needed
             width /= 2;
             height /= 2;
@@ -104,7 +104,7 @@ namespace Invader::Parser {
             for(std::size_t bd = 0; bd < bd_count; bd++) {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
-                bool compressed = bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+                bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
 
                 // TODO: Deal with cubemaps and stuff
                 if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
@@ -112,13 +112,39 @@ namespace Invader::Parser {
                     throw InvalidTagDataException();
                 }
                 
-                // Change mipmap count to be correct (if necessary)
-                while(xbox && compressed && size_of_bitmap(bitmap_data) > bitmap_data.pixel_data_size) {
-                    bitmap_data.mipmap_count--; // TODO: Regenerate the missing mipmaps instead
+                // If it's an Xbox bitmap and it's compressed, the mipmap count *may* be memed
+                if(xbox && compressed) {
+                    std::size_t width = bitmap_data.width;
+                    std::size_t height = bitmap_data.height;
+                    std::size_t old_mipmap_count_value = bitmap_data.mipmap_count;
+                    std::size_t new_mipmap_count_value;
+                    for(new_mipmap_count_value = 0; new_mipmap_count_value <= old_mipmap_count_value; new_mipmap_count_value++) {
+                        width /= 2;
+                        height /= 2;
+                        
+                        // If we're less than 4, break
+                        if(width < 4 || height < 4) {
+                            break;
+                        }
+                    }
+                    bitmap_data.mipmap_count = new_mipmap_count_value;
+                    bitmap_data.pixel_data_size = size_of_bitmap(bitmap_data);
+                }
+                
+                // Make sure the size is correct, too
+                auto bitmap_size = size_of_bitmap(bitmap_data);
+                if(bitmap_size < bitmap_data.pixel_data_size) {
+                    bitmap_data.pixel_data_size = bitmap_size;
+                }
+                
+                // Did someone screw up?
+                if(bitmap_size > bitmap_data.pixel_data_size) {
+                    oprintf("Failed to extract %s: size is too small %zu expected > %zu actual\n", tag.get_path().c_str(), bitmap_size, static_cast<std::size_t>(bitmap_data.pixel_data_size));
+                    throw InvalidTagDataException();
                 }
 
                 const std::byte *bitmap_data_ptr;
-                if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
+                if(bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                     bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
                 }
                 else {
