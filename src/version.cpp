@@ -3,7 +3,8 @@
 #include <invader/hek/data_type.hpp>
 #include <invader/printf.hpp>
 
-#include "version.hpp"
+#include <invader/version.hpp>
+#include "version.h"
 
 namespace Invader {
     void show_version_info() {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../../version.hpp"
+#include "../../version.h"
 
 1 VERSIONINFO
 FILEVERSION      INVADER_VERSION_MAJOR,INVADER_VERSION_MINOR,INVADER_VERSION_PATCH,INVADER_VERSION_COMMIT_COUNT
@@ -26,4 +26,4 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
-IDI_ICON1 ICON DISCARDABLE "../../icon/invader-edit-qt.ico"
+IDI_ICON1 ICON DISCARDABLE "../../../icon/invader-edit-qt.ico"
