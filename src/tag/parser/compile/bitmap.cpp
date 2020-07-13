@@ -3,6 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/build/build_workload.hpp>
+#include <invader/bitmap/swizzle.hpp>
 
 namespace Invader::Parser {
     template <typename T> static bool power_of_two(T value) {
@@ -105,6 +106,7 @@ namespace Invader::Parser {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
+                bool swizzled = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
 
                 // TODO: Deal with cubemaps and stuff
                 if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
@@ -151,8 +153,38 @@ namespace Invader::Parser {
                     bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size);
                 }
 
+                // Calculate our offset
                 bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());
-                bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+                
+                // If it's swizzled, deswizzle as we insert
+                if(!compressed && swizzled) {
+                    std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
+                    std::size_t mipmap_count = bitmap_data.mipmap_count;
+                    std::size_t width = bitmap_data.width;
+                    std::size_t height = bitmap_data.height;
+                    std::size_t depth = bitmap_data.depth;
+                    auto *data = bitmap_data_ptr;
+                    
+                    // Go through each mipmap and insert them deswizzled
+                    for(std::size_t m = 0; m <= mipmap_count; m++) {
+                        // Do it!
+                        auto deswizzled = Invader::Swizzle::swizzle(data, bits_per_pixel, width, height, true);
+                        data += deswizzled.size();
+                        bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), deswizzled.begin(), deswizzled.end());
+                        
+                        // Make sure we don't go below 1x1
+                        width = std::max(width / 2, static_cast<std::size_t>(1));
+                        height = std::max(height / 2, static_cast<std::size_t>(1));
+                        depth = std::max(depth / 2, static_cast<std::size_t>(1));
+                    }
+                    
+                    // Mark as unswizzled
+                    bitmap_data.flags &= ~(HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED);
+                }
+                // Otherwise, just copy
+                else {
+                    bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+                }
             }
         }
     }
