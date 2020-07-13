@@ -14,37 +14,39 @@ namespace Invader::Parser {
         }
         return true;
     }
-
-    static std::size_t size_of_bitmap(const BitmapData &data) {
-        std::size_t size = 0;
-        std::size_t bits_per_pixel = 0;
-
-        switch(data.format) {
+    
+    static constexpr std::size_t calculate_bits_per_pixel(HEK::BitmapDataFormat format) {
+        switch(format) {
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                bits_per_pixel = 32;
-                break;
+                return 32;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                bits_per_pixel = 16;
-                break;
+                return 16;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                bits_per_pixel = 8;
-                break;
+                return 8;
             case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                bits_per_pixel = 4;
-                break;
+                return 4;
             default:
-                eprintf_error("Unknown format %u", static_cast<unsigned int>(data.format));
-                //std::terminate();
-                throw std::exception();
+                return 0; // unknown
+        }
+    }
+
+    static std::size_t size_of_bitmap(const BitmapData &data) {
+        std::size_t size = 0;
+        std::size_t bits_per_pixel = calculate_bits_per_pixel(data.format);
+
+        // Is this a meme?
+        if(bits_per_pixel == 0) {
+            eprintf_error("Unknown format %u", static_cast<unsigned int>(data.format));
+            throw std::exception();
         }
 
         std::size_t height = data.height;
@@ -52,6 +54,7 @@ namespace Invader::Parser {
         std::size_t depth = data.depth;
         bool should_be_compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
         std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+        std::size_t block_length = should_be_compressed ? 4 : 1;
 
         // Do it
         for(std::size_t i = 0; i <= data.mipmap_count; i++) {
@@ -61,25 +64,11 @@ namespace Invader::Parser {
             width /= 2;
             height /= 2;
             depth /= 2;
-            if(width == 0) {
-                width = 1;
-            }
-            if(height == 0) {
-                height = 1;
-            }
-            if(depth == 0) {
-                depth = 1;
-            }
-
-            // If we're DXT compressed, the minimum is actually 4x4
-            if(should_be_compressed) {
-                if(width < 4) {
-                    width = 4;
-                }
-                if(height < 4) {
-                    height = 4;
-                }
-            }
+            
+            // But make sure we don't go below the block length (4x4 if DXT, else 1x1)
+            width = std::max(width, block_length);
+            height = std::max(height, block_length);
+            depth = std::max(depth, static_cast<std::size_t>(1));
         }
 
         return size;
