@@ -157,9 +157,6 @@ else()
     set(STATIC_INVADER_BUILD invader-static)
 endif()
 
-# Link the static library to the shared library so we only have to compile once
-add_dependencies(${SHARED_INVADER_BUILD} ${STATIC_INVADER_BUILD})
-
 # Set our alternative Invader library (the one we aren't linking)
 set_target_properties(${ALTERNATE_INVADER_BUILD}
     PROPERTIES OUTPUT_NAME invader
@@ -260,5 +257,5 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Link against everything
-target_link_libraries(${SHARED_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
+target_link_libraries(${SHARED_INVADER_BUILD} ${STATIC_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
 target_link_libraries(${STATIC_INVADER_BUILD} invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${DEP_ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
