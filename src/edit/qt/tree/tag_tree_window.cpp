@@ -172,11 +172,23 @@ namespace Invader::EditQt {
         // Make a layout
         auto *vbox_layout = new QVBoxLayout(&dialog);
         vbox_layout->setSizeConstraint(QLayout::SetFixedSize);
+        
+        // Add an icon thing
+        QLabel *icon_label = new QLabel();
+        QWidget *icon_label_widget = new QWidget();
+        QHBoxLayout *icon_hbox_layout = new QHBoxLayout();
+        icon_hbox_layout->addSpacing(1);
+        icon_hbox_layout->addWidget(icon_label);
+        icon_hbox_layout->addSpacing(1);
+        icon_label_widget->setLayout(icon_hbox_layout);
+        icon_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+        icon_label->setPixmap(QPixmap(":icon/invader-edit-qt.png"));
 
         // Show the version
         QLabel *label = new QLabel(full_version_and_credits());
         label->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
         label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        vbox_layout->addWidget(icon_label_widget);
         vbox_layout->addWidget(label);
 
         // Set our layout and disable resizing
