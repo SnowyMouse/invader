@@ -200,7 +200,8 @@ namespace Invader::EditQt {
         label->setText(label->text().replace("\n", "<br />"));
         
         // Replace the hyperlinks
-        #define REPLACE_HL(what) label->setText(label->text().replace(what, "<a href=\"" what "\">" what "</a>"));
+        #define REPLACE_HL(what) label->setText(label->text().replace(label->text().indexOf(what), QString(what).size(), "<a href=\"" what "\">" what "</a>"));
+        REPLACE_HL("https://invader.opencarnage.net/builds/nightly/")
         REPLACE_HL("https://invader.opencarnage.net")
         REPLACE_HL("https://github.com/nothings/stb");
         REPLACE_HL("https://www.freetype.org/");
