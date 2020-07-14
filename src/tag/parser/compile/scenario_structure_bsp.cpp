@@ -113,7 +113,7 @@ namespace Invader::Parser {
         
         // Handle fog plane materials
         if(fog_plane_count) {
-            // Null these out by default
+            // Null these out by default (this is complete bullshit, but the game may crash if they aren't nulled without materials)
             auto fog_plane_index = *tag_struct.resolve_pointer(&tag_data.fog_planes.pointer);
             auto *fog_planes = reinterpret_cast<ScenarioStructureBSPFogPlane::struct_little *>(workload.structs[fog_plane_index].data.data());
             for(std::size_t i = 0; i < fog_plane_count; i++) {
