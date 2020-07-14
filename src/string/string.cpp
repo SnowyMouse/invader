@@ -183,7 +183,11 @@ int main(int argc, char * const *argv) {
     std::size_t size = std::ftell(f);
     std::fseek(f, 0, SEEK_SET);
     auto file_data = std::make_unique<std::byte []>(size);
-    std::fread(file_data.get(), size, 1, f);
+    if(!std::fread(file_data.get(), size, 1, f)) {
+        eprintf_error("Failed to read %s.", input_path.c_str());
+        std::fclose(f);
+        return EXIT_FAILURE;
+    }
     std::fclose(f);
 
     // Determine the encoding of it
