@@ -12,9 +12,9 @@
 #include "tag_editor_bitmap_subwindow.hpp"
 #include "tag_editor_subwindow.hpp"
 #include "../../../../bitmap/color_plate_scanner.hpp"
-#include "s3tc/s3tc.hpp"
 #include <invader/tag/parser/parser.hpp>
 #include <invader/bitmap/swizzle.hpp>
+#include <invader/bitmap/bitmap_encode.hpp>
 
 #define GET_PIXEL(x,y) (x + y * real_width)
 
@@ -327,7 +327,9 @@ namespace Invader::EditQt {
 
         // Decode bitmap
         const auto *bytes = pixel_data->data() + offset;
-        std::vector<std::uint32_t> data = this->decode_bitmap(real_width, real_height, width, height, pixels_required, pixel_count, bytes, bitmap_data);
+        std::vector<std::uint32_t> data(real_width * real_height);
+        std::fill(data.begin(), data.end(), 0xFFFF00FF);
+        BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
         
         // Deswizzle if necessary
         if(bitmap_data->flags & Invader::HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
@@ -615,140 +617,6 @@ namespace Invader::EditQt {
         }
 
         data = std::move(scaled);
-    }
-
-    std::vector<std::uint32_t> TagEditorBitmapSubwindow::decode_bitmap(std::size_t real_width, std::size_t real_height, std::size_t width, std::size_t height, std::size_t pixels_required, std::size_t pixel_count, const std::byte *bytes, const Parser::BitmapData *bitmap_data) {
-        std::vector<std::uint32_t> data(real_width * real_height);
-
-        auto decode_8_bit = [&pixels_required, &bytes, &data](ColorPlatePixel (*with_what)(std::uint8_t)) {
-            auto pixels_left = pixels_required;
-            auto *bytes_to_add = bytes;
-            auto *bytes_to_write = data.data();
-            while(pixels_left) {
-                auto from_pixel = *reinterpret_cast<const std::uint8_t *>(bytes_to_add);
-                auto to_pixel = with_what(from_pixel);
-                *bytes_to_write = ((static_cast<std::uint32_t>(to_pixel.alpha) << 24) | (static_cast<std::uint32_t>(to_pixel.red) << 16) | (static_cast<std::uint32_t>(to_pixel.green) << 8) | static_cast<std::uint32_t>(to_pixel.blue));
-
-                pixels_left -= sizeof(from_pixel);
-                bytes_to_add += sizeof(from_pixel);
-                bytes_to_write++;
-            }
-        };
-
-        auto decode_16_bit = [&pixels_required, &bytes, &data](ColorPlatePixel (*with_what)(std::uint16_t)) {
-            auto pixels_left = pixels_required;
-            auto *bytes_to_add = bytes;
-            auto *bytes_to_write = data.data();
-            while(pixels_left) {
-                auto from_pixel = *reinterpret_cast<const std::uint16_t *>(bytes_to_add);
-                auto to_pixel = with_what(from_pixel);
-                *bytes_to_write = ((static_cast<std::uint32_t>(to_pixel.alpha) << 24) | (static_cast<std::uint32_t>(to_pixel.red) << 16) | (static_cast<std::uint32_t>(to_pixel.green) << 8) | static_cast<std::uint32_t>(to_pixel.blue));
-
-                pixels_left -= sizeof(from_pixel);
-                bytes_to_add += sizeof(from_pixel);
-                bytes_to_write++;
-            }
-        };
-
-        auto copy_block = [&real_width, &real_height](const std::uint32_t *from, std::uint32_t *to, std::size_t to_x, std::size_t to_y, std::size_t width, std::size_t height) {
-            for(std::uint32_t y = 0; y < 4 && y < height && (y + to_y < real_height); y++) {
-                for(std::uint32_t x = 0; x < 4 && x < width && (x + to_x < real_width); x++) {
-                    std::uint32_t color = from[x + 4 * y];
-                    to[to_x + x + real_width * (to_y + y)] = ((color & 0xFF) << 24) | (((color >> 24) & 0xFF) << 16) | (((color >> 16) & 0xFF) << 8) | (((color >> 8) & 0xFF));
-                }
-            }
-        };
-
-        // Let's decode the thing
-        std::size_t block_h = (real_height + 3) / 4;
-        std::size_t block_w = (real_width + 3) / 4;
-        const auto *block_input = reinterpret_cast<const std::uint8_t *>(bytes);
-
-        switch(bitmap_data->format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                for(std::size_t y = 0; y < block_h; y++) {
-                    for(std::size_t x = 0; x < block_w; x++) {
-                        std::uint32_t output[4*4];
-                        S3TCH::DecompressBlockDXT1(0, 0, 4, block_input + x * 8 + y * 8 * block_w, output);
-                        copy_block(output, data.data(), x * 4, y * 4, width, height);
-                    }
-                }
-                break;
-
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                for(std::size_t y = 0; y < block_h; y++) {
-                    for(std::size_t x = 0; x < block_w; x++) {
-                        std::uint32_t output[4*4];
-                        // Decompress color
-                        auto *input = block_input + x * 16 + y * 16 * block_w;
-                        S3TCH::DecompressBlockDXT1(0, 0, 4, input + 8, output);
-
-                        // Decompress alpha
-                        auto input_alpha = *reinterpret_cast<const std::uint64_t *>(input);
-                        for(std::uint32_t ya = 0; ya < 4; ya++) {
-                            for(std::uint32_t xa = 0; xa < 4; xa++) {
-                                auto &oa = output[xa + ya * 4];
-                                oa &= 0xFFFFFF00;
-                                oa |= static_cast<std::uint32_t>((input_alpha & 0b1111) / 15.0 * 0xFF);
-                                input_alpha >>= 4;
-                            }
-                        }
-                        copy_block(output, data.data(), x * 4, y * 4, width, height);
-                    }
-                }
-                break;
-
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                for(std::size_t y = 0; y < block_h; y++) {
-                    for(std::size_t x = 0; x < block_w; x++) {
-                        std::uint32_t output[4*4];
-                        S3TCH::DecompressBlockDXT5(0, 0, 4, block_input + x * 16 + y * 16 * block_w, output);
-                        copy_block(output, data.data(), x * 4, y * 4, width, height);
-                    }
-                }
-                break;
-
-            // 16-bit color
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<1,5,5,5>);
-                break;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<0,5,6,5>);
-                break;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-                decode_16_bit(ColorPlatePixel::convert_from_16_bit<4,4,4,4>);
-                break;
-
-            // 32-bit color
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                std::memcpy(data.data(), bytes, pixel_count * sizeof(*data.data()));
-                break;
-
-            // Monochrome
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                decode_16_bit(ColorPlatePixel::convert_from_a8y8);
-                break;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-                decode_8_bit(ColorPlatePixel::convert_from_a8);
-                break;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-                decode_8_bit(ColorPlatePixel::convert_from_y8);
-                break;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-                decode_8_bit(ColorPlatePixel::convert_from_ay8);
-                break;
-
-            // p8
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-                decode_8_bit(ColorPlatePixel::convert_from_p8);
-                break;
-
-            default:
-                break;
-        }
-
-        return data;
     }
 
     void TagEditorBitmapSubwindow::reload_view() {

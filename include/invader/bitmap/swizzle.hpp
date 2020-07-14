@@ -14,6 +14,7 @@ namespace Invader::Swizzle {
      * @param width          width in pixels
      * @param height         height in pixels
      * @param deswizzle      deswizzle instead of swizzle
+     * @output               (de)swizzled data
      */
     std::vector<std::byte> swizzle(const std::byte *data, std::size_t bits_per_pixel, std::size_t width, std::size_t height, bool deswizzle);
 }

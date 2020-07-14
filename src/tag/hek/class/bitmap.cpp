@@ -27,4 +27,28 @@ namespace Invader::HEK {
     const char *bitmap_data_format_name(BitmapDataFormat format) {
         return format >= (sizeof(BITMAP_DATA_FORMAT_NAMES) / sizeof(*BITMAP_DATA_FORMAT_NAMES)) ? nullptr : BITMAP_DATA_FORMAT_NAMES[format];
     }
+    
+    std::size_t calculate_bits_per_pixel(HEK::BitmapDataFormat format) noexcept {
+        switch(format) {
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
+                return 32;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+                return 16;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                return 8;
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                return 4;
+            default:
+                return 0; // unknown
+        }
+    }
 }

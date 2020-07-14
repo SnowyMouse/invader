@@ -13,36 +13,12 @@ namespace Invader::Parser {
             }
             value >>= 1;
         }
-        return true;
-    }
-    
-    static constexpr std::size_t calculate_bits_per_pixel(HEK::BitmapDataFormat format) {
-        switch(format) {
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8:
-                return 32;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A1R5G5B5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A4R4G4B4:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
-                return 16;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_P8_BUMP:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                return 8;
-            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                return 4;
-            default:
-                return 0; // unknown
-        }
+        return value & 1;
     }
 
     static std::size_t size_of_bitmap(const BitmapData &data) {
         std::size_t size = 0;
-        std::size_t bits_per_pixel = calculate_bits_per_pixel(data.format);
+        std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
 
         // Is this a meme?
         if(bits_per_pixel == 0) {
@@ -153,7 +129,7 @@ namespace Invader::Parser {
                 
                 // If it's swizzled, deswizzle as we insert
                 if(!compressed && swizzled) {
-                    std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
+                    std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(bitmap_data.format);
                     std::size_t mipmap_count = bitmap_data.mipmap_count;
                     std::size_t width = bitmap_data.width;
                     std::size_t height = bitmap_data.height;

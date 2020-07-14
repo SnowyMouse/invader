@@ -4,6 +4,7 @@
 #define INVADER__BITMAP__COLOR_PLATE_PIXEL_HPP
 
 #include <cstdint>
+#include <optional>
 
 namespace Invader {
     struct ColorPlatePixel {
