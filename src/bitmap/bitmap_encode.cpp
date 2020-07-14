@@ -9,7 +9,6 @@ namespace Invader::BitmapEncode {
     static std::vector<std::byte> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
     
     void encode_bitmap(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::byte *output_data, HEK::BitmapDataFormat output_format, std::size_t width, std::size_t height) {
-        if(input_format == output_format) {
         auto as_32_bit = decode_to_32_bit(input_data, input_format, width, height);
         
         // If it's already 32-bit ARGB, output it
