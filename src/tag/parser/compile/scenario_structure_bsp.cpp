@@ -110,45 +110,52 @@ namespace Invader::Parser {
         std::size_t fog_plane_count = this->fog_planes.size();
         std::size_t fog_region_count = this->fog_regions.size();
         std::size_t fog_palette_count = this->fog_palette.size();
-
-        if(fog_palette_count && fog_region_count && fog_plane_count) {
-            auto fog_palette_index = *tag_struct.resolve_pointer(&tag_data.fog_palette.pointer);
-            auto fog_region_index = *tag_struct.resolve_pointer(&tag_data.fog_regions.pointer);
+        
+        // Handle fog plane materials
+        if(fog_plane_count) {
+            // Null these out by default
             auto fog_plane_index = *tag_struct.resolve_pointer(&tag_data.fog_planes.pointer);
             auto *fog_planes = reinterpret_cast<ScenarioStructureBSPFogPlane::struct_little *>(workload.structs[fog_plane_index].data.data());
-            auto *fog_regions = reinterpret_cast<ScenarioStructureBSPFogRegion::struct_little *>(workload.structs[fog_region_index].data.data());
-            auto *fog_palette = reinterpret_cast<ScenarioStructureBSPFogPalette::struct_little *>(workload.structs[fog_palette_index].data.data());
-
-            // Go through each fog plane
             for(std::size_t i = 0; i < fog_plane_count; i++) {
-                auto &plane = fog_planes[i];
-                plane.material_type = static_cast<HEK::MaterialType>(0xFFFF);
+                fog_planes[i].material_type = static_cast<HEK::MaterialType>(0xFFFF);
+            }
+            
+            // If we *do* have fog palettes, regions, planes then we can determine their material
+            if(fog_palette_count && fog_region_count) {
+                auto fog_palette_index = *tag_struct.resolve_pointer(&tag_data.fog_palette.pointer);
+                auto fog_region_index = *tag_struct.resolve_pointer(&tag_data.fog_regions.pointer);
+                auto *fog_regions = reinterpret_cast<ScenarioStructureBSPFogRegion::struct_little *>(workload.structs[fog_region_index].data.data());
+                auto *fog_palette = reinterpret_cast<ScenarioStructureBSPFogPalette::struct_little *>(workload.structs[fog_palette_index].data.data());
 
-                if(workload.disable_recursion) {
-                    continue;
-                }
+                // Go through each fog plane
+                for(std::size_t i = 0; i < fog_plane_count; i++) {
+                    if(workload.disable_recursion) {
+                        continue;
+                    }
 
-                // Find what region this fog is in
-                std::size_t region_index = plane.front_region;
-                if(region_index >= fog_region_count) {
-                    continue;
-                }
-                auto &region = fog_regions[region_index];
+                    // Find what region this fog is in
+                    auto &plane = fog_planes[i];
+                    std::size_t region_index = plane.front_region;
+                    if(region_index >= fog_region_count) {
+                        continue;
+                    }
+                    auto &region = fog_regions[region_index];
 
-                // Lastly get the fog tag
-                std::size_t palette_index = region.fog;
-                if(palette_index >= fog_palette_count) {
-                    continue;
-                }
+                    // Lastly get the fog tag
+                    std::size_t palette_index = region.fog;
+                    if(palette_index >= fog_palette_count) {
+                        continue;
+                    }
 
-                const auto &fog_id = fog_palette[palette_index].fog.tag_id.read();
-                if(fog_id.is_null()) {
-                    continue;
-                }
+                    const auto &fog_id = fog_palette[palette_index].fog.tag_id.read();
+                    if(fog_id.is_null()) {
+                        continue;
+                    }
 
-                auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
-                if(fog.flags & HEK::FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
-                    plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;
+                    auto &fog = *reinterpret_cast<Fog::struct_little *>(workload.structs[*workload.tags[fog_id.index].base_struct].data.data());
+                    if(fog.flags & HEK::FogFlagsFlag::FOG_FLAGS_FLAG_IS_WATER) {
+                        plane.material_type = HEK::MaterialType::MATERIAL_TYPE_WATER;
+                    }
                 }
             }
         }
