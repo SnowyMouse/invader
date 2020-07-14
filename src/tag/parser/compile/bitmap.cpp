@@ -117,7 +117,7 @@ namespace Invader::Parser {
                 }
 
                 const std::byte *bitmap_data_ptr;
-                if(bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
+                if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
                     bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
                 }
                 else {
