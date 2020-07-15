@@ -375,7 +375,7 @@ namespace Invader::Parser {
             }
         }
         
-        // Handle blended nodes
+        // Handle blended normals
         if(what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS) {
             std::vector<HEK::Point3D<HEK::NativeEndian>> positions;
             
