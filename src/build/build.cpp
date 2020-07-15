@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
         std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
-        bool compress = false;
+        std::optional<bool> compress;
         bool optimize_space = false;
         bool hide_pedantic_warnings = false;
     } build_options;
@@ -113,19 +113,15 @@ int main(int argc, const char **argv) {
             case 'g':
                 if(std::strcmp(arguments[0], "custom") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
-                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "retail") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
-                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "demo") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
-                    build_options.compress = false;
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
-                    build_options.compress = true; // there is no reason to not have this default since it always supports it
                 }
                 else {
                     eprintf_error("Unknown engine type %s.", arguments[0]);
@@ -159,7 +155,23 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
-
+    
+    if(!build_options.compress.has_value()) {
+        switch(build_options.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                build_options.compress = false;
+                break;
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                build_options.compress = true;
+                break;
+            default:
+                break;
+        }
+    }
+    
     std::string scenario;
 
     // By default, just use tags
@@ -241,7 +253,7 @@ int main(int argc, const char **argv) {
             std::nullopt,
             build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
             build_options.optimize_space,
-            build_options.compress,
+            *build_options.compress,
             build_options.hide_pedantic_warnings
         );
 
