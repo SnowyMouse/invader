@@ -67,6 +67,19 @@ namespace Invader::Parser {
         auto engine = map.get_engine();
         auto xbox = engine == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         auto &base_struct = tag.get_base_struct<HEK::Bitmap>();
+        
+        // Un-zero out these if we're sprites (again, this is completely *insane* but compiled maps have this zeroed out for whatever reason which can completely FUCK things up if this were to not be "sprites" all of a sudden)
+        if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            for(auto &sequence : bitmap->bitmap_group_sequence) {
+                // If we have sprites, find the lowest bitmap index of them all
+                if(sequence.sprites.size() == 0) {
+                    sequence.first_bitmap_index = NULL_INDEX;
+                    for(auto &sprite : sequence.sprites) {
+                        sequence.first_bitmap_index = std::min(sequence.first_bitmap_index, sprite.bitmap_index);
+                    }
+                }
+            }
+        }
 
         // Do we have bitmap data?
         auto bd_count = bitmap->bitmap_data.size();
