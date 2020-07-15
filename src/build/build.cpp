@@ -156,22 +156,6 @@ int main(int argc, const char **argv) {
         }
     });
     
-    if(!build_options.compress.has_value()) {
-        switch(build_options.engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-            case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                build_options.compress = false;
-                break;
-            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                build_options.compress = true;
-                break;
-            default:
-                break;
-        }
-    }
-    
     std::string scenario;
 
     // By default, just use tags
@@ -238,6 +222,23 @@ int main(int argc, const char **argv) {
         if(!build_options.engine.has_value()) {
             eprintf_error("No engine target specified. Use -h for more information.");
             return 1;
+        }
+    
+        // Default compress value
+        if(!build_options.compress.has_value()) {
+            switch(*build_options.engine) {
+                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                    build_options.compress = false;
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                    build_options.compress = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         // Build!
