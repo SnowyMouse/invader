@@ -623,7 +623,7 @@ namespace Invader::Parser {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Non-Gearbox model tags are unsupported on the target engine", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
                 break;
             default: break;
         }
