@@ -254,6 +254,7 @@ int main(int argc, const char **argv) {
         if(duplicate) {
             continue;
         }
+        added_tags.emplace_back(tag_path);
 
         switch(*resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
