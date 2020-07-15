@@ -48,6 +48,8 @@ namespace Invader::HEK {
                 return 4;
             case TAG_CLASS_PLACEHOLDER:
                 return 2;
+            case TAG_CLASS_PREFERENCES_NETWORK_GAME:
+                return 2;
             case TAG_CLASS_PROJECTILE:
                 return 5;
             case TAG_CLASS_SCENARIO_STRUCTURE_BSP:

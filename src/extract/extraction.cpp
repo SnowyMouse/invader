@@ -327,6 +327,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
             EXTRACT_TAG_CLASS(Model, TAG_CLASS_MODEL)
             EXTRACT_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
+            EXTRACT_TAG_CLASS(PreferencesNetworkGame, TAG_CLASS_PREFERENCES_NETWORK_GAME)
             EXTRACT_TAG_CLASS(Object, TAG_CLASS_OBJECT)
             EXTRACT_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
             EXTRACT_TAG_CLASS(ParticleSystem, TAG_CLASS_PARTICLE_SYSTEM)
@@ -380,7 +381,6 @@ namespace Invader {
                 }
             }
 
-            case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND:

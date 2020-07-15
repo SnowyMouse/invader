@@ -714,6 +714,7 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(Physics, TAG_CLASS_PHYSICS) \
                                   DO_TAG_CLASS(Placeholder, TAG_CLASS_PLACEHOLDER) \
                                   DO_TAG_CLASS(PointPhysics, TAG_CLASS_POINT_PHYSICS) \
+                                  DO_TAG_CLASS(PreferencesNetworkGame, TAG_CLASS_PREFERENCES_NETWORK_GAME) \
                                   DO_TAG_CLASS(Projectile, TAG_CLASS_PROJECTILE) \
                                   DO_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO) \
                                   DO_TAG_CLASS(ScenarioStructureBSP, TAG_CLASS_SCENARIO_STRUCTURE_BSP) \
@@ -759,7 +760,6 @@ namespace Invader::Parser {
         switch(header->tag_class_int) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
@@ -785,7 +785,6 @@ namespace Invader::Parser {
         switch(tag_class) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:

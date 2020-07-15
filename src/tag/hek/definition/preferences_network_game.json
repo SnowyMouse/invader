@@ -1,0 +1,60 @@
+[
+    {
+        "name": "PreferencesNetworkGame",
+        "fields": [
+            {
+                "type": "TagString",
+                "endian": null,
+                "name": "name"
+            },
+            {
+                "type": "ColorRGB",
+                "compound": true,
+                "name": "primary color"
+            },
+            {
+                "type": "ColorRGB",
+                "compound": true,
+                "name": "secondary color"
+            },
+            {
+                "type": "TagDependency",
+                "compound": true,
+                "name": "pattern",
+                "classes": [
+                    "bitmap"
+                ]
+            },
+            {
+                "type": "Index",
+                "name": "pattern bitmap index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "TagDependency",
+                "compound": true,
+                "name": "decal",
+                "classes": [
+                    "bitmap"
+                ]
+            },
+            {
+                "type": "Index",
+                "name": "decal bitmap index"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "type": "pad",
+                "size": 800
+            }
+        ],
+        "type": "struct",
+        "size": 896
+    }
+]
