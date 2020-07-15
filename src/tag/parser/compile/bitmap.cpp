@@ -166,7 +166,7 @@ namespace Invader::Parser {
             bitmap->bitmap_group_sequence.erase(bitmap->bitmap_group_sequence.begin() + (bitmap->bitmap_group_sequence.size() - 1));
         }
         
-        // Zero out these if we're sprites
+        // Zero out these if we're sprites (this is completely *insane* but that's what tool.exe does)
         if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             for(auto &sequence : bitmap->bitmap_group_sequence) {
                 sequence.first_bitmap_index = 0;
