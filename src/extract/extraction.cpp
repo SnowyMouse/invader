@@ -292,6 +292,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(Bitmap, TAG_CLASS_BITMAP)
             EXTRACT_TAG_CLASS(ModelCollisionGeometry, TAG_CLASS_MODEL_COLLISION_GEOMETRY)
             EXTRACT_TAG_CLASS(ColorTable, TAG_CLASS_COLOR_TABLE)
+            EXTRACT_TAG_CLASS(ContinuousDamageEffect, TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT)
             EXTRACT_TAG_CLASS(Contrail, TAG_CLASS_CONTRAIL)
             EXTRACT_TAG_CLASS(DeviceControl, TAG_CLASS_DEVICE_CONTROL)
             EXTRACT_TAG_CLASS(Decal, TAG_CLASS_DECAL)
@@ -338,6 +339,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED)
             EXTRACT_TAG_CLASS(ShaderTransparentChicago, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO)
             EXTRACT_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO)
+            EXTRACT_TAG_CLASS(Spheroid, TAG_CLASS_SPHEROID)
             EXTRACT_TAG_CLASS(ShaderEnvironment, TAG_CLASS_SHADER_ENVIRONMENT)
             EXTRACT_TAG_CLASS(ShaderTransparentGlass, TAG_CLASS_SHADER_TRANSPARENT_GLASS)
             EXTRACT_TAG_CLASS(Shader, TAG_CLASS_SHADER)
@@ -379,8 +381,6 @@ namespace Invader {
             }
 
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
-            case TagClassInt::TAG_CLASS_SPHEROID:
-            case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
             case TagClassInt::TAG_CLASS_EXTENDED_SOUND:

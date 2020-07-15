@@ -13,6 +13,7 @@ This is used for recording Invader's changes. This changelog is based on
   truly monochromatic inputs
 - invader-build: Fixed the maximum distance value not being set correctly for
   sound_looping tags that have detail sounds
+- invader-edit-qt: Fixed "damage upper bound" showing as two separate fields
 - invader-compare: Fixed `-f` requiring a tag input
 - invader-compare: Fixed mismatched tags showing up twice
 

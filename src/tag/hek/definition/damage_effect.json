@@ -398,12 +398,9 @@
                 "type": "float"
             },
             {
-                "name": "damage upper bound from",
-                "type": "float"
-            },
-            {
-                "name": "damage upper bound to",
-                "type": "float"
+                "name": "damage upper bound",
+                "type": "float",
+                "bounds": true
             },
             {
                 "name": "damage vehicle passthrough penalty",

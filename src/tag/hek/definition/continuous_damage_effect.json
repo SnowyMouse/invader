@@ -1,0 +1,284 @@
+[
+    {
+        "name": "ContinuousDamageEffect",
+        "fields": [
+            {
+                "name": "radius",
+                "bounds": true,
+                "type": "float",
+                "unit": "world units"
+            },
+            {
+                "name": "cutoff scale",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+                "name": "low frequency vibrate frequency",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "name": "high frequency vibrate frequency",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "type": "pad",
+                "size": 24
+            },
+            {
+            
+                "name": "camera shaking random translation",
+                "type": "float",
+                "unit": "world units"
+            },
+            {
+                "name": "camera shaking random rotation",
+                "type": "Angle"
+            },
+            {
+                "type": "pad",
+                "size": 12
+            },
+            {
+                "name": "camera shaking wobble function",
+                "type": "WaveFunction"
+            },
+            {
+                "type": "pad",
+                "size": 2
+            },
+            {
+                "name": "camera shaking wobble period",
+                "type": "float",
+                "unit": "seconds",
+                "default": 1.0
+            },
+            {
+                "name": "camera shaking wobble weight",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "type": "pad",
+                "size": 20
+            },
+            {
+                "type": "pad",
+                "size": 8
+            },
+            {
+                "type": "pad",
+                "size": 160
+            },
+            {
+                "name": "damage side effect",
+                "type": "DamageEffectSideEffect"
+            },
+            {
+                "name": "damage category",
+                "type": "DamageEffectCategory"
+            },
+            {
+                "name": "damage flags",
+                "type": "DamageEffectDamageFlags"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "damage lower bound",
+                "type": "float"
+            },
+            {
+                "name": "damage upper bound",
+                "type": "float",
+                "bounds": true
+            },
+            {
+                "name": "damage vehicle passthrough penalty",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "damage stun",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "name": "damage maximum stun",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "name": "damage stun time",
+                "type": "float",
+                "unit": "seconds"
+            },
+            {
+                "type": "pad",
+                "size": 4
+            },
+            {
+                "name": "damage instantaneous acceleration",
+                "type": "Vector3D",
+                "compound": true
+            },
+            {
+                "name": "dirt",
+                "type": "float"
+            },
+            {
+                "name": "sand",
+                "type": "float"
+            },
+            {
+                "name": "stone",
+                "type": "float"
+            },
+            {
+                "name": "snow",
+                "type": "float"
+            },
+            {
+                "name": "wood",
+                "type": "float"
+            },
+            {
+                "name": "metal hollow",
+                "type": "float"
+            },
+            {
+                "name": "metal thin",
+                "type": "float"
+            },
+            {
+                "name": "metal thick",
+                "type": "float"
+            },
+            {
+                "name": "rubber",
+                "type": "float"
+            },
+            {
+                "name": "glass",
+                "type": "float"
+            },
+            {
+                "name": "force field",
+                "type": "float"
+            },
+            {
+                "name": "grunt",
+                "type": "float"
+            },
+            {
+                "name": "hunter armor",
+                "type": "float"
+            },
+            {
+                "name": "hunter skin",
+                "type": "float"
+            },
+            {
+                "name": "elite",
+                "type": "float"
+            },
+            {
+                "name": "jackal",
+                "type": "float"
+            },
+            {
+                "name": "jackal energy shield",
+                "type": "float"
+            },
+            {
+                "name": "engineer skin",
+                "type": "float"
+            },
+            {
+                "name": "engineer force field",
+                "type": "float"
+            },
+            {
+                "name": "flood combat form",
+                "type": "float"
+            },
+            {
+                "name": "flood carrier form",
+                "type": "float"
+            },
+            {
+                "name": "cyborg armor",
+                "type": "float"
+            },
+            {
+                "name": "cyborg energy shield",
+                "type": "float"
+            },
+            {
+                "name": "human armor",
+                "type": "float"
+            },
+            {
+                "name": "human skin",
+                "type": "float"
+            },
+            {
+                "name": "sentinel",
+                "type": "float"
+            },
+            {
+                "name": "monitor",
+                "type": "float"
+            },
+            {
+                "name": "plastic",
+                "type": "float"
+            },
+            {
+                "name": "water",
+                "type": "float"
+            },
+            {
+                "name": "leaves",
+                "type": "float"
+            },
+            {
+                "name": "elite energy shield",
+                "type": "float"
+            },
+            {
+                "name": "ice",
+                "type": "float"
+            },
+            {
+                "name": "hunter shield",
+                "type": "float"
+            },
+            {
+                "type": "pad",
+                "size": 28
+            }
+        ],
+        "type": "struct",
+        "size": 512
+    }
+]

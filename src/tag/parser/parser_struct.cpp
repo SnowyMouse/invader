@@ -670,6 +670,7 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(Bitmap, TAG_CLASS_BITMAP) \
                                   DO_TAG_CLASS(CameraTrack, TAG_CLASS_CAMERA_TRACK) \
                                   DO_TAG_CLASS(ColorTable, TAG_CLASS_COLOR_TABLE) \
+                                  DO_TAG_CLASS(ContinuousDamageEffect, TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT) \
                                   DO_TAG_CLASS(Contrail, TAG_CLASS_CONTRAIL) \
                                   DO_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT) \
                                   DO_TAG_CLASS(Decal, TAG_CLASS_DECAL) \
@@ -732,6 +733,7 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(SoundScenery, TAG_CLASS_SOUND_SCENERY) \
                                   DO_TAG_CLASS(SoundEnvironment, TAG_CLASS_SOUND_ENVIRONMENT) \
                                   DO_TAG_CLASS(SoundLooping, TAG_CLASS_SOUND_LOOPING) \
+                                  DO_TAG_CLASS(Spheroid, TAG_CLASS_SPHEROID) \
                                   DO_TAG_CLASS(StringList, TAG_CLASS_STRING_LIST) \
                                   DO_TAG_CLASS(TagCollection, TAG_CLASS_TAG_COLLECTION) \
                                   DO_TAG_CLASS(UnicodeStringList, TAG_CLASS_UNICODE_STRING_LIST) \
@@ -758,8 +760,6 @@ namespace Invader::Parser {
             DO_BASED_ON_TAG_CLASS
 
             case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
-            case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
@@ -786,8 +786,6 @@ namespace Invader::Parser {
             DO_BASED_ON_TAG_CLASS
 
             case Invader::HEK::TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
-            case Invader::HEK::TagClassInt::TAG_CLASS_SPHEROID:
-            case Invader::HEK::TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
             case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
