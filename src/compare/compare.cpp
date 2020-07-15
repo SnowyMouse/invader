@@ -110,14 +110,6 @@ int main(int argc, const char **argv) {
                 break;
                 
             case 'f':
-                if(!compare_options.top_input) {
-                    eprintf_error("An input is required before setting a maps directory.");
-                    std::exit(EXIT_FAILURE);
-                }
-                if(!top_option_is_tag_input) {
-                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_TAG_INPUT);
-                    std::exit(EXIT_FAILURE);
-                }
                 compare_options.functional = true;
                 break;
                 

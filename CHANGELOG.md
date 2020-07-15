@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader-compare: Fixed `-f` requiring a tag input
+
 ## [0.35.0] - 2020-07-14
 ### Added
 - invader-bludgeon: Added `-T nonnormal-vectors` which can detect and fix
