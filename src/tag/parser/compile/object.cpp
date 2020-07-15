@@ -373,6 +373,11 @@ namespace Invader::Parser {
     }
     
     static void set_pathfinding_spheres(BuildWorkload &workload, std::size_t struct_index, std::optional<float> collision_radius = std::nullopt) {
+        // If recursion is disabled, do not do this
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         // Get our object
         auto &object_struct = workload.structs[struct_index];
         auto &object_data = *reinterpret_cast<Object::struct_little *>(object_struct.data.data());

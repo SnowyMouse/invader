@@ -13,7 +13,6 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/extract/extraction.hpp>
 #include <invader/command_line_option.hpp>
-#include "../crc/picosha2.hpp"
 
 using namespace Invader;
 
@@ -403,54 +402,48 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         if(functional) {
             try {
                 auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
-                    auto data = struct_v.generate_hek_tag_data(tag.class_int);
+                    auto hdata = struct_v.generate_hek_tag_data(tag.class_int);
+                    std::vector<std::uint8_t> meme_data;
                     
                     // Compile it
-                    auto compiled = BuildWorkload::compile_single_tag(data.data(), data.size());
-                    
-                    // Start hashing
-                    picosha2::hash256_one_by_one hasher;
+                    auto compiled = BuildWorkload::compile_single_tag(hdata.data(), hdata.size());
                     
                     // Process each struct
                     for(auto &s : compiled.structs) {
                         // Process struct data
-                        hasher.process(reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
+                        meme_data.insert(meme_data.end(), reinterpret_cast<const std::uint8_t *>(s.data.data()), reinterpret_cast<const std::uint8_t *>(s.data.data() + s.data.size()));
                         
                         // Process each dependency
                         for(auto &d : s.dependencies) {
-                            char o[1024];
-                            auto len = std::snprintf(o, sizeof(o), "%zu-%zu", d.offset, d.tag_index);
-                            hasher.process(o, o + len);
+                            char o[1024] = {};
+                            auto len = std::snprintf(o, sizeof(o), "D:%08zX->%08zX!", d.offset, d.tag_index);
+                            meme_data.insert(meme_data.end(), o, o + len);
                         }
                         
                         // Process each pointer
                         for(auto &p : s.pointers) {
-                            char o[1024];
-                            auto len = std::snprintf(o, sizeof(o), "%zu-%zu", p.offset, p.struct_index);
-                            hasher.process(o, o + len);
+                            char o[1024] = {};
+                            auto len = std::snprintf(o, sizeof(o), "P:%08zX->%08zX!", p.offset, p.struct_index);
+                            meme_data.insert(meme_data.end(), o, o + len);
                         }
                     }
                     
                     // Process each tag
                     for(auto &t : compiled.tags) {
-                        char o[1024];
-                        auto len = std::snprintf(o, sizeof(o), "%s.%s", t.path.c_str(), HEK::tag_class_to_extension(t.tag_class_int));
-                        hasher.process(o, o + len);
+                        char o[1024] = {};
+                        auto len = std::snprintf(o, sizeof(o), "T:%s.%s!", t.path.c_str(), HEK::tag_class_to_extension(t.tag_class_int));
+                        meme_data.insert(meme_data.end(), o, o + len);
                     }
                     
-                    // Done
-                    hasher.finish();
-                    std::vector<std::uint8_t> hash(picosha2::k_digest_size);
-                    hasher.get_hash_bytes(hash.begin(), hash.end());
-                    
-                    return hash;
+                    return meme_data;
                 };
                 
                 auto first_meme = meme_up_struct(*first_struct);
                 for(std::size_t i = 1; i < found_count; i++) {
-                    if(first_meme != meme_up_struct(*structs[i])) {
+                    auto mms = meme_up_struct(*structs[i]);
+                    if(first_meme != mms) {
                         matched = false;
-                        break;
+                        oprintf_success_warn("%s%s.%s", show_all ? "Mismatched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
                     }
                 }
             }
