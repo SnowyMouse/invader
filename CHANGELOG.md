@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.35.0]
 ### Added
 - invader-bludgeon: Added `-T nonnormal-vectors` which can detect and fix
   potential vectors that tool.exe does not like when building lightmaps
@@ -18,6 +18,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added support for model tags (as opposed to gbxmodel)
 - invader-edit-qt: Added support for hexadecimal input (integers only)
 - invader-edit-qt: Added comments for some fields in weapons.
+- invader-edit-qt: Added an icon courtesy of ST34MF0X
 - invader-extract: Xbox model tags now extract
 - invader-extract: Added word wrapping for most error messages when on Linux or
   Windows
@@ -80,8 +81,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-string: Empty string list tags can no longer be created
 
 ### Fixed
-- invader: Added an enum in the actor_variant tags for choosing the object type
-  when built for MCC and scoring is used
+- invader: Added an enum in the actor_variant tags for MCC's scoring
 - invader: Fixed the ColorARGBInt definition (you do not need to re-extract tags
   or rebuild maps for this - it effectively only impacted invader-edit-qt)
 - invader: Fixed a couple issues with compressed vertex generation, including an
@@ -113,6 +113,7 @@ This is used for recording Invader's changes. This changelog is based on
   period not defaulting to 1
 - invader-build: If a tag class is unimplemented, a more descriptive error is
   shown
+- invader-build: Fixed a crash with some maps that have fog planes such as d40
 - invader-edit-qt: Fixed crashing if a tag directory contained files that could
   not be accessed in the filesystem
 - invader-edit-qt: Fixed 8-bit color being displayed in the wrong order
