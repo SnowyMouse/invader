@@ -197,6 +197,11 @@ namespace Invader::Parser {
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
         
+        // Warn if we're using bullshit distances
+        if(this->minimum_distance > this->maximum_distance) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Minimum distance is greater than maximum distance (%f > %f)", this->maximum_distance, this->minimum_distance);
+        }
+        
         // Find the song length
         if(this->zero_pitch_modifier == 1.0F && this->one_pitch_modifier == 1.0F) {
             double seconds = 0.0F;
@@ -326,6 +331,7 @@ namespace Invader::Parser {
             return max;
         };
         
+        // Get the maximum distances of all referenced sound tags
         for(auto &i : this->tracks) {
             maximum_distance = std::max(std::max(std::initializer_list<float> {
                 get_max_distance_of_sound_tag(i.loop),
@@ -334,6 +340,9 @@ namespace Invader::Parser {
                 get_max_distance_of_sound_tag(i.start),
                 get_max_distance_of_sound_tag(i.end)
             }), maximum_distance.read());
+        }
+        for(auto &i : this->detail_sounds) {
+            maximum_distance = std::max(get_max_distance_of_sound_tag(i.sound), maximum_distance.read());
         }
     }
         

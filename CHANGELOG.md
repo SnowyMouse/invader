@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Fixed
+- invader-build: Fixed the maximum distance value not being set correctly for
+  sound_looping tags that have detail sounds
 - invader-compare: Fixed `-f` requiring a tag input
 - invader-compare: Fixed mismatched tags showing up twice
 
