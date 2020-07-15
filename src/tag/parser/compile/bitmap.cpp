@@ -161,17 +161,16 @@ namespace Invader::Parser {
     }
 
     template <typename T> static void do_pre_compile(T *bitmap, BuildWorkload &workload, std::size_t tag_index) {
-        for(auto &sequence : bitmap->bitmap_group_sequence) {
-            for(auto &sprite : sequence.sprites) {
-                if(sprite.bitmap_index >= bitmap->bitmap_data.size()) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sprite %zu of sequence %zu has an invalid bitmap index", &sprite - sequence.sprites.data(), &sequence - bitmap->bitmap_group_sequence.data());
-                    throw InvalidTagDataException();
-                }
-            }
-        }
-
+        // Delete null group sequences at the end
         while(bitmap->bitmap_group_sequence.size() > 0 && bitmap->bitmap_group_sequence[bitmap->bitmap_group_sequence.size() - 1].first_bitmap_index == NULL_INDEX) {
             bitmap->bitmap_group_sequence.erase(bitmap->bitmap_group_sequence.begin() + (bitmap->bitmap_group_sequence.size() - 1));
+        }
+        
+        // Zero out these if we're sprites
+        if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            for(auto &sequence : bitmap->bitmap_group_sequence) {
+                sequence.first_bitmap_index = 0;
+            }
         }
 
         auto max_size = bitmap->processed_pixel_data.size();

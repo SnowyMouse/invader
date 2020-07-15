@@ -178,7 +178,9 @@
             },
             {
                 "name": "first bitmap index",
-                "type": "Index"
+                "type": "Index",
+                "reflexive": "bitmap data",
+                "struct": "Bitmap"
             },
             {
                 "name": "bitmap count",
