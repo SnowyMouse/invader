@@ -5,6 +5,7 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Fixed
 - invader-compare: Fixed `-f` requiring a tag input
+- invader-compare: Fixed mismatched tags showing up twice
 
 ## [0.35.0] - 2020-07-14
 ### Added

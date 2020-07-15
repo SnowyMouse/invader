@@ -435,7 +435,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     auto mms = meme_up_struct(*structs[i]);
                     if(first_meme != mms) {
                         matched = false;
-                        oprintf_success_warn("%s%s.%s", show_all ? "Mismatched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+                        break;
                     }
                 }
             }
