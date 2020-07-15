@@ -773,6 +773,7 @@ Options:
 ## Frequently asked questions
 These are a selection of questions that have been asked over the course of
 Invader's development.
+- [I get errors when building HEK tags or tags extracted with invader-extract]
 - [What operating systems are supported?]
 - [Who owns my map when I build it?]
 - [Why GPL and not MIT or BSD?]
@@ -784,6 +785,47 @@ Invader's development.
 - [The HEK says my bitmap tag is "too large" when opening.]
 - [How close to completion is Invader?]
 - [Should I use invader-build for my map right now?]
+
+### I get errors when building HEK tags or tags extracted with invader-extract
+The stock Halo Editing Kit tags as well as a number of extracted tags have a
+number of issues such as invalid enumerators, indices, and references. In many
+cases, this can result in undefined, unexpected behavior or crashing. Obviously,
+the stock Halo Editing Kit doesn't crash, but this data is still invalid
+nevertheless.
+
+The most common issues can be fixed by running the following command:
+
+```
+invader-bludgeon --all -T invalid-indices -T invalid-enums -T out-of-range
+```
+
+The stock Halo Editing Kit also comes with a number of tags that reference model
+tags instead of gbxmodel. The Halo Editing Kit automatically changes these on
+tag load, likely because Gearbox developers felt it would be better to just do
+this than fix their tags (since their engine only supports gbxmodel tags).
+
+Invader supports multiple engines, with Xbox support being planned, so we cannot
+just do this. Fortunately, there is a command you can run that will actually fix
+the tags for you:
+
+```
+invader-refactor -Nc model gbxmodel
+```
+
+Lastly, invader-build checks the CRC32 checksums of each tag. This is done to
+ensure that the tags have been modified correctly, giving you a warning in the
+case they have not. However, some HEK tags do not have this set for some reason.
+You can fix this by running this command:
+
+```
+invader-strip --all
+```
+
+Note that the above commands take `-t <path-to-tags-directory>` just like
+invader-build, so if you use a tags directory that isn't "tags" on the current
+directory, simply append that. And, of course, if Invader isn't installed
+system-wide, you will need to replace the program names with paths to their
+respective executables.
 
 ### What operating systems are supported?
 Invader does not support any one operating system, but Invader is developed on
@@ -963,6 +1005,7 @@ to a point where it can be a solid replacement to tool.exe.
 [Programs]: #programs
 [Frequently asked questions]: #frequently-asked-questions
 
+[I get errors when building HEK tags or tags extracted with invader-extract]: #i-get-errors-when-building-hek-tags-or-tags-extracted-with-invader-extract
 [What operating systems are supported?]: #what-operating-systems-are-supported
 [Who owns my map when I build it?]: #who-owns-my-map-when-i-build-it
 [Why GPL and not MIT or BSD?]: #why-gpl-and-not-mit-or-bsd
