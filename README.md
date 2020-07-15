@@ -532,30 +532,39 @@ Options:
 This program renames and moves tag references.
 
 ```
-Usage: invader-refactor [options] <-M|-N> < <from.class> <to.class> | -r <from-dir> <to-dir> >
+Usage: invader-refactor <-M|-N> [options]
 
 Find and replace tag references.
 
 Options:
+  -c --class <f> <t>           Refactor all tags of a given class to another
+                               class. All tags in the destination class must
+                               exist. This can be specified multiple times but
+                               cannot be used with --recursive or --move.
   -D --dry-run                 Do not actually make any changes.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
-  -M --move                    Move files that are being refactored. This can
+  -M --move                    Move files that are being refactored. Tag
+                               classes cannot be refactored this way. This can
                                only be set once and cannot be set with
                                --no-move or --dry-run.
   -N --no-move                 Do not move any files; just change the
                                references in the tags. This can only be set
                                once and cannot be set with --move, --dry-run,
                                or --recursive.
-  -r --recursive               Recursively move all tags in a directory. This
+  -r --recursive <f> <t>       Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
-                               and new directories, and it cannot be used with
-                               --no-move.
+                               and new directories, it cannot be used with
+                               --no-move. This can only be specified once per
+                               operation and cannot be used with --tag.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
                                the whole tag directory.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
+  -T --tag <f> <t>             Refactor an individual tag. This can be
+                               specified multiple times but cannot be used with
+                               --recursive.
 ```
 
 ### invader-resource

@@ -61,14 +61,15 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes.");
-    options.emplace_back("move", 'M', 0, "Move files that are being refactored. This can only be set once and cannot be set with --no-move or --dry-run.");
+    options.emplace_back("move", 'M', 0, "Move files that are being refactored. Tag classes cannot be refactored this way. This can only be set once and cannot be set with --no-move or --dry-run.");
     options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
-    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with --no-move. This can only be specified once per operation and cannot be used with -T.", "<f> <t>");
-    options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with -r.", "<f> <t>");
+    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with --no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
+    options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
+    options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or --move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "[options] <-M|-N> <-T <from> <to> [...] | -r <from-dir> <to-dir> >";
+    static constexpr char USAGE[] = "<-M|-N> [options]";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
@@ -78,10 +79,21 @@ int main(int argc, char * const *argv) {
         const char *single_tag = nullptr;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
+        std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> class_replacements;
+        std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> reverse_class_replacements;
         std::optional<std::pair<std::string, std::string>> recursive;
     } refactor_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<RefactorOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, refactor_options, [](char opt, const std::vector<const char *> &arguments, auto &refactor_options) {
+        auto get_class = [](auto *argument) -> Invader::HEK::TagClassInt {
+            auto tag_class = Invader::HEK::extension_to_tag_class(argument);
+            if(!tag_class) {
+                eprintf_error("Error: %s is not a valid tag class", argument);
+                std::exit(EXIT_FAILURE);
+            }
+            return tag_class;
+        };
+        
         switch(opt) {
             case 't':
                 refactor_options.tags.emplace_back(arguments[0]);
@@ -106,12 +118,15 @@ int main(int argc, char * const *argv) {
             case 'r':
                 refactor_options.recursive = { arguments[0], arguments[1] };
                 return;
+            case 'c':
+                refactor_options.class_replacements.emplace_back(get_class(arguments[0]), get_class(arguments[1]));
+                return;
             case 'T':
                 try {
                     refactor_options.replacements.emplace_back(split_tag_class_extension(preferred_path_to_halo_path(arguments[0])).value(), split_tag_class_extension(preferred_path_to_halo_path(arguments[1])).value());
                 }
                 catch(std::bad_optional_access &) {
-                    eprintf_error("Invalid path pair: \"%s\" and \"%s\"", arguments[0], arguments[1]);
+                    eprintf_error("Error: Invalid path pair: \"%s\" and \"%s\"", arguments[0], arguments[1]);
                     std::exit(EXIT_FAILURE);
                 }
                 return;
@@ -130,8 +145,15 @@ int main(int argc, char * const *argv) {
     });
 
     auto &replacements = refactor_options.replacements;
+    auto &class_replacements = refactor_options.class_replacements;
+    
     if(replacements.size() && refactor_options.recursive) {
         eprintf_error("Error: --recursive and --tag cannot be used at the same time");
+        return EXIT_FAILURE;
+    }
+    
+    if(class_replacements.size() && refactor_options.recursive) {
+        eprintf_error("Error: --recursive and --class cannot be used at the same time");
         return EXIT_FAILURE;
     }
 
@@ -141,7 +163,7 @@ int main(int argc, char * const *argv) {
     }
 
     if(!refactor_options.set_move_or_no_move) {
-        eprintf_error("Error: Either --dry-run, --no-move, or --move need must be set");
+        eprintf_error("Error: Either --no-move or --move need must be set");
         return EXIT_FAILURE;
     }
 
@@ -154,7 +176,29 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile> all_tags = load_virtual_tag_folder(refactor_options.tags);
     std::vector<TagFile> single_tag;
     std::vector<TagFile> *tag_to_modify;
-
+    
+    // Resolve all single tag replacements
+    for(auto &r : class_replacements) {
+        for(auto &t : all_tags) {
+            if(t.tag_class_int == r.second) {
+                auto split_from = *Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(t.tag_path));
+                auto split_to = split_from;
+                split_from.class_int = r.first;
+                refactor_options.replacements.emplace_back(split_from, split_to);
+            }
+        }
+    }
+    
+    // Make sure we aren't changing tag classes if move
+    if(!refactor_options.no_move) {
+        for(auto &t : refactor_options.replacements) {
+            if(t.first != t.second) {
+                eprintf_error("Error: Tag classes cannot be changed with --move");
+                return EXIT_FAILURE;
+            }
+        }
+    }
+    
     // Do we only need to go through one tag?
     if(refactor_options.single_tag) {
         tag_to_modify = &single_tag;

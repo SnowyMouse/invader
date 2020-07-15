@@ -3,6 +3,9 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-refactor: Added class refactoring
+
 ### Changed
 - invader: Added support for the missing tags: continuous_damage_effect,
   multiplayer_scenario_description, preferences_network_game, and spheroid
