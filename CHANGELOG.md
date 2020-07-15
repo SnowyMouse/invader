@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader: Added support for the missing tags: continuous_damage_effect,
   multiplayer_scenario_description, preferences_network_game, and spheroid
+- invader-build: Implemented "blend shared nodes"
 - invader-edit-qt: Monochrome bitmaps now show "Alpha-Luminance", "Luminance
   only" and "Alpha only" instead of individual color channels, since those would
   be meaningless

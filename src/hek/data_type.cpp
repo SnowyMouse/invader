@@ -242,7 +242,7 @@ namespace Invader::HEK {
         }
     }
 
-    std::uint32_t compress_vector(float i, float j, float k) {
+    std::uint32_t compress_vector(float i, float j, float k) noexcept {
         return (compress_float<11>(i)) | (compress_float<11>(j) << 11) | (compress_float<10>(k) << 22);
     }
 

@@ -3,6 +3,7 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/model.hpp>
+#include <map>
 
 namespace Invader::Parser {
     template<typename M> static void postprocess_hek_data_model(M &what) {
@@ -371,6 +372,76 @@ namespace Invader::Parser {
                 DO_GEO_CHECK(low, "Low");
                 DO_GEO_CHECK(super_low, "Super low");
                 #undef DO_GEO_CHECK
+            }
+        }
+        
+        // Handle blended nodes
+        if(what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_BLEND_SHARED_NORMALS) {
+            std::vector<HEK::Point3D<HEK::NativeEndian>> positions;
+            
+            // Get all of the possible vertex positions
+            for(auto &g : what.geometries) {
+                for(auto &p : g.parts) {
+                    for(auto &v : p.uncompressed_vertices) {
+                        bool present = false;
+                        for(auto &pos : positions) {
+                            if(pos == v.position) {
+                                present = true;
+                                break;
+                            }
+                        }
+                        if(!present) {
+                            positions.emplace_back(v.position);
+                        }
+                    }
+                    
+                }
+            }
+            
+            // Do we have anything?
+            if(positions.size() == 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
+            }
+            else {
+                // Add all the stuff (idk why it does this but lol)
+                for(auto &pos : positions) {
+                    // Add up all of the fun stuff
+                    HEK::Vector3D<HEK::NativeEndian> vectors = {};
+                    for(auto &g : what.geometries) {
+                        for(auto &p : g.parts) {
+                            for(auto &v : p.uncompressed_vertices) {
+                                if(pos == v.position) {
+                                    vectors = vectors + v.normal;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Account for memed stuff
+                    if(vectors.i == 0.0F && vectors.j == 0.0F && vectors.k == 0.0F) {
+                        vectors.i = 1.0F;
+                    }
+                    
+                    // Normalize
+                    auto normalized = vectors.normalize();
+                    auto normalized_compressed = compress_vector(normalized.i, normalized.j, normalized.k);
+                    
+                    // Store the stuff
+                    for(auto &g : what.geometries) {
+                        for(auto &p : g.parts) {
+                            for(auto &v : p.uncompressed_vertices) {
+                                if(pos == v.position) {
+                                    v.normal = normalized;
+                                }
+                            }
+                            for(auto &v : p.compressed_vertices) {
+                                if(pos == v.position) {
+                                    v.normal = normalized_compressed;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
