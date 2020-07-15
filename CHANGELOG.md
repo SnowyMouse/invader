@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Fixed
+- invader-bitmap: Fixed an issue with the intensity of pixels being off-by-1 for
+  truly monochromatic inputs
 - invader-build: Fixed the maximum distance value not being set correctly for
   sound_looping tags that have detail sounds
 - invader-compare: Fixed `-f` requiring a tag input

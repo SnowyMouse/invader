@@ -76,6 +76,11 @@ namespace Invader {
          * @return 8-bit grayscale representation of the color
          */
         std::uint8_t convert_to_y8() {
+            // If our channels are the same, return that
+            if(this->red == this->green && this->green == this->blue) {
+                return this->red;
+            }
+            
             // Based on Luma
             static const std::uint8_t RED_WEIGHT = 54;
             static const std::uint8_t GREEN_WEIGHT = 182;

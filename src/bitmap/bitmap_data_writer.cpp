@@ -75,7 +75,7 @@ namespace Invader {
                         alpha_equals_luminosity = false;
 
                         // Next, check if luminosity is not 0xFF. If so, A8 is not an option
-                        if(luminosity != 0xFF && pixel->alpha != 0x00) {
+                        if(luminosity != 0xFF) {
                             luminosity_set = true;
                         }
 
