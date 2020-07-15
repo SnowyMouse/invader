@@ -3,6 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader-edit-qt: Monochrome bitmaps now show "Alpha-Luminance", "Luminance
+  only" and "Alpha only" instead of individual color channels, since those would
+  be meaningless
+
 ### Fixed
 - invader-bitmap: Fixed an issue with the intensity of pixels being off-by-1 for
   truly monochromatic inputs

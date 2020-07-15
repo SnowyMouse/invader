@@ -66,6 +66,34 @@ namespace Invader::EditQt {
         // Done
         return w;
     }
+    
+    void TagEditorBitmapSubwindow::generate_colors_array(bool monochrome) {
+        // Is this populated at all?
+        if(this->colors->count() == 0) {
+            this->monochrome = monochrome;
+        }
+        // Do we even need to generate a new array?
+        else if(this->monochrome == monochrome) {
+            return;
+        }
+        
+        // Generate it!
+        colors->clear();
+        if(monochrome) {
+            colors->addItem("Alpha-Luminance");
+            colors->addItem("Luminance only");
+            colors->addItem("Alpha only");
+        }
+        else {
+            colors->addItem("ARGB");
+            colors->addItem("RGB only");
+            colors->addItem("Alpha only");
+            colors->addItem("Red only");
+            colors->addItem("Green only");
+            colors->addItem("Blue only");
+        }
+        colors->setCurrentIndex(0);
+    }
 
     template<typename T> static void generate_main_widget(TagEditorBitmapSubwindow *subwindow, T *bitmap_data, void (*set_values)(TagEditorBitmapSubwindow *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QComboBox *, QScrollArea *, std::vector<Parser::BitmapGroupSequence> *)) {
         // Set up the main widget
@@ -103,15 +131,6 @@ namespace Invader::EditQt {
         for(std::size_t i = 0; i < bitmap_count; i++) {
             bitmaps->addItem(QString::number(i));
         }
-
-        // Colors
-        colors->addItem("ARGB");
-        colors->addItem("RGB only");
-        colors->addItem("Alpha only");
-        colors->addItem("Red only");
-        colors->addItem("Green only");
-        colors->addItem("Blue only");
-        colors->setCurrentIndex(0);
 
         // Scaling stuff
         for(int z = 3; z > 0; z--) {
@@ -644,6 +663,19 @@ namespace Invader::EditQt {
                 break;
             default:
                 std::terminate();
+        }
+        
+        // Set the monochrome stuff depending on what we're doing
+        switch(bitmap_data->format) {
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_Y8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_AY8:
+            case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8Y8:
+                this->generate_colors_array(true);
+                break;
+            default:
+                this->generate_colors_array(false);
+                break;
         }
 
         auto *scroll_widget = new QWidget();
