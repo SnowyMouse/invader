@@ -75,7 +75,7 @@ namespace Invader {
                         alpha_equals_luminosity = false;
 
                         // Next, check if luminosity is not 0xFF. If so, A8 is not an option
-                        if(luminosity != 0xFF) {
+                        if(luminosity != 0xFF && pixel->alpha != 0x00) {
                             luminosity_set = true;
                         }
 
@@ -87,7 +87,7 @@ namespace Invader {
                 }
             }
 
-            // If we aren't doing monochrome, then we the bitness of the alpha
+            // If we aren't doing monochrome, then we check the bitness of the alpha (1-bit = 0xFF or 0x00, which if we only had that, we can get 5-bit color on 16-bit ARGB instead of 4-bit color)
             else {
                 for(auto *pixel = first_pixel; pixel < last_pixel; pixel++) {
                     if(pixel->alpha != 0xFF) {
