@@ -526,6 +526,4 @@ int main(int argc, const char **argv) {
 
     // Done!
     std::fclose(f);
-    
-    oprintf("CHU! %s\n", map_path.string().c_str());
 }
