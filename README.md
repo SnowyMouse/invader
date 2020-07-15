@@ -577,16 +577,26 @@ Usage: invader-resource [options] -T <type>
 Create resource maps.
 
 Options:
+  -g --game-engine <id>        Specify the game engine. This option is
+                               required. Valid engines are: custom, demo,
+                               retail
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -m --maps <dir>              Set the maps directory.
-  -R --retail                  Build a retail resource map (bitmaps/sounds
-                               only)
+  -M --with-map <file>         Use a map file for the tags. This can be
+                               specified multiple times.
+  -n --no-prefix               Don't use the "custom_" prefix when building a
+                               Custom Edition resource map.
+  -p --padding <bytes>         Add an extra number of bytes after the header
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
   -T --type <type>             Set the resource map. This option is required.
                                Can be: bitmaps, sounds, or loc.
+  -w --with-index <file>       Use an index file for the tags, ensuring tags
+                               are ordered in the same way (barring
+                               duplicates). This can be specified multiple
+                               times.
 ```
 
 

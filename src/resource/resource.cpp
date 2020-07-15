@@ -26,7 +26,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("maps", 'm', 1, "Set the maps directory.", "<dir>");
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail", "<id>");
     options.emplace_back("padding", 'p', 1, "Add an extra number of bytes after the header", "<bytes>");
-    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
+    options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring tags are ordered in the same way (barring duplicates). This can be specified multiple times.", "<file>");
+    options.emplace_back("with-map", 'M', 1, "Use a map file for the tags. This can be specified multiple times.", "<file>");
     options.emplace_back("no-prefix", 'n', 0, "Don't use the \"custom_\" prefix when building a Custom Edition resource map.");
 
     static constexpr char DESCRIPTION[] = "Create resource maps.";
@@ -40,14 +41,13 @@ int main(int argc, const char **argv) {
         const char *maps = "maps";
 
         // Resource map type
-        ResourceMapType type = ResourceMapType::RESOURCE_MAP_BITMAP;
+        std::optional<ResourceMapType> type = ResourceMapType::RESOURCE_MAP_BITMAP;
 
         // Engine target
         std::optional<HEK::CacheFileEngine> engine_target;
 
         const char **(*default_fn)() = get_default_bitmap_resources;
-        bool resource_map_set = false;
-        std::optional<const char *> index;
+        std::vector<std::pair<const char *, bool>> index; // path, and is it a map?
         std::size_t padding = 0;
         bool no_prefix = false;
     } resource_options;
@@ -88,7 +88,11 @@ int main(int argc, const char **argv) {
                 break;
 
             case 'w':
-                resource_options.index = arguments[0];
+                resource_options.index.emplace_back(arguments[0], false);
+                break;
+
+            case 'M':
+                resource_options.index.emplace_back(arguments[0], true);
                 break;
 
             case 'T':
@@ -108,12 +112,11 @@ int main(int argc, const char **argv) {
                     eprintf_error("Invalid type %s. Use --help for more information.", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
-                resource_options.resource_map_set = true;
                 break;
         }
     });
 
-    if(!resource_options.resource_map_set) {
+    if(!resource_options.type.has_value()) {
         eprintf_error("No resource map type was given. Use -h for more information.");
         return EXIT_FAILURE;
     }
@@ -133,32 +136,72 @@ int main(int argc, const char **argv) {
     if(resource_options.tags.size() == 0) {
         resource_options.tags.push_back("tags");
     }
-
-    // Get all the tags
+    
+    // Generate our list
     std::vector<File::TagFilePath> tags_list;
-    if(resource_options.index.has_value()) {
-        std::fstream index_file(*resource_options.index, std::ios_base::in);
-        std::string tag;
-        while(std::getline(index_file, tag)) {
-            auto split_path_maybe = File::split_tag_class_extension(tag);
-            if(split_path_maybe.has_value()) {
-                tags_list.emplace_back(*split_path_maybe);
-            }
-            else {
-                auto &new_path = tags_list.emplace_back();
-                new_path.path = tag;
-                new_path.class_int = TagClassInt::TAG_CLASS_NONE;
-            }
-        }
-    }
-    else {
+    
+    // First, add all default indices if we're Custom Edition
+    if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
         for(const char **i = resource_options.default_fn(); *i; i++) {
             tags_list.emplace_back(File::split_tag_class_extension(*i).value());
         }
     }
 
+    // Next, get all the tags
+    if(resource_options.index.size()) {
+        for(auto &index : resource_options.index) {
+            if(index.second) {
+                // Open the map first
+                auto map_file = File::open_file(index.first);
+                if(map_file.has_value()) {
+                    auto map = Map::map_with_pointer(map_file->data(), map_file->size());
+                    auto tag_count = map.get_tag_count();
+                    for(std::size_t t = 0; t < tag_count; t++) {
+                        auto &tag = map.get_tag(t);
+                        bool allowed = false;
+                        auto tag_class = tag.get_tag_class_int();
+                        switch(*resource_options.type) {
+                            case ResourceMapType::RESOURCE_MAP_BITMAP:
+                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_BITMAP;
+                                break;
+                            case ResourceMapType::RESOURCE_MAP_SOUND:
+                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_SOUND;
+                                break;
+                            case ResourceMapType::RESOURCE_MAP_LOC:
+                                allowed = tag_class == HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT || tag_class == HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST || tag_class == HEK::TagClassInt::TAG_CLASS_FONT;
+                                break;
+                        }
+                        if(allowed) {
+                            tags_list.emplace_back(tag.get_path(), tag_class);
+                        }
+                    }
+                }
+                else {
+                    eprintf_error("Failed to open %s\n", index.first);
+                    return EXIT_FAILURE;
+                }
+            }
+            else {
+                // Add an index
+                std::fstream index_file(index.first, std::ios_base::in);
+                std::string tag;
+                while(std::getline(index_file, tag)) {
+                    auto split_path_maybe = File::split_tag_class_extension(tag);
+                    if(split_path_maybe.has_value()) {
+                        tags_list.emplace_back(*split_path_maybe);
+                    }
+                    else {
+                        auto &new_path = tags_list.emplace_back();
+                        new_path.path = tag;
+                        new_path.class_int = TagClassInt::TAG_CLASS_NONE;
+                    }
+                }
+            }
+        }
+    }
+
     ResourceMapHeader header = {};
-    header.type = resource_options.type;
+    header.type = *resource_options.type;
     header.resource_count = tags_list.size();
 
     // Read the amazing fun happy stuff
@@ -166,6 +209,7 @@ int main(int argc, const char **argv) {
     std::vector<std::size_t> offsets;
     std::vector<std::size_t> sizes;
     std::vector<std::string> paths;
+    std::vector<std::string> added_tags;
 
     for(auto &listed_tag : tags_list) {
         // First let's open it
@@ -198,8 +242,20 @@ int main(int argc, const char **argv) {
         // Now, then!
         auto tag_path = File::halo_path_to_preferred_path(listed_tag.join());
         auto halo_tag_path = File::preferred_path_to_halo_path(listed_tag.path.c_str());
+        
+        // Did we add it?
+        bool duplicate = false;
+        for(auto &i : added_tags) {
+            if(i == tag_path) {
+                duplicate = true;
+                break;
+            }
+        }
+        if(duplicate) {
+            continue;
+        }
 
-        switch(resource_options.type) {
+        switch(*resource_options.type) {
             case ResourceMapType::RESOURCE_MAP_BITMAP:
                 tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
                 break;
@@ -268,7 +324,7 @@ int main(int argc, const char **argv) {
             };
 
             // Now, adjust stuff for pointers
-            switch(resource_options.type) {
+            switch(*resource_options.type) {
                 case ResourceMapType::RESOURCE_MAP_BITMAP: {
                     // Do stuff to the tag data
                     auto &bitmap = *reinterpret_cast<Bitmap<LittleEndian> *>(compiled_tag_data);
@@ -417,7 +473,7 @@ int main(int argc, const char **argv) {
     // Get the final path of the map
     const char *map;
     std::string prefix = (!retail && !resource_options.no_prefix) ? "custom_" : "";
-    switch(resource_options.type) {
+    switch(*resource_options.type) {
         case ResourceMapType::RESOURCE_MAP_BITMAP:
             map = "bitmaps.map";
             break;
@@ -469,4 +525,6 @@ int main(int argc, const char **argv) {
 
     // Done!
     std::fclose(f);
+    
+    oprintf("CHU! %s\n", map_path.string().c_str());
 }

@@ -5,6 +5,8 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-refactor: Added class refactoring
+- invader-resource: Added `-M` which allows you to specify cache files to create
+  resources
 
 ### Changed
 - invader: Added support for the missing tags: continuous_damage_effect,
