@@ -19,6 +19,8 @@ respectively. Licenses can be found at `src/sound/adpcm_xq/license.txt` and
 
 Roboto Mono is from Google Fonts under [Apache License, Version 2.0].
 
+[Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0
+
 ## Getting started
 This readme addresses a few topics:
 - [Staying up-to-date]
@@ -34,13 +36,14 @@ number that corresponds to the installation of Invader (e.g.
 `Invader 0.26.1.r1776.9db4cc5`). This is the project name (`Invader`), version
 (`0.26.1`), commit number (`r1776`), and commit hash (`9db4cc5`).
 
-Next, go to the [commits](https://github.com/Kavawuvi/invader/commits/master)
-and check the commit hash against the topmost commit. If it is the same, then
-you are using the latest version of Invader.
+Next, go to the [commits] and check the commit hash against the topmost commit.
+If it is the same, then you are using the latest version of Invader.
 
 Invader is not finished, so it is important to stay up-to-date to obtain the
 latest features and fixes. Staying on an old version means staying on unfinished
 software that likely has known issues.
+
+[commits]: https://github.com/Kavawuvi/invader/commits/master
 
 ## Contributing
 See CONTRIBUTING.md.
@@ -52,14 +55,20 @@ compiling from source.
 You can also download precompiled [Nightly Builds]. These will generally be
 up-to-date unless commits were made very recently.
 
+[Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
+
 ### Building Invader
 If you got this readme from an archive containing pre-compiled Invader
 binaries, this section probably doesn't apply to you, but you are welcome to
 compile Invader. Regardless, you can browse and download the source code for
 free on [GitHub].
 
+[GitHub]: https://github.com/Kavawuvi/invader
+
 If you use Arch Linux, the [Arch Linux AUR] has a package you can use to build
 Invader.
+
+[Arch Linux AUR]: https://aur.archlinux.org/packages/invader-git/
 
 #### Dependencies
 Invader depends on software in order for it to build and work properly. This
@@ -214,7 +223,7 @@ These formats are uncompressed and use explicit (not interpolated) RGB and/or
 alpha values. This results in higher quality bitmaps than using any of the
 block compressed formats, but it comes with a file size tradeoff. Note that
 32-bit bitmaps are slightly buggy on stock Halo: Combat Evolved without a mod
-(e.g. [Chimera]).
+(e.g. Chimera).
 
 If you use 16-bit, then using dithering (`-D rgb` or `-D argb` if you want
 dithered alpha) may help with banding.
@@ -841,6 +850,8 @@ respective executables.
 Invader does not support any one operating system, but Invader is developed on
 Arch Linux, and 64-bit Windows builds are available via [Nightly Builds].
 
+[Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
+
 ### Who owns my map when I build it?
 There is a commonly-spread myth that, once you build a map with tool.exe, your
 map belongs to Microsoft. Likewise, people may assume that, if you build a map
@@ -866,10 +877,10 @@ derivatives and modifications of Invader should stay free and open.
 
 The Halo CE modding community has a habit of obfuscating knowledge that could
 be used to help other people. This is often done through these means:
-- [Map protection]
-- [Writing closed source software]
-- [Obfuscating software]
-- [Keeping helpful information locked behind secret forums and groups]
+- [Map protection](http://forum.halomaps.org/index.cfm?page=topic&topicID=16885)
+- [Writing closed source software](http://halo.isimaginary.com/)
+- [Obfuscating software](http://forum.halomaps.org/index.cfm?page=topic&topicID=51196&start=112)
+- [Keeping helpful information locked behind secret forums and groups](http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948)
 
 Many great accomplishments have been lost to time, as most of the people who
 made them are no longer there to support what they have made.
@@ -889,6 +900,8 @@ software with working software, as they do not feel it is worth the time or
 effort. Therefore, the broken, unmaintained software continues being used. This
 is where Invader comes in.
 
+[it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
+
 In our opinion, we feel that modding tools should be open for all to use,
 share, change, and learn from. At the same time, we also feel that a
 requirement for people give back to the community the source code to any
@@ -906,7 +919,7 @@ Bungie, Microsoft, or our own mothers.
 In order to get Invader under a different license, you will need to write to
 *both* [Kavawuvi] and [Vaporeon], and you will need *unanimous* approval.
 
-[Kavawuvi]: https://githib.com/Kavawuvi
+[Kavawuvi]: https://github.com/Kavawuvi
 [Vaporeon]: https://github.com/Vaporeon
 
 ### Are there any GUI tools?
@@ -1004,11 +1017,6 @@ while tool.exe is basically the reference when it comes to building cache files.
 However, we do ask that you consider testing invader-build so we can improve it
 to a point where it can be a solid replacement to tool.exe.
 
-[GitHub]: https://github.com/Kavawuvi/invader
-[Arch Linux AUR]: https://aur.archlinux.org/packages/invader-git/
-[Nightly Builds]: https://invader.opencarnage.net/builds/nightly/download-latest.html
-[Chimera]: https://chimera.opencarnage.net
-
 [Staying up-to-date]: #staying-up-to-date
 [Contributing]: #contributing
 [Getting Invader]: #getting-invader
@@ -1027,14 +1035,6 @@ to a point where it can be a solid replacement to tool.exe.
 [The HEK says my bitmap tag is "too large" when opening.]: #the-hek-says-my-bitmap-tag-is-too-large-when-opening
 [How close to completion is Invader?]: #how-close-to-completion-is-invader
 [Should I use invader-build for my map right now?]: #should-i-use-invader-build-for-my-map-right-now
-
-[Map protection]: http://forum.halomaps.org/index.cfm?page=topic&topicID=16885
-[Obfuscating software]: http://forum.halomaps.org/index.cfm?page=topic&topicID=51196&start=112
-[Writing closed source software]: http://halo.isimaginary.com/
-[Keeping helpful information locked behind secret forums and groups]: http://www.macgamingmods.com/forum/viewtopic.php?f=40&t=7948
-[it is still the only way to fully create maps]: https://opencarnage.net/index.php?/topic/7765-replacing-the-halo-editing-kit-with-open-source-software/
-
-[Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0
 
 [invader-archive]: #invader-archive
 [invader-bitmap]: #invader-bitmap

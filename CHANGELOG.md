@@ -977,7 +977,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [0.15.0] - 2019-10-29
 ### Added
-- New tool: invader-compress - Compresses cache files using the [Zstandard]
+- New tool: invader-compress - Compresses cache files using the Zstandard
   algorithm
 - invader-resource: Added `--retail` / `-R` which will allow you to build
   retail maps
@@ -1120,6 +1120,8 @@ some sounds that sounded fine when built with tool.exe but sounded corrupt when
   worse, but the original Halo Editing Kit as well as [Mozzarilla] support it,
   so it's easier to use.
 - invader-bitmap: Now stores dithering and mipmapping settings in the tag
+
+[Mozzarilla]: https://github.com/MosesofEgypt/mozzarilla
 
 ### Fixed
 - invader-bitmap: Fixed blurring and sharpening values in the tag not being
@@ -1303,6 +1305,3 @@ image as one bitmap
 - New tool: invader-indexer - Outputs the list of tags in a cache file to a
   text file to be used with Invader
 - New tool: invader-resource - Builds resource map files
-
-[Mozzarilla]: https://github.com/MosesofEgypt/mozzarilla
-[Zstandard]: https://github.com/Facebook/zstd

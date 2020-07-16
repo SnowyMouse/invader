@@ -2,9 +2,13 @@
 Thank you for your interest! There are a number of ways you can help this
 project:
 
-- Testing (we need more testers!)
-- Submitting [issues]
-- Submitting [pull requests]
+- Testing (we need more testers!) and submitting [issues]
+- Resolving [issues] and submitting [pull requests]
+- [Donating] so more time can be spent developing Invader
+
+[issues]: https://github.com/Kavawuvi/Invader/issues
+[pull requests]: https://github.com/Kavawuvi/Invader/pulls
+[donating]: https://patreon.com/snowy_invader
 
 # Testing Invader
 To test Invader, run it and use it for making Halo maps and tags. Report issues
@@ -14,6 +18,10 @@ from the the [Halo Editing Kit] installer which can be extracted by either
 running it (requires a Halo Custom Edition install and Windows or Wine) or by
 using a program like [7-Zip] or [p7zip].
 
+[Halo Editing Kit]: https://opencarnage.net/index.php?/topic/2939-halo-editing-kit/
+[7-Zip]: https://www.7-zip.org/
+[p7zip]: https://sourceforge.net/projects/p7zip/
+
 You should always test using the latest [Git master branch] build when
 testing Invader. It is not recommended to test even slightly outdated versions
 of Invader, regardless of if it was a release or not. Note that Invader, in its
@@ -21,6 +29,8 @@ current state, has no concept of a "stable" release (i.e. a version you don't
 need to update for a long period of time), though the tools, themselves, may
 possibly be more stable than the Halo Editing Kit counterparts (i.e. less error
 prone).
+
+[git master branch]: https://github.com/Kavawuvi/Invader/tree/master
 
 # Conventions
 These conventions apply only for contributing to the official Invader
@@ -110,6 +120,9 @@ For all new issues:
 - Ensure your issue is relevant for the latest version of the Invader source
   code. This is why it is recommended that you compile Invader from source.
 - Ensure your issue is not out of scope (see the [scope conventions]).
+
+[scope conventions]: #scope-conventions
+[closed]: https://github.com/Kavawuvi/Invader/issues?q=is%3Aissue+is%3Aclosed
 
 For new issues, it is recommended to prefix the title with **one** of these:
 - `[New feature]` - New feature for multiple programs or one that doesn't yet
@@ -245,6 +258,8 @@ These apply to comments and when to comment.
   strictly required at this moment. This can and probably will change in the
   future.
 
+[javadoc]: https://en.wikipedia.org/wiki/Javadoc
+
 #### C/C++ conventions
 These apply to C/C++ code specifically.
 
@@ -259,6 +274,8 @@ These apply to C/C++ code specifically.
   of integer. Never assume the size of fundamental types like `int`, `short`,
   `size_t`, etc.
 
+[fixed-width integer types]: https://en.cppreference.com/w/cpp/types/integer
+  
 ##### Headers
 These apply to C/C++ header files.
 
@@ -327,14 +344,3 @@ These apply to C++ code.
   `oprintf` and `eprintf` (`<invader/printf.hpp>`), respectively.
 - Use C++17's `std::byte` type for raw memory instead of an integer type like
   `char` or `std::uint8_t`
-
-[issues]: https://github.com/Kavawuvi/Invader/issues
-[pull requests]: https://github.com/Kavawuvi/Invader/pulls
-[Halo Editing Kit]: https://opencarnage.net/index.php?/topic/2939-halo-editing-kit/
-[7-Zip]: https://www.7-zip.org/
-[p7zip]: https://sourceforge.net/projects/p7zip/
-[javadoc]: https://en.wikipedia.org/wiki/Javadoc
-[closed]: https://github.com/Kavawuvi/Invader/issues?q=is%3Aissue+is%3Aclosed
-[git master branch]: https://github.com/Kavawuvi/Invader/tree/master
-[fixed-width integer types]: https://en.cppreference.com/w/cpp/types/integer
-[scope conventions]: #scope-conventions
