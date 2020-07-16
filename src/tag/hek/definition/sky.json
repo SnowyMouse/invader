@@ -156,7 +156,8 @@
                 "name": "outdoor fog maximum density",
                 "minimum": 0.0,
                 "maximum": 1.0,
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "outdoor fog start distance",
@@ -181,7 +182,8 @@
                 "name": "indoor fog maximum density",
                 "minimum": 0.0,
                 "maximum": 1.0,
-                "type": "Fraction"
+                "type": "Fraction",
+                "default": 1.0
             },
             {
                 "name": "indoor fog start distance",
