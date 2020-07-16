@@ -8,7 +8,6 @@
 namespace Invader::Parser {
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
-    static void check_command_lists(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
     static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
@@ -29,7 +28,6 @@ namespace Invader::Parser {
 
         // Check some things
         check_palettes(workload, tag_index, *this);
-        check_command_lists(workload, tag_index, *this);
         fix_script_data(workload, tag_index, struct_index, *this);
         fix_bsp_transitions(workload, tag_index, *this);
     }
@@ -265,38 +263,6 @@ namespace Invader::Parser {
         new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
         new_ptr.struct_index = workload.structs.size();
         workload.structs.emplace_back(std::move(script_data_struct));
-    }
-    
-    static void check_command_lists(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
-        // Next, let's make sure the command lists are valid
-        std::size_t cmd_list_count = scenario.command_lists.size();
-        std::size_t animation_reference_count = scenario.ai_animation_references.size();
-        std::size_t script_reference_count = scenario.ai_script_references.size();
-        std::size_t recording_count = scenario.ai_recording_references.size();
-        std::size_t object_name_count = scenario.object_names.size();
-        
-        // Go through each command list and each command to check everything
-        for(std::size_t cl = 0; cl < cmd_list_count; cl++) {
-            auto &cmd_list = scenario.command_lists[cl];
-            std::size_t cmd_count = cmd_list.commands.size();
-            std::size_t point_count = cmd_list.points.size();
-            for(std::size_t c = 0; c < cmd_count; c++) {
-                auto &cmd = cmd_list.commands[c];
-                #define WARN_ON_BULLSHIT_VAL(what, check) { \
-                    if(cmd.what != NULL_INDEX && cmd.what >= check) { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, # what " of command %zu of command list %zu is invalid so the command will be skipped (%zu >= %zu)", c, cl, static_cast<std::size_t>(cmd.what), check); \
-                    } \
-                }
-                WARN_ON_BULLSHIT_VAL(point_1, point_count);
-                WARN_ON_BULLSHIT_VAL(point_2, point_count);
-                WARN_ON_BULLSHIT_VAL(animation, animation_reference_count);
-                WARN_ON_BULLSHIT_VAL(script, script_reference_count);
-                WARN_ON_BULLSHIT_VAL(recording, recording_count);
-                WARN_ON_BULLSHIT_VAL(command, cmd_count);
-                WARN_ON_BULLSHIT_VAL(object_name, object_name_count);
-                #undef WARN_ON_BULLSHIT_VAL
-            }
-        }
     }
     
     static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {

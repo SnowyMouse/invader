@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader: Re-added checking and erroring on invalid command list indices
 - invader-refactor: Added class refactoring
 - invader-resource: Added `-M` which allows you to specify cache files to create
   resources

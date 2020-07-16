@@ -2288,37 +2288,44 @@
             {
                 "name": "point 1",
                 "type": "Index",
-                "comment": "This can be an index to a point from the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "points",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "point 2",
                 "type": "Index",
-                "comment": "This can be an index to a point from the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "points",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "animation",
                 "type": "Index",
-                "comment": "This can be an index to an animation reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "ai animation references",
+                "struct": "Scenario"
             },
             {
                 "name": "script",
                 "type": "Index",
-                "comment": "This can be an index to an AI script reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "ai script references",
+                "struct": "Scenario"
             },
             {
                 "name": "recording",
                 "type": "Index",
-                "comment": "This can be an index to an AI recording reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "ai recording references",
+                "struct": "Scenario"
             },
             {
                 "name": "command",
                 "type": "Index",
-                "comment": "This can be an index to another command in the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "commands",
+                "struct": "ScenarioCommandList"
             },
             {
                 "name": "object name",
                 "type": "Index",
-                "comment": "This can be an index to an object name from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
+                "reflexive": "object names",
+                "struct": "Scenario"
             },
             {
                 "type": "pad",
