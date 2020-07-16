@@ -282,6 +282,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         if(bitmap_options.use_extended) {
             compressed_data.resize(ZSTD_compressBound(image_size));
             compressed_data.resize(ZSTD_compress(compressed_data.data(), compressed_data.size(), image_pixels, image_size, 19));
+            bitmap_tag_data.compressed_color_plate_data.insert(bitmap_tag_data.compressed_color_plate_data.end(), compressed_data.begin(), compressed_data.end());
         }
 
         // DEFLATE if not extended
