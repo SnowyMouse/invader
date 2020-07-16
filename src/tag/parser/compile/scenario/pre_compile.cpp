@@ -7,6 +7,10 @@
 
 namespace Invader::Parser {
     static void merge_child_scenarios(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
+    static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
+    static void check_command_lists(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
+    static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario);
+    static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario);
     
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         merge_child_scenarios(workload, tag_index, *this);
@@ -23,128 +27,54 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
 
-        // Check for unused stuff
-        std::size_t name_count = this->object_names.size();
-        std::vector<std::vector<std::pair<const char *, std::size_t>>> name_used(name_count);
+        // Check some things
+        check_palettes(workload, tag_index, *this);
+        check_command_lists(workload, tag_index, *this);
+        fix_script_data(workload, tag_index, struct_index, *this);
+        fix_bsp_transitions(workload, tag_index, *this);
+    }
+    
+    static void fix_bsp_transitions(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
+        // BSP transitions
+        std::size_t trigger_volume_count = scenario.trigger_volumes.size();
+        scenario.bsp_switch_trigger_volumes.clear();
+        for(std::size_t tv = 0; tv < trigger_volume_count; tv++) {
+            auto &trigger_volume = scenario.trigger_volumes[tv];
+            if(std::strncmp(trigger_volume.name.string, "bsp", 3) != 0) {
+                continue;
+            }
 
-        #define CHECK_PALETTE_AND_SPAWNS(object_type_str, scenario_object_type, scenario_palette_type, object_type_int) { \
-            std::size_t type_count = this->scenario_palette_type.size(); \
-            std::size_t count = this->scenario_object_type.size(); \
-            std::vector<std::uint32_t> used(type_count); \
-            for(std::size_t i = 0; i < count; i++) { \
-                auto &r = this->scenario_object_type[i]; \
-                std::size_t name_index = r.name; \
-                if(name_index != NULL_INDEX) { \
-                    /* Check the name to see if it's valid */ \
-                    if(name_index >= name_count) { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
-                    } \
-                    /* If it is, increment the used counter and assign everything */ \
-                    else { \
-                        name_used[name_index].emplace_back(object_type_str, i); \
-                        auto &name = this->object_names[name_index]; \
-                        name.object_index = static_cast<HEK::Index>(i); \
-                        name.object_type = HEK::ObjectType::object_type_int; \
-                    } \
-                } \
-                std::size_t type_index = r.type; \
-                if(type_index == NULL_INDEX) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " spawn #%zu has no object type, so it will be unused", i); \
-                } \
-                else if(type_index >= type_count) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
-                } \
-                else { \
-                    used[type_index]++; \
-                } \
-            } \
-            for(std::size_t i = 0; i < type_count; i++) { \
-                auto &palette = this->scenario_palette_type[i].name; \
-                bool is_null = palette.path.size() == 0; \
-                if(!used[i]) { \
-                    if(is_null) { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
-                    } \
-                    else { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_class_to_extension(palette.tag_class_int)); \
-                    } \
-                } \
-                else if(is_null) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu is null, so %zu reference%s will be unused", i, static_cast<std::size_t>(used[i]), used[i] == 1 ? "" : "s"); \
-                } \
-            } \
-        }
+            // Parse it
+            unsigned int bsp_from = ~0;
+            unsigned int bsp_to = ~0;
+            if(std::sscanf(trigger_volume.name.string, "bsp%u,%u", &bsp_from, &bsp_to) != 2) {
+                continue;
+            }
 
-        CHECK_PALETTE_AND_SPAWNS("Biped", bipeds, biped_palette, OBJECT_TYPE_BIPED);
-        CHECK_PALETTE_AND_SPAWNS("Vehicle", vehicles, vehicle_palette, OBJECT_TYPE_VEHICLE);
-        CHECK_PALETTE_AND_SPAWNS("Weapon", weapons, weapon_palette, OBJECT_TYPE_WEAPON);
-        CHECK_PALETTE_AND_SPAWNS("Equipment", equipment, equipment_palette, OBJECT_TYPE_EQUIPMENT);
-        CHECK_PALETTE_AND_SPAWNS("Scenery", scenery, scenery_palette, OBJECT_TYPE_SCENERY);
-        CHECK_PALETTE_AND_SPAWNS("Machine", machines, machine_palette, OBJECT_TYPE_DEVICE_MACHINE);
-        CHECK_PALETTE_AND_SPAWNS("Control", controls, control_palette, OBJECT_TYPE_DEVICE_CONTROL);
-        CHECK_PALETTE_AND_SPAWNS("Light fixture", light_fixtures, light_fixture_palette, OBJECT_TYPE_DEVICE_LIGHT_FIXTURE);
-        CHECK_PALETTE_AND_SPAWNS("Sound scenery", sound_scenery, sound_scenery_palette, OBJECT_TYPE_SOUND_SCENERY);
-
-        #undef CHECK_PALETTE_AND_SPAWNS
-        
-        // Next, let's make sure "set new name" is used
-        for(auto &c : this->ai_conversations) {
-            for(auto &p : c.participants) {
-                auto new_name = p.set_new_name;
-                if(new_name > name_count || new_name == NULL_INDEX) {
-                    continue;
-                }
-                else if(name_used[new_name].size() == 0) {
-                    name_used[new_name].emplace_back(); 
-                }
+            // Save it
+            if(bsp_from >= scenario.structure_bsps.size() || bsp_to >= scenario.structure_bsps.size()) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+            }
+            else {
+                auto &bsp_switch_trigger_volume = scenario.bsp_switch_trigger_volumes.emplace_back();
+                bsp_switch_trigger_volume.trigger_volume = static_cast<HEK::Index>(tv);
+                bsp_switch_trigger_volume.source = static_cast<HEK::Index>(bsp_from);
+                bsp_switch_trigger_volume.destination = static_cast<HEK::Index>(bsp_to);
+                bsp_switch_trigger_volume.unknown = 0xFFFF;
             }
         }
-
-        // Make sure we don't have any fun stuff with object names going on
-        for(std::size_t i = 0; i < name_count; i++) {
-            auto &used_arr = name_used[i];
-            auto used = used_arr.size();
-            auto &name = this->object_names[i];
-            const char *name_str = name.name.string;
-            if(used == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Object name #%zu (%s) is unused", i, name_str);
-            }
-            else if(used > 1) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
-                
-                // Put together a list to help the user track everything down
-                char found[1024] = {};
-                std::size_t p = 0;
-                
-                std::size_t f = 0;
-                for(auto &u : used_arr) {
-                    // Don't show more than 3 elements
-                    if(f++ == 3) {
-                        std::snprintf(found + p, sizeof(found) - p, ", ...");
-                        break;
-                    }
-                    else {
-                        p += std::snprintf(found + p, sizeof(found) - p, "%s%s #%zu", f == 1 ? "" : ", ", u.first, u.second);
-                        if(p > sizeof(found)) {
-                            break;
-                        }
-                    }
-                }
-                
-                // List everything off
-                eprintf_warn_lesser("    - objects with this name: [%s]", found);
-            }
-        }
-
+    }
+    
+    static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
         // If we don't have any string data, allocate 512 bytes
-        if(this->script_string_data.size() == 0) {
-            this->script_string_data.resize(512);
+        if(scenario.script_string_data.size() == 0) {
+            scenario.script_string_data.resize(512);
         }
 
         // If we don't have any syntax data, let's make some stuff
         static constexpr char SCRIPT_NODE_LITERAL[] = "script node";
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
-        if(this->script_syntax_data.size() == 0) {
+        if(scenario.script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::struct_little t = {};
             static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 32;
             t.count = 0;
@@ -156,27 +86,27 @@ namespace Invader::Parser {
             t.size = 0;
             std::copy(SCRIPT_NODE_LITERAL, SCRIPT_NODE_LITERAL + sizeof(SCRIPT_NODE_LITERAL), t.name.string);
 
-            this->script_syntax_data.resize(sizeof(t) + SCRIPT_ELEMENT_SIZE * DEFAULT_SCRIPT_NODE_COUNT);
-            auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(this->script_syntax_data.data() + sizeof(t));
+            scenario.script_syntax_data.resize(sizeof(t) + SCRIPT_ELEMENT_SIZE * DEFAULT_SCRIPT_NODE_COUNT);
+            auto *first_node = reinterpret_cast<ScenarioScriptNode::struct_little *>(scenario.script_syntax_data.data() + sizeof(t));
             for(std::size_t i = 0; i < DEFAULT_SCRIPT_NODE_COUNT; i++) {
                 auto &node = first_node[i];
                 std::memset(reinterpret_cast<std::uint8_t *>(&node), 0xCA, sizeof(node));
                 node.salt = 0;
             }
 
-            std::copy(reinterpret_cast<const std::byte *>(&t), reinterpret_cast<const std::byte *>(&t + 1), this->script_syntax_data.data());
+            std::copy(reinterpret_cast<const std::byte *>(&t), reinterpret_cast<const std::byte *>(&t + 1), scenario.script_syntax_data.data());
         }
         else {
             ScenarioScriptNodeTable::struct_little t;
-            if(this->script_syntax_data.size() < sizeof(t)) {
+            if(scenario.script_syntax_data.size() < sizeof(t)) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script syntax data is invalid", tag_index);
                 throw InvalidTagDataException();
             }
-            t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(this->script_syntax_data.data());
-            *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(this->script_syntax_data.data()) = t;
+            t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
+            *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
             t.first_element_ptr = 0;
 
-            auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(this->script_syntax_data.data() + sizeof(t));
+            auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
             auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
             if(t.element_size != SCRIPT_ELEMENT_SIZE) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
@@ -185,8 +115,8 @@ namespace Invader::Parser {
 
             std::size_t element_count = t.maximum_count;
             std::size_t expected_table_size = element_count * SCRIPT_ELEMENT_SIZE + sizeof(t);
-            if(this->script_syntax_data.size() != expected_table_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, this->script_syntax_data.size());
+            if(scenario.script_syntax_data.size() != expected_table_size) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, scenario.script_syntax_data.size());
                 throw InvalidTagDataException();
             }
 
@@ -194,10 +124,10 @@ namespace Invader::Parser {
                 start_little[i] = start_big[i];
             }
         }
-
+        
         // If we have scripts, do stuff
-        if(this->scripts.size() > 0 || this->globals.size() > 0) {
-            if(this->source_files.size() == 0) {
+        if(scenario.scripts.size() > 0 || scenario.globals.size() > 0) {
+            if(scenario.source_files.size() == 0) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
                 eprintf_warn("To fix this, recompile the scripts");
                 throw InvalidTagDataException();
@@ -210,9 +140,9 @@ namespace Invader::Parser {
 
         // Let's start on the script data
         BuildWorkload::BuildWorkloadStruct script_data_struct = {};
-        script_data_struct.data = std::move(this->script_syntax_data);
-        const char *string_data = reinterpret_cast<const char *>(this->script_string_data.data());
-        std::size_t string_data_length = this->script_string_data.size();
+        script_data_struct.data = std::move(scenario.script_syntax_data);
+        const char *string_data = reinterpret_cast<const char *>(scenario.script_string_data.data());
+        std::size_t string_data_length = scenario.script_string_data.size();
 
         // Ensure we're null terminated
         while(string_data_length > 0) {
@@ -309,14 +239,14 @@ namespace Invader::Parser {
                 // Let's also add up a reference too. This is 110% pointless and only wastes tag data space, but it's what tool.exe does, and a Vap really wanted it.
                 bool exists = false;
                 auto &new_tag = workload.tags[new_id];
-                for(auto &r : this->references) {
+                for(auto &r : scenario.references) {
                     if(r.reference.tag_class_int == new_tag.tag_class_int && r.reference.path == new_tag.path) {
                         exists = true;
                         break;
                     }
                 }
                 if(!exists) {
-                    auto &reference = this->references.emplace_back().reference;
+                    auto &reference = scenario.references.emplace_back().reference;
                     reference.tag_class_int = new_tag.tag_class_int;
                     reference.path = new_tag.path;
                     reference.tag_id = HEK::TagID { static_cast<std::uint32_t>(new_id) };
@@ -330,38 +260,157 @@ namespace Invader::Parser {
 
         // Add the new structs
         auto &new_ptr = workload.structs[struct_index].pointers.emplace_back();
-        auto &scenario_struct = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data());
+        auto &scenario_struct = *reinterpret_cast<Scenario::struct_little *>(workload.structs[struct_index].data.data());
         scenario_struct.script_syntax_data.size = static_cast<std::uint32_t>(script_data_struct.data.size());
         new_ptr.offset = reinterpret_cast<std::byte *>(&scenario_struct.script_syntax_data.pointer) - reinterpret_cast<std::byte *>(&scenario_struct);
         new_ptr.struct_index = workload.structs.size();
         workload.structs.emplace_back(std::move(script_data_struct));
-
-        // BSP transitions
-        std::size_t trigger_volume_count = this->trigger_volumes.size();
-        this->bsp_switch_trigger_volumes.clear();
-        for(std::size_t tv = 0; tv < trigger_volume_count; tv++) {
-            auto &trigger_volume = this->trigger_volumes[tv];
-            if(std::strncmp(trigger_volume.name.string, "bsp", 3) != 0) {
-                continue;
+    }
+    
+    static void check_command_lists(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
+        // Next, let's make sure the command lists are valid
+        std::size_t cmd_list_count = scenario.command_lists.size();
+        std::size_t animation_reference_count = scenario.ai_animation_references.size();
+        std::size_t script_reference_count = scenario.ai_script_references.size();
+        std::size_t recording_count = scenario.ai_recording_references.size();
+        std::size_t object_name_count = scenario.object_names.size();
+        
+        // Go through each command list and each command to check everything
+        for(std::size_t cl = 0; cl < cmd_list_count; cl++) {
+            auto &cmd_list = scenario.command_lists[cl];
+            std::size_t cmd_count = cmd_list.commands.size();
+            std::size_t point_count = cmd_list.points.size();
+            for(std::size_t c = 0; c < cmd_count; c++) {
+                auto &cmd = cmd_list.commands[c];
+                #define WARN_ON_BULLSHIT_VAL(what, check) { \
+                    if(cmd.what != NULL_INDEX && cmd.what >= check) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, # what " of command %zu of command list %zu is invalid so the command will be skipped (%zu >= %zu)", c, cl, static_cast<std::size_t>(cmd.what), check); \
+                    } \
+                }
+                WARN_ON_BULLSHIT_VAL(point_1, point_count);
+                WARN_ON_BULLSHIT_VAL(point_2, point_count);
+                WARN_ON_BULLSHIT_VAL(animation, animation_reference_count);
+                WARN_ON_BULLSHIT_VAL(script, script_reference_count);
+                WARN_ON_BULLSHIT_VAL(recording, recording_count);
+                WARN_ON_BULLSHIT_VAL(command, cmd_count);
+                WARN_ON_BULLSHIT_VAL(object_name, object_name_count);
+                #undef WARN_ON_BULLSHIT_VAL
             }
+        }
+    }
+    
+    static void check_palettes(BuildWorkload &workload, std::size_t tag_index, Scenario &scenario) {
+        // Check for unused stuff
+        std::size_t name_count = scenario.object_names.size();
+        std::vector<std::vector<std::pair<const char *, std::size_t>>> name_used(name_count);
 
-            // Parse it
-            unsigned int bsp_from = ~0;
-            unsigned int bsp_to = ~0;
-            if(std::sscanf(trigger_volume.name.string, "bsp%u,%u", &bsp_from, &bsp_to) != 2) {
-                continue;
-            }
+        // We want to make sure things are valid
+        #define CHECK_PALETTE_AND_SPAWNS(object_type_str, scenario_object_type, scenario_palette_type, object_type_int) { \
+            std::size_t type_count = scenario.scenario_palette_type.size(); \
+            std::size_t count = scenario.scenario_object_type.size(); \
+            std::vector<std::uint32_t> used(type_count); \
+            for(std::size_t i = 0; i < count; i++) { \
+                auto &r = scenario.scenario_object_type[i]; \
+                std::size_t name_index = r.name; \
+                if(name_index != NULL_INDEX) { \
+                    /* Check the name to see if it's valid */ \
+                    if(name_index >= name_count) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
+                    } \
+                    /* If it is, increment the used counter and assign everything */ \
+                    else { \
+                        name_used[name_index].emplace_back(object_type_str, i); \
+                        auto &name = scenario.object_names[name_index]; \
+                        name.object_index = static_cast<HEK::Index>(i); \
+                        name.object_type = HEK::ObjectType::object_type_int; \
+                    } \
+                } \
+                std::size_t type_index = r.type; \
+                if(type_index == NULL_INDEX) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " spawn #%zu has no object type, so it will be unused", i); \
+                } \
+                else if(type_index >= type_count) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
+                } \
+                else { \
+                    used[type_index]++; \
+                } \
+            } \
+            for(std::size_t i = 0; i < type_count; i++) { \
+                auto &palette = scenario.scenario_palette_type[i].name; \
+                bool is_null = palette.path.size() == 0; \
+                if(!used[i]) { \
+                    if(is_null) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (null) is unused", i); \
+                    } \
+                    else { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu (%s.%s) is unused", i, File::halo_path_to_preferred_path(palette.path).c_str(), HEK::tag_class_to_extension(palette.tag_class_int)); \
+                    } \
+                } \
+                else if(is_null) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " palette type #%zu is null, so %zu reference%s will be unused", i, static_cast<std::size_t>(used[i]), used[i] == 1 ? "" : "s"); \
+                } \
+            } \
+        }
 
-            // Save it
-            if(bsp_from >= this->structure_bsps.size() || bsp_to >= this->structure_bsps.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+        CHECK_PALETTE_AND_SPAWNS("Biped", bipeds, biped_palette, OBJECT_TYPE_BIPED);
+        CHECK_PALETTE_AND_SPAWNS("Vehicle", vehicles, vehicle_palette, OBJECT_TYPE_VEHICLE);
+        CHECK_PALETTE_AND_SPAWNS("Weapon", weapons, weapon_palette, OBJECT_TYPE_WEAPON);
+        CHECK_PALETTE_AND_SPAWNS("Equipment", equipment, equipment_palette, OBJECT_TYPE_EQUIPMENT);
+        CHECK_PALETTE_AND_SPAWNS("Scenery", scenery, scenery_palette, OBJECT_TYPE_SCENERY);
+        CHECK_PALETTE_AND_SPAWNS("Machine", machines, machine_palette, OBJECT_TYPE_DEVICE_MACHINE);
+        CHECK_PALETTE_AND_SPAWNS("Control", controls, control_palette, OBJECT_TYPE_DEVICE_CONTROL);
+        CHECK_PALETTE_AND_SPAWNS("Light fixture", light_fixtures, light_fixture_palette, OBJECT_TYPE_DEVICE_LIGHT_FIXTURE);
+        CHECK_PALETTE_AND_SPAWNS("Sound scenery", sound_scenery, sound_scenery_palette, OBJECT_TYPE_SOUND_SCENERY);
+
+        #undef CHECK_PALETTE_AND_SPAWNS
+        
+        // Next, let's make sure "set new name" is used
+        for(auto &c : scenario.ai_conversations) {
+            for(auto &p : c.participants) {
+                auto new_name = p.set_new_name;
+                if(new_name > name_count || new_name == NULL_INDEX) {
+                    continue;
+                }
+                else if(name_used[new_name].size() == 0) {
+                    name_used[new_name].emplace_back(); 
+                }
             }
-            else {
-                auto &bsp_switch_trigger_volume = this->bsp_switch_trigger_volumes.emplace_back();
-                bsp_switch_trigger_volume.trigger_volume = static_cast<HEK::Index>(tv);
-                bsp_switch_trigger_volume.source = static_cast<HEK::Index>(bsp_from);
-                bsp_switch_trigger_volume.destination = static_cast<HEK::Index>(bsp_to);
-                bsp_switch_trigger_volume.unknown = 0xFFFF;
+        }
+
+        // Make sure we don't have any fun stuff with object names going on
+        for(std::size_t i = 0; i < name_count; i++) {
+            auto &used_arr = name_used[i];
+            auto used = used_arr.size();
+            auto &name = scenario.object_names[i];
+            const char *name_str = name.name.string;
+            if(used == 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Object name #%zu (%s) is unused", i, name_str);
+            }
+            else if(used > 1) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
+                
+                // Put together a list to help the user track everything down
+                char found[1024] = {};
+                std::size_t p = 0;
+                
+                std::size_t f = 0;
+                for(auto &u : used_arr) {
+                    // Don't show more than 3 elements
+                    if(f++ == 3) {
+                        std::snprintf(found + p, sizeof(found) - p, ", ...");
+                        break;
+                    }
+                    else {
+                        p += std::snprintf(found + p, sizeof(found) - p, "%s%s #%zu", f == 1 ? "" : ", ", u.first, u.second);
+                        if(p > sizeof(found)) {
+                            break;
+                        }
+                    }
+                }
+                
+                // List everything off
+                eprintf_warn_lesser("    - objects with this name: [%s]", found);
             }
         }
     }

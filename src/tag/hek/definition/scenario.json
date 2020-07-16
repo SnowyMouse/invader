@@ -2288,37 +2288,37 @@
             {
                 "name": "point 1",
                 "type": "Index",
-                "comment": "This can be an index to a point from the command list, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to a point from the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "point 2",
                 "type": "Index",
-                "comment": "This can be an index to a point from the command list, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to a point from the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "animation",
                 "type": "Index",
-                "comment": "This can be an index to an animation reference from the scenario, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to an animation reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "script",
                 "type": "Index",
-                "comment": "This can be an index to an AI script reference from the scenario, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to an AI script reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "recording",
                 "type": "Index",
-                "comment": "This can be an index to an AI recording reference from the scenario, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to an AI recording reference from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "command",
                 "type": "Index",
-                "comment": "This can be an index to another command in the command list, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to another command in the command list, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "name": "object name",
                 "type": "Index",
-                "comment": "This can be an index to an object name from the scenario, 65535 (null), or an invalid index. If it's an invalid index, then the command gets skipped."
+                "comment": "This can be an index to an object name from the scenario, null, or an invalid index. If it's an invalid index, then the command gets skipped."
             },
             {
                 "type": "pad",
