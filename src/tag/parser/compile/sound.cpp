@@ -7,11 +7,13 @@
 
 namespace Invader::Parser {
     void SoundPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        auto permutation_index = offset / sizeof(struct_little);
+        
         // Flip the endianness of the 16-bit PCM stream
         if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
             std::size_t size = this->samples.size() / 2;
             if(size * 2 != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid size.", permutation_index);
                 throw InvalidTagDataException();
             }
 
@@ -27,20 +29,47 @@ namespace Invader::Parser {
         if(buffer_size_required) {
             bool stock_halo_wont_play_it = false;
             if(this->buffer_size == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has 0 decompression buffer.", permutation_index);
                 stock_halo_wont_play_it = true;
             }
             // Make sure the value is set
             else if(this->format == HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM && this->buffer_size != this->samples.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", offset / sizeof(struct_little));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu has an incorrect decompression buffer size.", permutation_index);
                 stock_halo_wont_play_it = true;
             }
             if(stock_halo_wont_play_it) {
-                eprintf_warn("Stock Halo will not play it.");
+                eprintf_warn("Stock Halo may not play it.");
             }
         }
         else {
             this->buffer_size = 0;
+        }
+        
+        // Warn based on format
+        switch(this->format) {
+            case HEK::SoundFormat::SOUND_FORMAT_FLAC:
+                if(workload.cache_file_type != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
+                }
+                break;
+            case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
+                if(workload.cache_file_type == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
+                }
+                break;
+            case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses IMA ADPCM is unsupported on the target engine", permutation_index);
+                break;
+            case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                if(workload.cache_file_type != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the target engine without a mod", permutation_index);
+                }
+                break;
+            case HEK::SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                break;
+            default:
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu has an invalid sound format set", permutation_index);
+                throw InvalidTagDataException();
         }
 
         // Add the two lone IDs and set the sample size
