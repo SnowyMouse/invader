@@ -128,12 +128,19 @@ namespace Invader::EditQt {
                 auto &current_value = values[value_index];
                 set_error_level_textbox(textbox, ((min.has_value() && compare_number(current_value, min.value()) < 0) || (max.has_value() && compare_number(current_value, max.value()) > 0)) ? 2 : 0);
 
-                // Radians get converted to degrees
-                if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
-                    textbox->setText(QString::number(RADIANS_TO_DEGREES(std::get<double>(current_value))));
-                }
-                else if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
-                    textbox->setText(QString::number(std::get<double>(current_value)));
+                auto value_type = value->get_type();
+                if(value->get_number_format() == Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT) {
+                    // Radians get converted to degrees
+                    switch(value_type) {
+                        case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
+                        case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
+                        case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
+                            textbox->setText(QString::number(RADIANS_TO_DEGREES(std::get<double>(current_value))));
+                            break;
+                        default:
+                            textbox->setText(QString::number(std::get<double>(current_value)));
+                            break;
+                    }
                 }
                 // Indices can be blank (null)
                 else if(value->get_type() == Parser::ParserStructValue::VALUE_TYPE_INDEX) {
@@ -490,8 +497,16 @@ namespace Invader::EditQt {
 
         // Add any suffix if needed
         const char *unit = value->get_unit();
-        if(unit == nullptr && value->get_type() == Parser::ParserStructValue::VALUE_TYPE_ANGLE) {
-            unit = "degrees";
+        if(unit == nullptr) {
+            switch(value->get_type()) {
+                case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
+                case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
+                case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
+                    unit = "degrees";
+                    break;
+                default:
+                    break;
+            }
         }
         if(unit) {
             layout->addWidget(widgets_array.emplace_back(new QLabel(unit)));
@@ -740,12 +755,21 @@ namespace Invader::EditQt {
                     switch(number_format) {
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_FLOAT: {
                             double double_value = widget->text().toDouble(&ok);
-                            if(value_type == Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE) {
-                                double_value = DEGREES_TO_RADIANS(double_value);
+                            
+                            // Modify the value if we're inputting into something that takes degrees but stores as radians
+                            switch(value_type) {
+                                case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
+                                case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
+                                case Parser::ParserStructValue::ValueType::VALUE_TYPE_ANGLE:
+                                    double_value = DEGREES_TO_RADIANS(double_value);
+                                    break;
+                                default:
+                                    break;
                             }
                             number = double_value;
                             break;
                         }
+                        
                         case Parser::ParserStructValue::NumberFormat::NUMBER_FORMAT_INT:
                             if(value_type == Parser::ParserStructValue::ValueType::VALUE_TYPE_INDEX && (widget->text().isEmpty() || widget->text().toLower() == "null")) {
                                 number = static_cast<std::int64_t>(NULL_INDEX);

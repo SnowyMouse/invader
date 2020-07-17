@@ -23,9 +23,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed the maximum distance value not being set correctly for
   sound_looping tags that have detail sounds
 - invader-build: Fixed `-u` and `-c` being ignored if specified before `-g`
-- invader-edit-qt: Fixed "damage upper bound" showing as two separate fields
 - invader-compare: Fixed `-f` requiring a tag input
 - invader-compare: Fixed mismatched tags showing up twice
+- invader-edit-qt: Fixed "damage upper bound" showing as two separate fields
+- invader-edit-qt: Fixed 2D and 3D Euler angles not showing up as degrees
 
 ## [0.35.0] - 2020-07-14
 ### Added

@@ -198,7 +198,8 @@
                 "name": "natural pitch",
                 "type": "float",
                 "default": 1.0,
-                "default_sign": true
+                "default_sign": true,
+                "comment": "The playback rate is the inverse of this (so doubling this effectively halves the pitch)"
             },
             {
                 "name": "bend bounds",
@@ -279,7 +280,8 @@
                 "name": "random pitch bounds",
                 "bounds": true,
                 "type": "float",
-                "default": [ 1.0, 1.0 ]
+                "default": [ 1.0, 1.0 ],
+                "comment": "This affects the playback rate of the sound."
             },
             {
                 "name": "inner cone angle",
