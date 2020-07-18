@@ -177,7 +177,7 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile> single_tag;
     std::vector<TagFile> *tag_to_modify;
     
-    // Resolve all single tag replacements
+    // Resolve all class replacements
     for(auto &r : class_replacements) {
         for(auto &t : all_tags) {
             if(t.tag_class_int == r.second) {
@@ -192,7 +192,7 @@ int main(int argc, char * const *argv) {
     // Make sure we aren't changing tag classes if move
     if(!refactor_options.no_move) {
         for(auto &t : refactor_options.replacements) {
-            if(t.first != t.second) {
+            if(t.first.class_int != t.second.class_int) {
                 eprintf_error("Error: Tag classes cannot be changed with --move");
                 return EXIT_FAILURE;
             }

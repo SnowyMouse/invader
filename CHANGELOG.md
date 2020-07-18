@@ -27,6 +27,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-compare: Fixed mismatched tags showing up twice
 - invader-edit-qt: Fixed "damage upper bound" showing as two separate fields
 - invader-edit-qt: Fixed 2D and 3D Euler angles not showing up as degrees
+- invader-refactor: Fixed `-M` not working
 
 ## [0.35.0] - 2020-07-14
 ### Added
