@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.35.1] - 2020-07-18
 ### Added
 - invader: Re-added checking and erroring on invalid command list indices
 - invader-refactor: Added class refactoring
