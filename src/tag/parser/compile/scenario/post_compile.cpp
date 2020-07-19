@@ -664,8 +664,8 @@ namespace Invader::Parser {
                         participant.encounter_index = encounter_index.value_or(0xFFFFFFFF);
                         
                         // Next, we need to look at the marine types
-                        #define MAX_VARIANT_COUNT (sizeof(participant.marine_variants) / sizeof(*participant.marine_variants))
-                        std::fill(participant.marine_variants, participant.marine_variants + MAX_VARIANT_COUNT, 0xFFFF);
+                        #define MAX_VARIANT_COUNT (sizeof(participant.variant_numbers) / sizeof(*participant.variant_numbers))
+                        std::fill(participant.variant_numbers, participant.variant_numbers + MAX_VARIANT_COUNT, 0xFFFF);
                         bool warned_variants[MAX_VARIANT_COUNT] = {};
                         
                         // Check for variants
@@ -692,7 +692,7 @@ namespace Invader::Parser {
                                 
                                 // Try to match a variant
                                 std::uint16_t variant_matched;
-                                auto &variant_to_set = participant.marine_variants[variant];
+                                auto &variant_to_set = participant.variant_numbers[variant];
                                 
                                 // Basically we're checking the tag paths for keywords
                                 auto path_length = what.path.size();
@@ -752,7 +752,7 @@ namespace Invader::Parser {
                         // Will it even play???
                         if(participant.selection_type != HEK::ScenarioSelectionType::SCENARIO_SELECTION_TYPE_DISEMBODIED && !(participant.flags & HEK::ScenarioAIConversationParticipantFlagsFlag::SCENARIO_A_I_CONVERSATION_PARTICIPANT_FLAGS_FLAG_OPTIONAL)) {
                             bool has_dialogue_present = false;
-                            for(auto &i : participant.marine_variants) {
+                            for(auto &i : participant.variant_numbers) {
                                 if(i != 0xFFFF) {
                                     has_dialogue_present = true;
                                     break;
