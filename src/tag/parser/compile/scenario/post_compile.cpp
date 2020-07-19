@@ -678,7 +678,7 @@ namespace Invader::Parser {
                             }
                             
                             // Matching by tag paths and hardcoding these things is insane, but here we are.
-                            auto set_variant = [&participant, &tag_index, &workload, &aic, &p, &warned_variants](std::size_t variant, Dependency &what) {
+                            auto set_variant = [&participant, &tag_index, &workload, &aic, &p, &warned_variants, &convo](std::size_t variant, Dependency &what) {
                                 // If null, do nothing
                                 if(what.path.size() == 0) {
                                     return;
@@ -748,6 +748,20 @@ namespace Invader::Parser {
                         }
                         
                         #undef MAX_VARIANT_COUNT
+                        
+                        // Will it even play???
+                        if(participant.selection_type != HEK::ScenarioSelectionType::SCENARIO_SELECTION_TYPE_DISEMBODIED && !(participant.flags & HEK::ScenarioAIConversationParticipantFlagsFlag::SCENARIO_A_I_CONVERSATION_PARTICIPANT_FLAGS_FLAG_OPTIONAL)) {
+                            bool has_dialogue_present = false;
+                            for(auto &i : participant.marine_variants) {
+                                if(i != 0xFFFF) {
+                                    has_dialogue_present = true;
+                                    break;
+                                }
+                            }
+                            if(!has_dialogue_present) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu (%s) has no lines and is not set to disembodied. The conversation will not play.", p, aic, convo.name.string);
+                            }
+                        }
                     }
                 }
             }
