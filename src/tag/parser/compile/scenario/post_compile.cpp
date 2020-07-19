@@ -730,14 +730,12 @@ namespace Invader::Parser {
                                 #undef IF_THING_IS_CONTAINED_IN_THE_THING
                                 
                                 // Now let's see if it's something bad
-                                if(variant_to_set != 0xFFFF && variant_to_set != variant_matched) {
-                                    if(!warned_variants[variant]) {
-                                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu matches multiple marine variants for variant #%zu", p, aic, variant);
-                                        warned_variants[variant] = true;
-                                    }
-                                }
-                                else {
+                                if(variant_to_set == 0xFFFF || variant_to_set == 0x0000) {
                                     variant_to_set = variant_matched;
+                                }
+                                else if(variant_matched != 0x0000 && variant_to_set != 0x0000 && !warned_variants[variant]) {
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu (%s) matches multiple marine variants for variant #%zu", p, aic, convo.name.string, variant);
+                                    warned_variants[variant] = true;
                                 }
                             };
                             
