@@ -13,6 +13,8 @@ namespace Invader::EditQt {
     class TagTreeWindow;
 
     class TagTreeDialog : public QDialog {
+        Q_OBJECT
+        
     public:
         /**
          * Instantiate a TagFileDialog
@@ -41,11 +43,14 @@ namespace Invader::EditQt {
          * @return tag file result
          */
         const std::optional<File::TagFile> &get_tag() const noexcept;
+        
+        ~TagTreeDialog() = default;
 
     private:
         TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, std::optional<HEK::TagClassInt> saving);
         std::optional<File::TagFile> tag;
         TagTreeWidget *tree_widget;
+        void match_find_filter(const QString &filter);
         void change_title(const std::optional<std::vector<HEK::TagClassInt>> &classes);
         void change_title(HEK::TagClassInt save_class);
         void done(int r);
@@ -54,6 +59,9 @@ namespace Invader::EditQt {
         void new_folder();
         void do_save_as();
         std::optional<HEK::TagClassInt> save_class;
+        std::optional<std::vector<HEK::TagClassInt>> filter_classes;
+        QString path_filter;
+        void refresh_filter();
 
         QLineEdit *path_to_enter;
         QComboBox *tag_paths;

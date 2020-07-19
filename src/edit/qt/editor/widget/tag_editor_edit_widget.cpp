@@ -841,7 +841,7 @@ namespace Invader::EditQt {
     }
 
     void TagEditorEditWidget::find_dependency() {
-        TagTreeDialog dialog(this, this->get_editor_window()->get_parent_window(), this->get_struct_value()->get_allowed_classes());
+        TagTreeDialog dialog(nullptr, this->get_editor_window()->get_parent_window(), this->get_struct_value()->get_allowed_classes());
         dialog.exec();
         auto &tag = dialog.get_tag();
         if(tag.has_value()) {

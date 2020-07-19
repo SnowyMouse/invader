@@ -3,6 +3,13 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-build: Added warnings for if you use multiple variants for a slot in a
+  conversation
+- invader-edit-qt: Added filtering in the Find dialog
+- invader-edit-qt: Made the filter in the Find dialog and the path in the Save
+  dialog have focus
+
 ### Fixed
 - invader-build: Fixed an issue where participants were set as valid when they
   shouldn't have (fixes unused dialogue being played in maps like b30 and a50)

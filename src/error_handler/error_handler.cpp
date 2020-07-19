@@ -69,10 +69,10 @@ namespace Invader {
                     for(; offset < len && text_to_output[word_end] != ' ' && text_to_output[word_end] != 0; word_end++); \
                      \
                     /* get the number of characters */ \
-                    std::size_t word_len = word_end - word_offset; \
+                    std::size_t word_len = (word_end - word_offset) + 1; \
                      \
                     /* if we have characters in the line, and we're at the end of the line, empty the line */ \
-                    if(word_len + line_offset + 1 > terminal_width && line_offset > 0) { \
+                    if(word_len + line_offset > terminal_width && line_offset > 0) { \
                         call("%s", line); \
                         line_offset = 0; \
                         line[0] = 0; \
@@ -87,8 +87,8 @@ namespace Invader {
                     } \
                     /* otherwise, append it! */ \
                     else { \
-                        std::snprintf(line + line_offset, word_len + 2, "%s%s", (line_offset > 0 ? " " : ""), text_to_output + offset); \
-                        line_offset += word_len + (line_offset > 0 ? 1 : 0); \
+                        std::snprintf(line + line_offset, word_len + 1, "%s%s", (line_offset > 0 ? " " : ""), text_to_output + offset); \
+                        line_offset += (word_len - 1) + (line_offset > 0 ? 1 : 0); \
                     } \
                     /* advance number of characters */ \
                     offset = word_end; \

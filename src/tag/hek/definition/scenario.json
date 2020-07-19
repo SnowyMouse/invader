@@ -2502,12 +2502,12 @@
                 "size": 12
             },
             {
-                "name": "marine variants",
+                "name": "variant numbers",
                 "type": "uint16",
                 "endian": "little",
                 "cache_only": true,
                 "count": 6,
-                "comment": "Matches by tag path. WHAT??? (bisenti = 2, fitzgerald/jenkins = 4, aussie = 5, mendoza = 6, sarge/johnson = 100, sarge2/lehto = 101, everything else = 0, null = 65535)"
+                "comment": "Determines which kind of variant gets a given line. By default, this matches by tag path (bisenti = 2, fitzgerald/jenkins = 4, aussie = 5, mendoza = 6, sarge/johnson = 100, sarge2/lehto = 101, everything else = 0, null = 65535)"
             },
             {
                 "name": "encounter name",

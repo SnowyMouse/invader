@@ -29,6 +29,9 @@ namespace Invader::EditQt {
         refresh->setShortcut(QKeySequence::Refresh);
         connect(refresh, &QAction::triggered, parent_window, &TagTreeWindow::refresh_view);
         this->addAction(refresh);
+        
+        // Hold onto classes
+        this->filter_classes = classes;
 
         // Add the widget
         if(save_class.has_value()) {
@@ -55,13 +58,13 @@ namespace Invader::EditQt {
         // Set layout
         vbox_layout->addWidget(this->tree_widget);
 
-        // Next, add a textbox to type a path in, a button to create directories in, and a combo box of tag paths
+        // Add a textbox to type paths in
+        auto *hbox_layout = new QHBoxLayout();
+        this->path_to_enter = new QLineEdit();
+        hbox_layout->addWidget(this->path_to_enter);
+        
+        // Next, add a button to create directories in, and a combo box of tag paths
         if(save_class.has_value()) {
-            auto *hbox_layout = new QHBoxLayout();
-            this->path_to_enter = new QLineEdit();
-
-            hbox_layout->addWidget(this->path_to_enter);
-
             // Add a new directory button because memes
             auto *new_directory = new QPushButton("New folder");
             connect(new_directory, &QPushButton::clicked, this, &TagTreeDialog::new_folder);
@@ -72,17 +75,42 @@ namespace Invader::EditQt {
             hbox_layout->addWidget(save);
             new_directory->setAutoDefault(false);
             save->setAutoDefault(true);
-
-            // Add our thing
-            auto *widget = new QWidget();
-            widget->setLayout(hbox_layout);
-            vbox_layout->addWidget(widget);
         }
+        
+        // This looks like a find dialogue, so provide a filter option
+        else {
+            this->path_to_enter->setPlaceholderText("Filter (e.g. *test* matches all tags with \"test\")");
+            connect(this->path_to_enter, &QLineEdit::textChanged, this, &TagTreeDialog::match_find_filter);
+        }
+
+        // Add our thing
+        auto *widget = new QWidget();
+        widget->setLayout(hbox_layout);
+        vbox_layout->addWidget(widget);
 
         this->tree_widget->setMinimumSize(640, 480);
 
         // Set our layout
         this->setLayout(vbox_layout);
+        
+        this->path_to_enter->setFocus();
+    }
+    
+    void TagTreeDialog::match_find_filter(const QString &filter) {
+        this->path_filter = filter;
+        this->refresh_filter();
+    }
+    
+    void TagTreeDialog::refresh_filter() {
+        // If we have any sort of path filter set, apply that first
+        std::optional<std::vector<std::string>> expr_filters;
+        if(this->path_filter.size()) {
+            expr_filters = std::vector<std::string>();
+            expr_filters->emplace_back(this->path_filter.toStdString());
+        }
+        
+        // Next, set the filter!
+        this->tree_widget->set_filter(this->filter_classes, std::nullopt, expr_filters);
     }
 
     TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes) : TagTreeDialog(parent, parent_window, classes, std::nullopt) {
@@ -98,7 +126,8 @@ namespace Invader::EditQt {
     }
 
     void TagTreeDialog::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes) {
-        this->tree_widget->set_filter(classes);
+        this->filter_classes = classes;
+        this->refresh_filter();
         this->change_title(classes);
     }
 
