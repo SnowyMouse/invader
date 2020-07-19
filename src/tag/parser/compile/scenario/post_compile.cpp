@@ -759,7 +759,7 @@ namespace Invader::Parser {
                                 }
                             }
                             if(!has_dialogue_present) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu (%s) has no lines and is not set to disembodied. The conversation will not play.", p, aic, convo.name.string);
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu (%s) has no lines and is neither optional nor set to disembodied. The conversation will not play.", p, aic, convo.name.string);
                             }
                         }
                     }
