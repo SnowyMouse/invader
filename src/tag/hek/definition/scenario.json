@@ -2502,28 +2502,12 @@
                 "size": 12
             },
             {
-                "name": "unknown1",
+                "name": "marine variants",
                 "type": "uint16",
                 "endian": "little",
-                "cache_only": true
-            },
-            {
-                "name": "unknown2",
-                "type": "uint16",
-                "endian": "little",
-                "cache_only": true
-            },
-            {
-                "name": "unknown3",
-                "type": "uint32",
-                "endian": "little",
-                "cache_only": true
-            },
-            {
-                "name": "unknown4",
-                "type": "uint32",
-                "endian": "little",
-                "cache_only": true
+                "cache_only": true,
+                "count": 6,
+                "comment": "Matches by tag path. WHAT??? (bisenti = 2, fitzgerald/jenkins = 4, aussie = 5, mendoza = 6, sarge/johnson = 100, sarge2/lehto = 101, everything else = 0, null = 65535)"
             },
             {
                 "name": "encounter name",

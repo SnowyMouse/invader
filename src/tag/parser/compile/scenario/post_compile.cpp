@@ -641,6 +641,7 @@ namespace Invader::Parser {
             for(std::size_t aic = 0; aic < ai_conversation_count; aic++) {
                 auto &convo = ai_conversation_data[aic];
                 std::size_t participation_count = convo.participants.count.read();
+                std::size_t line_count = convo.lines.count.read();
                 if(participation_count) {
                     auto &participation_struct = workload.structs[*ai_conversation_struct.resolve_pointer(&convo.participants.pointer)];
                     auto *participation_data = reinterpret_cast<Parser::ScenarioAIConversationParticipant::struct_little *>(participation_struct.data.data());
@@ -657,15 +658,98 @@ namespace Invader::Parser {
                                 }
                             }
                             if(!encounter_index.has_value()) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a non-existant encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a nonexistent encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
                             }
                         }
-                        
                         participant.encounter_index = encounter_index.value_or(0xFFFFFFFF);
-                        participant.unknown1 = 0;
-                        participant.unknown2 = 0xFFFF;
-                        participant.unknown3 = 0xFFFFFFFF;
-                        participant.unknown4 = 0xFFFFFFFF;
+                        
+                        // Next, we need to look at the marine types
+                        #define MAX_VARIANT_COUNT (sizeof(participant.marine_variants) / sizeof(*participant.marine_variants))
+                        std::fill(participant.marine_variants, participant.marine_variants + MAX_VARIANT_COUNT, 0xFFFF);
+                        bool warned_variants[MAX_VARIANT_COUNT] = {};
+                        
+                        // Check for variants
+                        for(std::size_t l = 0; l < line_count; l++) {
+                            auto &line = scenario.ai_conversations[aic].lines[l];
+                            
+                            // If it's not our guy, skip
+                            if(line.participant != p) {
+                                continue;
+                            }
+                            
+                            // Matching by tag paths and hardcoding these things is insane, but here we are.
+                            auto set_variant = [&participant, &tag_index, &workload, &aic, &p, &warned_variants](std::size_t variant, Dependency &what) {
+                                // If null, do nothing
+                                if(what.path.size() == 0) {
+                                    return;
+                                }
+                                
+                                // If this is bullshit, stop the program.
+                                if(variant >= MAX_VARIANT_COUNT) {
+                                    eprintf_error("variant index %zu >= %zu", variant, MAX_VARIANT_COUNT);
+                                    std::terminate();
+                                }
+                                
+                                // Try to match a variant
+                                std::uint16_t variant_matched;
+                                auto &variant_to_set = participant.marine_variants[variant];
+                                
+                                // Basically we're checking the tag paths for keywords
+                                auto path_length = what.path.size();
+                                auto *path_cstr = what.path.c_str();
+                                
+                                auto contains_thing = [](const char *haystack, std::size_t haystack_length, const char *needle, std::size_t needle_length) -> bool {
+                                    if(haystack_length < needle_length) {
+                                        return false;
+                                    }
+                                    for(std::size_t h = 0; h <= haystack_length - needle_length; h++) {
+                                        if(std::strncmp(haystack + h, needle, needle_length) == 0) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                };
+                                
+                                #define IF_THING_IS_CONTAINED_IN_THE_THING(thing, to) if(contains_thing(path_cstr, path_length, thing, std::strlen(thing))) {\
+                                                                                          variant_matched = to;\
+                                                                                      }
+                                        
+                                IF_THING_IS_CONTAINED_IN_THE_THING("bisenti", 2)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("fitzgerald", 4)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("jenkins", 4)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("aussie", 5)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("mendoza", 6)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("sarge", 100)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("johnson", 100)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("sarge2", 101)
+                                else IF_THING_IS_CONTAINED_IN_THE_THING("lehto", 101)
+                                else {
+                                    variant_matched = 0;
+                                }
+                                    
+                                #undef IF_THING_IS_CONTAINED_IN_THE_THING
+                                
+                                // Now let's see if it's something bad
+                                if(variant_to_set != 0xFFFF && variant_to_set != variant_matched) {
+                                    if(!warned_variants[variant]) {
+                                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Participant #%zu of AI conversation #%zu matches multiple marine variants for variant #%zu", p, aic, variant);
+                                        warned_variants[variant] = true;
+                                    }
+                                }
+                                else {
+                                    variant_to_set = variant_matched;
+                                }
+                            };
+                            
+                            set_variant(0, line.variant_1);
+                            set_variant(1, line.variant_2);
+                            set_variant(2, line.variant_3);
+                            set_variant(3, line.variant_4);
+                            set_variant(4, line.variant_5);
+                            set_variant(5, line.variant_6);
+                        }
+                        
+                        #undef MAX_VARIANT_COUNT
                     }
                 }
             }
