@@ -205,6 +205,10 @@ namespace Invader::Parser {
             if(!fix) {
                 return true;
             }
+            
+            // Compressed vertices do NOT use local nodes so untick zoner
+            part.flags &= ~HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
+            
             part.uncompressed_vertices.reserve(part.compressed_vertices.size());
             for(auto &v : part.compressed_vertices) {
                 auto before_data = v.generate_hek_tag_data();
@@ -222,9 +226,31 @@ namespace Invader::Parser {
             }
         }
         else if(part.compressed_vertices.size() == 0 && part.uncompressed_vertices.size() > 0) {
+            auto resolve_local_node = [&part](HEK::Index local_index) -> HEK::Index {
+                // If we don't have any local nodes, just passthrough
+                if((sizeof(typename P::struct_little) != sizeof(GBXModelGeometryPart::struct_little)) || !(part.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER)) {
+                    return local_index;
+                }
+                
+                // And if the local node passed is null, just return it
+                if(local_index == NULL_INDEX) {
+                    return NULL_INDEX;
+                }
+                
+                // Do it
+                auto *part_gbx = reinterpret_cast<GBXModelGeometryPart *>(&part);
+                if(local_index >= part_gbx->local_node_count) {
+                    eprintf_error("Can't fix: Index is out-of-bounds for local node indices (%u vs %u)", local_index, part_gbx->local_node_count);
+                    throw InvalidTagDataException();
+                }
+                return part_gbx->local_node_indices[local_index];
+            };
+            
             // Can we even do this?
             for(auto &v : part.uncompressed_vertices) {
-                if((v.node0_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && v.node0_index < NULL_INDEX) || (v.node1_index > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && v.node1_index < NULL_INDEX)) {
+                auto n0 = resolve_local_node(v.node0_index);
+                auto n1 = resolve_local_node(v.node1_index);
+                if((n0 > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && n0 < NULL_INDEX) || (n1 > MaxCompressedModelNodeIndex::MAX_COMPRESSED_MODEL_NODE_INDEX && n1 < NULL_INDEX)) {
                     return false;
                 }
             }
@@ -234,9 +260,15 @@ namespace Invader::Parser {
             }
             
             part.compressed_vertices.reserve(part.uncompressed_vertices.size());
+            
             for(auto &v : part.uncompressed_vertices) {
-                auto before_data = v.generate_hek_tag_data();
-                auto after_data = HEK::compress_model_vertex(*reinterpret_cast<ModelVertexUncompressed::struct_big *>(before_data.data()));
+                // Resolve local nodes before throwing them into the compressor
+                auto before_data_copy = *reinterpret_cast<ModelVertexUncompressed::struct_big *>(v.generate_hek_tag_data().data());
+                before_data_copy.node0_index = resolve_local_node(before_data_copy.node0_index);
+                before_data_copy.node1_index = resolve_local_node(before_data_copy.node1_index);
+                
+                // Done
+                auto after_data = HEK::compress_model_vertex(before_data_copy);
                 auto &after_data_write = part.compressed_vertices.emplace_back();
                 after_data_write.binormal = after_data.binormal;
                 after_data_write.normal = after_data.normal;
@@ -269,11 +301,19 @@ namespace Invader::Parser {
 
     template <class M> static bool regenerate_missing_model_vertices_model(M &model, bool fix) {
         bool result = false;
+        bool zoner_present = false;
         for(auto &g : model.geometries) {
             for(auto &p : g.parts) {
                 result = regenerate_missing_model_vertices(p, fix) || result;
+                zoner_present = zoner_present || (p.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER);
             }
         }
+        
+        // Do we have to remove a zoner flag?
+        if(fix && !zoner_present) {
+            model.flags &= ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        }
+        
         return result;
     }
 
@@ -320,9 +360,6 @@ namespace Invader::Parser {
                 }
                 indices = reinterpret_cast<const HEK::LittleEndian<HEK::Index> *>(map.get_data_at_offset(model_index_offset + part.triangle_offset.read(), sizeof(std::uint16_t) * index_count));
             }
-            
-            // Regenerate vertices
-            regenerate_missing_model_vertices(what, true);
         }
 
         // Get model indices
@@ -880,6 +917,8 @@ namespace Invader::Parser {
         what.high_detail_cutoff = low;
         what.super_high_detail_cutoff = super_low;
 
+        regenerate_missing_model_vertices(what, true); // regenerate if needed
+        
         what.postprocess_hek_data();
     }
 
