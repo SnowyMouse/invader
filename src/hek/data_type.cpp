@@ -272,7 +272,7 @@ namespace Invader::HEK {
         r.node0_index = vertex.node0_index < 0 ? 65535 : vertex.node0_index / 3;
         r.node0_weight = decompress_float<16>(vertex.node0_weight);
         r.node1_index = vertex.node1_index < 0 ? 65535 : vertex.node1_index / 3;
-        r.node1_weight = 0;
+        r.node1_weight = 1.0F - r.node0_weight; // this is just derived from node0_weight
         r.texture_coords.x = decompress_float<16>(vertex.texture_coordinate_u);
         r.texture_coords.y = decompress_float<16>(vertex.texture_coordinate_v);
 
