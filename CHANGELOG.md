@@ -10,7 +10,15 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Made the filter in the Find dialog and the path in the Save
   dialog have focus
 
+### Changed
+- invader: Decompressing vertices now clears the "zoner" and "uses local nodes"
+  flags since compressed vertices do not use these
+
 ### Fixed
+- invader: Fixed decompressing vertices not calculating weight correctly
+- invader: Fixed compressing vertices using local node indices instead of actual
+  indices (this affects Xbox map compilation support, mainly, which isn't yet 
+  implemented)
 - invader-build: Fixed an issue where participants were set as valid when they
   shouldn't have (fixes unused dialogue being played in maps like b30 and a50)
 - invader-extract: Fixed sounds from sounds.map being extracted with the wrong
