@@ -216,11 +216,6 @@ namespace Invader::Parser {
 
     template <typename T> static void sound_post_cache_parse(T *sound, const Invader::Tag &tag) {
         sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, TICK_RATE);
-        if(tag.is_indexed()) {
-            auto &tag_data = *(reinterpret_cast<const typename T::struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(static_cast<HEK::Pointer>(0), 0)) - 1);
-            sound->format = tag_data.format;
-            sound->channel_count = tag_data.channel_count;
-        }
     }
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {

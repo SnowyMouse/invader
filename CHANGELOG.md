@@ -13,6 +13,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed an issue where participants were set as valid when they
   shouldn't have (fixes unused dialogue being played in maps like b30 and a50)
+- invader-extract: Fixed sounds from sounds.map being extracted with the wrong
+  sample rate
 
 ## [0.35.1] - 2020-07-18
 ### Added
