@@ -252,7 +252,7 @@ namespace Invader::Parser {
         }
     }
 
-    void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void Sound::post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>) {
         sound_post_cache_parse(this);
     }
 
@@ -260,7 +260,7 @@ namespace Invader::Parser {
         sound_pre_compile(this, workload, tag_index);
     }
 
-    void ExtendedSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void ExtendedSound::post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>) {
         sound_post_cache_parse(this);
     }
 
