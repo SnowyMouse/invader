@@ -214,8 +214,14 @@ namespace Invader::Parser {
         }
     }
 
-    template <typename T> static void sound_post_cache_parse(T *sound) {
+    template <typename T> static void sound_post_cache_parse(const Invader::Tag &tag, T *sound) {
         sound->maximum_bend_per_second = std::pow(sound->maximum_bend_per_second, TICK_RATE);
+        if(tag.is_indexed()) {
+            auto &tag_data = *(reinterpret_cast<const typename T::struct_little *>(&tag.get_struct_at_pointer<HEK::SoundPitchRange>(static_cast<HEK::Pointer>(0), 0)) - 1);
+            sound->format = tag_data.format;
+            sound->channel_count = tag_data.channel_count;
+            sound->sample_rate = tag_data.sample_rate;
+        }
     }
 
     void Sound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -252,16 +258,16 @@ namespace Invader::Parser {
         }
     }
 
-    void Sound::post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        sound_post_cache_parse(this);
+    void Sound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        sound_post_cache_parse(tag, this);
     }
 
     void ExtendedSound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
     }
 
-    void ExtendedSound::post_cache_parse(const Invader::Tag &, std::optional<HEK::Pointer>) {
-        sound_post_cache_parse(this);
+    void ExtendedSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+        sound_post_cache_parse(tag, this);
     }
 
     void SoundPermutation::post_cache_deformat() {
