@@ -13,6 +13,9 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader: Decompressing vertices now clears the "zoner" and "uses local nodes"
   flags since compressed vertices do not use these
+- invader-bitmap: Improved the accuracy of bitmap tags to ensure they match the
+  tags in the bitmaps.map file when compiling Halo Custom Edition maps. Sprites,
+  sequences, resolution, data format, type, and mipmap count are all checked.
 
 ### Fixed
 - invader: Fixed decompressing vertices not calculating weight correctly

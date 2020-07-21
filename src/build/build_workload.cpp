@@ -1669,46 +1669,137 @@ namespace Invader {
                                     const auto &bitmap_tag_other = *reinterpret_cast<const Parser::Bitmap::struct_little *>(bitmap_tag_struct_other_data);
                                     std::size_t bitmap_data_count = bitmap_tag.bitmap_data.count;
                                     std::size_t bitmap_data_other_count = bitmap_tag_other.bitmap_data.count;
-
-                                    // Make sure we have the same number of stuff
-                                    if(bitmap_data_count > 0 && bitmap_data_count == bitmap_data_other_count) {
-                                        // Make sure it's not out-of-bounds
-                                        const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
-                                        if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
-                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
-                                            match = false;
-                                            break;
+                                    std::size_t sequence_count = bitmap_tag.bitmap_group_sequence.count;
+                                    std::size_t sequence_other_count = bitmap_tag_other.bitmap_group_sequence.count;
+                                    
+                                    // Make sure the bitmap type matches, first off
+                                    if(bitmap_tag_other.type == bitmap_tag.type) {
+                                        // Make sure our sequences match
+                                        if(match && sequence_count > 0 && sequence_count == sequence_other_count) {
+                                            // Make sure it's not out-of-bounds
+                                            const auto *all_sequence_other = reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_group_sequence.pointer);
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_sequence_other + sequence_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (sequence data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
+                                                match = false;
+                                                break;
+                                            }
+                                            
+                                            // Also get the bitmap sequences we have
+                                            auto &sequence_struct = this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_group_sequence.pointer)];
+                                            const auto *all_sequence = reinterpret_cast<const Parser::BitmapGroupSequence::struct_little *>(sequence_struct.data.data());
+                                            
+                                            if(bitmap_tag_other.type == BitmapType::BITMAP_TYPE_SPRITES) {
+                                                for(std::size_t s = 0; s < sequence_count && match; s++) {
+                                                    // Get sequence data
+                                                    const auto &sequence = all_sequence[s];
+                                                    const auto &sequence_other = all_sequence_other[s];
+                                                    
+                                                    // Make sure the sprites match
+                                                    std::size_t sprite_count = sequence.sprites.count;
+                                                    std::size_t sprite_count_other = sequence_other.sprites.count;
+                                                    
+                                                    if(sprite_count > 0 && sprite_count == sprite_count_other) {
+                                                        // Make sure it's not out-of-bounds
+                                                        const auto *all_sprites_other = reinterpret_cast<const Parser::BitmapGroupSprite::struct_little *>(bitmap_tag_struct_other_data + sequence_other.sprites.pointer);
+                                                        if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_sprites_other + sprite_count_other) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
+                                                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (sequence sprites goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
+                                                            match = false;
+                                                            break;
+                                                        }
+                                                        
+                                                        // And get our sprites, too
+                                                        auto &sprites_struct = this->structs[*sequence_struct.resolve_pointer(&sequence.sprites.pointer)];
+                                                        const auto *all_sprites = reinterpret_cast<const Parser::BitmapGroupSprite::struct_little *>(sprites_struct.data.data());
+                                                        
+                                                        // Check individual sprites to make sure they match
+                                                        for(std::size_t sp = 0; sp < sprite_count && match; sp++) {
+                                                            const auto &sprite = all_sprites[sp];
+                                                            const auto &sprite_other = all_sprites_other[sp];
+                                                            match = match && sprite.bitmap_index == sprite_other.bitmap_index;
+                                                            match = match && sprite.bottom == sprite_other.bottom;
+                                                            match = match && sprite.left == sprite_other.left;
+                                                            match = match && sprite.top == sprite_other.top;
+                                                            match = match && sprite.right == sprite_other.right;
+                                                            match = match && sprite.registration_point == sprite_other.registration_point;
+                                                        }
+                                                    }
+                                                    else {
+                                                        match = match && sprite_count == sprite_count_other;
+                                                    }
+                                                }
+                                            }
+                                            else {
+                                                for(std::size_t s = 0; s < sequence_count && match; s++) {
+                                                    // Get sequence data
+                                                    const auto &sequence = all_sequence[s];
+                                                    const auto &sequence_other = all_sequence_other[s];
+                                                    
+                                                    // Make sure the bitmap range matches
+                                                    match = match && sequence.bitmap_count == sequence_other.bitmap_count;
+                                                    match = match && sequence.first_bitmap_index == sequence_other.first_bitmap_index;
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            match = match && sequence_count == sequence_other_count;
                                         }
 
-                                        // Make sure we get match to equal the bitmap data count
-                                        for(std::size_t b = 0; b < bitmap_data_count && match; b++) {
-                                            // Get the bitmap data
-                                            const auto &bitmap_data_other = all_bitmap_data_other[b];
-
-                                            // Get the raw data and make sure the sizes match
-                                            std::size_t raw_data_index = t.asset_data[b];
-                                            auto &asset_raw_data = this->raw_data[raw_data_index];
-                                            std::size_t raw_data_size = asset_raw_data.size();
-                                            std::size_t raw_data_other_size = bitmap_data_other.pixel_data_size;
-                                            if(raw_data_other_size != raw_data_size) {
+                                        // Make sure we have the same number of bitmap data
+                                        if(match && bitmap_data_count > 0 && bitmap_data_count == bitmap_data_other_count) {
+                                            // Make sure it's not out-of-bounds
+                                            const auto *all_bitmap_data_other = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_tag_struct_other_data + bitmap_tag_other.bitmap_data.pointer);
+                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_bitmap_data_other + bitmap_data_other_count) - bitmap_tag_struct_other_data) > bitmap_tag_struct_other_size) {
+                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (bitmap data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
                                                 match = false;
                                                 break;
                                             }
+                                            
+                                            // Also get the bitmap data we have
+                                            auto &bitmap_data_struct = this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_data.pointer)];
+                                            const auto *all_bitmap_data = reinterpret_cast<const Parser::BitmapData::struct_little *>(bitmap_data_struct.data.data());
 
-                                            auto *raw_data_data = asset_raw_data.data();
-                                            auto *raw_data_other_data = bitmap_tag_struct_other_raw_data + bitmap_data_other.pixel_data_offset - bitmap_tag_struct_raw_data_translation;
+                                            // Make sure we get match to equal the bitmap data count
+                                            for(std::size_t b = 0; b < bitmap_data_count && match; b++) {
+                                                // Get the bitmap data
+                                                const auto &bitmap_data = all_bitmap_data[b];
+                                                const auto &bitmap_data_other = all_bitmap_data_other[b];
 
-                                            // Make sure it's not bullshit
-                                            if(raw_data_other_data < bitmap_tag_struct_other_raw_data || raw_data_other_data > (bitmap_tag_struct_other_raw_data + bitmap_tag_struct_other_raw_data_size)) {
-                                                oprintf("Range is 0x%08zX - 0x%08zX; needed 0x%08zX - 0x%08zX\n", bitmap_tag_struct_raw_data_translation, bitmap_tag_struct_raw_data_translation + bitmap_tag_struct_other_raw_data_size, static_cast<std::size_t>(bitmap_data_other.pixel_data_offset), static_cast<std::size_t>(bitmap_data_other.pixel_data_offset) + raw_data_size);
+                                                // Get the raw data and make sure the sizes match
+                                                std::size_t raw_data_index = t.asset_data[b];
+                                                auto &asset_raw_data = this->raw_data[raw_data_index];
+                                                std::size_t raw_data_size = asset_raw_data.size();
+                                                std::size_t raw_data_other_size = bitmap_data_other.pixel_data_size;
+                                                if(raw_data_other_size != raw_data_size) {
+                                                    match = false;
+                                                    break;
+                                                }
+                                                
+                                                // Make sure the formats and dimensions match too
+                                                match = match && bitmap_data_other.width == bitmap_data.width;
+                                                match = match && bitmap_data_other.height == bitmap_data.height;
+                                                match = match && bitmap_data_other.depth == bitmap_data.depth;
+                                                match = match && bitmap_data_other.mipmap_count == bitmap_data.mipmap_count;
+                                                match = match && bitmap_data_other.format == bitmap_data.format;
+                                                if(!match) {
+                                                    break;
+                                                }
+                                                
+                                                auto *raw_data_data = asset_raw_data.data();
+                                                auto *raw_data_other_data = bitmap_tag_struct_other_raw_data + bitmap_data_other.pixel_data_offset - bitmap_tag_struct_raw_data_translation;
 
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
-                                                match = false;
-                                                break;
+                                                // Make sure it's not bullshit
+                                                if(raw_data_other_data < bitmap_tag_struct_other_raw_data || raw_data_other_data > (bitmap_tag_struct_other_raw_data + bitmap_tag_struct_other_raw_data_size)) {
+                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (pixel data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
+                                                    match = false;
+                                                    break;
+                                                }
+
+                                                // Check the data
+                                                match = std::memcmp(raw_data_other_data, raw_data_data, raw_data_size) == 0;
                                             }
-
-                                            // Check the data
-                                            match = std::memcmp(raw_data_other_data, raw_data_data, raw_data_size) == 0;
+                                        }
+                                        else {
+                                            match = match && bitmap_data_count == bitmap_data_other_count;
                                         }
                                     }
                                     else {
