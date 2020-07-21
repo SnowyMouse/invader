@@ -32,8 +32,12 @@
                 "compound": true
             },
             {
+                "type": "Index",
+                "name": "pitch range"
+            },
+            {
                 "type": "pad",
-                "size": 12
+                "size": 10
             }
         ],
         "size": 64,
