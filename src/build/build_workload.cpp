@@ -1913,6 +1913,7 @@ namespace Invader {
                                                     match = match && permutation.format == permutation_other.format;
                                                     match = match && permutation.gain == permutation_other.gain;
                                                     match = match && permutation.next_permutation_index == permutation_other.next_permutation_index;
+                                                    match = match && permutation.skip_fraction == permutation_other.skip_fraction;
                                                     
                                                     if(!match) {
                                                         break;
