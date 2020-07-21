@@ -47,6 +47,30 @@ namespace Invader::EditQt {
             return option_layout;
         };
 
+        auto *pitch_range = new QComboBox();
+        add_option("Pitch range:", pitch_range, 2.0);
+        this->pitch_range = pitch_range;
+        auto *parser_data = this->get_parent_window()->get_parser_data();
+        
+        auto populate_pitch_range_box = [&pitch_range](auto *sound) {
+            for(auto &i : sound->pitch_ranges) {
+                pitch_range->addItem(i.name.string);
+            }
+        };
+        
+        switch(this->get_parent_window()->get_file().tag_class_int) {
+            case TagClassInt::TAG_CLASS_SOUND:
+                populate_pitch_range_box(dynamic_cast<Parser::Sound *>(parser_data));
+                break;
+            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+                populate_pitch_range_box(dynamic_cast<Parser::ExtendedSound *>(parser_data));
+                break;
+            default:
+                std::terminate();
+        }
+        
+        connect(this->pitch_range, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_pitch_range_permutations);
+
         // Generate our options
         this->actual_permutation = new QComboBox();
         add_option("Actual permutation:", this->actual_permutation, 2.0);
@@ -84,6 +108,13 @@ namespace Invader::EditQt {
         layout->addStretch();
 
         // Whoop!
+        this->update_pitch_range_permutations();
+    }
+    
+    void TagEditorSoundSubwindow::update_pitch_range_permutations() {
+        this->actual_permutation->blockSignals(true);
+        this->actual_permutation->clear();
+        
         Parser::SoundPitchRange *pitch_ranges = this->get_pitch_range();
         if(!pitch_ranges) {
             this->actual_permutation->setEnabled(false);
@@ -111,6 +142,7 @@ namespace Invader::EditQt {
 
         connect(this->actual_permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_permutation_list);
         connect(this->permutation, &QComboBox::currentTextChanged, this, &TagEditorSoundSubwindow::update_sound);
+        this->actual_permutation->blockSignals(false);
         this->update_permutation_list();
     }
 
@@ -296,7 +328,12 @@ namespace Invader::EditQt {
     Parser::SoundPitchRange *TagEditorSoundSubwindow::get_pitch_range() noexcept {
         auto &sample_rate = this->sample_rate;
         auto &channel_count = this->channel_count;
-        auto get_it = [&channel_count, &sample_rate](auto *what) -> Parser::SoundPitchRange * {
+        int index = this->pitch_range->currentIndex();
+        if(index < 0) {
+            return nullptr;
+        }
+        
+        auto get_it = [&channel_count, &sample_rate, &index](auto *what) -> Parser::SoundPitchRange * {
             switch(what->sample_rate) {
                 case HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ:
                     sample_rate = 44100;
@@ -319,13 +356,13 @@ namespace Invader::EditQt {
             }
 
             if(what->pitch_ranges.size()) {
-                return what->pitch_ranges.data();
+                return what->pitch_ranges.data() + index;
             }
             else {
                 return nullptr;
             }
         };
-
+        
         // Depending on the class, get the thing
         auto *parser_data = this->get_parent_window()->get_parser_data();
         switch(this->get_parent_window()->get_file().tag_class_int) {

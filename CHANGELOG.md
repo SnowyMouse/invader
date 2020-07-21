@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added filtering in the Find dialog
 - invader-edit-qt: Made the filter in the Find dialog and the path in the Save
   dialog have focus
+- invader-edit-qt: Added selecting individual pitch ranges
 
 ### Changed
 - invader: Decompressing vertices now clears the "zoner" and "uses local nodes"

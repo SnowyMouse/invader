@@ -69,6 +69,7 @@ namespace Invader::EditQt {
 
         QPushButton *play_button;
         QPushButton *stop_button;
+        QComboBox *pitch_range;
         QComboBox *actual_permutation;
         QComboBox *permutation;
         QSlider *slider;
@@ -86,6 +87,7 @@ namespace Invader::EditQt {
         void change_sample();
         void update_time_label();
         void change_volume(float volume);
+        void update_pitch_range_permutations();
 
         void closeEvent(QCloseEvent *) override;
     };
