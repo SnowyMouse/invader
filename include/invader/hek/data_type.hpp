@@ -632,6 +632,10 @@ namespace Invader::HEK {
             copy.x = this->y + add.y;
             return copy;
         }
+        
+        bool operator==(const Point2D<EndianType> &other) const {
+            return other.x == this->x && other.y == this->y;
+        }
 
         /**
          * Get the distance from the plane
