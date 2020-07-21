@@ -787,6 +787,10 @@ namespace Invader::HEK {
             COPY_THIS(to);
             return copy;
         }
+        
+        bool operator ==(const Bounds<BoundsType> &other) const {
+            return this->from == other.from && this->to == other.to;
+        }
     };
     static_assert(sizeof(Bounds<BigEndian<float>>) == 0x8);
 

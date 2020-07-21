@@ -1848,9 +1848,13 @@ namespace Invader {
                                     const auto &sound_tag_other = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct_other_data);
                                     std::size_t pitch_range_count = sound_tag.pitch_ranges.count;
                                     std::size_t pitch_range_other_count = sound_tag_other.pitch_ranges.count;
+                                    
+                                    match = sound_tag.format == sound_tag_other.format; // unlike bitmap tags, this matters because the engine checks this
+                                    match = sound_tag.channel_count == sound_tag_other.channel_count;
+                                    match = sound_tag.sample_rate == sound_tag_other.sample_rate;
 
                                     // Make sure we have the same number of stuff
-                                    if(pitch_range_count > 0 && pitch_range_count == pitch_range_other_count) {
+                                    if(match && pitch_range_count > 0 && pitch_range_count == pitch_range_other_count) {
                                         // Make sure it's not out-of-bounds
                                         const auto *sound_data_ref = sound_tag_struct_other_data + sizeof(sound_tag);
                                         const auto &pitch_range_struct = this->structs[*sound_tag_struct.resolve_pointer(&sound_tag.pitch_ranges.pointer)];
@@ -1868,6 +1872,15 @@ namespace Invader {
                                             // Get the bitmap data
                                             const auto &pitch_range = all_pitch_ranges[pr];
                                             const auto &pitch_range_other = all_pitch_ranges_other[pr];
+                                        
+                                            // Make sure these match
+                                            match = match && pitch_range.bend_bounds == pitch_range_other.bend_bounds;
+                                            match = match && pitch_range.actual_permutation_count == pitch_range_other.actual_permutation_count;
+                                            match = match && pitch_range.natural_pitch == pitch_range_other.natural_pitch; // we could check the value derived from this, but I don't want to deal with floating point precision memes, so I'll just assume that the sounds.map isn't *total* bullshit
+                                            if(!match) {
+                                                match = false;
+                                                break;
+                                            }
 
                                             std::size_t permutation_count = pitch_range.permutations.count;
                                             std::size_t permutation_other_count = pitch_range_other.permutations.count;
@@ -1880,47 +1893,61 @@ namespace Invader {
                                             if(permutation_count == 0) {
                                                 continue;
                                             }
-
-                                            // Bounds check
-                                            const auto *all_permutations_other = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(sound_data_ref + pitch_range_other.permutations.pointer);
-                                            if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_permutations_other + permutation_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
-                                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (permutations go out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
-                                                match = false;
-                                                break;
-                                            }
-
-                                            for(std::size_t p = 0; p < permutation_count && match; p++) {
-                                                auto &permutation_other = all_permutations_other[p];
-
-                                                std::size_t raw_data_index = t.asset_data[raw_data_index_index++];
-                                                auto &raw_data = this->raw_data[raw_data_index];
-
-                                                auto *raw_data_data = raw_data.data();
-                                                std::size_t raw_data_size = raw_data.size();
-
-                                                auto *raw_data_other_data = sound_tag_struct_other_raw_data + permutation_other.samples.file_offset - sound_tag_struct_raw_data_translation;
-                                                std::size_t raw_data_other_size = permutation_other.samples.size;
-
-                                                // Make sure it's not bullshit
-                                                if(raw_data_other_data < sound_tag_struct_other_raw_data || raw_data_other_data > (sound_tag_struct_other_raw_data + sound_tag_struct_raw_data_size)) {
-                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (sample data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
+                                            if(permutation_count > 0) {
+                                                // Bounds check
+                                                const auto *all_permutations_other = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(sound_data_ref + pitch_range_other.permutations.pointer);
+                                                if(static_cast<std::size_t>(reinterpret_cast<const std::byte *>(all_permutations_other + permutation_count) - sound_tag_struct_other_data) > sound_tag_struct_other_size) {
+                                                    REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (permutations go out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
                                                     match = false;
                                                     break;
                                                 }
+                                            
+                                                const auto &permutation_struct = this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)];
+                                                const auto *permutations = reinterpret_cast<const Parser::SoundPermutation::struct_little *>(permutation_struct.data.data());
 
-                                                // Make sure the sizes match
-                                                if(raw_data_other_size != raw_data_size) {
-                                                    match = false;
-                                                    break;
+                                                for(std::size_t p = 0; p < permutation_count && match; p++) {
+                                                    const auto &permutation = permutations[p];
+                                                    const auto &permutation_other = all_permutations_other[p];
+                                                    
+                                                    // Make sure these match
+                                                    match = match && permutation.format == permutation_other.format;
+                                                    match = match && permutation.gain == permutation_other.gain;
+                                                    match = match && permutation.next_permutation_index == permutation_other.next_permutation_index;
+                                                    
+                                                    if(!match) {
+                                                        break;
+                                                    }
+
+                                                    std::size_t raw_data_index = t.asset_data[raw_data_index_index++];
+                                                    const auto &raw_data = this->raw_data[raw_data_index];
+
+                                                    const auto *raw_data_data = raw_data.data();
+                                                    std::size_t raw_data_size = raw_data.size();
+
+                                                    const auto *raw_data_other_data = sound_tag_struct_other_raw_data + permutation_other.samples.file_offset - sound_tag_struct_raw_data_translation;
+                                                    std::size_t raw_data_other_size = permutation_other.samples.size;
+
+                                                    // Make sure it's not bullshit
+                                                    if(raw_data_other_data < sound_tag_struct_other_raw_data || raw_data_other_data > (sound_tag_struct_other_raw_data + sound_tag_struct_raw_data_size)) {
+                                                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (sample data goes out of bounds)", File::halo_path_to_preferred_path(t.path).c_str());
+                                                        match = false;
+                                                        break;
+                                                    }
+
+                                                    // Make sure the sizes match
+                                                    if(raw_data_other_size != raw_data_size) {
+                                                        match = false;
+                                                        break;
+                                                    }
+
+                                                    // Check the data
+                                                    match = match && std::memcmp(raw_data_other_data, raw_data_data, raw_data_size) == 0;
                                                 }
-
-                                                // Check the data
-                                                match = std::memcmp(raw_data_other_data, raw_data_data, raw_data_size) == 0;
                                             }
                                         }
                                     }
                                     else {
-                                        match = false;
+                                        match = match && pitch_range_count == pitch_range_other_count;
                                     }
                                 }
 
