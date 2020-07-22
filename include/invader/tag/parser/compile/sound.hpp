@@ -7,11 +7,11 @@
 
 namespace Invader::Parser {
     /**
-     * Downgrade an extended sound tag to a regular sound tag
+     * Downgrade an invader sound tag to a regular sound tag
      * @param  tag tag to downgrade
      * @return     downgraded sound
      */
-    Sound downgrade_extended_sound(const ExtendedSound &tag);
+    Sound downgrade_invader_sound(const InvaderSound &tag);
 }
 
 #endif

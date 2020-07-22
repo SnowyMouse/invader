@@ -262,11 +262,11 @@ namespace Invader::Parser {
         sound_post_cache_parse(tag, this);
     }
 
-    void ExtendedSound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void InvaderSound::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         sound_pre_compile(this, workload, tag_index);
     }
 
-    void ExtendedSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void InvaderSound::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         sound_post_cache_parse(tag, this);
     }
 
@@ -377,7 +377,7 @@ namespace Invader::Parser {
     }
         
 
-    Sound downgrade_extended_sound(const ExtendedSound &sound) {
+    Sound downgrade_invader_sound(const InvaderSound &sound) {
         Sound s = {};
         s.flags = sound.flags;
         s.sound_class = sound.sound_class;

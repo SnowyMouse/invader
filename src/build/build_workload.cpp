@@ -311,7 +311,7 @@ namespace Invader {
             for(auto &t : this->tags) {
                 switch(t.tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
-                    case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
+                    case TagClassInt::TAG_CLASS_INVADER_BITMAP: {
                         auto &main_struct = this->structs[t.base_struct.value()];
                         auto &data = *reinterpret_cast<Parser::Bitmap::struct_little *>(main_struct.data.data());
                         std::size_t bitmap_data_count = data.bitmap_data.count.read();
@@ -327,7 +327,7 @@ namespace Invader {
                     }
 
                     case TagClassInt::TAG_CLASS_SOUND:
-                    case TagClassInt::TAG_CLASS_EXTENDED_SOUND: {
+                    case TagClassInt::TAG_CLASS_INVADER_SOUND: {
                         auto &main_struct = this->structs[*t.base_struct];
                         auto &data = *reinterpret_cast<Parser::Sound::struct_little *>(main_struct.data.data());
                         std::size_t pitch_range_count = data.pitch_ranges.count.read();
@@ -865,28 +865,28 @@ namespace Invader {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_class_int));
                 throw UnimplementedTagClassException();
 
-            // For extended sounds and bitmaps, downgrade if necessary
-            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
-                auto tag_data_parsed = Parser::ExtendedBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
+            // For invader sounds and bitmaps, downgrade if necessary
+            case TagClassInt::TAG_CLASS_INVADER_BITMAP: {
+                auto tag_data_parsed = Parser::InvaderBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
                 else {
                     this->tags[tag_index].alias = *tag_class_int;
                     this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
-                    do_compile_tag(downgrade_extended_bitmap(tag_data_parsed));
+                    do_compile_tag(downgrade_invader_bitmap(tag_data_parsed));
                 }
                 break;
             }
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND: {
-                auto tag_data_parsed = Parser::ExtendedSound::parse_hek_tag_file(tag_data, tag_data_size, true);
+            case TagClassInt::TAG_CLASS_INVADER_SOUND: {
+                auto tag_data_parsed = Parser::InvaderSound::parse_hek_tag_file(tag_data, tag_data_size, true);
                 if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
                 else {
                     this->tags[tag_index].alias = *tag_class_int;
                     this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_SOUND;
-                    do_compile_tag(downgrade_extended_sound(tag_data_parsed));
+                    do_compile_tag(downgrade_invader_sound(tag_data_parsed));
                 }
                 break;
             }
@@ -928,11 +928,11 @@ namespace Invader {
             case TagClassInt::TAG_CLASS_PREFERENCES_NETWORK_GAME:
             case TagClassInt::TAG_CLASS_SPHEROID:
             case TagClassInt::TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT:
-            case TagClassInt::TAG_CLASS_NEW_FONT:
-            case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
-            case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
-            case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
-            case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
+            case TagClassInt::TAG_CLASS_INVADER_FONT:
+            case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
+            case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are unimplemented at this current time", tag_class_to_extension(*tag_class_int));
                 throw UnimplementedTagClassException();

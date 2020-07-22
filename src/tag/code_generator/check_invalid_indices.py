@@ -83,7 +83,7 @@ def make_check_invalid_indices(all_used_structs, struct_name, hpp, cpp_check_inv
             
             # Do it for bitmap tags too
             if struct_to_check == "Bitmap":
-                do_it_for_bob("ExtendedBitmap")
+                do_it_for_bob("InvaderBitmap")
             
             cpp_check_invalid_indices.write("            }\n")
             cpp_check_invalid_indices.write("            #ifndef NDEBUG\n")

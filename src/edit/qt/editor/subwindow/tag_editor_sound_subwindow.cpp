@@ -62,8 +62,8 @@ namespace Invader::EditQt {
             case TagClassInt::TAG_CLASS_SOUND:
                 populate_pitch_range_box(dynamic_cast<Parser::Sound *>(parser_data));
                 break;
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
-                populate_pitch_range_box(dynamic_cast<Parser::ExtendedSound *>(parser_data));
+            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+                populate_pitch_range_box(dynamic_cast<Parser::InvaderSound *>(parser_data));
                 break;
             default:
                 std::terminate();
@@ -368,8 +368,8 @@ namespace Invader::EditQt {
         switch(this->get_parent_window()->get_file().tag_class_int) {
             case TagClassInt::TAG_CLASS_SOUND:
                 return get_it(dynamic_cast<Parser::Sound *>(parser_data));
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
-                return get_it(dynamic_cast<Parser::ExtendedSound *>(parser_data));
+            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+                return get_it(dynamic_cast<Parser::InvaderSound *>(parser_data));
             default:
                 std::terminate();
         }

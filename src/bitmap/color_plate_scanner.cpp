@@ -38,7 +38,7 @@ namespace Invader {
 
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
-    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::ExtendedBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+    GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
@@ -568,7 +568,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::ExtendedBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
 
@@ -735,14 +735,14 @@ namespace Invader {
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
 
                         // Interpolate color?
-                        if(mipmap_type == HEK::ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_LINEAR || mipmap_type == HEK::ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA) {
+                        if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR || mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA) {
                             INTERPOLATE_CHANNEL(red);
                             INTERPOLATE_CHANNEL(green);
                             INTERPOLATE_CHANNEL(blue);
                         }
 
                         // Interpolate alpha?
-                        if(mipmap_type == HEK::ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_LINEAR) {
+                        if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR) {
                             INTERPOLATE_CHANNEL(alpha);
                         }
 

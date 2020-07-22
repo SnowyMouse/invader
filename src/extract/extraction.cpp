@@ -366,7 +366,7 @@ namespace Invader {
             EXTRACT_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             EXTRACT_TAG_CLASS(Wind, TAG_CLASS_WIND)
             EXTRACT_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
-            EXTRACT_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP)
+            EXTRACT_TAG_CLASS(InvaderBitmap, TAG_CLASS_INVADER_BITMAP)
 
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -383,12 +383,12 @@ namespace Invader {
 
             case TagClassInt::TAG_CLASS_NONE:
             case TagClassInt::TAG_CLASS_NULL:
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
-            case TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
-            case TagClassInt::TAG_CLASS_NEW_FONT:
-            case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
-            case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
-            case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_INVADER_SOUND:
+            case TagClassInt::TAG_CLASS_INVADER_SCENARIO:
+            case TagClassInt::TAG_CLASS_INVADER_FONT:
+            case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
+            case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+            case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
             case TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }

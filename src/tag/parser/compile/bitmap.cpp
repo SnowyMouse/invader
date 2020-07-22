@@ -324,19 +324,19 @@ namespace Invader::Parser {
         do_pre_compile(this, workload, tag_index);
     }
 
-    void ExtendedBitmap::postprocess_hek_data() {
+    void InvaderBitmap::postprocess_hek_data() {
         do_postprocess_hek_data(this);
     }
 
-    void ExtendedBitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
+    void InvaderBitmap::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
         do_post_cache_parse(this, tag);
     }
 
-    void ExtendedBitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void InvaderBitmap::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         do_pre_compile(this, workload, tag_index);
     }
 
-    Bitmap downgrade_extended_bitmap(const ExtendedBitmap &tag) {
+    Bitmap downgrade_invader_bitmap(const InvaderBitmap &tag) {
         Bitmap new_tag = {};
         new_tag.type = tag.type;
         new_tag.encoding_format = tag.encoding_format;
@@ -372,7 +372,7 @@ namespace Invader::Parser {
         return fixed;
     }
 
-    bool fix_power_of_two(ExtendedBitmap &tag, bool fix) {
+    bool fix_power_of_two(InvaderBitmap &tag, bool fix) {
         return fix_power_of_two_for_tag(tag, fix);
     }
 

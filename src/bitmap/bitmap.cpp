@@ -47,7 +47,7 @@ struct BitmapOptions {
     const char *tags = "tags/";
 
     // Scale type?
-    std::optional<ExtendedBitmapMipmapScaling> mipmap_scale_type;
+    std::optional<InvaderBitmapMipmapScaling> mipmap_scale_type;
 
     // Format?
     std::optional<BitmapFormat> format;
@@ -148,14 +148,14 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bitmap_options.blur = bitmap_tag_data.blur_filter_size;
         }
 
-        if(sizeof(T) == sizeof(Parser::ExtendedBitmap) && !bitmap_options.dithering.has_value()) {
-            auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
+        if(sizeof(T) == sizeof(Parser::InvaderBitmap) && !bitmap_options.dithering.has_value()) {
+            auto *extended_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
             if(!bitmap_options.mipmap_scale_type.has_value()) {
                 bitmap_options.mipmap_scale_type = extended_bitmap->mipmap_scaling;
             }
             if(!bitmap_options.dithering.has_value()) {
-                bitmap_options.dither_alpha = extended_bitmap->extended_flags & HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
-                bitmap_options.dither_color = extended_bitmap->extended_flags & HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+                bitmap_options.dither_alpha = extended_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+                bitmap_options.dither_color = extended_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
                 bitmap_options.dithering = *bitmap_options.dither_alpha || *bitmap_options.dither_color;
             }
         }
@@ -176,7 +176,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     DEFAULT_VALUE(bitmap_options.sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
     DEFAULT_VALUE(bitmap_options.sprite_budget,32);
     DEFAULT_VALUE(bitmap_options.sprite_budget_count,0);
-    DEFAULT_VALUE(bitmap_options.mipmap_scale_type,ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_LINEAR);
+    DEFAULT_VALUE(bitmap_options.mipmap_scale_type,InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR);
     DEFAULT_VALUE(bitmap_options.mipmap_fade,0.0F);
     DEFAULT_VALUE(bitmap_options.usage,BitmapUsage::BITMAP_USAGE_DEFAULT);
     DEFAULT_VALUE(bitmap_options.palettize,false);
@@ -189,9 +189,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     #undef DEFAULT_VALUE
 
     // Make sure we're using features that are allowed
-    if(sizeof(T) != sizeof(Parser::ExtendedBitmap)) {
+    if(sizeof(T) != sizeof(Parser::InvaderBitmap)) {
         if(bitmap_options.use_extended) {
-            eprintf_error("Extended is enabled. Apparently I screwed up when trying to handle that.");
+            eprintf_error("Invader is enabled. Apparently I screwed up when trying to handle that.");
             return EXIT_FAILURE;
         }
         if(*bitmap_options.sprite_budget > 512) {
@@ -317,7 +317,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         eprintf_error("Failed to generate bitmap data: %s", e.what());
         std::exit(1);
     }
-    oprintf("Total: %.03f MiB%s\n", BYTES_TO_MIB(bitmap_tag_data.processed_pixel_data.size()), (sizeof(T) == sizeof(Parser::ExtendedBitmap)) ? "; --extended" : "");
+    oprintf("Total: %.03f MiB%s\n", BYTES_TO_MIB(bitmap_tag_data.processed_pixel_data.size()), (sizeof(T) == sizeof(Parser::InvaderBitmap)) ? "; --extended" : "");
 
     // Add all sequences
     for(auto &sequence : scanned_color_plate.sequences) {
@@ -390,19 +390,19 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Make sure data metadata is correctly sized and other stuff is in place
-    if(sizeof(T) == sizeof(Parser::ExtendedBitmap)) {
-        auto *extended_bitmap = reinterpret_cast<Parser::ExtendedBitmap *>(&bitmap_tag_data);
+    if(sizeof(T) == sizeof(Parser::InvaderBitmap)) {
+        auto *extended_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
         if(*bitmap_options.dither_alpha) {
-            extended_bitmap->extended_flags |= HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+            extended_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
         }
         else {
-            extended_bitmap->extended_flags &= ~HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+            extended_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
         }
         if(*bitmap_options.dither_color) {
-            extended_bitmap->extended_flags |= HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+            extended_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
         }
         else {
-            extended_bitmap->extended_flags &= ~HEK::ExtendedBitmapFlagsFlag::EXTENDED_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+            extended_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
         }
         extended_bitmap->mipmap_scaling = *bitmap_options.mipmap_scale_type;
     }
@@ -481,13 +481,13 @@ int main(int argc, char *argv[]) {
 
             case 's':
                 if(std::strcmp(arguments[0], "linear") == 0) {
-                    bitmap_options.mipmap_scale_type = ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_LINEAR;
+                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR;
                 }
                 else if(std::strcmp(arguments[0], "nearest") == 0) {
-                    bitmap_options.mipmap_scale_type = ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA_AND_COLOR;
+                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA_AND_COLOR;
                 }
                 else if(std::strcmp(arguments[0], "nearest-alpha") == 0) {
-                    bitmap_options.mipmap_scale_type = ExtendedBitmapMipmapScaling::EXTENDED_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA;
+                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA;
                 }
                 else {
                     eprintf_error("Unknown mipmap scale type %s", arguments[0]);
@@ -690,7 +690,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(bitmap_options.use_extended) {
-        return perform_the_ritual<Invader::Parser::ExtendedBitmap>(bitmap_tag, tag_path, final_path_extended_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_EXTENDED_BITMAP);
+        return perform_the_ritual<Invader::Parser::InvaderBitmap>(bitmap_tag, tag_path, final_path_extended_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_INVADER_BITMAP);
     }
     else {
         return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_BITMAP);

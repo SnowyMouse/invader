@@ -218,6 +218,7 @@ namespace Invader::Parser {
             case VALUE_TYPE_TAGSTRING:
             case VALUE_TYPE_TAGDATAOFFSET:
             case VALUE_TYPE_ENUM:
+            case VALUE_TYPE_GROUP_START:
                 return 0;
         }
 
@@ -442,6 +443,7 @@ namespace Invader::Parser {
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
                 case VALUE_TYPE_ENUM:
+                case VALUE_TYPE_GROUP_START:
                     break;
             }
         }
@@ -659,6 +661,7 @@ namespace Invader::Parser {
                 case VALUE_TYPE_TAGSTRING:
                 case VALUE_TYPE_TAGDATAOFFSET:
                 case VALUE_TYPE_ENUM:
+                case VALUE_TYPE_GROUP_START:
                     eprintf_error("Tried to use set_values() with a type that doesn't have values");
                     std::terminate();
             }
@@ -688,8 +691,6 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE) \
                                   DO_TAG_CLASS(Effect, TAG_CLASS_EFFECT) \
                                   DO_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT) \
-                                  DO_TAG_CLASS(ExtendedBitmap, TAG_CLASS_EXTENDED_BITMAP) \
-                                  DO_TAG_CLASS(ExtendedSound, TAG_CLASS_EXTENDED_SOUND) \
                                   DO_TAG_CLASS(Flag, TAG_CLASS_FLAG) \
                                   DO_TAG_CLASS(Fog, TAG_CLASS_FOG) \
                                   DO_TAG_CLASS(Font, TAG_CLASS_FONT) \
@@ -702,6 +703,8 @@ namespace Invader::Parser {
                                   DO_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT) \
                                   DO_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER) \
                                   DO_TAG_CLASS(InputDeviceDefaults, TAG_CLASS_INPUT_DEVICE_DEFAULTS) \
+                                  DO_TAG_CLASS(InvaderBitmap, TAG_CLASS_INVADER_BITMAP) \
+                                  DO_TAG_CLASS(InvaderSound, TAG_CLASS_INVADER_SOUND) \
                                   DO_TAG_CLASS(Item, TAG_CLASS_ITEM) \
                                   DO_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION) \
                                   DO_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE) \
@@ -766,13 +769,13 @@ namespace Invader::Parser {
         switch(header->tag_class_int) {
             DO_BASED_ON_TAG_CLASS
 
-            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
             case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }
@@ -793,11 +796,11 @@ namespace Invader::Parser {
 
             case Invader::HEK::TagClassInt::TAG_CLASS_NONE:
             case Invader::HEK::TagClassInt::TAG_CLASS_NULL:
-            case Invader::HEK::TagClassInt::TAG_CLASS_EXTENDED_SCENARIO:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_FONT:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
-            case Invader::HEK::TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_SCENARIO:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_FONT:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+            case Invader::HEK::TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
             case Invader::HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
                 break;
         }

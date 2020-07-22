@@ -1,6 +1,6 @@
 [
     {
-        "name": "ExtendedSoundSampleRate",
+        "name": "InvaderSoundSampleRate",
         "options": [
             "automatic",
             "22050 Hz",
@@ -9,7 +9,7 @@
         "type": "enum"
     },
     {
-        "name": "ExtendedSoundFlags",
+        "name": "InvaderSoundFlags",
         "type": "bitmask",
         "fields": [
             "use constant bitrate when possible"
@@ -18,7 +18,7 @@
         "width": 16
     },
     {
-        "name": "ExtendedSoundChannelCount",
+        "name": "InvaderSoundChannelCount",
         "options": [
             "automatic",
             "mono",
@@ -27,7 +27,7 @@
         "type": "enum"
     },
     {
-        "name": "ExtendedSoundSourceFLAC",
+        "name": "InvaderSoundSourceFLAC",
         "type": "struct",
         "fields": [
             {
@@ -54,27 +54,27 @@
         "read_only": true
     },
     {
-        "name": "ExtendedSound",
+        "name": "InvaderSound",
         "groups": [
             {
-                "name": "Extended Sound Data",
+                "name": "Invader Sound Data",
                 "description": "Invader-specific sound data",
-                "first": "extended flags"
+                "first": "invader sound flags"
             }
         ],
         "fields": [
             {
-                "type": "ExtendedSoundFlags",
-                "name": "extended flags"
+                "type": "InvaderSoundFlags",
+                "name": "invader sound flags"
             },
             {
                 "name": "encoding sample rate",
-                "type": "ExtendedSoundSampleRate",
+                "type": "InvaderSoundSampleRate",
                 "comment": "This can be used to resample the sample rate to be different from the source sample rate.\nChoosing \"automatic\" will, instead, do the default behavior of picking the closer sample rate to the highest sample rate of all of the permutations."
             },
             {
                 "name": "encoding channel count",
-                "type": "ExtendedSoundChannelCount",
+                "type": "InvaderSoundChannelCount",
                 "comment": "This can be used to mix up/down the channel count to be different from the source channel count.\nChoosing \"automatic\" will, instead, do the default behavior of picking the highest channel count of all of the permutations."
             },
             {
@@ -101,7 +101,7 @@
             },
             {
                 "type": "TagReflexive",
-                "struct": "ExtendedSoundSourceFLAC",
+                "struct": "InvaderSoundSourceFLAC",
                 "name": "source FLACs",
                 "compound": true,
                 "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC",

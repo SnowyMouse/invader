@@ -102,12 +102,12 @@ namespace Invader::HEK {
         MATCH_TAG_CLASS("wind", TAG_CLASS_WIND)
         MATCH_TAG_CLASS("weapon_hud_interface", TAG_CLASS_WEAPON_HUD_INTERFACE)
 
-        MATCH_TAG_CLASS("extended_bitmap", TAG_CLASS_EXTENDED_BITMAP)
-        MATCH_TAG_CLASS("extended_sound", TAG_CLASS_EXTENDED_SOUND)
-        MATCH_TAG_CLASS("new_font", TAG_CLASS_NEW_FONT)
-        MATCH_TAG_CLASS("new_ui_widget_definition", TAG_CLASS_NEW_UI_WIDGET_DEFINITION)
-        MATCH_TAG_CLASS("new_unit_hud_interface", TAG_CLASS_NEW_UNIT_HUD_INTERFACE)
-        MATCH_TAG_CLASS("new_weapon_hud_interface", TAG_CLASS_NEW_WEAPON_HUD_INTERFACE)
+        MATCH_TAG_CLASS("invader_bitmap", TAG_CLASS_INVADER_BITMAP)
+        MATCH_TAG_CLASS("invader_sound", TAG_CLASS_INVADER_SOUND)
+        MATCH_TAG_CLASS("invader_font", TAG_CLASS_INVADER_FONT)
+        MATCH_TAG_CLASS("invader_ui_widget_definition", TAG_CLASS_INVADER_UI_WIDGET_DEFINITION)
+        MATCH_TAG_CLASS("invader_unit_hud_interface", TAG_CLASS_INVADER_UNIT_HUD_INTERFACE)
+        MATCH_TAG_CLASS("invader_weapon_hud_interface", TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE)
         MATCH_TAG_CLASS("shader_transparent_glsl", TAG_CLASS_SHADER_TRANSPARENT_GLSL)
 
         return TAG_CLASS_NULL;

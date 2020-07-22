@@ -185,7 +185,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             
                 # Do it for bitmap tags too
                 if struct_to_check == "Bitmap":
-                    do_it_for_sam("ExtendedBitmap")
+                    do_it_for_sam("InvaderBitmap")
                     
                 cpp_cache_format_data.write("            #ifndef NDEBUG\n")
                 cpp_cache_format_data.write("            if(!found) {\n")

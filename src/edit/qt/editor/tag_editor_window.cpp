@@ -102,12 +102,12 @@ namespace Invader::EditQt {
         QPushButton *extra_widget;
         switch(tag_file.tag_class_int) {
             case TagClassInt::TAG_CLASS_BITMAP:
-            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
                 extra_widget = new QPushButton("Preview bitmap");
                 break;
             #ifndef DISABLE_AUDIO
             case TagClassInt::TAG_CLASS_SOUND:
-            case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+            case TagClassInt::TAG_CLASS_INVADER_SOUND:
                 extra_widget = new QPushButton("Preview sound");
                 break;
             #endif
@@ -122,9 +122,9 @@ namespace Invader::EditQt {
             // case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP:
             //     extra_widget = new QPushButton("Preview model");
             //     break;
-            // case TagClassInt::TAG_CLASS_NEW_UNIT_HUD_INTERFACE:
-            // case TagClassInt::TAG_CLASS_NEW_WEAPON_HUD_INTERFACE:
-            // case TagClassInt::TAG_CLASS_NEW_UI_WIDGET_DEFINITION:
+            // case TagClassInt::TAG_CLASS_INVADER_UNIT_HUD_INTERFACE:
+            // case TagClassInt::TAG_CLASS_INVADER_WEAPON_HUD_INTERFACE:
+            // case TagClassInt::TAG_CLASS_INVADER_UI_WIDGET_DEFINITION:
             // case TagClassInt::TAG_CLASS_UNIT_HUD_INTERFACE:
             // case TagClassInt::TAG_CLASS_WEAPON_HUD_INTERFACE:
             //     extra_widget = new QPushButton("Preview interface");
@@ -339,12 +339,12 @@ namespace Invader::EditQt {
         if(!this->subwindow) {
             switch(this->file.tag_class_int) {
                 case TagClassInt::TAG_CLASS_BITMAP:
-                case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
+                case TagClassInt::TAG_CLASS_INVADER_BITMAP:
                     this->subwindow = new TagEditorBitmapSubwindow(this);
                     break;
                 #ifndef DISABLE_AUDIO
                 case TagClassInt::TAG_CLASS_SOUND:
-                case TagClassInt::TAG_CLASS_EXTENDED_SOUND:
+                case TagClassInt::TAG_CLASS_INVADER_SOUND:
                     this->subwindow = new TagEditorSoundSubwindow(this);
                     break;
                 #endif

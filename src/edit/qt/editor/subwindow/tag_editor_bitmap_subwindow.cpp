@@ -162,8 +162,8 @@ namespace Invader::EditQt {
             case TagClassInt::TAG_CLASS_BITMAP:
                 generate_main_widget(this, dynamic_cast<Parser::Bitmap *>(data), TagEditorBitmapSubwindow::set_values);
                 break;
-            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-                generate_main_widget(this, dynamic_cast<Parser::ExtendedBitmap *>(data), TagEditorBitmapSubwindow::set_values);
+            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                generate_main_widget(this, dynamic_cast<Parser::InvaderBitmap *>(data), TagEditorBitmapSubwindow::set_values);
                 break;
             default:
                 std::terminate();
@@ -191,8 +191,8 @@ namespace Invader::EditQt {
                 case TagClassInt::TAG_CLASS_BITMAP:
                     bitmap_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
-                case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-                    bitmap_data = &dynamic_cast<Parser::ExtendedBitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
+                case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                    bitmap_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data[index_unsigned];
                     break;
                 default:
                     std::terminate();
@@ -657,9 +657,9 @@ namespace Invader::EditQt {
                 bitmap_data = dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
                 pixel_data = &dynamic_cast<Parser::Bitmap *>(parent_window->get_parser_data())->processed_pixel_data;
                 break;
-            case TagClassInt::TAG_CLASS_EXTENDED_BITMAP:
-                bitmap_data = dynamic_cast<Parser::ExtendedBitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
-                pixel_data = &dynamic_cast<Parser::ExtendedBitmap *>(parent_window->get_parser_data())->processed_pixel_data;
+            case TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                bitmap_data = dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->bitmap_data.data() + index_unsigned;
+                pixel_data = &dynamic_cast<Parser::InvaderBitmap *>(parent_window->get_parser_data())->processed_pixel_data;
                 break;
             default:
                 std::terminate();

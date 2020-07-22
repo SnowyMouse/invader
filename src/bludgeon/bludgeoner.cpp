@@ -136,7 +136,7 @@ namespace Invader::Bludgeoner {
             return fucked;
         };
 
-        return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::ExtendedSound *>(s));
+        return attempt_fix(dynamic_cast<Invader::Parser::Sound *>(s)) || attempt_fix(dynamic_cast<Invader::Parser::InvaderSound *>(s));
     }
     
     bool bullshit_references(Parser::ParserStruct *s, bool fix) {

@@ -3,6 +3,12 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Changed
+- invader: Renamed extended_bitmap to invader_bitmap and extended_sound to
+  invader_sound. The bitmap tags can simply be renamed. The sound tags can be
+  renamed if they were made in 0.36.0 or newer; otherwise they have to be remade
+  (as usual).
+
 ### Fixed
 - invader: Fixed superclasses (e.g. object) being directly supported as
   references, since these tags do not actually exist as real tags
@@ -17,7 +23,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Made the filter in the Find dialog and the path in the Save
   dialog have focus
 - invader-edit-qt: Added selecting individual pitch ranges
-- invader-sound: Added `-b` for constant bitrate for Ogg Vorbis
+- invader-sound: Added `-b` for constant bitrate for Ogg Vorbis (extended_sound
+  tags will have to be remade - sorry!)
 
 ### Changed
 - invader: Decompressing vertices now clears the "zoner" and "uses local nodes"

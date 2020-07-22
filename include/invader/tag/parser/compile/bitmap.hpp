@@ -7,11 +7,11 @@
 
 namespace Invader::Parser {
     /**
-     * Downgrade an extended bitmap tag to a regular bitmap tag
+     * Downgrade an invader bitmap tag to a regular bitmap tag
      * @param  tag tag to downgrade
      * @return     downgraded bitmap
      */
-    Bitmap downgrade_extended_bitmap(const ExtendedBitmap &tag);
+    Bitmap downgrade_invader_bitmap(const InvaderBitmap &tag);
     
     /**
      * Fix the power-of-two flags on a bitmap tag
@@ -27,7 +27,7 @@ namespace Invader::Parser {
      * @param  fix actually apply changes
      * @return     true if the flag was wrong, false if not
      */
-    bool fix_power_of_two(ExtendedBitmap &tag, bool fix);
+    bool fix_power_of_two(InvaderBitmap &tag, bool fix);
     
     /**
      * Fix the power-of-two flags on a bitmap data

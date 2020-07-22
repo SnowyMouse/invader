@@ -28,7 +28,7 @@ struct SoundOptions {
     std::optional<std::uint16_t> bitrate;
 };
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::ExtendedSound *extended_sound);
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *extended_sound);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
@@ -36,7 +36,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     // Parse the sound tag
     T sound_tag = {};
-    auto *extended_sound = sizeof(Parser::ExtendedSound) == sizeof(T) ? reinterpret_cast<Parser::ExtendedSound *>(&sound_tag) : nullptr;
+    auto *extended_sound = sizeof(Parser::InvaderSound) == sizeof(T) ? reinterpret_cast<Parser::InvaderSound *>(&sound_tag) : nullptr;
 
     if(std::filesystem::exists(tag_path)) {
         if(std::filesystem::is_directory(tag_path)) {
@@ -82,10 +82,10 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         if(sound_options.sample_rate.has_value()) {
             switch(*sound_options.sample_rate) {
                 case 22050:
-                    extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ;
+                    extended_sound->encoding_sample_rate = HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_22050_HZ;
                     break;
                 case 44100:
-                    extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ;
+                    extended_sound->encoding_sample_rate = HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_44100_HZ;
                     break;
                 default:
                     eprintf_error("Invalid sample rate given. What?");
@@ -93,12 +93,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             }
         }
         else switch(extended_sound->encoding_sample_rate) {
-            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_AUTOMATIC:
+            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_AUTOMATIC:
                 break;
-            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_22050_HZ:
+            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_22050_HZ:
                 sound_options.sample_rate = 22050;
                 break;
-            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ:
+            case HEK::InvaderSoundSampleRate::INVADER_SOUND_SAMPLE_RATE_44100_HZ:
                 sound_options.sample_rate = 44100;
                 break;
             default:
@@ -111,10 +111,10 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         if(sound_options.channel_count.has_value()) {
             switch(*sound_options.channel_count) {
                 case 1:
-                    extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO;
+                    extended_sound->encoding_channel_count = HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_MONO;
                     break;
                 case 2:
-                    extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO;
+                    extended_sound->encoding_channel_count = HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_STEREO;
                     break;
                 default:
                     eprintf_error("Invalid channel count given. What?");
@@ -122,12 +122,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             }
         }
         else switch(extended_sound->encoding_channel_count) {
-            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_AUTOMATIC:
+            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_AUTOMATIC:
                 break;
-            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO:
+            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_MONO:
                 sound_options.channel_count = 1;
                 break;
-            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO:
+            case HEK::InvaderSoundChannelCount::INVADER_SOUND_CHANNEL_COUNT_STEREO:
                 sound_options.channel_count = 2;
                 break;
             default:
@@ -146,15 +146,15 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         
         // If we have compression level set, then the sound option shouldn't have this set
         if(sound_options.compression_level.has_value()) {
-            extended_sound->extended_flags &= ~ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
+            extended_sound->invader_sound_flags &= ~InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
         }
         // If we don't have compression level set but we have a bitrate, set the flag
         else if(sound_options.bitrate.has_value()) {
-            extended_sound->extended_flags |= ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
+            extended_sound->invader_sound_flags |= InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
             extended_sound->compression_bitrate = *sound_options.bitrate;
         }
         // If we have neither but we have the bitrate flag, set the bitrate
-        else if(extended_sound->extended_flags & ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE) {
+        else if(extended_sound->invader_sound_flags & InvaderSoundFlagsFlag::INVADER_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE) {
             sound_options.bitrate = extended_sound->compression_bitrate;
         }
 
@@ -736,7 +736,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
 
-    auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_EXTENDED_SOUND, true);
+    auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, extended_sound == nullptr ? "" : " [--extended]");
 
     return sound_tag_data;
@@ -906,7 +906,7 @@ int main(int argc, const char **argv) {
             sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
         }
         else {
-            sound_tag_data = make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
+            sound_tag_data = make_sound_tag<Parser::InvaderSound>(tag_path, data_path, sound_options);
         }
     }
     catch(std::exception &e) {
@@ -932,7 +932,7 @@ int main(int argc, const char **argv) {
     }
 }
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::ExtendedSound *extended_sound) {
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *extended_sound) {
     for(auto &wav : std::filesystem::directory_iterator(directory)) {
         // Skip directories
         auto path = wav.path();

@@ -1,6 +1,6 @@
 [
     {
-        "name": "ExtendedBitmapFlags",
+        "name": "InvaderBitmapFlags",
         "fields": [
             "dither alpha",
             "dither color",
@@ -10,7 +10,7 @@
         "width": 16
     },
     {
-        "name": "ExtendedBitmapMipmapScaling",
+        "name": "InvaderBitmapMipmapScaling",
         "options": [
             "linear",
             "nearest alpha",
@@ -19,22 +19,22 @@
         "type": "enum"
     },
     {
-        "name": "ExtendedBitmap",
+        "name": "InvaderBitmap",
         "groups": [
             {
-                "name": "Extended Bitmap Data",
+                "name": "Invader Bitmap Data",
                 "description": "Invader-specific bitmap data",
-                "first": "extended flags"
+                "first": "invader bitmap flags"
             }
         ],
         "fields": [
             {
-                "name": "extended flags",
-                "type": "ExtendedBitmapFlags"
+                "name": "invader bitmap flags",
+                "type": "InvaderBitmapFlags"
             },
             {
                 "name": "mipmap scaling",
-                "type": "ExtendedBitmapMipmapScaling"
+                "type": "InvaderBitmapMipmapScaling"
             },
             {
                 "type": "pad",
