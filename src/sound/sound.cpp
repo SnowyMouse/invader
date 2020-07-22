@@ -27,6 +27,8 @@ struct SoundOptions {
     std::optional<std::uint32_t> sample_rate;
 };
 
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::ExtendedSound *extended_sound);
+
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
     static constexpr std::size_t MAX_PERMUTATIONS = UINT16_MAX - 1;
@@ -181,28 +183,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
     auto &format = sound_tag.format;
 
-    // If we don't have pitch ranges, add one
-    bool is_new_pitch_range = sound_tag.pitch_ranges.size() == 0;
-    sound_tag.pitch_ranges.resize(1, {});
-
-    // Initialize a pitch range
-    auto &old_pitch_range = sound_tag.pitch_ranges[0];
-    Parser::SoundPitchRange pitch_range = {};
-    
-    std::size_t old_actual_permutation_count;
-    bool old_split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
-    
-    if(old_split) {
-        old_actual_permutation_count = old_pitch_range.actual_permutation_count;
-        if(old_actual_permutation_count > old_pitch_range.permutations.size()) {
-            eprintf_error("Existing sound tag has an invalid actual permutation count");
-            std::exit(EXIT_FAILURE);
-        }
-    }
-    else {
-        old_actual_permutation_count = old_pitch_range.permutations.size();
-    }
-
     // Set a default level
     if(!sound_options.compression_level.has_value()) {
         sound_options.compression_level = 1.0F;
@@ -215,8 +195,13 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
 
     // Clear the old one
-    for(auto &permutation : old_pitch_range.permutations) {
-        permutation.samples = std::vector<std::byte>();
+    for(auto &old_pitch_range : sound_tag.pitch_ranges) {
+        for(auto &permutation : old_pitch_range.permutations) {
+            permutation.samples = std::vector<std::byte>();
+        }
+    }
+    if(extended_sound) {
+        extended_sound->source_FLACs.clear();
     }
 
     // Same with whether to split
@@ -229,124 +214,69 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
     bool split = sound_tag.flags & HEK::SoundFlagsFlag::SOUND_FLAGS_FLAG_SPLIT_LONG_SOUND_INTO_PERMUTATIONS;
-
-    auto wav_iterator = std::filesystem::directory_iterator(data_path);
+    
+    // Check to see if we have either just directories (so multiple pitch ranges) or just files (one pitch range)
+    bool contains_files = false;
+    bool contains_directories = false;
+    for(auto &f : std::filesystem::directory_iterator(data_path)) {
+        if(f.is_directory()) {
+            contains_directories = true;
+        }
+        if(f.is_regular_file()) {
+            contains_files = true;
+        }
+    }
+    
+    // Is it bullshit?
+    if(contains_files && contains_directories) {
+        eprintf_error("Data directory must have only directories or only files");
+        std::exit(EXIT_FAILURE);
+    }
+    if(!contains_files && !contains_directories) {
+        eprintf_error("Data directory is empty");
+        std::exit(EXIT_FAILURE);
+    }
 
     std::uint16_t highest_channel_count = 0;
     std::uint32_t highest_sample_rate = 0;
-
-    std::vector<SoundReader::Sound> permutations;
+    std::vector<std::pair<std::vector<SoundReader::Sound>, std::string>> pitch_ranges;
 
     oprintf("Loading sounds... ");
     oflush();
-    for(auto &wav : wav_iterator) {
-        // Skip directories
-        auto path = wav.path();
-        auto path_str = path.string();
-        auto *path_str_cstr = path_str.c_str();
-        if(wav.is_directory()) {
-            eprintf_error("Unexpected directory %s", path_str_cstr);
-            std::exit(EXIT_FAILURE);
-        }
-        auto extension = path.extension().string();
-
-        // Get the sound
-        SoundReader::Sound sound = {};
-        try {
-            if(extension == ".wav") {
-                sound = SoundReader::sound_from_wav_file(path_str_cstr);
-            }
-            else if(extension == ".flac") {
-                sound = SoundReader::sound_from_flac_file(path_str_cstr);
-            }
-            else {
-                eprintf_error("Unknown file format for %s", path_str_cstr);
-                std::exit(EXIT_FAILURE);
-            }
-        }
-        catch(std::exception &e) {
-            eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
-            std::exit(EXIT_FAILURE);
-        }
-
-        // Get the permutation name
-        auto filename = path.filename().string();
-        sound.name = filename.substr(0, filename.size() - extension.size());
-        if(sound.name.size() >= sizeof(HEK::TagString)) {
-            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
-            std::exit(EXIT_FAILURE);
-        }
-
-        // Lowercase it
-        for(char &c : sound.name) {
-            c = std::tolower(c);
-        }
-
-        // Add it to the source list
-        if(extended_sound) {
-            auto &source = extended_sound->source_FLACs.emplace_back();
-            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
-            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
-            if(extension == ".flac") {
-                source.compressed_audio_data = *File::open_file(path_str_cstr);
-            }
-            else {
-                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
-            }
-        }
-
-        // Use the highest channel count and sample rate
-        if(highest_channel_count < sound.channel_count) {
-            highest_channel_count = sound.channel_count;
-        }
-        if(highest_sample_rate < sound.sample_rate) {
-            highest_sample_rate = sound.sample_rate;
-        }
-
-        // Make sure we can actually work with this
-        if(sound.channel_count > 2 || sound.channel_count < 1) {
-            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
-            std::exit(EXIT_FAILURE);
-        }
-        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
-            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
-            std::exit(EXIT_FAILURE);
-        }
-
-        // Make it small
-        sound.pcm.shrink_to_fit();
-
-        // Add it
-        std::size_t i;
-        for(i = 0; i < permutations.size(); i++) {
-            if(sound.name < permutations[i].name) {
-                break;
-            }
-            else if(sound.name == permutations[i].name) {
-                eprintf_error("Multiple permutations with the same name (%s) cannot be added", permutations[i].name.c_str());
-                std::exit(EXIT_FAILURE);
-            }
-        }
-        permutations.insert(permutations.begin() + i, std::move(sound));
+    
+    // Load the sounds
+    if(contains_files) {
+        auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), "default");
+        populate_pitch_range(pitch_range.first, data_path, highest_sample_rate, highest_channel_count, 0, extended_sound);
     }
+    else if(contains_directories) {
+        std::size_t i = 0;
+        for(auto &f : std::filesystem::directory_iterator(data_path)) {
+            auto &path = f.path();
+            if(!f.is_directory()) {
+                eprintf_error("Unexpected file %s", path.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+            auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), path.filename().string());
+            populate_pitch_range(pitch_range.first, path, highest_sample_rate, highest_channel_count, i++, extended_sound);
+            if(i == NULL_INDEX) {
+                eprintf_error("%u or more pitch ranges are present", NULL_INDEX);
+                std::exit(EXIT_FAILURE);
+            }
+
+            // Make sure we have stuff
+            if(pitch_range.first.size() == 0) {
+                eprintf_error("No permutations found in %s", path.string().c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+    }
+
     oprintf("done!\n");
 
     // Force channel count
     if(sound_options.channel_count.has_value()) {
         highest_channel_count = *sound_options.channel_count;
-    }
-
-    // Make sure we have stuff
-    if(permutations.size() == 0) {
-        eprintf_error("No permutations found in %s", data_path.string().c_str());
-        std::exit(EXIT_FAILURE);
-    }
-
-    // Set the actual permutation count
-    auto actual_permutation_count = permutations.size();
-    if(actual_permutation_count > MAX_PERMUTATIONS) {
-        eprintf_error("Maximum number of actual permutations (%zu > %zu) exceeded", actual_permutation_count, MAX_PERMUTATIONS);
-        std::exit(EXIT_FAILURE);
     }
 
     // Sound tags currently only support 22.05 kHz and 44.1 kHz
@@ -389,104 +319,146 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     // Resample permutations when needed
     oprintf("Processing sounds... ");
     oflush();
-    for(auto &permutation : permutations) {
-        std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
-        std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
+    std::size_t total_sound_count = 0;
+    for(auto &pitch_range : pitch_ranges) {
+        for(auto &permutation : pitch_range.first) {
+            total_sound_count++;
+            std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
+            std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
 
-        // Sample rate doesn't match; this can be fixed with resampling
-        if(permutation.sample_rate != highest_sample_rate) {
-            double ratio = static_cast<double>(highest_sample_rate) / permutation.sample_rate;
-            std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
-            std::vector<float> new_samples(float_samples.size() * ratio);
-            permutation.sample_rate = highest_sample_rate;
+            // Sample rate doesn't match; this can be fixed with resampling
+            if(permutation.sample_rate != highest_sample_rate) {
+                double ratio = static_cast<double>(highest_sample_rate) / permutation.sample_rate;
+                std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
+                std::vector<float> new_samples(float_samples.size() * ratio);
+                permutation.sample_rate = highest_sample_rate;
 
-            // Resample it
-            SRC_DATA data = {};
-            data.data_in = float_samples.data();
-            data.data_out = new_samples.data();
-            data.input_frames = float_samples.size() / permutation.channel_count;
-            data.output_frames = new_samples.size() / permutation.channel_count;
-            data.src_ratio = ratio;
-            int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation.channel_count);
-            if(res) {
-                eprintf_error("Failed to resample: %s", src_strerror(res));
-                std::exit(EXIT_FAILURE);
-            }
-            new_samples.resize(data.output_frames_gen * permutation.channel_count);
+                // Resample it
+                SRC_DATA data = {};
+                data.data_in = float_samples.data();
+                data.data_out = new_samples.data();
+                data.input_frames = float_samples.size() / permutation.channel_count;
+                data.output_frames = new_samples.size() / permutation.channel_count;
+                data.src_ratio = ratio;
+                int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation.channel_count);
+                if(res) {
+                    eprintf_error("Failed to resample: %s", src_strerror(res));
+                    std::exit(EXIT_FAILURE);
+                }
+                new_samples.resize(data.output_frames_gen * permutation.channel_count);
 
-            // Set stuff
-            if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-                bytes_per_sample = sizeof(std::uint16_t);
-            }
-            permutation.sample_rate = highest_sample_rate;
-            permutation.bits_per_sample = bytes_per_sample * 8;
-            sample_count = new_samples.size();
-            permutation.pcm = SoundEncoder::convert_float_to_int(new_samples, permutation.bits_per_sample);
-        }
-
-        // Bits per sample doesn't match; we can fix that though
-        if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-            std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
-            permutation.pcm = SoundEncoder::convert_int_to_int(permutation.pcm, permutation.bits_per_sample, new_bytes_per_sample * 8);
-            bytes_per_sample = new_bytes_per_sample;
-            permutation.bits_per_sample = new_bytes_per_sample * 8;
-        }
-
-        // Mono -> Stereo (just duplicate the channels)
-        if(permutation.channel_count == 1 && highest_channel_count == 2) {
-            std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
-            const std::byte *old_sample = permutation.pcm.data();
-            const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
-            std::byte *new_sample = new_samples.data();
-
-            while(old_sample < old_sample_end) {
-                std::memcpy(new_sample, old_sample, bytes_per_sample);
-                std::memcpy(new_sample + bytes_per_sample, old_sample, bytes_per_sample);
-                old_sample += bytes_per_sample;
-                new_sample += bytes_per_sample * 2;
+                // Set stuff
+                if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+                    bytes_per_sample = sizeof(std::uint16_t);
+                }
+                permutation.sample_rate = highest_sample_rate;
+                permutation.bits_per_sample = bytes_per_sample * 8;
+                sample_count = new_samples.size();
+                permutation.pcm = SoundEncoder::convert_float_to_int(new_samples, permutation.bits_per_sample);
             }
 
-            permutation.pcm = std::move(new_samples);
-            permutation.pcm.shrink_to_fit();
-            permutation.channel_count = 2;
-        }
-
-        // Stereo -> Mono (mixdown)
-        else if(permutation.channel_count == 2 && highest_channel_count == 1) {
-            std::vector<std::byte> new_samples(sample_count * bytes_per_sample / 2);
-            std::byte *new_sample = new_samples.data();
-            const std::byte *old_sample = permutation.pcm.data();
-            const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
-
-            while(old_sample < old_sample_end) {
-                std::int32_t a = Invader::SoundEncoder::read_sample(old_sample, permutation.bits_per_sample);
-                std::int32_t b = Invader::SoundEncoder::read_sample(old_sample + bytes_per_sample, permutation.bits_per_sample);
-                std::int64_t ab = a + b;
-                Invader::SoundEncoder::write_sample(static_cast<std::int32_t>(ab / 2), new_sample, permutation.bits_per_sample);
-
-                old_sample += bytes_per_sample * 2;
-                new_sample += bytes_per_sample;
+            // Bits per sample doesn't match; we can fix that though
+            if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+                std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
+                permutation.pcm = SoundEncoder::convert_int_to_int(permutation.pcm, permutation.bits_per_sample, new_bytes_per_sample * 8);
+                bytes_per_sample = new_bytes_per_sample;
+                permutation.bits_per_sample = new_bytes_per_sample * 8;
             }
 
-            permutation.pcm = std::move(new_samples);
-            permutation.pcm.shrink_to_fit();
-            permutation.channel_count = 1;
+            // Mono -> Stereo (just duplicate the channels)
+            if(permutation.channel_count == 1 && highest_channel_count == 2) {
+                std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
+                const std::byte *old_sample = permutation.pcm.data();
+                const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
+                std::byte *new_sample = new_samples.data();
+
+                while(old_sample < old_sample_end) {
+                    std::memcpy(new_sample, old_sample, bytes_per_sample);
+                    std::memcpy(new_sample + bytes_per_sample, old_sample, bytes_per_sample);
+                    old_sample += bytes_per_sample;
+                    new_sample += bytes_per_sample * 2;
+                }
+
+                permutation.pcm = std::move(new_samples);
+                permutation.pcm.shrink_to_fit();
+                permutation.channel_count = 2;
+            }
+
+            // Stereo -> Mono (mixdown)
+            else if(permutation.channel_count == 2 && highest_channel_count == 1) {
+                std::vector<std::byte> new_samples(sample_count * bytes_per_sample / 2);
+                std::byte *new_sample = new_samples.data();
+                const std::byte *old_sample = permutation.pcm.data();
+                const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
+
+                while(old_sample < old_sample_end) {
+                    std::int32_t a = Invader::SoundEncoder::read_sample(old_sample, permutation.bits_per_sample);
+                    std::int32_t b = Invader::SoundEncoder::read_sample(old_sample + bytes_per_sample, permutation.bits_per_sample);
+                    std::int64_t ab = a + b;
+                    Invader::SoundEncoder::write_sample(static_cast<std::int32_t>(ab / 2), new_sample, permutation.bits_per_sample);
+
+                    old_sample += bytes_per_sample * 2;
+                    new_sample += bytes_per_sample;
+                }
+
+                permutation.pcm = std::move(new_samples);
+                permutation.pcm.shrink_to_fit();
+                permutation.channel_count = 1;
+            }
         }
     }
     oprintf("done!\n");
-
-    // Add a new permutation
-    auto new_permutation = [&pitch_range, &format](SoundReader::Sound &permutation) -> Parser::SoundPermutation & {
-        auto &p = pitch_range.permutations.emplace_back();
-        std::memset(p.name.string, 0, sizeof(p.name.string));
-        std::strncpy(p.name.string, permutation.name.c_str(), sizeof(p.name.string) - 1);
-        p.format = format;
-        return p;
-    };
-
-    // Add initial permutations
-    for(auto &permutation : permutations) {
-        new_permutation(permutation);
+    
+    // Remove pitch ranges that are present in the tag but not in what we found
+    while(true) {
+        bool should_continue = false;
+        std::size_t pitch_range_count = sound_tag.pitch_ranges.size();
+        for(std::size_t p = 0; p < pitch_range_count; p++) {
+            should_continue = true;
+            auto &name = sound_tag.pitch_ranges[p].name;
+            
+            // Check the pitch ranges we got
+            for(auto &pi : pitch_ranges) {
+                if(pi.second == name.string) {
+                    should_continue = false;
+                    break;
+                }
+            }
+            
+            // If we didn't find a match, erase it and continue
+            if(should_continue) {
+                sound_tag.pitch_ranges.erase(sound_tag.pitch_ranges.begin() + p);
+                break;
+            }
+        }
+        
+        if(!should_continue) {
+            break;
+        }
+    }
+    
+    // Index read pitch ranges to output pitch range
+    std::size_t pitch_range_count = pitch_ranges.size();
+    std::vector<std::size_t> pitch_range_index(pitch_range_count);
+    for(std::size_t i = 0; i < pitch_range_count; i++) {
+        auto &index = pitch_range_index[i];
+        std::size_t old_pitch_range_count = sound_tag.pitch_ranges.size();
+        auto &name = pitch_ranges[i].second;
+        
+        index = NULL_INDEX;
+        for(std::size_t p = 0; p < old_pitch_range_count; p++) {
+            if(name == sound_tag.pitch_ranges[p].name.string) {
+                index = p;
+                break;
+            }
+        }
+        
+        // If no pitch range was found, add one
+        if(index == NULL_INDEX) {
+            index = old_pitch_range_count;
+            auto &new_pitch_range = sound_tag.pitch_ranges.emplace_back();
+            std::strncpy(new_pitch_range.name.string, name.c_str(), sizeof(new_pitch_range.name.string) - 1);
+        }
     }
 
     // Make the sound tag
@@ -510,7 +482,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         case SoundFormat::SOUND_FORMAT_ENUM_COUNT:
             std::terminate();
     }
-    oprintf("Found %zu sound%s:\n", actual_permutation_count, actual_permutation_count == 1 ? "" : "s");
+    oprintf("Found %zu sound%s:\n", total_sound_count, total_sound_count == 1 ? "" : "s");
 
     // Check if this is dialogue
     bool is_dialogue;
@@ -530,254 +502,208 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         std::exit(EXIT_FAILURE);
     }
 
-    for(std::size_t i = 0; i < actual_permutation_count; i++) {
-        auto &permutation = permutations[i];
+    // Encode this
+    for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+        auto &pitch_range = sound_tag.pitch_ranges[pitch_range_index[pr]];
+        auto &permutations = pitch_ranges[pr].first;
+        auto actual_permutation_count = permutations.size();
+        pitch_range.actual_permutation_count = actual_permutation_count;
+        pitch_range.permutations.resize(actual_permutation_count);
+        
+        for(std::size_t i = 0; i < actual_permutation_count; i++) {
+            // Get the permutation and set its name, too
+            auto &permutation = permutations[i];
+            std::strncpy(pitch_range.permutations[i].name.string, permutation.name.c_str(), sizeof(pitch_range.permutations[i].name.string) - 1);
 
-        // Calculate length
-        double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
-        std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
-        std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
+            // Calculate length
+            double seconds = permutation.pcm.size() / static_cast<double>(static_cast<std::size_t>(permutation.sample_rate) * static_cast<std::size_t>(permutation.bits_per_sample / 8) * static_cast<std::size_t>(permutation.channel_count));
+            std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
+            std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
 
-        // Generate mouth data (a lot of this comes from MosesofEgypt's Reclaimer)
-        auto generate_mouth_data = [&permutation](Parser::SoundPermutation &p, const std::vector<std::uint8_t> &pcm_8_bit) {
-            // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
-            std::size_t samples_per_tick = static_cast<std::size_t>((permutation.sample_rate * permutation.channel_count) / TICK_RATE + 0.5);
-            std::size_t sample_count = pcm_8_bit.size();
+            // Generate mouth data (a lot of this comes from MosesofEgypt's Reclaimer)
+            auto generate_mouth_data = [&permutation](Parser::SoundPermutation &p, const std::vector<std::uint8_t> &pcm_8_bit) {
+                // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
+                std::size_t samples_per_tick = static_cast<std::size_t>((permutation.sample_rate * permutation.channel_count) / TICK_RATE + 0.5);
+                std::size_t sample_count = pcm_8_bit.size();
 
-            // Generate samples, adding an extra tick for incomplete ticks
-            std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
-            p.mouth_data = std::vector<std::byte>(tick_count);
-            auto *pcm_data = pcm_8_bit.data();
+                // Generate samples, adding an extra tick for incomplete ticks
+                std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
+                p.mouth_data = std::vector<std::byte>(tick_count);
+                auto *pcm_data = pcm_8_bit.data();
 
-            // Get max and total
-            std::uint8_t max = 0;
-            double mouth_total = 0;
-            for(std::size_t t = 0; t < tick_count; t++) {
-                // Get the sample range, accounting for when there aren't enough ticks
-                std::size_t first_sample = t * samples_per_tick;
-                std::size_t sample_count_to_check = sample_count - first_sample;
-                if(sample_count_to_check > samples_per_tick) {
-                    sample_count_to_check = samples_per_tick;
-                }
-                std::size_t last_sample = first_sample + sample_count_to_check;
-                double total = 0;
-                for(std::size_t s = first_sample; s < last_sample; s++) {
-                    total += pcm_data[s];
-                }
-
-                // Divide by samples per tick
-                double average = total / samples_per_tick;
-                mouth_total += average;
-                p.mouth_data[t] = static_cast<std::byte>(average);
-
-                if(average > max) {
-                    max = average;
-                }
-            }
-
-            // Get average and min, clamping min to 0-255
-            double average = mouth_total / tick_count;
-            double min = 2.0 * average - max;
-            if(min > UINT8_MAX) {
-                min = UINT8_MAX;
-            }
-            else if(min < 0) {
-                min = 0;
-            }
-
-            // Get range
-            double range = static_cast<double>(max + average) / 2 - min;
-
-            // Do nothing if there's no range
-            if(range == 0) {
-                return;
-            }
-
-            // Go through each sample
-            for(std::size_t t = 0; t < tick_count; t++) {
-                double sample = (static_cast<std::uint8_t>(p.mouth_data[t]) - min) / range;
-
-                // Clamp to 0 - 255
-                if(sample >= 1.0) {
-                    p.mouth_data[t] = static_cast<std::byte>(UINT8_MAX);
-                }
-                else if(sample <= 0.0) {
-                    p.mouth_data[t] = static_cast<std::byte>(0);
-                }
-                else {
-                    p.mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
-                }
-            }
-        };
-
-        // Encode a permutation
-        auto encode_permutation = [&permutation, &format, &sound_options, &generate_mouth_data, &is_dialogue](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
-            // Set the default stuff
-            p.gain = 1.0F;
-
-            // Generate mouth data if needed
-            if(is_dialogue) {
-                // Convert samples to 8-bit unsigned so we can use it to generate mouth data
-                auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
-                std::vector<std::uint8_t> pcm_8_bit;
-                pcm_8_bit.reserve(samples_float.size());
-                for(auto &f : samples_float) {
-                    float ff = f;
-                    if(ff < 0.0F) {
-                        ff *= -1.0F;
+                // Get max and total
+                std::uint8_t max = 0;
+                double mouth_total = 0;
+                for(std::size_t t = 0; t < tick_count; t++) {
+                    // Get the sample range, accounting for when there aren't enough ticks
+                    std::size_t first_sample = t * samples_per_tick;
+                    std::size_t sample_count_to_check = sample_count - first_sample;
+                    if(sample_count_to_check > samples_per_tick) {
+                        sample_count_to_check = samples_per_tick;
                     }
-                    pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
-                }
-                samples_float = {};
-                generate_mouth_data(p, pcm_8_bit);
-            }
-
-            switch(format) {
-                // Basically, just make it 16-bit big endian
-                case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                    p.samples = Invader::SoundEncoder::convert_to_16_bit_pcm_big_endian(pcm, permutation.bits_per_sample);
-                    p.buffer_size = p.samples.size();
-                    break;
-
-                // Encode to Vorbis in an Ogg container
-                case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
-                    if(sound_options.compression_level > 1.0F) {
-                        sound_options.compression_level = 1.0F;
-                    }
-                    else if(sound_options.compression_level < 0.0F) {
-                        sound_options.compression_level = 0.0F;
-                    }
-                    p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
-                    p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
-                    break;
-                }
-
-                // Encode to FLAC
-                case SoundFormat::SOUND_FORMAT_FLAC: {
-                    // Clamp to 0.0 - 0.8
-                    if(sound_options.compression_level > 0.8F) {
-                        sound_options.compression_level = 0.8F;
-                    }
-                    else if(sound_options.compression_level < 0.0F) {
-                        sound_options.compression_level = 0.0F;
-                    }
-                    // Convert to integer, rounding to the nearest level
-                    int flac_level = static_cast<int>(*sound_options.compression_level * 10.0F + 0.5F);
-                    p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, flac_level);
-                    break;
-                }
-
-                // Encode to Xbox ADPCMeme
-                case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
-                    p.samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation.bits_per_sample, permutation.channel_count);
-                    p.buffer_size = 0;
-                    break;
-
-                default:
-                    std::terminate();
-            }
-        };
-
-        // Split if requested
-        if(split) {
-            const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
-            std::size_t digested = 0;
-            while(permutation.pcm.size() > 0) {
-                // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one
-                auto &p = digested == 0 ? pitch_range.permutations[i] : new_permutation(permutation);
-                std::size_t remaining_size = permutation.pcm.size();
-                std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
-
-                // Encode it
-                auto *sample_data_start = permutation.pcm.data();
-                auto sample_data = std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size);
-                permutation.pcm = std::vector<std::byte>(permutation.pcm.begin() + permutation_size, permutation.pcm.end());
-                encode_permutation(p, sample_data);
-                p.samples.shrink_to_fit();
-                permutation.pcm.shrink_to_fit();
-                digested += permutation_size;
-
-                if(permutation.pcm.size() == 0) {
-                    p.next_permutation_index = NULL_INDEX;
-                }
-                else {
-                    std::size_t next_permutation = pitch_range.permutations.size();
-                    if(next_permutation > MAX_PERMUTATIONS) {
-                        eprintf_error("Maximum number of total permutations (%zu > %zu) exceeded", next_permutation, MAX_PERMUTATIONS);
-                        std::exit(EXIT_FAILURE);
-                    }
-                    p.next_permutation_index = static_cast<Index>(next_permutation);
-                }
-            }
-        }
-        else {
-            auto &p = pitch_range.permutations[i];
-            p.next_permutation_index = NULL_INDEX;
-            encode_permutation(p, permutation.pcm);
-            p.samples.shrink_to_fit();
-        }
-
-        // Write the old actual permutation stuff if needed
-        for(std::size_t o = 0; o < old_actual_permutation_count; o++) {
-            if(std::strcmp(old_pitch_range.permutations[o].name.string, permutation.name.c_str()) == 0) {
-                std::size_t new_permutation = i;
-                std::size_t old_permutation = o;
-                while(new_permutation != NULL_INDEX && old_permutation != NULL_INDEX) {
-                    if(old_permutation > old_pitch_range.permutations.size()) {
-                        eprintf_error("Existing sound tag has an invalid next permutation index");
-                        std::exit(EXIT_FAILURE);
+                    std::size_t last_sample = first_sample + sample_count_to_check;
+                    double total = 0;
+                    for(std::size_t s = first_sample; s < last_sample; s++) {
+                        total += pcm_data[s];
                     }
 
-                    auto &old_pr = old_pitch_range.permutations[old_permutation];
-                    auto &new_pr = pitch_range.permutations[new_permutation];
+                    // Divide by samples per tick
+                    double average = total / samples_per_tick;
+                    mouth_total += average;
+                    p.mouth_data[t] = static_cast<std::byte>(average);
 
-                    new_pr.gain = old_pr.gain;
-                    new_pr.skip_fraction = old_pr.skip_fraction;
+                    if(average > max) {
+                        max = average;
+                    }
+                }
 
-                    new_permutation = new_pr.next_permutation_index;
-                    old_permutation = old_pr.next_permutation_index;
+                // Get average and min, clamping min to 0-255
+                double average = mouth_total / tick_count;
+                double min = 2.0 * average - max;
+                if(min > UINT8_MAX) {
+                    min = UINT8_MAX;
+                }
+                else if(min < 0) {
+                    min = 0;
+                }
 
-                    if(!old_split || !split) {
+                // Get range
+                double range = static_cast<double>(max + average) / 2 - min;
+
+                // Do nothing if there's no range
+                if(range == 0) {
+                    return;
+                }
+
+                // Go through each sample
+                for(std::size_t t = 0; t < tick_count; t++) {
+                    double sample = (static_cast<std::uint8_t>(p.mouth_data[t]) - min) / range;
+
+                    // Clamp to 0 - 255
+                    if(sample >= 1.0) {
+                        p.mouth_data[t] = static_cast<std::byte>(UINT8_MAX);
+                    }
+                    else if(sample <= 0.0) {
+                        p.mouth_data[t] = static_cast<std::byte>(0);
+                    }
+                    else {
+                        p.mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
+                    }
+                }
+            };
+
+            // Encode a permutation
+            auto encode_permutation = [&permutation, &format, &sound_options, &generate_mouth_data, &is_dialogue](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
+                // Set the default stuff
+                p.gain = 1.0F;
+
+                // Generate mouth data if needed
+                if(is_dialogue) {
+                    // Convert samples to 8-bit unsigned so we can use it to generate mouth data
+                    auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
+                    std::vector<std::uint8_t> pcm_8_bit;
+                    pcm_8_bit.reserve(samples_float.size());
+                    for(auto &f : samples_float) {
+                        float ff = f;
+                        if(ff < 0.0F) {
+                            ff *= -1.0F;
+                        }
+                        pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
+                    }
+                    samples_float = {};
+                    generate_mouth_data(p, pcm_8_bit);
+                }
+
+                switch(format) {
+                    // Basically, just make it 16-bit big endian
+                    case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
+                        p.samples = Invader::SoundEncoder::convert_to_16_bit_pcm_big_endian(pcm, permutation.bits_per_sample);
+                        p.buffer_size = p.samples.size();
+                        break;
+
+                    // Encode to Vorbis in an Ogg container
+                    case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
+                        if(sound_options.compression_level > 1.0F) {
+                            sound_options.compression_level = 1.0F;
+                        }
+                        else if(sound_options.compression_level < 0.0F) {
+                            sound_options.compression_level = 0.0F;
+                        }
+                        p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
+                        p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                         break;
                     }
+
+                    // Encode to FLAC
+                    case SoundFormat::SOUND_FORMAT_FLAC: {
+                        // Clamp to 0.0 - 0.8
+                        if(sound_options.compression_level > 0.8F) {
+                            sound_options.compression_level = 0.8F;
+                        }
+                        else if(sound_options.compression_level < 0.0F) {
+                            sound_options.compression_level = 0.0F;
+                        }
+                        // Convert to integer, rounding to the nearest level
+                        int flac_level = static_cast<int>(*sound_options.compression_level * 10.0F + 0.5F);
+                        p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, flac_level);
+                        break;
+                    }
+
+                    // Encode to Xbox ADPCMeme
+                    case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
+                        p.samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation.bits_per_sample, permutation.channel_count);
+                        p.buffer_size = 0;
+                        break;
+
+                    default:
+                        std::terminate();
                 }
+            };
 
-                break;
+            // Split if requested
+            if(split) {
+                const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
+                std::size_t digested = 0;
+                while(permutation.pcm.size() > 0) {
+                    // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one as a copy
+                    auto &p = digested == 0 ? pitch_range.permutations[i] : pitch_range.permutations.emplace_back(pitch_range.permutations[i]);
+                    std::size_t remaining_size = permutation.pcm.size();
+                    std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
+
+                    // Encode it
+                    auto *sample_data_start = permutation.pcm.data();
+                    auto sample_data = std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size);
+                    permutation.pcm = std::vector<std::byte>(permutation.pcm.begin() + permutation_size, permutation.pcm.end());
+                    encode_permutation(p, sample_data);
+                    p.samples.shrink_to_fit();
+                    permutation.pcm.shrink_to_fit();
+                    digested += permutation_size;
+
+                    if(permutation.pcm.size() == 0) {
+                        p.next_permutation_index = NULL_INDEX;
+                    }
+                    else {
+                        std::size_t next_permutation = pitch_range.permutations.size();
+                        if(next_permutation > MAX_PERMUTATIONS) {
+                            eprintf_error("Maximum number of total permutations (%zu > %zu) exceeded", next_permutation, MAX_PERMUTATIONS);
+                            std::exit(EXIT_FAILURE);
+                        }
+                        p.next_permutation_index = static_cast<Index>(next_permutation);
+                    }
+                }
             }
+            else {
+                auto &p = pitch_range.permutations[i];
+                p.next_permutation_index = NULL_INDEX;
+                encode_permutation(p, permutation.pcm);
+                p.samples.shrink_to_fit();
+            }
+
+            // Print sound info
+            oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.c_str(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
+            permutation.pcm = std::vector<std::byte>();
         }
-
-        // Print sound info
-        oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.c_str(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
-        permutation.pcm = std::vector<std::byte>();
     }
-
-    // Wrap it up
-    std::memset(pitch_range.name.string, 0, sizeof(pitch_range.name));
-    static constexpr char DEFAULT_NAME[] = "default";
-    std::memcpy(pitch_range.name.string, DEFAULT_NAME, sizeof(DEFAULT_NAME));
-
-    // Move it
-    auto &new_pitch_range = sound_tag.pitch_ranges[0];
-    new_pitch_range.permutations.clear();
-    new_pitch_range.permutations.reserve(pitch_range.permutations.size());
-    for(auto &permutation : pitch_range.permutations) {
-        new_pitch_range.permutations.push_back(std::move(permutation));
-        permutation.samples = std::vector<std::byte>();
-        permutation.mouth_data = std::vector<std::byte>();
-    }
-    new_pitch_range.name = pitch_range.name;
-    
-    // Set this stuff up last
-    if(is_new_pitch_range) {
-        new_pitch_range.natural_pitch = 1.0F;
-        new_pitch_range.bend_bounds.to = 1.0F;
-    }
-    else {
-        new_pitch_range.natural_pitch = old_pitch_range.natural_pitch;
-        new_pitch_range.bend_bounds.from = old_pitch_range.bend_bounds.from;
-        new_pitch_range.bend_bounds.to = old_pitch_range.bend_bounds.to;
-    }
-    new_pitch_range.actual_permutation_count = static_cast<std::uint16_t>(actual_permutation_count);
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(extended_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_EXTENDED_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, extended_sound == nullptr ? "" : " [--extended]");
@@ -949,5 +875,99 @@ int main(int argc, const char **argv) {
     if(!Invader::File::save_file(tag_path.string().c_str(), sound_tag_data)) {
         eprintf_error("Failed to save %s", tag_path.string().c_str());
         return EXIT_FAILURE;
+    }
+}
+
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::ExtendedSound *extended_sound) {
+    for(auto &wav : std::filesystem::directory_iterator(directory)) {
+        // Skip directories
+        auto path = wav.path();
+        auto path_str = path.string();
+        auto *path_str_cstr = path_str.c_str();
+        if(wav.is_directory()) {
+            eprintf_error("Unexpected directory %s", path_str_cstr);
+            std::exit(EXIT_FAILURE);
+        }
+        auto extension = path.extension().string();
+
+        // Get the sound
+        SoundReader::Sound sound = {};
+        try {
+            if(extension == ".wav") {
+                sound = SoundReader::sound_from_wav_file(path_str_cstr);
+            }
+            else if(extension == ".flac") {
+                sound = SoundReader::sound_from_flac_file(path_str_cstr);
+            }
+            else {
+                eprintf_error("Unknown file format for %s", path_str_cstr);
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        catch(std::exception &e) {
+            eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
+            std::exit(EXIT_FAILURE);
+        }
+
+        // Get the permutation name
+        auto filename = path.filename().string();
+        sound.name = filename.substr(0, filename.size() - extension.size());
+        if(sound.name.size() >= sizeof(HEK::TagString)) {
+            eprintf_error("Permutation name %s exceeds the maximum permutation name size (%zu >= %zu)", sound.name.c_str(), sound.name.size(), sizeof(HEK::TagString));
+            std::exit(EXIT_FAILURE);
+        }
+
+        // Lowercase it
+        for(char &c : sound.name) {
+            c = std::tolower(c);
+        }
+
+        // Add it to the source list
+        if(extended_sound) {
+            auto &source = extended_sound->source_FLACs.emplace_back();
+            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
+            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
+            if(extension == ".flac") {
+                source.compressed_audio_data = *File::open_file(path_str_cstr);
+            }
+            else {
+                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
+            }
+            source.pitch_range = pitch_range_index;
+        }
+
+        // Use the highest channel count and sample rate
+        if(highest_channel_count < sound.channel_count) {
+            highest_channel_count = sound.channel_count;
+        }
+        if(highest_sample_rate < sound.sample_rate) {
+            highest_sample_rate = sound.sample_rate;
+        }
+
+        // Make sure we can actually work with this
+        if(sound.channel_count > 2 || sound.channel_count < 1) {
+            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
+            std::exit(EXIT_FAILURE);
+        }
+        if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
+            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
+            std::exit(EXIT_FAILURE);
+        }
+
+        // Make it small
+        sound.pcm.shrink_to_fit();
+
+        // Add it
+        std::size_t i;
+        for(i = 0; i < permutations.size(); i++) {
+            if(sound.name < permutations[i].name) {
+                break;
+            }
+            else if(sound.name == permutations[i].name) {
+                eprintf_error("Multiple permutations with the same name (%s) cannot be added", permutations[i].name.c_str());
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        permutations.insert(permutations.begin() + i, std::move(sound));
     }
 }
