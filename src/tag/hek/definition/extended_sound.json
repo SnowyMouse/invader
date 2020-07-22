@@ -59,7 +59,7 @@
             {
                 "name": "Extended Sound Data",
                 "description": "Invader-specific sound data",
-                "first": "encoding flags"
+                "first": "extended flags"
             }
         ],
         "fields": [
