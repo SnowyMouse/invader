@@ -149,13 +149,13 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         }
 
         if(sizeof(T) == sizeof(Parser::InvaderBitmap) && !bitmap_options.dithering.has_value()) {
-            auto *extended_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
+            auto *invader_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
             if(!bitmap_options.mipmap_scale_type.has_value()) {
-                bitmap_options.mipmap_scale_type = extended_bitmap->mipmap_scaling;
+                bitmap_options.mipmap_scale_type = invader_bitmap->mipmap_scaling;
             }
             if(!bitmap_options.dithering.has_value()) {
-                bitmap_options.dither_alpha = extended_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
-                bitmap_options.dither_color = extended_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+                bitmap_options.dither_alpha = invader_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+                bitmap_options.dither_color = invader_bitmap->invader_bitmap_flags & HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
                 bitmap_options.dithering = *bitmap_options.dither_alpha || *bitmap_options.dither_color;
             }
         }
@@ -391,20 +391,20 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // Make sure data metadata is correctly sized and other stuff is in place
     if(sizeof(T) == sizeof(Parser::InvaderBitmap)) {
-        auto *extended_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
+        auto *invader_bitmap = reinterpret_cast<Parser::InvaderBitmap *>(&bitmap_tag_data);
         if(*bitmap_options.dither_alpha) {
-            extended_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+            invader_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
         }
         else {
-            extended_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
+            invader_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_ALPHA;
         }
         if(*bitmap_options.dither_color) {
-            extended_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+            invader_bitmap->invader_bitmap_flags |= HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
         }
         else {
-            extended_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
+            invader_bitmap->invader_bitmap_flags &= ~HEK::InvaderBitmapFlagsFlag::INVADER_BITMAP_FLAGS_FLAG_DITHER_COLOR;
         }
-        extended_bitmap->mipmap_scaling = *bitmap_options.mipmap_scale_type;
+        invader_bitmap->mipmap_scaling = *bitmap_options.mipmap_scale_type;
     }
 
     // Write it all
@@ -682,15 +682,15 @@ int main(int argc, char *argv[]) {
     auto tag_path = tags_path / bitmap_tag;
 
     auto final_path_bitmap = tag_path.string() + ".bitmap";
-    auto final_path_extended_bitmap = tag_path.string() + ".extended_bitmap";
+    auto final_path_invader_bitmap = tag_path.string() + ".invader_bitmap";
 
     // Are we using an extended bitmap?
-    if(!bitmap_options.use_extended && std::filesystem::exists(final_path_extended_bitmap)) {
+    if(!bitmap_options.use_extended && std::filesystem::exists(final_path_invader_bitmap)) {
         bitmap_options.use_extended = true;
     }
 
     if(bitmap_options.use_extended) {
-        return perform_the_ritual<Invader::Parser::InvaderBitmap>(bitmap_tag, tag_path, final_path_extended_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_INVADER_BITMAP);
+        return perform_the_ritual<Invader::Parser::InvaderBitmap>(bitmap_tag, tag_path, final_path_invader_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_INVADER_BITMAP);
     }
     else {
         return perform_the_ritual<Invader::Parser::Bitmap>(bitmap_tag, tag_path, final_path_bitmap, bitmap_options, found_format, TagClassInt::TAG_CLASS_BITMAP);
