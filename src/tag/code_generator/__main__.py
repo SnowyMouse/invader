@@ -68,6 +68,12 @@ for i in range(bitfield_cpp+3, len(sys.argv)):
                     expand_superclass(f["classes"], "item", ["weapon", "garbage", "equipment"])
                     expand_superclass(f["classes"], "shader", ["shader_environment", "shader_model", "shader_transparent_chicago", "shader_transparent_chicago_extended", "shader_transparent_glass", "shader_transparent_meter", "shader_transparent_plasma", "shader_transparent_water", "shader_transparent_generic"])
                     expand_superclass(f["classes"], "device", ["device_control", "device_light_fixture", "device_machine"])
+                    
+                    # Remove superclasses
+                    for i in ["object", "unit", "device", "shader", "item"]:
+                        if i in f["classes"]:
+                            f["classes"].remove(i)
+                    
             all_structs.append(s)
         else:
             print("Unknown object type {}".format(s["type"]), file=sys.stderr)

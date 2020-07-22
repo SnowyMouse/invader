@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Fixed
+- invader: Fixed superclasses (e.g. object) being directly supported as
+  references, since these tags do not actually exist as real tags
+
 ## [0.36.0] - 2020-07-22
 ### Added
 - invader-build: Added warnings for if you use multiple variants for a slot in a

@@ -795,7 +795,6 @@ namespace Invader {
             COMPILE_TAG_CLASS(Decal, TAG_CLASS_DECAL)
             COMPILE_TAG_CLASS(UIWidgetDefinition, TAG_CLASS_UI_WIDGET_DEFINITION)
             COMPILE_TAG_CLASS(InputDeviceDefaults, TAG_CLASS_INPUT_DEVICE_DEFAULTS)
-            COMPILE_TAG_CLASS(Device, TAG_CLASS_DEVICE)
             COMPILE_TAG_CLASS(DetailObjectCollection, TAG_CLASS_DETAIL_OBJECT_COLLECTION)
             COMPILE_TAG_CLASS(Effect, TAG_CLASS_EFFECT)
             COMPILE_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT)
@@ -809,7 +808,6 @@ namespace Invader {
             COMPILE_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT)
             COMPILE_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER)
             COMPILE_TAG_CLASS(HUDGlobals, TAG_CLASS_HUD_GLOBALS)
-            COMPILE_TAG_CLASS(Item, TAG_CLASS_ITEM)
             COMPILE_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION)
             COMPILE_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT)
             COMPILE_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE)
@@ -824,7 +822,6 @@ namespace Invader {
             COMPILE_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL)
             COMPILE_TAG_CLASS(Model, TAG_CLASS_MODEL)
             COMPILE_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION)
-            COMPILE_TAG_CLASS(Object, TAG_CLASS_OBJECT)
             COMPILE_TAG_CLASS(Particle, TAG_CLASS_PARTICLE)
             COMPILE_TAG_CLASS(ParticleSystem, TAG_CLASS_PARTICLE_SYSTEM)
             COMPILE_TAG_CLASS(Physics, TAG_CLASS_PHYSICS)
@@ -838,7 +835,6 @@ namespace Invader {
             COMPILE_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO)
             COMPILE_TAG_CLASS(ShaderEnvironment, TAG_CLASS_SHADER_ENVIRONMENT)
             COMPILE_TAG_CLASS(ShaderTransparentGlass, TAG_CLASS_SHADER_TRANSPARENT_GLASS)
-            COMPILE_TAG_CLASS(Shader, TAG_CLASS_SHADER)
             COMPILE_TAG_CLASS(Sky, TAG_CLASS_SKY)
             COMPILE_TAG_CLASS(ShaderTransparentMeter, TAG_CLASS_SHADER_TRANSPARENT_METER)
             COMPILE_TAG_CLASS(Sound, TAG_CLASS_SOUND)
@@ -854,13 +850,20 @@ namespace Invader {
             COMPILE_TAG_CLASS(CameraTrack, TAG_CLASS_CAMERA_TRACK)
             COMPILE_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE)
             COMPILE_TAG_CLASS(UnitHUDInterface, TAG_CLASS_UNIT_HUD_INTERFACE)
-            COMPILE_TAG_CLASS(Unit, TAG_CLASS_UNIT)
             COMPILE_TAG_CLASS(UnicodeStringList, TAG_CLASS_UNICODE_STRING_LIST)
             COMPILE_TAG_CLASS(VirtualKeyboard, TAG_CLASS_VIRTUAL_KEYBOARD)
             COMPILE_TAG_CLASS(Vehicle, TAG_CLASS_VEHICLE)
             COMPILE_TAG_CLASS(Weapon, TAG_CLASS_WEAPON)
             COMPILE_TAG_CLASS(Wind, TAG_CLASS_WIND)
             COMPILE_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE)
+            
+            case TagClassInt::TAG_CLASS_OBJECT:
+            case TagClassInt::TAG_CLASS_UNIT:
+            case TagClassInt::TAG_CLASS_SHADER:
+            case TagClassInt::TAG_CLASS_ITEM:
+            case TagClassInt::TAG_CLASS_DEVICE:
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_class_int));
+                throw UnimplementedTagClassException();
 
             // For extended sounds and bitmaps, downgrade if necessary
             case TagClassInt::TAG_CLASS_EXTENDED_BITMAP: {
