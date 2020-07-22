@@ -191,7 +191,7 @@
         "groups": [
             {
                 "name": "Pitch Range Data",
-                "description": "In some instances where sounds are played, the pitch of sounds can be variable (e.g. vehicle engine effects). This is done by altering the playback speed of the sound. However, if the playback speed of a sound is changed too much, it can result in the sound being distorted. This can be worked around using pitch ranges.\n\nWhen creating your sound tag, you can create multiple pitch ranges using sounds that are recorded at different pitches. So, for a sound that is at natural pitch 2, you would supply a sound that is twice as high as a sound at natural pitch 1 (effectively one octave higher).\n\nBend bounds determines the minimum and maximum bend range to play the pitch range, and natural pitch determines the pitch bend in which the sound will be played at normal speed.\n\nExample: If there are two pitch ranges (bend bounds 0-1.75 & natural pitch 1, bend bounds 1.75-3 & natural pitch 2.25), then the first pitch range will be used until the bend is 1.75, in which the second pitch range will be used. So, if the pitch bend being used is 1.8, then the second pitch range will be used, and it will be played at 80% speed (1.8 / 2.25 = 0.8).\n\nIf you don't expect your sound to be played at multiple pitches, then having a single pitch range with a natural pitch of 1 is valid, too, and is typical of most sound tags.",
+                "description": "Bend bounds determines the minimum and maximum bend range to play the pitch range, and natural pitch determines the pitch bend in which the sound will be played at normal speed.\n\nIn some instances where sounds are played, the pitch of sounds can be variable (e.g. vehicle engine effects). This is done by altering the playback speed of the sound. However, if the playback speed of a sound is changed too much, it can result in the sound being distorted. This can be worked around using pitch ranges.\n\nWhen creating your sound tag, you can create multiple pitch ranges using sounds that are recorded at different pitches. So, for a sound that is at natural pitch 2, you would supply a sound that is twice as high as a sound at natural pitch 1 (effectively one octave higher).\n\nExample: If there are two pitch ranges (bend bounds 0-1.75 & natural pitch 1, bend bounds 1.75-3 & natural pitch 2.25), then the first pitch range will be used until the bend is 1.75, in which the second pitch range will be used. So, if the pitch bend being used is 1.8, then the second pitch range will be used, and it will be played at 80% speed (1.8 / 2.25 = 0.8).\n\nIf you don't expect your sound to be played at multiple pitches, then having a single pitch range is valid, too, and is typical of most sound tags.",
                 "first": "name"
             }
         ],
@@ -206,7 +206,7 @@
                 "type": "float",
                 "default": 1.0,
                 "default_sign": true,
-                "comment": "This is the base pitch for this pitch range.\nWhen the pitch bend is equal to this, then the audio is played at normal pitch and speed."
+                "comment": "This is the base pitch for this pitch range.\nWhen the pitch bend is equal to this, then the audio is played at normal pitch and speed.\nNote that 0 defaults to 1."
             },
             {
                 "name": "bend bounds",
