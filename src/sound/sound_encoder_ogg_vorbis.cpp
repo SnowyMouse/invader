@@ -6,10 +6,11 @@
 #include <invader/error.hpp>
 #include <vorbis/vorbisenc.h>
 #include <memory>
+#include <variant>
 #include <cstdint>
 
 namespace Invader::SoundEncoder {
-    std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality) {
+    static std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, std::variant<float, std::uint16_t> vorbis_quality) {
         // Begin
         std::vector<std::byte> output_samples;
         std::size_t bytes_per_sample_one_channel = bits_per_sample / 8;
@@ -19,7 +20,24 @@ namespace Invader::SoundEncoder {
 
         vorbis_info vi;
         vorbis_info_init(&vi);
-        auto ret = vorbis_encode_init_vbr(&vi, channel_count, sample_rate, vorbis_quality);
+        int ret;
+        
+        switch(vorbis_quality.index()) {
+            case 0:
+                ret = vorbis_encode_init_vbr(&vi, channel_count, sample_rate, std::get<0>(vorbis_quality));
+                break;
+            case 1: {
+                int bitrate = static_cast<int>(std::get<1>(vorbis_quality)) * 1000;
+                int min = (sample_rate * channel_count) / 22050 * 16000;
+                int max = min * 4;
+                int final_bitrate = std::max(std::min(bitrate, max), min);
+                ret = vorbis_encode_init(&vi, channel_count, sample_rate, final_bitrate, final_bitrate, final_bitrate);
+                break;
+            }
+            default:
+                ret = 1;
+                break;
+        }
         if(ret) {
             eprintf_error("Failed to initialize vorbis encoder");
             throw SoundEncodeFailureException();
@@ -123,5 +141,13 @@ namespace Invader::SoundEncoder {
 
         output_samples.shrink_to_fit();
         return output_samples;
+    }
+    
+    std::vector<std::byte> encode_to_ogg_vorbis_vbr(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality) {
+        return encode_to_ogg_vorbis(pcm, bits_per_sample, channel_count, sample_rate, vorbis_quality);
+    }
+    
+    std::vector<std::byte> encode_to_ogg_vorbis_cbr(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, std::uint16_t vorbis_bitrate) {
+        return encode_to_ogg_vorbis(pcm, bits_per_sample, channel_count, sample_rate, vorbis_bitrate);
     }
 }

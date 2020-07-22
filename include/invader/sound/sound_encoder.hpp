@@ -6,18 +6,30 @@
 #include <cstddef>
 #include <vector>
 #include <cstdint>
+#include <optional>
 
 namespace Invader::SoundEncoder {
     /**
-     * Encode the PCM data to Ogg Vorbis. This is lossy.
+     * Encode the PCM data to Ogg Vorbis with a variable bitrate. This is lossy.
      * @param pcm             PCM data
      * @param bits_per_sample bits per sample of the PCM data
      * @param channel_count   channel count
      * @param sample_rate     sample rate
-     * @param vorbis_quality  vorbis quality
+     * @param vorbis_quality  vorbis quality (0.0 to 1.0)
      * @return                Ogg Vorbis data
      */
-    std::vector<std::byte> encode_to_ogg_vorbis(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality);
+    std::vector<std::byte> encode_to_ogg_vorbis_vbr(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, float vorbis_quality);
+    
+    /**
+     * Encode the PCM data to Ogg Vorbis with a constant bitrate. This is lossy.
+     * @param pcm             PCM data
+     * @param bits_per_sample bits per sample of the PCM data
+     * @param channel_count   channel count
+     * @param sample_rate     sample rate
+     * @param vorbis_bitrate  vorbis bitrate (kilobits per second)
+     * @return                Ogg Vorbis data
+     */
+    std::vector<std::byte> encode_to_ogg_vorbis_cbr(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::uint32_t channel_count, std::uint32_t sample_rate, std::uint16_t vorbis_bitrate);
 
     /**
      * Generate a WAV container with the PCM data. This is lossless.

@@ -9,6 +9,15 @@
         "type": "enum"
     },
     {
+        "name": "ExtendedSoundFlags",
+        "type": "bitmask",
+        "fields": [
+            "use bitrate when possible"
+        ],
+        "type": "bitfield",
+        "width": 16
+    },
+    {
         "name": "ExtendedSoundChannelCount",
         "options": [
             "automatic",
@@ -55,8 +64,8 @@
         ],
         "fields": [
             {
-                "type": "pad",
-                "size": 2
+                "type": "ExtendedSoundFlags",
+                "name": "extended flags"
             },
             {
                 "name": "encoding sample rate",
@@ -76,7 +85,19 @@
             {
                 "type": "float",
                 "name": "compression level",
-                "comment": "This can be from 0.0 to 1.0.\nFor Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10).\nFor FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8).\nNote that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality."
+                "comment": "This can be from 0.0 to 1.0.\nFor Ogg Vorbis, higher levels meaning better quality but worse sizes (quality 0 to quality 10).\nFor FLAC, this is the inverse: higher levels mean better sizes but longer compression times, and this is clamped to 0.0 to 0.8 (FLAC 0 to FLAC 8).\nNote that higher Ogg Vorbis levels will be worse than FLAC 8 in both size and quality.",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            {
+                "type": "int16",
+                "name": "compression bitrate",
+                "unit": "kilobits per second",
+                "comment": "If \"use bitrate when possible\" is set, then compression level will be disregarded when using a lossy compression that supports it."
+            },
+            {
+                "type": "pad",
+                "size": 66
             },
             {
                 "type": "TagReflexive",
@@ -90,11 +111,11 @@
             },
             {
                 "type": "pad",
-                "size": 40
+                "size": 96
             }
         ],
         "type": "struct",
-        "size": 228,
+        "size": 352,
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
         "pre_compile": true,

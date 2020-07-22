@@ -74,6 +74,8 @@ namespace Invader::HEK {
                 return 2;
             case TAG_CLASS_WEAPON_HUD_INTERFACE:
                 return 2;
+            case TAG_CLASS_EXTENDED_SOUND:
+                return 2;
             default:
                 return 1;
         }

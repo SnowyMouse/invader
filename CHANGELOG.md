@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Made the filter in the Find dialog and the path in the Save
   dialog have focus
 - invader-edit-qt: Added selecting individual pitch ranges
+- invader-sound: Added `-b` for constant bitrate for Ogg Vorbis
 
 ### Changed
 - invader: Decompressing vertices now clears the "zoner" and "uses local nodes"

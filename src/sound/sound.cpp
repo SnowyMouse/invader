@@ -25,6 +25,7 @@ struct SoundOptions {
     std::optional<std::size_t> channel_count;
     std::optional<SoundClass> sound_class;
     std::optional<std::uint32_t> sample_rate;
+    std::optional<std::uint16_t> bitrate;
 };
 
 static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::ExtendedSound *extended_sound);
@@ -87,6 +88,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     extended_sound->encoding_sample_rate = HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ;
                     break;
                 default:
+                    eprintf_error("Invalid sample rate given. What?");
                     std::terminate();
             }
         }
@@ -99,14 +101,15 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_44100_HZ:
                 sound_options.sample_rate = 44100;
                 break;
-            case HEK::ExtendedSoundSampleRate::EXTENDED_SOUND_SAMPLE_RATE_ENUM_COUNT:
+            default:
+                eprintf_error("Invalid sample rate read. What?");
                 std::terminate();
                 break;
         }
 
         // Set channel count
         if(sound_options.channel_count.has_value()) {
-            switch(*sound_options.sample_rate) {
+            switch(*sound_options.channel_count) {
                 case 1:
                     extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_MONO;
                     break;
@@ -114,6 +117,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     extended_sound->encoding_channel_count = HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO;
                     break;
                 default:
+                    eprintf_error("Invalid channel count given. What?");
                     std::terminate();
             }
         }
@@ -126,7 +130,8 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_STEREO:
                 sound_options.channel_count = 2;
                 break;
-            case HEK::ExtendedSoundChannelCount::EXTENDED_SOUND_CHANNEL_COUNT_ENUM_COUNT:
+            default:
+                eprintf_error("Invalid channel count read. What?");
                 std::terminate();
                 break;
         }
@@ -138,11 +143,26 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         else {
             sound_options.format = extended_sound->encoding_format;
         }
+        
+        // If we have compression level set, then the sound option shouldn't have this set
+        if(sound_options.compression_level.has_value()) {
+            extended_sound->extended_flags &= ~ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE;
+        }
+        // If we don't have compression level set but we have a bitrate, set the flag
+        else if(sound_options.bitrate.has_value()) {
+            extended_sound->extended_flags |= ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE;
+            extended_sound->compression_bitrate = *sound_options.bitrate;
+        }
+        // If we have neither but we have the bitrate flag, set the bitrate
+        else if(extended_sound->extended_flags & ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE) {
+            sound_options.bitrate = extended_sound->compression_bitrate;
+        }
 
-        // Set this stuff too
+        // If we have a compression level set, set our compression level to the thing
         if(sound_options.compression_level.has_value()) {
             extended_sound->compression_level = *sound_options.compression_level;
         }
+        // Otherwise, default to it
         else {
             sound_options.compression_level = extended_sound->compression_level;
         }
@@ -480,6 +500,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             output_name = "Free Lossless Audio Codec";
             break;
         case SoundFormat::SOUND_FORMAT_ENUM_COUNT:
+            eprintf_error("Invalid format output name. What?");
             std::terminate();
     }
     oprintf("Found %zu sound%s:\n", total_sound_count, total_sound_count == 1 ? "" : "s");
@@ -633,7 +654,12 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         else if(sound_options.compression_level < 0.0F) {
                             sound_options.compression_level = 0.0F;
                         }
-                        p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
+                        if(sound_options.bitrate.has_value()) {
+                            p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis_cbr(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.bitrate);
+                        }
+                        else {
+                            p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis_vbr(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
+                        }
                         p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
                         break;
                     }
@@ -660,6 +686,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         break;
 
                     default:
+                        eprintf_error("Invalid format. What?");
                         std::terminate();
                 }
             };
@@ -732,6 +759,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("channel-count", 'C', 1, "[REQUIRES --extended] Set the channel count. Can be: mono, stereo. By default, this is determined based on the input audio.", "<#>");
     options.emplace_back("sample-rate", 'r', 1, "[REQUIRES --extended] Set the sample rate in Hz. Halo supports 22050 and 44100. By default, this is determined based on the input audio.", "<Hz>");
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
+    options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
@@ -757,6 +785,16 @@ int main(int argc, const char **argv) {
 
             case 'S':
                 sound_options.split = false;
+                break;
+
+            case 'b':
+                try {
+                    sound_options.bitrate = static_cast<std::uint16_t>(std::stol(arguments[0]));
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid bitrate: %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'C':
@@ -816,6 +854,11 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
+    
+    if(sound_options.bitrate.has_value() && sound_options.compression_level.has_value()) {
+        eprintf_error("Bitrate and compression level are mutually exclusive.");
+        return EXIT_FAILURE;
+    }
 
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
