@@ -12,7 +12,7 @@
         "name": "ExtendedSoundFlags",
         "type": "bitmask",
         "fields": [
-            "use bitrate when possible"
+            "use constant bitrate when possible"
         ],
         "type": "bitfield",
         "width": 16
@@ -93,7 +93,7 @@
                 "type": "uint16",
                 "name": "compression bitrate",
                 "unit": "kilobits per second",
-                "comment": "If \"use bitrate when possible\" is set, then compression level will be disregarded when using a lossy compression that supports it."
+                "comment": "If \"use constant bitrate when possible\" is set, then compression level will be disregarded when using a lossy compression, and this constant bitrate will be used instead."
             },
             {
                 "type": "pad",

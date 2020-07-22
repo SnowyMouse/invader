@@ -146,15 +146,15 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         
         // If we have compression level set, then the sound option shouldn't have this set
         if(sound_options.compression_level.has_value()) {
-            extended_sound->extended_flags &= ~ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE;
+            extended_sound->extended_flags &= ~ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
         }
         // If we don't have compression level set but we have a bitrate, set the flag
         else if(sound_options.bitrate.has_value()) {
-            extended_sound->extended_flags |= ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE;
+            extended_sound->extended_flags |= ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE;
             extended_sound->compression_bitrate = *sound_options.bitrate;
         }
         // If we have neither but we have the bitrate flag, set the bitrate
-        else if(extended_sound->extended_flags & ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_BITRATE_WHEN_POSSIBLE) {
+        else if(extended_sound->extended_flags & ExtendedSoundFlagsFlag::EXTENDED_SOUND_FLAGS_FLAG_USE_CONSTANT_BITRATE_WHEN_POSSIBLE) {
             sound_options.bitrate = extended_sound->compression_bitrate;
         }
 
