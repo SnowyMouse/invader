@@ -510,6 +510,10 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         pitch_range.actual_permutation_count = actual_permutation_count;
         pitch_range.permutations.resize(actual_permutation_count);
         
+        for(auto &p : pitch_range.permutations) {
+            p.format = sound_tag.format;
+        }
+        
         for(std::size_t i = 0; i < actual_permutation_count; i++) {
             // Get the permutation and set its name, too
             auto &permutation = permutations[i];
