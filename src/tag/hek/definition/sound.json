@@ -244,6 +244,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "title": "name",
         "size": 72
     },
     {
