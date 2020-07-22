@@ -74,7 +74,8 @@ namespace Invader::Parser {
             VALUE_TYPE_TAGSTRING,
             VALUE_TYPE_TAGDATAOFFSET,
             VALUE_TYPE_ENUM,
-            VALUE_TYPE_BITMASK
+            VALUE_TYPE_BITMASK,
+            VALUE_TYPE_GROUP_START
         };
 
         enum NumberFormat {
@@ -531,6 +532,16 @@ namespace Invader::Parser {
         bool is_read_only() const noexcept {
             return this->read_only;
         }
+
+        /**
+         * Instantiate a ParserStructValue with a group start
+         * @param name    name of the group
+         * @param comment comments
+         */
+        ParserStructValue(
+            const char *name,
+            const char *comment
+        );
 
         /**
          * Instantiate a ParserStructValue with a dependency

@@ -71,12 +71,16 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         hpp.write("    struct {} : public ParserStruct {{\n".format(struct_name))
         hpp.write("        using struct_big = HEK::{}<HEK::BigEndian>;\n".format(struct_name))
         hpp.write("        using struct_little = HEK::{}<HEK::LittleEndian>;\n".format(struct_name))
+        all_used_groups = s["groups"] if "groups" in s else []
         all_used_structs = []
         def add_structs_from_struct(struct):
             if "inherits" in struct:
                 for t in all_structs:
                     if t["name"] == struct["inherits"]:
                         add_structs_from_struct(t)
+                        if "groups" in t:
+                            for g in t["groups"]:
+                                all_used_groups.append(g)
                         break
             for t in struct["fields"]:
                 if t["type"] == "pad":
@@ -123,7 +127,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, all_used_structs, hpp, cpp_read_hek_data)
         make_parse_hek_tag_file(struct_name, hpp, cpp_read_hek_file)
         make_refactor_reference(all_used_structs, struct_name, hpp, cpp_refactor_reference)
-        make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, None if not "title" in s else s["title"])
+        make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, None if not "title" in s else s["title"])
         make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_check_broken_enums)
         make_check_invalid_references(all_used_structs, struct_name, hpp, cpp_check_invalid_references)
         make_check_invalid_ranges(all_used_structs, struct_name, hpp, cpp_check_invalid_ranges)

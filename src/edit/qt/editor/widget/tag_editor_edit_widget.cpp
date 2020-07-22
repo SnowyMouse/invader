@@ -66,11 +66,7 @@ namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
         TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
 
-        auto *comment = value->get_comment();
-        if(comment) {
-            this->setToolTip(comment);
-        }
-
+        this->setToolTip(QString(value->get_comment()).replace("\n","\n\n"));
         this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
 
         auto *title_label = new QLabel(value->get_name());
@@ -416,6 +412,7 @@ namespace Invader::EditQt {
                 }
 
                 case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
+                case Parser::ParserStructValue::VALUE_TYPE_GROUP_START:
                     std::terminate();
             }
         };

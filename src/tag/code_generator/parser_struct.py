@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, hpp, struct_name, extract_hidden, read_only, struct_title):
+def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_structs, all_used_groups, hpp, struct_name, extract_hidden, read_only, struct_title):
     hpp.write("        std::vector<ParserStructValue> get_values() override;\n".format(struct_name))
     cpp_struct_value.write("std::vector<ParserStructValue> {}::get_values() {{\n".format(struct_name))
     cpp_struct_value.write("    std::vector<ParserStructValue> values;\n")
@@ -12,17 +12,26 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
 
             if ("cache_only" in struct and struct["cache_only"]) or ("endian" in struct and struct["endian"] == "little") or ("unused" in struct and struct["unused"]):
                 continue
+            
+            def make_cpp_string(what):
+                return "\"{}\"".format(what.replace("\"", "\\\"").replace("\n", "\\n"))
 
             name = "\"{}\"".format(struct["name"])
             member_name = struct["member_name"]
             member_name_q = "\"{}\"".format(member_name)
-            comment = "nullptr" if "comment" not in struct else "\"{}\"".format(struct["comment"].replace("\"", "\\\"").replace("\n", "\\n\\n"))
+            comment = "nullptr" if "comment" not in struct else make_cpp_string(struct["comment"])
             struct_read_only = "true" if ((read_only or ("read_only" in struct and struct["read_only"])) and not ("read_only" in struct and struct["read_only"] == False)) else "false"
             unit = "nullptr" if "unit" not in struct else "\"{}\"".format(struct["unit"].replace("\"", "\\\""))
+            
+            # If this is the start of a group, add a group
+            for i in all_used_groups:
+                if i["first"] == struct["name"]:
+                    cpp_struct_value.write("    values.emplace_back(\"{}\", {});\n".format(i["name"], make_cpp_string(i["description"])))
+                    break
 
             first_arguments = "{},{},{},&this->{}".format(name, member_name_q, comment, struct["member_name"])
             type = struct["type"]
-
+            
             if type == "TagDependency":
                 classes = struct["classes"]
                 classes_len = len(classes)

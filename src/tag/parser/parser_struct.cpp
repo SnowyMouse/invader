@@ -22,6 +22,12 @@ namespace Invader::Parser {
         allowed_classes(allowed_classes, allowed_classes + count),
         read_only(read_only) {}
 
+    
+    ParserStructValue::ParserStructValue(
+        const char *name,
+        const char *comment
+    ) : name(name), comment(comment), type(ValueType::VALUE_TYPE_GROUP_START) {}
+            
     ParserStructValue::ParserStructValue(
         const char *          name,
         const char *          member_name,

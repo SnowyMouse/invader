@@ -30,6 +30,7 @@ if(${INVADER_EDIT_QT})
         src/edit/qt/editor/widget/tag_editor_array_widget.cpp
         src/edit/qt/editor/widget/tag_editor_edit_widget_view.cpp
         src/edit/qt/editor/widget/tag_editor_edit_widget.cpp
+        src/edit/qt/editor/widget/tag_editor_group_widget.cpp
         src/edit/qt/editor/widget/tag_editor_widget.cpp
         src/edit/qt/editor/tag_editor_window.cpp
         src/edit/qt/tree/tag_tree_dialog.cpp
