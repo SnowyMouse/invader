@@ -24,23 +24,29 @@ namespace Invader::SoundEncoder {
         
         switch(vorbis_quality.index()) {
             case 0:
-                ret = vorbis_encode_init_vbr(&vi, channel_count, sample_rate, std::get<0>(vorbis_quality));
+                if((ret = vorbis_encode_init_vbr(&vi, channel_count, sample_rate, std::get<0>(vorbis_quality)))) {
+                    eprintf_error("Failed to initialize vorbis encoder (invalid parameters given?)");
+                    vorbis_info_clear(&vi);
+                    throw SoundEncodeFailureException();
+                }
                 break;
             case 1: {
                 int bitrate = static_cast<int>(std::get<1>(vorbis_quality)) * 1000;
-                int min = (sample_rate * channel_count) / 22050 * 16000;
-                int max = min * 4;
-                int final_bitrate = std::max(std::min(bitrate, max), min);
-                ret = vorbis_encode_init(&vi, channel_count, sample_rate, final_bitrate, final_bitrate, final_bitrate);
+                if((ret = vorbis_encode_init(&vi, channel_count, sample_rate, bitrate, bitrate, bitrate))) {
+                    if(ret == OV_EIMPL) {
+                        eprintf_error("Failed to initialize vorbis encoder (bitrate likely too low or too high)");
+                    }
+                    else {
+                        eprintf_error("Failed to initialize vorbis encoder (invalid parameters given?)");
+                    }
+                    vorbis_info_clear(&vi);
+                    throw SoundEncodeFailureException();
+                }
                 break;
             }
             default:
-                ret = 1;
+                ret = 0;
                 break;
-        }
-        if(ret) {
-            eprintf_error("Failed to initialize vorbis encoder");
-            throw SoundEncodeFailureException();
         }
 
         // Set the comment

@@ -891,20 +891,27 @@ int main(int argc, const char **argv) {
         sound_options.extended = true;
     }
 
+    // Generate sound tag
     std::vector<std::byte> sound_tag_data;
-    if(!sound_options.extended) {
-        tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
+    try {
+        if(!sound_options.extended) {
+            tag_path = std::filesystem::path(sound_options.tags) / (halo_tag_path + ".sound");
 
-        // Make sure format was set
-        if(!sound_options.format.has_value()) {
-            eprintf_error("No sound format set (required for .sound tags). Use -h for more information.");
-            return EXIT_FAILURE;
+            // Make sure format was set
+            if(!sound_options.format.has_value()) {
+                eprintf_error("No sound format set (required for .sound tags). Use -h for more information.");
+                return EXIT_FAILURE;
+            }
+
+            sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
         }
-
-        sound_tag_data = make_sound_tag<Parser::Sound>(tag_path, data_path, sound_options);
+        else {
+            sound_tag_data = make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
+        }
     }
-    else {
-        sound_tag_data = make_sound_tag<Parser::ExtendedSound>(tag_path, data_path, sound_options);
+    catch(std::exception &e) {
+        eprintf_error("Failed to create sound tag due to an exception error: %s", e.what());
+        return EXIT_FAILURE;
     }
 
     // Create missing directories if needed
