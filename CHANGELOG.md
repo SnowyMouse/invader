@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader: Fixed superclasses (e.g. object) being directly supported as
   references, since these tags do not actually exist as real tags
+- invader-edit-qt: Fixed an issue where clicking "Cancel" when prompted whether
+  you want to save in the tag root would still result in saving
 
 ## [0.36.0] - 2020-07-22
 ### Added

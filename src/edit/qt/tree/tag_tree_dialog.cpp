@@ -217,7 +217,7 @@ namespace Invader::EditQt {
         }
 
         if(!potential_halo_path.contains(HALO_SEPARATOR)) {
-            if(QMessageBox(QMessageBox::Icon::Warning, "You think you want it, but you actually don't", "You are creating a tag in the tag directory root. This is not recommended.\n\nAre you sure you want to continue?", QMessageBox::Yes | QMessageBox::Cancel, this).exec() == QMessageBox::Accepted) {
+            if(QMessageBox(QMessageBox::Icon::Warning, "You think you want it, but you actually don't", "You are creating a tag in the tag directory root. This is not recommended.\n\nAre you sure you want to continue?", QMessageBox::Yes | QMessageBox::Cancel, this).exec() == QMessageBox::Cancel) {
                 return;
             }
         }
