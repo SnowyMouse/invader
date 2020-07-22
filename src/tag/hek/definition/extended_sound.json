@@ -90,7 +90,7 @@
                 "maximum": 1.0
             },
             {
-                "type": "int16",
+                "type": "uint16",
                 "name": "compression bitrate",
                 "unit": "kilobits per second",
                 "comment": "If \"use bitrate when possible\" is set, then compression level will be disregarded when using a lossy compression that supports it."
