@@ -728,6 +728,7 @@ namespace Invader::EditQt {
                             break;
                             
                         case Parser::ParserStructValue::VALUE_TYPE_RECTANGLE2D:
+                        case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                             actual_max = INT16_MAX;
                             actual_min = INT16_MIN;
                             break;
