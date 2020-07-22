@@ -4,7 +4,7 @@
         "groups": [
             {
                 "name": "Shader Transparent Chicago Extended Data",
-                "description": "This class is shit. Use shader_transparent_chicago instead.",
+                "description": "This works the same as shader_transparent_chicago, but it supports 2-stage maps for 2003's low-end potato PCs that have no business running games more complex than Hearts.\nUse shader_transparent_chicago, instead, since it's the same thing but less annoying.",
                 "first": "numeric counter limit"
             }
         ],
