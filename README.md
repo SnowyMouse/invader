@@ -630,6 +630,8 @@ Usage: invader-sound [options] <sound-tag>
 Create or modify a sound tag.
 
 Options:
+  -b --bitrate <br>            Set the bitrate in kilobits per second. This
+                               only applies to vorbis.
   -c --class <class>           Set the class. This is required when generating
                                new sounds. Can be: ambient-computers,
                                ambient-machinery, ambient-nature,
