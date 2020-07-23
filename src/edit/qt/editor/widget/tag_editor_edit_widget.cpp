@@ -9,6 +9,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QStandardItemModel>
+#include <QColorDialog>
 #include <QStandardItem>
 #include <QCheckBox>
 #include <QGraphicsView>
@@ -28,6 +29,19 @@ namespace Invader::EditQt {
     class EnumComboBox : public QComboBox {
         void wheelEvent(QWheelEvent *event) override {
             event->ignore();
+        }
+    };
+    
+    /**
+     * Graphics view that opens a color picker when clicked
+     */
+    class ColorPickerGraphicsView : public QGraphicsView {
+    public:
+        ColorPickerGraphicsView(TagEditorEditWidget *parent) : QGraphicsView(parent), parent(parent) {}
+    private:
+        TagEditorEditWidget *parent;
+        void mousePressEvent(QMouseEvent *) override {
+            parent->activate_auxiliary_widget();
         }
     };
     
@@ -66,33 +80,28 @@ namespace Invader::EditQt {
     TagEditorEditWidget::TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget) :
         TagEditorWidget(parent, value, editor_window), array_widget(array_widget) {
 
+        auto *this_widget = this;
         this->setToolTip(QString(value->get_comment()).replace("\n","\n\n"));
         this->read_only = value->is_read_only() && editor_window->get_parent_window()->safeguards();
-
         auto *title_label = new QLabel(value->get_name());
         int standard_width = title_label->fontMetrics().boundingRect("MMMM").width();
         int prefix_label_width = standard_width / 2;
         int label_width = standard_width * 7;
-
         title_label->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
         title_label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
         auto *layout = new QHBoxLayout();
         layout->addWidget(title_label);
         this->setLayout(layout);
-
         std::size_t value_index = 0;
         auto &widgets_array = this->widgets;
         auto values = value->get_values();
-
         auto &textbox_widgets = this->textbox_widgets;
-
         auto &read_only = this->read_only;
         auto &auxiliary_widget = this->auxiliary_widget;
         auto &auxiliary_checkbox = this->auxiliary_checkbox;
         auxiliary_widget = nullptr;
 
-        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox]() {
+        auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
             auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
@@ -162,8 +171,8 @@ namespace Invader::EditQt {
             };
 
             // Make a color widget thing
-            auto make_color_widget = [&auxiliary_widget, &layout, &auxiliary_checkbox]() {
-                auto *new_auxiliary_widget = new QGraphicsView();
+            auto make_color_widget = [&auxiliary_widget, &layout, &auxiliary_checkbox, &this_widget]() {
+                auto *new_auxiliary_widget = new ColorPickerGraphicsView(this_widget);
                 new_auxiliary_widget->setMaximumHeight(QLineEdit().minimumSizeHint().height());
                 new_auxiliary_widget->setMaximumWidth(new_auxiliary_widget->maximumHeight());
                 new_auxiliary_widget->setMinimumHeight(new_auxiliary_widget->maximumHeight());
@@ -730,6 +739,11 @@ namespace Invader::EditQt {
                             actual_min = INT16_MIN;
                             break;
                             
+                        case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
+                            actual_max = UINT8_MAX;
+                            actual_min = 0;
+                            break;
+                            
                         default:
                             std::terminate();
                     }
@@ -866,5 +880,76 @@ namespace Invader::EditQt {
         else if(error == 2) {
             textbox->setStyleSheet("color: #FF0000");
         }
+    }
+    
+    void TagEditorEditWidget::activate_auxiliary_widget() {
+        TagEditorEditWidget *this_widget = this;
+        auto show_color = [&this_widget](bool use_int, bool use_alpha) {
+            QColorDialog dialog;
+            dialog.setOption(QColorDialog::ColorDialogOption::ShowAlphaChannel, use_alpha);
+            Parser::ParserStructValue::Number numbers[4];
+            this_widget->get_struct_value()->get_values(numbers);
+            
+            // Set the default color to our current color
+            QColor color;
+            if(use_int) {
+                color.setAlpha(std::get<std::int64_t>(numbers[0]));
+                color.setRed(std::get<std::int64_t>(numbers[1]));
+                color.setGreen(std::get<std::int64_t>(numbers[2]));
+                color.setBlue(std::get<std::int64_t>(numbers[3]));
+            }
+            else if(use_alpha) {
+                color.setAlphaF(std::get<double>(numbers[0]));
+                color.setRedF(std::get<double>(numbers[1]));
+                color.setGreenF(std::get<double>(numbers[2]));
+                color.setBlueF(std::get<double>(numbers[3]));
+            }
+            else {
+                color.setRedF(std::get<double>(numbers[0]));
+                color.setGreenF(std::get<double>(numbers[1]));
+                color.setBlueF(std::get<double>(numbers[2]));
+            }
+            dialog.setCurrentColor(color);
+            dialog.exec();
+            
+            // When we're done, get the new color
+            color = dialog.selectedColor();
+            if(use_int) {
+                this_widget->textbox_widgets[0]->setText(QString::number(color.alpha()));
+                this_widget->textbox_widgets[1]->setText(QString::number(color.red()));
+                this_widget->textbox_widgets[2]->setText(QString::number(color.green()));
+                this_widget->textbox_widgets[3]->setText(QString::number(color.blue()));
+            }
+            else if(use_alpha) {
+                this_widget->textbox_widgets[0]->setText(QString::number(color.alphaF()));
+                this_widget->textbox_widgets[1]->setText(QString::number(color.redF()));
+                this_widget->textbox_widgets[2]->setText(QString::number(color.greenF()));
+                this_widget->textbox_widgets[3]->setText(QString::number(color.blueF()));
+            }
+            else {
+                this_widget->textbox_widgets[0]->setText(QString::number(color.redF()));
+                this_widget->textbox_widgets[1]->setText(QString::number(color.greenF()));
+                this_widget->textbox_widgets[2]->setText(QString::number(color.blueF()));
+            }
+            
+            this_widget->on_change();
+        };
+        
+        switch(this->get_struct_value()->get_type()) {
+            case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
+                show_color(false, true);
+                break;
+            case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
+                show_color(true, true);
+                break;
+            case Parser::ParserStructValue::VALUE_TYPE_COLORRGB:
+                show_color(false, false);
+                break;
+            default:
+                eprintf_error("Unknown type for aux widget");
+                std::terminate();
+        }
+        QColorDialog dialog;
+        
     }
 }

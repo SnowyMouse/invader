@@ -5,6 +5,10 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
+- invader-edit-qt: Added a color picker
+
+### Fixed
+- invader-edit-qt: Fixed an issue with editing ColorARGBInt values
 
 ## [0.36.1] - 2020-07-22
 ### Changed

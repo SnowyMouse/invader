@@ -26,6 +26,7 @@ namespace Invader::EditQt {
          * @param array_widget  optional array widget to update if changed
          */
         TagEditorEditWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window, TagEditorArrayWidget *array_widget = nullptr);
+        void activate_auxiliary_widget();
 
         ~TagEditorEditWidget() = default;
 
