@@ -274,7 +274,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         for(auto &f : std::filesystem::directory_iterator(data_path)) {
             auto &path = f.path();
             if(!f.is_directory()) {
-                eprintf_error("Unexpected file %s", path.c_str());
+                eprintf_error("Unexpected file %s", path.string().c_str());
                 std::exit(EXIT_FAILURE);
             }
             auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), path.filename().string());
