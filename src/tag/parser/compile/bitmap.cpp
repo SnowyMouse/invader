@@ -185,17 +185,39 @@ namespace Invader::Parser {
                 sequence.first_bitmap_index = 0;
             }
         }
-
+        
+        // Loop through again, but make sure sprites are present when needed and not present when not needed
+        bool has_sprites = false;
+        for(auto &sequence : bitmap->bitmap_group_sequence) {
+            if((has_sprites = sequence.sprites.size() > 0)) {
+                break;
+            }
+        }
+        bool errored_on_sprites = false;
+        if(has_sprites && bitmap->type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Bitmap has sprites but is not a sprites bitmap type", tag_index);
+            errored_on_sprites = true;
+        }
+        else if(!has_sprites && bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES && bitmap->bitmap_data.size() > 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
+            errored_on_sprites = true;
+        }
+        if(errored_on_sprites) {
+            eprintf_warn("To fix this, recompile the bitmap");
+        }
+        
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
-
-        for(auto &data : bitmap->bitmap_data) {
+        std::size_t bitmap_data_count = bitmap->bitmap_data.size();
+        
+        for(std::size_t b = 0; b < bitmap_data_count; b++) {
+            auto &data = bitmap->bitmap_data[b];
             bool swizzled = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
             bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             
             // DXTn bitmaps cannot be swizzled
             if(swizzled && compressed) {
-                eprintf_error("Swizzled bitmaps are not supported for compressed bitmaps");
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as compressed and swizzled which is not allowed", b);
                 throw InvalidTagDataException();
             }
 
