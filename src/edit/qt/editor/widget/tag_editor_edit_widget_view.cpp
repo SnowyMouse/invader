@@ -5,6 +5,19 @@
 #include <QApplication>
 
 namespace Invader::EditQt {
+    int TagEditorEditWidgetView::y_for_item(const char *item) const noexcept {
+        for(auto *i : this->widgets) {
+            auto *widget = dynamic_cast<TagEditorWidget *>(i);
+            if(widget) {
+                if(std::strcmp(item,widget->get_struct_value()->get_name()) == 0) {
+                    return widget->geometry().y();
+                }
+            }
+        }
+        
+        return -1;
+    }
+    
     TagEditorEditWidgetView::TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary, QWidget *extra_widget) : QFrame(parent), values(values), editor_window(editor_window) {
         auto *vbox_layout = new QVBoxLayout();
         vbox_layout->setMargin(0);
@@ -14,8 +27,9 @@ namespace Invader::EditQt {
         this->setLayout(vbox_layout);
 
         bool alternate = false;
+        auto &widgets = this->widgets;
 
-        auto add_widget = [&alternate, &vbox_layout](QWidget *widget) {
+        auto add_widget = [&alternate, &vbox_layout, &widgets](QWidget *widget) {
             QPalette palette;
             widget->setAutoFillBackground(true);
 
@@ -28,6 +42,7 @@ namespace Invader::EditQt {
 
             widget->setPalette(palette);
             vbox_layout->addWidget(widget);
+            widgets.emplace_back(widget);
 
             alternate = !alternate;
         };

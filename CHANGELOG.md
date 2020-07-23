@@ -2,6 +2,10 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-edit-qt: Added a Goto menu to go to top level structs quickly
+
 ## [0.36.1] - 2020-07-22
 ### Changed
 - invader: Renamed extended_bitmap to invader_bitmap and extended_sound to

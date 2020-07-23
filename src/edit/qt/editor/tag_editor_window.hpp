@@ -8,6 +8,8 @@
 #include <invader/file/file.hpp>
 #include "../tree/tag_tree_widget.hpp"
 
+class QScrollArea;
+
 namespace Invader::Parser {
     struct ParserStruct;
 }
@@ -15,6 +17,7 @@ namespace Invader::Parser {
 namespace Invader::EditQt {
     class TagTreeWindow;
     class TagEditorSubwindow;
+    class TagEditorEditWidgetView;
 
     class TagEditorWindow : public QMainWindow {
         friend class TagEditorWidget;
@@ -63,6 +66,11 @@ namespace Invader::EditQt {
         Parser::ParserStruct *get_parser_data() noexcept {
             return this->parser_data;
         }
+        
+        /**
+         * Scroll to the given item
+         */
+        void scroll_to(const char *item);
 
         ~TagEditorWindow();
 
@@ -82,6 +90,9 @@ namespace Invader::EditQt {
         TagEditorSubwindow *subwindow = nullptr;
 
         bool successfully_opened = false;
+        
+        QScrollArea *scroll_widget;
+        TagEditorEditWidgetView *main_widget;
 
         void toggle_fullscreen();
         void show_subwindow();

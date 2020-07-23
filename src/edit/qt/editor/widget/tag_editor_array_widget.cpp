@@ -59,7 +59,6 @@ namespace Invader::EditQt {
         header->setFrameStyle(QFrame::Panel | QFrame::Raised);
         header->setLineWidth(2);
         header_layout->setMargin(8);
-        header_layout->setMargin(8);
 
         QPalette palette;
         header->setAutoFillBackground(true);

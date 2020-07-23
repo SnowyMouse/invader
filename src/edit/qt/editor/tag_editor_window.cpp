@@ -5,6 +5,7 @@
 #include <QMenuBar>
 #include <QScrollArea>
 #include <QLabel>
+#include <QScrollBar>
 #include <QApplication>
 #include <QPushButton>
 #include <QScreen>
@@ -27,6 +28,19 @@
 #include "subwindow/tag_editor_font_subwindow.hpp"
 
 namespace Invader::EditQt {
+    // Used for scrolling to a specific item
+    class GotoAction : public QAction {
+    public:
+        void on_triggered(bool) {
+            parent_window->scroll_to(this->text().toLatin1().data());
+        }
+        GotoAction(const char *text, TagEditorWindow *parent_window) : QAction(text), parent_window(parent_window) {
+            connect(this, &QAction::triggered, this, &GotoAction::on_triggered);
+        }
+    private:
+        TagEditorWindow *parent_window;
+    };
+    
     TagEditorWindow::TagEditorWindow(QWidget *parent, TagTreeWindow *parent_window, const File::TagFile &tag_file) : QMainWindow(parent), parent_window(parent_window), file(tag_file) {
         // If we're loading an existing tag, open it and parse it
         if(tag_file.tag_path.size() != 0) {
@@ -158,10 +172,21 @@ namespace Invader::EditQt {
         }
 
         // Set up the scroll area and widgets
-        auto *scroll_view = new QScrollArea();
         auto values = std::vector<Parser::ParserStructValue>(this->parser_data->get_values());
-        this->setCentralWidget(scroll_view);
-        scroll_view->setWidget(new TagEditorEditWidgetView(nullptr, values, this, true, extra_widget_panel));
+        this->scroll_widget = new QScrollArea();
+        this->setCentralWidget(this->scroll_widget);
+        this->main_widget = new TagEditorEditWidgetView(nullptr, values, this, true, extra_widget_panel);
+        this->scroll_widget->setWidget(this->main_widget);
+
+        // Goto menu (goto top level reflexives)
+        auto *goto_menu = bar->addMenu("Goto");
+        goto_menu->setEnabled(false);
+        for(auto &v : values) {
+            if(v.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+                goto_menu->addAction(new GotoAction(v.get_name(), this));
+                goto_menu->setEnabled(true);
+            }
+        }
 
         // View menu
         auto *view_menu = bar->addMenu("View");
@@ -172,9 +197,9 @@ namespace Invader::EditQt {
 
         // Figure out how big we want to make this window
         auto screen_geometry = QGuiApplication::primaryScreen()->geometry();
-        int max_width = scroll_view->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) * 2 + min_width;
-        int max_height = min_height + scroll_view->widget()->height() + qApp->style()->pixelMetric(QStyle::PM_DefaultFrameWidth) * 2;
-        scroll_view->setWidgetResizable(true);
+        int max_width = this->scroll_widget->widget()->width() + qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent) * 2 + min_width;
+        int max_height = min_height + this->scroll_widget->widget()->height() + qApp->style()->pixelMetric(QStyle::PM_DefaultFrameWidth) * 2;
+        this->scroll_widget->setWidgetResizable(true);
 
         if(max_height > screen_geometry.height() / 5 * 4) {
             max_height = screen_geometry.height() / 5 * 4;
@@ -196,6 +221,13 @@ namespace Invader::EditQt {
 
         // We did it!
         this->successfully_opened = true;
+    }
+    
+    void TagEditorWindow::scroll_to(const char *item) {
+        int offset = this->main_widget->y_for_item(item);
+        if(offset >= 0) {
+            this->scroll_widget->verticalScrollBar()->setValue(offset);
+        }
     }
 
     void TagEditorWindow::closeEvent(QCloseEvent *event) {

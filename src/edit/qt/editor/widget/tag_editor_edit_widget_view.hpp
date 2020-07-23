@@ -22,11 +22,19 @@ namespace Invader::EditQt {
          * @param extra_widget  optional additional widget to add
          */
         TagEditorEditWidgetView(QWidget *parent, const std::vector<Parser::ParserStructValue> &values, TagEditorWindow *editor_window, bool primary, QWidget *extra_widget = nullptr);
+        
+        /**
+         * Get the y offset of the given item
+         * @param  item
+         * @return y offset or -1 if not valid
+         */
+        int y_for_item(const char *item) const noexcept;
 
         ~TagEditorEditWidgetView() = default;
 
     private:
         std::vector<Parser::ParserStructValue> values;
+        std::vector<QWidget *> widgets;
         TagEditorWindow *editor_window;
     };
 }
