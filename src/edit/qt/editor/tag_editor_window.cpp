@@ -182,7 +182,8 @@ namespace Invader::EditQt {
         auto *goto_menu = bar->addMenu("Goto");
         goto_menu->setEnabled(false);
         for(auto &v : values) {
-            if(v.get_type() == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE) {
+            auto type = v.get_type();
+            if(type == Parser::ParserStructValue::ValueType::VALUE_TYPE_REFLEXIVE || type == Parser::ParserStructValue::ValueType::VALUE_TYPE_GROUP_START) {
                 goto_menu->addAction(new GotoAction(v.get_name(), this));
                 goto_menu->setEnabled(true);
             }
