@@ -72,6 +72,10 @@ namespace Invader {
 
             // Get the path
             auto path = Invader::File::halo_path_to_preferred_path(tag.get_path());
+            if(path.size() == 0) {
+                workload.report_error(ErrorType::ERROR_TYPE_ERROR, "Tag path is invalid", tag_index);
+                return false;
+            }
 
             // Lowercase everything
             for(char &c : path) {

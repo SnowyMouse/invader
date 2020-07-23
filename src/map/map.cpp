@@ -336,11 +336,9 @@ namespace Invader {
                             break;
                         }
                         else if(*path_test < ' ') {
-                            eprintf_error("Tag #%zu has an invalid path (contains invalid characters)", i);
                             throw InvalidTagPathException();
                         }
                         else if(*path_test == '/') {
-                            eprintf_error("Tag #%zu has an invalid path (contains forward slashes)", i);
                             throw InvalidTagPathException();
                         }
                     }
@@ -353,7 +351,9 @@ namespace Invader {
                         throw InvalidTagPathException();
                     }
                 }
-                catch (Invader::OutOfBoundsException &) {}
+                catch (std::exception &) {
+                    tag.path = "";
+                }
 
                 if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     continue;

@@ -9,6 +9,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Fixed
 - invader-edit-qt: Fixed an issue with editing ColorARGBInt values
+- invader-info: Fixed opening protected maps resulting in an exception error
 
 ## [0.36.1] - 2020-07-22
 ### Changed
