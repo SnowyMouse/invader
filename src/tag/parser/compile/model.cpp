@@ -65,7 +65,44 @@ namespace Invader::Parser {
         postprocess_hek_data_model(*this);
     }
     
-    template <class M> static void model_post_compile(M &what, BuildWorkload &workload, std::size_t struct_index, std::size_t offset) {
+    template <class M> static void model_post_compile(M &what, BuildWorkload &workload, std::size_t struct_index, std::size_t offset, std::size_t tag_index) {
+        // Make sure it's synced with "zoner"
+        bool uses_local_nodes = what.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        std::size_t geometry_count = what.geometries.size();
+        std::size_t sync_error_count = 0;
+        constexpr static const std::size_t MAX_SYNC_ERRORS = 5;
+        for(std::size_t g = 0; g < geometry_count && sync_error_count <= MAX_SYNC_ERRORS; g++) {
+            auto &geo = what.geometries[g];
+            std::size_t part_count = geo.parts.size();
+            for(std::size_t p = 0; p < part_count && sync_error_count <= MAX_SYNC_ERRORS; p++) {
+                auto &part = geo.parts[p];
+                bool zoner_set = part.flags & HEK::ModelGeometryPartFlagsFlag::MODEL_GEOMETRY_PART_FLAGS_FLAG_ZONER;
+                if(uses_local_nodes == zoner_set) {
+                    continue;
+                }
+                else if(++sync_error_count > MAX_SYNC_ERRORS) {
+                    eprintf_error("...and more errors");
+                    break;
+                }
+                if(uses_local_nodes && !zoner_set) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Part #%zu of geometry #%zu is NOT set to ZONER but the model is set to use local nodes", p, g);
+                }
+                else if(!uses_local_nodes && zoner_set) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Part #%zu of geometry #%zu is set to ZONER but the model is NOT set to use local nodes", p, g);
+                }
+            }
+        }
+        
+        // If out of sync, do it
+        if(sync_error_count) {
+            if(sync_error_count == 1) {
+                eprintf_warn("To fix this error, recompile the model");
+            }
+            else {
+                eprintf_warn("To fix these errors, recompile the model");
+            }
+        }
+        
         // Put all of the markers in the marker array
         auto &markers = what.markers;
         auto region_count = what.regions.size();
@@ -191,12 +228,17 @@ namespace Invader::Parser {
         }
     }
 
-    void GBXModel::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
-        model_post_compile(*this, workload, struct_index, offset);
+    void GBXModel::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        model_post_compile(*this, workload, struct_index, offset, tag_index);
     }
 
-    void Model::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t offset) {
-        model_post_compile(*this, workload, struct_index, offset);
+    void Model::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        if(this->flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox models are not allowed to have \"parts have local nodes\" set but this model does", tag_index);
+            throw InvalidTagDataException();
+        }
+        
+        model_post_compile(*this, workload, struct_index, offset, tag_index);
     }
     
     template <class P> static bool regenerate_missing_model_vertices_part(P &part, bool fix) {
