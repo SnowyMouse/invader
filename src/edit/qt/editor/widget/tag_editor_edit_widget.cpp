@@ -910,7 +910,11 @@ namespace Invader::EditQt {
                 color.setBlueF(std::get<double>(numbers[2]));
             }
             dialog.setCurrentColor(color);
-            dialog.exec();
+            
+            // Open the dialog and cancel if the user cancelled
+            if(dialog.exec() == QDialog::Rejected) {
+                return;
+            }
             
             // When we're done, get the new color
             color = dialog.selectedColor();
