@@ -58,7 +58,7 @@
         "name": "ShaderEnvironment",
         "groups": [
             {
-                "name": "Shader Environment Data",
+                "name": "environment shader",
                 "description": "Shader Environment attributes",
                 "first": "shader environment flags"
             }

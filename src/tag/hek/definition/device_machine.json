@@ -30,7 +30,7 @@
         "name": "DeviceMachine",
         "groups": [
             {
-                "name": "Device Machine Data",
+                "name": "device machine",
                 "description": "Device Machine attributes",
                 "first": "machine type"
             }

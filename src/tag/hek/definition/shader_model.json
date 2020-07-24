@@ -40,7 +40,7 @@
         "name": "ShaderModel",
         "groups": [
             {
-                "name": "Shader Model Data",
+                "name": "model shader",
                 "description": "Shader Model attributes",
                 "first": "shader model flags"
             }

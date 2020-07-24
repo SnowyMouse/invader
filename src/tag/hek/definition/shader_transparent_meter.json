@@ -15,7 +15,7 @@
         "name": "ShaderTransparentMeter",
         "groups": [
             {
-                "name": "Shader Transparent Meter Data",
+                "name": "transparent meter shader",
                 "description": "Shader Transparent Meter attributes",
                 "first": "meter flags"
             }

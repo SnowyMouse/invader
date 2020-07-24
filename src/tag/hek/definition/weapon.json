@@ -555,7 +555,7 @@
         "name": "Weapon",
         "groups": [
             {
-                "name": "Weapon Data",
+                "name": "weapon",
                 "description": "Weapon attributes",
                 "first": "weapon flags"
             }

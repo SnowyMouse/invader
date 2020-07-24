@@ -14,7 +14,7 @@
         "name": "ShaderTransparentWaterRipple",
         "groups": [
             {
-                "name": "Shader Transparent Water Data",
+                "name": "transparent water shader",
                 "description": "Shader Transparent Water attributes",
                 "first": "contribution factor"
             }

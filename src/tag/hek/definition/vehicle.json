@@ -81,7 +81,7 @@
         "name": "Vehicle",
         "groups": [
             {
-                "name": "Vehicle Data",
+                "name": "vehicle",
                 "description": "Vehicle attributes",
                 "first": "vehicle flags"
             }

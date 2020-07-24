@@ -336,8 +336,7 @@
         "name": "Object",
         "groups": [
             {
-                "name": "Object Data",
-                "type": "Section",
+                "name": "object",
                 "description": "Base object attributes",
                 "first": "object type"
             }

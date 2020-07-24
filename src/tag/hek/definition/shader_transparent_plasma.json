@@ -3,7 +3,7 @@
         "name": "ShaderTransparentPlasma",
         "groups": [
             {
-                "name": "Shader Transparent Plasma Data",
+                "name": "transparent plasma shader",
                 "description": "Shader Transparent Plasma attributes",
                 "first": "intensity source"
             }

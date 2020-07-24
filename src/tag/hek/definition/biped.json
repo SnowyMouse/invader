@@ -47,7 +47,7 @@
         "name": "Biped",
         "groups": [
             {
-                "name": "Biped Data",
+                "name": "biped",
                 "description": "Biped attributes",
                 "first": "moving turning speed"
             }

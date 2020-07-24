@@ -320,7 +320,7 @@
         "name": "Unit",
         "groups": [
             {
-                "name": "Unit Data",
+                "name": "unit",
                 "description": "Base unit attributes",
                 "first": "unit flags"
             }

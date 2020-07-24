@@ -25,7 +25,7 @@
         "name": "Device",
         "groups": [
             {
-                "name": "Device Data",
+                "name": "device",
                 "description": "Base device attributes",
                 "first": "device flags"
             }

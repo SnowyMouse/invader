@@ -13,7 +13,7 @@
         "name": "Item",
         "groups": [
             {
-                "name": "Item Data",
+                "name": "item",
                 "description": "Base item attributes",
                 "first": "item flags"
             }

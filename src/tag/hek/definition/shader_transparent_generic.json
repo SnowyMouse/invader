@@ -426,7 +426,7 @@
         "name": "ShaderTransparentGeneric",
         "groups": [
             {
-                "name": "Shader Transparent Generic Data",
+                "name": "transparent generic shader",
                 "description": "Shader Transparent Generic attributes",
                 "first": "numeric counter limit"
             }

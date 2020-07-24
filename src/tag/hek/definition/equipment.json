@@ -16,7 +16,7 @@
         "name": "Equipment",
         "groups": [
             {
-                "name": "Equipment Data",
+                "name": "equipment",
                 "description": "Equipment attributes",
                 "first": "powerup type"
             }

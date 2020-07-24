@@ -22,7 +22,7 @@
         "name": "InvaderBitmap",
         "groups": [
             {
-                "name": "Invader Bitmap Data",
+                "name": "invader bitmap",
                 "description": "Invader-specific bitmap data",
                 "first": "invader bitmap flags"
             }

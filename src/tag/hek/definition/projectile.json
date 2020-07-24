@@ -180,7 +180,7 @@
         "name": "Projectile",
         "groups": [
             {
-                "name": "Projectile Data",
+                "name": "projectile",
                 "description": "Projectile attributes",
                 "first": "projectile flags"
             }

@@ -21,7 +21,7 @@
         "name": "DeviceControl",
         "groups": [
             {
-                "name": "Device Control Data",
+                "name": "device control",
                 "description": "Device Control attributes",
                 "first": "type"
             }

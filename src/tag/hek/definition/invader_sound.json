@@ -57,7 +57,7 @@
         "name": "InvaderSound",
         "groups": [
             {
-                "name": "Invader Sound Data",
+                "name": "invader sound",
                 "description": "Invader-specific sound data",
                 "first": "invader sound flags"
             }
