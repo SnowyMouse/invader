@@ -370,6 +370,13 @@ namespace Invader::EditQt {
         }
     }
 
+    void TagTreeWindow::perform_copy_virtual_path_without_extension() {
+        const auto *tag = this->tag_view->get_selected_tag();
+        if(tag) {
+            QGuiApplication::clipboard()->setText(Invader::File::split_tag_class_extension(File::halo_path_to_preferred_path(tag->tag_path).c_str()).value().path.c_str());
+        }
+    }
+
     void TagTreeWindow::perform_copy_file_path() {
         const auto *tag = this->tag_view->get_selected_tag();
         if(tag) {
@@ -523,6 +530,10 @@ namespace Invader::EditQt {
             auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");
             copy_virtual_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
             connect(copy_virtual_path, &QAction::triggered, this, &TagTreeWindow::perform_copy_virtual_path);
+
+            auto *copy_virtual_path_without_extension = right_click_menu.addAction("Copy virtual path (without extension)");
+            copy_virtual_path_without_extension->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
+            connect(copy_virtual_path_without_extension, &QAction::triggered, this, &TagTreeWindow::perform_copy_virtual_path_without_extension);
 
             auto *copy_file_path = right_click_menu.addAction("Copy file path");
             copy_file_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));

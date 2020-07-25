@@ -6,6 +6,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
 - invader-edit-qt: Added a color picker
+- invader-edit-qt: Added an option to copy a virtual path without an extension
 
 ### Changed
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
