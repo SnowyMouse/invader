@@ -376,6 +376,13 @@ namespace Invader::EditQt {
             QGuiApplication::clipboard()->setText(Invader::File::split_tag_class_extension(File::halo_path_to_preferred_path(tag->tag_path).c_str()).value().path.c_str());
         }
     }
+    
+    void TagTreeWindow::perform_copy_virtual_directory_path() {
+        auto directory = this->tag_view->get_selected_directory();
+        if(directory.has_value()) {
+            QGuiApplication::clipboard()->setText(directory->c_str());
+        }
+    }
 
     void TagTreeWindow::perform_copy_file_path() {
         const auto *tag = this->tag_view->get_selected_tag();
@@ -525,7 +532,7 @@ namespace Invader::EditQt {
 
     void TagTreeWindow::show_context_menu(const QPoint &point) {
         if(this->tag_view->get_selected_tag()) {
-            QMenu right_click_menu(this);
+            QMenu right_click_menu;
 
             auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");
             copy_virtual_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
@@ -566,6 +573,15 @@ namespace Invader::EditQt {
             properties->setIcon(QIcon::fromTheme(QStringLiteral("document-properties")));
             connect(properties, &QAction::triggered, this, &TagTreeWindow::show_properties);
             */
+
+            right_click_menu.exec(this->tag_view->mapToGlobal(point));
+        }
+        else if(this->tag_view->get_selected_directory().has_value()) {
+            QMenu right_click_menu;
+            
+            auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");
+            copy_virtual_path->setIcon(QIcon::fromTheme(QStringLiteral("edit-copy")));
+            connect(copy_virtual_path, &QAction::triggered, this, &TagTreeWindow::perform_copy_virtual_directory_path);
 
             right_click_menu.exec(this->tag_view->mapToGlobal(point));
         }

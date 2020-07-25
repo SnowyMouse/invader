@@ -42,7 +42,13 @@ namespace Invader::EditQt {
          * @return pointer to tag file if one is selected or nullptr
          */
         const File::TagFile *get_selected_tag() const noexcept;
-
+        
+        /**
+         * If a directory is selected, get it
+         * @return string path to the selected directory if one is selected or nullptr
+         */
+        std::optional<std::string> get_selected_directory() const noexcept;
+        
         /**
          * Sort elements in the tree
          */

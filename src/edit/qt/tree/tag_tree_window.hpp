@@ -127,6 +127,9 @@ namespace Invader::EditQt {
         /** Copy the virtual path without an extension */
         void perform_copy_virtual_path_without_extension();
 
+        /** Copy the virtual directory path */
+        void perform_copy_virtual_directory_path();
+
         /** Open an existing document */
         void perform_open();
 
