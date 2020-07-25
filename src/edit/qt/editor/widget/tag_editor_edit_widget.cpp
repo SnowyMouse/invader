@@ -864,14 +864,16 @@ namespace Invader::EditQt {
                         
                         // If we got a path, see if we can find it again
                         if(is_allowed) {
+                            // First, Jason Jones the path in, accounting for the extension
+                            dependency.path = split_path->path;
+                            dependency.tag_class_int = split_path->class_int;
+                            textbox->setText(split_path->path.c_str());
+                            textbox->setCursorPosition(textbox->text().size());
+                            reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_class_to_extension(split_path->class_int));
+                            
+                            // Then look for it
                             for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
                                 if(t.tag_class_int == class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == split_path->path) {
-                                    // If we found it, change it
-                                    dependency.path = split_path->path;
-                                    dependency.tag_class_int = split_path->class_int;
-                                    textbox->setText(split_path->path.c_str());
-                                    textbox->setCursorPosition(textbox->text().size());
-                                    reinterpret_cast<QComboBox *>(this->widgets[0])->setCurrentText(HEK::tag_class_to_extension(split_path->class_int));
                                     found = true;
                                     break;
                                 }
