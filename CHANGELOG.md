@@ -7,6 +7,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
 - invader-edit-qt: Added a color picker
 
+### Changed
+- invader-edit-qt: Typing in a valid path with an extension into a dependency
+  field will now change the class; this also applies to pasting in paths
+
 ### Fixed
 - invader-edit-qt: Fixed an issue with editing ColorARGBInt values
 - invader-info: Fixed opening protected maps resulting in an exception error
