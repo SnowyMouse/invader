@@ -49,6 +49,9 @@ namespace Invader::Compression {
         header_out.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD;
         header_out.tag_data_size = map.get_tag_data_length();
         header_out.tag_data_offset = map.get_tag_data_at_offset(0) - map.get_data_at_offset(0);
+        if(new_engine_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            reinterpret_cast<HEK::NativeCacheFileHeader *>(&header_out)->compression_type = HEK::NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD;
+        }
         if(decompressed_size > UINT32_MAX) {
             throw MaximumFileSizeException();
         }
@@ -62,28 +65,38 @@ namespace Invader::Compression {
         // Figure out the new engine version
         auto new_engine_version = header_copy.engine.read();
         bool invader_compression = false;
+        bool stores_uncompressed_size;
         switch(header_copy.engine.read()) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                stores_uncompressed_size = false;
                 throw MapNeedsCompressedException();
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 invader_compression = true;
-                // fallthrough
+                stores_uncompressed_size = true;
+                if(reinterpret_cast<const HEK::NativeCacheFileHeader *>(header_input)->compression_type.read() == HEK::NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED) {
+                    throw MapNeedsCompressedException();
+                }
+                break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                stores_uncompressed_size = false;
                 if(header_copy.decompressed_file_size.read() == 0) {
                     throw MapNeedsCompressedException();
                 }
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                stores_uncompressed_size = false;
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 invader_compression = true;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                stores_uncompressed_size = false;
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                 invader_compression = true;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                stores_uncompressed_size = false;
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO;
                 invader_compression = true;
                 break;
@@ -102,9 +115,14 @@ namespace Invader::Compression {
             throw InvalidMapException();
         }
 
-        // Set the file size to 0 and the engine to the new thing
-        header_copy.decompressed_file_size = 0;
+        // Set the file size to either the original decompressed size or 0 (if needed) and the engine to the new thing
+        header_copy.decompressed_file_size = stores_uncompressed_size ? header_copy.decompressed_file_size.read() : 0;
         header_copy.engine = new_engine_version;
+        
+        // Set the type, too, if need be
+        if(new_engine_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            reinterpret_cast<HEK::NativeCacheFileHeader *>(&header_copy)->compression_type = HEK::NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED;
+        }
 
         // if demo, convert the header, otherwise copy the header
         if(new_engine_version == HEK::CACHE_FILE_DEMO) {

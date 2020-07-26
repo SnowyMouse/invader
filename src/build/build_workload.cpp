@@ -612,6 +612,10 @@ namespace Invader {
                     oprintf(" done\n");
                 }
             }
+            // Set the file size in the header if needed
+            else if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                header.decompressed_file_size = final_data.size();
+            }
 
             // Display the scenario name and information
             if(workload.verbose) {

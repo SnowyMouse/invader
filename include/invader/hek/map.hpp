@@ -87,6 +87,11 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileHeader) == 0x800);
 
     struct NativeCacheFileHeader {
+        enum NativeCacheFileCompressionType : TagEnum {
+            NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED = 0,
+            NATIVE_CACHE_FILE_COMPRESSION_ZSTD = 1
+        };
+        
         LittleEndian<CacheFileLiteral> head_literal;
         LittleEndian<CacheFileEngine> engine;
         LittleEndian<std::uint64_t> decompressed_file_size;
@@ -95,7 +100,7 @@ namespace Invader::HEK {
         TagString name;
         TagString build;
         LittleEndian<CacheFileType> map_type;
-        PAD(0x2);
+        LittleEndian<NativeCacheFileCompressionType> compression_type;
         LittleEndian<std::uint32_t> crc32;
         PAD(0x794);
         LittleEndian<CacheFileLiteral> foot_literal;

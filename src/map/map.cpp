@@ -80,21 +80,32 @@ namespace Invader {
     }
 
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
-        const auto *potential_header = reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        using namespace Invader::HEK;
+        const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);
         bool needs_decompressed = false;
         if(data_size > sizeof(*potential_header)) {
             // Check if it needs decompressed based on header
             if(potential_header->valid()) {
                 switch(potential_header->engine.read()) {
-                    case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                    case CacheFileEngine::CACHE_FILE_NATIVE: {
+                        auto *header = reinterpret_cast<const NativeCacheFileHeader *>(&potential_header);
+                        needs_decompressed = header->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED;
+                        
+                        if(!needs_decompressed && header->decompressed_file_size.read() != data_size) {
+                            eprintf_error("decompressed file size in the header is wrong");
+                            throw InvalidMapException();
+                        }
+                        
+                        break;
+                    }
+                    case CacheFileEngine::CACHE_FILE_XBOX:
                         if(potential_header->decompressed_file_size != 0) {
                             needs_decompressed = true;
                         }
                         break;
-                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
-                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
-                    case HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
+                    case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
+                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
+                    case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
                         needs_decompressed = true;
                     default:
                         break;
@@ -222,7 +233,14 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_RETAIL:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     break;
-                case CacheFileEngine::CACHE_FILE_NATIVE:
+                case CacheFileEngine::CACHE_FILE_NATIVE: {
+                    auto *native_header = reinterpret_cast<const NativeCacheFileHeader *>(&header);
+                    if(native_header->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED) {
+                        oprintf("RAI! ;-;\n");
+                        throw MapNeedsDecompressedException();
+                    }
+                    break;
+                }
                 case CacheFileEngine::CACHE_FILE_XBOX:
                     if(header.decompressed_file_size != 0) {
                         throw MapNeedsDecompressedException();
