@@ -611,9 +611,17 @@
     },
     {
         "name": "Model",
+        "groups": [
+            {
+                "name": "model",
+                "first": "flags",
+                "description": "These kinds of tags are compatible with the Xbox version of the game (but not Gearbox). When the cache file is compiled for Xbox, then the uncompressed vertices are discarded when copied into the map. Otherwise, the compressed vertices are discarded.\n\nFlags:\n- blend shared normals: On map compilation, vertices with the same positions have their normals linearly averaged.\n- parts have local nodes: Invalid for this model class\n- ignore skinning: Unknown? Probably invalid for this model class.\n\nNote that compressed vertices can only address up to 42 nodes."
+            }
+        ],
         "fields": [
             {
                 "name": "flags",
+                "read_only": false,
                 "type": "ModelFlags"
             },
             {

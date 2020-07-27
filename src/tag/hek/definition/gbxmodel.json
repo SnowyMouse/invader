@@ -184,9 +184,17 @@
     },
     {
         "name": "GBXModel",
+        "groups": [
+            {
+                "name": "gbxmodel",
+                "first": "flags",
+                "description": "This type of tag is used for Gearbox maps (but not Xbox) and features local nodes. When the cache file is compiled, then the compressed vertices are discarded when copied into the map.\n\nFlags:\n- blend shared normals: On map compilation, vertices with the same positions have their normals linearly averaged.\n- parts have local nodes: Use local nodes. Geometries with local nodes are flagged as \"ZONER\" in this case.\n- ignore skinning: Unknown?\n\nNote that compressed vertices can only address up to 42 nodes and cannot use local nodes."
+            }
+        ],
         "fields": [
             {
                 "name": "flags",
+                "read_only": false,
                 "type": "ModelFlags"
             },
             {
