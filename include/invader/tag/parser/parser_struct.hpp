@@ -442,11 +442,25 @@ namespace Invader::Parser {
          * Return a list of all of the possible enums
          * @return vector of all possible enums
          */
-        template <typename T, const char *(*convert_fn)(T), std::size_t count>
+        template <typename T, const char *(*convert_fn)(T), std::size_t count, T *ignore_list = nullptr, std::size_t ignore_count = 0>
         static std::vector<const char *> list_enum_template() {
-            std::vector<const char *> out(count);
+            std::vector<const char *> out;
+            out.reserve(count - ignore_count);
             for(std::size_t i = 0; i < count; i++) {
-                out[i] = convert_fn(static_cast<T>(i));
+                // Check if we need to ignore it
+                bool ignore = false;
+                for(std::size_t g = 0; g < ignore_count; g++) {
+                    if(ignore_list[g] == i) {
+                        ignore = true;
+                        break;
+                    }
+                }
+                if(ignore) {
+                    continue;
+                }
+                
+                // Let's-a-go
+                out.emplace_back(convert_fn(static_cast<T>(i)));
             }
             return out;
         }

@@ -87,7 +87,17 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                 for e in all_enums:
                     if type == e["name"]:
                         found = True
-                        cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string_pretty, {}>, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>, {});\n".format(first_arguments, type, type, len(e["options_formatted"]), type, type, len(e["options_formatted"]), type, type, type, type, struct_read_only))
+                        cpp_struct_value.write("    {\n")
+                        ignorelist_params = ""
+                        if "__excluded" in struct and struct["__excluded"] is not None:
+                            cpp_struct_value.write("    static HEK::{} ignorelist[] = {{\n".format(e["name"]))
+                            for x in struct["__excluded"]:
+                                cpp_struct_value.write("        static_cast<HEK::{}>({}),\n".format(e["name"], x))
+                            cpp_struct_value.write("    };\n")
+                            ignorelist_params = ", ignorelist, {}".format(len(struct["__excluded"]))
+                        list_enum_invocation = "ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string_pretty, {}{}>".format(type, type, len(e["options_formatted"]), ignorelist_params)
+                        cpp_struct_value.write("        values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, {}, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>, {});\n".format(first_arguments, type, type, len(e["options_formatted"]), list_enum_invocation, type, type, type, type, struct_read_only))
+                        cpp_struct_value.write("    }\n")
                         break
                 if found:
                     continue
