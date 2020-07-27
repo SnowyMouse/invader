@@ -326,7 +326,17 @@
             },
             {
                 "name": "sprite budget size",
-                "type": "BitmapSpriteBudgetSize"
+                "type": "BitmapSpriteBudgetSize",
+                "exclude": [
+                    {
+                        "option": "1024x1024",
+                        "struct": ["Bitmap"]
+                    },
+                    {
+                        "option": "2048x2048",
+                        "struct": ["Bitmap"]
+                    }
+                ]
             },
             {
                 "name": "sprite budget count",

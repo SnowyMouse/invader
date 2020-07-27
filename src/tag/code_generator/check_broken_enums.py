@@ -14,13 +14,19 @@ def make_check_broken_enums(all_enums, all_used_structs, struct_name, hpp, cpp_c
             cpp_check_broken_enums.write("        }\n")
         for enum in all_enums:
             if struct["type"] == enum["name"]:
-                cpp_check_broken_enums.write("        if(this->{} >= {}) {{\n".format(struct["member_name"], len(enum["options"])))
-                cpp_check_broken_enums.write("            return_value = true;\n")
-                cpp_check_broken_enums.write("            if(reset_enums) {\n")
-                cpp_check_broken_enums.write("                this->{} = {{}};\n".format(struct["member_name"]))
-                cpp_check_broken_enums.write("            }\n")
-                cpp_check_broken_enums.write("            else {\n")
-                cpp_check_broken_enums.write("                return true;\n")
+                cpp_check_broken_enums.write("        {\n")
+                cpp_check_broken_enums.write("            bool out_of_range = (this->{} >= {});\n".format(struct["member_name"], len(enum["options"])))
+                if "__excluded" in struct and struct["__excluded"] is not None:
+                    for e in struct["__excluded"]:
+                        cpp_check_broken_enums.write("            out_of_range = out_of_range || (this->{} == {});\n".format(struct["member_name"], e))
+                cpp_check_broken_enums.write("            if(out_of_range) {\n")
+                cpp_check_broken_enums.write("                return_value = true;\n")
+                cpp_check_broken_enums.write("                if(reset_enums) {\n")
+                cpp_check_broken_enums.write("                    this->{} = {{}};\n".format(struct["member_name"]))
+                cpp_check_broken_enums.write("                }\n")
+                cpp_check_broken_enums.write("                else {\n")
+                cpp_check_broken_enums.write("                    return true;\n")
+                cpp_check_broken_enums.write("                }\n")
                 cpp_check_broken_enums.write("            }\n")
                 cpp_check_broken_enums.write("        }\n")
                 break

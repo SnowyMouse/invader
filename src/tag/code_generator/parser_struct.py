@@ -65,6 +65,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                         
                         mask = 0xFFFFFFFF
                         
+                        # Hide unused cache-only stuff
                         if "cache_only" in b:
                             mask = 0
                             for a in b["cache_only"]:
@@ -73,7 +74,11 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                                         mask = mask | (1 << n)
                                         break
                                 
-                            mask = (~mask) & 0xFFFFFFFF
+                            mask = (~mask) & mask
+                        
+                        # Hide unused bitmasks
+                        if "__excluded" in struct:
+                            mask = (~struct["__excluded"]) & mask
                         
                         cpp_struct_value.write("    values.emplace_back({}, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string, {}, 0x{:X}>, ParserStructValue::list_bitmask_template<HEK::{}, HEK::{}_to_string_pretty, {}, 0x{:X}>, ParserStructValue::read_bitfield_template<HEK::{}, HEK::{}_from_string>, ParserStructValue::write_bitfield_template<HEK::{}, HEK::{}_from_string>, {});\n".format(first_arguments, type, type, len(b["fields_formatted"]), mask, type, type, len(b["fields_formatted"]), mask, type, type, type, type, struct_read_only))
                         break

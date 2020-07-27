@@ -360,7 +360,17 @@
             {
                 "name": "format",
                 "type": "SoundFormat",
-                "read_only": true
+                "read_only": true,
+                "exclude": [
+                    {
+                        "option": "FLAC",
+                        "struct": ["Sound"]
+                    },
+                    {
+                        "option": "IMA ADPCM",
+                        "struct": null
+                    }
+                ]
             },
             {
                 "name": "promotion sound",

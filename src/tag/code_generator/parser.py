@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+from copy import deepcopy
 from compile import make_cache_format_data
 from generate_hek_tag_data import make_cpp_save_hek_data
 from read_cache_file_data import make_parse_cache_file_data
@@ -73,6 +74,8 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         hpp.write("        using struct_little = HEK::{}<HEK::LittleEndian>;\n".format(struct_name))
         all_used_groups = s["groups"] if "groups" in s else []
         all_used_structs = []
+        
+        # First add all of the values
         def add_structs_from_struct(struct):
             if "inherits" in struct:
                 for t in all_structs:
@@ -80,7 +83,7 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                         add_structs_from_struct(t)
                         if "groups" in t:
                             for g in t["groups"]:
-                                all_used_groups.append(g)
+                                all_used_groups.append(deepcopy(g))
                         break
             for t in struct["fields"]:
                 if t["type"] == "pad":
@@ -116,10 +119,52 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                 if "bounds" in t and t["bounds"]:
                     type_to_write = "HEK::Bounds<{}>".format(type_to_write)
                 hpp.write("        {} {}{}{};\n".format(type_to_write, t["member_name"], "" if "count" not in t or t["count"] == 1 else "[{}]".format(t["count"]), initializer))
-                all_used_structs.append(t)
+                all_used_structs.append(deepcopy(t))
                 continue
         add_structs_from_struct(s)
-
+        
+        # Next, account for enums being excluded on different structs
+        for s in all_used_structs:
+            for q in all_enums:
+                if s["type"] == q["name"] and "exclude" in s:
+                    excluded = []
+                    for i in s["exclude"]:
+                        if i["struct"] is None or struct_name in i["struct"]:
+                            intval = None
+                            for k in range(len(q["options"])):
+                                if q["options"][k] == i["option"]:
+                                    intval = k
+                                    break
+                            if intval is None:
+                                raise "option {} not found in enum {}".format(i["option"], q["name"])
+                            excluded.append(intval)
+                    if len(excluded) > 0:
+                        s["__excluded"] = excluded
+                    else:
+                        s["__excluded"] = None
+                    break
+        
+        # Next, account for bitmasks being excluded on different structs
+        for s in all_used_structs:
+            for q in all_bitfields:
+                if s["type"] == q["name"] and "exclude" in s:
+                    excluded = 0
+                    for i in s["exclude"]:
+                        if i["struct"] is None or struct_name in i["struct"]:
+                            intval = None
+                            for k in range(len(q["fields"])):
+                                if q["fields"][k] == i["field"]:
+                                    intval = k
+                                    break
+                            if intval is None:
+                                raise "field {} not found in bitmask {}".format(i["field"], q["name"])
+                            excluded = excluded | (1 << intval)
+                    if excluded > 0:
+                        s["__excluded"] = excluded
+                    else:
+                        s["__excluded"] = None
+        
+        # Next, run all this stuff to generate our C++ source files
         make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)
         make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_structs, hpp, cpp_cache_format_data, all_enums, all_structs_arranged)
         make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, struct_name, hpp, cpp_save_hek_data)

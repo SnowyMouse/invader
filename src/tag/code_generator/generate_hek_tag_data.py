@@ -74,21 +74,19 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
             elif "count" in struct and struct["count"] > 1:
                 cpp_save_hek_data.write("        std::copy(this->{}, this->{} + {}, b.{});\n".format(name, name, struct["count"], name))
             else:
-                added = False
+                negate = ""
                 for b in all_bitfields:
                     if b["name"] == struct["type"]:
                         if "cache_only" in b:
                             added = True
-                            negate = ""
                             for c in b["cache_only"]:
                                 for i in range(0,len(b["fields"])):
                                     if b["fields"][i] == c:
                                         negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], 1 << i)
                                         break
-                            cpp_save_hek_data.write("        b.{} = this->{}{};\n".format(name, name, negate))
-                        break
-                if not added:
-                    cpp_save_hek_data.write("        b.{} = this->{};\n".format(name, name))
+                        if "__excluded" in struct:
+                            negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], struct["__excluded"])
+                cpp_save_hek_data.write("        b.{} = this->{}{};\n".format(name, name, negate))
         cpp_save_hek_data.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")
     cpp_save_hek_data.write("        if(generate_header_class.has_value()) {\n")
     cpp_save_hek_data.write("            reinterpret_cast<HEK::TagFileHeader *>(converted_data.data())->crc32 = ~crc32(clear_on_save ^ clear_on_save, reinterpret_cast<const void *>(converted_data.data() + tag_header_offset), converted_data.size() - tag_header_offset);\n")
