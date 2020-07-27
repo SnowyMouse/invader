@@ -67,14 +67,14 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                         
                         # Hide unused cache-only stuff
                         if "cache_only" in b:
-                            mask = 0
+                            mask_cache_only = 0
                             for a in b["cache_only"]:
                                 for n in range(0, len(b["fields"])):
                                     if b["fields"][n] == a:
-                                        mask = mask | (1 << n)
+                                        mask_cache_only = mask_cache_only | (1 << n)
                                         break
                                 
-                            mask = (~mask) & mask
+                            mask = (~mask_cache_only) & mask
                         
                         # Hide unused bitmasks
                         if "__excluded" in struct:
