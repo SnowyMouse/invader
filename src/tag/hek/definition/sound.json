@@ -264,7 +264,29 @@
             },
             {
                 "name": "sound class",
-                "type": "SoundClass"
+                "type": "SoundClass",
+                "exclude": [
+                    { "option": "unused", "struct": null },
+                    { "option": "unused 1", "struct": null },
+                    { "option": "unused 2", "struct": null },
+                    { "option": "unused 3", "struct": null },
+                    { "option": "unused 4", "struct": null },
+                    { "option": "unused 5", "struct": null },
+                    { "option": "unused 6", "struct": null },
+                    { "option": "unused 7", "struct": null },
+                    { "option": "unused 8", "struct": null },
+                    { "option": "unused 9", "struct": null },
+                    { "option": "unused 10", "struct": null },
+                    { "option": "unused 11", "struct": null },
+                    { "option": "unused 12", "struct": null },
+                    { "option": "unused 13", "struct": null },
+                    { "option": "unused 14", "struct": null },
+                    { "option": "unused 15", "struct": null },
+                    { "option": "unused 16", "struct": null },
+                    { "option": "unused 17", "struct": null },
+                    { "option": "unused 18", "struct": null },
+                    { "option": "unused 19", "struct": null }
+                ]
             },
             {
                 "name": "sample rate",

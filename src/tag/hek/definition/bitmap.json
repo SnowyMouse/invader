@@ -231,7 +231,14 @@
             },
             {
                 "name": "format",
-                "type": "BitmapDataFormat"
+                "type": "BitmapDataFormat",
+                "exclude": [
+                    { "option": "unused1", "struct": null },
+                    { "option": "unused2", "struct": null },
+                    { "option": "unused3", "struct": null },
+                    { "option": "unused4", "struct": null },
+                    { "option": "unused5", "struct": null }
+                ]
             },
             {
                 "name": "flags",
