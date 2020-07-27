@@ -89,14 +89,19 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
                         found = True
                         cpp_struct_value.write("    {\n")
                         ignorelist_params = ""
+                        
+                        # Make an ignorelist to hold stuff we don't want to list
                         if "__excluded" in struct and struct["__excluded"] is not None:
                             cpp_struct_value.write("    static HEK::{} ignorelist[] = {{\n".format(e["name"]))
                             for x in struct["__excluded"]:
                                 cpp_struct_value.write("        static_cast<HEK::{}>({}),\n".format(e["name"], x))
                             cpp_struct_value.write("    };\n")
                             ignorelist_params = ", ignorelist, {}".format(len(struct["__excluded"]))
-                        list_enum_invocation = "ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string_pretty, {}{}>".format(type, type, len(e["options_formatted"]), ignorelist_params)
-                        cpp_struct_value.write("        values.emplace_back({}, ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string, {}>, {}, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>, {});\n".format(first_arguments, type, type, len(e["options_formatted"]), list_enum_invocation, type, type, type, type, struct_read_only))
+                            
+                        # Do it!
+                        list_enum_invocation = "ParserStructValue::list_enum_template<HEK::{}, HEK::{}_to_string{{}}, {}{}>".format(type, type, len(e["options_formatted"]), ignorelist_params)
+                        
+                        cpp_struct_value.write("        values.emplace_back({}, {}, {}, ParserStructValue::read_enum_template<HEK::{}, HEK::{}_to_string>, ParserStructValue::write_enum_template<HEK::{}, HEK::{}_from_string>, {});\n".format(first_arguments, list_enum_invocation.format(""), list_enum_invocation.format("_pretty"), type, type, type, type, struct_read_only))
                         cpp_struct_value.write("    }\n")
                         break
                 if found:
