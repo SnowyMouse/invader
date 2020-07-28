@@ -10,6 +10,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added an option to copy a virtual path for a directory
 
 ### Changed
+- invader-bludgeon: Adjusted the threshold for nonnormal-vectors to trip. This
+  will result in more problematic vectors being shown, but it may result in some
+  vectors that are "normal enough" for tool.exe but not actually normal to show
+  up, too.
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
   field will now change the class; this also applies to pasting in paths
 - invader-edit-qt: A number of unused or invalid flags and enumerators have been

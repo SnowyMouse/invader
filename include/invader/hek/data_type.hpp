@@ -346,7 +346,7 @@ namespace Invader::HEK {
         }
         
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k + w*w)) < 0.005;
+            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k + w*w)) < 0.00001;
         }
 
         Quaternion<EndianType> normalize() const noexcept {
@@ -508,7 +508,7 @@ namespace Invader::HEK {
         }
         
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k)) < 0.005;
+            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k)) < 0.00001;
         }
 
         Vector3D<EndianType> normalize() const noexcept {
@@ -556,7 +556,7 @@ namespace Invader::HEK {
         }
         
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j)) < 0.005;
+            return std::fabs(1.0 - std::sqrt(i*i + j*j)) < 0.00001;
         }
 
         Vector2D<EndianType> normalize() const noexcept {
