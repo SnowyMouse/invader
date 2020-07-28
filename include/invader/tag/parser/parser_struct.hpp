@@ -449,7 +449,7 @@ namespace Invader::Parser {
             for(std::size_t i = 0; i < count; i++) {
                 // Check if we need to ignore it
                 bool ignore = false;
-                for(std::size_t g = 0; g < ignore_count; g++) {
+                for(std::size_t g = 0; (g + 1) < (ignore_count + 1); g++) { // adding 1 to both sides seems pointless, but it removes a warning when ignore_count is 0
                     if(ignore_list[g] == i) {
                         ignore = true;
                         break;
