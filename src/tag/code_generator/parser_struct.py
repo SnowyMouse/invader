@@ -123,7 +123,7 @@ def make_parser_struct(cpp_struct_value, all_enums, all_bitfields, all_used_stru
     cpp_struct_value.write("    return \"{}\";\n".format(struct_name))
     cpp_struct_value.write("}\n")
 
-    if not struct_title is None:
+    if struct_title is not None:
         hpp.write("        bool has_title() const override;\n")
         cpp_struct_value.write("bool {}::has_title() const {{\n".format(struct_name))
         cpp_struct_value.write("    return true;\n")
