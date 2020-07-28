@@ -12,6 +12,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
   field will now change the class; this also applies to pasting in paths
+- invader-edit-qt: A number of unused or invalid flags and enumerators have been
+  hidden
 
 ### Fixed
 - invader-edit-qt: Fixed an issue with editing ColorARGBInt values
