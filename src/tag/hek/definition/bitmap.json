@@ -31,6 +31,13 @@
             "dxt5",
             "p8 bump"
         ],
+        "exclude": [
+            { "option": "unused1" },
+            { "option": "unused2" },
+            { "option": "unused3" },
+            { "option": "unused4" },
+            { "option": "unused5" }
+        ],
         "type": "enum"
     },
     {
@@ -231,14 +238,7 @@
             },
             {
                 "name": "format",
-                "type": "BitmapDataFormat",
-                "exclude": [
-                    { "option": "unused1", "struct": null },
-                    { "option": "unused2", "struct": null },
-                    { "option": "unused3", "struct": null },
-                    { "option": "unused4", "struct": null },
-                    { "option": "unused5", "struct": null }
-                ]
+                "type": "BitmapDataFormat"
             },
             {
                 "name": "flags",

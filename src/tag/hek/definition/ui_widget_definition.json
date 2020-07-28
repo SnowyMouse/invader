@@ -62,6 +62,7 @@
             "direct ip connect update",
             "network settings update"
         ],
+        "exclude": [{"option": "unused"}],
         "type": "enum"
     },
     {
@@ -111,7 +112,7 @@
             "list goto next item",
             "list goto previous item",
             "unused",
-            "unused 1",
+            "unused1",
             "initialize sp level list solo",
             "initialize sp level list coop",
             "dispose sp level list",
@@ -298,6 +299,7 @@
             "load game menu delete request",
             "load game menu delete finish"
         ],
+        "exclude": [{"option": "unused"},{"option": "unused1"}],
         "type": "enum"
     },
     {
@@ -428,8 +430,7 @@
         "fields": [
             {
                 "name": "function",
-                "type": "UIGameDataInputReferenceFunction",
-                "exclude": [{"option": "unused", "struct": null}]
+                "type": "UIGameDataInputReferenceFunction"
             },
             {
                 "type": "pad",
@@ -456,8 +457,7 @@
             },
             {
                 "name": "function",
-                "type": "UIEventHandlerReferenceFunction",
-                "exclude": [{"option": "unused", "struct": null}, {"option": "unused 1", "struct": null}]
+                "type": "UIEventHandlerReferenceFunction"
             },
             {
                 "name": "widget tag",

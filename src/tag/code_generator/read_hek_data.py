@@ -154,7 +154,7 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
                                     if b["fields"][i] == c:
                                         negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], 1 << i)
                                         break
-                        if "__excluded" in struct:
+                        if "__excluded" in struct and struct["__excluded"] is not None:
                             negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], struct["__excluded"])
                             
                         cpp_read_hek_data.write("        r.{} = static_cast<std::uint{}_t>(h.{}) & static_cast<std::uint{}_t>(0x{:X}){};\n".format(name, b["width"], name, b["width"], (1 << len(b["fields"])) - 1, negate))

@@ -84,7 +84,7 @@ def make_cpp_save_hek_data(extract_hidden, all_bitfields, all_used_structs, stru
                                     if b["fields"][i] == c:
                                         negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], 1 << i)
                                         break
-                        if "__excluded" in struct:
+                        if "__excluded" in struct and struct["__excluded"] is not None:
                             negate = "{} & ~static_cast<std::uint{}_t>(0x{:X})".format(negate, b["width"], struct["__excluded"])
                 cpp_save_hek_data.write("        b.{} = this->{}{};\n".format(name, name, negate))
         cpp_save_hek_data.write("        *reinterpret_cast<struct_big *>(converted_data.data() + tag_header_offset) = b;\n")

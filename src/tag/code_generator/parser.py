@@ -127,18 +127,27 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         # Next, account for enums being excluded on different structs
         for s in all_used_structs:
             for q in all_enums:
-                if s["type"] == q["name"] and "exclude" in s:
+                if s["type"] == q["name"]:
                     excluded = []
-                    for i in s["exclude"]:
-                        if i["struct"] is None or struct_name in i["struct"]:
-                            intval = None
-                            for k in range(len(q["options"])):
-                                if q["options"][k] == i["option"]:
-                                    intval = k
-                                    break
-                            if intval is None:
-                                raise "option {} not found in enum {}".format(i["option"], q["name"])
-                            excluded.append(intval)
+                    
+                    def exclude_enum(exclude_list):
+                        for i in exclude_list:
+                            if "struct" not in i or i["struct"] is None or struct_name in i["struct"]:
+                                intval = None
+                                for k in range(len(q["options"])):
+                                    if q["options"][k] == i["option"]:
+                                        intval = k
+                                        break
+                                if intval is None:
+                                    raise Exception("option {} not found in enum {}".format(i["option"], q["name"]))
+                                if intval not in excluded:
+                                    excluded.append(intval)
+                                
+                    if "exclude" in s:
+                        exclude_enum(s["exclude"])
+                    if "exclude" in q:
+                        exclude_enum(q["exclude"])
+                    
                     if len(excluded) > 0:
                         s["__excluded"] = excluded
                     else:
@@ -148,22 +157,33 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
         # Next, account for bitmasks being excluded on different structs
         for s in all_used_structs:
             for q in all_bitfields:
-                if s["type"] == q["name"] and "exclude" in s:
+                if s["type"] == q["name"]:
                     excluded = 0
-                    for i in s["exclude"]:
-                        if i["struct"] is None or struct_name in i["struct"]:
-                            intval = None
-                            for k in range(len(q["fields"])):
-                                if q["fields"][k] == i["field"]:
-                                    intval = k
-                                    break
-                            if intval is None:
-                                raise "field {} not found in bitmask {}".format(i["field"], q["name"])
-                            excluded = excluded | (1 << intval)
+                    
+                    def exclude_bitmask(exclude_list):
+                        excluded_copy = 0
+                        for i in exclude_list:
+                            if "struct" not in i or i["struct"] is None or struct_name in i["struct"]:
+                                intval = None
+                                for k in range(len(q["fields"])):
+                                    if q["fields"][k] == i["field"]:
+                                        intval = k
+                                        break
+                                if intval is None:
+                                    raise Exception("field {} not found in bitmask {}".format(i["field"], q["name"]))
+                                excluded_copy = excluded_copy | (1 << intval)
+                        return excluded_copy
+                                    
+                    if "exclude" in s:
+                        excluded = excluded | exclude_bitmask(s["exclude"])
+                    if "exclude" in q:
+                        excluded = excluded | exclude_bitmask(q["exclude"])
+                    
                     if excluded > 0:
                         s["__excluded"] = excluded
                     else:
                         s["__excluded"] = None
+                    break
         
         # Next, run all this stuff to generate our C++ source files
         make_cache_deformat(post_cache_deformat, all_used_structs, struct_name, hpp, cpp_cache_deformat_data)

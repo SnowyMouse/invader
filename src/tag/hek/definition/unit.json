@@ -22,11 +22,12 @@
             "covenant",
             "flood",
             "sentinel",
-            "unused 6",
-            "unused 7",
-            "unused 8",
-            "unused 9"
+            "unused6",
+            "unused7",
+            "unused8",
+            "unused9"
         ],
+        "exclude": [{"option": "unused6"},{"option": "unused7"},{"option": "unused8"},{"option": "unused9"}],
         "type": "enum"
     },
     {
@@ -68,6 +69,7 @@
             "integrated light cntrls weapon",
             "integrated light lasts forever"
         ],
+        "exclude": [{"field": "unused"}],
         "width": 32
     },
     {
@@ -319,13 +321,11 @@
         "fields": [
             {
                 "name": "unit flags",
-                "type": "UnitFlags",
-                "exclude": [{"field": "unused", "struct": null}]
+                "type": "UnitFlags"
             },
             {
                 "name": "default team",
-                "type": "UnitDefaultTeam",
-                "exclude": [{"option": "unused 6", "struct": null},{"option": "unused 7", "struct": null},{"option": "unused 8", "struct": null},{"option": "unused 9", "struct": null}]
+                "type": "UnitDefaultTeam"
             },
             {
                 "name": "constant sound volume",

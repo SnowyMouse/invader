@@ -30,10 +30,17 @@
             "shooting near us",
             "damaging us",
             "unused",
-            "unused 1",
-            "unused 2",
-            "unused 3",
-            "unused 4"
+            "unused1",
+            "unused2",
+            "unused3",
+            "unused4"
+        ],
+        "exclude": [
+            { "option": "unused" },
+            { "option": "unused1" },
+            { "option": "unused2" },
+            { "option": "unused3" },
+            { "option": "unused4" }
         ],
         "type": "enum"
     },
@@ -407,36 +414,15 @@
             },
             {
                 "name": "unreachable danger trigger",
-                "type": "ActorUnreachableDangerTrigger",
-                "exclude": [
-                    { "option": "unused", "struct": null },
-                    { "option": "unused 1", "struct": null },
-                    { "option": "unused 2", "struct": null },
-                    { "option": "unused 3", "struct": null },
-                    { "option": "unused 4", "struct": null }
-                ]
+                "type": "ActorUnreachableDangerTrigger"
             },
             {
                 "name": "vehicle danger trigger",
-                "type": "ActorUnreachableDangerTrigger",
-                "exclude": [
-                    { "option": "unused", "struct": null },
-                    { "option": "unused 1", "struct": null },
-                    { "option": "unused 2", "struct": null },
-                    { "option": "unused 3", "struct": null },
-                    { "option": "unused 4", "struct": null }
-                ]
+                "type": "ActorUnreachableDangerTrigger"
             },
             {
                 "name": "player danger trigger",
-                "type": "ActorUnreachableDangerTrigger",
-                "exclude": [
-                    { "option": "unused", "struct": null },
-                    { "option": "unused 1", "struct": null },
-                    { "option": "unused 2", "struct": null },
-                    { "option": "unused 3", "struct": null },
-                    { "option": "unused 4", "struct": null }
-                ]
+                "type": "ActorUnreachableDangerTrigger"
             },
             {
                 "type": "pad",

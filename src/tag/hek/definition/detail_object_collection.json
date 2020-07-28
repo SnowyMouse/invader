@@ -16,6 +16,9 @@
             "interpolate color in hsv",
             "more colors"
         ],
+        "exclude": [
+            { "field": "unused a" }, { "field": "unused b" }
+        ],
         "width": 8
     },
     {
@@ -34,9 +37,6 @@
             {
                 "name": "flags",
                 "type": "DetailObjectCollectionTypeFlags",
-                "exclude": [
-                    { "field": "unused a", "struct": null }, { "field": "unused b", "struct": null }
-                ],
                 "endian": null
             },
             {

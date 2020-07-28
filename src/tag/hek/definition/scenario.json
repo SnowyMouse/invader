@@ -27,6 +27,14 @@
             "all except ctf",
             "all except race ctf"
         ],
+        "exclude": [
+            {"option": "terminator"},
+            {"option": "stub"},
+            {"option": "ignored1"},
+            {"option": "ignored2"},
+            {"option": "ignored3"},
+            {"option": "ignored4"}
+        ],
         "type": "enum"
     },
     {
@@ -145,6 +153,12 @@
             "unused7",
             "unused8",
             "unused9"
+        ],
+        "exclude": [
+            { "option": "unused6" },
+            { "option": "unused7" },
+            { "option": "unused8" },
+            { "option": "unused9" }
         ],
         "type": "enum"
     },
@@ -350,6 +364,16 @@
             "unused5",
             "unused6",
             "unused7"
+        ],
+        "exclude": [
+            { "field": "unused" },
+            { "field": "unused1" },
+            { "field": "unused2" },
+            { "field": "unused3" },
+            { "field": "unused4" },
+            { "field": "unused5" },
+            { "field": "unused6" },
+            { "field": "unused7" }
         ],
         "width": 16
     },
@@ -941,17 +965,7 @@
             },
             {
                 "name": "multiplayer spawn flags",
-                "type": "ScenarioVehicleMultiplayerSpawnFlags",
-                "exclude": [
-                    { "field": "unused", "struct": null },
-                    { "field": "unused1", "struct": null },
-                    { "field": "unused2", "struct": null },
-                    { "field": "unused3", "struct": null },
-                    { "field": "unused4", "struct": null },
-                    { "field": "unused5", "struct": null },
-                    { "field": "unused6", "struct": null },
-                    { "field": "unused7", "struct": null }
-                ]
+                "type": "ScenarioVehicleMultiplayerSpawnFlags"
             },
             {
                 "type": "pad",
@@ -2213,13 +2227,7 @@
             },
             {
                 "name": "team index",
-                "type": "ScenarioTeamIndex",
-                "exclude": [
-                    { "option": "unused6", "struct": null },
-                    { "option": "unused7", "struct": null },
-                    { "option": "unused8", "struct": null },
-                    { "option": "unused9", "struct": null }
-                ]
+                "type": "ScenarioTeamIndex"
             },
             {
                 "name": "one",
