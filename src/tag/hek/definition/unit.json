@@ -328,11 +328,13 @@
         "fields": [
             {
                 "name": "unit flags",
-                "type": "UnitFlags"
+                "type": "UnitFlags",
+                "exclude": [{"field": "unused", "struct": null}]
             },
             {
                 "name": "default team",
-                "type": "UnitDefaultTeam"
+                "type": "UnitDefaultTeam",
+                "exclude": [{"option": "unused 6", "struct": null},{"option": "unused 7", "struct": null},{"option": "unused 8", "struct": null},{"option": "unused 9", "struct": null}]
             },
             {
                 "name": "constant sound volume",

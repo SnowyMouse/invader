@@ -41,9 +41,9 @@
     {
         "name": "ShaderType",
         "options": [
-            "unkn0",
-            "unkn1",
-            "unkn2",
+            "unused",
+            "unused1",
+            "unused2",
             "shader environment",
             "shader model",
             "shader transparent generic",
@@ -133,7 +133,8 @@
             {
                 "name": "physics flags",
                 "type": "ShaderPhysicsFlags",
-                "endian": null
+                "endian": null,
+                "hidden": true
             },
             {
                 "name": "material type",

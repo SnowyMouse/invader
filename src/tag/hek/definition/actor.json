@@ -407,15 +407,36 @@
             },
             {
                 "name": "unreachable danger trigger",
-                "type": "ActorUnreachableDangerTrigger"
+                "type": "ActorUnreachableDangerTrigger",
+                "exclude": [
+                    { "option": "unused", "struct": null },
+                    { "option": "unused 1", "struct": null },
+                    { "option": "unused 2", "struct": null },
+                    { "option": "unused 3", "struct": null },
+                    { "option": "unused 4", "struct": null }
+                ]
             },
             {
                 "name": "vehicle danger trigger",
-                "type": "ActorUnreachableDangerTrigger"
+                "type": "ActorUnreachableDangerTrigger",
+                "exclude": [
+                    { "option": "unused", "struct": null },
+                    { "option": "unused 1", "struct": null },
+                    { "option": "unused 2", "struct": null },
+                    { "option": "unused 3", "struct": null },
+                    { "option": "unused 4", "struct": null }
+                ]
             },
             {
                 "name": "player danger trigger",
-                "type": "ActorUnreachableDangerTrigger"
+                "type": "ActorUnreachableDangerTrigger",
+                "exclude": [
+                    { "option": "unused", "struct": null },
+                    { "option": "unused 1", "struct": null },
+                    { "option": "unused 2", "struct": null },
+                    { "option": "unused 3", "struct": null },
+                    { "option": "unused 4", "struct": null }
+                ]
             },
             {
                 "type": "pad",

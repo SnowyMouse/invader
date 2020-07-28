@@ -34,6 +34,9 @@
             {
                 "name": "flags",
                 "type": "DetailObjectCollectionTypeFlags",
+                "exclude": [
+                    { "field": "unused a", "struct": null }, { "field": "unused b", "struct": null }
+                ],
                 "endian": null
             },
             {

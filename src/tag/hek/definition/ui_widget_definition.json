@@ -428,7 +428,8 @@
         "fields": [
             {
                 "name": "function",
-                "type": "UIGameDataInputReferenceFunction"
+                "type": "UIGameDataInputReferenceFunction",
+                "exclude": [{"option": "unused", "struct": null}]
             },
             {
                 "type": "pad",
@@ -455,7 +456,8 @@
             },
             {
                 "name": "function",
-                "type": "UIEventHandlerReferenceFunction"
+                "type": "UIEventHandlerReferenceFunction",
+                "exclude": [{"option": "unused", "struct": null}, {"option": "unused 1", "struct": null}]
             },
             {
                 "name": "widget tag",
