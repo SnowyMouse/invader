@@ -84,17 +84,7 @@
             "first person camera slaved to gun",
             "allow vehicle communication animations",
             "not valid without driver",
-            "allow ai noncombatants",
-            "reserved",
-            "reserved 1",
-            "reserved 2",
-            "reserved 3",
-            "reserved 4",
-            "reserved 5",
-            "reserved 6",
-            "reserved 7",
-            "reserved 8",
-            "allows melee"
+            "allow ai noncombatants"
         ],
         "width": 32
     },
