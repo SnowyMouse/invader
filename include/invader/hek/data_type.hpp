@@ -345,8 +345,14 @@ namespace Invader::HEK {
             return copy;
         }
         
+        static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
+        
+        float calculate_scale() const noexcept {
+            return std::sqrt(i*i + j*j + k*k + w*w);
+        }
+        
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k + w*w)) < 0.00001;
+            return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
 
         Quaternion<EndianType> normalize() const noexcept {
@@ -507,8 +513,14 @@ namespace Invader::HEK {
             return copy;
         }
         
+        static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
+        
+        float calculate_scale() const noexcept {
+            return std::sqrt(i*i + j*j + k*k);
+        }
+        
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j + k*k)) < 0.00001;
+            return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
 
         Vector3D<EndianType> normalize() const noexcept {
@@ -555,8 +567,14 @@ namespace Invader::HEK {
             return copy;
         }
         
+        static const constexpr double NONNORMAL_THRESHOLD = 0.00001;
+        
+        float calculate_scale() const noexcept {
+            return std::sqrt(i*i + j*j);
+        }
+        
         bool is_normalized() const noexcept {
-            return std::fabs(1.0 - std::sqrt(i*i + j*j)) < 0.00001;
+            return std::fabs(1.0 - this->calculate_scale()) < NONNORMAL_THRESHOLD;
         }
 
         Vector2D<EndianType> normalize() const noexcept {

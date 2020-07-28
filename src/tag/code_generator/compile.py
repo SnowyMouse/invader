@@ -195,6 +195,26 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        r.{} = this->{};\n".format(name, name))
         else:
+            # Check if normalized
+            if "normalize" in struct and struct["normalize"]:
+                if struct["type"] == "Vector2D":
+                    cpp_cache_format_data.write("        if(!this->{}.is_normalized()) {{\n".format(name))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal 2D vector (%f, %f) -> %f\", this->{}.i.read(), this->{}.j.read(), this->{}.calculate_scale());\n".format(struct_name, name, name, name, name))
+                elif struct["type"] == "Vector3D":
+                    cpp_cache_format_data.write("        if(!this->{}.is_normalized()) {{\n".format(name))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal 3D vector (%f, %f, %f) -> %f\", this->{}.i.read(), this->{}.j.read(), this->{}.k.read(), this->{}.calculate_scale());\n".format(struct_name, name, name, name, name, name))
+                elif struct["type"] == "Quaternion":
+                    cpp_cache_format_data.write("        if(!this->{}.is_normalized()) {{\n".format(name))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal quaternion (%f, %f, %f / %f) -> %f\", this->{}.i.read(), this->{}.j.read(), this->{}.k.read(), this->{}.w.read(), this->{}.calculate_scale());\n".format(struct_name, name, name, name, name, name, name))
+                elif struct["type"] == "Plane2D":
+                    cpp_cache_format_data.write("        if(!this->{}.vector.is_normalized()) {{\n".format(name))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal 2D plane (%f, %f) -> %f\", this->{}.vector.i.read(), this->{}.vector.j.read(), this->{}.vector.calculate_scale());\n".format(struct_name, name, name, name, name))
+                elif struct["type"] == "Plane3D":
+                    cpp_cache_format_data.write("        if(!this->{}.vector.is_normalized()) {{\n".format(name))
+                    cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is not a normal 3D plane (%f, %f, %f) -> %f\", this->{}.vector.i.read(), this->{}.vector.j.read(), this->{}.vector.k.read(), this->{}.vector.calculate_scale());\n".format(struct_name, name, name, name, name, name))
+                cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
+            
             for e in all_enums:
                 if e["name"] == struct["type"]:
                     shifted_by_one = "+ 1" if ("shifted_by_one" in struct and struct["shifted_by_one"]) else ""

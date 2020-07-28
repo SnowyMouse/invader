@@ -14,6 +14,8 @@ This is used for recording Invader's changes. This changelog is based on
   will result in more problematic vectors being shown, but it may result in some
   vectors that are "normal enough" for tool.exe but not actually normal to show
   up, too.
+- invader-build: Invalid vectors are now checked against and are considered
+  errors if they are not normalized
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
   field will now change the class; this also applies to pasting in paths
 - invader-edit-qt: A number of unused or invalid flags and enumerators have been

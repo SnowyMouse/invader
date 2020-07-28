@@ -396,7 +396,7 @@
             },
             {
                 "name": "seat acceleration scale",
-                "type": "Vector3D",
+                "type": "Point3D",
                 "compound": true
             },
             {

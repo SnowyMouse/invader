@@ -245,7 +245,7 @@
             },
             {
                 "name": "relative offset",
-                "type": "Vector3D",
+                "type": "Point3D",
                 "compound": true
             },
             {
