@@ -236,7 +236,6 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_NATIVE: {
                     auto *native_header = reinterpret_cast<const NativeCacheFileHeader *>(&header);
                     if(native_header->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED) {
-                        oprintf("RAI! ;-;\n");
                         throw MapNeedsDecompressedException();
                     }
                     break;
