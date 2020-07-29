@@ -58,7 +58,7 @@ namespace Invader::Parser {
             workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
             workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
         ) {
-            #define CHECK_NADE_ON_MP_COUNT(what) if(this->what > max_grenades_mp_gbx) { \
+            #define CHECK_NADE_ON_MP_COUNT(what) if(static_cast<std::size_t>(this->what) > max_grenades_mp_gbx) { \
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
             }
             CHECK_NADE_ON_MP_COUNT(maximum_count);
