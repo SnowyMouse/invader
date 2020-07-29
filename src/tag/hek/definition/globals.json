@@ -1676,7 +1676,8 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsGrenade",
                 "compound": true,
-                "minimum": 2
+                "minimum": 2,
+                "maximum": 2
             },
             {
                 "name": "rasterizer data",
