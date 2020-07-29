@@ -654,11 +654,13 @@
         "fields": [
             {
                 "name": "maximum count",
-                "type": "uint16"
+                "type": "uint16",
+                "maximum": 127
             },
             {
                 "name": "mp spawn default",
-                "type": "uint16"
+                "type": "uint16",
+                "maximum": 127
             },
             {
                 "name": "throwing effect",
