@@ -644,6 +644,13 @@
     },
     {
         "name": "GlobalsGrenade",
+        "groups": [
+            {
+                "name": "grenade count",
+                "description": "\"maximum count\" is the number of grenades the player can hold, while \"mp spawn default\" is the default number of grenades. On Xbox, \"mp spawn default\" will only be used if the player count is four players or less. Otherwise, the maximum count is used.\n\nNOTE: Do not use more than 7 grenades if creating a multiplayer map for the Gearbox versions of the game (i.e. custom, retail, demo), as the grenade count will underflow if the player exceeds 7 grenades due to the four-bit signed integer used in the netcode for syncing grenades.",
+                "first": "maximum count"
+            }
+        ],
         "fields": [
             {
                 "name": "maximum count",
@@ -687,6 +694,7 @@
             }
         ],
         "type": "struct",
+        "pre_compile": true,
         "size": 68
     },
     {

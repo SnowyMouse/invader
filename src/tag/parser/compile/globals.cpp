@@ -47,6 +47,24 @@ namespace Invader::Parser {
             }
         }
     }
+    void GlobalsGrenade::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
+        // Account for a four-bit signed integer underflow glitch in the Gearbox netcode that occurs when using more than 7 (0b0111) grenades.
+        // Basically, a 4-bit signed integer's range is -8 to 7. So, if you have more than 7, you get underflowed to -8, and you can't throw grenades if you have 0 or fewer grenades.
+        // I have no idea why they thought that their netcode needed this to be optimized down to four bits SIGNED (so effectively three bits can actually be used) for grenades, but it's a massive meme.
+        static constexpr const std::size_t max_grenades_mp_gbx = 7;
+        if(
+            workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
+            (workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
+            workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+            workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
+        ) {
+            #define CHECK_NADE_ON_MP_COUNT(what) if(this->what > max_grenades_mp_gbx) { \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
+            }
+            CHECK_NADE_ON_MP_COUNT(maximum_count);
+            CHECK_NADE_ON_MP_COUNT(mp_spawn_default);
+        }
+    }
     void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
