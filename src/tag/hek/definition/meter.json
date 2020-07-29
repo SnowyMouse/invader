@@ -32,7 +32,6 @@
                     "bitmap"
                 ],
                 "compound": true,
-                "hidden": true,
                 "non_cached": true,
                 "comment": "Don't use this! This gets dereferenced on map build."
             },
@@ -43,7 +42,6 @@
                     "bitmap"
                 ],
                 "compound": true,
-                "hidden": true,
                 "non_cached": true,
                 "comment": "Don't use this! This gets dereferenced on map build."
             },
