@@ -1282,6 +1282,13 @@
     },
     {
         "name": "GlobalsFirstPersonInterface",
+        "groups": [
+            {
+                "name": "first person interface",
+                "first": "first person hands",
+                "description": "The \"first person hands\" model is used when holding a weapon that has first person animations. It will not appear if the player is unarmed or is using a weapon that doesn't have first person animations. The \"night vision on effect\" and \"night vision off effect\" are played once when enabling and disabling night vision, respectfully.\n\nThe \"base bitmap\", \"shield meter\", \"shield meter origin\", \"body meter\", and \"body meter origin\" tags are not used, and they appear to be a holdover from an older, unreleased version of the original Halo engine. The unit HUD interface tag referenced in the biped is used, instead."
+            }
+        ],
         "fields": [
             {
                 "name": "first person hands",
@@ -1289,6 +1296,7 @@
                 "classes": [
                     "model"
                 ],
+                "description": "This is the model used for hands when a weapon with first person animatinos is held.",
                 "compound": true
             },
             {
@@ -1326,19 +1334,21 @@
                 "compound": true
             },
             {
-                "name": "night vision off on effect",
+                "name": "night vision on effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
+                "description": "This effect is played when enabling night vision.",
                 "compound": true
             },
             {
-                "name": "night vision on off effect",
+                "name": "night vision off effect",
                 "type": "TagDependency",
                 "classes": [
                     "effect"
                 ],
+                "description": "This effect is played when disabling night vision.",
                 "compound": true
             },
             {
