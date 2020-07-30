@@ -790,7 +790,9 @@
             {
                 "name": "node transform flag data",
                 "type": "uint32",
-                "count": 2
+                "count": 2,
+                "hidden": true,
+                "comment": "These are two bitfields. Each bits refer to a node to which the transformation applies. The first field refers to the first 32 nodes and the second field is the second 32 nodes."
             },
             {
                 "type": "pad",
@@ -799,7 +801,9 @@
             {
                 "name": "node rotation flag data",
                 "type": "uint32",
-                "count": 2
+                "count": 2,
+                "hidden": true,
+                "comment": "These are two bitfields. Each bits refer to a node to which the transformation applies. The first field refers to the first 32 nodes and the second field is the second 32 nodes."
             },
             {
                 "type": "pad",
@@ -808,7 +812,9 @@
             {
                 "name": "node scale flag data",
                 "type": "uint32",
-                "count": 2
+                "count": 2,
+                "hidden": true,
+                "comment": "These are two bitfields. Each bits refer to a node to which the transformation applies. The first field refers to the first 32 nodes and the second field is the second 32 nodes."
             },
             {
                 "type": "pad",
