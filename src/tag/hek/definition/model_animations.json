@@ -639,19 +639,22 @@
                 "name": "next sibling node index",
                 "type": "Index",
                 "reflexive": "nodes",
-                "struct": "ModelAnimations"
+                "struct": "ModelAnimations",
+                "read_only": true
             },
             {
                 "name": "first child node index",
                 "type": "Index",
                 "reflexive": "nodes",
-                "struct": "ModelAnimations"
+                "struct": "ModelAnimations",
+                "read_only": true
             },
             {
                 "name": "parent node index",
                 "type": "Index",
                 "reflexive": "nodes",
-                "struct": "ModelAnimations"
+                "struct": "ModelAnimations",
+                "read_only": true
             },
             {
                 "type": "pad",
@@ -664,11 +667,13 @@
             {
                 "name": "base vector",
                 "type": "Vector3D",
-                "compound": true
+                "compound": true,
+                "read_only": true
             },
             {
                 "name": "vector range",
-                "type": "float"
+                "type": "float",
+                "read_only": true
             },
             {
                 "type": "pad",
@@ -685,31 +690,38 @@
             {
                 "name": "name",
                 "type": "TagString",
-                "endian": null
+                "endian": null,
+                "read_only": true
             },
             {
                 "name": "type",
-                "type": "AnimationType"
+                "type": "AnimationType",
+                "read_only": true
             },
             {
                 "name": "frame count",
-                "type": "uint16"
+                "type": "uint16",
+                "read_only": true
             },
             {
                 "name": "frame size",
-                "type": "uint16"
+                "type": "uint16",
+                "read_only": true
             },
             {
                 "name": "frame info type",
-                "type": "AnimationFrameInfoType"
+                "type": "AnimationFrameInfoType",
+                "read_only": true
             },
             {
                 "name": "node list checksum",
-                "type": "uint32"
+                "type": "uint32",
+                "read_only": true
             },
             {
                 "name": "node count",
-                "type": "uint16"
+                "type": "uint16",
+                "read_only": true
             },
             {
                 "name": "loop frame index",
@@ -731,7 +743,8 @@
                 "name": "next animation",
                 "type": "Index",
                 "reflexive": "animations",
-                "struct": "ModelAnimations"
+                "struct": "ModelAnimations",
+                "read_only": true
             },
             {
                 "name": "flags",
@@ -803,7 +816,8 @@
             },
             {
                 "name": "offset to compressed data",
-                "type": "uint32"
+                "type": "uint32",
+                "read_only": true
             },
             {
                 "name": "default data",
