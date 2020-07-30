@@ -3,128 +3,6 @@
         "name": "GBXModelGeometryPart",
         "fields": [
             {
-                "name": "flags",
-                "type": "ModelGeometryPartFlags"
-            },
-            {
-                "name": "shader index",
-                "type": "Index",
-                "reflexive": "shaders",
-                "struct": "GBXModel"
-            },
-            {
-                "name": "prev filthy part index",
-                "type": "uint8",
-                "default": 255,
-                "endian": null
-            },
-            {
-                "name": "next filthy part index",
-                "type": "uint8",
-                "default": 255,
-                "endian": null
-            },
-            {
-                "name": "centroid primary node",
-                "type": "Index",
-                "cache_only": true
-            },
-            {
-                "name": "centroid secondary node",
-                "type": "Index",
-                "cache_only": true
-            },
-            {
-                "name": "centroid primary weight",
-                "type": "Fraction",
-                "cache_only": true
-            },
-            {
-                "name": "centroid secondary weight",
-                "type": "Fraction",
-                "cache_only": true
-            },
-            {
-                "name": "centroid",
-                "type": "Point3D",
-                "compound": true
-            },
-            {
-                "name": "uncompressed vertices",
-                "type": "TagReflexive",
-                "struct": "ModelVertexUncompressed",
-                "compound": true,
-                "non_cached": true
-            },
-            {
-                "name": "compressed vertices",
-                "type": "TagReflexive",
-                "struct": "ModelVertexCompressed",
-                "compound": true,
-                "non_cached": true
-            },
-            {
-                "name": "triangles",
-                "type": "TagReflexive",
-                "struct": "ModelTriangle",
-                "compound": true,
-                "non_cached": true
-            },
-            {
-                "name": "do not crash the game",
-                "type": "uint32",
-                "cache_only": true,
-                "endian": "little"
-            },
-            {
-                "name": "triangle count",
-                "endian": "little",
-                "cache_only": true,
-                "type": "uint32"
-            },
-            {
-                "name": "triangle offset",
-                "endian": "little",
-                "type": "uint32",
-                "cache_only": true,
-                "drop_on_extract_hidden": true
-            },
-            {
-                "name": "triangle offset 2",
-                "endian": "little",
-                "type": "uint32",
-                "cache_only": true,
-                "drop_on_extract_hidden": true
-            },
-            {
-                "name": "do not screw up the model",
-                "type": "uint32",
-                "drop_on_extract_hidden": true,
-                "cache_only": true,
-                "endian": "little"
-            },
-            {
-                "name": "vertex count",
-                "endian": "little",
-                "cache_only": true,
-                "type": "uint32"
-            },
-            {
-                "type": "pad",
-                "size": 4
-            },
-            {
-                "name": "bullshit",
-                "type": "uint32",
-                "endian": "little",
-                "cache_only": true
-            },
-            {
-                "name": "vertex offset",
-                "type": "uint32",
-                "drop_on_extract_hidden": true
-            },
-            {
                 "type": "pad",
                 "size": 1
             },
@@ -140,13 +18,16 @@
                 "name": "local node count",
                 "type": "uint8",
                 "maximum": 22,
-                "endian": null
+                "endian": null,
+                "read_only": true
             },
             {
                 "name": "local node indices",
                 "type": "uint8",
                 "endian": null,
-                "count": 22
+                "count": 22,
+                "hidden": true,
+                "comment": "Local nodes are used to indirectly refer to a real node. So, if local nodes are used, a vertex says node #4, and local node #4 refers to node #5, then the vertex is node #5. There really doesn't seem to be any benefit to using local nodes, considering compressed vertices (which can only address 42 nodes) don't even use them. They just make the models unnecessarily more convoluted while taking up more space."
             },
             {
                 "type": "pad",
@@ -154,6 +35,7 @@
             }
         ],
         "type": "struct",
+        "inherits": "ModelGeometryPart",
         "post_cache_parse": true,
         "unsafe_to_dedupe": true,
         "pre_compile": true,
