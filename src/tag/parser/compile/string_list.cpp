@@ -41,7 +41,7 @@ namespace Invader::Parser {
                 c++;
             }
             if(improper_line_endings) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "String #%zu contains non-CRLF line endings; it may not display correctly", offset / sizeof(*what));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu contains non-CRLF line endings", offset / sizeof(*what));
             }
         }
     }
