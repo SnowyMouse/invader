@@ -16,6 +16,10 @@ This is used for recording Invader's changes. This changelog is based on
   up, too.
 - invader-build: Invalid vectors are now checked against and are considered
   errors if they are not normalized
+- invader-build: String list strings that are empty or not null terminated are
+  now errored (also applies to unicode string lists)
+- invader-build: Unicode string list strings that have an odd number of bytes
+  are now errored
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
   field will now change the class; this also applies to pasting in paths
 - invader-edit-qt: A number of unused or invalid flags and enumerators have been

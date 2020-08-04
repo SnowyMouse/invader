@@ -124,6 +124,7 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/compile/scenario_structure_bsp.cpp
     src/tag/parser/compile/shader.cpp
     src/tag/parser/compile/sound.cpp
+    src/tag/parser/compile/string_list.cpp
 
     src/crc/crc32.c
     src/crc/crc_spoof.c
