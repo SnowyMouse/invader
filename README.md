@@ -911,6 +911,13 @@ derivatives of our tools they have chosen to share is not too much to ask for,
 as this ensures that modding stays free and open instead of left to stagnation
 behind closed groups and obfuscation as modding this game has been in the past.
 
+Also, using a weak license like MIT has proven to not be helpful. A number of
+open source mods, which were released as MIT and BSD, have been used in closed
+source projects, or they have been converted to a closed source project with the
+[original open source versions receiving zero contributions].
+
+[original open source versions receiving zero contributions](https://github.com/Chaosvex/HAC2)
+
 That is why Invader uses version 3 of the GNU GPL.
 
 ### How can I get Invader under a different license?
