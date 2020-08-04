@@ -17,9 +17,14 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Invalid vectors are now checked against and are considered
   errors if they are not normalized
 - invader-build: String list strings that are empty or not null terminated are
-  now errored (also applies to unicode string lists)
+  now errored (also applies to unicode string lists). This typically happens in
+  tags that have been modified rather than generated.
 - invader-build: Unicode string list strings that have an odd number of bytes
   are now errored
+- invader-build: String lists that contain non-CRLF line endings (i.e. single \n
+  line endings) now result in a warning, as these may not display correctly in
+  some instances. This typically only occurs in string lists that have been
+  modified rather than generated.
 - invader-edit-qt: Typing in a valid path with an extension into a dependency
   field will now change the class; this also applies to pasting in paths
 - invader-edit-qt: A number of unused or invalid flags and enumerators have been

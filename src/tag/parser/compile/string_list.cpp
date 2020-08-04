@@ -21,6 +21,29 @@ namespace Invader::Parser {
         else if(*(reinterpret_cast<const CHAR *>(what->string.data() + size) - 1) != 0) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu is not null terminated", offset / sizeof(*what));
         }
+        
+        // Does the string not have proper line endings
+        else {
+            auto *start = reinterpret_cast<const CHAR *>(what->string.data());
+            auto *c = start;
+            bool improper_line_endings = false;
+            while(*c) {
+                // \n without a preceeding \r
+                if(*c == '\n' && (c == start || c[-1] != '\r')) {
+                    improper_line_endings = true;
+                    break;
+                }
+                // \r without a succeeding \n
+                else if(*c == '\r' && c[1] != '\n') {
+                    improper_line_endings = true;
+                    break;
+                }
+                c++;
+            }
+            if(improper_line_endings) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "String #%zu contains non-CRLF line endings; it may not display correctly", offset / sizeof(*what));
+            }
+        }
     }
     
     void StringListString::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {
