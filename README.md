@@ -911,9 +911,10 @@ derivatives of our tools they have chosen to share is not too much to ask for,
 as this ensures that modding stays free and open instead of left to stagnation
 behind closed groups and obfuscation as modding this game has been in the past.
 
-Also, using a weak license like MIT has proven to not be helpful. A number of
-open source mods, which were released as MIT and BSD, have been used in closed
-source projects, or they have been converted to a closed source project with the
+Also, a weak license like MIT has proven to not be helpful. A common argument is
+that more people will be willing to use and contribute to it. However, a number
+of open source mods, which were released as MIT and BSD, have been used in
+closed source projects, or they have been converted to closed source with the
 [original open source versions receiving zero contributions].
 
 [original open source versions receiving zero contributions]: https://github.com/Chaosvex/HAC2
