@@ -916,7 +916,7 @@ open source mods, which were released as MIT and BSD, have been used in closed
 source projects, or they have been converted to a closed source project with the
 [original open source versions receiving zero contributions].
 
-[original open source versions receiving zero contributions](https://github.com/Chaosvex/HAC2)
+[original open source versions receiving zero contributions]: https://github.com/Chaosvex/HAC2
 
 That is why Invader uses version 3 of the GNU GPL.
 
