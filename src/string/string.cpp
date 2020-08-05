@@ -33,6 +33,7 @@ template <typename T, typename G, Invader::TagClassInt C> static std::vector<std
     // Separate into lines
     std::string string;
     std::size_t line_start = 0;
+    bool character_found = false;
     static const char LINE_ENDING[] = "\r\n";
     for(std::size_t i = 0; i < string_length; i++) {
         if(c[i] == '\r' || c[i] == '\n') {
@@ -40,13 +41,19 @@ template <typename T, typename G, Invader::TagClassInt C> static std::vector<std
             if(c[i] == '\r' && c[i + 1] == '\n') {
                 increment = 1;
             }
+            else if(c[i] == 0) {
+                eprintf_error("Error: Null character is present in the file.");
+                std::exit(EXIT_FAILURE);
+            }
             else {
                 increment = 0;
+                character_found = true;
             }
             std::string line(c + line_start, c + i);
             if(line == "###END-STRING###") {
                 strings.emplace_back(string, 0, string.size() - (sizeof(LINE_ENDING) - 1));
                 string.clear();
+                character_found = false;
             }
             else {
                 string += line + LINE_ENDING;
@@ -54,6 +61,12 @@ template <typename T, typename G, Invader::TagClassInt C> static std::vector<std
             i += increment;
             line_start = i + 1;
         }
+    }
+    
+    // Did we have any text left?
+    if(character_found) {
+        eprintf_error("Error: Missing ###END-STRING### after string.");
+        std::exit(EXIT_FAILURE);
     }
 
     // Add each string
@@ -75,7 +88,7 @@ template <typename T, typename G, Invader::TagClassInt C> static std::vector<std
 
 static std::vector<std::byte> generate_hud_message_text_tag(const std::string &) {
     eprintf_error("Error: Unimplemented.");
-    exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
 }
 
 int main(int argc, char * const *argv) {
