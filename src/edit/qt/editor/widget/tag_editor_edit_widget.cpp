@@ -313,15 +313,15 @@ namespace Invader::EditQt {
                     layout->addWidget(rows);
                     
                     // Set up widgets
-                    add_single_textbox(3, top_layout,    "x<sub>1</sub>:");
-                    add_single_textbox(3, top_layout,    "y<sub>1</sub>:");
-                    add_single_textbox(3, top_layout,    "z<sub>1</sub>:");
-                    add_single_textbox(3, mid_layout,    "x<sub>2</sub>:");
-                    add_single_textbox(3, mid_layout,    "y<sub>2</sub>:");
-                    add_single_textbox(3, mid_layout,    "z<sub>2</sub>:");
-                    add_single_textbox(3, bottom_layout, "x<sub>3</sub>:");
-                    add_single_textbox(3, bottom_layout, "y<sub>3</sub>:");
-                    add_single_textbox(3, bottom_layout, "z<sub>3</sub>:");
+                    add_single_textbox(3, top_layout,    "x<sub><strong>1</strong></sub>:");
+                    add_single_textbox(3, top_layout,    "y<sub><strong>1</strong></sub>:");
+                    add_single_textbox(3, top_layout,    "z<sub><strong>1</strong></sub>:");
+                    add_single_textbox(3, mid_layout,    "x<sub><strong>2</strong></sub>:");
+                    add_single_textbox(3, mid_layout,    "y<sub><strong>2</strong></sub>:");
+                    add_single_textbox(3, mid_layout,    "z<sub><strong>2</strong></sub>:");
+                    add_single_textbox(3, bottom_layout, "x<sub><strong>3</strong></sub>:");
+                    add_single_textbox(3, bottom_layout, "y<sub><strong>3</strong></sub>:");
+                    add_single_textbox(3, bottom_layout, "z<sub><strong>3</strong></sub>:");
                     break;
                 }
 
