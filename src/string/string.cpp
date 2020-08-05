@@ -98,7 +98,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
-    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Default: unicode");
+    options.emplace_back("format", 'f', 1, "Set string list format. Can be unicode or latin-1. Must be specified if a string tag is not present.");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the text file.");
 
     static constexpr char DESCRIPTION[] = "Generate string list tags.";
@@ -107,8 +107,7 @@ int main(int argc, char * const *argv) {
     struct StringOptions {
         const char *data = "data";
         const char *tags = "tags";
-        Format format = Format::STRING_LIST_FORMAT_UNICODE;
-        const char *output_extension = ".unicode_string_list";
+        std::optional<Format> format;
         bool use_filesystem_path = false;
     } string_options;
 
@@ -129,15 +128,12 @@ int main(int argc, char * const *argv) {
             case 'f':
                 if(std::strcmp(arguments[0], "utf-16") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
-                    string_options.output_extension = ".unicode_string_list";
                 }
                 else if(std::strcmp(arguments[0], "latin-1") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
-                    string_options.output_extension = ".string_list";
                 }
                 else if(std::strcmp(arguments[0], "hmt") == 0) {
                     string_options.format = Format::STRING_LIST_FORMAT_HMT;
-                    string_options.output_extension = ".hud_message_text";
                 }
                 break;
         }
@@ -170,6 +166,7 @@ int main(int argc, char * const *argv) {
         }
     }
 
+    // Make sure we have a tags directory
     std::filesystem::path tags_path(string_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
         if(std::strcmp(string_options.tags, "tags") == 0) {
@@ -180,10 +177,48 @@ int main(int argc, char * const *argv) {
         }
         return EXIT_FAILURE;
     }
+    
+    // If we don't have it, find it
+    auto tag_path_absolute = (tags_path / string_tag);
+    if(!string_options.format.has_value()) {
+        int found = 0;
+        if(std::filesystem::exists(tag_path_absolute.string() + std::string(".string_list"))) {
+            string_options.format = Format::STRING_LIST_FORMAT_LATIN1;
+            found++;
+        }
+        if(std::filesystem::exists(tag_path_absolute.string() + std::string(".unicode_string_list"))) {
+            string_options.format = Format::STRING_LIST_FORMAT_UNICODE;
+            found++;
+        }
+        if(found == 0) {
+            eprintf_error("Cannot auto-determine format if no string list tags by the path exist");
+            return EXIT_FAILURE;
+        }
+        else if(found > 1) {
+            eprintf_error("Cannot auto-determine format if multiple string list tags by the path exist");
+            return EXIT_FAILURE;
+        }
+    }
+    
+    // Make the data path
     std::filesystem::path data_path(string_options.data);
+    
+    // Figure out our extension
+    const char *output_extension = nullptr;
+    switch(*string_options.format) {
+        case Format::STRING_LIST_FORMAT_HMT:
+            output_extension = ".hud_message_text";
+            break;
+        case Format::STRING_LIST_FORMAT_LATIN1:
+            output_extension = ".string_list";
+            break;
+        case Format::STRING_LIST_FORMAT_UNICODE:
+            output_extension = ".unicode_string_list";
+            break;
+    }
 
     auto input_path = (data_path / string_tag).string() + valid_extension;
-    auto output_path = (tags_path / string_tag).string() + string_options.output_extension;
+    auto output_path = tag_path_absolute.string() + output_extension;
 
     // Open a file
     std::FILE *f = std::fopen(input_path.c_str(), "rb");
@@ -232,7 +267,7 @@ int main(int argc, char * const *argv) {
 
     // Generate the data
     std::vector<std::byte> final_data;
-    switch(string_options.format) {
+    switch(*string_options.format) {
         case STRING_LIST_FORMAT_UNICODE:
             final_data = generate_string_list_tag<char16_t, Invader::Parser::UnicodeStringList, Invader::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST>(text);
             break;
