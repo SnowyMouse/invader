@@ -102,7 +102,7 @@ namespace Invader::EditQt {
         auxiliary_widget = nullptr;
 
         auto add_widget = [&value_index, &value, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only, &auxiliary_widget, &auxiliary_checkbox, &this_widget]() {
-            auto add_single_textbox = [&value, &value_index, &widgets_array, &layout, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, const char *prefix = nullptr) -> QLineEdit * {
+            auto add_single_textbox = [&value, &value_index, &widgets_array, &values, &label_width, &textbox_widgets, &standard_width, &prefix_label_width, &read_only](int size, QLayout *layout, const char *prefix = nullptr) -> QLineEdit * {
                 // Make our textbox
                 auto *textbox = reinterpret_cast<QLineEdit *>(widgets_array.emplace_back(new QLineEdit()));
 
@@ -191,16 +191,16 @@ namespace Invader::EditQt {
                 // Simple value types; just textboxes
                 case Parser::ParserStructValue::VALUE_TYPE_INT8:
                 case Parser::ParserStructValue::VALUE_TYPE_UINT8:
-                    add_single_textbox(1);
+                    add_single_textbox(1, layout);
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INT16:
                 case Parser::ParserStructValue::VALUE_TYPE_UINT16:
-                    add_single_textbox(2);
+                    add_single_textbox(2, layout);
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INDEX:
-                    add_single_textbox(2);
+                    add_single_textbox(2, layout);
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_INT32:
@@ -208,102 +208,122 @@ namespace Invader::EditQt {
                 case Parser::ParserStructValue::VALUE_TYPE_FLOAT:
                 case Parser::ParserStructValue::VALUE_TYPE_FRACTION:
                 case Parser::ParserStructValue::VALUE_TYPE_ANGLE:
-                    add_single_textbox(3);
+                    add_single_textbox(3, layout);
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_TAGSTRING:
-                    add_single_textbox(8);
+                    add_single_textbox(8, layout);
                     break;
 
                 // Some more complex stuff with multiple boxes
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGBINT:
-                    add_single_textbox(1, "a:");
-                    add_single_textbox(1, "r:");
-                    add_single_textbox(1, "g:");
-                    add_single_textbox(1, "b:");
+                    add_single_textbox(1, layout, "a:");
+                    add_single_textbox(1, layout, "r:");
+                    add_single_textbox(1, layout, "g:");
+                    add_single_textbox(1, layout, "b:");
                     make_color_widget();
                     auxiliary_checkbox->setCheckState(Qt::Unchecked);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
-                    add_single_textbox(2, "x:");
-                    add_single_textbox(2, "y:");
+                    add_single_textbox(2, layout, "x:");
+                    add_single_textbox(2, layout, "y:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_RECTANGLE2D:
-                    add_single_textbox(2, "t:");
-                    add_single_textbox(2, "r:");
-                    add_single_textbox(2, "b:");
-                    add_single_textbox(2, "l:");
+                    add_single_textbox(2, layout, "t:");
+                    add_single_textbox(2, layout, "r:");
+                    add_single_textbox(2, layout, "b:");
+                    add_single_textbox(2, layout, "l:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORARGB:
-                    add_single_textbox(3, "a:");
-                    add_single_textbox(3, "r:");
-                    add_single_textbox(3, "g:");
-                    add_single_textbox(3, "b:");
+                    add_single_textbox(3, layout, "a:");
+                    add_single_textbox(3, layout, "r:");
+                    add_single_textbox(3, layout, "g:");
+                    add_single_textbox(3, layout, "b:");
                     make_color_widget();
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_COLORRGB:
-                    add_single_textbox(3, "r:");
-                    add_single_textbox(3, "g:");
-                    add_single_textbox(3, "b:");
+                    add_single_textbox(3, layout, "r:");
+                    add_single_textbox(3, layout, "g:");
+                    add_single_textbox(3, layout, "b:");
                     make_color_widget();
                     auxiliary_checkbox->setHidden(true);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR2D:
-                    add_single_textbox(3, "i:");
-                    add_single_textbox(3, "j:");
+                    add_single_textbox(3, layout, "i:");
+                    add_single_textbox(3, layout, "j:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_VECTOR3D:
-                    add_single_textbox(3, "i:");
-                    add_single_textbox(3, "j:");
-                    add_single_textbox(3, "k:");
+                    add_single_textbox(3, layout, "i:");
+                    add_single_textbox(3, layout, "j:");
+                    add_single_textbox(3, layout, "k:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_EULER2D:
-                    add_single_textbox(3, "y:");
-                    add_single_textbox(3, "p:");
+                    add_single_textbox(3, layout, "y:");
+                    add_single_textbox(3, layout, "p:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_EULER3D:
-                    add_single_textbox(3, "y:");
-                    add_single_textbox(3, "p:");
-                    add_single_textbox(3, "r:");
+                    add_single_textbox(3, layout, "y:");
+                    add_single_textbox(3, layout, "p:");
+                    add_single_textbox(3, layout, "r:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_PLANE2D:
-                    add_single_textbox(3, "x:");
-                    add_single_textbox(3, "y:");
-                    add_single_textbox(3, "w:");
+                    add_single_textbox(3, layout, "x:");
+                    add_single_textbox(3, layout, "y:");
+                    add_single_textbox(3, layout, "w:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2D:
-                    add_single_textbox(3, "x:");
-                    add_single_textbox(3, "y:");
+                    add_single_textbox(3, layout, "x:");
+                    add_single_textbox(3, layout, "y:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT3D:
-                    add_single_textbox(3, "x:");
-                    add_single_textbox(3, "y:");
-                    add_single_textbox(3, "z:");
+                    add_single_textbox(3, layout, "x:");
+                    add_single_textbox(3, layout, "y:");
+                    add_single_textbox(3, layout, "z:");
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_PLANE3D:
-                    add_single_textbox(3, "x:");
-                    add_single_textbox(3, "y:");
-                    add_single_textbox(3, "z:");
-                    add_single_textbox(3, "w:");
+                    add_single_textbox(3, layout, "x:");
+                    add_single_textbox(3, layout, "y:");
+                    add_single_textbox(3, layout, "z:");
+                    add_single_textbox(3, layout, "w:");
                     break;
 
                 case Parser::ParserStructValue::VALUE_TYPE_QUATERNION:
-                    add_single_textbox(3, "i:");
-                    add_single_textbox(3, "j:");
-                    add_single_textbox(3, "k:");
-                    add_single_textbox(3, "w:");
+                    add_single_textbox(3, layout, "i:");
+                    add_single_textbox(3, layout, "j:");
+                    add_single_textbox(3, layout, "k:");
+                    add_single_textbox(3, layout, "w:");
                     break;
-                case Parser::ParserStructValue::VALUE_TYPE_MATRIX:
-                    add_single_textbox(3, "x0:");
-                    add_single_textbox(3, "y0:");
-                    add_single_textbox(3, "z0:");
-                    add_single_textbox(3, "x1:");
-                    add_single_textbox(3, "y1:");
-                    add_single_textbox(3, "z1:");
-                    add_single_textbox(3, "x2:");
-                    add_single_textbox(3, "y2:");
-                    add_single_textbox(3, "z2:");
+                case Parser::ParserStructValue::VALUE_TYPE_MATRIX: {
+                    // Set up layouts
+                    auto *top = new QWidget();
+                    auto *top_layout = new QHBoxLayout();
+                    top->setLayout(top_layout);
+                    auto *mid = new QWidget();
+                    auto *mid_layout = new QHBoxLayout();
+                    mid->setLayout(mid_layout);
+                    auto *bottom = new QWidget();
+                    auto *bottom_layout = new QHBoxLayout();
+                    bottom->setLayout(bottom_layout);
+                    auto *rows = new QWidget();
+                    auto *row_layout = new QVBoxLayout();
+                    rows->setLayout(row_layout);
+                    row_layout->addWidget(top);
+                    row_layout->addWidget(mid);
+                    row_layout->addWidget(bottom);
+                    layout->addWidget(rows);
+                    
+                    // Set up widgets
+                    add_single_textbox(3, top_layout,    "x<sub>1</sub>:");
+                    add_single_textbox(3, top_layout,    "y<sub>1</sub>:");
+                    add_single_textbox(3, top_layout,    "z<sub>1</sub>:");
+                    add_single_textbox(3, mid_layout,    "x<sub>2</sub>:");
+                    add_single_textbox(3, mid_layout,    "y<sub>2</sub>:");
+                    add_single_textbox(3, mid_layout,    "z<sub>2</sub>:");
+                    add_single_textbox(3, bottom_layout, "x<sub>3</sub>:");
+                    add_single_textbox(3, bottom_layout, "y<sub>3</sub>:");
+                    add_single_textbox(3, bottom_layout, "z<sub>3</sub>:");
                     break;
+                }
 
                 // Dependencies!
                 case Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY: {
@@ -331,7 +351,7 @@ namespace Invader::EditQt {
                     layout->addWidget(combobox);
 
                     // Next, the textbox
-                    auto *textbox = add_single_textbox(8);
+                    auto *textbox = add_single_textbox(8, layout);
 
                     // Next, get our thing
                     auto &dependency = value->get_dependency();
