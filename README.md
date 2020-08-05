@@ -767,7 +767,8 @@ Generate string list tags.
 Options:
   -d --data <dir>              Use the specified data directory.
   -f --format                  Set string list format. Can be unicode or
-                               latin-1. Default: unicode
+                               latin-1. Must be specified if a string tag is not
+                               present.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -P --fs-path                 Use a filesystem path for the text file.
