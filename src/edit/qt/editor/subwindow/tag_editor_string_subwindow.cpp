@@ -70,6 +70,11 @@ namespace Invader::EditQt {
     }
     
     QString TagEditorStringSubwindow::decode_string(const std::vector<std::byte> *data, bool first_line_only) {
+        // Check if it's zero bytes in length, incorrect length, or not null terminated
+        if(data->size() == 0 || (this->utf16 && (data->size() % sizeof(char16_t)) != 0) || (this->utf16 && reinterpret_cast<const char16_t *>(data->data() + data->size())[-1] != 0)) {
+            return QString("ERROR ??????????");
+        }
+        
         if(first_line_only) {
             return this->decode_string(data, false).split("\n")[0];
         }
