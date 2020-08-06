@@ -199,6 +199,18 @@ int main(int argc, char * const *argv) {
         }
     }
     
+    // Next, any refactors that are just refactoring the tag to itself (effectively no operation)
+    std::size_t index = 0;
+    while(index < refactor_options.replacements.size()) {
+        auto &replacement = refactor_options.replacements[index];
+        if(replacement.first == replacement.second) {
+            refactor_options.replacements.erase(refactor_options.replacements.begin() + index);
+        }
+        else {
+            index++;
+        }
+    }
+    
     // Do we only need to go through one tag?
     if(refactor_options.single_tag) {
         tag_to_modify = &single_tag;
