@@ -406,6 +406,19 @@ int main(int argc, char * const *argv) {
             }
         }
         
+        // Skip some tags that cannot reference anything
+        switch(tag.tag_class_int) {
+            case Invader::HEK::TagClassInt::TAG_CLASS_BITMAP:
+            case Invader::HEK::TagClassInt::TAG_CLASS_PHYSICS:
+            case Invader::HEK::TagClassInt::TAG_CLASS_STRING_LIST:
+            case Invader::HEK::TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
+            case Invader::HEK::TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT:
+                skip = true;
+                break;
+            default:
+                break;
+        }
+        
         if(!skip && refactor_tags(tag.full_path.string().c_str(), replacements, true, refactor_options.dry_run)) {
             tags_to_do.emplace_back(&tag);
         }
