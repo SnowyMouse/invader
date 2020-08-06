@@ -54,28 +54,32 @@ std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<Tag
     return count;
 }
 
+enum RefactorMode {
+    REFACTOR_MODE_COPY,
+    REFACTOR_MODE_MOVE,
+    REFACTOR_MODE_NO_MOVE
+};
+
 int main(int argc, char * const *argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES
 
     std::vector<Invader::CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes.");
-    options.emplace_back("move", 'M', 0, "Move files that are being refactored. Tag classes cannot be refactored this way. This can only be set once and cannot be set with --no-move or --dry-run.");
-    options.emplace_back("no-move", 'N', 0, "Do not move any files; just change the references in the tags. This can only be set once and cannot be set with --move, --dry-run, or --recursive.");
-    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with --no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
+    options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught.");
+    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. Can be: copy, move, no-move", "<mode>");
+    options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
-    options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or --move.", "<f> <t>");
+    options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
-    static constexpr char USAGE[] = "<-M|-N> [options]";
+    static constexpr char USAGE[] = "<-M <mode>> [options]";
 
     struct RefactorOptions {
         std::vector<std::string> tags;
-        bool no_move = false;
-        bool set_move_or_no_move = false;
         bool dry_run = false;
+        std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
@@ -102,18 +106,20 @@ int main(int argc, char * const *argv) {
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
                 return;
-            case 'N':
-                if(refactor_options.set_move_or_no_move) {
-                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
-                }
-                refactor_options.no_move = true;
-                refactor_options.set_move_or_no_move = true;
-                return;
             case 'M':
-                if(refactor_options.set_move_or_no_move) {
-                    goto SPAGHETTI_CODE_VELOCIRAPTOR;
+                if(std::strcmp(arguments[0], "move") == 0) {
+                    refactor_options.mode = RefactorMode::REFACTOR_MODE_MOVE;
                 }
-                refactor_options.set_move_or_no_move = true;
+                else if(std::strcmp(arguments[0], "no-move") == 0) {
+                    refactor_options.mode = RefactorMode::REFACTOR_MODE_NO_MOVE;
+                }
+                else if(std::strcmp(arguments[0], "copy") == 0) {
+                    refactor_options.mode = RefactorMode::REFACTOR_MODE_COPY;
+                }
+                else {
+                    eprintf_error("Unknown mode %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 return;
             case 'r':
                 refactor_options.recursive = { arguments[0], arguments[1] };
@@ -137,11 +143,6 @@ int main(int argc, char * const *argv) {
                 refactor_options.single_tag = arguments[0];
                 return;
         }
-
-        // For when you fuck up and need to get taught a lesson by a velociraptor programmer that is eating spaghetti
-        SPAGHETTI_CODE_VELOCIRAPTOR:
-            eprintf_error("Error: -D, -M, or -N can only be set once.");
-            std::exit(EXIT_FAILURE);
     });
 
     auto &replacements = refactor_options.replacements;
@@ -156,16 +157,18 @@ int main(int argc, char * const *argv) {
         eprintf_error("Error: --recursive and --class cannot be used at the same time");
         return EXIT_FAILURE;
     }
-
-    if(refactor_options.no_move && refactor_options.recursive) {
-        eprintf_error("Error: --no-move and --recursive cannot be used at the same time");
+    
+    if(!refactor_options.mode.has_value()) {
+        eprintf_error("Error: No mode specified. Use -h for more information.");
         return EXIT_FAILURE;
     }
 
-    if(!refactor_options.set_move_or_no_move) {
-        eprintf_error("Error: Either --no-move or --move need must be set");
+    if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_NO_MOVE && refactor_options.recursive) {
+        eprintf_error("Error: -M no-move and --recursive cannot be used at the same time");
         return EXIT_FAILURE;
     }
+    
+    auto move_or_copy_file = (*refactor_options.mode == RefactorMode::REFACTOR_MODE_MOVE || *refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY);
 
     if(refactor_options.tags.size() == 0) {
         refactor_options.tags.emplace_back("tags");
@@ -190,10 +193,10 @@ int main(int argc, char * const *argv) {
     }
     
     // Make sure we aren't changing tag classes if move
-    if(!refactor_options.no_move) {
+    if(move_or_copy_file) {
         for(auto &t : refactor_options.replacements) {
             if(t.first.class_int != t.second.class_int) {
-                eprintf_error("Error: Tag classes cannot be changed with --move");
+                eprintf_error("Error: Tag classes cannot be changed with -M move or -M copy");
                 return EXIT_FAILURE;
             }
         }
@@ -271,7 +274,7 @@ int main(int argc, char * const *argv) {
         }
     }
     else {
-        if(!refactor_options.no_move) {
+        if(move_or_copy_file) {
             for(auto &i : replacements) {
                 bool added = false;
                 auto joined = i.first.join();
@@ -291,7 +294,7 @@ int main(int argc, char * const *argv) {
         }
 
         // If we're moving tags, we can't change tag classes
-        if(!refactor_options.no_move && !refactor_options.dry_run) {
+        if(move_or_copy_file && !refactor_options.dry_run) {
             for(auto &i : replacements) {
                 if(i.first.class_int != i.second.class_int) {
                     eprintf_error("Error: Tag class cannot be changed if moving tags.");
@@ -324,7 +327,7 @@ int main(int argc, char * const *argv) {
     oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
 
     // Move everything
-    if(!refactor_options.dry_run && !refactor_options.no_move) {
+    if(!refactor_options.dry_run && move_or_copy_file) {
         auto replacement_count = replacements.size();
         bool deleted_error_shown = false;
         for(std::size_t i = 0; i < replacement_count; i++) {
@@ -342,7 +345,16 @@ int main(int argc, char * const *argv) {
             // Rename, copying as a last resort
             bool renamed = false;
             try {
-                std::filesystem::rename(file->full_path, new_path);
+                switch(*refactor_options.mode) {
+                    case RefactorMode::REFACTOR_MODE_MOVE:
+                        std::filesystem::rename(file->full_path, new_path);
+                        break;
+                    case RefactorMode::REFACTOR_MODE_COPY:
+                        std::filesystem::copy(file->full_path, new_path);
+                        break;
+                    default:
+                        std::terminate();
+                }
                 renamed = true;
             }
             catch(std::exception &e) {
