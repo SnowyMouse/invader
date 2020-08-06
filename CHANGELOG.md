@@ -9,6 +9,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added an option to copy a virtual path without an extension
 - invader-edit-qt: Added an option to copy a virtual path for a directory
 - invader-refactor: Added `-M copy` which copies files
+- invader-refactor: Added `--internal` which, when used with `-M copy`, will not
+  change references external to the tags being refactored (e.g. refactoring
+  `weapons/assault rifle` to `weapons/a salt rifle` with `--internal` will not
+  affect any tags *outside* of the new `weapons/a salt rifle` directory)
 
 ### Changed
 - invader-bludgeon: Adjusted the threshold for nonnormal-vectors to trip. This

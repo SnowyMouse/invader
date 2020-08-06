@@ -556,6 +556,9 @@ Options:
                                caught.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
+  -I --internal                Do not modify references except for tags
+                               internal to the copied tags. This can only be
+                               used with -M copy
   -M --mode <mode>             Specify what to do with the file if it exists.
                                Can be: copy, move, no-move
   -r --recursive <f> <t>       Recursively move all tags in a directory. This
