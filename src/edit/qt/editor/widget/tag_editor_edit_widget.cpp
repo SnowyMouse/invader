@@ -183,7 +183,6 @@ namespace Invader::EditQt {
                 layout->addWidget(auxiliary_widget);
 
                 auxiliary_checkbox = new QCheckBox("Preview alpha");
-                auxiliary_checkbox->setCheckState(Qt::Checked);
                 layout->addWidget(auxiliary_checkbox);
             };
 
@@ -222,7 +221,6 @@ namespace Invader::EditQt {
                     add_single_textbox(1, layout, "g:");
                     add_single_textbox(1, layout, "b:");
                     make_color_widget();
-                    auxiliary_checkbox->setCheckState(Qt::Unchecked);
                     break;
                 case Parser::ParserStructValue::VALUE_TYPE_POINT2DINT:
                     add_single_textbox(2, layout, "x:");

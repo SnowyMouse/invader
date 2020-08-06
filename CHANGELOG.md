@@ -28,6 +28,8 @@ This is used for recording Invader's changes. This changelog is based on
   field will now change the class; this also applies to pasting in paths
 - invader-edit-qt: A number of unused or invalid flags and enumerators have been
   hidden
+- invader-edit-qt: Alphas for colors are no longer previewed by default for
+  anything
 - invader-string: If the `###END-STRING###` line is missing, Invader will error.
 - invader-string: The format is now automatically determined by checking if the
   tag exists.
