@@ -72,6 +72,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
+    options.emplace_back("internal", 'I', 0, "Do not modify references except for tags internal to the copied tags. This can only be used with -M copy");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -81,6 +82,7 @@ int main(int argc, char * const *argv) {
         bool dry_run = false;
         std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;
+        bool internal = false;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
         std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> class_replacements;
@@ -142,6 +144,9 @@ int main(int argc, char * const *argv) {
             case 's':
                 refactor_options.single_tag = arguments[0];
                 return;
+            case 'I':
+                refactor_options.internal = true;
+                return;
         }
     });
 
@@ -165,6 +170,11 @@ int main(int argc, char * const *argv) {
 
     if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_NO_MOVE && refactor_options.recursive) {
         eprintf_error("Error: -M no-move and --recursive cannot be used at the same time");
+        return EXIT_FAILURE;
+    }
+    
+    if(refactor_options.internal && *refactor_options.mode != RefactorMode::REFACTOR_MODE_COPY) {
+        eprintf_error("Error: --internal can only be used with -M copy");
         return EXIT_FAILURE;
     }
     
@@ -309,6 +319,8 @@ int main(int argc, char * const *argv) {
     auto perform_move = [&refactor_options, &move_or_copy_file, &replacements, &replacements_files, &already_moved]() {
         // Move/copy everything
         if(!already_moved && !refactor_options.dry_run && move_or_copy_file) {
+            already_moved = true; // Don't allow again
+            
             auto replacement_count = replacements.size();
             bool deleted_error_shown = false;
             for(std::size_t i = 0; i < replacement_count; i++) {
@@ -377,7 +389,6 @@ int main(int argc, char * const *argv) {
                 eprintf_error("Error: Failed to delete some empty directories");
             }
         }
-        already_moved = true;
     };
     
     // Before we do our thing, perform the move if we need to copy
@@ -397,11 +408,25 @@ int main(int argc, char * const *argv) {
         bool skip = false;
         
         // If copying and we aren't performing a dry run, don't modify the original tags
-        if(!refactor_options.dry_run && *refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY) {
-            for(auto &i : replacements) {
-                if(i.first == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
-                    skip = true;
-                    break;
+        if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY) {
+            // If internal is done, only modify the new tags (or original if dry run)
+            if(refactor_options.internal) {
+                skip = true;
+                for(auto &i : replacements) {
+                    if((refactor_options.dry_run ? i.first : i.second) == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                        skip = false;
+                        break;
+                    }
+                }
+            }
+            
+            // If we aren't performing a dry run, do not modify the original tags
+            if(!skip && !refactor_options.dry_run) {
+                for(auto &i : replacements) {
+                    if(i.first == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                        skip = true;
+                        break;
+                    }
                 }
             }
         }
