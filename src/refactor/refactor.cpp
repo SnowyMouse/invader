@@ -303,6 +303,90 @@ int main(int argc, char * const *argv) {
             }
         }
     }
+    
+    bool already_moved = false;
+    
+    auto perform_move = [&refactor_options, &move_or_copy_file, &replacements, &replacements_files, &already_moved]() {
+        // Move/copy everything
+        if(!already_moved && !refactor_options.dry_run && move_or_copy_file) {
+            auto replacement_count = replacements.size();
+            bool deleted_error_shown = false;
+            for(std::size_t i = 0; i < replacement_count; i++) {
+                auto *file = replacements_files[i];
+                auto &replacement = replacements[i];
+
+                auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
+
+                // Create directories. If this fails, it probably matters, but it's not critical in and of itself
+                try {
+                    std::filesystem::create_directories(new_path.parent_path());
+                }
+                catch(std::exception &) {}
+
+                // Rename, copying as a last resort
+                bool renamed = false;
+                try {
+                    switch(*refactor_options.mode) {
+                        case RefactorMode::REFACTOR_MODE_MOVE:
+                            std::filesystem::rename(file->full_path, new_path);
+                            break;
+                        case RefactorMode::REFACTOR_MODE_COPY:
+                            std::filesystem::copy(file->full_path, new_path);
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                    renamed = true;
+                }
+                catch(std::exception &e) {
+                    try {
+                        std::filesystem::copy(file->full_path, new_path);
+                        eprintf_error("Error: Failed to move %s to %s, thus it was copied instead: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
+                    }
+                    catch(std::exception &e) {
+                        eprintf_error("Error: Failed to move or copy %s to %s: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
+                    }
+                }
+
+                // Lastly, delete empty directories if possible, obviously doing that only if renamed
+                if(renamed) {
+                    auto delete_directory_if_empty = [](std::filesystem::path directory, auto &delete_directory_if_empty, int depth) -> bool {
+                        if(++depth == 256) {
+                            return false;
+                        }
+                        for(auto &i : std::filesystem::directory_iterator(directory)) {
+                            if(!i.is_directory() || !delete_directory_if_empty(i.path(), delete_directory_if_empty, depth)) {
+                                return false;
+                            }
+                        }
+                        std::filesystem::remove_all(directory);
+                        return true;
+                    };
+                    try {
+                        auto parent = file->full_path.parent_path();
+                        while(delete_directory_if_empty(parent, delete_directory_if_empty, 0)) {
+                            parent = parent.parent_path();
+                        }
+                    }
+                    catch(std::exception &) {
+                        deleted_error_shown = true;
+                    }
+                }
+            }
+            if(deleted_error_shown) {
+                eprintf_error("Error: Failed to delete some empty directories");
+            }
+        }
+        already_moved = true;
+    };
+    
+    // Before we do our thing, perform the move if we need to copy
+    if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY) {
+        perform_move();
+        
+        // Refresh our directory to account for copies
+        all_tags = load_virtual_tag_folder(refactor_options.tags);
+    }
 
     // Go through all the tags and see what needs edited
     std::size_t total_tags = 0;
@@ -310,7 +394,19 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile *> tags_to_do;
 
     for(auto &tag : *tag_to_modify) {
-        if(refactor_tags(tag.full_path.string().c_str(), replacements, true, refactor_options.dry_run)) {
+        bool skip = false;
+        
+        // If copying and we aren't performing a dry run, don't modify the original tags
+        if(!refactor_options.dry_run && *refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY) {
+            for(auto &i : replacements) {
+                if(i.first == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                    skip = true;
+                    break;
+                }
+            }
+        }
+        
+        if(!skip && refactor_tags(tag.full_path.string().c_str(), replacements, true, refactor_options.dry_run)) {
             tags_to_do.emplace_back(&tag);
         }
     }
@@ -326,74 +422,6 @@ int main(int argc, char * const *argv) {
 
     oprintf("Replaced %zu reference%s in %zu tag%s\n", total_replaced, total_replaced == 1 ? "" : "s", total_tags, total_tags == 1 ? "" : "s");
 
-    // Move everything
-    if(!refactor_options.dry_run && move_or_copy_file) {
-        auto replacement_count = replacements.size();
-        bool deleted_error_shown = false;
-        for(std::size_t i = 0; i < replacement_count; i++) {
-            auto *file = replacements_files[i];
-            auto &replacement = replacements[i];
-
-            auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
-
-            // Create directories. If this fails, it probably matters, but it's not critical in and of itself
-            try {
-                std::filesystem::create_directories(new_path.parent_path());
-            }
-            catch(std::exception &) {}
-
-            // Rename, copying as a last resort
-            bool renamed = false;
-            try {
-                switch(*refactor_options.mode) {
-                    case RefactorMode::REFACTOR_MODE_MOVE:
-                        std::filesystem::rename(file->full_path, new_path);
-                        break;
-                    case RefactorMode::REFACTOR_MODE_COPY:
-                        std::filesystem::copy(file->full_path, new_path);
-                        break;
-                    default:
-                        std::terminate();
-                }
-                renamed = true;
-            }
-            catch(std::exception &e) {
-                try {
-                    std::filesystem::copy(file->full_path, new_path);
-                    eprintf_error("Error: Failed to move %s to %s, thus it was copied instead: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
-                }
-                catch(std::exception &e) {
-                    eprintf_error("Error: Failed to move or copy %s to %s: %s\n", file->full_path.string().c_str(), new_path.string().c_str(), e.what());
-                }
-            }
-
-            // Lastly, delete empty directories if possible, obviously doing that only if renamed
-            if(renamed) {
-                auto delete_directory_if_empty = [](std::filesystem::path directory, auto &delete_directory_if_empty, int depth) -> bool {
-                    if(++depth == 256) {
-                        return false;
-                    }
-                    for(auto &i : std::filesystem::directory_iterator(directory)) {
-                        if(!i.is_directory() || !delete_directory_if_empty(i.path(), delete_directory_if_empty, depth)) {
-                            return false;
-                        }
-                    }
-                    std::filesystem::remove_all(directory);
-                    return true;
-                };
-                try {
-                    auto parent = file->full_path.parent_path();
-                    while(delete_directory_if_empty(parent, delete_directory_if_empty, 0)) {
-                        parent = parent.parent_path();
-                    }
-                }
-                catch(std::exception &) {
-                    deleted_error_shown = true;
-                }
-            }
-        }
-        if(deleted_error_shown) {
-            eprintf_error("Error: Failed to delete some empty directories");
-        }
-    }
+    // Move things if needed
+    perform_move();
 }
