@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added a color picker
 - invader-edit-qt: Added an option to copy a virtual path without an extension
 - invader-edit-qt: Added an option to copy a virtual path for a directory
+- invader-refactor: Added `-M copy` which copies files
 
 ### Changed
 - invader-bludgeon: Adjusted the threshold for nonnormal-vectors to trip. This
@@ -30,6 +31,7 @@ This is used for recording Invader's changes. This changelog is based on
   hidden
 - invader-edit-qt: Alphas for colors are no longer previewed by default for
   anything
+- invader-refactor: Moved `--move` and `--no-move` to `-M` which is now `--mode`
 - invader-string: If the `###END-STRING###` line is missing, Invader will error.
 - invader-string: The format is now automatically determined by checking if the
   tag exists.

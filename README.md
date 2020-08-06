@@ -541,7 +541,7 @@ Options:
 This program renames and moves tag references.
 
 ```
-Usage: invader-refactor <-M|-N> [options]
+Usage: invader-refactor <-M <mode>> [options]
 
 Find and replace tag references.
 
@@ -549,22 +549,19 @@ Options:
   -c --class <f> <t>           Refactor all tags of a given class to another
                                class. All tags in the destination class must
                                exist. This can be specified multiple times but
-                               cannot be used with --recursive or --move.
-  -D --dry-run                 Do not actually make any changes.
+                               cannot be used with --recursive or -M move.
+  -D --dry-run                 Do not actually make any changes. This is useful
+                               for checking for errors before committing
+                               anything, although filesystem errors may not be
+                               caught.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
-  -M --move                    Move files that are being refactored. Tag
-                               classes cannot be refactored this way. This can
-                               only be set once and cannot be set with
-                               --no-move or --dry-run.
-  -N --no-move                 Do not move any files; just change the
-                               references in the tags. This can only be set
-                               once and cannot be set with --move, --dry-run,
-                               or --recursive.
+  -M --mode <mode>             Specify what to do with the file if it exists.
+                               Can be: copy, move, no-move
   -r --recursive <f> <t>       Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
                                and new directories, it cannot be used with
-                               --no-move. This can only be specified once per
+                               no-move. This can only be specified once per
                                operation and cannot be used with --tag.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
                                the whole tag directory.
