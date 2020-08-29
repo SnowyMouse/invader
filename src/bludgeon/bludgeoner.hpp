@@ -9,7 +9,7 @@ namespace Invader::Parser {
 
 namespace Invader::Bludgeoner {
     bool bullshit_enums(Parser::ParserStruct *s, bool fix);
-    bool refinery_model_markers(Parser::ParserStruct *s, bool fix);
+    bool invalid_model_markers(Parser::ParserStruct *s, bool fix);
     bool sound_buffer(Parser::ParserStruct *s, bool fix);
     bool fucked_vertices(Parser::ParserStruct *s, bool fix);
     bool bullshit_references(Parser::ParserStruct *s, bool fix);
@@ -17,6 +17,7 @@ namespace Invader::Bludgeoner {
     bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix);
     bool fucked_indices_fix(Parser::ParserStruct *s, bool fix);
     bool fucked_normals(Parser::ParserStruct *s, bool fix);
+    bool broken_strings(Parser::ParserStruct *s, bool fix);
 }
 
 #endif

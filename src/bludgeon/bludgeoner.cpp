@@ -3,6 +3,7 @@
 #include <invader/tag/parser/compile/model.hpp>
 #include <invader/tag/parser/compile/scenario.hpp>
 #include <invader/tag/parser/compile/scenario_structure_bsp.hpp>
+#include <invader/tag/parser/compile/string_list.hpp>
 #include <invader/sound/sound_reader.hpp>
 
 namespace Invader::Bludgeoner {
@@ -47,7 +48,7 @@ namespace Invader::Bludgeoner {
         return fucked_bsp_vertices(dynamic_cast<Parser::ScenarioStructureBSP *>(s), fix) || fucked_model_vertices(dynamic_cast<Parser::GBXModel *>(s), fix) || fucked_model_vertices(dynamic_cast<Parser::Model *>(s), fix);
     }
 
-    bool refinery_model_markers(Parser::ParserStruct *s, bool fix) {
+    bool invalid_model_markers(Parser::ParserStruct *s, bool fix) {
         auto attempt_fix = [&fix](auto *model) -> bool {
             if(!model) {
                 return false;
@@ -149,5 +150,16 @@ namespace Invader::Bludgeoner {
     
     bool fucked_indices_fix(Parser::ParserStruct *s, bool fix) {
         return s->check_for_invalid_indices(fix);
+    }
+    
+    template <typename T> static bool broken_strings(T *s, bool fix) {
+        if(s) {
+            return fix_broken_strings(*s, fix);
+        }
+        return false;
+    }
+    
+    bool broken_strings(Parser::ParserStruct *s, bool fix) {
+        return broken_strings(dynamic_cast<Parser::StringList *>(s), fix) || broken_strings(dynamic_cast<Parser::UnicodeStringList *>(s), fix);
     }
 }

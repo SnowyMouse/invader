@@ -31,8 +31,8 @@ enum WaysToFuckUpTheTag : std::uint64_t {
         allowing 16-bit PCM, but this was fixed in mods, and this is undefined behavior) */
     BULLSHIT_SOUND_FORMAT               = 1ull << 3,
 
-    /** Unused again (sad Vulpix noises) ;-; */
-    // UNUSED                           = 1ull << 4,
+    /** Fix strings not being null terminated or being the wrong length */
+    BULLSHIT_STRINGS                    = 1ull << 4,
 
     /** Extract scripts (not having this results in undefined behavior when built by tool.exe) */
     WHERE_THE_FUCK_ARE_THE_SCRIPTS      = 1ull << 5,
@@ -48,22 +48,18 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 
     /** Fix normals (broken normals crashes tool.exe and sapien when generating lightmaps) */
     FUCKED_NORMALS                      = 1ull << 9,
-
-    // Stuff that Refinery breaks
-
+    
     /** Fix model markers not being put in the right place (not having this results in undefined behavior when built by
         tool.exe) */
-    FUCKED_MODEL_MARKERS                = 1ull << 61,
+    FUCKED_MODEL_MARKERS                = 1ull << 10,
 
     /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
-    FUCKED_VERTICES                     = 1ull << 62,
+    FUCKED_VERTICES                     = 1ull << 11,
 
-    /** Make sound tags that were truncated by Refinery' "safe mode" bullshit valid again (basically Refinery turns
-        perfectly valid tags into invalid tags BY DEFAULT; this is a longstanding issue that's been ignored - see
-        https://github.com/Sigmmma/refinery/issues/13) */
-    REFINERY_SOUND_PERMUTATIONS         = 1ull << 63,
-
-    /** Attempt to unfuck anything that can be unfucked (you can unscrew a lightbulb; you can't unscrew a Halo tag) */
+    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled) */
+    FUCKED_SOUND_PERMUTATIONS         = 1ull << 12,
+    
+    /** Attempt to unfuck anything that can be unfucked (CAUTION: you can unscrew a lightbulb; you can't unscrew a Halo tag) */
     EVERYTHING                          = ~0ull
 };
 
@@ -76,10 +72,11 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define FUCKED_VERTICES_FIX "missing-vertices"
 #define WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX "missing-script-source"
 #define BULLSHIT_RANGE_FIX "out-of-range"
-#define REFINERY_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
+#define FUCKED_SOUND_PERMUTATIONS_FIX "invalid-sound-permutations"
 #define FUCKED_SOUND_BUFFER_FIX "incorrect-sound-buffer"
 #define FUCKED_INDICES_FIX "invalid-indices"
 #define FUCKED_NORMALS_FIX "nonnormal-vectors"
+#define BULLSHIT_STRINGS_FIX "invalid-strings"
 #define EVERYTHING_FIX "everything"
 
 static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
@@ -113,13 +110,14 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             
             check_fix(bullshit_enums, "invalid enums detected; fix with " BULLSHIT_ENUMS_FIX);
             check_fix(bullshit_references, "invalid reference class detected; fix with " BULLSHIT_REFERENCE_CLASSES_FIX);
-            check_fix(refinery_model_markers, "invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX);
+            check_fix(invalid_model_markers, "invalid model markers detected; fix with " FUCKED_MODEL_MARKERS_FIX);
             check_fix(sound_buffer, "incorrect sound buffer size on one or more permutations; fix with " FUCKED_SOUND_BUFFER_FIX);
             check_fix(fucked_vertices, "missing compressed or uncompressed vertices; fix with " FUCKED_VERTICES_FIX);
             check_fix(bullshit_range_fix, "value(s) are out of range; fix with " BULLSHIT_RANGE_FIX);
             check_fix(where_the_fuck_are_the_scripts, "script source data is missing; fix with " WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             check_fix(fucked_indices_fix, "indices are out of bounds; fix with " FUCKED_INDICES_FIX);
             check_fix(fucked_normals, "problematic nonnormal vectors detected; fix with " FUCKED_NORMALS_FIX);
+            check_fix(broken_strings, "problematic strings detected; fix with " BULLSHIT_STRINGS_FIX);
             
             #undef check_fix
         }
@@ -131,13 +129,14 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
             
             apply_fix(bullshit_enums, BULLSHIT_ENUMS, BULLSHIT_ENUMS_FIX);
             apply_fix(bullshit_references, BULLSHIT_REFERENCE_CLASSES, BULLSHIT_REFERENCE_CLASSES_FIX);
-            apply_fix(refinery_model_markers, FUCKED_MODEL_MARKERS, FUCKED_MODEL_MARKERS_FIX);
+            apply_fix(invalid_model_markers, FUCKED_MODEL_MARKERS, FUCKED_MODEL_MARKERS_FIX);
             apply_fix(bullshit_range_fix, BULLSHIT_RANGE, BULLSHIT_RANGE_FIX);
             apply_fix(sound_buffer, FUCKED_SOUND_BUFFER, FUCKED_SOUND_BUFFER_FIX);
             apply_fix(fucked_vertices, FUCKED_VERTICES, FUCKED_VERTICES_FIX);
             apply_fix(where_the_fuck_are_the_scripts, WHERE_THE_FUCK_ARE_THE_SCRIPTS, WHERE_THE_FUCK_ARE_THE_SCRIPTS_FIX);
             apply_fix(fucked_indices_fix, FUCKED_INDICES, FUCKED_INDICES_FIX);
             apply_fix(fucked_normals, FUCKED_NORMALS, FUCKED_NORMALS_FIX);
+            apply_fix(broken_strings, BULLSHIT_STRINGS, BULLSHIT_STRINGS_FIX);
             
             #undef apply_fix
         }
@@ -228,8 +227,8 @@ int main(int argc, char * const *argv) {
                 else if(std::strcmp(arguments[0], FUCKED_VERTICES_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_VERTICES;
                 }
-                else if(std::strcmp(arguments[0], REFINERY_SOUND_PERMUTATIONS_FIX) == 0) {
-                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::REFINERY_SOUND_PERMUTATIONS;
+                else if(std::strcmp(arguments[0], FUCKED_SOUND_PERMUTATIONS_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::FUCKED_SOUND_PERMUTATIONS;
                 }
                 else if(std::strcmp(arguments[0], FUCKED_SOUND_BUFFER_FIX) == 0) {
                     #ifndef DISABLE_AUDIO
