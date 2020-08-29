@@ -62,9 +62,9 @@ namespace Invader::Parser {
                     std::vector<CHAR> new_vector;
                     new_vector.reserve(size / CHAR_SIZE);
                     
-                    // Basically, add every character that isn't a null terminator
+                    // Basically, add every character up to the null terminator.
                     c = start;
-                    while(c < end) {
+                    while(*c) {
                         new_vector.push_back(*c);
                         c++;
                     }
