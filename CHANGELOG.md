@@ -4,6 +4,7 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-bludgeon: Added `-T invalid-strings`
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
 - invader-edit-qt: Added a color picker
 - invader-edit-qt: Added an option to copy a virtual path without an extension
