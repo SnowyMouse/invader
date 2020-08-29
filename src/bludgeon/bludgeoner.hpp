@@ -8,15 +8,15 @@ namespace Invader::Parser {
 }
 
 namespace Invader::Bludgeoner {
-    bool bullshit_enums(Parser::ParserStruct *s, bool fix);
+    bool broken_enums(Parser::ParserStruct *s, bool fix);
     bool invalid_model_markers(Parser::ParserStruct *s, bool fix);
     bool sound_buffer(Parser::ParserStruct *s, bool fix);
-    bool fucked_vertices(Parser::ParserStruct *s, bool fix);
-    bool bullshit_references(Parser::ParserStruct *s, bool fix);
-    bool bullshit_range_fix(Parser::ParserStruct *s, bool fix);
-    bool where_the_fuck_are_the_scripts(Parser::ParserStruct *s, bool fix);
-    bool fucked_indices_fix(Parser::ParserStruct *s, bool fix);
-    bool fucked_normals(Parser::ParserStruct *s, bool fix);
+    bool broken_vertices(Parser::ParserStruct *s, bool fix);
+    bool broken_references(Parser::ParserStruct *s, bool fix);
+    bool broken_range_fix(Parser::ParserStruct *s, bool fix);
+    bool missing_scripts(Parser::ParserStruct *s, bool fix);
+    bool broken_indices_fix(Parser::ParserStruct *s, bool fix);
+    bool broken_normals(Parser::ParserStruct *s, bool fix);
     bool broken_strings(Parser::ParserStruct *s, bool fix);
 }
 
