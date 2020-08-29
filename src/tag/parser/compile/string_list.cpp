@@ -138,11 +138,35 @@ namespace Invader::Parser {
         bool error_found = false;
         for(std::size_t i = 0; i < string_count; i++) {
             auto &string = list.strings[i];
-            bool error_found_in_this_string = check_string<CHAR>(string, fix);
-            if(!fix && error_found_in_this_string) {
-                return true;
+            StringError error_found_in_this_string;
+            
+            // Fix the string until it's no longer screwed up
+            while((error_found_in_this_string = check_string<CHAR>(string, fix))) {
+                if(!fix && error_found_in_this_string) {
+                    return true;
+                }
+                
+                error_found = error_found || error_found_in_this_string;
+                switch(error_found_in_this_string) {
+                    case STRING_ERROR_OK:
+                        break;
+                    case STRING_ERROR_EMPTY:
+                        oprintf_success_lesser_warn("Found an empty string");
+                        break;
+                    case STRING_ERROR_INVALID_SIZE:
+                        oprintf_success_lesser_warn("Found an invalid string size");
+                        break;
+                    case STRING_ERROR_MISSING_NULL_TERMINATOR:
+                        oprintf_success_lesser_warn("Found a non-null terminated string");
+                        break;
+                    case STRING_ERROR_EXTRA_NULL_TERMINATOR:
+                        oprintf_success_lesser_warn("Found an extraneous null terminator in the string");
+                        break;
+                    case STRING_ERROR_IMPROPER_LINE_ENDINGS:
+                        oprintf_success_lesser_warn("Found a non-CRLF line ending in the string");
+                        break;
+                }
             }
-            error_found = error_found || error_found_in_this_string;
         }
         return error_found;
     }
@@ -160,7 +184,7 @@ namespace Invader::Parser {
         
         switch(check_string<CHAR>(*what, false)) {
             case STRING_ERROR_OK:
-                return;
+                break;
             case STRING_ERROR_EMPTY:
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu is empty", index);
                 break;
