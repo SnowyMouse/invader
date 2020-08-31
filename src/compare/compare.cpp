@@ -425,7 +425,8 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             }
         }
         
-        bool skipped_first_input = false;
+        // Don't skip the first input if we're comparing by same paths
+        bool skipped_first_input = by_path == ByPath::BY_PATH_SAME;
         
         for(auto &i : inputs) {
             if(!skipped_first_input) {
@@ -488,7 +489,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         bool matched = true;
         
         // Just for setting counter/debugging
-        auto BY_PATH_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths](bool did_match, std::size_t i) {
+        auto by_path_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths](bool did_match, std::size_t i) {
             auto *extension = HEK::tag_class_to_extension(tag.class_int);
             auto other = File::halo_path_to_preferred_path(by_path_paths[i]);
             if(did_match) {
@@ -559,7 +560,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 else {
                     for(std::size_t i = 1; i < found_count; i++) {
                         auto mms = meme_up_struct(*structs[i]);
-                        BY_PATH_match(first_meme == mms, i);
+                        by_path_match(first_meme == mms, i);
                     }
                 }
             }
@@ -579,7 +580,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             }
             else {
                 for(std::size_t i = 1; i < found_count; i++) {
-                    BY_PATH_match(first_struct->compare(structs[i].get(), precision, true), i);
+                    by_path_match(first_struct->compare(structs[i].get(), precision, true), i);
                 }
             }
         }
