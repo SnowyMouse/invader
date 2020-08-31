@@ -16,10 +16,10 @@
 
 using namespace Invader;
 
-enum Show {
-    SHOW_MISMATCHED = 0b10,
-    SHOW_MATCHED = 0b01,
-    SHOW_ALL = 0b11
+enum Show : std::uint8_t {
+    SHOW_MISMATCHED = 1 << 0,
+    SHOW_MATCHED = 1 << 1,
+    SHOW_ALL = 0xFF
 };
 
 struct Input {
@@ -40,7 +40,13 @@ template <typename T> static void close_input(T &options) {
     options.top_input = nullptr;
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional);
+enum ByClass {
+    BY_CLASS_NONE = 0,
+    BY_CLASS_ANY = 1,
+    BY_CLASS_DIFFERENT = 2
+};
+
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByClass by_class);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -53,6 +59,7 @@ int main(int argc, const char **argv) {
         bool precision = false;
         bool match_all = false;
         bool functional = false;
+        ByClass by_class = ByClass::BY_CLASS_NONE;
         Show show = Show::SHOW_ALL;
     } compare_options;
 
@@ -65,6 +72,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
+    options.emplace_back("by-class", 'C', 1, "Compare tags against tags of the same class rather than the same path. Using \"different\" ignores tags with the same path and can be useful for finding duplicate tags. Can be: any or different", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
@@ -87,6 +95,18 @@ int main(int argc, const char **argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
+                
+            case 'C':
+                if(std::strcmp(args[0], "any") == 0) {
+                    compare_options.by_class = ByClass::BY_CLASS_ANY;
+                }
+                else if(std::strcmp(args[0], "different") == 0) {
+                    compare_options.by_class = ByClass::BY_CLASS_DIFFERENT;
+                }
+                else {
+                    eprintf_error("Unknown by-class argument %s", args[0]);
+                }
+                break;
                 
             case 'I':
                 close_input(compare_options);
@@ -280,13 +300,15 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_class);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByClass by_class) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
+    
+    #define CAN_COMPARE(path1, path2) ((!by_class && path1 == path2) || (by_class == ByClass::BY_CLASS_DIFFERENT && path1 != path2) || (by_class == ByClass::BY_CLASS_ANY))
     
     // Do this thing
     if(match_all) {
@@ -298,7 +320,10 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             for(std::size_t i = 1; i < input_count; i++) {
                 bool found = false;
                 for(auto &tag2 : inputs[i].tag_paths) {
-                    if(tag2 == tag) {
+                    if(tag2.class_int != tag.class_int) {
+                        continue;
+                    }
+                    if(CAN_COMPARE(tag.path, tag2.path)) {
                         found = true;
                         break;
                     }
@@ -334,7 +359,10 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     
                     // Add it if it's present!
                     for(auto &tag2 : input2.tag_paths) {
-                        if(tag2 == tag) {
+                        if(tag2.class_int != tag.class_int) {
+                            continue;
+                        }
+                        if(CAN_COMPARE(tag.path, tag2.path)) {
                             found = true;
                             tags.push_back(tag);
                             break;
@@ -351,18 +379,26 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     
     // Next, compare each tag
     std::size_t matched_count = 0;
+    std::size_t mismatched_count = 0;
     for(auto &tag : tags) {
         std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
-        for(auto &i : inputs) {
-            // If it's a map, do this
+        std::vector<std::string> by_class_paths;
+        
+        if(by_class) {
+            auto &i = inputs[0];
+            
+            // First get the struct we're comparing with. If it's a map, do this.
             if(i.map.has_value()) {
                 // First, extract it
                 auto tag_count = i.map_data->get_tag_count();
                 for(std::size_t t = 0; t < tag_count; t++) {
                     auto &map_tag = i.map_data->get_tag(t);
-                    if(map_tag.get_tag_class_int() == tag.class_int && map_tag.get_path() == tag.path) {
+                    auto &map_tag_path = map_tag.get_path();
+                    if(map_tag.get_tag_class_int() == tag.class_int && tag.path == map_tag_path) {
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
+                        
+                        by_class_paths.emplace_back(map_tag_path);
                         break;
                     }
                 }
@@ -371,14 +407,67 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             // If it's a tag, do this
             else {
                 for(auto &vd : i.virtual_directory) {
-                    if(vd.tag_class_int == tag.class_int && File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path == tag.path) {
+                    auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
+                    if(vd.tag_class_int == tag.class_int && tag.path == other_path) {
                         // Open it
                         auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
                         
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
                         
+                        by_class_paths.emplace_back(other_path);
                         break;
+                    }
+                }
+            }
+        }
+        
+        bool skipped_first_input = false;
+        
+        for(auto &i : inputs) {
+            if(!skipped_first_input) {
+                skipped_first_input = true;
+                continue;
+            }
+            
+            // If it's a map, do this
+            if(i.map.has_value()) {
+                // First, extract it
+                auto tag_count = i.map_data->get_tag_count();
+                for(std::size_t t = 0; t < tag_count; t++) {
+                    auto &map_tag = i.map_data->get_tag(t);
+                    auto &map_tag_path = map_tag.get_path();
+                    if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(tag.path, map_tag_path)) {
+                        auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
+                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
+                        
+                        if(by_class) {
+                            by_class_paths.emplace_back(map_tag_path);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If it's a tag, do this
+            else {
+                for(auto &vd : i.virtual_directory) {
+                    auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
+                    if(vd.tag_class_int == tag.class_int && CAN_COMPARE(tag.path, other_path)) {
+                        // Open it
+                        auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
+                        
+                        // Parse it
+                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
+                        
+                        if(by_class) {
+                            by_class_paths.emplace_back(other_path);
+                        }
+                        else {
+                            break;
+                        }
                     }
                 }
             }
@@ -386,11 +475,33 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         
         auto found_count = structs.size();
         if(found_count < 2) {
-            std::terminate();
+            continue;
         }
+        
+        #define MATCHED(type) "%s%s.%s", show_all ? type ": " : ""
+        #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
         
         auto &first_struct = structs[0];
         bool matched = true;
+        
+        // Just for setting counter/debugging
+        auto by_class_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_class_paths](bool did_match, std::size_t i) {
+            auto *extension = HEK::tag_class_to_extension(tag.class_int);
+            auto other = File::halo_path_to_preferred_path(by_class_paths[i]);
+            if(did_match) {
+                if(show & Show::SHOW_MATCHED) {
+                    oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                }
+                matched_count++;
+            }
+            else {
+                if(show & Show::SHOW_MISMATCHED) {
+                    oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                }
+                mismatched_count++;
+            }
+        };
+        
         if(functional) {
             try {
                 auto meme_up_struct = [&tag](Parser::ParserStruct &struct_v) -> std::vector<std::uint8_t> {
@@ -431,11 +542,22 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 };
                 
                 auto first_meme = meme_up_struct(*first_struct);
-                for(std::size_t i = 1; i < found_count; i++) {
-                    auto mms = meme_up_struct(*structs[i]);
-                    if(first_meme != mms) {
-                        matched = false;
-                        break;
+                
+                // If by class, we only care if *one* of them matches, but we, of course, check
+                if(by_class) {
+                    for(std::size_t i = 1; i < found_count; i++) {
+                        auto mms = meme_up_struct(*structs[i]);
+                        by_class_match(first_meme == mms, i);
+                    }
+                }
+                // Otherwise, we care if *all* of them match
+                else {
+                    for(std::size_t i = 1; i < found_count; i++) {
+                        auto mms = meme_up_struct(*structs[i]);
+                        if(first_meme != mms) {
+                            matched = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -445,25 +567,42 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             }
         }
         else {
-            for(std::size_t i = 1; i < found_count; i++) {
-                if(!first_struct->compare(structs[i].get(), precision, true)) {
-                    matched = false;
-                    break;
+            if(by_class) {
+                for(std::size_t i = 1; i < found_count; i++) {
+                    by_class_match(first_struct->compare(structs[i].get(), precision, true), i);
+                }
+            }
+            else {
+                for(std::size_t i = 1; i < found_count; i++) {
+                    if(!first_struct->compare(structs[i].get(), precision, true)) {
+                        matched = false;
+                        break;
+                    }
                 }
             }
         }
         
-        if(matched && (show & Show::SHOW_MATCHED)) {
-            oprintf_success("%s%s.%s", show_all ? "Matched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
-            matched_count++;
-        }
-        else if(!matched && (show & Show::SHOW_MISMATCHED)) {
-            oprintf_success_warn("%s%s.%s", show_all ? "Mismatched: " : "", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+        // Don't show "Matched" here if by class since we already showed that
+        if(!by_class) {
+            if(matched && (show & Show::SHOW_MATCHED)) {
+                oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+            }
+            else if(!matched && (show & Show::SHOW_MISMATCHED)) {
+                oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+            }
+            
+            if(matched) {
+                matched_count++;
+            }
+            else {
+                mismatched_count++;
+            }
         }
     }
     
     // Show the total matched if we are showing both
     if(show_all) {
-        oprintf("Matched %zu / %zu tag%s\n", matched_count, tags.size(), tags.size() == 1 ? "" : "s");
+        auto total = matched_count + mismatched_count;
+        oprintf("Matched %zu / %zu tag%s\n", matched_count, total, total == 1 ? "" : "s");
     }
 }
