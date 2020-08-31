@@ -40,13 +40,13 @@ template <typename T> static void close_input(T &options) {
     options.top_input = nullptr;
 }
 
-enum ByClass {
-    BY_CLASS_NONE = 0,
-    BY_CLASS_ANY = 1,
-    BY_CLASS_DIFFERENT = 2
+enum ByPath {
+    BY_PATH_SAME = 0,
+    BY_PATH_ANY = 1,
+    BY_PATH_DIFFERENT = 2
 };
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByClass by_class);
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path);
 
 int main(int argc, const char **argv) {
     using namespace Invader::HEK;
@@ -59,7 +59,7 @@ int main(int argc, const char **argv) {
         bool precision = false;
         bool match_all = false;
         bool functional = false;
-        ByClass by_class = ByClass::BY_CLASS_NONE;
+        ByPath by_path = ByPath::BY_PATH_SAME;
         Show show = Show::SHOW_ALL;
     } compare_options;
 
@@ -72,7 +72,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
-    options.emplace_back("by-class", 'C', 1, "Compare tags against tags of the same class rather than the same path. Using \"any\" ignores paths completely (useful when both inputs are different) while \"different\" only checks tags with different paths (useful when both inputs are the same). Can be: any or different", "<path-type>");
+    options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
@@ -96,15 +96,18 @@ int main(int argc, const char **argv) {
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
-            case 'C':
+            case 'D':
                 if(std::strcmp(args[0], "any") == 0) {
-                    compare_options.by_class = ByClass::BY_CLASS_ANY;
+                    compare_options.by_path = ByPath::BY_PATH_ANY;
                 }
                 else if(std::strcmp(args[0], "different") == 0) {
-                    compare_options.by_class = ByClass::BY_CLASS_DIFFERENT;
+                    compare_options.by_path = ByPath::BY_PATH_DIFFERENT;
+                }
+                else if(std::strcmp(args[0], "same") == 0) {
+                    compare_options.by_path = ByPath::BY_PATH_SAME;
                 }
                 else {
-                    eprintf_error("Unknown by-class argument %s", args[0]);
+                    eprintf_error("Unknown by-path argument %s", args[0]);
                 }
                 break;
                 
@@ -300,15 +303,15 @@ int main(int argc, const char **argv) {
         i.tag_paths.shrink_to_fit();
     }
     
-    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_class);
+    regular_comparison(compare_options.inputs, compare_options.precision, compare_options.show, compare_options.match_all, compare_options.functional, compare_options.by_path);
 }
 
-static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByClass by_class) {
+static void regular_comparison(const std::vector<Input> &inputs, bool precision, Show show, bool match_all, bool functional, ByPath by_path) {
     // Find all tags we have in common first
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
     
-    #define CAN_COMPARE(path1, path2) ((!by_class && path1 == path2) || (by_class == ByClass::BY_CLASS_DIFFERENT && path1 != path2) || (by_class == ByClass::BY_CLASS_ANY))
+    #define CAN_COMPARE(path1, path2) ((by_path == ByPath::BY_PATH_SAME && path1 == path2) || (by_path == ByPath::BY_PATH_DIFFERENT && path1 != path2) || (by_path == ByPath::BY_PATH_ANY))
     
     // Do this thing
     if(match_all) {
@@ -382,9 +385,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     std::size_t mismatched_count = 0;
     for(auto &tag : tags) {
         std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
-        std::vector<std::string> by_class_paths;
+        std::vector<std::string> by_path_paths;
         
-        if(by_class) {
+        if(by_path != ByPath::BY_PATH_SAME) {
             auto &i = inputs[0];
             
             // First get the struct we're comparing with. If it's a map, do this.
@@ -398,7 +401,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         
-                        by_class_paths.emplace_back(map_tag_path);
+                        by_path_paths.emplace_back(map_tag_path);
                         break;
                     }
                 }
@@ -415,7 +418,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
                         
-                        by_class_paths.emplace_back(other_path);
+                        by_path_paths.emplace_back(other_path);
                         break;
                     }
                 }
@@ -441,8 +444,8 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         
-                        if(by_class) {
-                            by_class_paths.emplace_back(map_tag_path);
+                        if(by_path != ByPath::BY_PATH_SAME) {
+                            by_path_paths.emplace_back(map_tag_path);
                         }
                         else {
                             break;
@@ -462,8 +465,8 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
                         
-                        if(by_class) {
-                            by_class_paths.emplace_back(other_path);
+                        if(by_path != ByPath::BY_PATH_SAME) {
+                            by_path_paths.emplace_back(other_path);
                         }
                         else {
                             break;
@@ -485,9 +488,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         bool matched = true;
         
         // Just for setting counter/debugging
-        auto by_class_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_class_paths](bool did_match, std::size_t i) {
+        auto BY_PATH_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths](bool did_match, std::size_t i) {
             auto *extension = HEK::tag_class_to_extension(tag.class_int);
-            auto other = File::halo_path_to_preferred_path(by_class_paths[i]);
+            auto other = File::halo_path_to_preferred_path(by_path_paths[i]);
             if(did_match) {
                 if(show & Show::SHOW_MATCHED) {
                     oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
@@ -543,21 +546,20 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 
                 auto first_meme = meme_up_struct(*first_struct);
                 
-                // If by class, we only care if *one* of them matches, but we, of course, check
-                if(by_class) {
-                    for(std::size_t i = 1; i < found_count; i++) {
-                        auto mms = meme_up_struct(*structs[i]);
-                        by_class_match(first_meme == mms, i);
-                    }
-                }
-                // Otherwise, we care if *all* of them match
-                else {
+                // If the paths are the same, we compare like this
+                if(by_path == ByPath::BY_PATH_SAME) {
                     for(std::size_t i = 1; i < found_count; i++) {
                         auto mms = meme_up_struct(*structs[i]);
                         if(first_meme != mms) {
                             matched = false;
                             break;
                         }
+                    }
+                }
+                else {
+                    for(std::size_t i = 1; i < found_count; i++) {
+                        auto mms = meme_up_struct(*structs[i]);
+                        BY_PATH_match(first_meme == mms, i);
                     }
                 }
             }
@@ -567,12 +569,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             }
         }
         else {
-            if(by_class) {
-                for(std::size_t i = 1; i < found_count; i++) {
-                    by_class_match(first_struct->compare(structs[i].get(), precision, true), i);
-                }
-            }
-            else {
+            if(by_path == ByPath::BY_PATH_SAME) {
                 for(std::size_t i = 1; i < found_count; i++) {
                     if(!first_struct->compare(structs[i].get(), precision, true)) {
                         matched = false;
@@ -580,10 +577,15 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     }
                 }
             }
+            else {
+                for(std::size_t i = 1; i < found_count; i++) {
+                    BY_PATH_match(first_struct->compare(structs[i].get(), precision, true), i);
+                }
+            }
         }
         
         // Don't show "Matched" here if by class since we already showed that
-        if(!by_class) {
+        if(by_path == ByPath::BY_PATH_SAME) {
             if(matched && (show & Show::SHOW_MATCHED)) {
                 oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
             }

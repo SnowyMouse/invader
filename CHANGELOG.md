@@ -5,13 +5,11 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Added
 - invader-bludgeon: Added `-T invalid-strings`
-- invader-compare: Added `--by-class` or `-C` which compares by tag class alone
-  rather than tag class and tag path. This can be useful for finding duplicate
-  tags regardless of paths. You can use `-C any` to completely ignore tag paths
-  or `-C different` to only match against tags with differing paths. For
-  example: `invader-compare -It tags -It tags -C different -s mismatch` will
-  show all tags in the tags directory that are duplicates of other tags in the
-  same tags directory.
+- invader-compare: Added `--by-path` or `-B` which sets how paths are compared.
+  This can be useful for finding duplicate tags regardless of paths. You can use
+  `-B any` to match any tags regardless of tag path (useful if inputs are 
+  different) or `-B different` to only match against tags with differing paths
+  (useful if both inputs are the same)
 - invader-edit-qt: Added a Goto menu to go to top level structs quickly
 - invader-edit-qt: Added a color picker
 - invader-edit-qt: Added an option to copy a virtual path without an extension
