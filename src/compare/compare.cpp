@@ -96,7 +96,7 @@ int main(int argc, const char **argv) {
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
                 
-            case 'D':
+            case 'B':
                 if(std::strcmp(args[0], "any") == 0) {
                     compare_options.by_path = ByPath::BY_PATH_ANY;
                 }
@@ -108,6 +108,7 @@ int main(int argc, const char **argv) {
                 }
                 else {
                     eprintf_error("Unknown by-path argument %s", args[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
                 
