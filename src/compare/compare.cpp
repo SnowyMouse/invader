@@ -312,7 +312,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     auto input_count = inputs.size();
     std::vector<File::TagFilePath> tags;
     
-    #define CAN_COMPARE(path1, path2) ((by_path == ByPath::BY_PATH_SAME && path1 == path2) || (by_path == ByPath::BY_PATH_DIFFERENT && path1 != path2) || (by_path == ByPath::BY_PATH_ANY))
+    #define CAN_COMPARE(by_path, path1, path2) ((by_path == ByPath::BY_PATH_SAME && path1 == path2) || (by_path == ByPath::BY_PATH_DIFFERENT && path1 != path2) || (by_path == ByPath::BY_PATH_ANY))
     
     // Do this thing
     if(match_all) {
@@ -327,7 +327,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     if(tag2.class_int != tag.class_int) {
                         continue;
                     }
-                    if(CAN_COMPARE(tag.path, tag2.path)) {
+                    if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
                         found = true;
                         break;
                     }
@@ -366,7 +366,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         if(tag2.class_int != tag.class_int) {
                             continue;
                         }
-                        if(CAN_COMPARE(tag.path, tag2.path)) {
+                        if(CAN_COMPARE(by_path, tag.path, tag2.path)) {
                             found = true;
                             tags.push_back(tag);
                             break;
@@ -388,52 +388,20 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
         std::vector<std::string> by_path_paths;
         
-        if(by_path != ByPath::BY_PATH_SAME) {
-            auto &i = inputs[0];
-            
-            // First get the struct we're comparing with. If it's a map, do this.
-            if(i.map.has_value()) {
-                // First, extract it
-                auto tag_count = i.map_data->get_tag_count();
-                for(std::size_t t = 0; t < tag_count; t++) {
-                    auto &map_tag = i.map_data->get_tag(t);
-                    auto &map_tag_path = map_tag.get_path();
-                    if(map_tag.get_tag_class_int() == tag.class_int && tag.path == map_tag_path) {
-                        auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
-                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
-                        
-                        by_path_paths.emplace_back(map_tag_path);
-                        break;
-                    }
-                }
-            }
-            
-            // If it's a tag, do this
-            else {
-                for(auto &vd : i.virtual_directory) {
-                    auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
-                    if(vd.tag_class_int == tag.class_int && tag.path == other_path) {
-                        // Open it
-                        auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
-                        
-                        // Parse it
-                        structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
-                        
-                        by_path_paths.emplace_back(other_path);
-                        break;
-                    }
-                }
-            }
-        }
+        bool first_input = true;
+        bool only_finding_same_tag = true;
         
-        // Don't skip the first input if we're comparing by same paths
-        bool skipped_first_input = by_path == ByPath::BY_PATH_SAME;
-        
+        // Go through each input
         for(auto &i : inputs) {
-            if(!skipped_first_input) {
-                skipped_first_input = true;
-                continue;
+            // On the first input, we always break when we find the tag since we're only looking for tags with the same path to match the tag with the outer loop
+            // On subsequent inputs, we only break if we're *always* looking for tags with the same path.
+            auto by_path_copy = by_path;
+            if(first_input) {
+                first_input = false; // set to false
+                by_path_copy = ByPath::BY_PATH_SAME;
             }
+            
+            only_finding_same_tag = by_path_copy == ByPath::BY_PATH_SAME;
             
             // If it's a map, do this
             if(i.map.has_value()) {
@@ -442,14 +410,14 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 for(std::size_t t = 0; t < tag_count; t++) {
                     auto &map_tag = i.map_data->get_tag(t);
                     auto &map_tag_path = map_tag.get_path();
-                    if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(tag.path, map_tag_path)) {
+                    if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
                         
                         if(by_path != ByPath::BY_PATH_SAME) {
                             by_path_paths.emplace_back(map_tag_path);
                         }
-                        else {
+                        if(only_finding_same_tag) {
                             break;
                         }
                     }
@@ -460,7 +428,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
             else {
                 for(auto &vd : i.virtual_directory) {
                     auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
-                    if(vd.tag_class_int == tag.class_int && CAN_COMPARE(tag.path, other_path)) {
+                    if(vd.tag_class_int == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
                         // Open it
                         auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
                         
@@ -470,7 +438,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         if(by_path != ByPath::BY_PATH_SAME) {
                             by_path_paths.emplace_back(other_path);
                         }
-                        else {
+                        if(only_finding_same_tag) {
                             break;
                         }
                     }
@@ -487,21 +455,30 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
         
         auto &first_struct = structs[0];
-        bool matched = true;
         
         // Just for setting counter/debugging
-        auto by_path_match = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths](bool did_match, std::size_t i) {
+        auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths, &by_path](bool did_match, std::size_t i) {
             auto *extension = HEK::tag_class_to_extension(tag.class_int);
             auto other = File::halo_path_to_preferred_path(by_path_paths[i]);
             if(did_match) {
                 if(show & Show::SHOW_MATCHED) {
-                    oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                    if(by_path == ByPath::BY_PATH_SAME) {
+                        oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+                    }
+                    else {
+                        oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                    }
                 }
                 matched_count++;
             }
             else {
                 if(show & Show::SHOW_MISMATCHED) {
-                    oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                    if(by_path == ByPath::BY_PATH_SAME) {
+                        oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
+                    }
+                    else {
+                        oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                    }
                 }
                 mismatched_count++;
             }
@@ -547,59 +524,18 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                 };
                 
                 auto first_meme = meme_up_struct(*first_struct);
-                
-                // If the paths are the same, we compare like this
-                if(by_path == ByPath::BY_PATH_SAME) {
-                    for(std::size_t i = 1; i < found_count; i++) {
-                        auto mms = meme_up_struct(*structs[i]);
-                        if(first_meme != mms) {
-                            matched = false;
-                            break;
-                        }
-                    }
-                }
-                else {
-                    for(std::size_t i = 1; i < found_count; i++) {
-                        auto mms = meme_up_struct(*structs[i]);
-                        by_path_match(first_meme == mms, i);
-                    }
+                for(std::size_t i = 1; i < found_count; i++) {
+                    auto mms = meme_up_struct(*structs[i]);
+                    match_log(first_meme == mms, i);
                 }
             }
             catch(std::exception &e) {
                 eprintf_error("Cannot functional compare %s.%s due to an error: %s", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int), e.what());
-                matched = false;
             }
         }
         else {
-            if(by_path == ByPath::BY_PATH_SAME) {
-                for(std::size_t i = 1; i < found_count; i++) {
-                    if(!first_struct->compare(structs[i].get(), precision, true)) {
-                        matched = false;
-                        break;
-                    }
-                }
-            }
-            else {
-                for(std::size_t i = 1; i < found_count; i++) {
-                    by_path_match(first_struct->compare(structs[i].get(), precision, true), i);
-                }
-            }
-        }
-        
-        // Don't show "Matched" here if by class since we already showed that
-        if(by_path == ByPath::BY_PATH_SAME) {
-            if(matched && (show & Show::SHOW_MATCHED)) {
-                oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
-            }
-            else if(!matched && (show & Show::SHOW_MISMATCHED)) {
-                oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
-            }
-            
-            if(matched) {
-                matched_count++;
-            }
-            else {
-                mismatched_count++;
+            for(std::size_t i = 1; i < found_count; i++) {
+                match_log(first_struct->compare(structs[i].get(), precision, true), i);
             }
         }
     }
