@@ -386,7 +386,8 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
     std::size_t mismatched_count = 0;
     for(auto &tag : tags) {
         std::vector<std::unique_ptr<Parser::ParserStruct>> structs;
-        std::vector<std::string> by_path_paths;
+        std::vector<std::string> struct_paths;
+        std::vector<const Input *> struct_inputs;
         
         bool first_input = true;
         bool only_finding_same_tag = true;
@@ -413,10 +414,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     if(map_tag.get_tag_class_int() == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, map_tag_path)) {
                         auto extracted_data = Invader::ExtractionWorkload::extract_single_tag(i.map_data->get_tag(t));
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(extracted_data.data(), extracted_data.size(), true));
-                        
-                        if(by_path != ByPath::BY_PATH_SAME) {
-                            by_path_paths.emplace_back(map_tag_path);
-                        }
+                        struct_paths.emplace_back(map_tag_path);
+                        struct_inputs.emplace_back(&i);
+                            
                         if(only_finding_same_tag) {
                             break;
                         }
@@ -434,10 +434,9 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                         
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));
+                        struct_paths.emplace_back(other_path);
+                        struct_inputs.emplace_back(&i);
                         
-                        if(by_path != ByPath::BY_PATH_SAME) {
-                            by_path_paths.emplace_back(other_path);
-                        }
                         if(only_finding_same_tag) {
                             break;
                         }
@@ -453,20 +452,38 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
         
         #define MATCHED(type) "%s%s.%s", show_all ? type ": " : ""
         #define MATCHED_TO(type) "%s%s.%s, %s.%s", show_all ? type ": " : ""
+        #define MATCHED_TO_DIFFERENT_INPUT(type) "%s%s.%s, %s.%s (%zu)", show_all ? type ": " : ""
         
         auto &first_struct = structs[0];
         
         // Just for setting counter/debugging
-        auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &by_path_paths, &by_path](bool did_match, std::size_t i) {
+        auto match_log = [&tag, &matched_count, &show, &show_all, &mismatched_count, &struct_paths, &by_path, &struct_inputs, &inputs](bool did_match, std::size_t i) {
             auto *extension = HEK::tag_class_to_extension(tag.class_int);
-            auto other = File::halo_path_to_preferred_path(by_path_paths[i]);
+            auto other_path = File::halo_path_to_preferred_path(struct_paths[i]);
+            bool show_different_input = inputs.size() > 2; // only need to show differing inputs if we have more than two inputs
+            std::size_t input_of_other = 1;
+            
+            // If we're using multiple inputs, get the input of the other thing
+            if(show_different_input) {
+                auto *other_input = struct_inputs[i];
+                for(auto &i : inputs) {
+                    if(&i == other_input) {
+                        input_of_other = &i - inputs.data();
+                        break;
+                    }
+                }
+            }
+            
             if(did_match) {
                 if(show & Show::SHOW_MATCHED) {
                     if(by_path == ByPath::BY_PATH_SAME) {
                         oprintf_success(MATCHED("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
                     }
+                    else if(show_different_input) {
+                        oprintf_success(MATCHED_TO_DIFFERENT_INPUT("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
+                    }
                     else {
-                        oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                        oprintf_success(MATCHED_TO("Matched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
                     }
                 }
                 matched_count++;
@@ -476,8 +493,11 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     if(by_path == ByPath::BY_PATH_SAME) {
                         oprintf_success_warn(MATCHED("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.class_int));
                     }
+                    else if(show_different_input) {
+                        oprintf_success_warn(MATCHED_TO_DIFFERENT_INPUT("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension, input_of_other);
+                    }
                     else {
-                        oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other.c_str(), extension);
+                        oprintf_success_warn(MATCHED_TO("Mismatched"), File::halo_path_to_preferred_path(tag.path).c_str(), extension, other_path.c_str(), extension);
                     }
                 }
                 mismatched_count++;
