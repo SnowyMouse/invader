@@ -383,6 +383,12 @@ Options:
   -a --all                     Only match if tags are in all inputs
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
+  -C --by-class <path-type>    Compare tags against tags of the same class
+                               rather than the same path. Using "any" ignores
+                               paths completely (useful when both inputs are
+                               different) while "different" only checks tags
+                               with different paths (useful when both inputs
+                               are the same). Can be: any or different
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
   -h --help                    Show this list of options.

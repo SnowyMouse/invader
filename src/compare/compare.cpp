@@ -72,7 +72,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("class", 'c', 1, "Add a tag class to check. If no tag classes are specified, all tag classes will be checked.");
     options.emplace_back("precision", 'p', 0, "Allow for slight differences in floats to account for precision loss.");
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
-    options.emplace_back("by-class", 'C', 1, "Compare tags against tags of the same class rather than the same path. Using \"different\" ignores tags with the same path and can be useful for finding duplicate tags. Can be: any or different", "<path-type>");
+    options.emplace_back("by-class", 'C', 1, "Compare tags against tags of the same class rather than the same path. Using \"any\" ignores paths completely (useful when both inputs are different) while \"different\" only checks tags with different paths (useful when both inputs are the same). Can be: any or different", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
