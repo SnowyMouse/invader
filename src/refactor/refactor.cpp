@@ -67,12 +67,11 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught.");
-    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. Can be: copy, move, no-move", "<mode>");
+    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the tag does not have to exist on the filesystem) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>");
     options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
-    options.emplace_back("internal", 'I', 0, "Do not modify references except for tags internal to the copied tags. This can only be used with -M copy");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -82,7 +81,6 @@ int main(int argc, char * const *argv) {
         bool dry_run = false;
         std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;
-        bool internal = false;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
         std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> class_replacements;
@@ -144,9 +142,6 @@ int main(int argc, char * const *argv) {
             case 's':
                 refactor_options.single_tag = arguments[0];
                 return;
-            case 'I':
-                refactor_options.internal = true;
-                return;
         }
     });
 
@@ -170,11 +165,6 @@ int main(int argc, char * const *argv) {
 
     if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_NO_MOVE && refactor_options.recursive) {
         eprintf_error("Error: -M no-move and --recursive cannot be used at the same time");
-        return EXIT_FAILURE;
-    }
-    
-    if(refactor_options.internal && *refactor_options.mode != RefactorMode::REFACTOR_MODE_COPY) {
-        eprintf_error("Error: --internal can only be used with -M copy");
         return EXIT_FAILURE;
     }
     
@@ -409,14 +399,12 @@ int main(int argc, char * const *argv) {
         
         // If copying and we aren't performing a dry run, don't modify the original tags
         if(*refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY) {
-            // If internal is done, only modify the new tags (or original if dry run)
-            if(refactor_options.internal) {
-                skip = true;
-                for(auto &i : replacements) {
-                    if((refactor_options.dry_run ? i.first : i.second) == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
-                        skip = false;
-                        break;
-                    }
+            // If copying, only refactor the new tags (or original if dry run)
+            skip = true;
+            for(auto &i : replacements) {
+                if((refactor_options.dry_run ? i.first : i.second) == Invader::File::split_tag_class_extension(Invader::File::preferred_path_to_halo_path(tag.tag_path))) {
+                    skip = false;
+                    break;
                 }
             }
             
