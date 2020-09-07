@@ -173,9 +173,13 @@ int main(int argc, const char **argv) {
 
     std::unique_ptr<Map> map;
     std::size_t file_size = 0;
+    std::byte header_cache[sizeof(Invader::HEK::NativeCacheFileHeader)];
     try {
         auto file = File::open_file(remaining_arguments[0]).value();
         file_size = file.size();
+        if(file_size >= sizeof(header_cache)) {
+            std::memcpy(header_cache, file.data(), sizeof(header_cache));
+        }
         map = std::make_unique<Map>(Map::map_with_move(std::move(file)));
     }
     catch (std::exception &e) {
@@ -327,6 +331,11 @@ int main(int argc, const char **argv) {
             oprintf("Scenario name:     %s\n", map->get_scenario_name());
             oprintf("Build:             %s\n", map->get_build());
             oprintf("Engine:            %s\n", engine_name(engine));
+            
+            if(engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                oprintf("Timestamp:         %s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
+            }
+            
             oprintf("Map type:          %s\n", type_name(map->get_type()));
             oprintf("Tags:              %zu / %zu (%.02f MiB", tag_count, static_cast<std::size_t>(65535), BYTES_TO_MiB(map->get_tag_data_length()));
             auto stubbed = stub_count();
