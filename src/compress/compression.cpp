@@ -186,6 +186,7 @@ namespace Invader::Compression {
         else {
             if(engine == HEK::CACHE_FILE_NATIVE) {
                 compress_header<HEK::NativeCacheFileHeader>(map, output, data_size);
+                reinterpret_cast<HEK::NativeCacheFileHeader *>(output)->timestamp = reinterpret_cast<const HEK::NativeCacheFileHeader *>(data)->timestamp;
             }
             else {
                 compress_header<HEK::CacheFileHeader>(map, output, data_size);
@@ -217,6 +218,7 @@ namespace Invader::Compression {
 
         if(header->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             decompress_header<HEK::NativeCacheFileHeader>(data, output);
+            reinterpret_cast<HEK::NativeCacheFileHeader *>(output)->timestamp = reinterpret_cast<const HEK::NativeCacheFileHeader *>(data)->timestamp;
         }
         else {
             decompress_header<HEK::CacheFileHeader>(data, output);
@@ -278,6 +280,7 @@ namespace Invader::Compression {
 
         if(header->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             decompress_header<HEK::NativeCacheFileHeader>(data, new_data.data());
+            reinterpret_cast<HEK::NativeCacheFileHeader *>(new_data.data())->timestamp = reinterpret_cast<const HEK::NativeCacheFileHeader *>(data)->timestamp;
         }
         else {
             decompress_header<HEK::CacheFileHeader>(data, new_data.data());
@@ -328,6 +331,7 @@ namespace Invader::Compression {
              try {
                  if(header_input.engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                      decompress_header<HEK::NativeCacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);
+                     reinterpret_cast<HEK::NativeCacheFileHeader *>(header_output)->timestamp = reinterpret_cast<const HEK::NativeCacheFileHeader *>(&header_input)->timestamp;
                  }
                  else {
                      decompress_header<HEK::CacheFileHeader>(reinterpret_cast<std::byte *>(&header_input), header_output);

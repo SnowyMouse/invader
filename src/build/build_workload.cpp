@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <time.h>
-#include <stdio.h>
+#include <ctime>
+#include <cstdio>
 
 #include <invader/build/build_workload.hpp>
 #include <invader/hek/map.hpp>
@@ -462,7 +462,6 @@ namespace Invader {
         auto &workload = *this;
         auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header, auto max_size) {
             std::vector<std::byte> final_data;
-            header = {};
             std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
             header.engine = workload.engine_target;
             header.map_type = *workload.cache_file_type;
@@ -736,11 +735,18 @@ namespace Invader {
         };
 
         if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            HEK::NativeCacheFileHeader header;
+            HEK::NativeCacheFileHeader header = {};
+            
+            // Store the timestamp
+            std::time_t current_time = std::time(nullptr);
+            auto *gmt = std::gmtime(&current_time);
+            std::snprintf(header.timestamp.string, sizeof(header.timestamp.string), "%04u-%02u-%02uT%02u:%02u:%02uZ", gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
+            
+            // Done
             return generate_final_data(header, UINT64_MAX);
         }
         else {
-            HEK::CacheFileHeader header;
+            HEK::CacheFileHeader header = {};
             return generate_final_data(header, UINT32_MAX);
         }
     }

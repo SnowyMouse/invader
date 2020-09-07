@@ -102,7 +102,9 @@ namespace Invader::HEK {
         LittleEndian<CacheFileType> map_type;
         LittleEndian<NativeCacheFileCompressionType> compression_type;
         LittleEndian<std::uint32_t> crc32;
-        PAD(0x794);
+        PAD(0x18);
+        TagString timestamp;
+        PAD(0x75C);
         LittleEndian<CacheFileLiteral> foot_literal;
 
         bool valid() const noexcept;
