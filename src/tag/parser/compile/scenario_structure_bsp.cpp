@@ -75,31 +75,57 @@ namespace Invader::Parser {
     }
 
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
-        // Check lightmaps
+        auto lightmap_count = this->lightmaps.size();
+        auto lightmap_bitmap = this->lightmaps_bitmap.tag_id;
+        std::size_t lightmap_bitmap_count;
+        if(!lightmap_bitmap.is_null()) {
+            lightmap_bitmap_count = reinterpret_cast<Bitmap::struct_little *>(workload.structs[*workload.tags[lightmap_bitmap.index].base_struct].data.data())->bitmap_data.count.read();
+        }
+        else {
+            lightmap_bitmap_count = 0;
+        }
+        
+        // Check lightmaps to see if they're valid
+        bool invalid_bitmap = false;
         bool lightmaps_present = false;
-        bool only_transparent = true;
-        for(auto &lm : this->lightmaps) {
-            for(auto &mat : lm.materials) {
-                if(mat.lightmap_vertices_count) {
-                    lightmaps_present = true;
-                    break;
-                }
-                else {
-                    auto &shader = mat.shader;
-                    if(!shader.tag_id.is_null()) {
-                        auto shader_type = reinterpret_cast<Shader::struct_little *>(workload.structs[*workload.tags[mat.shader.tag_id.index].base_struct].data.data())->shader_type.read();
-                        if(shader_type < HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC) {
-                            only_transparent = false;
+        for(std::size_t i = 0; i < lightmap_count; i++) {
+            auto &lm = this->lightmaps[i];
+            
+            // Do we even have lightmaps?
+            for(auto &m : lm.materials) {
+                switch(m.shader.tag_class_int) {
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GENERIC:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLASS:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_GLSL:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_METER:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_PLASMA:
+                    case HEK::TagClassInt::TAG_CLASS_SHADER_TRANSPARENT_WATER:
+                        break;
+                    default:
+                        if(m.lightmap_vertices_count) {
+                            lightmaps_present = true;
                         }
-                    }
+                        break;
                 }
             }
-            if(lightmaps_present) {
-                break;
+            
+            // Make sure the bitmap is valid
+            if(lm.bitmap != NULL_INDEX) {
+                lightmaps_present = true;
+                auto bitmap = static_cast<std::size_t>(lm.bitmap);
+                if(bitmap >= lightmap_bitmap_count) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap #%zu has an invalid bitmap index (%zu > %zu)", i, bitmap, lightmap_bitmap_count);
+                    invalid_bitmap = true;
+                }
             }
         }
+        if(invalid_bitmap) {
+            throw InvalidTagDataException();
+        }
 
-        if(!lightmaps_present && !only_transparent) {
+        if(!lightmaps_present) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "BSP has no lightmaps baked, so parts of it will not render");
         }
 
