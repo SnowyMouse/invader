@@ -434,6 +434,13 @@ namespace Invader::Parser {
         std::size_t region_count = what.regions.size();
         std::size_t geometries_count = what.geometries.size();
         std::size_t node_count = what.nodes.size();
+        
+        // Make sure we HAVE nodes
+        if(node_count == 0) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Model has no nodes");
+            throw InvalidTagDataException();
+        }
+        
         for(std::size_t ri = 0; ri < region_count; ri++) {
             auto &r = what.regions[ri];
             std::size_t permutation_count = r.permutations.size();

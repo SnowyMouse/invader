@@ -31,7 +31,7 @@ namespace Invader::Parser {
         auto bsp_count = bsp_data.size();
 
         // Determine which BSP light fixtures and scenery are in
-        #define FIND_BSP_INDICES_FOR_OBJECT_ARRAY(array_type, objects, palette_type, palette, type_name) { \
+        #define FIND_BSP_INDICES_FOR_OBJECT_ARRAY(array_type, objects, palette_type, palette, type_name, check_if_partially_outside) { \
             std::size_t object_count = this->objects.size(); \
             if(object_count) { \
                 auto &object_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.objects.pointer)]; \
@@ -42,8 +42,19 @@ namespace Invader::Parser {
                     auto &object = object_array[o]; \
                     if(object.type != NULL_INDEX) { \
                         auto &type = this->palette[object.type].name; \
-                        auto &object_bounding_offset = reinterpret_cast<Object::struct_little *>(workload.structs[*workload.tags[type.tag_id.index].base_struct].data.data())->bounding_offset; \
-                        auto position_to_check = object.position + object_bounding_offset; \
+                        auto &object_data = *reinterpret_cast<Object::struct_little *>(workload.structs[*workload.tags[type.tag_id.index].base_struct].data.data()); \
+                        auto object_bounding_offset = object_data.bounding_offset; \
+                        /* check if we have a model to add the default translation to */ \
+                        auto model_index = object_data.model.tag_id.read(); \
+                        auto model_present = !model_index.is_null(); \
+                        if(model_present) { \
+                            auto &model_struct = workload.structs[*workload.tags[model_index.index].base_struct]; \
+                            auto &model_data = *reinterpret_cast<Model::struct_little *>(model_struct.data.data()); \
+                            auto &node = *reinterpret_cast<ModelNode::struct_little *>(workload.structs[*model_struct.resolve_pointer(&model_data.nodes.pointer)].data.data()); \
+                            object_bounding_offset = object_bounding_offset + node.default_translation; \
+                        } \
+                        auto rotated = rotate_vector(object_bounding_offset, euler_to_matrix(object.rotation)); \
+                        auto position_to_check = object.position + rotated; \
                         for(std::size_t b = 0; b < bsp_count; b++) { \
                             /* Check if we're inside this BSP */ \
                             auto &bsp = bsp_data[b]; \
@@ -57,10 +68,12 @@ namespace Invader::Parser {
                         if(bsp_indices == 0 && bsp_indices_technically_inside == 0) { \
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu was found in 0 BSPs, so it will not spawn", o); \
                         } \
-                        /* If it's technically outside of a BSP due to bounding offset, warn */ \
-                        auto partially_outside = (bsp_indices ^ bsp_indices_technically_inside) & bsp_indices_technically_inside; \
-                        if(partially_outside) { \
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu is inside a BSP but offset outside, so it will be fullbright", o); \
+                        else if(check_if_partially_outside) { \
+                            /* If it's technically outside of a BSP due to bounding offset and we have a model, warn */ \
+                            auto partially_outside = (bsp_indices ^ bsp_indices_technically_inside) & bsp_indices_technically_inside; \
+                            if(partially_outside && model_present) { \
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, type_name " spawn #%zu is inside a BSP but offset outside, so it will be fullbright", o); \
+                            } \
                         } \
                     } \
                     /* Set to the result */ \
@@ -69,8 +82,8 @@ namespace Invader::Parser {
             } \
         }
 
-        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioScenery, scenery, ScenarioSceneryPalette, scenery_palette, "Scenery");
-        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures, ScenarioLightFixturePalette, light_fixture_palette, "Light fixture");
+        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioScenery, scenery, ScenarioSceneryPalette, scenery_palette, "Scenery", true);
+        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures, ScenarioLightFixturePalette, light_fixture_palette, "Light fixture", false);
         
         #undef FIND_BSP_INDICES_FOR_OBJECT_ARRAY
 

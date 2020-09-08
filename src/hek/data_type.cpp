@@ -79,6 +79,10 @@ namespace Invader::HEK {
 
         return returned_matrix;
     }
+    
+    Matrix<NativeEndian> euler_to_matrix(const Euler3D<NativeEndian> &rotation) noexcept {
+        return quaternion_to_matrix(euler_to_quaternion(rotation));
+    }
 
     Vector3D<NativeEndian> add_vector(const Vector3D<NativeEndian> &vector, const Vector3D<NativeEndian> &value) noexcept {
         Vector3D<NativeEndian> returned_value;
