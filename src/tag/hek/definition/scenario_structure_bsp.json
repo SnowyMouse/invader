@@ -1652,28 +1652,8 @@
                 "endian": "little"
             },
             {
-                "name": "lightmap vertices size",
-                "type": "uint32",
-                "comment": "size of the lightmap vertices (Halo CE Anniversary on MCC)",
-                "cache_only": true,
-                "endian": "little",
-                "engine": [
-                    "mcc"
-                ]
-            },
-            {
-                "name": "lightmap vertices start",
-                "type": "uint32",
-                "comment": "points to the beginning of the lightmap vertices (Halo CE Anniversary on MCC)",
-                "cache_only": true,
-                "endian": "little",
-                "engine": [
-                    "mcc"
-                ]
-            },
-            {
                 "type": "pad",
-                "size": 8
+                "size": 16
             },
             {
                 "name": "signature",
