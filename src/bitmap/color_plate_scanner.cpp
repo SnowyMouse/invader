@@ -44,6 +44,10 @@ namespace Invader {
 
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
+        
+        if(usage == BitmapUsage::BITMAP_USAGE_LIGHT_MAP) {
+            mipmaps = 0;
+        }
 
         if(width == 0 || height == 0) {
             return generated_bitmap;
