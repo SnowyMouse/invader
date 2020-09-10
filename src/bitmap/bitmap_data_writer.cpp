@@ -103,11 +103,11 @@ namespace Invader {
             }
 
             // Set the format
-            bool compressed = (format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY || format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA || format == BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA);
+            bool compressed = (format == BitmapFormat::BITMAP_FORMAT_DXT1 || format == BitmapFormat::BITMAP_FORMAT_DXT3 || format == BitmapFormat::BITMAP_FORMAT_DXT3);
 
             // If the bitmap length or height isn't divisible by 4, use 32-bit color
             if(compressed && ((bitmap.height % 4) != 0 || (bitmap.width % 4) != 0)) {
-                format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+                format = BitmapFormat::BITMAP_FORMAT_32_BIT;
                 compressed = false;
             }
 
@@ -115,10 +115,10 @@ namespace Invader {
             bool palettized = false;
 
             switch(format) {
-                case BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR:
+                case BitmapFormat::BITMAP_FORMAT_32_BIT:
                     bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_X8R8G8B8 : BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8;
                     break;
-                case BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR:
+                case BitmapFormat::BITMAP_FORMAT_16_BIT:
                     switch(alpha_present) {
                         case ALPHA_TYPE_NONE:
                             bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_R5G6B5;
@@ -148,13 +148,13 @@ namespace Invader {
                     }
                     break;
 
-                case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY:
+                case BitmapFormat::BITMAP_FORMAT_DXT1:
                     bitmap.format = BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
                     break;
-                case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA:
+                case BitmapFormat::BITMAP_FORMAT_DXT3:
                     bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 : BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
                     break;
-                case BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA:
+                case BitmapFormat::BITMAP_FORMAT_DXT5:
                     bitmap.format = alpha_present == AlphaType::ALPHA_TYPE_NONE ? BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 : BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
                     break;
 

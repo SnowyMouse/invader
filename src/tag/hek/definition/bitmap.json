@@ -54,11 +54,11 @@
     {
         "name": "BitmapFormat",
         "options": [
-            "compressed with color key transparency",
-            "compressed with explicit alpha",
-            "compressed with interpolated alpha",
-            "16-bit color",
-            "32-bit color",
+            "dxt1",
+            "dxt3",
+            "dxt5",
+            "16-bit",
+            "32-bit",
             "monochrome"
         ],
         "type": "enum"

@@ -44,10 +44,6 @@ namespace Invader {
 
         generated_bitmap.type = type;
         scanner.power_of_two = (type != BitmapType::BITMAP_TYPE_SPRITES) && (type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS);
-        
-        if(usage == BitmapUsage::BITMAP_USAGE_LIGHT_MAP) {
-            mipmaps = 0;
-        }
 
         if(width == 0 || height == 0) {
             return generated_bitmap;
@@ -235,8 +231,8 @@ namespace Invader {
         }
 
         // If we aren't making interface bitmaps, generate mipmaps when needed
-        if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
-            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sprite_parameters, sharpen, blur);
+        if(type != BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && usage != BitmapUsage::BITMAP_USAGE_LIGHT_MAP) {
+            generate_mipmaps(generated_bitmap, mipmaps, mipmap_type, mipmap_fade_factor, sprite_parameters, sharpen, blur, usage);
         }
 
         // If we're making cubemaps, we need to make all sides of each cubemap sequence one cubemap bitmap data. 3D textures work similarly
@@ -572,7 +568,7 @@ namespace Invader {
         }
     }
 
-    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur) {
+    void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
 
@@ -730,26 +726,46 @@ namespace Invader {
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
                     for(std::uint32_t x = 0; x < mipmap_width; x++) {
                         auto &pixel = this_mipmap_data[x + y * mipmap_width];
-                        auto &last_a = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2];
-                        auto &last_b = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2 + 1];
-                        auto &last_c = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2];
-                        auto &last_d = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2 + 1];
+                        auto last_a = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2];
+                        auto last_b = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2 + 1];
+                        auto last_c = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2];
+                        auto last_d = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2 + 1];
                         pixel = last_a; // Nearest-neighbor first
+                        
+                        int pixel_count = 0;
 
-                        #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
+                        #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / pixel_count)
+                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; }
+                        
+                        // If alpha blend, discard anything with 0 alpha
+                        if(usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND) {
+                            ZERO_OUT_IF_NO_ALPHA(last_a);
+                            ZERO_OUT_IF_NO_ALPHA(last_b);
+                            ZERO_OUT_IF_NO_ALPHA(last_c);
+                            ZERO_OUT_IF_NO_ALPHA(last_d);
+                        }
+                        
+                        if(pixel_count > 0) {
+                            // Interpolate color?
+                            if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR || mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA) {
+                                INTERPOLATE_CHANNEL(red);
+                                INTERPOLATE_CHANNEL(green);
+                                INTERPOLATE_CHANNEL(blue);
+                            }
 
-                        // Interpolate color?
-                        if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR || mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA) {
-                            INTERPOLATE_CHANNEL(red);
-                            INTERPOLATE_CHANNEL(green);
-                            INTERPOLATE_CHANNEL(blue);
+                            // Interpolate alpha?
+                            if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR && usage != BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
+                                INTERPOLATE_CHANNEL(alpha);
+                            }
+                        }
+                        else {
+                            // Delete if no pixels
+                            pixel = {};
                         }
 
-                        // Interpolate alpha?
-                        if(mipmap_type == HEK::InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR) {
-                            INTERPOLATE_CHANNEL(alpha);
-                        }
-
+                        
+                        
+                        #undef ZERO_OUT_IF_NO_ALPHA
                         #undef INTERPOLATE_CHANNEL
                     }
                 }

@@ -170,7 +170,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // If these values weren't set, set them
     #define DEFAULT_VALUE(what, default) if(!what.has_value()) { what = default; }
 
-    DEFAULT_VALUE(bitmap_options.format,BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR);
+    DEFAULT_VALUE(bitmap_options.format,BitmapFormat::BITMAP_FORMAT_32_BIT);
     DEFAULT_VALUE(bitmap_options.bitmap_type,BitmapType::BITMAP_TYPE_2D_TEXTURES);
     DEFAULT_VALUE(bitmap_options.max_mipmap_count,INT16_MAX);
     DEFAULT_VALUE(bitmap_options.sprite_usage,BitmapSpriteUsage::BITMAP_SPRITE_USAGE_BLEND_ADD_SUBTRACT_MAX);
@@ -437,7 +437,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
-    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d, 3d, cubemap, interface, or sprite. Default (new tag): 2d", "<type>");
+    options.emplace_back("type", 'T', 1, "Set the type of bitmap. Can be: 2d-textures, 3d-textures, cube-maps, interface-bitmaps, or sprites. Default (new tag): 2d", "<type>");
     options.emplace_back("mipmap-count", 'M', 1, "Set maximum mipmaps. Default (new tag): 32767", "<count>");
     options.emplace_back("mipmap-scale", 's', 1, "[REQUIRES --extended] Mipmap scale type. Can be: linear, nearest-alpha, nearest. Default (new tag): linear", "<type>");
     options.emplace_back("detail-fade", 'f', 1, "Set detail fade factor. Default (new tag): 0.0", "<factor>");
@@ -445,7 +445,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("budget-count", 'C', 1, "Set maximum number of sprite sheets. Setting this to 0 disables budgeting. Default (new tag): 0", "<count>");
     options.emplace_back("bump-palettize", 'p', 1, "Set the bumpmap palettization setting. Can be: off or on. Default (new tag): off", "<val>");
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
-    options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: default, bumpmap, lightmap, detail. Default: default", "<usage>");
+    options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha-blend, default, height-map, detail-map, light-map, vector-map. Default: default", "<usage>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
     options.emplace_back("extended", 'x', 0, "Create an invader_bitmap tag (required for some features).");
 
@@ -480,64 +480,31 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 's':
-                if(std::strcmp(arguments[0], "linear") == 0) {
-                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_LINEAR;
+                try {
+                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "nearest") == 0) {
-                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA_AND_COLOR;
-                }
-                else if(std::strcmp(arguments[0], "nearest-alpha") == 0) {
-                    bitmap_options.mipmap_scale_type = InvaderBitmapMipmapScaling::INVADER_BITMAP_MIPMAP_SCALING_NEAREST_ALPHA;
-                }
-                else {
-                    eprintf_error("Unknown mipmap scale type %s", arguments[0]);
+                catch(std::exception &) {
+                    eprintf_error("Invalid mipmap scale type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'F':
-                if(std::strcmp(arguments[0], "32-bit") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_32_BIT_COLOR;
+                try {
+                    bitmap_options.format = BitmapFormat_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "16-bit") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_16_BIT_COLOR;
-                }
-                else if(std::strcmp(arguments[0], "monochrome") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_MONOCHROME;
-                }
-                else if(std::strcmp(arguments[0], "dxt5") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_INTERPOLATED_ALPHA;
-                }
-                else if(std::strcmp(arguments[0], "dxt3") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_EXPLICIT_ALPHA;
-                }
-                else if(std::strcmp(arguments[0], "dxt1") == 0) {
-                    bitmap_options.format = BitmapFormat::BITMAP_FORMAT_COMPRESSED_WITH_COLOR_KEY_TRANSPARENCY;
-                }
-                else {
-                    eprintf_error("Unknown format %s", arguments[0]);
+                catch(std::exception &) {
+                    eprintf_error("Invalid bitmap format %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
 
             case 'T':
-                if(std::strcmp(arguments[0], "2d") == 0) {
-                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_2D_TEXTURES;
+                try {
+                    bitmap_options.bitmap_type = BitmapType_from_string(arguments[0]);
                 }
-                else if(std::strcmp(arguments[0], "3d") == 0) {
-                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_3D_TEXTURES;
-                }
-                else if(std::strcmp(arguments[0], "cubemap") == 0) {
-                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_CUBE_MAPS;
-                }
-                else if(std::strcmp(arguments[0], "interface") == 0) {
-                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
-                }
-                else if(std::strcmp(arguments[0], "sprite") == 0) {
-                    bitmap_options.bitmap_type = BitmapType::BITMAP_TYPE_SPRITES;
-                }
-                else {
-                    eprintf_error("Unknown type %s", arguments[0]);
+                catch(std::exception &) {
+                    eprintf_error("Invalid bitmap type %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;
@@ -583,20 +550,11 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'u':
-                if(strcmp(arguments[0], "default") == 0) {
-                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DEFAULT;
+                try {
+                    bitmap_options.usage = BitmapUsage_from_string(arguments[0]);
                 }
-                else if(strcmp(arguments[0], "bumpmap") == 0) {
-                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_HEIGHT_MAP;
-                }
-                else if(strcmp(arguments[0], "detail") == 0) {
-                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_DETAIL_MAP;
-                }
-                else if(strcmp(arguments[0], "lightmap") == 0) {
-                    bitmap_options.usage = BitmapUsage::BITMAP_USAGE_LIGHT_MAP;
-                }
-                else {
-                    eprintf_error("Unknown usage %s", arguments[0]);
+                catch(std::exception &) {
+                    eprintf_error("Invalid bitmap usage %s", arguments[0]);
                     std::exit(EXIT_FAILURE);
                 }
                 break;

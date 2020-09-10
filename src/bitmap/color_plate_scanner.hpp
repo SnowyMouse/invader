@@ -171,8 +171,9 @@ namespace Invader {
          * @param mipmap_fade_factor fade-to-gray factor for mipmaps
          * @param sprite_parameters  sprite parameters (if using sprites)
          * @param sharpen            sharpen filter
+         * @param usage              bitmap usage value
          */
-        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur);
+        static void generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage);
 
         /**
          * Consolidate the stacked bitmap data (cubemaps and 3d textures)
