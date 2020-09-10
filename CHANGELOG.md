@@ -45,6 +45,8 @@ This is used for recording Invader's changes. This changelog is based on
   tag exists.
 
 ### Fixed
+- invader-build: Fixed not taking rotation into consideration when checking if
+  an object is in the BSP or not
 - invader-edit-qt: Fixed an issue with editing ColorARGBInt values
 - invader-edit-qt: Fixed an issue with names missing in arrays
 - invader-info: Fixed opening protected maps resulting in an exception error
