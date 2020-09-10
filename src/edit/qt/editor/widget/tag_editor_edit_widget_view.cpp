@@ -2,6 +2,7 @@
 
 #include "tag_editor_edit_widget_view.hpp"
 #include "tag_editor_array_widget.hpp"
+#include "tag_editor_group_widget.hpp"
 #include <QApplication>
 
 namespace Invader::EditQt {
@@ -44,7 +45,10 @@ namespace Invader::EditQt {
             vbox_layout->addWidget(widget);
             widgets.emplace_back(widget);
 
-            alternate = !alternate;
+            // Don't alternate the colors if showing a group widget
+            if(dynamic_cast<TagEditorGroupWidget *>(widget) == nullptr) {
+                alternate = !alternate;
+            }
         };
 
         if(extra_widget) {
