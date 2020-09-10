@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.37.0] - 2020-09-10
 ### Added
 - invader-bludgeon: Added `-T invalid-strings`
 - invader-compare: Added `--by-path` or `-B` which sets how paths are compared.
@@ -48,6 +48,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Fixed an issue with editing ColorARGBInt values
 - invader-edit-qt: Fixed an issue with names missing in arrays
 - invader-info: Fixed opening protected maps resulting in an exception error
+
+### Removed
+- invader-edit-qt: Removed "mcc actor type"
 
 ## [0.36.1] - 2020-07-22
 ### Changed
