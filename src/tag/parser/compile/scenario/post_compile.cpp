@@ -72,7 +72,7 @@ namespace Invader::Parser {
                             /* If it's technically outside of a BSP due to bounding offset and we have a model, warn */ \
                             auto partially_outside = (bsp_indices ^ bsp_indices_technically_inside) & bsp_indices_technically_inside; \
                             if(partially_outside && model_present) { \
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, type_name " spawn #%zu is inside a BSP but offset outside, so it will be fullbright", o); \
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu is inside a BSP but offset outside, so it will be fullbright", o); \
                             } \
                         } \
                     } \
