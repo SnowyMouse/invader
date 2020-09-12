@@ -434,6 +434,7 @@ namespace Invader {
 
                     // Make sure it's valid
                     if(resource_index >= count) {
+                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int), static_cast<std::size_t>(resource_index), static_cast<std::size_t>(count));
                         throw OutOfBoundsException();
                     }
 
@@ -454,11 +455,29 @@ namespace Invader {
         };
 
         if(this->engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            do_populate_the_array(reinterpret_cast<const NativeCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
+            try {
+                do_populate_the_array(reinterpret_cast<const NativeCacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
+            }
+            catch(std::exception &) {
+                eprintf_error("Failed to populate the tag array");
+                throw;
+            }
         }
         else {
-            do_populate_the_array(reinterpret_cast<const CacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
-            this->get_bsps();
+            try {
+                do_populate_the_array(reinterpret_cast<const CacheFileTagDataTag *>(this->resolve_tag_data_pointer(header.tag_array_address, sizeof(CacheFileTagDataTag) * tag_count)));
+            }
+            catch(std::exception &) {
+                eprintf_error("Failed to populate the tag array");
+                throw;
+            }
+            try {
+                this->get_bsps();
+            }
+            catch(std::exception &) {
+                eprintf_error("Failed to read BSPs");
+                throw;
+            }
         }
     }
 
