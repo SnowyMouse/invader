@@ -2,10 +2,16 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-compare: Added `-G` which allows you to ignore resource maps for the
+  current input
+- invader-extract: Added `-G` which allows you to ignore resource maps
+
 ## [0.37.0] - 2020-09-10
 ### Added
 - invader-bludgeon: Added `-T invalid-strings`
-- invader-compare: Added `--by-path` or `-B` which sets how paths are compared.
+- invader-compare: Added `--by-path` or `-B` which sets how paths are compared
   This can be useful for finding duplicate tags regardless of paths. You can use
   `-B any` to match any tags regardless of tag path (useful if inputs are 
   different) or `-B different` to only match against tags with differing paths

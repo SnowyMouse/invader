@@ -25,6 +25,7 @@ int main(int argc, const char **argv) {
         bool recursive = false;
         bool overwrite = false;
         bool non_mp_globals = false;
+        bool ignore_resource_maps = false;
     } extract_options;
 
     // Command line options
@@ -33,6 +34,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("recursive", 'r', 0, "Extract tag dependencies");
     options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist");
+    options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info");
     options.emplace_back("search", 's', 1, "Search for tags (* and ? are wildcards); use multiple times for multiple queries", "<expr>");
     options.emplace_back("non-mp-globals", 'n', 0, "Enable extraction of non-multiplayer .globals");
@@ -43,6 +45,9 @@ int main(int argc, const char **argv) {
     // Do it!
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ExtractOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, extract_options, [](char opt, const auto &args, auto &extract_options) {
         switch(opt) {
+            case 'I':
+                extract_options.ignore_resource_maps = true;
+                break;
             case 'm':
                 extract_options.maps_directory = args[0];
                 break;
@@ -91,7 +96,8 @@ int main(int argc, const char **argv) {
         }
     }
     
-    if(extract_options.maps_directory.has_value()) {
+    // Load resource maps
+    if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map, const char *map_alt, auto &open_map_possibly) -> std::vector<std::byte> {
             auto potential_map_path = (maps_directory / map).string();

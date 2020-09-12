@@ -26,6 +26,7 @@ struct Input {
     std::optional<const char *> map;
     std::optional<std::filesystem::path> maps;
     std::vector<std::string> tags;
+    bool ignore_resource_maps = false;
     
     std::vector<File::TagFilePath> tag_paths;
     std::vector<File::TagFile> virtual_directory;
@@ -74,6 +75,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("functional", 'f', 0, "Precompile the tags before comparison to check for only functional differences.");
     options.emplace_back("by-path", 'B', 1, "Set what tags get compared against other tags. By default, only tags with the same relative path are checked. Using \"any\" ignores paths completely (useful for finding duplicates when both inputs are different) while \"different\" only checks tags with different paths (useful for finding duplicates when both inputs are the same). Can be: any, different, or same (default)", "<path-type>");
     options.emplace_back("show", 's', 1, "Can be: all, matched, or mismatched. Default: all");
+    options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
     static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
@@ -95,6 +97,14 @@ int main(int argc, const char **argv) {
             case 'i':
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
+                
+            case 'G':
+                if(!top_option_is_map_input) {
+                    eprintf_error("%s", CAN_ONLY_BE_USED_WITH_MAP_INPUT);
+                    std::exit(EXIT_FAILURE);
+                }
+                compare_options.top_input->ignore_resource_maps = true;
+                break;
                 
             case 'B':
                 if(std::strcmp(args[0], "any") == 0) {
@@ -221,7 +231,7 @@ int main(int argc, const char **argv) {
         if(i.map.has_value() && !i.maps.has_value()) {
             i.maps = std::filesystem::absolute(std::filesystem::path(*i.map)).parent_path();
         }
-        if(i.maps.has_value()) {
+        if(i.maps.has_value() && !i.ignore_resource_maps) {
             auto loc = File::open_file((*i.maps / "loc.map").string().c_str()).value_or(std::vector<std::byte>());
             auto bitmaps = File::open_file((*i.maps / "bitmaps.map").string().c_str()).value_or(std::vector<std::byte>());
             auto sounds = File::open_file((*i.maps / "sounds.map").string().c_str()).value_or(std::vector<std::byte>());
