@@ -231,15 +231,22 @@ int main(int argc, const char **argv) {
         if(i.map.has_value() && !i.maps.has_value()) {
             i.maps = std::filesystem::absolute(std::filesystem::path(*i.map)).parent_path();
         }
-        if(i.maps.has_value() && !i.ignore_resource_maps) {
-            auto loc = File::open_file((*i.maps / "loc.map").string().c_str()).value_or(std::vector<std::byte>());
-            auto bitmaps = File::open_file((*i.maps / "bitmaps.map").string().c_str()).value_or(std::vector<std::byte>());
-            auto sounds = File::open_file((*i.maps / "sounds.map").string().c_str()).value_or(std::vector<std::byte>());
+            
+        if(i.map.has_value()) {
+            // Load resource maps
+            std::vector<std::byte> loc, bitmaps, sounds;
+            if(i.maps.has_value() && !i.ignore_resource_maps) {
+                loc = File::open_file((*i.maps / "loc.map").string().c_str()).value_or(std::vector<std::byte>());
+                bitmaps = File::open_file((*i.maps / "bitmaps.map").string().c_str()).value_or(std::vector<std::byte>());
+                sounds = File::open_file((*i.maps / "sounds.map").string().c_str()).value_or(std::vector<std::byte>());
+            }
+        
             auto data = File::open_file(*i.map);
             if(!data.has_value()) {
                 eprintf_error("Failed to read %s", *i.map);
                 return EXIT_FAILURE;
             }
+            
             auto &map = *(i.map_data = std::make_unique<Map>(Map::map_with_move(*std::move(data),std::move(bitmaps),std::move(loc),std::move(sounds))));
             
             // Warn if we failed to open some resource maps
