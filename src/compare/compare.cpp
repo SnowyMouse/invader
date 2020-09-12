@@ -250,23 +250,25 @@ int main(int argc, const char **argv) {
             auto &map = *(i.map_data = std::make_unique<Map>(Map::map_with_move(*std::move(data),std::move(bitmaps),std::move(loc),std::move(sounds))));
             
             // Warn if we failed to open some resource maps
-            switch(map.get_engine()) {
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
-                        eprintf_warn("Failed to find or read a loc.map");
-                    }
-                    // fallthrough
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                    if(map.get_data_length(Invader::Map::DATA_MAP_BITMAP) == 0) {
-                        eprintf_warn("Failed to find or read a bitmaps.map");
-                    }
-                    if(map.get_data_length(Invader::Map::DATA_MAP_SOUND) == 0) {
-                        eprintf_warn("Failed to find or read a sounds.map");
-                    }
-                    break;
-                default:
-                    break;
+            if(!i.ignore_resource_maps) {
+                switch(map.get_engine()) {
+                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                        if(map.get_data_length(Invader::Map::DATA_MAP_LOC) == 0) {
+                            eprintf_warn("Failed to find or read a loc.map");
+                        }
+                        // fallthrough
+                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                        if(map.get_data_length(Invader::Map::DATA_MAP_BITMAP) == 0) {
+                            eprintf_warn("Failed to find or read a bitmaps.map");
+                        }
+                        if(map.get_data_length(Invader::Map::DATA_MAP_SOUND) == 0) {
+                            eprintf_warn("Failed to find or read a sounds.map");
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             
             // Go through each tag and add them if we want to do the thing
