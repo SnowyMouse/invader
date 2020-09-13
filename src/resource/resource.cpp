@@ -46,7 +46,7 @@ int main(int argc, const char **argv) {
         // Engine target
         std::optional<HEK::CacheFileEngine> engine_target;
 
-        const char **(*default_fn)() = get_default_bitmap_resources;
+        const char * const *(*default_fn)() = get_default_bitmap_resources;
         std::vector<std::pair<const char *, bool>> index; // path, and is it a map?
         std::size_t padding = 0;
         bool no_prefix = false;
@@ -142,7 +142,7 @@ int main(int argc, const char **argv) {
     
     // First, add all default indices if we're Custom Edition
     if(resource_options.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-        for(const char **i = resource_options.default_fn(); *i; i++) {
+        for(const char * const *i = resource_options.default_fn(); *i; i++) {
             tags_list.emplace_back(File::split_tag_class_extension(*i).value());
         }
     }
