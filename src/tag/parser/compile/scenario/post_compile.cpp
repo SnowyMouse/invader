@@ -67,8 +67,6 @@ namespace Invader::Parser {
                                 bsp_indices |= 1 << b; \
                             } \
                         } \
-                        oprintf(type_name " #%zu %f %f %f -> ", o, object_bounding_offset.x.read(), object_bounding_offset.y.read(), object_bounding_offset.z.read()); \
-                        oprintf("%f %f %f\n", rotated.i.read(), rotated.j.read(), rotated.k.read()); \
                         if(bsp_indices == 0 && bsp_indices_technically_inside == 0) { \
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu was found in 0 BSPs, so it will not spawn", o); \
                         } \
