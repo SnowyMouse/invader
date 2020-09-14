@@ -4,9 +4,16 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-bitmap: Added `light-map` as a usage
 - invader-compare: Added `-G` which allows you to ignore resource maps for the
   current input
 - invader-extract: Added `-G` which allows you to ignore resource maps
+
+### Changed
+- invader-bitmap: Lightmap bitmaps no longer generate mipmaps, as expected
+- invader-info: Now reports if a map's tag indices are outside of stock Custom
+  Edition's
+- invader-info: Changed the outputs of some of the options given
 
 ## [0.37.0] - 2020-09-10
 ### Added
