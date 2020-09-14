@@ -7,6 +7,7 @@
 #include <invader/resource/resource_map.hpp>
 #include <invader/map/map.hpp>
 #include <invader/file/file.hpp>
+#include <invader/crc/hek/crc.hpp>
 
 namespace Invader {
     Map Map::map_with_copy(const std::byte *data, std::size_t data_size,
@@ -278,7 +279,8 @@ namespace Invader {
             map.tag_data = map.get_data_at_offset(header.tag_data_offset, map.tag_data_length);
             map.scenario_name = header.name;
             map.build = header.build;
-            map.crc32 = header.crc32;
+            
+            map.header_crc32 = header.crc32;
         };
 
         // Check if the literals are invalid
@@ -298,6 +300,10 @@ namespace Invader {
         }
 
         this->populate_tag_array();
+    }
+    
+    std::uint32_t Map::get_crc32() const noexcept {
+        return calculate_map_crc(*const_cast<Map *>(this));
     }
 
     void Map::populate_tag_array() {
@@ -384,6 +390,7 @@ namespace Invader {
                     }
                     else {
                         tag.base_struct_pointer = 0;
+                        tag.resource_index = tags[i].tag_data;
                     }
 
                     // Find where it's located
@@ -415,31 +422,33 @@ namespace Invader {
                     auto &header = *reinterpret_cast<ResourceMapHeader *>(map.get_data_at_offset(0, sizeof(ResourceMapHeader), type));
                     auto count = header.resource_count.read();
                     auto *indices = reinterpret_cast<ResourceMapResource *>(map.get_data_at_offset(header.resources, count * sizeof(ResourceMapResource), type));
-                    std::uint32_t resource_index = static_cast<std::uint32_t>(~0);
 
-                    // Find that index
-                    if(type == DataMapType::DATA_MAP_SOUND) {
+                    // Find that index if we're a sounds.map file
+                    if(!tag.resource_index.has_value()) {
                         auto *paths = reinterpret_cast<const char *>(map.get_data_at_offset(header.paths, 0, type));
                         for(std::uint32_t i = 1; i < count; i+=2) {
                             auto *path = paths + indices[i].path_offset;
                             if(tag.path == path) {
-                                resource_index = i;
+                                tag.resource_index = i;
                                 break;
                             }
                         }
                     }
-                    else {
-                        resource_index = tags[i].tag_data;
+                    
+                    // Do we even have an index?
+                    if(!tag.resource_index.has_value()) {
+                        eprintf_error("Tag %s.%s could not be found in the resource map file", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int));
+                        throw OutOfBoundsException();
                     }
 
                     // Make sure it's valid
-                    if(resource_index >= count) {
-                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int), static_cast<std::size_t>(resource_index), static_cast<std::size_t>(count));
+                    if(*tag.resource_index >= count) {
+                        eprintf_error("Tag %s.%s is out-of-bounds for the resource map(s) provided (%zu >= %zu)", File::halo_path_to_preferred_path(tag.path).c_str(), HEK::tag_class_to_extension(tag.tag_class_int), *tag.resource_index, static_cast<std::size_t>(count));
                         throw OutOfBoundsException();
                     }
 
                     // Set it all
-                    auto &index = indices[resource_index];
+                    auto &index = indices[*tag.resource_index];
                     tag.tag_data_size = index.size;
                     if(tag.tag_class_int == TagClassInt::TAG_CLASS_SOUND) {
                         tag.base_struct_offset = index.data_offset + sizeof(HEK::Sound<HEK::LittleEndian>);
@@ -607,5 +616,24 @@ namespace Invader {
         }
 
         return this->get_data_at_offset(offset, minimum_size);
+    }
+    
+    bool Map::is_clean() const noexcept {
+        if(this->get_crc32() != this->get_header_crc32() || this->is_protected()) {
+            return false;
+        }
+        else if(this->get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            auto tag_count = this->get_tag_count();
+            for(std::size_t i = 0; i < tag_count; i++) {
+                auto &tag = this->get_tag(i);
+                auto &index = tag.get_tag_data_index();
+                
+                // BSP tags are NOT supposed to have this set
+                if(tag.get_tag_class_int() == HEK::TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && index.tag_data != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

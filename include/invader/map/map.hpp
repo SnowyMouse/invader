@@ -106,8 +106,14 @@ namespace Invader {
          * @return header's precomputed CRC32
          */
         std::uint32_t get_header_crc32() const noexcept {
-            return this->crc32;
+            return this->header_crc32;
         }
+        
+        /**
+         * Calculate the map's CRC32
+         * @return crc32
+         */
+        std::uint32_t get_crc32() const noexcept;
 
         /**
          * Get the tag data length
@@ -291,6 +297,12 @@ namespace Invader {
          * @return true if the map is obviously protected
          */
         bool is_protected() const noexcept;
+        
+        /**
+         * Do a basic check to ensure the map hasn't been improperly modified or corrupted
+         * @return true if the map is clean
+         */
+        bool is_clean() const noexcept;
 
         Map(Map &&);
     private:
@@ -375,7 +387,10 @@ namespace Invader {
         HEK::TagString build;
 
         /** CRC32 */
-        std::uint32_t crc32;
+        std::optional<std::uint32_t> crc32;
+        
+        /** CRC32 in header */
+        std::uint32_t header_crc32;
 
         /** Asset indices offset */
         std::uint64_t asset_indices_offset;

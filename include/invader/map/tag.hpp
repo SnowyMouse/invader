@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 #include <cstddef>
 
 #include "../hek/data_type.hpp"
@@ -60,6 +61,14 @@ namespace Invader {
         bool is_indexed() const noexcept {
             return this->indexed;
         }
+        
+        /**
+         * Get the resource index. This only applies to indexed Custom Edition maps, and it does not work for sound tags unless resource maps are loaded.
+         * @return resource index if applicable
+         */
+        std::optional<std::size_t> get_resource_index() const noexcept {
+            return this->resource_index;
+        }
 
         /**
          * Get the tag index
@@ -74,6 +83,12 @@ namespace Invader {
          * @return true if the tag data is available
          */
         bool data_is_available() const noexcept;
+        
+        /**
+         * Get whether or not the tag is actually a stub (not a real tag)
+         * @return true if the tag is a stub
+         */
+        bool is_stub() const noexcept;
 
         /**
          * Get the tag data index
@@ -269,6 +284,9 @@ namespace Invader {
 
         /** Initialize the tag */
         Tag(Map &map);
+        
+        /** Resource index */
+        std::optional<std::size_t> resource_index;
     };
 }
 #endif

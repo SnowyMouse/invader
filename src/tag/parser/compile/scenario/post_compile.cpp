@@ -31,7 +31,7 @@ namespace Invader::Parser {
         auto bsp_count = bsp_data.size();
 
         // Determine which BSP light fixtures and scenery are in
-        #define FIND_BSP_INDICES_FOR_OBJECT_ARRAY(array_type, objects, palette_type, palette, type_name, check_if_partially_outside) { \
+        #define FIND_BSP_INDICES_FOR_OBJECT_ARRAY(array_type, objects, palette_type, palette, type_name, warn_if_partially_outside) { \
             std::size_t object_count = this->objects.size(); \
             if(object_count) { \
                 auto &object_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.objects.pointer)]; \
@@ -53,7 +53,9 @@ namespace Invader::Parser {
                             auto &node = *reinterpret_cast<ModelNode::struct_little *>(workload.structs[*model_struct.resolve_pointer(&model_data.nodes.pointer)].data.data()); \
                             object_bounding_offset = object_bounding_offset + node.default_translation; \
                         } \
-                        auto rotated = rotate_vector(object_bounding_offset, euler_to_matrix(object.rotation)); \
+                        auto rotation = object.rotation; \
+                        std::swap(rotation.yaw, rotation.pitch); \
+                        auto rotated = rotate_vector(object_bounding_offset, euler_to_matrix(rotation)); \
                         auto position_to_check = object.position + rotated; \
                         for(std::size_t b = 0; b < bsp_count; b++) { \
                             /* Check if we're inside this BSP */ \
@@ -65,10 +67,12 @@ namespace Invader::Parser {
                                 bsp_indices |= 1 << b; \
                             } \
                         } \
+                        oprintf(type_name " #%zu %f %f %f -> ", o, object_bounding_offset.x.read(), object_bounding_offset.y.read(), object_bounding_offset.z.read()); \
+                        oprintf("%f %f %f\n", rotated.i.read(), rotated.j.read(), rotated.k.read()); \
                         if(bsp_indices == 0 && bsp_indices_technically_inside == 0) { \
                             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, type_name " spawn #%zu was found in 0 BSPs, so it will not spawn", o); \
                         } \
-                        else if(check_if_partially_outside) { \
+                        else if(warn_if_partially_outside) { \
                             /* If it's technically outside of a BSP due to bounding offset and we have a model, warn */ \
                             auto partially_outside = (bsp_indices ^ bsp_indices_technically_inside) & bsp_indices_technically_inside; \
                             if(partially_outside && model_present) { \
@@ -83,7 +87,7 @@ namespace Invader::Parser {
         }
 
         FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioScenery, scenery, ScenarioSceneryPalette, scenery_palette, "Scenery", true);
-        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures, ScenarioLightFixturePalette, light_fixture_palette, "Light fixture", false);
+        FIND_BSP_INDICES_FOR_OBJECT_ARRAY(ScenarioLightFixture, light_fixtures, ScenarioLightFixturePalette, light_fixture_palette, "Light fixture", true);
         
         #undef FIND_BSP_INDICES_FOR_OBJECT_ARRAY
 

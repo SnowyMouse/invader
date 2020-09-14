@@ -8,7 +8,11 @@
 #include <invader/map/map.hpp>
 
 namespace Invader {
-    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty, bool allow_compressed) {
+    std::uint32_t calculate_map_crc(Invader::Map &map, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty) {
+        // Reassign variables if needed
+        auto *data = map.get_data();
+        auto size = map.get_data_length();
+        
         std::vector<std::byte> data_crc;
         std::uint32_t crc = 0;
 
@@ -19,17 +23,11 @@ namespace Invader {
         if(new_crc) {
             data_crc.reserve(size);
         }
-
-        // Parse the map
-        Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
+        
         auto engine = map.get_engine();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             return 0;
         }
-
-        // Reassign variables if needed
-        data = map.get_data();
-        size = map.get_data_length();
 
         #define CRC_DATA(data_start, data_end) \
             if(new_crc) { \
@@ -103,5 +101,11 @@ namespace Invader {
             }
             return crc_value;
         }
+    }
+    
+    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc, std::uint32_t *new_random, bool *check_dirty, bool allow_compressed) {
+        // Parse the map
+        Map map = allow_compressed ? Map::map_with_copy(data, size) : Map::map_with_pointer(const_cast<std::byte *>(data), size);
+        return calculate_map_crc(map, new_crc, new_random, check_dirty);
     }
 }

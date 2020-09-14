@@ -7,6 +7,7 @@ endif()
 if(${INVADER_INFO})
     add_executable(invader-info
         src/info/info.cpp
+        src/info/info_def.cpp
     )
     target_link_libraries(invader-info invader)
 
