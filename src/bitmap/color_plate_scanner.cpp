@@ -726,13 +726,13 @@ namespace Invader {
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
                     for(std::uint32_t x = 0; x < mipmap_width; x++) {
                         auto &pixel = this_mipmap_data[x + y * mipmap_width];
+                        
                         auto last_a = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2];
                         auto last_b = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2 + 1];
                         auto last_c = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2];
                         auto last_d = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2 + 1];
                         pixel = last_a; // Nearest-neighbor first
-                        
-                        int pixel_count = 0;
+                        int pixel_count = 4;
 
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / pixel_count)
                         #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; }
