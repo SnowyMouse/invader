@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.37.1] - 2020-09-15
 ### Added
 - invader-bitmap: Added `light-map` as a usage
 - invader-compare: Added `-G` which allows you to ignore resource maps for the
@@ -14,6 +14,9 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Now reports if a map's tag indices are outside of stock Custom
   Edition's
 - invader-info: Changed the outputs of some of the options given
+
+### Fixed
+- invader-bitmap: Fixed mipmaps not generating
 
 ## [0.37.0] - 2020-09-10
 ### Added
