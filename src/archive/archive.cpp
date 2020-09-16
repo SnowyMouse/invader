@@ -104,9 +104,16 @@ int main(int argc, const char **argv) {
             fail = std::strcmp(archive_options.output.c_str() + archive_options.output.size() - sizeof(extension) + 1, extension) != 0;
         }
 
-        if(fail) {
-            eprintf_error("Invalid output file %s. This should end with .tar.xz.\n", archive_options.output.c_str());
-            return EXIT_FAILURE;
+        if(!archive_options.copy) {
+            if(fail) {
+                eprintf_error("Invalid output file %s. This should end with %s.\n", archive_options.output.c_str(), extension);
+                return EXIT_FAILURE;
+            }
+        }
+        else {
+            if(!fail) {
+                eprintf_warn("Output directory %s ends with %s. This is technically valid, but you probably didn't want to do this.\n", archive_options.output.c_str(), extension);
+            }
         }
     }
 
