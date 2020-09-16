@@ -2,6 +2,11 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- invader-archive: Added `-C` which copies the tags to a directory instead of
+  creating an archive.
+
 ## [0.37.1] - 2020-09-15
 ### Added
 - invader-bitmap: Added `light-map` as a usage

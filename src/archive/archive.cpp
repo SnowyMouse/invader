@@ -19,6 +19,7 @@ int main(int argc, const char **argv) {
         std::vector<std::string> tags;
         std::string output;
         bool use_filesystem_path = false;
+        bool copy = false;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
@@ -28,8 +29,9 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz.", "<file>");
+    options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
+    options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -47,6 +49,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'P':
                 archive_options.use_filesystem_path = true;
+                break;
+            case 'C':
+                archive_options.copy = true;
                 break;
         }
     });
@@ -91,7 +96,7 @@ int main(int argc, const char **argv) {
     static const char extension[] = ".tar.xz";
     if(archive_options.output.size() == 0) {
         // Set output
-        archive_options.output = Invader::File::base_name(base_tag.data()) + extension;
+        archive_options.output = Invader::File::base_name(base_tag.data()) + ((archive_options.copy) ? "" : extension);
     }
     else {
         bool fail = true;
@@ -202,56 +207,117 @@ int main(int argc, const char **argv) {
             archive_list.emplace_back(dependency.file_path, path_copy);
         }
     }
+    
+    // Archive
+    if(!archive_options.copy) {
+        // Begin making the archive
+        auto *archive = archive_write_new();
+        archive_write_add_filter_xz(archive);
+        archive_write_set_format_pax_restricted(archive);
+        archive_write_open_filename(archive, archive_options.output.c_str());
 
-    // Begin making the archive
-    auto *archive = archive_write_new();
-    archive_write_add_filter_xz(archive);
-    archive_write_set_format_pax_restricted(archive);
-    archive_write_open_filename(archive, archive_options.output.c_str());
+        // Go through each tag path we got
+        for(std::size_t i = 0; i < archive_list.size(); i++) {
+            const char *path = archive_list[i].first.c_str();
 
-    // Go through each tag path we got
-    for(std::size_t i = 0; i < archive_list.size(); i++) {
-        const char *path = archive_list[i].first.c_str();
+            // Begin
+            auto *entry = archive_entry_new();
+            archive_entry_set_pathname(entry, archive_list[i].second.c_str());
+            archive_entry_set_perm(entry, 0644);
+            archive_entry_set_filetype(entry, AE_IFREG);
 
-        // Begin
-        auto *entry = archive_entry_new();
-        archive_entry_set_pathname(entry, archive_list[i].second.c_str());
-        archive_entry_set_perm(entry, 0644);
-        archive_entry_set_filetype(entry, AE_IFREG);
+            auto data_maybe = Invader::File::open_file(path);
+            if(!data_maybe.has_value()) {
+                eprintf_error("Failed to open %s\n", path);
+                return EXIT_FAILURE;
+            }
+            auto &data = data_maybe.value();
 
-        auto data_maybe = Invader::File::open_file(path);
-        if(!data_maybe.has_value()) {
-            eprintf_error("Failed to open %s\n", path);
-            return EXIT_FAILURE;
+            // Get the filesystem path and write time
+            std::filesystem::path path_path = path;
+
+            // Get the modified time
+            struct stat s;
+            stat(path, &s);
+
+            // Windows uses mtime which is a time_t rather than a struct with nanoseconds
+            #ifdef _WIN32
+            archive_entry_set_mtime(entry, s.st_mtime, 0);
+            #else
+            archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
+            #endif
+
+            // Archive that bastard
+            archive_entry_set_size(entry, data.size());
+            archive_write_header(archive, entry);
+            archive_write_data(archive, data.data(), data.size());
+
+            // Close it
+            archive_entry_free(entry);
         }
-        auto &data = data_maybe.value();
 
-        // Get the filesystem path and write time
-        std::filesystem::path path_path = path;
-
-        // Get the modified time
-        struct stat s;
-        stat(path, &s);
-
-        // Windows uses mtime which is a time_t rather than a struct with nanoseconds
-        #ifdef _WIN32
-        archive_entry_set_mtime(entry, s.st_mtime, 0);
-        #else
-        archive_entry_set_mtime(entry, s.st_mtim.tv_sec, 0);
-        #endif
-
-        // Archive that bastard
-        archive_entry_set_size(entry, data.size());
-        archive_write_header(archive, entry);
-        archive_write_data(archive, data.data(), data.size());
-
-        // Close it
-        archive_entry_free(entry);
+        // Save and close
+        archive_write_close(archive);
+        archive_write_free(archive);
     }
-
-    // Save and close
-    archive_write_close(archive);
-    archive_write_free(archive);
+    // Copy
+    else {
+        // Make the directory if it doesn't yet exist
+        auto base_path = std::filesystem::path(archive_options.output.c_str());
+        if(!std::filesystem::is_directory(base_path)) {
+            try {
+                std::filesystem::create_directory(base_path);
+            }
+            catch(std::exception &e) {
+                eprintf_error("Failed to create directory %s: %s", base_path.string().c_str(), e.what());
+                return EXIT_FAILURE;
+            }
+        }
+        
+        // Go through each file to archive
+        for(std::size_t i = 0; i < archive_list.size(); i++) {
+            auto old_path = std::filesystem::path(archive_list[i].first.c_str());
+            auto new_path = base_path / std::filesystem::path(archive_list[i].second.c_str());
+            
+            // Copy function
+            auto place_if_possible = [&new_path, &old_path]() -> bool {
+                // If it exists, continue
+                if(std::filesystem::exists(new_path)) {
+                    return false;
+                }
+                
+                // Try to see if we need to create the directory
+                auto up_one_dir = new_path.parent_path();
+                if(!std::filesystem::exists(up_one_dir)) {
+                    try {
+                        std::filesystem::create_directories(up_one_dir);
+                    }
+                    catch(std::exception &e) {
+                        eprintf_error("Failed to create directory %s: %s", up_one_dir.string().c_str(), e.what());
+                        return false;
+                    }
+                }
+                
+                // Now copy
+                try {
+                    std::filesystem::copy_file(old_path, new_path);
+                }
+                catch(std::exception &e) {
+                    eprintf_error("Failed to create copy %s to %s: %s", old_path.string().c_str(), new_path.string().c_str(), e.what());
+                    return false;
+                }
+                
+                return true;
+            };
+            
+            if(place_if_possible()) {
+                oprintf_success("Saved %s", new_path.string().c_str());
+            }
+            else {
+                eprintf_warn("Skipping %s...", new_path.string().c_str());
+            }
+        }
+    }
 
     return EXIT_SUCCESS;
 }
