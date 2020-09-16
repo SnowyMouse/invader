@@ -106,13 +106,13 @@ int main(int argc, const char **argv) {
 
         if(!archive_options.copy) {
             if(fail) {
-                eprintf_error("Invalid output file %s. This should end with %s.\n", archive_options.output.c_str(), extension);
+                eprintf_error("Invalid output file path %s. This should end with %s.\n", archive_options.output.c_str(), extension);
                 return EXIT_FAILURE;
             }
         }
         else {
             if(!fail) {
-                eprintf_warn("Output directory %s ends with %s. This is technically valid, but you probably didn't want to do this.\n", archive_options.output.c_str(), extension);
+                eprintf_warn("Output directory path %s ends with %s.\nThis is technically valid, but you probably didn't want to do this.", archive_options.output.c_str(), extension);
             }
         }
     }
