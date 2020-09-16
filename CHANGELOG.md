@@ -6,6 +6,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-archive: Added `-C` which copies the tags to a directory instead of
   creating an archive.
+  
+### Fixed
+- invader-build: Fixed some scenery spawns warning about fullbright when it is
+  not an issue
 
 ## [0.37.1] - 2020-09-15
 ### Added

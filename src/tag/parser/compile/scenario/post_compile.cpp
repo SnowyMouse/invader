@@ -54,7 +54,6 @@ namespace Invader::Parser {
                             object_bounding_offset = object_bounding_offset + node.default_translation; \
                         } \
                         auto rotation = object.rotation; \
-                        std::swap(rotation.yaw, rotation.pitch); \
                         auto rotated = rotate_vector(object_bounding_offset, euler_to_matrix(rotation)); \
                         auto position_to_check = object.position + rotated; \
                         for(std::size_t b = 0; b < bsp_count; b++) { \
