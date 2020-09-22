@@ -11,6 +11,7 @@
 
 namespace Invader::EditQt {
     TagTreeWidget::TagTreeWidget(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, bool show_directories) : QTreeWidget(parent), filter(classes), tag_arrays_to_show(tags_directories), show_directories(show_directories) {
+        this->setColumnCount(1);
         this->setAlternatingRowColors(true);
         this->setHeaderHidden(true);
         this->setAnimated(false);
@@ -172,6 +173,40 @@ namespace Invader::EditQt {
                     if(!found) {
                         dir_item->setIcon(0, file_icon);
                     }
+                    
+                    // Make size text
+                    char size[12];
+                    std::uint64_t file_size;
+                    try {
+                        file_size = std::filesystem::file_size(t.full_path);
+                    }
+                    catch(std::exception &e) {
+                        eprintf_error("Failed to get file size for %s: %s", t.full_path.c_str(), e.what());
+                        file_size = 0;
+                    }
+                    if(file_size > 1024 * 1024) {
+                        std::snprintf(size, sizeof(size), "%.02f MiB", file_size / 1024.0 / 1024.0);
+                    }
+                    else if(file_size > 1024) {
+                        std::snprintf(size, sizeof(size), "%.02f KiB", file_size / 1024.0);
+                    }
+                    else if(file_size > 0) {
+                        std::snprintf(size, sizeof(size), "%zu byte%s", file_size, file_size == 1 ? "" : "s");
+                    }
+                    else {
+                        std::strcpy(size, "Unknown");
+                    }
+                    
+                    // Make hover text
+                    char text[1024];
+                    std::snprintf(text, sizeof(text),
+                        "Virtual path: %s\n"
+                        "File path: %s\n"
+                        "File size: %s"
+                    , t.tag_path.c_str(),  t.full_path.c_str(), size);
+                    dir_item->setToolTip(0, text);
+                    dir_item->setToolTip(1, text);
+                    dir_item->setText(1, size);
                 }
                 else if(!found) {
                     dir_item->setIcon(0, dir_icon);

@@ -8,6 +8,10 @@ This is used for recording Invader's changes. This changelog is based on
   creating an archive.
 - invader-bitmap: Added `-R` which uses the compressed color plate data of the
   tag in pllace of an image file (this will not work with extracted tags)
+
+### Changed
+- invader-edit-qt: Mousing over a tag now displays the file size and path of the
+  tag
   
 ### Fixed
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
