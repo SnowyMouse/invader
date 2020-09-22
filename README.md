@@ -207,15 +207,19 @@ Options:
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
+  -R --regenerate              Use the bitmap tag's color plate as data.
   -s --mipmap-scale <type>     [REQUIRES --extended] Mipmap scale type. Can be:
                                linear, nearest-alpha, nearest. Default (new
                                tag): linear
   -t --tags <dir>              Use the specified tags directory.
-  -T --type <type>             Set the type of bitmap. Can be: 2d, 3d, cubemap,
-                               interface, or sprite. Default (new tag): 2d
-  -u --usage <usage>           Set the bitmap usage. Can be: default, bumpmap,
-                               detail. Default: default
-  -x --extended                Create an extended_bitmap tag.
+  -T --type <type>             Set the type of bitmap. Can be: 2d-textures,
+                               3d-textures, cube-maps, interface-bitmaps, or
+                               sprites. Default (new tag): 2d
+  -u --usage <usage>           Set the bitmap usage. Can be: alpha-blend,
+                               default, height-map, detail-map, light-map,
+                               vector-map. Default: default
+  -x --extended                Create an invader_bitmap tag (required for some
+                               features).
 ```
 
 #### Uncompressed bitmap formats

@@ -90,6 +90,9 @@ struct BitmapOptions {
 
     // Use extended
     bool use_extended = false;
+    
+    // Regenerate?
+    bool regenerate = false;
 };
 
 template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::string &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
@@ -98,6 +101,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // Start building the bitmap tag
     T bitmap_tag_data = {};
+    bool source_is_extended = false;
 
     // See if we can get anything out of this
     if(!bitmap_options.ignore_tag_data && std::filesystem::exists(final_path)) {
@@ -164,7 +168,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         bitmap_tag_data.bitmap_data.clear();
         bitmap_tag_data.bitmap_group_sequence.clear();
         bitmap_tag_data.processed_pixel_data.clear();
-        bitmap_tag_data.compressed_color_plate_data.clear();
+        
+        // TODO: Handle converting between extended and non-extended
+        source_is_extended = sizeof(T) == sizeof(Parser::InvaderBitmap);
     }
 
     // If these values weren't set, set them
@@ -191,7 +197,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     // Make sure we're using features that are allowed
     if(sizeof(T) != sizeof(Parser::InvaderBitmap)) {
         if(bitmap_options.use_extended) {
-            eprintf_error("Invader is enabled. Apparently I screwed up when trying to handle that.");
+            eprintf_error("Extended is enabled. Apparently I screwed up when trying to handle that.");
             return EXIT_FAILURE;
         }
         if(*bitmap_options.sprite_budget > 512) {
@@ -209,36 +215,88 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     std::size_t image_size = 0;
     ColorPlatePixel *image_pixels = nullptr;
 
-    // Try to figure out the extension
-    auto bitmap_data_path = (data_path / bitmap_tag).string();
-    for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-        std::string image_path = bitmap_data_path + SUPPORTED_FORMATS[i];
-        if(std::filesystem::exists(image_path)) {
-            switch(i) {
-                case SUPPORTED_FORMATS_TIF:
-                case SUPPORTED_FORMATS_TIFF:
-                    image_pixels = load_tiff(image_path.c_str(), image_width, image_height, image_size);
-                    break;
-                case SUPPORTED_FORMATS_PNG:
-                case SUPPORTED_FORMATS_TGA:
-                case SUPPORTED_FORMATS_BMP:
-                    image_pixels = load_image(image_path.c_str(), image_width, image_height, image_size);
-                    break;
-                default:
-                    std::terminate();
-                    break;
+    // If we're regenerating, our color plate data is in the tag
+    if(bitmap_options.regenerate) {
+        // Check to see if we have data
+        auto size = bitmap_tag_data.compressed_color_plate_data.size();
+        image_width = bitmap_tag_data.color_plate_width;
+        image_height = bitmap_tag_data.color_plate_height;
+        if(size < sizeof(std::uint32_t) || image_width == 0 || image_height == 0) {
+            eprintf_error("Cannot regenerate a bitmap that doesn't have color plate data.");
+            return EXIT_FAILURE;
+        }
+        
+        // Get the size of the data we're going to decompress
+        auto *data = bitmap_tag_data.compressed_color_plate_data.data();
+        image_size = reinterpret_cast<HEK::BigEndian<std::uint32_t> *>(data)->read();
+        if((image_size % sizeof(ColorPlatePixel)) != 0) {
+            invalid_color_plate_data_size_spaghetti_code:
+            eprintf_error("Cannot regenerate due the compressed color plate data size being wrong)");
+            return EXIT_FAILURE;
+        }
+        image_pixels = new ColorPlatePixel[image_size / sizeof(ColorPlatePixel)];
+        
+        data += sizeof(std::uint32_t);
+        size -= sizeof(std::uint32_t);
+        
+        // Zstandard if extended
+        if(source_is_extended) {
+            if(ZSTD_decompress(image_pixels, image_size, data, size) != image_size) {
+                goto invalid_color_plate_data_size_spaghetti_code;
             }
-            break;
+        }
+
+        // DEFLATE if not extended
+        else {
+            z_stream inflate_stream;
+            inflate_stream.zalloc = Z_NULL;
+            inflate_stream.zfree = Z_NULL;
+            inflate_stream.opaque = Z_NULL;
+            inflate_stream.avail_out = image_size;
+            inflate_stream.next_out = reinterpret_cast<Bytef *>(image_pixels);
+            inflate_stream.avail_in = size;
+            inflate_stream.next_in = reinterpret_cast<Bytef *>(data);
+
+            // Do it
+            inflateInit(&inflate_stream);
+            inflate(&inflate_stream, Z_FINISH);
+            inflateEnd(&inflate_stream);
         }
     }
-
-    if(image_pixels == nullptr) {
-        eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
-        eprintf("Valid formats are:\n");
-        for(auto *format : SUPPORTED_FORMATS) {
-            eprintf("    %s\n", format);
+    
+    // Otherwise, find the file
+    else {
+        // Try to figure out the extension
+        auto bitmap_data_path = (data_path / bitmap_tag).string();
+        for(auto i = found_format; i < SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+            std::string image_path = bitmap_data_path + SUPPORTED_FORMATS[i];
+            if(std::filesystem::exists(image_path)) {
+                switch(i) {
+                    case SUPPORTED_FORMATS_TIF:
+                    case SUPPORTED_FORMATS_TIFF:
+                        image_pixels = load_tiff(image_path.c_str(), image_width, image_height, image_size);
+                        break;
+                    case SUPPORTED_FORMATS_PNG:
+                    case SUPPORTED_FORMATS_TGA:
+                    case SUPPORTED_FORMATS_BMP:
+                        image_pixels = load_image(image_path.c_str(), image_width, image_height, image_size);
+                        break;
+                    default:
+                        std::terminate();
+                        break;
+                }
+                break;
+            }
         }
-        return EXIT_FAILURE;
+
+        if(image_pixels == nullptr) {
+            eprintf_error("Failed to find %s in %s", bitmap_tag.c_str(), bitmap_options.data);
+            eprintf("Valid formats are:\n");
+            for(auto *format : SUPPORTED_FORMATS) {
+                eprintf("    %s\n", format);
+            }
+            return EXIT_FAILURE;
+        }
     }
 
     // Set up sprite parameters
@@ -266,8 +324,9 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     std::size_t bitmap_count = scanned_color_plate.bitmaps.size();
 
     // Compress the original input blob
-    {
+    if(!bitmap_options.regenerate) {
         // Get ready
+        bitmap_tag_data.compressed_color_plate_data.clear();
         std::vector<std::byte> compressed_data(image_size * 4);
         BigEndian<std::uint32_t> decompressed_size;
         decompressed_size = static_cast<std::uint32_t>(image_size);
@@ -447,6 +506,7 @@ int main(int argc, char *argv[]) {
     options.emplace_back("bump-height", 'H', 1, "Set the apparent bumpmap height from 0 to 1. Default (new tag): 0.026", "<height>");
     options.emplace_back("usage", 'u', 1, "Set the bitmap usage. Can be: alpha-blend, default, height-map, detail-map, light-map, vector-map. Default: default", "<usage>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the data.");
+    options.emplace_back("regenerate", 'R', 0, "Use the bitmap tag's compressed color plate data as data.");
     options.emplace_back("extended", 'x', 0, "Create an invader_bitmap tag (required for some features).");
 
     static constexpr char DESCRIPTION[] = "Create or modify a bitmap tag.";
@@ -461,6 +521,10 @@ int main(int argc, char *argv[]) {
 
             case 't':
                 bitmap_options.tags = arguments[0];
+                break;
+
+            case 'R':
+                bitmap_options.regenerate = true;
                 break;
 
             case 'i':
@@ -604,19 +668,40 @@ int main(int argc, char *argv[]) {
     SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
 
     if(bitmap_options.filesystem_path) {
-        std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
-        SupportedFormatsInt i;
-        for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
-            auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
-            if(bitmap_tag_maybe.has_value()) {
-                bitmap_tag = bitmap_tag_maybe.value();
-                found_format = i;
-                break;
+        // Check for a ".bitmap" and ".extended_bitmap"
+        if(bitmap_options.regenerate) {
+            std::vector<std::string> tags_v(&bitmap_options.tags, &bitmap_options.tags + 1);
+            auto try_it_and_buy_it = [&tags_v, &bitmap_tag](HEK::TagClassInt tag_class_int) -> bool {
+                auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, HEK::tag_class_to_extension(tag_class_int));
+                if(!p.has_value()) {
+                    return false;
+                }
+                bitmap_tag = *p;
+                return true;
+            };
+            
+            if(!try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP) && try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_BITMAP)) {
+                eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
+                return EXIT_FAILURE;
             }
         }
-        if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
-            eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
-            return EXIT_FAILURE;
+        
+        // Iterate through all the possible extensions
+        else {
+            std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
+            SupportedFormatsInt i;
+            for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
+                auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
+                if(bitmap_tag_maybe.has_value()) {
+                    bitmap_tag = *bitmap_tag_maybe;
+                    found_format = i;
+                    break;
+                }
+            }
+            if(i == SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT) {
+                eprintf_error("Failed to find a valid bitmap %s in the data directory.", remaining_arguments[0]);
+                return EXIT_FAILURE;
+            }
         }
     }
 

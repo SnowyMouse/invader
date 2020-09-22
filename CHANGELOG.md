@@ -6,6 +6,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Added
 - invader-archive: Added `-C` which copies the tags to a directory instead of
   creating an archive.
+- invader-bitmap: Added `-R` which uses the compressed color plate data of the
+  tag in pllace of an image file (this will not work with extracted tags)
   
 ### Fixed
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
