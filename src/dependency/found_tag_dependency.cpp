@@ -67,12 +67,7 @@ namespace Invader {
                                 continue;
                             }
 
-                            // Fix .model dependencies so they're .gbxmodel (this is only an issue with HEK stock tags)
                             auto class_to_use = dependency.second;
-                            if(class_to_use == TagClassInt::TAG_CLASS_MODEL) {
-                                class_to_use = TagClassInt::TAG_CLASS_GBXMODEL;
-                            }
-
                             std::string path_copy = File::halo_path_to_preferred_path(dependency.first + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
