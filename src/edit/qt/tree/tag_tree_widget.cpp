@@ -181,7 +181,7 @@ namespace Invader::EditQt {
                         file_size = std::filesystem::file_size(t.full_path);
                     }
                     catch(std::exception &e) {
-                        eprintf_error("Failed to get file size for %s: %s", t.full_path.c_str(), e.what());
+                        eprintf_error("Failed to get file size for %s: %s", t.full_path.string().c_str(), e.what());
                         file_size = 0;
                     }
                     if(file_size > 1024 * 1024) {
@@ -203,7 +203,7 @@ namespace Invader::EditQt {
                         "Virtual path: %s\n"
                         "File path: %s\n"
                         "File size: %s"
-                    , t.tag_path.c_str(),  t.full_path.c_str(), size);
+                    , t.tag_path.c_str(),  t.full_path.string().c_str(), size);
                     dir_item->setToolTip(0, text);
                     dir_item->setToolTip(1, text);
                     dir_item->setText(1, size);
