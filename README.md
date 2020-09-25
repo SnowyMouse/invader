@@ -677,6 +677,8 @@ Options:
                                16-bit-pcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
+  -j --threads                 Set the number of threads to use for resampling.
+                               Default: 1
   -l --compress-level <lvl>    Set the compression level. This can be between
                                0.0 and 1.0. For Ogg Vorbis, higher levels
                                result in better quality but worse sizes. For
@@ -694,7 +696,8 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -x --extended                Create an extended_sound tag.
+  -x --extended                Create an invader_sound tag (required for some
+                               features).
 ```
 
 #### What is splitting?

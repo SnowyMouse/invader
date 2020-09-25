@@ -8,6 +8,10 @@ This is used for recording Invader's changes. This changelog is based on
   creating an archive.
 - invader-bitmap: Added `-R` which uses the compressed color plate data of the
   tag in pllace of an image file (this will not work with extracted tags)
+- invader-sound: Added `--threads` or `-j` which can be used to parallelize
+  encoding and resampling of sounds with a set number of threads. This can
+  drastically speed up sound tag generation when creating a sound tag with
+  multiple or split permutations.
 
 ### Changed
 - invader-edit-qt: Mousing over a tag now displays the file size and path of the
