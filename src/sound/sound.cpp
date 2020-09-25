@@ -352,7 +352,13 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             total_sound_count++;
             while(thread_count > sound_options.max_threads);
             thread_count++;
-            std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count).detach();
+            auto thread = std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count);
+            if(sound_options.max_threads > 1) {
+                thread.detach();
+            }
+            else {
+                thread.join();
+            }
         }
     }
     
@@ -454,14 +460,19 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         eprintf_error("Split dialogue is unsupported.");
         std::exit(EXIT_FAILURE);
     }
+    
+    // Make sure we don't completely blow things up
+    std::mutex encoding_mutex;
 
     // Encode this
     for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
+        encoding_mutex.lock();
         auto &pitch_range = sound_tag.pitch_ranges[pitch_range_index[pr]];
         auto &permutations = pitch_ranges[pr].first;
         auto actual_permutation_count = permutations.size();
         pitch_range.actual_permutation_count = actual_permutation_count;
         pitch_range.permutations.resize(actual_permutation_count);
+        encoding_mutex.unlock();
         
         for(auto &p : pitch_range.permutations) {
             p.format = sound_tag.format;
@@ -477,87 +488,85 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             std::size_t bytes_per_sample_one_channel = permutation.bits_per_sample / 8;
             std::size_t bytes_per_sample_all_channels = bytes_per_sample_one_channel * permutation.channel_count;
 
-            // Generate mouth data (a lot of this comes from MosesofEgypt's Reclaimer)
-            auto generate_mouth_data = [&permutation](Parser::SoundPermutation &p, const std::vector<std::uint8_t> &pcm_8_bit) {
-                // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
-                std::size_t samples_per_tick = static_cast<std::size_t>((permutation.sample_rate * permutation.channel_count) / TICK_RATE + 0.5);
-                std::size_t sample_count = pcm_8_bit.size();
-
-                // Generate samples, adding an extra tick for incomplete ticks
-                std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
-                p.mouth_data = std::vector<std::byte>(tick_count);
-                auto *pcm_data = pcm_8_bit.data();
-
-                // Get max and total
-                std::uint8_t max = 0;
-                double mouth_total = 0;
-                for(std::size_t t = 0; t < tick_count; t++) {
-                    // Get the sample range, accounting for when there aren't enough ticks
-                    std::size_t first_sample = t * samples_per_tick;
-                    std::size_t sample_count_to_check = sample_count - first_sample;
-                    if(sample_count_to_check > samples_per_tick) {
-                        sample_count_to_check = samples_per_tick;
-                    }
-                    std::size_t last_sample = first_sample + sample_count_to_check;
-                    double total = 0;
-                    for(std::size_t s = first_sample; s < last_sample; s++) {
-                        total += pcm_data[s];
-                    }
-
-                    // Divide by samples per tick
-                    double average = total / samples_per_tick;
-                    mouth_total += average;
-                    p.mouth_data[t] = static_cast<std::byte>(average);
-
-                    if(average > max) {
-                        max = average;
-                    }
-                }
-
-                // Get average and min, clamping min to 0-255
-                double average = mouth_total / tick_count;
-                double min = 2.0 * average - max;
-                if(min > UINT8_MAX) {
-                    min = UINT8_MAX;
-                }
-                else if(min < 0) {
-                    min = 0;
-                }
-
-                // Get range
-                double range = static_cast<double>(max + average) / 2 - min;
-
-                // Do nothing if there's no range
-                if(range == 0) {
-                    return;
-                }
-
-                // Go through each sample
-                for(std::size_t t = 0; t < tick_count; t++) {
-                    double sample = (static_cast<std::uint8_t>(p.mouth_data[t]) - min) / range;
-
-                    // Clamp to 0 - 255
-                    if(sample >= 1.0) {
-                        p.mouth_data[t] = static_cast<std::byte>(UINT8_MAX);
-                    }
-                    else if(sample <= 0.0) {
-                        p.mouth_data[t] = static_cast<std::byte>(0);
-                    }
-                    else {
-                        p.mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
-                    }
-                }
-            };
-
             // Encode a permutation
-            auto encode_permutation = [&permutation, &format, &sound_options, &generate_mouth_data, &is_dialogue](Parser::SoundPermutation &p, std::vector<std::byte> &pcm) {
-                // Set the default stuff
-                p.gain = 1.0F;
+            auto encode_permutation = [](auto *sound_tag, std::size_t pitch_range, std::size_t pitch_range_permutation, std::mutex *mutex, std::vector<std::byte> pcm, const SoundReader::Sound *permutation, bool is_dialogue, SoundFormat format, SoundOptions *sound_options, std::atomic<std::size_t> *thread_count) {
+                auto generate_mouth_data = [&permutation](const std::vector<std::uint8_t> &pcm_8_bit) -> std::vector<std::byte> {
+                    // Basically, take the sample rate, multiply by channel count, divide by tick rate (30 Hz), and round the result
+                    std::size_t samples_per_tick = static_cast<std::size_t>((permutation->sample_rate * permutation->channel_count) / TICK_RATE + 0.5);
+                    std::size_t sample_count = pcm_8_bit.size();
+
+                    // Generate samples, adding an extra tick for incomplete ticks
+                    std::size_t tick_count = (sample_count + samples_per_tick - 1) / samples_per_tick;
+                    std::vector<std::byte> mouth_data = std::vector<std::byte>(tick_count);
+                    auto *pcm_data = pcm_8_bit.data();
+
+                    // Get max and total
+                    std::uint8_t max = 0;
+                    double mouth_total = 0;
+                    for(std::size_t t = 0; t < tick_count; t++) {
+                        // Get the sample range, accounting for when there aren't enough ticks
+                        std::size_t first_sample = t * samples_per_tick;
+                        std::size_t sample_count_to_check = sample_count - first_sample;
+                        if(sample_count_to_check > samples_per_tick) {
+                            sample_count_to_check = samples_per_tick;
+                        }
+                        std::size_t last_sample = first_sample + sample_count_to_check;
+                        double total = 0;
+                        for(std::size_t s = first_sample; s < last_sample; s++) {
+                            total += pcm_data[s];
+                        }
+
+                        // Divide by samples per tick
+                        double average = total / samples_per_tick;
+                        mouth_total += average;
+                        mouth_data[t] = static_cast<std::byte>(average);
+
+                        if(average > max) {
+                            max = average;
+                        }
+                    }
+
+                    // Get average and min, clamping min to 0-255
+                    double average = mouth_total / tick_count;
+                    double min = 2.0 * average - max;
+                    if(min > UINT8_MAX) {
+                        min = UINT8_MAX;
+                    }
+                    else if(min < 0) {
+                        min = 0;
+                    }
+
+                    // Get range
+                    double range = static_cast<double>(max + average) / 2 - min;
+
+                    // Do nothing if there's no range
+                    if(range == 0) {
+                        return mouth_data;
+                    }
+
+                    // Go through each sample
+                    for(std::size_t t = 0; t < tick_count; t++) {
+                        double sample = (static_cast<std::uint8_t>(mouth_data[t]) - min) / range;
+
+                        // Clamp to 0 - 255
+                        if(sample >= 1.0) {
+                            mouth_data[t] = static_cast<std::byte>(UINT8_MAX);
+                        }
+                        else if(sample <= 0.0) {
+                            mouth_data[t] = static_cast<std::byte>(0);
+                        }
+                        else {
+                            mouth_data[t] = static_cast<std::byte>(sample * UINT8_MAX);
+                        }
+                    }
+                    
+                    return mouth_data;
+                };
 
                 // Generate mouth data if needed
                 if(is_dialogue) {
                     // Convert samples to 8-bit unsigned so we can use it to generate mouth data
-                    auto samples_float = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
+                    auto samples_float = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
                     std::vector<std::uint8_t> pcm_8_bit;
                     pcm_8_bit.reserve(samples_float.size());
                     for(auto &f : samples_float) {
@@ -568,59 +577,74 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                         pcm_8_bit.emplace_back(static_cast<std::uint8_t>(ff * UINT8_MAX));
                     }
                     samples_float = {};
-                    generate_mouth_data(p, pcm_8_bit);
+                    generate_mouth_data(pcm_8_bit);
                 }
+                
+                // Do the encoding thing
+                std::vector<std::byte> samples;
+                std::size_t buffer_size = 0;
 
                 switch(format) {
                     // Basically, just make it 16-bit big endian
                     case SoundFormat::SOUND_FORMAT_16_BIT_PCM:
-                        p.samples = Invader::SoundEncoder::convert_to_16_bit_pcm_big_endian(pcm, permutation.bits_per_sample);
-                        p.buffer_size = p.samples.size();
+                        samples = Invader::SoundEncoder::convert_to_16_bit_pcm_big_endian(pcm, permutation->bits_per_sample);
+                        buffer_size = samples.size();
                         break;
 
                     // Encode to Vorbis in an Ogg container
                     case SoundFormat::SOUND_FORMAT_OGG_VORBIS: {
-                        if(sound_options.compression_level > 1.0F) {
-                            sound_options.compression_level = 1.0F;
+                        if(sound_options->compression_level > 1.0F) {
+                            sound_options->compression_level = 1.0F;
                         }
-                        else if(sound_options.compression_level < 0.0F) {
-                            sound_options.compression_level = 0.0F;
+                        else if(sound_options->compression_level < 0.0F) {
+                            sound_options->compression_level = 0.0F;
                         }
-                        if(sound_options.bitrate.has_value()) {
-                            p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis_cbr(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.bitrate);
+                        if(sound_options->bitrate.has_value()) {
+                            samples = Invader::SoundEncoder::encode_to_ogg_vorbis_cbr(pcm, permutation->bits_per_sample, permutation->channel_count, permutation->sample_rate, *sound_options->bitrate);
                         }
                         else {
-                            p.samples = Invader::SoundEncoder::encode_to_ogg_vorbis_vbr(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, *sound_options.compression_level);
+                            samples = Invader::SoundEncoder::encode_to_ogg_vorbis_vbr(pcm, permutation->bits_per_sample, permutation->channel_count, permutation->sample_rate, *sound_options->compression_level);
                         }
-                        p.buffer_size = pcm.size() / (permutation.bits_per_sample / 8) * sizeof(std::int16_t);
+                        buffer_size = pcm.size() / (permutation->bits_per_sample / 8) * sizeof(std::int16_t);
                         break;
                     }
 
                     // Encode to FLAC
                     case SoundFormat::SOUND_FORMAT_FLAC: {
                         // Clamp to 0.0 - 0.8
-                        if(sound_options.compression_level > 0.8F) {
-                            sound_options.compression_level = 0.8F;
+                        if(sound_options->compression_level > 0.8F) {
+                            sound_options->compression_level = 0.8F;
                         }
-                        else if(sound_options.compression_level < 0.0F) {
-                            sound_options.compression_level = 0.0F;
+                        else if(sound_options->compression_level < 0.0F) {
+                            sound_options->compression_level = 0.0F;
                         }
                         // Convert to integer, rounding to the nearest level
-                        int flac_level = static_cast<int>(*sound_options.compression_level * 10.0F + 0.5F);
-                        p.samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation.bits_per_sample, permutation.channel_count, permutation.sample_rate, flac_level);
+                        int flac_level = static_cast<int>(*sound_options->compression_level * 10.0F + 0.5F);
+                        samples = Invader::SoundEncoder::encode_to_flac(pcm, permutation->bits_per_sample, permutation->channel_count, permutation->sample_rate, flac_level);
                         break;
                     }
 
                     // Encode to Xbox ADPCMeme
                     case SoundFormat::SOUND_FORMAT_XBOX_ADPCM:
-                        p.samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation.bits_per_sample, permutation.channel_count);
-                        p.buffer_size = 0;
+                        samples = Invader::SoundEncoder::encode_to_xbox_adpcm(pcm, permutation->bits_per_sample, permutation->channel_count);
                         break;
 
                     default:
                         eprintf_error("Invalid format. What?");
                         std::terminate();
                 }
+                
+                // Set the default stuff
+                mutex->lock();
+                auto &p = sound_tag->pitch_ranges[pitch_range].permutations[pitch_range_permutation];
+                p.gain = 1.0F;
+                p.samples = samples;
+                p.buffer_size = buffer_size;
+                p.samples.shrink_to_fit();
+                mutex->unlock();
+                
+                // Finish up
+                (*thread_count)--;
             };
 
             // Split if requested
@@ -629,7 +653,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 std::size_t digested = 0;
                 while(permutation.pcm.size() > 0) {
                     // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one as a copy
+                    encoding_mutex.lock();
                     auto &p = digested == 0 ? pitch_range.permutations[i] : pitch_range.permutations.emplace_back(pitch_range.permutations[i]);
+                    encoding_mutex.unlock();
                     std::size_t remaining_size = permutation.pcm.size();
                     std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
 
@@ -637,8 +663,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     auto *sample_data_start = permutation.pcm.data();
                     auto sample_data = std::vector<std::byte>(sample_data_start, sample_data_start + permutation_size);
                     permutation.pcm = std::vector<std::byte>(permutation.pcm.begin() + permutation_size, permutation.pcm.end());
-                    encode_permutation(p, sample_data);
-                    p.samples.shrink_to_fit();
                     permutation.pcm.shrink_to_fit();
                     digested += permutation_size;
 
@@ -648,25 +672,54 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     else {
                         std::size_t next_permutation = pitch_range.permutations.size();
                         if(next_permutation > MAX_PERMUTATIONS) {
+                            encoding_mutex.lock();
                             eprintf_error("Maximum number of total permutations (%zu > %zu) exceeded", next_permutation, MAX_PERMUTATIONS);
                             std::exit(EXIT_FAILURE);
                         }
                         p.next_permutation_index = static_cast<Index>(next_permutation);
                     }
+                    
+                    // Wait until we have threads cleared up
+                    while(thread_count > sound_options.max_threads);
+                    
+                    // Punch it
+                    thread_count++;
+                    auto thread = std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count);
+                    if(sound_options.max_threads > 1) {
+                        thread.detach();
+                    }
+                    else {
+                        thread.join();
+                    }
                 }
             }
             else {
+                // Wait until we have threads cleared up
+                while(thread_count > sound_options.max_threads);
+                    
+                // Punch it
+                thread_count++;
                 auto &p = pitch_range.permutations[i];
                 p.next_permutation_index = NULL_INDEX;
-                encode_permutation(p, permutation.pcm);
-                p.samples.shrink_to_fit();
+                auto thread = std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(permutation.pcm), &permutation, is_dialogue, format, &sound_options, &thread_count);
+                if(sound_options.max_threads > 1) {
+                    thread.detach();
+                }
+                else {
+                    thread.join();
+                }
             }
 
             // Print sound info
+            encoding_mutex.lock();
             oprintf("    %-32s%2zu:%06.3f (%2zu-bit %6s %5zu Hz)\n", permutation.name.c_str(), static_cast<std::size_t>(seconds) / 60, std::fmod(seconds, 60.0), static_cast<std::size_t>(permutation.input_bits_per_sample), permutation.input_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(permutation.input_sample_rate));
             permutation.pcm = std::vector<std::byte>();
+            encoding_mutex.unlock();
         }
     }
+    
+    // Wait until we have 0 threads left
+    while(thread_count > 0);
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
@@ -693,7 +746,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
     options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
-    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for resampling. Default: 1");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel resampling and encoding. Default: 1");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
