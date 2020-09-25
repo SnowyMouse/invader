@@ -10,6 +10,8 @@
 #include <invader/version.hpp>
 #include <vorbis/vorbisenc.h>
 #include <samplerate.h>
+#include <atomic>
+#include <thread>
 
 using namespace Invader;
 using namespace Invader::HEK;
@@ -26,9 +28,11 @@ struct SoundOptions {
     std::optional<SoundClass> sound_class;
     std::optional<std::uint32_t> sample_rate;
     std::optional<std::uint16_t> bitrate;
+    std::size_t max_threads = 1;
 };
 
 static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound);
+static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
@@ -340,93 +344,21 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     oprintf("Processing sounds... ");
     oflush();
     std::size_t total_sound_count = 0;
+    std::atomic<std::size_t> thread_count;
+    
+    // Process things!
     for(auto &pitch_range : pitch_ranges) {
         for(auto &permutation : pitch_range.first) {
             total_sound_count++;
-            std::size_t bytes_per_sample = permutation.bits_per_sample / 8;
-            std::size_t sample_count = permutation.pcm.size() / bytes_per_sample;
-
-            // Sample rate doesn't match; this can be fixed with resampling
-            if(permutation.sample_rate != highest_sample_rate) {
-                double ratio = static_cast<double>(highest_sample_rate) / permutation.sample_rate;
-                std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation.pcm, permutation.bits_per_sample);
-                std::vector<float> new_samples(float_samples.size() * ratio);
-                permutation.sample_rate = highest_sample_rate;
-
-                // Resample it
-                SRC_DATA data = {};
-                data.data_in = float_samples.data();
-                data.data_out = new_samples.data();
-                data.input_frames = float_samples.size() / permutation.channel_count;
-                data.output_frames = new_samples.size() / permutation.channel_count;
-                data.src_ratio = ratio;
-                int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation.channel_count);
-                if(res) {
-                    eprintf_error("Failed to resample: %s", src_strerror(res));
-                    std::exit(EXIT_FAILURE);
-                }
-                new_samples.resize(data.output_frames_gen * permutation.channel_count);
-
-                // Set stuff
-                if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-                    bytes_per_sample = sizeof(std::uint16_t);
-                }
-                permutation.sample_rate = highest_sample_rate;
-                permutation.bits_per_sample = bytes_per_sample * 8;
-                sample_count = new_samples.size();
-                permutation.pcm = SoundEncoder::convert_float_to_int(new_samples, permutation.bits_per_sample);
-            }
-
-            // Bits per sample doesn't match; we can fix that though
-            if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-                std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
-                permutation.pcm = SoundEncoder::convert_int_to_int(permutation.pcm, permutation.bits_per_sample, new_bytes_per_sample * 8);
-                bytes_per_sample = new_bytes_per_sample;
-                permutation.bits_per_sample = new_bytes_per_sample * 8;
-            }
-
-            // Mono -> Stereo (just duplicate the channels)
-            if(permutation.channel_count == 1 && highest_channel_count == 2) {
-                std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
-                const std::byte *old_sample = permutation.pcm.data();
-                const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
-                std::byte *new_sample = new_samples.data();
-
-                while(old_sample < old_sample_end) {
-                    std::memcpy(new_sample, old_sample, bytes_per_sample);
-                    std::memcpy(new_sample + bytes_per_sample, old_sample, bytes_per_sample);
-                    old_sample += bytes_per_sample;
-                    new_sample += bytes_per_sample * 2;
-                }
-
-                permutation.pcm = std::move(new_samples);
-                permutation.pcm.shrink_to_fit();
-                permutation.channel_count = 2;
-            }
-
-            // Stereo -> Mono (mixdown)
-            else if(permutation.channel_count == 2 && highest_channel_count == 1) {
-                std::vector<std::byte> new_samples(sample_count * bytes_per_sample / 2);
-                std::byte *new_sample = new_samples.data();
-                const std::byte *old_sample = permutation.pcm.data();
-                const std::byte *old_sample_end = permutation.pcm.data() + permutation.pcm.size();
-
-                while(old_sample < old_sample_end) {
-                    std::int32_t a = Invader::SoundEncoder::read_sample(old_sample, permutation.bits_per_sample);
-                    std::int32_t b = Invader::SoundEncoder::read_sample(old_sample + bytes_per_sample, permutation.bits_per_sample);
-                    std::int64_t ab = a + b;
-                    Invader::SoundEncoder::write_sample(static_cast<std::int32_t>(ab / 2), new_sample, permutation.bits_per_sample);
-
-                    old_sample += bytes_per_sample * 2;
-                    new_sample += bytes_per_sample;
-                }
-
-                permutation.pcm = std::move(new_samples);
-                permutation.pcm.shrink_to_fit();
-                permutation.channel_count = 1;
-            }
+            while(thread_count > sound_options.max_threads);
+            thread_count++;
+            std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count).detach();
         }
     }
+    
+    // Wait until done
+    while(thread_count > 0);
+    
     oprintf("done!\n");
     
     // Remove pitch ranges that are present in the tag but not in what we found
@@ -761,6 +693,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("compress-level", 'l', 1, "Set the compression level. This can be between 0.0 and 1.0. For Ogg Vorbis, higher levels result in better quality but worse sizes. For FLAC, higher levels result in better sizes but longer compression time, clamping from 0.0 to 0.8 (FLAC 0 to FLAC 8). Default: 1.0", "<lvl>");
     options.emplace_back("bitrate", 'b', 1, "Set the bitrate in kilobits per second. This only applies to vorbis.", "<br>");
     options.emplace_back("class", 'c', 1, "Set the class. This is required when generating new sounds. Can be: ambient-computers, ambient-machinery, ambient-nature, device-computers, device-door, device-force-field, device-machinery, device-nature, first-person-damage, game-event, music, object-impacts, particle-impacts, projectile-impact, projectile-detonation, scripted-dialog-force-unspatialized, scripted-dialog-other, scripted-dialog-player, scripted-effect, slow-particle-impacts, unit-dialog, unit-footsteps, vehicle-collision, vehicle-engine, weapon-charge, weapon-empty, weapon-fire, weapon-idle, weapon-overheat, weapon-ready, weapon-reload", "<class>");
+    options.emplace_back("threads", 'j', 1, "Set the number of threads to use for resampling. Default: 1");
 
     static constexpr char DESCRIPTION[] = "Create or modify a sound tag.";
     static constexpr char USAGE[] = "[options] <sound-tag>";
@@ -781,6 +714,19 @@ int main(int argc, const char **argv) {
 
             case 's':
                 sound_options.split = true;
+                break;
+
+            case 'j':
+                try {
+                    sound_options.max_threads = std::stoi(arguments[0]);
+                    if(sound_options.max_threads < 1) {
+                        throw std::exception();
+                    }
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid number of threads %s\n", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'S':
@@ -1024,4 +970,96 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         }
         permutations.insert(permutations.begin() + i, std::move(sound));
     }
+}
+
+static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count) {
+    // Calculate some stuff
+    std::size_t bytes_per_sample = permutation->bits_per_sample / 8;
+    std::size_t sample_count = permutation->pcm.size() / bytes_per_sample;
+    
+    // Mutex for errors
+    static std::mutex error_mutex;
+
+    // Sample rate doesn't match; this can be fixed with resampling
+    if(permutation->sample_rate != highest_sample_rate) {
+        double ratio = static_cast<double>(highest_sample_rate) / permutation->sample_rate;
+        std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
+        std::vector<float> new_samples(float_samples.size() * ratio);
+        permutation->sample_rate = highest_sample_rate;
+
+        // Resample it
+        SRC_DATA data = {};
+        data.data_in = float_samples.data();
+        data.data_out = new_samples.data();
+        data.input_frames = float_samples.size() / permutation->channel_count;
+        data.output_frames = new_samples.size() / permutation->channel_count;
+        data.src_ratio = ratio;
+        int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation->channel_count);
+        if(res) {
+            error_mutex.lock();
+            eprintf_error("Failed to resample: %s", src_strerror(res));
+            std::exit(EXIT_FAILURE);
+        }
+        new_samples.resize(data.output_frames_gen * permutation->channel_count);
+
+        // Set stuff
+        if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            bytes_per_sample = sizeof(std::uint16_t);
+        }
+        permutation->sample_rate = highest_sample_rate;
+        permutation->bits_per_sample = bytes_per_sample * 8;
+        sample_count = new_samples.size();
+        permutation->pcm = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
+    }
+
+    // Bits per sample doesn't match; we can fix that though
+    if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+        std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
+        permutation->pcm = SoundEncoder::convert_int_to_int(permutation->pcm, permutation->bits_per_sample, new_bytes_per_sample * 8);
+        bytes_per_sample = new_bytes_per_sample;
+        permutation->bits_per_sample = new_bytes_per_sample * 8;
+    }
+
+    // Mono -> Stereo (just duplicate the channels)
+    if(permutation->channel_count == 1 && highest_channel_count == 2) {
+        std::vector<std::byte> new_samples(sample_count * 2 * bytes_per_sample);
+        const std::byte *old_sample = permutation->pcm.data();
+        const std::byte *old_sample_end = permutation->pcm.data() + permutation->pcm.size();
+        std::byte *new_sample = new_samples.data();
+
+        while(old_sample < old_sample_end) {
+            std::memcpy(new_sample, old_sample, bytes_per_sample);
+            std::memcpy(new_sample + bytes_per_sample, old_sample, bytes_per_sample);
+            old_sample += bytes_per_sample;
+            new_sample += bytes_per_sample * 2;
+        }
+
+        permutation->pcm = std::move(new_samples);
+        permutation->pcm.shrink_to_fit();
+        permutation->channel_count = 2;
+    }
+
+    // Stereo -> Mono (mixdown)
+    else if(permutation->channel_count == 2 && highest_channel_count == 1) {
+        std::vector<std::byte> new_samples(sample_count * bytes_per_sample / 2);
+        std::byte *new_sample = new_samples.data();
+        const std::byte *old_sample = permutation->pcm.data();
+        const std::byte *old_sample_end = permutation->pcm.data() + permutation->pcm.size();
+
+        while(old_sample < old_sample_end) {
+            std::int32_t a = Invader::SoundEncoder::read_sample(old_sample, permutation->bits_per_sample);
+            std::int32_t b = Invader::SoundEncoder::read_sample(old_sample + bytes_per_sample, permutation->bits_per_sample);
+            std::int64_t ab = a + b;
+            Invader::SoundEncoder::write_sample(static_cast<std::int32_t>(ab / 2), new_sample, permutation->bits_per_sample);
+
+            old_sample += bytes_per_sample * 2;
+            new_sample += bytes_per_sample;
+        }
+
+        permutation->pcm = std::move(new_samples);
+        permutation->pcm.shrink_to_fit();
+        permutation->channel_count = 1;
+    }
+    
+    (*thread_count)--;
 }
