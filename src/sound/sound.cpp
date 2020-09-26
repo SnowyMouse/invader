@@ -346,24 +346,32 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     std::size_t total_sound_count = 0;
     std::atomic<std::size_t> thread_count;
     
+    // Wait until we have 0 threads working
+    auto wait_until_threads_are_done = [&thread_count]() {
+        while(thread_count > 0) {
+            std::this_thread::yield();
+        }
+    };
+    
+    // Wait until we have room for more threads
+    auto wait_until_threads_are_open = [&thread_count, &sound_options]() {
+        while(thread_count >= sound_options.max_threads) {
+            std::this_thread::yield();
+        }
+    };
+    
     // Process things!
     for(auto &pitch_range : pitch_ranges) {
         for(auto &permutation : pitch_range.first) {
             total_sound_count++;
-            while(thread_count > sound_options.max_threads);
+            wait_until_threads_are_open();
             thread_count++;
-            auto thread = std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count);
-            if(sound_options.max_threads > 1) {
-                thread.detach();
-            }
-            else {
-                thread.join();
-            }
+            std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count).detach();
         }
     }
     
     // Wait until done
-    while(thread_count > 0);
+    wait_until_threads_are_done();
     
     oprintf("done!\n");
     
@@ -680,34 +688,22 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     }
                     
                     // Wait until we have threads cleared up
-                    while(thread_count > sound_options.max_threads);
+                    wait_until_threads_are_open();
                     
                     // Punch it
                     thread_count++;
-                    auto thread = std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count);
-                    if(sound_options.max_threads > 1) {
-                        thread.detach();
-                    }
-                    else {
-                        thread.join();
-                    }
+                    std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count).join();
                 }
             }
             else {
                 // Wait until we have threads cleared up
-                while(thread_count > sound_options.max_threads);
+                wait_until_threads_are_open();
                     
                 // Punch it
                 thread_count++;
                 auto &p = pitch_range.permutations[i];
                 p.next_permutation_index = NULL_INDEX;
-                auto thread = std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(permutation.pcm), &permutation, is_dialogue, format, &sound_options, &thread_count);
-                if(sound_options.max_threads > 1) {
-                    thread.detach();
-                }
-                else {
-                    thread.join();
-                }
+                std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(permutation.pcm), &permutation, is_dialogue, format, &sound_options, &thread_count).join();
             }
 
             // Print sound info
@@ -719,7 +715,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     }
     
     // Wait until we have 0 threads left
-    while(thread_count > 0);
+    wait_until_threads_are_done();
 
     auto sound_tag_data = sound_tag.generate_hek_tag_data(invader_sound == nullptr ? TagClassInt::TAG_CLASS_SOUND : TagClassInt::TAG_CLASS_INVADER_SOUND, true);
     oprintf("Output: %s, %s, %zu Hz%s, %s, %.03f MiB%s\n", output_name, highest_channel_count == 1 ? "mono" : "stereo", static_cast<std::size_t>(highest_sample_rate), split ? ", split" : "", SoundClass_to_string(sound_class), sound_tag_data.size() / 1024.0 / 1024.0, invader_sound == nullptr ? "" : " [--extended]");
