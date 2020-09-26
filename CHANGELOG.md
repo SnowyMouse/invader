@@ -14,6 +14,9 @@ This is used for recording Invader's changes. This changelog is based on
   multiple or split permutations.
 
 ### Changed
+- invader-bitmap: Height maps have been capped to 0.5 height
+- invader-bitmap: Generating a height map with 0 or less height no longer
+  generates a height map, and an error will be printed to the console
 - invader-edit-qt: Mousing over a tag now displays the file size and path of the
   tag
   

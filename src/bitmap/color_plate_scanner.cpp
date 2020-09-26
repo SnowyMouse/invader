@@ -509,8 +509,14 @@ namespace Invader {
     }
 
     void ColorPlateScanner::process_height_maps(GeneratedBitmapData &generated_bitmap, float bump_height) {
-        if(bump_height < 0.0000001F) {
-            bump_height = 0.0000001F;
+        if(bump_height <= 0.0F) {
+            eprintf_warn("process_height_maps(): No bump height given, so no bump map will be generated");
+            return;
+        }
+        
+        if(bump_height > 0.5F) {
+            eprintf_warn("process_height_maps(): Bump height was capped to 0.5");
+            bump_height = 0.5F;
         }
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
