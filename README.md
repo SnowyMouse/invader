@@ -374,6 +374,47 @@ Options:
                                map's tags are ordered in the same way.
 ```
 
+#### Tag patches
+In some instances, specific tags will be modified. Some of these are a holdover
+from tool.exe, or they are done to account for different versions of the game.
+Admittedly, this is poor design, but that's ultimately on Gearbox and Bungie for
+changing the tags in the first place rather than creating new tags.
+
+Invader will silently modify a few tags for single player:
+
+- `weapons\pistol\pistol.weapon`
+    - Minimum error: 0.2°
+    - Error angle: 0.2° to 0.4°
+- `weapons\pistol\bullet.damage_effect`
+    - Elite energy shield modifier: 0.8
+- `weapons\plasma rifle\plasma rifle.weapon`
+    - Error angle: 0.25° to 2.5°
+
+This is a holdover from tool.exe, and it is done in Invader to prevent the core
+single player experience from being affected. If you do not want it to do this,
+copy these respective tags to a different path.
+
+Invader will also silently modify the ting sound effect for multiplayer to have
+a gain of 1.0 if Custom Edition and 0.2 if not. This is so the sound is not too
+loud or too quiet when played on their respective versions.
+
+Invader will modify a few tags when building a stock multiplayer map:
+
+- `vehicles\ghost\ghost bolt.damage_effect`, 
+  `vehicles\banshee\banshee bolt.damage_effect`
+    - Stun: 0.0 if Custom Edition, else 1.0
+    - Maximum stun: 0.0 if Custom Edition, else 1.0
+    - Stun time: 0.0 if Custom Edition, else 0.15
+- `vehicles\rwarthog\rwarthog_gun.weapon`
+    - Autoaim angle: 6.0° if Custom Edition, else 1.0°
+    - Deviation angle: 12.0° if Custom Edition, else 1.0°
+
+This is done to prevent desyncing caused by using tag sets from different
+versions of the game. If you do not want it to do this, copy these respective
+tags to a different path. Custom maps (i.e. maps that don't use stock scenario
+tag names) are not affected by this. Also, if any changes are applied, a minor
+warning will be emitted.
+
 ### invader-compare
 This program compares tags against maps, maps against maps, and tags against
 tags.
