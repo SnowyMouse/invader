@@ -692,7 +692,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     
                     // Punch it
                     thread_count++;
-                    std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count).join();
+                    std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(sample_data), &permutation, is_dialogue, format, &sound_options, &thread_count).detach();
                 }
             }
             else {
@@ -703,7 +703,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 thread_count++;
                 auto &p = pitch_range.permutations[i];
                 p.next_permutation_index = NULL_INDEX;
-                std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(permutation.pcm), &permutation, is_dialogue, format, &sound_options, &thread_count).join();
+                std::thread(encode_permutation, &sound_tag, pr, &p - pitch_range.permutations.data(), &encoding_mutex, std::move(permutation.pcm), &permutation, is_dialogue, format, &sound_options, &thread_count).detach();
             }
 
             // Print sound info
