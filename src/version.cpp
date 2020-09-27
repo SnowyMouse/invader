@@ -35,7 +35,7 @@ namespace Invader {
                "  STB library                  - https://github.com/nothings/stb\n"
                "\n"
                "Links:\n"
-               "  Invader source code          - https://github.com/Kavawuvi/invader\n"
+               "  Invader source code          - https://github.com/SnowyMouse/invader\n"
                #ifdef SHOW_NIGHTLY_LINK
                "  Invader nightly builds       - https://invader.opencarnage.net/builds/nightly/\n"
                #endif

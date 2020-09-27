@@ -205,7 +205,7 @@ namespace Invader::EditQt {
         REPLACE_HL("https://invader.opencarnage.net")
         REPLACE_HL("https://github.com/nothings/stb");
         REPLACE_HL("https://www.freetype.org/");
-        REPLACE_HL("https://github.com/Kavawuvi/invader");
+        REPLACE_HL("https://github.com/SnowyMouse/invader");
         #undef REPLACE_HL
         
         vbox_layout->addWidget(icon_label_widget);
@@ -588,7 +588,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::show_source_code() {
-        QDesktopServices::openUrl(QUrl::fromUserInput("https://github.com/Kavawuvi/invader"));
+        QDesktopServices::openUrl(QUrl::fromUserInput("https://github.com/SnowyMouse/invader"));
     }
 
     #ifdef SHOW_NIGHTLY_LINK

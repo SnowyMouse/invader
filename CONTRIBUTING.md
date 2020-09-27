@@ -6,8 +6,8 @@ project:
 - Resolving [issues] and submitting [pull requests]
 - [Donating] so more time can be spent developing Invader
 
-[issues]: https://github.com/Kavawuvi/Invader/issues
-[pull requests]: https://github.com/Kavawuvi/Invader/pulls
+[issues]: https://github.com/SnowyMouse/Invader/issues
+[pull requests]: https://github.com/SnowyMouse/Invader/pulls
 [donating]: https://patreon.com/snowy_invader
 
 # Testing Invader
@@ -30,7 +30,7 @@ need to update for a long period of time), though the tools, themselves, may
 possibly be more stable than the Halo Editing Kit counterparts (i.e. less error
 prone).
 
-[git master branch]: https://github.com/Kavawuvi/Invader/tree/master
+[git master branch]: https://github.com/SnowyMouse/Invader/tree/master
 
 # Conventions
 These conventions apply only for contributing to the official Invader
@@ -122,7 +122,7 @@ For all new issues:
 - Ensure your issue is not out of scope (see the [scope conventions]).
 
 [scope conventions]: #scope-conventions
-[closed]: https://github.com/Kavawuvi/Invader/issues?q=is%3Aissue+is%3Aclosed
+[closed]: https://github.com/SnowyMouse/Invader/issues?q=is%3Aissue+is%3Aclosed
 
 For new issues, it is recommended to prefix the title with **one** of these:
 - `[New feature]` - New feature for multiple programs or one that doesn't yet

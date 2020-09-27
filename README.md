@@ -4,7 +4,7 @@ Evolved.
 
 Our Discord server is https://discord.gg/RCX3nvw
 
-The official source code repository is https://github.com/Kavawuvi/invader
+The official source code repository is https://github.com/SnowyMouse/invader
 
 ## License
 Invader is licensed under version 3.0 of the GNU General Public License. Note
@@ -43,7 +43,7 @@ Invader is not finished, so it is important to stay up-to-date to obtain the
 latest features and fixes. Staying on an old version means staying on unfinished
 software that likely has known issues.
 
-[commits]: https://github.com/Kavawuvi/invader/commits/master
+[commits]: https://github.com/SnowyMouse/invader/commits/master
 
 ## Contributing
 See CONTRIBUTING.md.
@@ -63,7 +63,7 @@ binaries, this section probably doesn't apply to you, but you are welcome to
 compile Invader. Regardless, you can browse and download the source code for
 free on [GitHub].
 
-[GitHub]: https://github.com/Kavawuvi/invader
+[GitHub]: https://github.com/SnowyMouse/invader
 
 If you use Arch Linux, the [Arch Linux AUR] has a package you can use to build
 Invader.
@@ -97,7 +97,7 @@ First, you will need to download the Invader repository onto your computer. You
 can do this using the command:
 
 ```
-git clone https://github.com/Kavawuvi/invader
+git clone https://github.com/SnowyMouse/invader
 ```
 
 Everything in this section, from this point on, assumes the Invader repository
@@ -993,7 +993,7 @@ Bungie, Microsoft, or our own mothers.
 In order to get Invader under a different license, you will need to write to
 *both* [Snowy] and [Vaporeon], and you will need *unanimous* approval.
 
-[Snowy]: https://github.com/Kavawuvi
+[Snowy]: https://github.com/SnowyMouse
 [Vaporeon]: https://github.com/Vaporeon
 
 ### Are there any GUI tools?
