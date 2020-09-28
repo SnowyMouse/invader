@@ -409,6 +409,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     bitmap_tag_data.encoding_format = bitmap_options.format.value();
     bitmap_tag_data.sharpen_amount = bitmap_options.sharpen.value_or(0.0F);
     bitmap_tag_data.blur_filter_size = bitmap_options.blur.value_or(0.0F);
+    bitmap_tag_data.flags = (bitmap_tag_data.flags & ~HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION) | (*bitmap_options.palettize ? 0 : HEK::BitmapFlagsFlag::BITMAP_FLAGS_FLAG_DISABLE_HEIGHT_MAP_COMPRESSION);
     if(bitmap_options.max_mipmap_count.value() >= INT16_MAX) {
         bitmap_tag_data.mipmap_count = 0;
     }

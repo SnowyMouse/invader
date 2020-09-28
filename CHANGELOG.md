@@ -27,6 +27,7 @@ This is used for recording Invader's changes. This changelog is based on
   present
 - invader-bitmap: Fixed generating too few mipmaps for non-1:1 bitmaps. This was
   unlikely to cause issues, since the mipmaps missing were all one-dimensional
+- invader-bitmap: Fixed not setting "disable height map compression" by default
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
 - invader-dependency: Fixed .model references being converted to .gbxmodel when
