@@ -23,6 +23,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-archive: Fixed .model references being converted to .gbxmodel when
   checking for dependencies
+- invader-bitmap: Fixed spacing color only working if sequence separator is
+  present
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
 - invader-dependency: Fixed .model references being converted to .gbxmodel when

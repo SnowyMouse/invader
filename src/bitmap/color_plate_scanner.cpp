@@ -69,19 +69,9 @@ namespace Invader {
             if(valid_color_plate_key) {
                 scanner.transparency_color = transparency_candidate;
             
-                // What we need to do next is determine if we have a sequence divider and maybe even spacing
+                // What we need to do next is determine if we have a sequence divider
                 if(!same_color_ignore_opacity(transparency_candidate, separator_candidate)) {
                     scanner.sequence_divider_color = separator_candidate;
-                    
-                    if(!same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
-                        scanner.spacing_color = spacing_candidate;
-                        
-                        // Make sure it's valid!
-                        if(same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
-                            eprintf_error("Spacing and sequence divider colors must not match");
-                            throw InvalidInputBitmapException();
-                        }
-                    }
                     
                     // Generate sequences
                     auto *sequence = &generated_bitmap.sequences.emplace_back();
@@ -114,6 +104,18 @@ namespace Invader {
                     // Terminate the last sequence index
                     sequence->y_end = height;
                 }
+                
+                // Lastly, do we have spacing?
+                if(!same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
+                    scanner.spacing_color = spacing_candidate;
+                    
+                    // Make sure it's valid!
+                    if(same_color_ignore_opacity(separator_candidate, spacing_candidate)) {
+                        eprintf_error("Spacing and sequence divider colors must not match");
+                        throw InvalidInputBitmapException();
+                    }
+                }
+                
             }
         }
 
