@@ -87,41 +87,38 @@ namespace Invader {
         static GeneratedBitmapData scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur);
 
     private:
-        /** Was valid color plate data used? If so, we need to check for multiple sequences. */
-        bool valid_color_plate = false;
-
         /** Is power of two required */
         bool power_of_two = true;
 
-        /** Blue color */
-        ColorPlatePixel blue = { 0xFF, 0x00, 0x00, 0xFF };
+        /** Transparency color */
+        std::optional<ColorPlatePixel> transparency_color;
 
-        /** Magenta color */
-        ColorPlatePixel magenta = { 0xFF, 0x00, 0xFF, 0xFF };
+        /** Sequence divider color */
+        std::optional<ColorPlatePixel> sequence_divider_color;
 
-        /** Cyan color */
-        std::optional<ColorPlatePixel> cyan;
+        /** Spacing color */
+        std::optional<ColorPlatePixel> spacing_color;
 
         /**
          * Check if the color is blue
          * @param  color color to check
          * @return       true if blue
          */
-        bool is_blue(const ColorPlatePixel &color) const;
+        bool is_transparency_color(const ColorPlatePixel &color) const;
 
         /**
          * Check if the color is magenta
          * @param  color color to check
          * @return       true if magenta
          */
-        bool is_magenta(const ColorPlatePixel &color) const;
+        bool is_sequence_divider_color(const ColorPlatePixel &color) const;
 
         /**
          * Check if the color is cyan
          * @param  color color to check
          * @return       true if cyan
          */
-        bool is_cyan(const ColorPlatePixel &color) const;
+        bool is_spacing_color(const ColorPlatePixel &color) const;
 
         /**
          * Check if the color is ignored

@@ -50,80 +50,61 @@ namespace Invader {
         }
 
         // Check to see if we have valid color plate data. If so, look for sequences
+        bool valid_color_plate_key = true;
         if(width >= 4 && height >= 2) {
             // Get the candidate pixels
-            const auto &blue_candidate = pixels[0];
-            const auto &magenta_candidate = pixels[1];
-            const auto &cyan_candidate = pixels[2];
-
-            scanner.valid_color_plate = true;
-
-            // Make sure they aren't the same
-            if(!same_color_ignore_opacity(blue_candidate, magenta_candidate) && !same_color_ignore_opacity(magenta_candidate, cyan_candidate)) {
-                // Let's assume for a moment they are. Is everything after the cyan pixel blue?
-                for(std::uint32_t x = 3; x < width; x++) {
-                    if(!same_color_ignore_opacity(GET_PIXEL(x, 0), blue_candidate)) {
-                        scanner.valid_color_plate = false;
-                        break;
-                    }
+            const auto &transparency_candidate = pixels[0];
+            const auto &separator_candidate = pixels[1];
+            const auto &spacing_candidate = pixels[2];
+            
+            // First, check to see if everything on the top row except the first three pixels is transparency
+            for(std::uint32_t x = 3; x < width; x++) {
+                if(!same_color_ignore_opacity(GET_PIXEL(x, 0), transparency_candidate)) {
+                    valid_color_plate_key = false;
+                    break;
                 }
-
-                // Is the cyan pixel blue? If it is, that's okay, but we can't use the cyan pixel
-                bool ignore_cyan = same_color_ignore_opacity(blue_candidate, cyan_candidate);
-
-                static constexpr char ERROR_SEQUENCE_DIVIDER_BROKEN[] = "Error: Sequence divider broken at (%u,%u)\n";
-
-                // Next, is there a sequence border immediately below this?
-                if(scanner.valid_color_plate) {
-                    for(std::uint32_t x = 0; x < width; x++) {
-                        if(!same_color_ignore_opacity(GET_PIXEL(x, 1), magenta_candidate)) {
-                            // If it's not a sprite, that's fine
-                            if(type != BitmapType::BITMAP_TYPE_SPRITES) {
-                                scanner.valid_color_plate = false;
-                                break;
-                            }
-
-                            // Otherwise, bad!
-                            else {
-                                eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, 1);
-                                throw InvalidInputBitmapException();
-                            }
+            }
+            
+            // The key is valid. We have a transparency color at the very least
+            if(valid_color_plate_key) {
+                scanner.transparency_color = transparency_candidate;
+            
+                // What we need to do next is determine if we have a sequence divider and maybe even spacing
+                if(!same_color_ignore_opacity(transparency_candidate, separator_candidate)) {
+                    scanner.sequence_divider_color = separator_candidate;
+                    
+                    if(!same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
+                        scanner.spacing_color = spacing_candidate;
+                        
+                        // Make sure it's valid!
+                        if(same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
+                            eprintf_error("Spacing and sequence divider colors must not match");
+                            throw InvalidInputBitmapException();
                         }
                     }
-                }
-
-                // Okay, I'm convinced this is a valid color plate
-                if(scanner.valid_color_plate) {
-                    scanner.blue = blue_candidate;
-                    scanner.magenta = magenta_candidate;
-
-                    if(!ignore_cyan) {
-                        scanner.cyan = cyan_candidate;
-                    }
-
+                    
+                    // Generate sequences
                     auto *sequence = &generated_bitmap.sequences.emplace_back();
-                    sequence->y_start = 2;
-
-                    // Next, we need to find all of the sequences
-                    for(std::uint32_t y = 2; y < height; y++) {
-                        bool sequence_border = true;
-                        for(std::uint32_t x = 0; x < width; x++) {
-                            if(!same_color_ignore_opacity(GET_PIXEL(x, y), magenta_candidate)) {
-                                // If we're on the first pixel, that's fine
-                                if(x == 0) {
-                                    sequence_border = false;
-                                    break;
-                                }
-                                // Otherwise we only got part of a sequence divider and that's not fine
-                                else {
-                                    eprintf(ERROR_SEQUENCE_DIVIDER_BROKEN, x, y);
+                    
+                    auto is_horizontal_bar = [&scanner, &width, &pixels](std::size_t y) {
+                        if(scanner.is_sequence_divider_color(GET_PIXEL(0,y))) {
+                            for(std::size_t x = 1; x < width; x++) {
+                                if(!scanner.is_sequence_divider_color(GET_PIXEL(x,y))) {
+                                    eprintf_error("Sequence divider broken at (%zu,%zu)", x, y);
                                     throw InvalidInputBitmapException();
                                 }
                             }
+                            return true;
                         }
+                        return false;
+                    };
+                    
+                    sequence->y_start = is_horizontal_bar(1) ? 2 : 1;
 
+                    // Next, we need to find all of the sequences
+                    for(std::uint32_t y = sequence->y_start; y < height; y++) {
                         // If we got it, create a new sequence, but not before terminating the last one
-                        if(sequence_border) {
+                        if(is_horizontal_bar(y)) {
                             sequence->y_end = y;
                             sequence = &generated_bitmap.sequences.emplace_back();
                             sequence->y_start = y + 1;
@@ -134,84 +115,30 @@ namespace Invader {
                     sequence->y_end = height;
                 }
             }
-            else {
-                scanner.valid_color_plate = false;
-            }
         }
 
         // If we have valid color plate data, use the color plate data
-        if(scanner.valid_color_plate) {
+        if(valid_color_plate_key) {
             scanner.read_color_plate(generated_bitmap, pixels, width);
         }
 
-        // Depending on if the whole top row is blue or not, read as one bitmap/unrolled cubemap or read as color plate
+        // Otherwise, read as one bitmap
         else {
-            bool read = false;
-            for(std::uint32_t x = 0; x < width; x++) {
-                if(!scanner.is_blue(pixels[x])) {
-                    // Since it's just one bitmap in a sequence, we just need to make a 0-1 sequence
-                    auto &new_sequence = generated_bitmap.sequences.emplace_back();
-                    new_sequence.bitmap_count = 1;
-                    new_sequence.first_bitmap = 0;
-                    new_sequence.y_start = 0;
-                    new_sequence.y_end = height;
+            auto &new_sequence = generated_bitmap.sequences.emplace_back();
+            new_sequence.bitmap_count = 1;
+            new_sequence.first_bitmap = 0;
+            new_sequence.y_start = 0;
+            new_sequence.y_end = height;
 
-                    if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
-                        scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
-                    }
-                    else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
-                        eprintf_error("Error: Sprites must have blue borders or a valid color plate.\n");
-                        throw InvalidInputBitmapException();
-                    }
-                    else {
-                        scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
-                    }
-                    read = true;
-                    break;
-                }
+            if(type == BitmapType::BITMAP_TYPE_CUBE_MAPS) {
+                scanner.read_unrolled_cubemap(generated_bitmap, pixels, width, height);
             }
-            if(!read) {
-                // First, let's get the sequences
-                for(std::uint32_t y = 1; y < height; y++) {
-                    for(std::uint32_t x = 0; x < width; x++) {
-                        auto &pixel = GET_PIXEL(x,y);
-                        if(!scanner.is_blue(pixel)) {
-                            // Start a sequence
-                            auto &new_sequence = generated_bitmap.sequences.emplace_back();
-                            new_sequence.y_start = y;
-                            new_sequence.bitmap_count = 0;
-                            new_sequence.first_bitmap = 0;
-
-                            // Find the end of said sequence
-                            for(; y < height; y++) {
-                                bool found_the_end = true;
-                                for(std::uint32_t xb = 0; xb < width; xb++) {
-                                    if(!scanner.is_blue(GET_PIXEL(xb, y))) {
-                                        found_the_end = false;
-                                        break;
-                                    }
-                                }
-
-                                if(found_the_end) {
-                                    break;
-                                }
-                            }
-
-                            new_sequence.y_end = y;
-                            break;
-                        }
-                    }
-                }
-
-                // Next, set the dummy space
-                ColorPlatePixel cyan;
-                cyan.alpha = 0xFF;
-                cyan.red = 0;
-                cyan.green = 0xFF;
-                cyan.blue = 0xFF;
-                scanner.cyan = cyan;
-
-                scanner.read_color_plate(generated_bitmap, pixels, width);
+            else if(type == BitmapType::BITMAP_TYPE_SPRITES) {
+                eprintf_error("Error: Sprite color plates must have a color plate key.\n");
+                throw InvalidInputBitmapException();
+            }
+            else {
+                scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
             }
         }
 
@@ -267,7 +194,7 @@ namespace Invader {
                     auto &pixel = GET_PIXEL(x,y);
 
                     // Ignore? Okay.
-                    if(this->is_blue(pixel) || this->is_magenta(pixel)) {
+                    if(this->is_transparency_color(pixel) || this->is_sequence_divider_color(pixel)) {
                         continue;
                     }
 
@@ -315,7 +242,7 @@ namespace Invader {
                             }
 
                             // Anything that's not a magenta/blue pixel then
-                            if(!this->is_blue(pixel) && !this->is_magenta(pixel)) {
+                            if(!this->is_transparency_color(pixel) && !this->is_sequence_divider_color(pixel)) {
                                 ignored_this_x = false;
 
                                 if(virtual_min_x.has_value()) {
@@ -492,20 +419,20 @@ namespace Invader {
         generated_bitmap.sequences[0].bitmap_count = 1;
     }
 
-    bool ColorPlateScanner::is_blue(const ColorPlatePixel &color) const {
-        return same_color_ignore_opacity(this->blue, color);
+    bool ColorPlateScanner::is_transparency_color(const ColorPlatePixel &color) const {
+        return this->transparency_color.has_value() && same_color_ignore_opacity(*this->transparency_color, color);
     }
 
-    bool ColorPlateScanner::is_magenta(const ColorPlatePixel &color) const {
-        return same_color_ignore_opacity(this->magenta, color);
+    bool ColorPlateScanner::is_sequence_divider_color(const ColorPlatePixel &color) const {
+        return this->sequence_divider_color.has_value() && same_color_ignore_opacity(*this->sequence_divider_color, color);
     }
 
-    bool ColorPlateScanner::is_cyan(const ColorPlatePixel &color) const {
-        return this->cyan.has_value() && same_color_ignore_opacity(this->cyan.value(), color);
+    bool ColorPlateScanner::is_spacing_color(const ColorPlatePixel &color) const {
+        return this->spacing_color.has_value() && same_color_ignore_opacity(*this->spacing_color, color);
     }
 
     bool ColorPlateScanner::is_ignored(const ColorPlatePixel &color) const {
-        return this->is_blue(color) || this->is_cyan(color) || (this->valid_color_plate && this->is_magenta(color));
+        return this->is_transparency_color(color) || this->is_spacing_color(color) || this->is_sequence_divider_color(color);
     }
 
     void ColorPlateScanner::process_height_maps(GeneratedBitmapData &generated_bitmap, float bump_height) {
