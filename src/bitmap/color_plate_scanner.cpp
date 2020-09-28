@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <optional>
+#include <algorithm>
 
 #include <invader/hek/data_type.hpp>
 #include "color_plate_scanner.hpp"
@@ -510,7 +511,7 @@ namespace Invader {
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
             std::uint32_t mipmap_height = bitmap.height;
-            std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_height) : log2_int(mipmap_width);
+            std::uint32_t max_mipmap_count = mipmap_width > mipmap_height ? log2_int(mipmap_width) : log2_int(mipmap_height);
             if(max_mipmap_count > mipmaps_unsigned) {
                 max_mipmap_count = mipmaps_unsigned;
             }
@@ -640,8 +641,11 @@ namespace Invader {
                 }
             }
 
-            mipmap_height /= 2;
-            mipmap_width /= 2;
+            auto last_mipmap_height = mipmap_height;
+            auto last_mipmap_width = mipmap_width;
+            
+            mipmap_height = std::max(static_cast<std::size_t>(mipmap_height / 2), static_cast<std::size_t>(1));
+            mipmap_width = std::max(static_cast<std::size_t>(mipmap_width / 2), static_cast<std::size_t>(1));
 
             while(bitmap.mipmaps.size() < max_mipmap_count) {
                 // Begin creating the mipmap
@@ -662,12 +666,47 @@ namespace Invader {
                     for(std::uint32_t x = 0; x < mipmap_width; x++) {
                         auto &pixel = this_mipmap_data[x + y * mipmap_width];
                         
-                        auto last_a = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2];
-                        auto last_b = last_mipmap_data[x * 2 + y * 2 * mipmap_width * 2 + 1];
-                        auto last_c = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2];
-                        auto last_d = last_mipmap_data[x * 2 + (y * 2 + 1) * mipmap_width * 2 + 1];
-                        pixel = last_a; // Nearest-neighbor first
+                        // Start getting our pixels for mipmaps
+                        ColorPlatePixel last_a, last_b, last_c, last_d;
+                        last_a = last_mipmap_data[x * 2 + y * 2 * last_mipmap_width];
+                        
+                        // If we went down a dimension, use the pixel from the last mipmap. Otherwise, just use last_a so we don't go out-of-bounds
+                        bool went_down_both_dimensions = true;
+                        
+                        // Right pixel
+                        if(mipmap_width < last_mipmap_width) {
+                            last_b = last_mipmap_data[x * 2 + 1 + y * 2 * last_mipmap_width];
+                        }
+                        else {
+                            last_b = last_a;
+                            went_down_both_dimensions = false;
+                        }
+                        
+                        // Bottom pixel
+                        if(mipmap_height < last_mipmap_height) {
+                            last_c = last_mipmap_data[x * 2     + (y * 2 + 1) * last_mipmap_width];
+                        }
+                        else {
+                            last_c = last_a;
+                            went_down_both_dimensions = false;
+                        }
+                        
+                        // Bottom-right pixel - this one's a little tricky
+                        if(went_down_both_dimensions) {
+                            last_d = last_mipmap_data[x * 2 + 1 + (y * 2 + 1) * last_mipmap_width];
+                        }
+                        else if(mipmap_height < last_mipmap_height) {
+                            last_d = last_c;
+                        }
+                        else if(mipmap_width < last_mipmap_width) {
+                            last_d = last_b;
+                        }
+                        else {
+                            last_d = last_a;
+                        }
+                        
                         int pixel_count = 4;
+                        pixel = last_a;
 
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
                         #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; }
@@ -697,8 +736,6 @@ namespace Invader {
                             // Delete if no pixels
                             pixel = {};
                         }
-
-                        
                         
                         #undef ZERO_OUT_IF_NO_ALPHA
                         #undef INTERPOLATE_CHANNEL
@@ -706,8 +743,10 @@ namespace Invader {
                 }
 
                 // Set the values for the next mipmap
-                mipmap_height /= 2;
-                mipmap_width /= 2;
+                last_mipmap_height = mipmap_height;
+                last_mipmap_width = mipmap_width;
+                mipmap_height = std::max(static_cast<std::size_t>(mipmap_height / 2), static_cast<std::size_t>(1));
+                mipmap_width = std::max(static_cast<std::size_t>(mipmap_width / 2), static_cast<std::size_t>(1));
                 last_mipmap_offset = this_mipmap_offset;
             }
 

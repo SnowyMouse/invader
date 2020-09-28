@@ -25,6 +25,10 @@ This is used for recording Invader's changes. This changelog is based on
   checking for dependencies
 - invader-bitmap: Fixed spacing color only working if sequence separator is
   present
+- invader-bitmap: Fixed an issue with linear interpolation when generating
+  mipmaps
+- invader-bitmap: Fixed generating too few mipmaps for non-1:1 bitmaps. This was
+  unlikely to cause issues, since the mipmaps missing were all one-dimensional
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
 - invader-dependency: Fixed .model references being converted to .gbxmodel when
