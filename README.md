@@ -129,10 +129,6 @@ with Halo Custom Edition's tool.exe, as well as make things easier to develop,
 this project is split into different programs.
 - [invader-archive]
 - [invader-bitmap]
-    - [Uncompressed bitmap formats]
-    - [Block-compressed bitmap formats]
-    - [More bitmap formats]
-    - [Which bitmap format should I use?]
 - [invader-bludgeon]
 - [invader-build]
 - [invader-compare]
@@ -146,9 +142,6 @@ this project is split into different programs.
 - [invader-refactor]
 - [invader-resource]
 - [invader-sound]
-    - [What is splitting?]
-    - [Audio formats]
-    - [Which audio format should I use?]
 - [invader-string]
 - [invader-strip]
 
@@ -222,91 +215,9 @@ Options:
                                features).
 ```
 
-#### Uncompressed bitmap formats
-These formats are uncompressed and use explicit (not interpolated) RGB and/or
-alpha values. This results in higher quality bitmaps than using any of the
-block compressed formats, but it comes with a file size tradeoff. Note that
-32-bit bitmaps are slightly buggy on stock Halo: Combat Evolved without a mod
-(e.g. Chimera).
+Refer to [Creating a bitmap] for information on how to create bitmap tags.
 
-If you use 16-bit, then using dithering (`-D rgb` or `-D argb` if you want
-dithered alpha) may help with banding.
-
-The exact storage format used will depend on the bitmap:
-- If 32-bit is specified and all pixels have 100% alpha, then X8R8G8B8 is used.
-  Otherwise, A8R8G8B8 is used.
-- If 16-bit is specified and all pixels have 100% alpha, then R5G6B5 is used.
-  If pixels have either 0% or 100% alpha, A1R5G5B5 is used. Otherwise, A4R4G4B4
-  is used.
-
-Format   | Storage  | Bits/px | Alpha | Red   | Green | Blue  | Notes
--------- | -------- | ------- | ----- | ----- | ----- | ----- | ----------
-32-bit   | A8R8G8B8 | 32      | 8-bit | 8-bit | 8-bit | 8-bit |
-32-bit   | X8R8G8B8 | 32      |       | 8-bit | 8-bit | 8-bit | 100% alpha
-16-bit   | R5G6B5   | 16      |       | 5-bit | 6-bit | 5-bit | 100% alpha
-16-bit   | A1R5G5B5 | 16      | 1-bit | 5-bit | 5-bit | 5-bit |
-16-bit   | A4R4G4B4 | 16      | 4-bit | 4-bit | 4-bit | 4-bit |
-
-#### Block-compressed bitmap formats
-These formats utilize block compression. Basically, each bitmap is separated
-into 4x4 blocks, and each block has two 16-bit (R5G6B5) colors which are
-interpolated at runtime. This provides massive space savings but at a
-significant loss in quality. Since the smallest block is 4x4, then mipmaps
-smaller than 4x4 will not be generated, nor will you be able to make bitmaps
-smaller than 4x4 while still being block-compressed.
-
-There is no difference in RGB quality between dxt1, dxt3, or dxt5. The only
-difference is in how alpha is handled. Therefore, if dxt3 or dxt5 is specified
-and a bitmap does not have transparency, then dxt1 will automatically be used
-to keep the size as small as possible.
-
-We do not recommend using these formats. They are only provided for completion
-sake.
-
-Format | Bits/px | Alpha              | Notes
------- | ------- | ------------------ | --------------------------------------
-DXT1   | 4       |                    | 100% alpha
-DXT3   | 8       | 4-bit explicit     | Better for shapes like HUDs
-DXT5   | 8       | 4-bit interpolated | Better for alpha gradients like clouds
-
-#### More bitmap formats
-These formats were originally available on Xbox and do not work on stock Halo.
-They all use explicit RGB and/or alpha.
-
-If you use monochrome with a monochrome bitmap used as input, then there will
-be no loss in quality.
-
-Format       | Storage  | Bits/px | Alpha   | RGB     | Notes
------------- | -------- | ------- | ------- | ------- | ---------------------
-monochrome   | A8Y8     | 16      | 8-bit   | 8-bit   | Intensity (R=G=B)
-monochrome   | A8       | 8       | 8-bit   |         | 100% intensity
-monochrome   | Y8       | 8       |         | 8-bit   | 100% alpha
-palettized   | P8       | 8       | Indexed | Indexed | Bump compression only
-
-#### Which bitmap format should I use?
-32-bit color and monochrome (with monochrome input) have zero quality loss.
-Unfortunately, Halo PC does not support monochrome, and it'd easily be the best
-choice for monochrome textures like HUD masks. So, the best format with zero
-loss in quality is 32-bit color. Obviously, this results in a larger file size,
-with a 1024x1024 bitmap taking up ~5.3 MiB and a 2048x2048 bitmap taking up
-~21.3 MiB, with mipmaps included for both. But if you don't care, this is the
-best way to go.
-
-16-bit color works well on some textures without any noticeable impact, such as
-noise maps and some simple textures, but it is subject to banding due to a lack
-of color depth. The color depth also gets significantly worse if you use an
-alpha channel.
-
-dxt1 takes up very little space, but make no mistake: it's a lossy compression
-format, and the image will lose finer details as a result - an issue that
-16-bit often does not have. As such, it's quite bad on HUDs, detail maps,
-bumpmaps, and multipurpose maps, and, in our opinion, literally anything else.
-
-dxt3 and dxt5 use dxt1 for color, only differing in how alpha works. Alpha is
-explicit on dxt3, thus dxt3 works better for things that need definite shape
-such as HUD backgrounds. It will result in banding on gradients, however. dxt5
-compresses alpha to be interpolated like the color, so it works better for
-more things than dxt3.
+[Creating a bitmap]: https://github.com/SnowyMouse/invader/wiki/Creating-a-bitmap
 
 ### invader-bludgeon
 This program convinces tags to work with Invader.
@@ -741,81 +652,9 @@ Options:
                                features).
 ```
 
-#### What is splitting?
-The Halo engine was written to primarily handle short-length sounds. It cannot
-handle extremely long audio sections due to memory and engine limitations, and
-this is regardless of the audio format being used since all audio is eventually
-handled as a 16-bit PCM stream.
+Refer to [Creating a sound] for a guide on how to create sound tags.
 
-Stock tool.exe splits Ogg Vorbis audio into 910 KiB chunks and all other audio
-to 227.5 KiB chunks before compression, but we found that looping issues were
-more likely to occur with the higher chunk size. Therefore, all splitting is
-done on 227.5 KiB with invader-sound.
-
-For sounds that are more than 2.5 seconds long if 44100 Hz stereo, 5 seconds if
-22050 Hz stereo, or 10 seconds long if 22050 Hz mono, such as music, we
-recommend enabling splitting.
-
-Note that you cannot use splitting for dialogue. The original Halo engine has
-issues playing back this type of dialogue.
-
-#### Audio formats
-These are the different audio formats that invader-sound supports, assuming a
-16-bit, 44.1 kHz stereo input.
-
-Format                | Bitrate (44100 Hz stereo) | Type
---------------------- | ------------------------- | ---------------------------
-16-bit PCM            | 1411.2 kbps               | Lossless
-FLAC       (`-l 0.8`) | ~875   kbps (on average)  | Lossless; FLAC 8 (best)
-FLAC       (`-l 0.5`) | ~900   kbps (on average)  | Lossless; FLAC 5 (faster)
-Ogg Vorbis (`-l 1`)   | ~500   kbps (on average)  | Lossy; Max quality
-Ogg Vorbis (`-l 0.5`) | ~160   kbps (on average)  | Lossy; Transparent quality
-Ogg Vorbis (`-l 0.3`) | ~112   kbps (on average)  | Lossy; Oggenc default
-Xbox ADPCM            | ~390.8 kbps               | Lossy
-
-#### Which audio format should I use?
-There are two options: lossless and lossy. Both have their pros and cons.
-
-#### Lossless
-Lossless means that the output is the same quality as the input. Of course, this
-is only true if your input bit depth, sample rate, and channel count matches your
-output. Halo only supports 22.05 kHz and 44.1 kHz, so supplying a 48 kHz input
-will require resampling which is lossy. And, of course, if your input is 24-bit
-PCM, then encoding to 16-bit PCM will be lossy, too.
-
-There are two lossless formats available: 16-bit PCM and FLAC.
-
-Using 16-bit PCM requires little to no processing, making it the fastest, but it
-does have a very high bitrate. This can make maps become massive really quickly.
-
-FLAC is compressed and supports up to 32-bit integer PCM samples. This makes it
-more flexible and better in bitrate. However, the actual compression ratio you
-get will vary sound-to-sound.
-
-Also, unmodified Halo PC, as released by Gearbox, does not support tags that
-have lossless data. The game can handle 16-bit PCM sounds, but you need a mod to
-enable this behavior.
-
-FLAC, on the other hand, cannot be decoded by Halo and will require modding to
-use it. Therefore, if your goal is to ensure compatibility across all versions
-of the game without mods, it is not recommended to use either format.
-
-#### Lossy
-Lossy means that the output may not be the same quality as the input. Discarding
-information means that the sound can be smaller, but it also means that it will
-never be exactly the same.
-
-Ogg Vorbis provides a good tradeoff in terms of bitrate and quality. Using 0.5
-is considered "transparent" (unnoticeable quality loss) provided you use a
-lossless audio input (if not, then you may need to use a higher quality value),
-and this also gives you lower bitrate and better quality than Xbox ADPCM. Like
-FLAC, the bitrate varies sound-to-sound.
-
-Xbox ADPCM does not compress as efficiently as Ogg Vorbis, but it decodes
-faster. Even so, we don't recommend you use this for anything in newer assets.
-Unlike FLAC and Ogg Vorbis, the bitrate is constant.
-
-Both of these formats are supported by the game.
+[Creating a sound]: https://github.com/SnowyMouse/invader/wiki/Creating-a-sound
 
 ### invader-string
 This program generates string tags. If building a unicode or latin-1 tag,
@@ -1125,11 +964,3 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-sound]: #invader-sound
 [invader-string]: #invader-string
 [invader-strip]: #invader-strip
-
-[Uncompressed bitmap formats]: #uncompressed-bitmap-formats
-[Block-compressed bitmap formats]: #block-compressed-bitmap-formats
-[More bitmap formats]: #more-bitmap-formats
-[Which bitmap format should I use?]: #which-bitmap-formats-should-i-use
-[What is splitting?]: #what-is-splitting
-[Audio formats]: #audio-formats
-[Which audio format should I use?]: #which-audio-format-should-i-use
