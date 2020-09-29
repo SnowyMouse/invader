@@ -17,6 +17,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Height maps have been capped to 0.5 height
 - invader-bitmap: Generating a height map with 0 or less height no longer
   generates a height map, and an error will be printed to the console
+- invader-build: Having model, gbxmodel, or scenario_structure_bsp shaders be
+  set to null now fails to build, as this crashes the game
 - invader-edit-qt: Mousing over a tag now displays the file size and path of the
   tag
   
