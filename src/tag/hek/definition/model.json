@@ -596,6 +596,7 @@
                 "classes": [
                     "shader"
                 ],
+                "non_null": true,
                 "compound": true
             },
             {

@@ -231,6 +231,7 @@
                 "classes": [
                     "shader"
                 ],
+                "non_null": true,
                 "read_only": false,
                 "compound": true
             },
