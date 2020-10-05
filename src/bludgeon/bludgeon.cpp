@@ -182,7 +182,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct BludgeonOptions {
-        const char *tags = "tags";
+        std::optional<const char *> tags;
         bool use_filesystem_path = false;
         bool all = false;
         std::uint64_t fixes = WaysToFuckUpTheTag::NO_FIXES;
@@ -191,6 +191,10 @@ int main(int argc, char * const *argv) {
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<BludgeonOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, bludgeon_options, [](char opt, const std::vector<const char *> &arguments, auto &bludgeon_options) {
         switch(opt) {
             case 't':
+                if(bludgeon_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 bludgeon_options.tags = arguments[0];
                 break;
             case 'i':
@@ -260,6 +264,10 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    
+    if(!bludgeon_options.tags.has_value()) {
+        bludgeon_options.tags = "tags";
+    }
 
     auto &fixes = bludgeon_options.fixes;
 
@@ -286,7 +294,7 @@ int main(int argc, char * const *argv) {
             }
         };
 
-        recursively_bludgeon_dir(std::filesystem::path(bludgeon_options.tags), recursively_bludgeon_dir);
+        recursively_bludgeon_dir(std::filesystem::path(*bludgeon_options.tags), recursively_bludgeon_dir);
 
         oprintf("Bludgeoned %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
 
@@ -302,7 +310,7 @@ int main(int argc, char * const *argv) {
             file_path = std::string(remaining_arguments[0]);
         }
         else {
-            file_path = std::filesystem::path(bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
+            file_path = std::filesystem::path(*bludgeon_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
         }
         std::string file_path_str = file_path.string();
         bool bludgeoned;

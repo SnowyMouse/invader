@@ -26,13 +26,17 @@ int main(int argc, char * const *argv) {
 
     struct CollectionOptions {
         const char *data = "data";
-        const char *tags = "tags";
+        std::optional<const char *> tags;
         bool use_filesystem_path = false;
     } collection_options;
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CollectionOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, collection_options, [](char opt, const std::vector<const char *> &arguments, auto &collection) {
         switch(opt) {
             case 't':
+                if(collection.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 collection.tags = arguments[0];
                 break;
             case 'i':
@@ -46,6 +50,10 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    
+    if(!collection_options.tags.has_value()) {
+        collection_options.tags = "tags";
+    }
 
     // Check if there's a string tag
     std::string string_tag;
@@ -72,13 +80,13 @@ int main(int argc, char * const *argv) {
         }
     }
 
-    std::filesystem::path tags_path(collection_options.tags);
+    std::filesystem::path tags_path(*collection_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(collection_options.tags, "tags") == 0) {
+        if(std::strcmp(*collection_options.tags, "tags") == 0) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", collection_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", *collection_options.tags);
         }
         return EXIT_FAILURE;
     }

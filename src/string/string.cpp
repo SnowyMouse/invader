@@ -106,7 +106,7 @@ int main(int argc, char * const *argv) {
 
     struct StringOptions {
         const char *data = "data";
-        const char *tags = "tags";
+        std::optional<const char *> tags;
         std::optional<Format> format;
         bool use_filesystem_path = false;
     } string_options;
@@ -114,6 +114,10 @@ int main(int argc, char * const *argv) {
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StringOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, string_options, [](char opt, const std::vector<const char *> &arguments, auto &string_options) {
         switch(opt) {
             case 't':
+                if(string_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 string_options.tags = arguments[0];
                 break;
             case 'i':
@@ -138,6 +142,9 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    if(!string_options.tags.has_value()) {
+        string_options.tags = "tags";
+    }
 
     const char *valid_extension = string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt";
 
@@ -167,13 +174,13 @@ int main(int argc, char * const *argv) {
     }
 
     // Make sure we have a tags directory
-    std::filesystem::path tags_path(string_options.tags);
+    std::filesystem::path tags_path(*string_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(string_options.tags, "tags") == 0) {
+        if(std::strcmp(*string_options.tags, "tags") == 0) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", string_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", *string_options.tags);
         }
         return EXIT_FAILURE;
     }

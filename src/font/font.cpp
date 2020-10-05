@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     // Options struct
     struct FontOptions {
         const char *data = "data/";
-        const char *tags = "tags/";
+        std::optional<const char *>tags;
         int pixel_size = 14;
         bool use_filesystem_path = false;
         bool use_latin1 = false;
@@ -73,6 +73,10 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 't':
+                if(font_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 font_options.tags = args[0];
                 break;
 
@@ -98,6 +102,9 @@ int main(int argc, char *argv[]) {
                 break;
         }
     });
+    if(!font_options.tags.has_value()) {
+        font_options.tags = "tags";
+    }
 
     // Do it!
     std::string font_tag;
@@ -126,13 +133,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Font tag path
-    std::filesystem::path tags_path(font_options.tags);
+    std::filesystem::path tags_path(*font_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(font_options.tags, "tags") == 0) {
+        if(std::strcmp(*font_options.tags, "tags") == 0) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", font_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", *font_options.tags);
         }
         return EXIT_FAILURE;
     }

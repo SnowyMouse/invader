@@ -55,7 +55,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct StripOptions {
-        const char *tags = "tags";
+        std::optional<const char *> tags;
         bool use_filesystem_path = false;
         bool all = false;
         bool preprocess = false;
@@ -64,6 +64,10 @@ int main(int argc, char * const *argv) {
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<StripOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 1, strip_options, [](char opt, const std::vector<const char *> &arguments, auto &strip_options) {
         switch(opt) {
             case 't':
+                if(strip_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 strip_options.tags = arguments[0];
                 break;
             case 'i':
@@ -80,6 +84,9 @@ int main(int argc, char * const *argv) {
                 break;
         }
     });
+    if(!strip_options.tags.has_value()) {
+        strip_options.tags = "tags";
+    }
 
     bool preprocess = strip_options.preprocess;
 
@@ -104,7 +111,7 @@ int main(int argc, char * const *argv) {
             }
         };
 
-        recursively_strip_dir(std::filesystem::path(strip_options.tags), recursively_strip_dir);
+        recursively_strip_dir(std::filesystem::path(*strip_options.tags), recursively_strip_dir);
 
         oprintf("Stripped %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
 
@@ -120,7 +127,7 @@ int main(int argc, char * const *argv) {
             file_path = std::string(remaining_arguments[0]);
         }
         else {
-            file_path = std::filesystem::path(strip_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
+            file_path = std::filesystem::path(*strip_options.tags) / Invader::File::halo_path_to_preferred_path(remaining_arguments[0]);
         }
         std::string file_path_str = file_path.string();
         return strip_tag(file_path_str.c_str(), preprocess);

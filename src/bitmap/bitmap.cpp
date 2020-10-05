@@ -44,7 +44,7 @@ struct BitmapOptions {
     const char *data = "data/";
 
     // Tags directory
-    const char *tags = "tags/";
+    std::optional<const char *> tags;
 
     // Scale type?
     std::optional<InvaderBitmapMipmapScaling> mipmap_scale_type;
@@ -521,6 +521,10 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 't':
+                if(bitmap_options.tags.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 bitmap_options.tags = arguments[0];
                 break;
 
@@ -663,6 +667,11 @@ int main(int argc, char *argv[]) {
                 break;
         }
     });
+    
+    // Default
+    if(!bitmap_options.tags.has_value()) {
+        bitmap_options.tags = "tags";
+    }
 
     // See if we can figure out the bitmap tag using extensions
     std::string bitmap_tag = remaining_arguments[0];
@@ -671,7 +680,7 @@ int main(int argc, char *argv[]) {
     if(bitmap_options.filesystem_path) {
         // Check for a ".bitmap" and ".extended_bitmap"
         if(bitmap_options.regenerate) {
-            std::vector<std::string> tags_v(&bitmap_options.tags, &bitmap_options.tags + 1);
+            std::vector<std::string> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
             auto try_it_and_buy_it = [&tags_v, &bitmap_tag](HEK::TagClassInt tag_class_int) -> bool {
                 auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, HEK::tag_class_to_extension(tag_class_int));
                 if(!p.has_value()) {
@@ -715,13 +724,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if the tags directory exists
-    std::filesystem::path tags_path(bitmap_options.tags);
+    std::filesystem::path tags_path(*bitmap_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(bitmap_options.tags, "tags") == 0) {
+        if(std::strcmp(*bitmap_options.tags, "tags") == 0) {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", bitmap_options.tags);
+            eprintf_error("Directory %s was not found or is not a directory", *bitmap_options.tags);
         }
         return EXIT_FAILURE;
     }

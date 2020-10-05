@@ -17,7 +17,7 @@ int main(int argc, const char **argv) {
 
     // Options struct
     struct ExtractOptions {
-        std::string tags_directory = "tags";
+        std::optional<std::string> tags_directory;
         std::optional<std::string> maps_directory;
         std::vector<std::string> tags_to_extract;
         std::vector<std::string> search_queries;
@@ -52,6 +52,10 @@ int main(int argc, const char **argv) {
                 extract_options.maps_directory = args[0];
                 break;
             case 't':
+                if(extract_options.tags_directory.has_value()) {
+                    eprintf_error("This tool does not support multiple tags directories.");
+                    std::exit(EXIT_FAILURE);
+                }
                 extract_options.tags_directory = args[0];
                 break;
             case 'r':
@@ -72,15 +76,20 @@ int main(int argc, const char **argv) {
                 std::exit(EXIT_SUCCESS);
         }
     });
+    
+    
+    if(!extract_options.tags_directory.has_value()) {
+        extract_options.tags_directory = "tags";
+    }
 
     // Check if the tags directory exists
-    std::filesystem::path tags(extract_options.tags_directory);
+    std::filesystem::path tags(*extract_options.tags_directory);
     if(!std::filesystem::is_directory(tags)) {
         if(extract_options.tags_directory == "tags") {
             eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
         }
         else {
-            eprintf_error("Directory %s was not found or is not a directory", extract_options.tags_directory.c_str());
+            eprintf_error("Directory %s was not found or is not a directory", extract_options.tags_directory->c_str());
         }
         return EXIT_FAILURE;
     }
@@ -166,5 +175,5 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
-    ExtractionWorkload::extract_map(*map, extract_options.tags_directory, extract_options.search_queries, extract_options.recursive, extract_options.overwrite, extract_options.non_mp_globals);
+    ExtractionWorkload::extract_map(*map, *extract_options.tags_directory, extract_options.search_queries, extract_options.recursive, extract_options.overwrite, extract_options.non_mp_globals);
 }
