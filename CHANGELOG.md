@@ -32,6 +32,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Fixed not setting "disable height map compression" by default
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
+- invader-build: Fixed checking for local nodes when a part did not, in fact,
+  have them
 - invader-dependency: Fixed .model references being converted to .gbxmodel when
   checking for dependencies
 
