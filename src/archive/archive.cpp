@@ -151,7 +151,7 @@ int main(int argc, const char **argv) {
             auto &tag = parsed_map->get_tag(i);
             std::string full_tag_path = Invader::File::halo_path_to_preferred_path(std::string(tag.get_path()) + "." + tag_class_to_extension(tag.get_tag_class_int()));
 
-            // Check each tag directory if it exists. If so, archive it
+            // Check each tags directory if it exists. If so, archive it
             bool exists = false;
             for(auto &dir : archive_options.tags) {
                 std::filesystem::path tag_path = std::filesystem::path(dir) / full_tag_path;

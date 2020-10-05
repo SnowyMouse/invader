@@ -24,7 +24,7 @@ namespace Invader {
         
         /**
          * @param map             map to read
-         * @param tags            tag directory to extract to
+         * @param tags            tags directory to extract to
          * @param queries         search queries to look for
          * @param recursive       also extract tags depended by a tag
          * @param overwrite       overwrite tag files that exist

@@ -71,7 +71,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
-    options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tag directory.", "<path>");
+    options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>");
 
     static constexpr char DESCRIPTION[] = "Find and replace tag references.";
     static constexpr char USAGE[] = "<-M <mode>> [options]";
@@ -233,7 +233,7 @@ int main(int argc, char * const *argv) {
         // Find it
         auto file_path_maybe = Invader::File::tag_path_to_file_path(tag.tag_path, refactor_options.tags, true);
         if(!file_path_maybe.has_value()) {
-            eprintf_error("Error: %s was not found in any tag directory", refactor_options.single_tag);
+            eprintf_error("Error: %s was not found in any tags directory", refactor_options.single_tag);
             return EXIT_FAILURE;
         }
 
@@ -251,7 +251,7 @@ int main(int argc, char * const *argv) {
         return value.value();
     };
 
-    // If recursive, we need to go through each tag in the tag directory for a match
+    // If recursive, we need to go through each tag in the tags directory for a match
     if(refactor_options.recursive.has_value()) {
         auto from_halo = remove_trailing_slashes(preferred_path_to_halo_path(refactor_options.recursive->first));
         auto from_halo_size = from_halo.size();

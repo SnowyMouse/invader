@@ -300,7 +300,7 @@ int main(int argc, const char **argv) {
                 i.virtual_directory = File::load_virtual_tag_folder(i.tags);
             }
             catch(std::exception &e) {
-                eprintf_error("Failed to load the tag directory for an input: %s", e.what());
+                eprintf_error("Failed to load the tags directory for an input: %s", e.what());
                 return EXIT_FAILURE;
             }
             i.tag_paths.reserve(i.virtual_directory.size());
