@@ -1398,7 +1398,7 @@
                 "compound": true
             },
             {
-                "name": "vehicle environment collision damage effect",
+                "name": "vehicle environment collision damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
@@ -1406,7 +1406,7 @@
                 "compound": true
             },
             {
-                "name": "vehicle killed unit damage effect",
+                "name": "vehicle killed unit damage",
                 "type": "TagDependency",
                 "classes": [
                     "damage_effect"
