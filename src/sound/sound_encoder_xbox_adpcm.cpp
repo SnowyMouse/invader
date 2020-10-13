@@ -11,6 +11,16 @@ extern "C" {
 }
 
 namespace Invader::SoundEncoder {
+    static constexpr std::size_t code_chunks_count = 8;
+    
+    static std::size_t calculate_samples_per_block() noexcept {
+        return code_chunks_count * 8;
+    }
+    
+    std::size_t calculate_adpcm_pcm_block_size(std::size_t channel_count) noexcept {
+        return calculate_samples_per_block() * channel_count;
+    }
+    
     // From the MEK - I have no clue how to do this
     std::vector<std::byte> encode_to_xbox_adpcm(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::size_t channel_count) {
         // Set some parameters
@@ -29,15 +39,14 @@ namespace Invader::SoundEncoder {
         }
 
         // Set our output
-        std::vector<std::byte> adpcm_stream_buffer(sample_count * 2);
+        std::vector<std::byte> adpcm_stream_buffer(sample_count * bytes_per_sample);
         std::uint8_t *adpcm_stream = reinterpret_cast<std::uint8_t *>(adpcm_stream_buffer.data());
 
-        static constexpr std::size_t code_chunks_count = 8;
         std::size_t samples_per_block = code_chunks_count * 8;
         std::size_t block_count = sample_count / samples_per_block;
         std::size_t num_bytes_decoded = 0;
 
-        std::size_t pcm_block_size   = samples_per_block * channel_count;  // number of pcm sint16 per block
+        std::size_t pcm_block_size   = calculate_adpcm_pcm_block_size(channel_count);  // number of pcm sint16 per block
         std::size_t adpcm_block_size = (code_chunks_count * 4 + 4) * channel_count;  // number of adpcm bytes per block
 
         std::int32_t average_deltas[2];

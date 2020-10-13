@@ -657,7 +657,13 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
 
             // Split if requested
             if(split) {
-                const std::size_t MAX_SPLIT_SIZE = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
+                std::size_t max_split_size = SPLIT_BUFFER_SIZE - (SPLIT_BUFFER_SIZE % bytes_per_sample_all_channels);
+                
+                // If ADPCM, also take block size into account
+                if(format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM) {
+                    max_split_size = max_split_size - (max_split_size % (bytes_per_sample_all_channels * SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count)));
+                }
+                
                 std::size_t digested = 0;
                 while(permutation.pcm.size() > 0) {
                     // Basically, if we haven't encoded anything, use the i-th permutation, otherwise make a new one as a copy
@@ -665,7 +671,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                     auto &p = digested == 0 ? pitch_range.permutations[i] : pitch_range.permutations.emplace_back(pitch_range.permutations[i]);
                     encoding_mutex.unlock();
                     std::size_t remaining_size = permutation.pcm.size();
-                    std::size_t permutation_size = remaining_size > MAX_SPLIT_SIZE ? MAX_SPLIT_SIZE : remaining_size;
+                    std::size_t permutation_size = remaining_size > max_split_size ? max_split_size : remaining_size;
 
                     // Encode it
                     auto *sample_data_start = permutation.pcm.data();

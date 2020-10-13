@@ -60,6 +60,13 @@ namespace Invader::SoundEncoder {
      * @return                Xbox ADPCM data
      */
     std::vector<std::byte> encode_to_xbox_adpcm(const std::vector<std::byte> &pcm, std::size_t bits_per_sample, std::size_t channel_count);
+    
+    /**
+     * Calculate the PCM block size to use for encoding to ADPCM. Basically the number of samples must be a multiple of this.
+     * @param channel_count channel count
+     * @return              ADPCM PCM block size
+     */
+    std::size_t calculate_adpcm_pcm_block_size(std::size_t channel_count) noexcept;
 
     /**
      * Encode the PCM data to 16-bit big endian PCM. This is lossless unless the input data is greater than 16 bits.
