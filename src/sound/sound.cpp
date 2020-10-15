@@ -32,7 +32,7 @@ struct SoundOptions {
 };
 
 static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound);
-static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count);
+static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count, bool fit_adpcm_block_size);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
     static constexpr std::size_t SPLIT_BUFFER_SIZE = 0x38E00;
@@ -366,7 +366,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             total_sound_count++;
             wait_until_threads_are_open();
             thread_count++;
-            std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count).detach();
+            std::thread(process_permutation_thread, &permutation, highest_sample_rate, format, highest_channel_count, &thread_count, sound_tag.flags & SoundFlagsFlag::SOUND_FLAGS_FLAG_FIT_TO_ADPCM_BLOCKSIZE).detach();
         }
     }
     
@@ -471,6 +471,9 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     
     // Make sure we don't completely blow things up
     std::mutex encoding_mutex;
+    
+    // Block size
+    std::size_t adpcm_block_size = SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count);
 
     // Encode this
     for(std::size_t pr = 0; pr < pitch_range_count; pr++) {
@@ -661,7 +664,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 
                 // If ADPCM, also take block size into account
                 if(format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM) {
-                    max_split_size = max_split_size - (max_split_size % (bytes_per_sample_all_channels * SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count)));
+                    max_split_size = max_split_size - (max_split_size % (bytes_per_sample_all_channels * adpcm_block_size));
                 }
                 
                 std::size_t digested = 0;
@@ -1027,7 +1030,7 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
     }
 }
 
-static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count) {
+static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count, bool fit_adpcm_block_size) {
     // Calculate some stuff
     std::size_t bytes_per_sample = permutation->bits_per_sample / 8;
     std::size_t sample_count = permutation->pcm.size() / bytes_per_sample;
@@ -1035,40 +1038,8 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
     // Mutex for errors
     static std::mutex error_mutex;
 
-    // Sample rate doesn't match; this can be fixed with resampling
-    if(permutation->sample_rate != highest_sample_rate) {
-        double ratio = static_cast<double>(highest_sample_rate) / permutation->sample_rate;
-        std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
-        std::vector<float> new_samples(float_samples.size() * ratio);
-        permutation->sample_rate = highest_sample_rate;
-
-        // Resample it
-        SRC_DATA data = {};
-        data.data_in = float_samples.data();
-        data.data_out = new_samples.data();
-        data.input_frames = float_samples.size() / permutation->channel_count;
-        data.output_frames = new_samples.size() / permutation->channel_count;
-        data.src_ratio = ratio;
-        int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation->channel_count);
-        if(res) {
-            error_mutex.lock();
-            eprintf_error("Failed to resample: %s", src_strerror(res));
-            std::exit(EXIT_FAILURE);
-        }
-        new_samples.resize(data.output_frames_gen * permutation->channel_count);
-
-        // Set stuff
-        if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
-            bytes_per_sample = sizeof(std::uint16_t);
-        }
-        permutation->sample_rate = highest_sample_rate;
-        permutation->bits_per_sample = bytes_per_sample * 8;
-        sample_count = new_samples.size();
-        permutation->pcm = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
-    }
-
     // Bits per sample doesn't match; we can fix that though
-    if(bytes_per_sample != sizeof(std::uint16_t) && format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+    if(bytes_per_sample != sizeof(std::uint16_t) && (format == SoundFormat::SOUND_FORMAT_16_BIT_PCM || format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM)) {
         std::size_t new_bytes_per_sample = sizeof(std::uint16_t);
         permutation->pcm = SoundEncoder::convert_int_to_int(permutation->pcm, permutation->bits_per_sample, new_bytes_per_sample * 8);
         bytes_per_sample = new_bytes_per_sample;
@@ -1114,6 +1085,77 @@ static void process_permutation_thread(SoundReader::Sound *permutation, std::uin
         permutation->pcm = std::move(new_samples);
         permutation->pcm.shrink_to_fit();
         permutation->channel_count = 1;
+    }
+
+    // Sample rate doesn't match; this can be fixed with resampling
+    if(static_cast<double>(highest_sample_rate) != permutation->sample_rate) {
+        double ratio = static_cast<double>(highest_sample_rate) / permutation->sample_rate;
+        std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
+        std::vector<float> new_samples(float_samples.size() * ratio);
+        permutation->sample_rate = highest_sample_rate;
+
+        // Resample it
+        SRC_DATA data = {};
+        data.data_in = float_samples.data();
+        data.data_out = new_samples.data();
+        data.input_frames = float_samples.size() / permutation->channel_count;
+        data.output_frames = new_samples.size() / permutation->channel_count;
+        data.src_ratio = ratio;
+        int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation->channel_count);
+        if(res) {
+            error_mutex.lock();
+            eprintf_error("Failed to resample: %s", src_strerror(res));
+            std::exit(EXIT_FAILURE);
+        }
+        new_samples.resize(data.output_frames_gen * permutation->channel_count);
+
+        // Set stuff
+        if(format == SoundFormat::SOUND_FORMAT_16_BIT_PCM) {
+            bytes_per_sample = sizeof(std::uint16_t);
+        }
+        permutation->sample_rate = highest_sample_rate;
+        permutation->bits_per_sample = bytes_per_sample * 8;
+        sample_count = new_samples.size();
+        permutation->pcm = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
+    }
+    
+
+    // Add samples to fit block size via resampling
+    auto adpcm_block_size = SoundEncoder::calculate_adpcm_pcm_block_size(highest_channel_count);
+    auto trip_adpcm_block_size = adpcm_block_size * 123;
+    auto quad_adpcm_block_size = adpcm_block_size * 124;
+    
+    if(fit_adpcm_block_size && format == SoundFormat::SOUND_FORMAT_XBOX_ADPCM && sample_count > quad_adpcm_block_size) {
+        std::size_t delta = trip_adpcm_block_size + (adpcm_block_size - (sample_count % adpcm_block_size));
+        if(delta > 0) {
+            double ratio = delta / static_cast<double>(quad_adpcm_block_size);
+            std::vector<float> float_samples = SoundEncoder::convert_int_to_float(permutation->pcm, permutation->bits_per_sample);
+            std::vector<float> new_samples(float_samples.size() * ratio);
+            auto new_quad = static_cast<std::size_t>(quad_adpcm_block_size * ratio);
+            
+            // Resample it
+            SRC_DATA data = {};
+            data.data_in = float_samples.data();
+            data.data_out = new_samples.data();
+            data.input_frames = float_samples.size() / permutation->channel_count;
+            data.output_frames = new_samples.size() / permutation->channel_count;
+            data.src_ratio = ratio;
+            int res = src_simple(&data, SRC_SINC_BEST_QUALITY, permutation->channel_count);
+            if(res) {
+                error_mutex.lock();
+                eprintf_error("Failed to resample: %s", src_strerror(res));
+                std::exit(EXIT_FAILURE);
+            }
+            
+            new_samples.resize(data.output_frames_gen * permutation->channel_count);
+            auto new_int_samples = SoundEncoder::convert_float_to_int(new_samples, permutation->bits_per_sample);
+            
+            permutation->pcm.erase(permutation->pcm.begin(), permutation->pcm.begin() + quad_adpcm_block_size * bytes_per_sample);
+            permutation->pcm.insert(permutation->pcm.begin(), new_int_samples.begin(), new_int_samples.begin() + new_quad * bytes_per_sample);
+            
+            sample_count -= quad_adpcm_block_size;
+            sample_count += new_quad;
+        }
     }
     
     (*thread_count)--;
