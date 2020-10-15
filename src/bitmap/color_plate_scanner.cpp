@@ -115,9 +115,6 @@ namespace Invader {
                     }
                     
                     break_off_sequence(height);
-                    
-                    // Set to magenta
-                    scanner.sequence_divider_color = ColorPlatePixel { 0xFF, 0x00, 0xFF, 0xFF };
                 }
             }
             
