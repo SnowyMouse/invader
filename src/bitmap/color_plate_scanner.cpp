@@ -128,6 +128,7 @@ namespace Invader {
             // If we don't have a sequence color and the transparency color is NOT blue, then we actually do not have a valid color plate
             if(!scanner.sequence_divider_color.has_value() && !scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
                 valid_color_plate_key = false;
+                generated_bitmap.sequences.clear();
             }
         }
 
