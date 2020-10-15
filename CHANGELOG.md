@@ -30,6 +30,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Fixed generating too few mipmaps for non-1:1 bitmaps. This was
   unlikely to cause issues, since the mipmaps missing were all one-dimensional
 - invader-bitmap: Fixed not setting "disable height map compression" by default
+- invader-bitmap: Fixed `-P` not working with `-R`
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
 - invader-build: Fixed checking for local nodes when a part did not, in fact,

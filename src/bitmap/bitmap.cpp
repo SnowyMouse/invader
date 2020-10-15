@@ -676,21 +676,25 @@ int main(int argc, char *argv[]) {
     // See if we can figure out the bitmap tag using extensions
     std::string bitmap_tag = remaining_arguments[0];
     SupportedFormatsInt found_format = static_cast<SupportedFormatsInt>(0);
+    
+    // Remember what kind of tag class we're using, if we're using -P with -R
+    std::optional<TagClassInt> tag_class_to_use;
 
     if(bitmap_options.filesystem_path) {
         // Check for a ".bitmap" and ".extended_bitmap"
         if(bitmap_options.regenerate) {
             std::vector<std::string> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
-            auto try_it_and_buy_it = [&tags_v, &bitmap_tag](HEK::TagClassInt tag_class_int) -> bool {
-                auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, HEK::tag_class_to_extension(tag_class_int));
+            auto try_it_and_buy_it = [&tags_v, &bitmap_tag, &tag_class_to_use](HEK::TagClassInt tag_class_int) -> bool {
+                auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, std::string(".") + HEK::tag_class_to_extension(tag_class_int));
                 if(!p.has_value()) {
                     return false;
                 }
                 bitmap_tag = *p;
+                tag_class_to_use = tag_class_int;
                 return true;
             };
             
-            if(!try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP) && try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_BITMAP)) {
+            if(!try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP) && !try_it_and_buy_it(HEK::TagClassInt::TAG_CLASS_BITMAP)) {
                 eprintf_error("Failed to find a valid bitmap %s in the tags directory.", remaining_arguments[0]);
                 return EXIT_FAILURE;
             }
@@ -739,9 +743,26 @@ int main(int argc, char *argv[]) {
 
     auto final_path_bitmap = tag_path.string() + ".bitmap";
     auto final_path_invader_bitmap = tag_path.string() + ".invader_bitmap";
-
-    // Are we using an extended bitmap?
-    if(!bitmap_options.use_extended && std::filesystem::exists(final_path_invader_bitmap)) {
+    
+    // Determine if we're using extended or not
+    if(tag_class_to_use.has_value()) { // if -P and -R is used
+        switch(tag_class_to_use.value()) {
+            case HEK::TagClassInt::TAG_CLASS_BITMAP:
+                if(bitmap_options.use_extended) {
+                    eprintf_error("Using --extended while regenerating a non-extended bitmap is not yet supported");
+                    return EXIT_FAILURE;
+                }
+                break;
+            
+            case HEK::TagClassInt::TAG_CLASS_INVADER_BITMAP:
+                bitmap_options.use_extended = true;
+                break;
+            
+            default:
+                std::terminate();
+        }
+    }
+    else if(bitmap_options.use_extended || (!bitmap_options.use_extended && std::filesystem::exists(final_path_invader_bitmap))) { // if .invader_bitmap exists or we're using extended
         bitmap_options.use_extended = true;
     }
 
