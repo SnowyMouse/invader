@@ -156,6 +156,12 @@ namespace Invader {
                 scanner.read_single_bitmap(generated_bitmap, pixels, width, height);
             }
         }
+        
+        // If we have zero bitmaps, error
+        if(generated_bitmap.bitmaps.size() == 0) {
+            eprintf_error("Error: No bitmaps were found in the color plate");
+            throw InvalidInputBitmapException();
+        }
 
         // If the last sequence is empty, purge it
         if(generated_bitmap.sequences.size() > 0 && generated_bitmap.sequences[generated_bitmap.sequences.size() - 1].bitmap_count == 0) {

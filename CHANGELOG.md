@@ -17,6 +17,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bitmap: Height maps have been capped to 0.5 height
 - invader-bitmap: Generating a height map with 0 or less height no longer
   generates a height map, and an error will be printed to the console
+- invader-bitmap: If a color plate has no bitmaps in it, then it is now an error
 - invader-build: Having model, gbxmodel, or scenario_structure_bsp shaders be
   set to null now fails to build, as this crashes the game
 - invader-edit-qt: Mousing over a tag now displays the file size and path of the
@@ -31,6 +32,7 @@ This is used for recording Invader's changes. This changelog is based on
   unlikely to cause issues, since the mipmaps missing were all one-dimensional
 - invader-bitmap: Fixed not setting "disable height map compression" by default
 - invader-bitmap: Fixed `-P` not working with `-R`
+- invader-bitmap: Fixed an issue with loading some bitmaps
 - invader-build: Fixed some scenery spawns warning about fullbright when it is
   not an issue
 - invader-build: Fixed checking for local nodes when a part did not, in fact,
