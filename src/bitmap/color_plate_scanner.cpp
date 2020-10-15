@@ -99,7 +99,7 @@ namespace Invader {
                         }
                     };
                     
-                    for(std::size_t y = 0; y < height; y++) {
+                    for(std::size_t y = 1; y < height; y++) {
                         bool all_blue = true;
                         for(std::size_t x = 0; x < width; x++) {
                             if(!scanner.is_transparency_color(GET_PIXEL(x,y))) {
@@ -115,6 +115,13 @@ namespace Invader {
                     }
                     
                     break_off_sequence(height);
+                    
+                    scanner.spacing_color = ColorPlatePixel { 0xFF, 0xFF, 0x00, 0xFF };
+                    
+                    if(!scanner.is_transparency_color(spacing_candidate) && !scanner.is_spacing_color(spacing_candidate)) {
+                        eprintf_error("Error: Spacing color, if set, can only be #00FFFF if sequence divider is not set");
+                        throw InvalidInputBitmapException();
+                    }
                 }
             }
             
@@ -153,7 +160,7 @@ namespace Invader {
             }
             
             // Is it still valid? If so, check spacing
-            if(valid_color_plate_key && !same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
+            if(valid_color_plate_key && !scanner.spacing_color.has_value() && !same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
                 scanner.spacing_color = spacing_candidate;
                 
                 // Make sure it's valid!
