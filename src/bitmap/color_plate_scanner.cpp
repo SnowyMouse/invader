@@ -73,62 +73,95 @@ namespace Invader {
                 // What we need to do next is determine if we have a sequence divider
                 if(!same_color_ignore_opacity(transparency_candidate, separator_candidate)) {
                     scanner.sequence_divider_color = separator_candidate;
+                }
+                
+                // If there's no sequence divider color, check if we're blue. If not, we're not a valid key (treat as one bitmap)
+                else if(!scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
+                    valid_color_plate_key = false;
+                }
+                
+                // Otherwise, it's valid, but we have to look for sequences based on seeing if a line is fully blue or not
+                else {
+                    // start_y has a value whenever we're inside a sequence
+                    std::optional<std::size_t> start_y;
                     
-                    // Generate sequences
-                    auto *sequence = &generated_bitmap.sequences.emplace_back();
-                    
-                    auto is_horizontal_bar = [&scanner, &width, &pixels](std::size_t y) {
-                        if(scanner.is_sequence_divider_color(GET_PIXEL(0,y))) {
-                            for(std::size_t x = 1; x < width; x++) {
-                                if(!scanner.is_sequence_divider_color(GET_PIXEL(x,y))) {
-                                    eprintf_error("Sequence divider broken at (%zu,%zu)", x, y);
-                                    throw InvalidInputBitmapException();
-                                }
-                            }
-                            return true;
+                    auto break_off_sequence = [&start_y, &generated_bitmap](std::size_t y) {
+                        if(start_y.has_value()) {
+                            auto &sequences = generated_bitmap.sequences.emplace_back();
+                            sequences.y_start = *start_y;
+                            sequences.y_end = y;
+                            start_y = std::nullopt;
                         }
-                        return false;
+                        else {
+                            start_y = y;
+                        }
                     };
                     
-                    sequence->y_start = is_horizontal_bar(1) ? 2 : 1;
-
-                    // Next, we need to find all of the sequences
-                    for(std::uint32_t y = sequence->y_start; y < height; y++) {
-                        // If we got it, create a new sequence, but not before terminating the last one
-                        if(is_horizontal_bar(y)) {
-                            sequence->y_end = y;
-                            sequence = &generated_bitmap.sequences.emplace_back();
-                            sequence->y_start = y + 1;
+                    for(std::size_t y = 0; y < height; y++) {
+                        bool all_blue = true;
+                        for(std::size_t x = 0; x < width; x++) {
+                            if(!scanner.is_transparency_color(GET_PIXEL(x,y))) {
+                                all_blue = false;
+                                break;
+                            }
+                        }
+                        
+                        // If it's all blue and we're in a sequence, then the sequence has ended
+                        if(all_blue == start_y.has_value()) {
+                            break_off_sequence(y);
                         }
                     }
-
-                    // Terminate the last sequence index
-                    sequence->y_end = height;
-                }
-                
-                // Add a default sequence
-                else {
-                    auto &sequence = generated_bitmap.sequences.emplace_back();
-                    sequence.y_start = 1;
-                    sequence.y_end = height;
-                }
-                
-                // Lastly, do we have spacing?
-                if(!same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
-                    scanner.spacing_color = spacing_candidate;
                     
-                    // Make sure it's valid!
-                    if(same_color_ignore_opacity(separator_candidate, spacing_candidate)) {
-                        eprintf_error("Spacing and sequence divider colors must not match");
-                        throw InvalidInputBitmapException();
-                    }
+                    break_off_sequence(height);
+                    
+                    // Set to magenta
+                    scanner.sequence_divider_color = ColorPlatePixel { 0xFF, 0x00, 0xFF, 0xFF };
                 }
             }
             
-            // If we don't have a sequence color and the transparency color is NOT blue, then we actually do not have a valid color plate
-            if(!scanner.sequence_divider_color.has_value() && !scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
-                valid_color_plate_key = false;
-                generated_bitmap.sequences.clear();
+            // If we still have a valid color plate key and we don't have sequences, find them
+            if(valid_color_plate_key && !generated_bitmap.sequences.size()) {
+                // Generate sequences
+                auto *sequence = &generated_bitmap.sequences.emplace_back();
+                
+                auto is_horizontal_bar = [&scanner, &width, &pixels](std::size_t y) {
+                    if(scanner.is_sequence_divider_color(GET_PIXEL(0,y))) {
+                        for(std::size_t x = 1; x < width; x++) {
+                            if(!scanner.is_sequence_divider_color(GET_PIXEL(x,y))) {
+                                eprintf_error("Sequence divider broken at (%zu,%zu)", x, y);
+                                throw InvalidInputBitmapException();
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                };
+                
+                sequence->y_start = is_horizontal_bar(1) ? 2 : 1;
+
+                // Next, we need to find all of the sequences
+                for(std::uint32_t y = sequence->y_start; y < height; y++) {
+                    // If we got it, create a new sequence, but not before terminating the last one
+                    if(is_horizontal_bar(y)) {
+                        sequence->y_end = y;
+                        sequence = &generated_bitmap.sequences.emplace_back();
+                        sequence->y_start = y + 1;
+                    }
+                }
+
+                // Terminate the last sequence index
+                sequence->y_end = height;
+            }
+            
+            // Is it still valid? If so, check spacing
+            if(valid_color_plate_key && !same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
+                scanner.spacing_color = spacing_candidate;
+                
+                // Make sure it's valid!
+                if(same_color_ignore_opacity(separator_candidate, spacing_candidate)) {
+                    eprintf_error("Spacing and sequence divider colors must not match");
+                    throw InvalidInputBitmapException();
+                }
             }
         }
 
