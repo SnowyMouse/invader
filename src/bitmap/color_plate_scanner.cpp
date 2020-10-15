@@ -66,7 +66,7 @@ namespace Invader {
                 }
             }
             
-            // The key is valid. We have a transparency color at the very least
+            // The key is valid maybe?
             if(valid_color_plate_key) {
                 scanner.transparency_color = transparency_candidate;
             
@@ -106,6 +106,13 @@ namespace Invader {
                     sequence->y_end = height;
                 }
                 
+                // Add a default sequence
+                else {
+                    auto &sequence = generated_bitmap.sequences.emplace_back();
+                    sequence.y_start = 1;
+                    sequence.y_end = height;
+                }
+                
                 // Lastly, do we have spacing?
                 if(!same_color_ignore_opacity(transparency_candidate, spacing_candidate)) {
                     scanner.spacing_color = spacing_candidate;
@@ -116,7 +123,11 @@ namespace Invader {
                         throw InvalidInputBitmapException();
                     }
                 }
-                
+            }
+            
+            // If we don't have a sequence color and the transparency color is NOT blue, then we actually do not have a valid color plate
+            if(!scanner.sequence_divider_color.has_value() && !scanner.is_transparency_color(ColorPlatePixel { 0xFF, 0x00, 0x00, 0xFF } )) {
+                valid_color_plate_key = false;
             }
         }
 
