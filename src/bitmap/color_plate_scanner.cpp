@@ -80,7 +80,9 @@ namespace Invader {
                     valid_color_plate_key = false;
                 }
                 
-                // Otherwise, it's valid, but we have to look for sequences based on seeing if a line is fully blue or not
+                // Otherwise, it's valid, but we have to look for sequences based on seeing if a horizontal line is fully blue or not
+                //
+                // Basically, transparency IS the sequence divider
                 else {
                     // start_y has a value whenever we're inside a sequence
                     std::optional<std::size_t> start_y;
