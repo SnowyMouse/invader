@@ -37,6 +37,8 @@ This is used for recording Invader's changes. This changelog is based on
   not an issue
 - invader-build: Fixed checking for local nodes when a part did not, in fact,
   have them
+- invader-build: Fixed warnings regarding weapon triggers showing the wrong
+  trigger indices
 - invader-dependency: Fixed .model references being converted to .gbxmodel when
   checking for dependencies
 
