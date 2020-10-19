@@ -3,11 +3,13 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+## [0.38.0] - 2020-10-19
 ### Added
 - invader-archive: Added `-C` which copies the tags to a directory instead of
   creating an archive.
 - invader-bitmap: Added `-R` which uses the compressed color plate data of the
-  tag in pllace of an image file (this will not work with extracted tags)
+  tag in place of an image file (this will not work with extracted tags)
 - invader-sound: Added `--threads` or `-j` which can be used to parallelize
   encoding and resampling of sounds with a set number of threads. This can
   drastically speed up sound tag generation when creating a sound tag with
