@@ -263,7 +263,7 @@
                 "name": "rotation animation scale",
                 "unit": "degrees",
                 "type": "float",
-                "default": 1.0
+                "default": 360.0
             },
             {
                 "name": "rotation animation center",
@@ -297,7 +297,8 @@
             {
                 "name": "color0 animation period",
                 "unit": "seconds",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "color0 animation lower bound",
