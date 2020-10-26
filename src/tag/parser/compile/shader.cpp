@@ -17,45 +17,6 @@ namespace Invader::Parser {
     void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_MODEL;
         this->unknown = 1.0F;
-        
-        // Do we have a multipurpose? If so, what type of flag?
-        if(this->multipurpose_map.path.size()) {
-            bool uses_xbox_multi_order = this->shader_model_flags & HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-            bool clear_flag = false;
-            
-            switch(workload.engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    if(!uses_xbox_multi_order) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine requires Xbox multipurpose channel order; the resulting shader may not appear as intended", tag_index);
-                    }
-                    clear_flag = true;
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    if(uses_xbox_multi_order) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support Xbox multipurpose channel order; the resulting shader may not appear as intended", tag_index);
-                    }
-                    clear_flag = true;
-                    break;
-                default:
-                    break;
-            }
-        
-            // Clear the flag when putting it in a map if we need to
-            if(clear_flag) {
-                this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-            }
-        }
-    }
-    void ShaderModel::post_cache_parse(const Invader::Tag &tag, std::optional<HEK::Pointer>) {
-        // If we have a multipurpose and we're Xbox, set the flag. Otherwise, negate it.
-        if(tag.get_map().get_engine() == HEK::CacheFileEngine::CACHE_FILE_XBOX && this->multipurpose_map.path.size() > 0) {
-            this->shader_model_flags |= HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-        }
-        else {
-            this->shader_model_flags &= ~HEK::ShaderModelFlagsFlag::SHADER_MODEL_FLAGS_FLAG_USE_XBOX_MULTIPURPOSE_CHANNEL_ORDER;
-        }
     }
     
     void ShaderTransparentChicago::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
