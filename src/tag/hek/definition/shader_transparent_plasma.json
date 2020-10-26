@@ -109,7 +109,8 @@
             {
                 "name": "primary animation period",
                 "unit": "seconds",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "primary animation direction",
@@ -139,7 +140,8 @@
             {
                 "name": "secondary animation period",
                 "unit": "seconds",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "secondary animation direction",

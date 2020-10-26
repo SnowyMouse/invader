@@ -157,7 +157,8 @@
             },
             {
                 "name": "ripple mipmap levels",
-                "type": "uint16"
+                "type": "uint16",
+                "default": 1
             },
             {
                 "type": "pad",

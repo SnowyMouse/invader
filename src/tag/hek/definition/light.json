@@ -21,7 +21,8 @@
             },
             {
                 "name": "radius",
-                "type": "float"
+                "type": "float",
+                "default": 1.0
             },
             {
                 "name": "radius modifer",
@@ -79,12 +80,14 @@
             {
                 "name": "color lower bound",
                 "type": "ColorARGB",
-                "compound": true
+                "compound": true,
+                "default": [0.0,1.0, 1.0, 1.0]
             },
             {
                 "name": "color upper bound",
                 "type": "ColorARGB",
-                "compound": true
+                "compound": true,
+                "default": [0.0,1.0, 1.0, 1.0]
             },
             {
                 "type": "pad",
