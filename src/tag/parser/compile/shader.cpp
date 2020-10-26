@@ -14,7 +14,7 @@ namespace Invader::Parser {
             this->material_color.blue = 1.0F;
         }
     }
-    void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+    void ShaderModel::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_MODEL;
         this->unknown = 1.0F;
     }
