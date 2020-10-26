@@ -3,6 +3,12 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Removed
+- invader-build: Now deswizzles Xbox bitmaps on build
+
+### Removed
+- invader: Removed "use xbox multipurpose channel order" from definitions
+- invader-extract: Removed deswizzling Xbox bitmaps on extraction
 
 ## [0.38.0] - 2020-10-19
 ### Added

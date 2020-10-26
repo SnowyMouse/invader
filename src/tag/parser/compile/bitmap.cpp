@@ -90,7 +90,6 @@ namespace Invader::Parser {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-                bool swizzled = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
 
                 // TODO: Deal with cubemaps and stuff
                 if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
@@ -140,35 +139,8 @@ namespace Invader::Parser {
                 // Calculate our offset
                 bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());
                 
-                // If it's swizzled, deswizzle as we insert
-                if(!compressed && swizzled) {
-                    std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(bitmap_data.format);
-                    std::size_t mipmap_count = bitmap_data.mipmap_count;
-                    std::size_t width = bitmap_data.width;
-                    std::size_t height = bitmap_data.height;
-                    std::size_t depth = bitmap_data.depth;
-                    auto *data = bitmap_data_ptr;
-                    
-                    // Go through each mipmap and insert them deswizzled
-                    for(std::size_t m = 0; m <= mipmap_count; m++) {
-                        // Do it!
-                        auto deswizzled = Invader::Swizzle::swizzle(data, bits_per_pixel, width, height, true);
-                        data += deswizzled.size();
-                        bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), deswizzled.begin(), deswizzled.end());
-                        
-                        // Make sure we don't go below 1x1
-                        width = std::max(width / 2, static_cast<std::size_t>(1));
-                        height = std::max(height / 2, static_cast<std::size_t>(1));
-                        depth = std::max(depth / 2, static_cast<std::size_t>(1));
-                    }
-                    
-                    // Mark as unswizzled
-                    bitmap_data.flags &= ~(HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED);
-                }
-                // Otherwise, just copy
-                else {
-                    bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
-                }
+                // Insert this
+                bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
             }
         }
     }
@@ -209,6 +181,8 @@ namespace Invader::Parser {
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
         std::size_t bitmap_data_count = bitmap->bitmap_data.size();
+        std::size_t swizzle_count = 0;
+        const char *swizzle_verb = "";
         
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
@@ -220,6 +194,44 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as compressed and swizzled which is not allowed", b);
                 throw InvalidTagDataException();
             }
+            
+            // Should we (de)swizzle?
+            auto do_swizzle = [&data, &pixel_data, &swizzled, &swizzle_verb, &swizzle_count](bool deswizzle) {
+                std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
+                std::size_t mipmap_count = data.mipmap_count;
+                std::size_t width = data.width;
+                std::size_t height = data.height;
+                std::size_t depth = data.depth;
+                auto *this_bitmap_data = pixel_data + data.pixel_data_offset;
+                
+                // Go through each mipmap and insert them deswizzled
+                for(std::size_t m = 0; m <= mipmap_count; m++) {
+                    // Do it!
+                    auto deswizzled = Invader::Swizzle::swizzle(this_bitmap_data, bits_per_pixel, width, height, true);
+                    auto deswizzled_size = deswizzled.size();
+                    std::memcpy(this_bitmap_data, deswizzled.data(), deswizzled_size);
+                    this_bitmap_data += deswizzled_size;
+                    
+                    // Make sure we don't go below 1x1
+                    width = std::max(width / 2, static_cast<std::size_t>(1));
+                    height = std::max(height / 2, static_cast<std::size_t>(1));
+                    depth = std::max(depth / 2, static_cast<std::size_t>(1));
+                }
+                
+                // Mark as (un)swizzled
+                if(deswizzle) {
+                    data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                    swizzled = false;
+                    swizzle_verb = "deswizzled";
+                }
+                else {
+                    data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                    swizzled = true;
+                    swizzle_verb = "swizzled";
+                }
+                
+                swizzle_count++;
+            };
 
             // Check if we can or must use swizzled stuff
             switch(workload.engine_target) {
@@ -227,12 +239,12 @@ namespace Invader::Parser {
                 case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     if(swizzled) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support swizzled bitmaps; it may not appear as intended", tag_index);
+                        do_swizzle(true);
                     }
                     break;
                 case HEK::CacheFileEngine::CACHE_FILE_XBOX:
                     if(!compressed && !swizzled) {
-                        workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "The target engine does not support unswizzled uncompressed bitmaps; it may not appear as intended", tag_index);
+                        do_swizzle(false);
                     }
                     break;
                 default:
@@ -292,6 +304,11 @@ namespace Invader::Parser {
                         eprintf_warn("Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
                     }
                 }
+            }
+            
+            // Indicate if we had to swizzle or deswizzlle
+            if(swizzle_count > 0) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%zu bitmap%s needed to be %s for the target engine", swizzle_count, swizzle_count == 1 ? "" : "s", swizzle_verb);
             }
 
             if(depth != 1 && type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
