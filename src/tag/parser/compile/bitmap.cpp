@@ -305,11 +305,6 @@ namespace Invader::Parser {
                     }
                 }
             }
-            
-            // Indicate if we had to swizzle or deswizzlle
-            if(swizzle_count > 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%zu bitmap%s needed to be %s for the target engine", swizzle_count, swizzle_count == 1 ? "" : "s", swizzle_verb);
-            }
 
             if(depth != 1 && type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is not a 3D texture but has depth (%zu != 1)", data_index, depth);
@@ -341,6 +336,11 @@ namespace Invader::Parser {
             workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
             workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
             data.pixel_data_size = static_cast<std::uint32_t>(size);
+        }
+            
+        // Indicate if we had to swizzle or deswizzle
+        if(swizzle_count > 0) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%zu bitmap%s needed to be %s for the target engine", swizzle_count, swizzle_count == 1 ? "" : "s", swizzle_verb);
         }
     }
 
