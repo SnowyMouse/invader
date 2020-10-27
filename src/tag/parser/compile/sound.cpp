@@ -218,6 +218,7 @@ namespace Invader::Parser {
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
                 case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_EFFECT:
                     sound->zero_gain_modifier = 0.0F;
                     break;
                 default:
