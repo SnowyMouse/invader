@@ -78,7 +78,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("ignore-resources", 'G', 0, "Ignore resource maps for the current map input.");
     options.emplace_back("all", 'a', 0, "Only match if tags are in all inputs");
 
-    static constexpr char DESCRIPTION[] = "Create a file listing the tags of a map.";
+    static constexpr char DESCRIPTION[] = "Compare tags against other tags.";
     static constexpr char USAGE[] = "[options] <-I <options>> <-I <options>> [<-I <options>> ...]";
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<CompareOptions &>(argc, argv, options, USAGE, DESCRIPTION, 0, 0, compare_options, [](char opt, const auto &args, CompareOptions &compare_options) {

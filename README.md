@@ -333,7 +333,7 @@ tags.
 ```
 Usage: invader-compare [options] <-I <options>> <-I <options>> [<-I <options>> ...]
 
-Create a file listing the tags of a map.
+Compare tags against other tags.
 
 Options:
   -a --all                     Only match if tags are in all inputs
