@@ -331,7 +331,7 @@ namespace Invader::EditQt {
         }
         else {
             const char *asterisk = dirty ? " *" : "";
-            std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.tag_path.c_str(), asterisk);
+            std::snprintf(title_bar, sizeof(title_bar), "%s%s", this->file.full_path.string().c_str(), asterisk);
         }
         this->setWindowTitle(title_bar);
 

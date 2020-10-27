@@ -9,6 +9,8 @@ This is used for recording Invader's changes. This changelog is based on
   manually; it is set to (ascending height + descending_height) / 5 to be in
   line with what tool.exe does
 - invader-build: More defaults are now set
+- invader-edit-qt: The relative file path is now shown in the title bar rather
+  than the virtual tag path
 - invader-sound: No longer sets values that are defaulted when building into a
   cache file
 
