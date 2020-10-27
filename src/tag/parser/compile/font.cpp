@@ -39,6 +39,9 @@ namespace Invader::Parser {
     
     void Font::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         generate_character_tables(*this);
+        
+        // This is super dumb, but that's what it does
+        this->leading_width = (static_cast<std::int32_t>(this->ascending_height) + static_cast<std::int32_t>(this->descending_height)) / 5;
     }
 
     void FontCharacter::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {

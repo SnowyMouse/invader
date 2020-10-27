@@ -91,7 +91,9 @@
             },
             {
                 "name": "leading width",
-                "type": "int16"
+                "type": "int16",
+                "comment": "you can't actually set this; it gets overridden with (ascending height + descending height) / 5 on map build",
+                "cache_only": true
             },
             {
                 "type": "pad",

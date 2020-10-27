@@ -5,6 +5,9 @@ This is used for recording Invader's changes. This changelog is based on
 ## [Unreleased]
 ### Changed
 - invader-build: Now deswizzles Xbox bitmaps on build
+- invader-build: The "leading width" value in font tags can no longer be set
+  manually; it is set to (ascending height + descending_height) / 5 to be in
+  line with what tool.exe does
 - invader-sound: No longer sets values that are defaulted when building into a
   cache file
 
@@ -14,6 +17,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Removed
 - invader: Removed "use xbox multipurpose channel order" from definitions
+- invader-edit-qt: Removed editing "leading width" for font tags since this
+  value gets overwritten anyway
 - invader-extract: Removed deswizzling Xbox bitmaps on extraction
 
 ## [0.38.0] - 2020-10-19
