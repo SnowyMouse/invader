@@ -9,6 +9,9 @@ This is used for recording Invader's changes. This changelog is based on
   manually; it is set to (ascending height + descending_height) / 5 to be in
   line with what tool.exe does
 - invader-build: More defaults are now set
+- invader-build: Now detects if falloff distance is greater than or equal to
+  cutoff distance and both are non-zero (if so, they get set to 0 and a warning
+  is shown)
 - invader-edit-qt: The relative file path is now shown in the title bar rather
   than the virtual tag path
 - invader-sound: No longer sets values that are defaulted when building into a

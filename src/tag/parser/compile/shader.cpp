@@ -14,9 +14,15 @@ namespace Invader::Parser {
             this->material_color.blue = 1.0F;
         }
     }
-    void ShaderModel::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
+    void ShaderModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_MODEL;
         this->unknown = 1.0F;
+        
+        if(this->reflection_falloff_distance >= this->reflection_cutoff_distance && (this->reflection_cutoff_distance != 0.0F && this->reflection_falloff_distance != 0.0F)) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Reflection falloff is greater than or equal to cutoff, so both of these values were set to 0 (%f >= %f)", this->reflection_falloff_distance, this->reflection_cutoff_distance);
+            this->reflection_cutoff_distance = 0.0F;
+            this->reflection_falloff_distance = 0.0F;
+        }
     }
     
     void ShaderTransparentChicago::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
