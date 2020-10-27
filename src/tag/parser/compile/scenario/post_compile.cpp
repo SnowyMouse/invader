@@ -465,6 +465,7 @@ namespace Invader::Parser {
                 auto point_count = command_list.points.size();
                 std::vector<std::optional<std::uint32_t>> best_surface_indices(point_count);
                 
+                // Go through each BSP (or one BSP for manual) to look for surface indices
                 for(std::size_t b = start; b < bsp_count; b++) {
                     auto &bsp = bsp_data[b];
                     std::size_t hits = 0;
@@ -473,19 +474,21 @@ namespace Invader::Parser {
                     surface_indices.reserve(point_count);
 
                     // Basically, add 1 for every time we find it in here
+                    // We need to check if there is a surface that is half a world unit or less below the position
                     for(auto &p : command_list.points) {
                         total_hits++;
                         
                         std::uint32_t surface_index = 0;
                         if(bsp.check_for_intersection(p.position, 0.5F, nullptr, &surface_index, nullptr)) {
                             hits++;
-                            surface_indices.emplace_back(surface_index);
+                            surface_indices.emplace_back(surface_index); // found a surface
                         }
                         else {
-                            surface_indices.emplace_back();
+                            surface_indices.emplace_back(std::nullopt); // no surface underneath
                         }
                     }
 
+                    // Did we have more matches for this BSP than past BSPs checked?
                     if(hits > best_bsp_hits) {
                         best_bsp_hits = hits;
                         best_bsp = b;
