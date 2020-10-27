@@ -29,7 +29,7 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
         for struct in all_used_structs:
             name = struct["member_name"]
             unread = ("cache_only" in struct and struct["cache_only"]) or ("unused" in struct and struct["unused"])
-            if unread and struct["type"] != "TagReflexive" and struct["type"] != "TagDependency":
+            if unread and struct["type"] != "TagReflexive" and struct["type"] != "TagDependency" and struct["type"] != "TagDataOffset":
                 continue
             default_sign = "<=" if "default_sign" in struct and struct["default_sign"] else "=="
             if struct["type"] == "TagDependency":
@@ -94,7 +94,8 @@ def make_parse_hek_tag_data(postprocess_hek_data, all_bitfields, struct_name, al
                 cpp_read_hek_data.write("            eprintf_error(\"Failed to read tag data block {}::{}: %zu bytes needed > %zu bytes available\", h_{}_size, data_size);\n".format(struct_name, name, name))
                 cpp_read_hek_data.write("            throw OutOfBoundsException();\n")
                 cpp_read_hek_data.write("        }\n")
-                cpp_read_hek_data.write("        r.{} = std::vector<std::byte>(data, data + h_{}_size);\n".format(name, name))
+                if not unread:
+                    cpp_read_hek_data.write("        r.{} = std::vector<std::byte>(data, data + h_{}_size);\n".format(name, name))
                 cpp_read_hek_data.write("        data_size -= h_{}_size;\n".format(name))
                 cpp_read_hek_data.write("        data_read += h_{}_size;\n".format(name))
                 cpp_read_hek_data.write("        data += h_{}_size;\n".format(name))
