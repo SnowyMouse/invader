@@ -383,7 +383,13 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
         auto &bgs = bitmap_tag_data.bitmap_group_sequence.emplace_back();
 
         bgs.first_bitmap_index = sequence.first_bitmap;
-        bgs.bitmap_count = sequence.bitmap_count;
+        
+        if(bitmap_options.bitmap_type.value() == BitmapType::BITMAP_TYPE_SPRITES) {
+            bgs.bitmap_count = sequence.sprites.size() == 1 ? 1 : 0;
+        }
+        else {
+            bgs.bitmap_count = sequence.bitmap_count;
+        }
 
         // Add the sprites in the sequence
         for(auto &sprite : sequence.sprites) {

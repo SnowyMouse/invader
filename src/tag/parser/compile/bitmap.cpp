@@ -71,9 +71,12 @@ namespace Invader::Parser {
         // Un-zero out these if we're sprites (again, this is completely *insane* but compiled maps have this zeroed out for whatever reason which can completely FUCK things up if this were to not be "sprites" all of a sudden)
         if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             for(auto &sequence : bitmap->bitmap_group_sequence) {
+                // Default
+                sequence.first_bitmap_index = NULL_INDEX;
+                sequence.bitmap_count = sequence.sprites.size() == 1 ? 1 : 0; // set to 1 if we have one sprite; 0 otherwise
+                
                 // If we have sprites, find the lowest bitmap index of them all
-                if(sequence.sprites.size() == 0) {
-                    sequence.first_bitmap_index = NULL_INDEX;
+                if(sequence.sprites.size() != 0) {
                     for(auto &sprite : sequence.sprites) {
                         sequence.first_bitmap_index = std::min(sequence.first_bitmap_index, sprite.bitmap_index);
                     }
@@ -155,6 +158,7 @@ namespace Invader::Parser {
         if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES) {
             for(auto &sequence : bitmap->bitmap_group_sequence) {
                 sequence.first_bitmap_index = 0;
+                sequence.bitmap_count = 0;
             }
         }
         
