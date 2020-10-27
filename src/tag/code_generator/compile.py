@@ -74,7 +74,6 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             cpp_cache_format_data.write("            auto &d = workload.structs[struct_index].dependencies.emplace_back();\n")
             cpp_cache_format_data.write("            d.offset = reinterpret_cast<std::byte *>(&r.{}) - start;\n".format(name))
             cpp_cache_format_data.write("            d.tag_index = index;\n".format(name))
-                    
             cpp_cache_format_data.write("        }\n")
             cpp_cache_format_data.write("        else {\n")
             if "non_null" in struct and struct["non_null"]:
@@ -82,8 +81,6 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
             else:
                 cpp_cache_format_data.write("            r.{}.tag_id = HEK::TagID::null_tag_id();\n".format(name))
-                if struct["classes"][0] != "*":
-                    cpp_cache_format_data.write("            r.{}.tag_class_int = HEK::TagClassInt::TAG_CLASS_{};\n".format(name, struct["classes"][0].upper()))
             cpp_cache_format_data.write("        }\n")
         elif struct["type"] == "TagReflexive":
             cpp_cache_format_data.write("        std::size_t t_{}_count = this->{}.size();\n".format(name, name))
