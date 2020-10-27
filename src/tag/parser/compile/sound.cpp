@@ -196,8 +196,7 @@ namespace Invader::Parser {
                 }
             }
         }
-
-        // Default these if need be
+        
         if(sound->one_skip_fraction_modifier == 0.0f && sound->zero_skip_fraction_modifier == 0.0f) {
             sound->one_skip_fraction_modifier = 1.0f;
             sound->zero_skip_fraction_modifier = 1.0f;
@@ -205,7 +204,26 @@ namespace Invader::Parser {
 
         if(sound->one_gain_modifier == 0.0f && sound->zero_gain_modifier == 0.0f) {
             sound->one_gain_modifier = 1.0f;
-            sound->zero_gain_modifier = 1.0f;
+        
+            // Set default zero gain modifier based on class
+            switch(sound->sound_class) {
+                case HEK::SoundClass::SOUND_CLASS_OBJECT_IMPACTS:
+                case HEK::SoundClass::SOUND_CLASS_PARTICLE_IMPACTS:
+                case HEK::SoundClass::SOUND_CLASS_SLOW_PARTICLE_IMPACTS:
+                case HEK::SoundClass::SOUND_CLASS_UNIT_DIALOG:
+                case HEK::SoundClass::SOUND_CLASS_MUSIC:
+                case HEK::SoundClass::SOUND_CLASS_AMBIENT_NATURE:
+                case HEK::SoundClass::SOUND_CLASS_AMBIENT_MACHINERY:
+                case HEK::SoundClass::SOUND_CLASS_AMBIENT_COMPUTERS:
+                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_PLAYER:
+                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_OTHER:
+                case HEK::SoundClass::SOUND_CLASS_SCRIPTED_DIALOG_FORCE_UNSPATIALIZED:
+                    sound->zero_gain_modifier = 0.0F;
+                    break;
+                default:
+                    sound->zero_gain_modifier = 1.0F;
+                    break;
+            }
         }
 
         if(sound->zero_pitch_modifier == 0.0f && sound->one_pitch_modifier == 0.0f) {
