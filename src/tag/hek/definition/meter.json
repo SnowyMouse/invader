@@ -109,7 +109,8 @@
             {
                 "name": "encoded stencil",
                 "type": "TagDataOffset",
-                "compound": true
+                "compound": true,
+                "cache_only": true
             }
         ],
         "type": "struct",
