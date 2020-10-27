@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.38.1] - 2020-10-27
 ### Changed
 - invader-build: Now deswizzles Xbox bitmaps on build
 - invader-build: The "leading width" value in font tags can no longer be set
@@ -20,6 +20,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed setting "zero gain modifier" to 1 on sound classes that
   default it to 0
+- invader-compare: Functional comparisons now match empty tag references
 
 ### Removed
 - invader: Removed "use xbox multipurpose channel order" from definitions
