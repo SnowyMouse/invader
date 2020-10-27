@@ -8,6 +8,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: The "leading width" value in font tags can no longer be set
   manually; it is set to (ascending height + descending_height) / 5 to be in
   line with what tool.exe does
+- invader-build: More defaults are now set
 - invader-sound: No longer sets values that are defaulted when building into a
   cache file
 
