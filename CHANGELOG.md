@@ -3,8 +3,10 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-### Removed
+### Changed
 - invader-build: Now deswizzles Xbox bitmaps on build
+- invader-sound: No longer sets values that are defaulted when building into a
+  cache file
 
 ### Removed
 - invader: Removed "use xbox multipurpose channel order" from definitions

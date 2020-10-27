@@ -66,14 +66,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         }
     }
     else {
-        sound_tag.format = SoundFormat::SOUND_FORMAT_16_BIT_PCM;
-        sound_tag.random_pitch_bounds.from = 1.0F;
-        sound_tag.random_pitch_bounds.to = 1.0F;
-        sound_tag.outer_cone_gain = 1.0F;
-        sound_tag.random_gain_modifier = 1.0F;
-        sound_tag.inner_cone_angle = 2 * HALO_PI;
-        sound_tag.outer_cone_angle = 2 * HALO_PI;
-
         if(!sound_options.sound_class.has_value()) {
             eprintf_error("A sound class is required when generating new sound tags");
             std::exit(EXIT_FAILURE);
