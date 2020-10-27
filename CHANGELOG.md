@@ -8,6 +8,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-sound: No longer sets values that are defaulted when building into a
   cache file
 
+### Fixed
+- invader-build: Fixed setting "zero gain modifier" to 1 on sound classes that
+  default it to 0
+
 ### Removed
 - invader: Removed "use xbox multipurpose channel order" from definitions
 - invader-extract: Removed deswizzling Xbox bitmaps on extraction
