@@ -1056,8 +1056,9 @@
                 "size": 8
             },
             {
-                "name": "rounds left",
-                "type": "uint16"
+                "name": "rounds reserved",
+                "type": "uint16",
+                "comment": "does not include loaded rounds; cannot go above maximum rounds"
             },
             {
                 "name": "rounds loaded",
@@ -1387,8 +1388,9 @@
                 "type": "uint16"
             },
             {
-                "name": "primary rounds total",
-                "type": "uint16"
+                "name": "primary rounds reserved",
+                "type": "uint16",
+                "comment": "does not include loaded ammo; can go above maximum rounds"
             },
             {
                 "name": "secondary weapon",
@@ -1403,8 +1405,9 @@
                 "type": "uint16"
             },
             {
-                "name": "secondary rounds total",
-                "type": "uint16"
+                "name": "secondary rounds reserved",
+                "type": "uint16",
+                "comment": "does not include loaded ammo; can go above maximum rounds"
             },
             {
                 "name": "starting fragmentation grenade count",
