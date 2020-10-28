@@ -3,8 +3,15 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- invader-refactor: Added --unsafe (-U) which can be used to do a no-move
+  refactor where the destination tags do not exist. This does not affect class
+  refactoring.
+
 ### Changed
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
+- invader-refactor: The destination tags must exist (unless you use --unsafe)
+  when doing a no-move refactor.
 
 ### Fixed
 - invader-build: Fixed an ellipsis when too many squad positions are shown that

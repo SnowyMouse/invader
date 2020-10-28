@@ -67,8 +67,9 @@ int main(int argc, char * const *argv) {
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("dry-run", 'D', 0, "Do not actually make any changes. This is useful for checking for errors before committing anything, although filesystem errors may not be caught.");
-    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the tag does not have to exist on the filesystem) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>");
+    options.emplace_back("mode", 'M', 1, "Specify what to do with the file if it exists. If using move, then the tag is moved (the tag must exist on the filesystem) while also changing all references to the tag to the new path. If using no-move, then the tag is not moved (the destination tag must exist on the filesystem unless you use --unsafe) while also changing all references to the tag to the new path. If using copy, then the tag is copied (the tag must exist on the filesystem) and references to the tag are not changed except for other tags copied by this command. Can be: copy, move, no-move", "<mode>");
     options.emplace_back("recursive", 'r', 2, "Recursively move all tags in a directory. This will fail if a tag is present in both the old and new directories, it cannot be used with no-move. This can only be specified once per operation and cannot be used with --tag.", "<f> <t>");
+    options.emplace_back("unsafe", 'U', 0, "Do not require the destination tags to exist if using no-move");
     options.emplace_back("tag", 'T', 2, "Refactor an individual tag. This can be specified multiple times but cannot be used with --recursive.", "<f> <t>");
     options.emplace_back("class", 'c', 2, "Refactor all tags of a given class to another class. All tags in the destination class must exist. This can be specified multiple times but cannot be used with --recursive or -M move.", "<f> <t>");
     options.emplace_back("single-tag", 's', 1, "Make changes to a single tag, only, rather than the whole tags directory.", "<path>");
@@ -81,6 +82,7 @@ int main(int argc, char * const *argv) {
         bool dry_run = false;
         std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;
+        bool unsafe = false;
 
         std::vector<std::pair<TagFilePath, TagFilePath>> replacements;
         std::vector<std::pair<Invader::HEK::TagClassInt, Invader::HEK::TagClassInt>> class_replacements;
@@ -106,6 +108,9 @@ int main(int argc, char * const *argv) {
                 Invader::show_version_info();
                 std::exit(EXIT_SUCCESS);
                 return;
+            case 'U':
+                refactor_options.unsafe = true;
+                break;
             case 'M':
                 if(std::strcmp(arguments[0], "move") == 0) {
                     refactor_options.mode = RefactorMode::REFACTOR_MODE_MOVE;
@@ -168,6 +173,11 @@ int main(int argc, char * const *argv) {
         return EXIT_FAILURE;
     }
     
+    if(refactor_options.unsafe && *refactor_options.mode != RefactorMode::REFACTOR_MODE_NO_MOVE) {
+        eprintf_error("Error: -U can only be used with -M no-move");
+        return EXIT_FAILURE;
+    }
+    
     auto move_or_copy_file = (*refactor_options.mode == RefactorMode::REFACTOR_MODE_MOVE || *refactor_options.mode == RefactorMode::REFACTOR_MODE_COPY);
 
     if(refactor_options.tags.size() == 0) {
@@ -179,6 +189,28 @@ int main(int argc, char * const *argv) {
     std::vector<TagFile> all_tags = load_virtual_tag_folder(refactor_options.tags);
     std::vector<TagFile> single_tag;
     std::vector<TagFile> *tag_to_modify;
+    
+    // If we're not moving, check if the destination files exist
+    if(refactor_options.mode == RefactorMode::REFACTOR_MODE_NO_MOVE && !refactor_options.unsafe) {
+        bool failed = false;
+        for(auto &i : refactor_options.replacements) {
+            bool nonexistant = true;
+            for(auto &t : refactor_options.tags) {
+                if(std::filesystem::exists(std::filesystem::path(t) / (Invader::File::halo_path_to_preferred_path(i.second.path) + "." + Invader::HEK::tag_class_to_extension(i.second.class_int)))) {
+                    nonexistant = false;
+                    break;
+                }
+            }
+            if(nonexistant) {
+                eprintf_error("Cannot safely refactor %s.%s to %s.%s (destination doesn't exist)", Invader::File::halo_path_to_preferred_path(i.first.path).c_str(), Invader::HEK::tag_class_to_extension(i.first.class_int), Invader::File::halo_path_to_preferred_path(i.second.path).c_str(), Invader::HEK::tag_class_to_extension(i.second.class_int));
+                failed = true;
+            }
+        }
+        if(failed) {
+            eprintf_warn("Use --unsafe to override");
+            return EXIT_FAILURE;
+        }
+    }
     
     // Resolve all class replacements
     for(auto &r : class_replacements) {
