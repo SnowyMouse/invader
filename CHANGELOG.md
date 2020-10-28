@@ -6,6 +6,10 @@ This is used for recording Invader's changes. This changelog is based on
 ### Changed
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
 
+### Fixed
+- invader-build: Fixed an ellipsis when too many squad positions are shown that
+  aren't in the BSP
+
 ## [0.38.1] - 2020-10-27
 ### Changed
 - invader-build: Now deswizzles Xbox bitmaps on build

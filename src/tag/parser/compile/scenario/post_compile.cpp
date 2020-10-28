@@ -388,11 +388,12 @@ namespace Invader::Parser {
                                 
                                 // If we're going past 5, we shouldn't list anymore as it's a bit spammy
                                 if(++listed == 5) {
-                                    if(missing_firing_positions > listed) {
+                                    if(missing_squad_positions > listed) {
                                         std::snprintf(missing_squad_positions_list + offset, sizeof(missing_squad_positions_list) - offset, " ...");
                                     }
                                     break;
                                 }
+                                
                             }
                         }
                         
