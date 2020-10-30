@@ -3213,7 +3213,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
                 "compound": true,
-                "maximum": 65535
+                "maximum": 65534
             },
             {
                 "name": "equipment",
