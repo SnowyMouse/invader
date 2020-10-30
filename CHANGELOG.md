@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
+- invader-edit-qt: Leading width is now automatically calculated when previewing
+  font tags
 
 ## [0.38.1] - 2020-10-27
 ### Changed

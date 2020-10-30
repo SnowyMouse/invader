@@ -6,6 +6,8 @@
 #include "../../../bitmap/color_plate_scanner.hpp"
 
 namespace Invader::Parser {
+    #define CALCULATE_LEADING_WIDTH(font) ((static_cast<std::int32_t>((font).ascending_height) + static_cast<std::int32_t>((font).descending_height)) / 5)
+    
     void generate_character_tables(Font &font) {
         // Clear the character tables
         font.character_tables.clear();
@@ -41,7 +43,7 @@ namespace Invader::Parser {
         generate_character_tables(*this);
         
         // This is super dumb, but that's what it does
-        this->leading_width = (static_cast<std::int32_t>(this->ascending_height) + static_cast<std::int32_t>(this->descending_height)) / 5;
+        this->leading_width = CALCULATE_LEADING_WIDTH(*this);
     }
 
     void FontCharacter::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
@@ -119,7 +121,7 @@ namespace Invader::Parser {
                 }
             }
         }
-        width += font_data.leading_width;
+        width += CALCULATE_LEADING_WIDTH(font_data);
         
         // Set the height
         height = line_count * (font_data.ascending_height + font_data.descending_height);
@@ -172,11 +174,12 @@ namespace Invader::Parser {
             }
             
             auto ci = get_font_character(font_data, *t);
+            auto leading_width = CALCULATE_LEADING_WIDTH(font_data);
             if(ci.has_value()) {
                 auto &c = font_data.characters[*ci];
                 
                 // Get the x offset
-                std::int32_t bx = horizontal_advance - (c.bitmap_origin_x - font_data.leading_width);
+                std::int32_t bx = horizontal_advance - (c.bitmap_origin_x - leading_width);
                 std::int32_t by = font_data.ascending_height - (c.bitmap_origin_y + font_data.leading_height) + line_height * line;
                 
                 horizontal_advance += c.character_width;
