@@ -473,7 +473,12 @@
             },
             {
                 "type": "pad",
-                "size": 12
+                "size": 10
+            },
+            {
+                "name": "name thing",
+                "type": "int16",
+                "cache_only": true
             },
             {
                 "name": "bsps",
@@ -742,6 +747,7 @@
         ],
         "type": "struct",
         "pre_compile": true,
+        "post_compile": true,
         "size": 664
     }
 ]

@@ -1641,8 +1641,14 @@
                 "comment": "0 = use default spawn time in item_collection"
             },
             {
+                "name": "unknown_ffffffff",
+                "type": "uint32",
+                "cache_only": "true",
+                "comment": "always 0xFFFFFFFF?"
+            },
+            {
                 "type": "pad",
-                "size": 48
+                "size": 44
             },
             {
                 "name": "position",
@@ -1668,6 +1674,7 @@
         ],
         "type": "struct",
         "title": "item collection",
+        "post_compile": true,
         "size": 144
     },
     {

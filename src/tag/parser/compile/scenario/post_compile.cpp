@@ -10,6 +10,10 @@
 namespace Invader::Parser {
     using BSPData = HEK::BSPData;
     
+    void ScenarioNetgameEquipment::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->unknown_ffffffff = 0xFFFFFFFF;
+    }
+    
     // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
     static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
