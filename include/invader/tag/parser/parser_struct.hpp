@@ -19,6 +19,94 @@ namespace Invader::File {
     struct TagFilePath;
 }
 
+
+
+#define DO_BASED_ON_TAG_CLASS DO_TAG_CLASS(Actor, TAG_CLASS_ACTOR) \
+                                DO_TAG_CLASS(ActorVariant, TAG_CLASS_ACTOR_VARIANT) \
+                                DO_TAG_CLASS(Antenna, TAG_CLASS_ANTENNA) \
+                                DO_TAG_CLASS(Biped, TAG_CLASS_BIPED) \
+                                DO_TAG_CLASS(Bitmap, TAG_CLASS_BITMAP) \
+                                DO_TAG_CLASS(CameraTrack, TAG_CLASS_CAMERA_TRACK) \
+                                DO_TAG_CLASS(ColorTable, TAG_CLASS_COLOR_TABLE) \
+                                DO_TAG_CLASS(ContinuousDamageEffect, TAG_CLASS_CONTINUOUS_DAMAGE_EFFECT) \
+                                DO_TAG_CLASS(Contrail, TAG_CLASS_CONTRAIL) \
+                                DO_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT) \
+                                DO_TAG_CLASS(Decal, TAG_CLASS_DECAL) \
+                                DO_TAG_CLASS(DetailObjectCollection, TAG_CLASS_DETAIL_OBJECT_COLLECTION) \
+                                DO_TAG_CLASS(Device, TAG_CLASS_DEVICE) \
+                                DO_TAG_CLASS(DeviceControl, TAG_CLASS_DEVICE_CONTROL) \
+                                DO_TAG_CLASS(DeviceLightFixture, TAG_CLASS_DEVICE_LIGHT_FIXTURE) \
+                                DO_TAG_CLASS(DeviceMachine, TAG_CLASS_DEVICE_MACHINE) \
+                                DO_TAG_CLASS(Dialogue, TAG_CLASS_DIALOGUE) \
+                                DO_TAG_CLASS(Effect, TAG_CLASS_EFFECT) \
+                                DO_TAG_CLASS(Equipment, TAG_CLASS_EQUIPMENT) \
+                                DO_TAG_CLASS(Flag, TAG_CLASS_FLAG) \
+                                DO_TAG_CLASS(Fog, TAG_CLASS_FOG) \
+                                DO_TAG_CLASS(Font, TAG_CLASS_FONT) \
+                                DO_TAG_CLASS(Garbage, TAG_CLASS_GARBAGE) \
+                                DO_TAG_CLASS(GBXModel, TAG_CLASS_GBXMODEL) \
+                                DO_TAG_CLASS(Globals, TAG_CLASS_GLOBALS) \
+                                DO_TAG_CLASS(Glow, TAG_CLASS_GLOW) \
+                                DO_TAG_CLASS(GrenadeHUDInterface, TAG_CLASS_GRENADE_HUD_INTERFACE) \
+                                DO_TAG_CLASS(HUDGlobals, TAG_CLASS_HUD_GLOBALS) \
+                                DO_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT) \
+                                DO_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER) \
+                                DO_TAG_CLASS(InputDeviceDefaults, TAG_CLASS_INPUT_DEVICE_DEFAULTS) \
+                                DO_TAG_CLASS(InvaderBitmap, TAG_CLASS_INVADER_BITMAP) \
+                                DO_TAG_CLASS(InvaderSound, TAG_CLASS_INVADER_SOUND) \
+                                DO_TAG_CLASS(Item, TAG_CLASS_ITEM) \
+                                DO_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION) \
+                                DO_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE) \
+                                DO_TAG_CLASS(Light, TAG_CLASS_LIGHT) \
+                                DO_TAG_CLASS(LightVolume, TAG_CLASS_LIGHT_VOLUME) \
+                                DO_TAG_CLASS(Lightning, TAG_CLASS_LIGHTNING) \
+                                DO_TAG_CLASS(MaterialEffects, TAG_CLASS_MATERIAL_EFFECTS) \
+                                DO_TAG_CLASS(Meter, TAG_CLASS_METER) \
+                                DO_TAG_CLASS(Model, TAG_CLASS_MODEL) \
+                                DO_TAG_CLASS(ModelAnimations, TAG_CLASS_MODEL_ANIMATIONS) \
+                                DO_TAG_CLASS(ModelCollisionGeometry, TAG_CLASS_MODEL_COLLISION_GEOMETRY) \
+                                DO_TAG_CLASS(MultiplayerScenarioDescription, TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION) \
+                                DO_TAG_CLASS(Object, TAG_CLASS_OBJECT) \
+                                DO_TAG_CLASS(Particle, TAG_CLASS_PARTICLE) \
+                                DO_TAG_CLASS(ParticleSystem, TAG_CLASS_PARTICLE_SYSTEM) \
+                                DO_TAG_CLASS(Physics, TAG_CLASS_PHYSICS) \
+                                DO_TAG_CLASS(Placeholder, TAG_CLASS_PLACEHOLDER) \
+                                DO_TAG_CLASS(PointPhysics, TAG_CLASS_POINT_PHYSICS) \
+                                DO_TAG_CLASS(PreferencesNetworkGame, TAG_CLASS_PREFERENCES_NETWORK_GAME) \
+                                DO_TAG_CLASS(Projectile, TAG_CLASS_PROJECTILE) \
+                                DO_TAG_CLASS(Scenario, TAG_CLASS_SCENARIO) \
+                                DO_TAG_CLASS(ScenarioStructureBSP, TAG_CLASS_SCENARIO_STRUCTURE_BSP) \
+                                DO_TAG_CLASS(Scenery, TAG_CLASS_SCENERY) \
+                                DO_TAG_CLASS(Shader, TAG_CLASS_SHADER) \
+                                DO_TAG_CLASS(ShaderTransparentChicago, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO) \
+                                DO_TAG_CLASS(ShaderTransparentChicagoExtended, TAG_CLASS_SHADER_TRANSPARENT_CHICAGO_EXTENDED) \
+                                DO_TAG_CLASS(ShaderEnvironment, TAG_CLASS_SHADER_ENVIRONMENT) \
+                                DO_TAG_CLASS(ShaderModel, TAG_CLASS_SHADER_MODEL) \
+                                DO_TAG_CLASS(ShaderTransparentGeneric, TAG_CLASS_SHADER_TRANSPARENT_GENERIC) \
+                                DO_TAG_CLASS(ShaderTransparentGlass, TAG_CLASS_SHADER_TRANSPARENT_GLASS) \
+                                DO_TAG_CLASS(ShaderTransparentMeter, TAG_CLASS_SHADER_TRANSPARENT_METER) \
+                                DO_TAG_CLASS(ShaderTransparentPlasma, TAG_CLASS_SHADER_TRANSPARENT_PLASMA) \
+                                DO_TAG_CLASS(ShaderTransparentWater, TAG_CLASS_SHADER_TRANSPARENT_WATER) \
+                                DO_TAG_CLASS(Sky, TAG_CLASS_SKY) \
+                                DO_TAG_CLASS(Sound, TAG_CLASS_SOUND) \
+                                DO_TAG_CLASS(SoundScenery, TAG_CLASS_SOUND_SCENERY) \
+                                DO_TAG_CLASS(SoundEnvironment, TAG_CLASS_SOUND_ENVIRONMENT) \
+                                DO_TAG_CLASS(SoundLooping, TAG_CLASS_SOUND_LOOPING) \
+                                DO_TAG_CLASS(Spheroid, TAG_CLASS_SPHEROID) \
+                                DO_TAG_CLASS(StringList, TAG_CLASS_STRING_LIST) \
+                                DO_TAG_CLASS(TagCollection, TAG_CLASS_TAG_COLLECTION) \
+                                DO_TAG_CLASS(UnicodeStringList, TAG_CLASS_UNICODE_STRING_LIST) \
+                                DO_TAG_CLASS(UnitHUDInterface, TAG_CLASS_UNIT_HUD_INTERFACE) \
+                                DO_TAG_CLASS(Unit, TAG_CLASS_UNIT) \
+                                DO_TAG_CLASS(Vehicle, TAG_CLASS_VEHICLE) \
+                                DO_TAG_CLASS(VirtualKeyboard, TAG_CLASS_VIRTUAL_KEYBOARD) \
+                                DO_TAG_CLASS(Weapon, TAG_CLASS_WEAPON) \
+                                DO_TAG_CLASS(WeaponHUDInterface, TAG_CLASS_WEAPON_HUD_INTERFACE) \
+                                DO_TAG_CLASS(WeatherParticleSystem, TAG_CLASS_WEATHER_PARTICLE_SYSTEM) \
+                                DO_TAG_CLASS(Wind, TAG_CLASS_WIND) \
+                                DO_TAG_CLASS(TagCollection, TAG_CLASS_UI_WIDGET_COLLECTION) \
+                                DO_TAG_CLASS(UIWidgetDefinition, TAG_CLASS_UI_WIDGET_DEFINITION) \
+
 namespace Invader::Parser {
     struct ParserStruct;
 
@@ -71,6 +159,7 @@ namespace Invader::Parser {
             // Other stuff
             VALUE_TYPE_REFLEXIVE, // use templates for this maybe?
             VALUE_TYPE_DEPENDENCY,
+            VALUE_TYPE_TAGID,
             VALUE_TYPE_TAGSTRING,
             VALUE_TYPE_TAGDATAOFFSET,
             VALUE_TYPE_ENUM,

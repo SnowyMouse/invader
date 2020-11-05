@@ -831,26 +831,6 @@ namespace Invader::HEK {
         }\
     }
 
-    enum PredictedResourceType : TagEnum {
-        PREDICTED_RESOUCE_TYPE_BITMAP,
-        PREDICTED_RESOUCE_TYPE_SOUND
-    };
-
-    ENDIAN_TEMPLATE(EndianType) struct PredictedResource {
-        EndianType<PredictedResourceType> type;
-        EndianType<Index> resource_index;
-        EndianType<TagID> tag;
-
-        ENDIAN_TEMPLATE(OtherType) operator PredictedResource<OtherType>() const noexcept {
-            PredictedResource<OtherType> copy;
-            COPY_THIS(type);
-            COPY_THIS(resource_index);
-            COPY_THIS(tag);
-            return copy;
-        }
-    };
-    static_assert(sizeof(PredictedResource<BigEndian>) == 0x8);
-
     ENDIAN_TEMPLATE(EndianType) struct TagDataOffset {
         EndianType<std::uint32_t> size;
         LittleEndian<std::uint32_t> external;

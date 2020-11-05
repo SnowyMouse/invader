@@ -49,6 +49,9 @@ namespace Invader::EditQt {
 
             case Parser::ParserStructValue::VALUE_TYPE_GROUP_START:
                 return new TagEditorGroupWidget(parent, struct_value, editor_window);
+                
+            case Parser::ParserStructValue::VALUE_TYPE_TAGID:
+                return nullptr;
         }
 
         return nullptr;

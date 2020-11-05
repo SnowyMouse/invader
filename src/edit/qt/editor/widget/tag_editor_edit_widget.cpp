@@ -439,6 +439,7 @@ namespace Invader::EditQt {
                 }
 
                 case Parser::ParserStructValue::VALUE_TYPE_REFLEXIVE:
+                case Parser::ParserStructValue::VALUE_TYPE_TAGID:
                 case Parser::ParserStructValue::VALUE_TYPE_GROUP_START:
                     std::terminate();
             }

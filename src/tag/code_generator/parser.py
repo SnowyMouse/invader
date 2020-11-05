@@ -101,8 +101,6 @@ def make_parser(all_enums, all_bitfields, all_structs_arranged, all_structs, ext
                     type_to_write = "Dependency"
                     non_type = True
                 elif type_to_write == "TagReflexive":
-                    if t["struct"] == "PredictedResource":
-                        continue
                     type_to_write = "std::vector<{}>".format(t["struct"])
                     non_type = True
                 elif type_to_write == "TagDataOffset":

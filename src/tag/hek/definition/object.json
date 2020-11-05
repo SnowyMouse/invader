@@ -1,5 +1,32 @@
 [
     {
+        "name": "PredictedResourceType",
+        "type": "enum",
+        "options": [
+            "bitmap",
+            "sound"
+        ]
+    },
+    {
+        "name": "PredictedResource",
+        "type": "struct",
+        "fields": [
+            {
+                "name": "type",
+                "type": "PredictedResourceType"
+            },
+            {
+                "name": "resource index",
+                "type": "Index"
+            },
+            {
+                "name": "tag",
+                "type": "TagID"
+            }
+        ],
+        "size": 8
+    },
+    {
         "name": "ObjectNoise",
         "options": [
             "silent",
@@ -496,6 +523,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "cache_only": true,
                 "compound": true
             }
         ],

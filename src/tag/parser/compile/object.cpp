@@ -360,7 +360,7 @@ namespace Invader::Parser {
             for(std::size_t r : resources) {
                 auto &resource = predicted_resources.emplace_back();
                 auto &resource_tag = workload.tags[r];
-                resource.type = resource_tag.tag_class_int == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOUCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOUCE_TYPE_SOUND;
+                resource.type = resource_tag.tag_class_int == TagClassInt::TAG_CLASS_BITMAP ? HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_BITMAP : HEK::PredictedResourceType::PREDICTED_RESOURCE_TYPE_SOUND;
                 resource.tag = HEK::TagID { static_cast<std::uint32_t>(r) };
                 resource.resource_index = 0;
                 auto &resource_dep = prs.dependencies.emplace_back();
