@@ -333,7 +333,7 @@ jobs:
     - name: Checkout Invader
       working-directory: ${{runner.workspace}}
       #uses: actions/checkout@v2
-      run: git clone https://github.com/SnowyMouse/invader
+      run: git clone https://github.com/${{github.repository}}
 
     - name: Build Invader
       id: build_invader
