@@ -1909,11 +1909,23 @@
             },
             {
                 "type": "pad",
-                "size": 44
+                "size": 8
+            },
+            {
+                "name": "cluster index",
+                "type": "Index",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 34
             },
             {
                 "name": "surface index",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true,
+                "endian": "little"
             }
         ],
         "type": "struct",
@@ -2204,7 +2216,7 @@
             },
             {
                 "name": "cluster index",
-                "type": "uint16",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },

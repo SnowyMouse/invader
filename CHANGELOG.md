@@ -10,6 +10,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
+- invader-edit-qt: Surface indices are now marked as `cache_only` (hidden) for
+  move positions since these are calculated at build time
 - invader-refactor: The destination tags must exist (unless you use --unsafe)
   when doing a no-move refactor.
 
@@ -17,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
 - invader-build: Fixed an issue where the wrong death animation would play
+- invader-build: Fixed move positions' cluster and surface indices not being
+  calculated for squads
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
 
