@@ -354,6 +354,7 @@ jobs:
         echo ::set-output name=version::`grep CMAKE_PROJECT_VERSION:STATIC build/CMakeCache.txt | cut -d "=" -f2`
         echo ::set-output name=commit_count::`git -C invader rev-list --count HEAD`
         echo ::set-output name=commit_hash::`git -C invader rev-parse --short HEAD`
+        echo ::set-output name=tag_name::${GITHUB_REF#refs/tags/}
 
     - name: "Set up package"
       id: set_up_package
@@ -426,7 +427,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        tag_name: ${{steps.get_invader_build_info.outputs.version}}
+        tag_name: ${{steps.get_invader_build_info.outputs.tag_name}}
         release_name: Invader v${{steps.get_invader_build_info.outputs.version}}
         draft: false
         prerelease: false
