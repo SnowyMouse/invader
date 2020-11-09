@@ -16,6 +16,7 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
+- invader-build: Fixed an issue where the wrong death animation would play
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
 
