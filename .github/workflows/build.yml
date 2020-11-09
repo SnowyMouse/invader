@@ -38,6 +38,12 @@ jobs:
           # Set posix instead win32
           sudo update-alternatives --set $CC /usr/bin/$CC-posix
           sudo update-alternatives --set $CXX /usr/bin/$CXX-posix
+          
+          ### IMPORTANT
+          ## If you are going to install MinGW from the debian sid repository,
+          ## make sure to block updates for MinGW packages and then remove the
+          ## repository before doing an update or you will get a lot of unmet
+          ## dependencies errors.
 
     - name: Set up build environment
       working-directory: ${{runner.workspace}}
