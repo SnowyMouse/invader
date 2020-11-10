@@ -10,12 +10,24 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
+- invader-edit-qt: Surface indices are now marked as `cache_only` (hidden) for
+  move positions since these are calculated at build time
 - invader-refactor: The destination tags must exist (unless you use --unsafe)
   when doing a no-move refactor.
 
 ### Fixed
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
+- invader-build: Fixed an issue where the wrong death animation would play
+- invader-build: Fixed move positions' cluster and surface indices not being
+  calculated for squads
+- invader-build: Fixed some hidden values not being calculated for machines
+- invader-build: Fixed the pelvis node index not being calculated for bipeds;
+  this only affected biped tags which `bip01 pelvis` was not the first node, so
+  stock bipeds were largely unaffected
+- invader-build: Fixed a hidden value not being calculated for actor tags
+- invader-build: Fixed a hidden value not being calculated for
+  detail_object_collection tags
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
 

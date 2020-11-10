@@ -7,6 +7,71 @@ namespace Invader::Parser {
     void ModelCollisionGeometry::pre_compile(BuildWorkload &, std::size_t , std::size_t, std::size_t) {
         this->shield_recharge_rate = 1.0F / this->recharge_time / TICK_RATE;
     }
+    void ModelCollisionGeometry::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        auto &s = workload.structs[struct_index];
+        auto &mcg = *reinterpret_cast<struct_little *>(s.data.data() + offset);
+        std::size_t node_count = mcg.nodes.count;
+        if(node_count != 0) {
+            auto &resolved = workload.structs[*s.resolve_pointer(&mcg.nodes.pointer)];
+            auto *nodes = reinterpret_cast<ModelCollisionGeometryNode::struct_little *>(resolved.data.data());
+            
+            for(std::size_t n = 0; n < node_count; n++) {
+                auto *node_to_check = nodes + n;
+                
+                std::size_t iterations = 0;
+                std::uint16_t thing = NULL_INDEX;
+                
+                // Find... whatever this is
+                while(node_to_check && thing == NULL_INDEX) {
+                    auto contain_set = [&node_to_check, &thing](const char *str, std::uint16_t set_value) {
+                        std::size_t ilength = std::strlen(str);
+                        std::size_t olength = std::strlen(node_to_check->name.string);
+                        
+                        if(olength >= ilength) {
+                            for(std::size_t i = 0; i <= (olength - ilength); i++) {
+                                if(std::strcmp(str, node_to_check->name.string + i) == 0) {
+                                    thing = set_value;
+                                    break;
+                                }
+                            }
+                        }
+                    };
+                    
+                    contain_set("tail", 10);
+                    contain_set("r foot", 10);
+                    contain_set("r calf", 10);
+                    contain_set("r horselink", 10);
+                    contain_set("r thigh", 10);
+                    contain_set("r hand", 8);
+                    contain_set("r forearm", 8);
+                    contain_set("r upperarm", 7);
+                    contain_set("r clavicle", 7);
+                    contain_set("l foot", 6);
+                    contain_set("l calf", 6);
+                    contain_set("l horselink", 6);
+                    contain_set("l thigh", 6);
+                    contain_set("l upperarm", 3);
+                    contain_set("l clavicle", 3);
+                    contain_set("spine", 0);
+                    contain_set("spine1", 1);
+                    contain_set("pelvis", 0);
+                    contain_set("neck", 2);
+                    contain_set("l hand", 4);
+                    contain_set("l forearm", 4);
+                    contain_set("head", 2);
+                    
+                    if(thing == NULL_INDEX) {
+                        if(iterations++ > NULL_INDEX) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Infinite loop detected with node#%zu's parents", n);
+                            throw InvalidTagDataException();
+                        }
+                        node_to_check = (node_to_check->parent_node == NULL_INDEX) ? nullptr : nodes + node_to_check->parent_node;
+                    }
+                }
+                nodes[n].name_thing = thing;
+            }
+        }
+    }
     void ModelCollisionGeometryBSP::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         std::size_t bsp3d_count = this->bsp3d_nodes.size();
         std::size_t bsp2d_count = this->bsp2d_nodes.size();

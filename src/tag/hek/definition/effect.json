@@ -348,7 +348,7 @@
             }
         ],
         "type": "struct",
-        "pre_compile": true,
+        "post_compile": true,
         "title": "particle type",
         "size": 232
     },
@@ -415,8 +415,14 @@
                 "struct": "Effect"
             },
             {
+                "name": "maximum damage radius",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
                 "type": "pad",
-                "size": 32
+                "size": 28
             },
             {
                 "name": "locations",
@@ -432,7 +438,7 @@
             }
         ],
         "type": "struct",
-        "pre_compile": true,
+        "post_compile": true,
         "size": 64
     }
 ]

@@ -10,6 +10,10 @@
 namespace Invader::Parser {
     using BSPData = HEK::BSPData;
     
+    void ScenarioNetgameEquipment::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + struct_offset)->unknown_ffffffff = 0xFFFFFFFF;
+    }
+    
     // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
     static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
@@ -418,6 +422,9 @@ namespace Invader::Parser {
                     std::size_t position_index_found = 0;
                     auto &squad_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.squads.pointer)];
                     auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::struct_little *>(squad_struct.data.data());
+                    
+                    auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr; 
+                    
                     for(std::size_t s = 0; s < squad_count; s++) {
                         auto &squad = squad_data[s];
                         std::size_t position_count = squad.starting_locations.count.read();
@@ -426,6 +433,47 @@ namespace Invader::Parser {
                             for(std::size_t p = 0; p < position_count; p++) {
                                 auto &found_index = best_squad_positions_found[position_index_found++];
                                 position_data[p].cluster_index = found_index.cluster_index;
+                            }
+                        }
+                        
+                        std::size_t move_position_count = squad.move_positions.count.read();
+                        if(move_position_count) {
+                            auto *move_position_data = reinterpret_cast<Parser::ScenarioMovePosition::struct_little *>(workload.structs[*squad_struct.resolve_pointer(&squad.move_positions.pointer)].data.data());
+                            for(std::size_t p = 0; p < move_position_count; p++) {
+                                if(!found_bsp) {
+                                    move_position_data[p].cluster_index = NULL_INDEX;
+                                    move_position_data[p].surface_index = 0;
+                                    continue;
+                                }
+                                
+                                std::optional<std::uint32_t> leaf_index;
+                                std::uint32_t surface_index = 0;
+                                
+                                if(raycast) {
+                                    std::uint32_t leaf;
+                                    if(found_bsp->check_for_intersection(move_position_data[p].position, 0.5F, nullptr, &surface_index, &leaf)) {
+                                        leaf_index = leaf;
+                                    }
+                                }
+                                else {
+                                    std::uint32_t leaf;
+                                    if(found_bsp->check_if_point_inside_bsp(move_position_data[p].position, &leaf)) {
+                                        leaf_index = leaf; 
+                                    }
+                                }
+                                
+                                // Set the cluster index
+                                HEK::Index cluster_index;
+                                if(leaf_index.has_value()) {
+                                    cluster_index = found_bsp->render_leaves[*leaf_index].cluster;
+                                }
+                                else {
+                                    cluster_index = NULL_INDEX;
+                                }
+                                
+                                // Set surface and cluster index
+                                move_position_data[p].surface_index = surface_index;
+                                move_position_data[p].cluster_index = cluster_index;
                             }
                         }
                     }

@@ -1641,8 +1641,14 @@
                 "comment": "0 = use default spawn time in item_collection"
             },
             {
+                "name": "unknown_ffffffff",
+                "type": "uint32",
+                "cache_only": "true",
+                "comment": "always 0xFFFFFFFF?"
+            },
+            {
                 "type": "pad",
-                "size": 48
+                "size": 44
             },
             {
                 "name": "position",
@@ -1668,6 +1674,7 @@
         ],
         "type": "struct",
         "title": "item collection",
+        "post_compile": true,
         "size": 144
     },
     {
@@ -1902,11 +1909,23 @@
             },
             {
                 "type": "pad",
-                "size": 44
+                "size": 8
+            },
+            {
+                "name": "cluster index",
+                "type": "Index",
+                "cache_only": true,
+                "endian": "little"
+            },
+            {
+                "type": "pad",
+                "size": 34
             },
             {
                 "name": "surface index",
-                "type": "uint32"
+                "type": "uint32",
+                "cache_only": true,
+                "endian": "little"
             }
         ],
         "type": "struct",
@@ -2197,7 +2216,7 @@
             },
             {
                 "name": "cluster index",
-                "type": "uint16",
+                "type": "Index",
                 "endian": "little",
                 "cache_only": true
             },
@@ -3141,7 +3160,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
-                "hidden": true,
+                "cache_only": true,
                 "compound": true
             },
             {

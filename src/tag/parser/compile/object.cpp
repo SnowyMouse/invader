@@ -213,28 +213,18 @@ namespace Invader::Parser {
         compile_object(*this, workload, tag_index);
     }
 
-    template <typename T> void compile_device(T &tag) {
-        tag.inverse_power_transition_time = 1.0F / (TICK_RATE * tag.power_transition_time);
-        tag.inverse_power_acceleration_time = 1.0F / (TICK_RATE * tag.power_acceleration_time);
-        tag.inverse_position_transition_time = 1.0f / (TICK_RATE * tag.position_transition_time);
-        tag.inverse_position_acceleration_time = 1.0f / (TICK_RATE * tag.position_acceleration_time);
-    }
-
     void DeviceMachine::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_MACHINE;
         compile_object(*this, workload, tag_index);
-        compile_device(*this);
         this->door_open_time_ticks = static_cast<std::uint32_t>(this->door_open_time * TICK_RATE);
     }
     void DeviceControl::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_CONTROL;
         compile_object(*this, workload, tag_index);
-        compile_device(*this);
     }
     void DeviceLightFixture::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         this->object_type = HEK::ObjectType::OBJECT_TYPE_DEVICE_LIGHT_FIXTURE;
         compile_object(*this, workload, tag_index);
-        compile_device(*this);
     }
 
     void ObjectFunction::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
@@ -475,6 +465,9 @@ namespace Invader::Parser {
                     if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
                         this->head_model_node_index = static_cast<HEK::Index>(n);
                     }
+                    if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
+                        this->pelvis_model_node_index = static_cast<HEK::Index>(n);
+                    }
                 }
             }
         }
@@ -567,14 +560,37 @@ namespace Invader::Parser {
     void SoundScenery::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
         calculate_object_predicted_resources(workload, struct_index);
     }
-    void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    
+    void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
+        auto &device = *reinterpret_cast<Device::struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
+        
+        auto set_inverse = [](auto &from, auto &to) {
+            if(from.read() != 0) {
+                to = 1.0F / (TICK_RATE * from);
+            }
+        };
+        
+        set_inverse(device.power_transition_time, device.inverse_power_transition_time);
+        set_inverse(device.power_acceleration_time, device.inverse_power_acceleration_time);
+        set_inverse(device.position_transition_time, device.inverse_position_transition_time);
+        set_inverse(device.position_acceleration_time, device.inverse_position_acceleration_time);
+        set_inverse(device.depowered_position_transition_time, device.inverse_depowered_position_transition_time);
+        set_inverse(device.depowered_position_acceleration_time, device.inverse_depowered_position_acceleration_time);
+        
+        device.delay_time_ticks = TICK_RATE * device.delay_time;
+    }
+    
+    void DeviceMachine::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
         set_pathfinding_spheres(workload, struct_index);
     }
-    void DeviceControl::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void DeviceControl::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
     }
-    void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t) {
+    void DeviceLightFixture::post_compile(BuildWorkload &workload, std::size_t, std::size_t struct_index, std::size_t struct_offset) {
+        device_post_compile(workload, struct_index, struct_offset);
         calculate_object_predicted_resources(workload, struct_index);
     }
 }

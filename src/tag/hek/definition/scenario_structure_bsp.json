@@ -622,6 +622,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "cache_only": true,
                 "compound": true
             },
             {
