@@ -445,10 +445,10 @@ namespace Invader::Parser {
         }
 
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
-        auto &head_index = struct_val.head_model_node_index;
         auto &model_id = this->model.tag_id;
 
-        this->head_model_node_index = NULL_INDEX;
+        struct_val.head_model_node_index = NULL_INDEX;
+        struct_val.pelvis_model_node_index = NULL_INDEX;
 
         if(struct_val.animation_graph.tag_id.read().is_null()) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, "Biped has no animation graph, so the biped will not spawn", tag_index);
@@ -463,18 +463,17 @@ namespace Invader::Parser {
                 for(std::size_t n = 0; n < node_count; n++) {
                     auto &node = nodes[n];
                     if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
-                        this->head_model_node_index = static_cast<HEK::Index>(n);
+                        struct_val.head_model_node_index = static_cast<HEK::Index>(n);
                     }
                     if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
-                        this->pelvis_model_node_index = static_cast<HEK::Index>(n);
+                        struct_val.pelvis_model_node_index = static_cast<HEK::Index>(n);
                     }
                 }
             }
         }
 
-        head_index = this->head_model_node_index;
         calculate_object_predicted_resources(workload, struct_index);
-        set_pathfinding_spheres(workload, struct_index, this->collision_radius);
+        set_pathfinding_spheres(workload, struct_index, struct_val.collision_radius);
     }
     void Vehicle::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto &struct_val = *reinterpret_cast<struct_little *>(workload.structs[struct_index].data.data() + offset);
