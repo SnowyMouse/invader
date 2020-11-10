@@ -465,6 +465,9 @@ namespace Invader::Parser {
                     if(std::strncmp(node.name.string, "bip01 head", sizeof(node.name.string) - 1) == 0) {
                         this->head_model_node_index = static_cast<HEK::Index>(n);
                     }
+                    if(std::strncmp(node.name.string, "bip01 pelvis", sizeof(node.name.string) - 1) == 0) {
+                        this->pelvis_model_node_index = static_cast<HEK::Index>(n);
+                    }
                 }
             }
         }
