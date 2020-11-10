@@ -423,7 +423,9 @@ namespace Invader::Parser {
                     auto &squad_struct = workload.structs[*encounter_struct.resolve_pointer(&encounter_data.squads.pointer)];
                     auto *squad_data = reinterpret_cast<Parser::ScenarioSquad::struct_little *>(squad_struct.data.data());
                     
-                    auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr; 
+                    auto *found_bsp = total_best_bsps > 0 ? (bsp_data.data() + best_bsp) : nullptr;
+                    std::vector<std::vector<std::size_t>> missing_squad_positions(squad_count);
+                    std::size_t out_of_bounds = 0;
                     
                     for(std::size_t s = 0; s < squad_count; s++) {
                         auto &squad = squad_data[s];
@@ -469,6 +471,8 @@ namespace Invader::Parser {
                                 }
                                 else {
                                     cluster_index = NULL_INDEX;
+                                    missing_squad_positions[s].emplace_back(p);
+                                    out_of_bounds++;
                                 }
                                 
                                 // Set surface and cluster index
@@ -476,6 +480,32 @@ namespace Invader::Parser {
                                 move_position_data[p].cluster_index = cluster_index;
                             }
                         }
+                    }
+                    
+                    if(out_of_bounds) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) has %zu squad move position%s that fall out of BSP #%zu", i, encounter.name.string, out_of_bounds, out_of_bounds == 1 ? "" : "s", best_bsp);
+                        
+                        int offset = 0;
+                        char missing_move_positions_list[256] = {};
+                        std::size_t listed = 0;
+                        for(std::size_t i = 0; i < squad_count; i++) {
+                            // Look for anything we didn't find
+                            if(missing_squad_positions[i].size() > 0) {
+                                for(auto msp : missing_squad_positions[i]) {
+                                    offset += std::snprintf(missing_move_positions_list + offset, sizeof(missing_move_positions_list) - offset, "%s%zu-%zu", listed == 0 ? "" : " ", i, msp);
+                                
+                                    // If we're going past 5, we shouldn't list anymore as it's a bit spammy
+                                    if(++listed == 5) {
+                                        if(out_of_bounds > listed) {
+                                            std::snprintf(missing_move_positions_list + offset, sizeof(missing_move_positions_list) - offset, " ...");
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        eprintf_warn_lesser("    - %zu move position%s fell out: [%s]", out_of_bounds, out_of_bounds == 1 ? "" : "s", missing_move_positions_list);
                     }
                 }
             }
