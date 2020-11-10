@@ -175,8 +175,16 @@
                 "cache_only": true
             },
             {
-                "type": "pad",
-                "size": 8
+                "name": "inverse depowered position acceleration time",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
+            },
+            {
+                "name": "inverse depowered position transition time",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "inverse position acceleration time",
@@ -191,8 +199,10 @@
                 "cache_only": true
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "delay time ticks",
+                "type": "float",
+                "endian": "little",
+                "cache_only": true
             }
         ],
         "type": "struct",
