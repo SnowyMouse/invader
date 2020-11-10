@@ -21,6 +21,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Fixed an issue where the wrong death animation would play
 - invader-build: Fixed move positions' cluster and surface indices not being
   calculated for squads
+- invader-build: Fixed some hidden values not being calculated for machines
+- invader-build: Fixed the pelvis node index not being calculated for bipeds;
+  this only affected biped tags which `bip01 pelvis` was not the first node, so
+  stock bipeds were largely unaffected
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
 
