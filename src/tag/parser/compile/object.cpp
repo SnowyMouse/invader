@@ -561,12 +561,19 @@ namespace Invader::Parser {
     void device_post_compile(BuildWorkload &workload, ::size_t struct_index, std::size_t struct_offset) {
         auto &device = *reinterpret_cast<Device::struct_little *>(workload.structs[struct_index].data.data() + struct_offset);
         
-        device.inverse_power_transition_time = 1.0F / (TICK_RATE * device.power_transition_time);
-        device.inverse_power_acceleration_time = 1.0F / (TICK_RATE * device.power_acceleration_time);
-        device.inverse_position_transition_time = 1.0f / (TICK_RATE * device.position_transition_time);
-        device.inverse_position_acceleration_time = 1.0f / (TICK_RATE * device.position_acceleration_time);
-        device.inverse_depowered_position_transition_time = 1.0f / (TICK_RATE * device.depowered_position_transition_time);
-        device.inverse_depowered_position_acceleration_time = 1.0f / (TICK_RATE * device.depowered_position_acceleration_time);
+        auto set_inverse = [](auto &from, auto &to) {
+            if(from.read() != 0) {
+                to = 1.0F / (TICK_RATE * from);
+            }
+        };
+        
+        set_inverse(device.power_transition_time, device.inverse_power_transition_time);
+        set_inverse(device.power_acceleration_time, device.inverse_power_acceleration_time);
+        set_inverse(device.position_transition_time, device.inverse_position_transition_time);
+        set_inverse(device.position_acceleration_time, device.inverse_position_acceleration_time);
+        set_inverse(device.depowered_position_transition_time, device.inverse_depowered_position_transition_time);
+        set_inverse(device.depowered_position_acceleration_time, device.inverse_depowered_position_acceleration_time);
+        
         device.delay_time_ticks = TICK_RATE * device.delay_time;
     }
     
