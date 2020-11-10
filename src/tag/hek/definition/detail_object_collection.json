@@ -40,8 +40,10 @@
                 "endian": null
             },
             {
-                "type": "pad",
-                "size": 1
+                "name": "first sprite index",
+                "type": "uint8",
+                "endian": null,
+                "cache_only": true
             },
             {
                 "name": "sprite count",
