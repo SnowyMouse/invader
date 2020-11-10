@@ -117,38 +117,33 @@ namespace Invader::Info {
         }
         
         // Languages?
-        switch(engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL: {
-                bool any;
-                auto languages = find_languages_for_map(map, any);
-                if(any) {
-                    PRINT_LINE(oprintf_success, "Valid languages:", "%s", "Any (map will work on all original releases of the game)");
-                }
-                else if(languages.size() == 0) {
-                    if(!check_if_valid_indexed_tags_for_stock_custom_edition(map)) {
-                        PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map contains invalid indices for stock resource maps)");
-                    }
-                    else {
-                        PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map was built against custom resource maps)");
-                    }
+        if(engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+            bool any;
+            auto languages = find_languages_for_map(map, any);
+            if(any) {
+                PRINT_LINE(oprintf_success, "Valid languages:", "%s", "Any (map will work on all original releases of the game)");
+            }
+            else if(languages.size() == 0) {
+                if(!check_if_valid_indexed_tags_for_stock_custom_edition(map)) {
+                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map contains invalid indices for stock resource maps)");
                 }
                 else {
-                    std::string list;
-                    for(auto &i : languages) {
-                        if(list.size() == 0) {
-                            list = i;
-                        }
-                        else {
-                            list += ", ";
-                            list += i;
-                        }
-                    }
-                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", list.c_str());
+                    PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", "None (map was built against custom resource maps)");
                 }
             }
-            default:
-                break;
+            else {
+                std::string list;
+                for(auto &i : languages) {
+                    if(list.size() == 0) {
+                        list = i;
+                    }
+                    else {
+                        list += ", ";
+                        list += i;
+                    }
+                }
+                PRINT_LINE(oprintf_success_warn, "Valid languages:", "%s", list.c_str());
+            }
         }
         
         // Compressed?
