@@ -283,10 +283,12 @@ jobs:
         make -j $(nproc)
         sudo make install
 
-    # The checkout action breaks the repository commit count
     - name: Checkout Invader
-      #uses: actions/checkout@v2
-      run: git clone https://github.com/${{github.repository}}
+      uses: actions/checkout@v2
+      with:
+        # Get all history - the build process uses the number of commits
+        fetch-depth: 0
+        path: invader
 
     - name: Build Invader
       id: build_invader
