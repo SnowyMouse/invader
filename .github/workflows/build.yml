@@ -66,27 +66,27 @@ jobs:
           > build/toolchain.cmake
 
     - name: Build zlib
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/madler/zlib/archive/v1.2.11.tar.gz' | tar -x --gzip
         cd zlib-*
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX
         cd build
         sudo make -j $(nproc) install
 
     - name: Build Zstandard library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/facebook/zstd/archive/v1.4.5.tar.gz' | tar -x --gzip
         cd zstd-*
         cd build/cmake
         cmake \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DZSTD_BUILD_PROGRAMS=OFF \
           -DZSTD_BUILD_SHARED=ON \
@@ -97,7 +97,7 @@ jobs:
         sudo cp lib/libzstd.dll $PREFIX/bin
 
     - name: Build libiconv
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz' | tar -x --gzip
         cd libiconv-*
@@ -121,13 +121,13 @@ jobs:
         sudo cp lib/.libs/libiconv-2.dll $PREFIX/bin
 
     - name: Build libarchive
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/libarchive/libarchive/archive/v3.4.3.tar.gz' | tar -x --gzip
         cd libarchive-*
         cmake -S . -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DZLIB_WINAPI_EXITCODE=PLEASE_FILL_OUT-FAILED_TO_RUN \
           -DZLIB_WINAPI_EXITCODE__TRYRUN_OUTPUT=PLEASE_FILL_OUT-NOTFOUND
@@ -137,14 +137,14 @@ jobs:
         sudo make -j $(nproc) install
 
     - name: Build Ogg library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL https://github.com/xiph/ogg/archive/v1.3.4.tar.gz | tar -x --gzip
         cd ogg-*
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
@@ -154,7 +154,7 @@ jobs:
         sudo mv $PREFIX/bin/libogg.dll $PREFIX/bin/ogg.dll
 
     - name: Build Vorbis library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/xiph/vorbis/archive/v1.3.7.tar.gz' | tar -x --gzip
         cd vorbis-*
@@ -165,7 +165,7 @@ jobs:
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
@@ -177,7 +177,7 @@ jobs:
         sudo mv $PREFIX/bin/libvorbisfile.dll $PREFIX/bin/vorbisfile.dll
 
     - name: Build FLAC library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         # The last tag seems to have undefined references to __memcpy_chk even with -fstack-protector
         curl -sL 'https://github.com/xiph/flac/archive/ce6dd6b5732e319ef60716d9cc9af6a836a4011a.tar.gz' | tar -x --gzip
@@ -185,14 +185,14 @@ jobs:
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
         sudo make -j $(nproc) install
 
     - name: Build TIFF library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       env:
         CFLAGS: -D_FORTIFY_SOURCE=0 -O2 -pipe -fno-plt -fexceptions
         CXXFLAGS: -D_FORTIFY_SOURCE=0
@@ -202,49 +202,49 @@ jobs:
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
         sudo make -j $(nproc) install
 
     - name: Build Freetype library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/freetype/freetype2/archive/VER-2-10-2.tar.gz' | tar -x --gzip
         cd freetype2-*
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
         sudo make -j $(nproc) install
 
     - name: Build samplerate library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/libsndfile/libsamplerate/archive/67b53baa8913efadd8663f7317f565d6452c402e.tar.gz' | tar -x --gzip
         cd libsamplerate-*
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
         cd build
         sudo make -j $(nproc) install
 
     - name: Build EGL library
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         curl -sL 'https://github.com/McNopper/EGL/archive/184bbd45d44d6bd6575e1c411b845acfabb4b03e.tar.gz' | tar -x --gzip
         cd EGL-*/EGL
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DEGL_NO_GLEW=ON
         cd build
@@ -254,7 +254,7 @@ jobs:
         sudo cp -r ../include $PREFIX
 
     - name: Build QT5
-      working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
+      working-directory: ${{github.workspace}}/build/ext/sources
       run: |-
         git clone --depth=1 --branch=v5.15.1 https://code.qt.io/qt/qt5.git
         cd qt5
@@ -295,8 +295,8 @@ jobs:
       run: |-
         cmake -S invader -B build \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE=${GITHUB_WORKSPACE}/build/toolchain.cmake \
-          -DCMAKE_INSTALL_PREFIX=${GITHUB_WORKSPACE}/build/output
+          -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/build/toolchain.cmake \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/build/output
         cd build
         sudo make -j $(nproc) install
 
@@ -316,12 +316,12 @@ jobs:
         cd package
 
         # Copy invader binaries
-        cp ${GITHUB_WORKSPACE}/build/output/bin/* .
+        cp $GITHUB_WORKSPACE/build/output/bin/* .
 
         # Copy Invader readme files
-        cp ${GITHUB_WORKSPACE}/invader/CHANGELOG.md .
-        cp ${GITHUB_WORKSPACE}/invader/COPYING LICENSE.txt
-        cp ${GITHUB_WORKSPACE}/invader/README.md .
+        cp $GITHUB_WORKSPACE/invader/CHANGELOG.md .
+        cp $GITHUB_WORKSPACE/invader/COPYING LICENSE.txt
+        cp $GITHUB_WORKSPACE/invader/README.md .
 
         # Copy GCC/C++ shared libraries
         cp /usr/lib/gcc/$TARGET/10-posix/libgcc_s_seh-1.dll .
@@ -367,7 +367,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{steps.set_up_package.outputs.package_name}}
-        path: ${GITHUB_WORKSPACE}/package/*
+        path: ${{github.workspace}}/package/*
 
     - name: "Create release"
       id: create_release
@@ -388,6 +388,6 @@ jobs:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
         upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: ${GITHUB_WORKSPACE}/${{steps.set_up_package.outputs.package_name}}.7z
+        asset_path: ${{github.workspace}}/${{steps.set_up_package.outputs.package_name}}.7z
         asset_name: ${{steps.set_up_package.outputs.package_name}}.7z
         asset_content_type: application/x-7z-compressed
