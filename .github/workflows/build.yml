@@ -38,7 +38,7 @@ jobs:
           # Set posix instead win32
           sudo update-alternatives --set $CC /usr/bin/$CC-posix
           sudo update-alternatives --set $CXX /usr/bin/$CXX-posix
-          
+
           ### IMPORTANT
           ## If you are going to install MinGW from the debian sid repository,
           ## make sure to block updates for MinGW packages and then remove the
@@ -46,7 +46,6 @@ jobs:
           ## dependencies errors.
 
     - name: Set up build environment
-      working-directory: ${{runner.workspace}}
       run: |-
           # Create directories
           mkdir build
@@ -55,10 +54,9 @@ jobs:
           mkdir build/ext/sources
 
           # Get CMake toolchain file
-          pushd build
+          cd build
           wget https://gist.githubusercontent.com/JerryBrick/2bfb441a234554e5ca273ec5a05d57d2/raw/621a39183ecc211b3a1bd6ff138256891d7336bc/toolchain-x86_64-w64-mingw32.cmake
           mv toolchain-x86_64-w64-mingw32.cmake toolchain.cmake
-          popd
 
     - name: Build zlib
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -66,17 +64,15 @@ jobs:
         HEAD: tags/v1.2.11
       run: |-
         git clone https://github.com/madler/zlib
-        pushd zlib
+        cd zlib
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build Zstandard library
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -84,9 +80,9 @@ jobs:
         HEAD: tags/v1.4.5
       run: |-
         git clone https://github.com/facebook/zstd
-        pushd zstd
+        cd zstd
         git checkout $HEAD
-        pushd build/cmake
+        cd build/cmake
         cmake \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
@@ -98,17 +94,15 @@ jobs:
         sudo make -j $(nproc) install
         # This is known bug on this tag. https://github.com/facebook/zstd/issues/2160
         sudo cp lib/libzstd.dll $PREFIX/bin
-        popd
-        popd
 
     - name: Build libiconv
       working-directory: ${{runner.workspace}}/build/ext/sources
       run: |-
         wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
         tar -xf libiconv-1.16.tar.gz
-        pushd libiconv-1.16
+        cd libiconv-1.16
         mkdir build
-        pushd build
+        cd build
         ../configure \
           --host=$TARGET --target=$TARGET --build=$CHOST \
           --prefix=$PREFIX --libdir=$PREFIX/lib --includedir=$PREFIX/include \
@@ -126,16 +120,13 @@ jobs:
         sudo cp lib/.libs/libiconv.dll.a $PREFIX/lib
         sudo cp lib/.libs/libiconv-2.dll $PREFIX/bin
 
-        popd
-        popd
-
     - name: Build libarchive
       working-directory: ${{runner.workspace}}/build/ext/sources
       env:
         HEAD: tags/v3.4.3
       run: |-
         git clone https://github.com/libarchive/libarchive
-        pushd libarchive
+        cd libarchive
         git checkout $HEAD
         cmake -S . -B build \
           -DCMAKE_BUILD_TYPE=Release \
@@ -143,12 +134,10 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DZLIB_WINAPI_EXITCODE=PLEASE_FILL_OUT-FAILED_TO_RUN \
           -DZLIB_WINAPI_EXITCODE__TRYRUN_OUTPUT=PLEASE_FILL_OUT-NOTFOUND
-        pushd build
+        cd build
         # Set GCC library path
         cmake .. -DLIBGCC_LIBRARY=$LIBGCC
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build Ogg library
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -156,7 +145,7 @@ jobs:
         HEAD: tags/v1.3.4
       run: |-
         git clone https://github.com/xiph/ogg
-        pushd ogg
+        cd ogg
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -164,10 +153,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
         # Make ogg dynamic library match the name defined in the def file
         sudo mv $PREFIX/bin/libogg.dll $PREFIX/bin/ogg.dll
@@ -179,7 +166,7 @@ jobs:
       run: |-
         # Use my fork which has a fix for the incomplete LIBRARY statement on def files
         git clone https://github.com/JerryBrick/vorbis
-        pushd vorbis
+        cd vorbis
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -187,10 +174,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
         # Make vorbis dynamic libraries match the name defined in the def file
         sudo mv $PREFIX/bin/libvorbis.dll $PREFIX/bin/vorbis.dll
@@ -204,7 +189,7 @@ jobs:
         HEAD: ce6dd6b5732e319ef60716d9cc9af6a836a4011a
       run: |-
         git clone https://github.com/xiph/flac
-        pushd flac
+        cd flac
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -212,10 +197,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build TIFF library
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -225,7 +208,7 @@ jobs:
         CXXFLAGS: -D_FORTIFY_SOURCE=0
       run: |-
         git clone https://gitlab.com/libtiff/libtiff.git
-        pushd libtiff
+        cd libtiff
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -233,10 +216,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build Freetype library
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -244,7 +225,7 @@ jobs:
         HEAD: tags/VER-2-10-2
       run: |-
         git clone https://github.com/freetype/freetype2
-        pushd freetype2
+        cd freetype2
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -252,10 +233,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build samplerate library
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -263,7 +242,7 @@ jobs:
         HEAD: 67b53baa8913efadd8663f7317f565d6452c402e
       run: |-
         git clone https://github.com/libsndfile/libsamplerate
-        pushd libsamplerate
+        cd libsamplerate
         git checkout $HEAD
         cmake -E make_directory build
         cmake -B build \
@@ -271,28 +250,25 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DBUILD_SHARED_LIBS=ON
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
-        popd
 
     - name: Build EGL library
       working-directory: ${{runner.workspace}}/build/ext/sources
       run: |-
         git clone https://github.com/McNopper/EGL
-        pushd EGL/EGL
+        cd EGL/EGL
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DEGL_NO_GLEW=ON
-        pushd build
+        cd build
         make -j $(nproc)
+
         sudo mv libegl.a $PREFIX/lib
-        popd
-        sudo cp -r include $PREFIX
-        popd
+        sudo cp -r ../include $PREFIX
 
     - name: Build QT5
       working-directory: ${{runner.workspace}}/build/ext/sources
@@ -300,11 +276,11 @@ jobs:
         HEAD: tags/v5.15.1
       run: |-
         git clone https://code.qt.io/qt/qt5.git
-        pushd qt5
+        cd qt5
         git checkout $HEAD
         git submodule update --init --recursive -j $(nproc)
         mkdir build
-        pushd build
+        cd build
         ../configure \
           -xplatform win32-g++ \
           -device-option CROSS_COMPILE=/usr/bin/x86_64-w64-mingw32- \
@@ -322,34 +298,28 @@ jobs:
           -skip qtwebglplugin -skip qtwebsockets -skip webview -skip qtxmlpatterns \
           -skip qtconnectivity -skip qttools -skip qtactiveqt -skip qtdeclarative \
           -skip qtx11extras
-        
+
         # The install command does not trigger the compilation process :S
         make -j $(nproc)
         sudo make install
-        popd
-        popd
 
     # The checkout action breaks the repository commit count
     - name: Checkout Invader
-      working-directory: ${{runner.workspace}}
       #uses: actions/checkout@v2
       run: git clone https://github.com/${{github.repository}}
 
     - name: Build Invader
       id: build_invader
-      working-directory: ${{runner.workspace}}
       run: |-
         cmake -S invader -B build \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_TOOLCHAIN_FILE=${{runner.workspace}}/build/toolchain.cmake \
           -DCMAKE_INSTALL_PREFIX=${{runner.workspace}}/build/output
-        pushd build
+        cd build
         sudo make -j $(nproc) install
-        popd
 
     - name: Get Invader build info
       id: get_invader_build_info
-      working-directory: ${{runner.workspace}}
       run: |-
         echo ::set-output name=version::`grep CMAKE_PROJECT_VERSION:STATIC build/CMakeCache.txt | cut -d "=" -f2`
         echo ::set-output name=commit_count::`git -C invader rev-list --count HEAD`
@@ -358,11 +328,10 @@ jobs:
 
     - name: "Set up package"
       id: set_up_package
-      working-directory: ${{runner.workspace}}
       run: |-
         # Set up package directory
         mkdir package
-        pushd package
+        cd package
 
         # Copy invader binaries
         cp ${{runner.workspace}}/build/output/bin/* .
@@ -410,8 +379,6 @@ jobs:
         PACKAGE_NAME=invader-$INVADER_VERSION-r$INVADER_COMMIT_COUNT-$INVADER_COMMIT_HASH-win32-$ARCH
         7z a ../$PACKAGE_NAME.7z *
         echo ::set-output name=package_name::$PACKAGE_NAME
-
-        popd
 
     - name: Upload artifact
       if: "!startsWith(github.ref, 'refs/tags/')"
