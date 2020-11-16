@@ -255,12 +255,9 @@ jobs:
 
     - name: Build QT5
       working-directory: ${GITHUB_WORKSPACE}/build/ext/sources
-      env:
-        HEAD: tags/v5.15.1
       run: |-
-        git clone https://code.qt.io/qt/qt5.git
+        git clone --depth=1 --branch=v5.15.1 https://code.qt.io/qt/qt5.git
         cd qt5
-        git checkout $HEAD
         git submodule update --init --recursive -j $(nproc)
         mkdir build
         cd build
