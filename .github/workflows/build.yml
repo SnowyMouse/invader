@@ -162,12 +162,15 @@ jobs:
     - name: Build Vorbis library
       working-directory: ${{runner.workspace}}/build/ext/sources
       env:
-        HEAD: 680f7f0c5d37464d6a2fba960bacac49164cc32a
+        HEAD: tags/v1.3.7
       run: |-
-        # Use my fork which has a fix for the incomplete LIBRARY statement on def files
-        git clone https://github.com/JerryBrick/vorbis
+        git clone https://github.com/xiph/vorbis
         cd vorbis
         git checkout $HEAD
+
+        # Have to modify some LIBRARY definitions to include the filenames
+        for x in win32/*.def; do sed --in-place --expression "s/LIBRARY/LIBRARY $(basename "${x%.*}")/" "$x"; done
+
         cmake -E make_directory build
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
