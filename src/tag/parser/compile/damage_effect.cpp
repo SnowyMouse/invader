@@ -12,7 +12,7 @@ namespace Invader::Parser {
         }
 
         if(workload.building_stock_map && (workload.tags[tag_index].path == "vehicles\\ghost\\ghost bolt" || workload.tags[tag_index].path == "vehicles\\banshee\\banshee bolt")) {
-            bool custom_edition = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+            bool custom_edition = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
 
             float new_damage_stun = custom_edition ? 0.0F : 1.0F;
             float damage_maximum_stun = custom_edition ? 0.0F : 1.0F;

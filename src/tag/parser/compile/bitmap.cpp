@@ -187,6 +187,7 @@ namespace Invader::Parser {
         std::size_t bitmap_data_count = bitmap->bitmap_data.size();
         std::size_t swizzle_count = 0;
         const char *swizzle_verb = "";
+        auto engine_target = build_parameters->details.build_cache_file_engine;
         
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
@@ -238,7 +239,7 @@ namespace Invader::Parser {
             };
 
             // Check if we can or must use swizzled stuff
-            switch(workload.engine_target) {
+            switch(engine_target) {
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
@@ -264,17 +265,19 @@ namespace Invader::Parser {
             std::size_t start = data.pixel_data_offset;
             std::size_t width = data.width;
             std::size_t height = data.height;
+            
+            auto *build_parameters = workload.get_build_parameters();
 
             // Warn for stuff
-            if(!workload.hide_pedantic_warnings) {
+            if(build_parameters->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
                 bool exceeded = false;
                 bool non_power_of_two = (!power_of_two(height) || !power_of_two(width) || !power_of_two(depth));
 
-                if((
-                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                    workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
-                ) && !workload.hide_pedantic_warnings) {
+                if(
+                    engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
+                    engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+                    engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
+                ) {
                     if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
                         exceeded = true;

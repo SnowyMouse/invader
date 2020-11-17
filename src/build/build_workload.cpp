@@ -17,6 +17,54 @@
 
 namespace Invader {
     using namespace HEK;
+    
+    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine) {
+        switch(engine) {
+            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                this->build_compress = false;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                break;
+            case CacheFileEngine::CACHE_FILE_RETAIL:
+                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+                this->build_compress = false;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                break;
+            case CacheFileEngine::CACHE_FILE_DEMO:
+                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
+                this->build_compress = false;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                break;
+            case CacheFileEngine::CACHE_FILE_XBOX:
+                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
+                this->build_compress = true;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                break;
+            case CacheFileEngine::CACHE_FILE_NATIVE:
+                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
+                this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
+                this->build_compress = true;
+                this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                break;
+            default: std::terminate(); // unimplemented
+        }
+    }
+    
+    BuildWorkload::BuildParameters::BuildParameters::BuildParameters(HEK::CacheFileEngine engine) noexcept : details(engine) {}
+    
+    BuildWorkload::BuildParameters::BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::CacheFileEngine engine) : 
+        scenario(scenario),
+        tags_directories(tags_directories),
+        details(engine) {}
 
     #define TAG_DATA_HEADER_STRUCT (structs[0])
     #define TAG_ARRAY_STRUCT (structs[1])
@@ -38,252 +86,37 @@ namespace Invader {
 
     BuildWorkload::BuildWorkload() : ErrorHandler() {}
 
-    std::vector<std::byte> BuildWorkload::compile_map (
-        const char *scenario,
-        const std::vector<std::string> &tags_directories,
-        HEK::CacheFileEngine engine_target,
-        std::string maps_directory,
-        RawDataHandling raw_data_handling,
-        bool verbose,
-        const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index,
-        const std::optional<std::uint32_t> &forge_crc,
-        const std::optional<std::uint32_t> &tag_data_address,
-        const std::optional<std::string> &rename_scenario,
-        bool optimize_space,
-        bool compress,
-        bool hide_pedantic_warnings
-    ) {
+    std::vector<std::byte> BuildWorkload::compile_map(const BuildParameters &parameters) {
         BuildWorkload workload;
+        workload.parameters = &parameters;
 
         // Start benchmark
         workload.start = std::chrono::steady_clock::now();
 
         // Hide these?
-        if((workload.hide_pedantic_warnings = hide_pedantic_warnings)) {
-            workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_PEDANTIC_WARNINGS);
+        switch(parameters.verbosity) {
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_SHOW_ALL:
+                break;
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC:
+                workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_PEDANTIC_WARNINGS);
+                break;
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_WARNINGS:
+                workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_WARNINGS);
+                break;
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET:
+                workload.set_reporting_level(REPORTING_LEVEL_HIDE_EVERYTHING);
+                break;
         }
 
-        auto scenario_name_fixed = File::preferred_path_to_halo_path(scenario);
+        auto scenario_name_fixed = File::preferred_path_to_halo_path(parameters.scenario);
         workload.scenario = scenario_name_fixed.c_str();
-        workload.tags_directories = &tags_directories;
-        workload.engine_target = engine_target;
-        workload.optimize_space = optimize_space;
-        workload.verbose = verbose;
-        workload.compress = compress;
-
-        // Set defaults
-        if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_DEFAULT) {
-            switch(engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        // Native maps can only use these
-        if(raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL && engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-            throw InvalidArgumentException();
-        }
-
-        // Only Custom Edition can use this
-        if(raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX && engine_target != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-            throw InvalidArgumentException();
-        }
-
-        workload.raw_data_handling = raw_data_handling;
-
-        // Attempt to open the resource map
-        auto open_resource_map = [&maps_directory, &workload](const char *map, const char *map_alt = nullptr) -> std::vector<Resource> {
-            if(workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL || workload.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
-                return std::vector<Resource>();
-            }
-            else {
-                if(map_alt) {
-                    oprintf("Reading %s or %s...", map, map_alt);
-                }
-                else {
-                    oprintf("Reading %s...", map);
-                }
-                oflush();
-
-                // Make two paths
-                auto map_path = std::filesystem::path(maps_directory) / map;
-                auto map_path_str = map_path.string();
-                auto map_path_alt = std::filesystem::path(maps_directory) / (map_alt ? map_alt : map);
-                auto map_path_alt_str = map_path_alt.string();
-
-                // Try to open either
-                auto map_data = Invader::File::open_file(map_path_str.c_str());
-                if(!map_data.has_value() && map_alt) {
-                    map_data = Invader::File::open_file(map_path_alt_str.c_str());
-                }
-
-                if(!map_data.has_value()) {
-                    oprintf(" failed\n");
-                    if(map_alt) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Failed to open %s or %s", map_path_str.c_str(), map_path_alt_str.c_str());
-                    }
-                    else {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Failed to open %s", map_path_str.c_str());
-                    }
-                    throw FailedToOpenFileException();
-                }
-                oprintf(" done\n");
-                return load_resource_map(map_data->data(), map_data->size());
-            }
-        };
 
         // Set the scenario name too
-        if(rename_scenario.has_value()) {
-            workload.set_scenario_name((*rename_scenario).c_str());
+        if(parameters.rename_scenario.has_value()) {
+            workload.set_scenario_name((*parameters.rename_scenario).c_str());
         }
         else {
             workload.set_scenario_name(scenario_name_fixed.c_str());
-        }
-
-        // If no index was provided, see if we can get one
-        std::vector<std::pair<TagClassInt, std::string>> use_index;
-        if(with_index.has_value()) {
-            use_index = *with_index;
-        }
-        else {
-            switch(engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                    use_index = custom_edition_indices(workload.scenario_name.string);
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                    use_index = retail_indices(workload.scenario_name.string);
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    use_index = demo_indices(workload.scenario_name.string);
-                    break;
-                default:
-                    break;
-            }
-            if(use_index.size()) {
-                oprintf_success_lesser_warn("Using built-in indices for %s...", workload.scenario_name.string);
-            }
-        }
-        auto index_size = use_index.size();
-
-        // If we have one, continue on
-        if(index_size) {
-            auto &error_reporter_tags = workload.get_tag_paths();
-            error_reporter_tags.reserve(index_size);
-            workload.tags.reserve(index_size);
-            for(auto &tag : use_index) {
-                auto &new_tag = workload.tags.emplace_back();
-                new_tag.path = tag.second;
-                new_tag.tag_class_int = tag.first;
-                new_tag.stubbed = true;
-                error_reporter_tags.emplace_back(tag.second, tag.first);
-            }
-        }
-
-        // Next, if no CRC is passed and we need a CRC, press on
-        if(!forge_crc.has_value() && engine_target == CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
-            if(std::strcmp(workload.scenario_name.string, "beavercreek") == 0) {
-                workload.forge_crc = 0x07B3876A;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "bloodgulch") == 0) {
-                workload.forge_crc = 0x7B309554;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "boardingaction") == 0) {
-                workload.forge_crc = 0xF4DEEF94;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "carousel") == 0) {
-                workload.forge_crc = 0x9C301A08;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "chillout") == 0) {
-                workload.forge_crc = 0x93C53C27;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "damnation") == 0) {
-                workload.forge_crc = 0x0FBA059D;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "dangercanyon") == 0) {
-                workload.forge_crc = 0xC410CD74;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "deathisland") == 0) {
-                workload.forge_crc = 0x1DF8C97F;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "gephyrophobia") == 0) {
-                workload.forge_crc = 0xD2872165;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "hangemhigh") == 0) {
-                workload.forge_crc = 0xA7C8B9C6;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "icefields") == 0) {
-                workload.forge_crc = 0x5EC1DEB7;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "infinity") == 0) {
-                workload.forge_crc = 0x0E7F7FE7;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "longest") == 0) {
-                workload.forge_crc = 0xC8F48FF6;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "prisoner") == 0) {
-                workload.forge_crc = 0x43B81A8B;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "putput") == 0) {
-                workload.forge_crc = 0xAF2F0B84;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "ratrace") == 0) {
-                workload.forge_crc = 0xF7F8E14C;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "sidewinder") == 0) {
-                workload.forge_crc = 0xBD95CF55;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "timberland") == 0) {
-                workload.forge_crc = 0x54446470;
-            }
-            else if(std::strcmp(workload.scenario_name.string, "wizard") == 0) {
-                workload.forge_crc = 0xCF3359B1;
-            }
-            if(workload.forge_crc.has_value()) {
-                oprintf_success_lesser_warn("Using built-in CRC32 for %s...", workload.scenario_name.string);
-            }
-        }
-        else {
-            workload.forge_crc = forge_crc;
-        }
-
-        // Set the tag data address
-        switch(engine_target) {
-            case CacheFileEngine::CACHE_FILE_NATIVE:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
-                break;
-            case CacheFileEngine::CACHE_FILE_DEMO:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-                workload.bitmaps = open_resource_map("bitmaps.map");
-                workload.sounds = open_resource_map("sounds.map");
-                break;
-            case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-                workload.loc = open_resource_map("custom_loc.map", "loc.map");
-                workload.bitmaps = open_resource_map("custom_bitmaps.map", "bitmaps.map");
-                workload.sounds = open_resource_map("custom_sounds.map", "sounds.map");
-                break;
-            default:
-                workload.tag_data_address = CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
-                workload.tag_data_size = CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
-                workload.bitmaps = open_resource_map("bitmaps.map");
-                workload.sounds = open_resource_map("sounds.map");
-                break;
-        }
-
-        if(tag_data_address.has_value()) {
-            workload.tag_data_address = *tag_data_address;
-        }
-
-        if(engine_target != CacheFileEngine::CACHE_FILE_NATIVE && (0x100000000ull - workload.tag_data_address) < workload.tag_data_size) {
-            eprintf_error("Specified tag data address cannot contain the entire tag space");
-            throw InvalidArgumentException();
         }
 
         return workload.build_cache_file();
@@ -301,13 +134,13 @@ namespace Invader {
         TAG_ARRAY_STRUCT.unsafe_to_dedupe = true;
 
         // Add all of the tags
-        if(this->verbose) {
+        if(this->parameters->verbosity) {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
 
         // Invalidate the raw data if we're removing everything
-        if(this->raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
+        if(this->parameters->details.build_raw_data_handling == BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
             for(auto &t : this->tags) {
                 switch(t.tag_class_int) {
                     case TagClassInt::TAG_CLASS_BITMAP:
@@ -377,8 +210,7 @@ namespace Invader {
             tag_data_ptr.struct_index = 1;
             tag_data_ptr.limit_to_32_bits = true;
         };
-
-        switch(this->engine_target) {
+        switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::NativeCacheFileTagDataHeader));
                 break;
@@ -390,7 +222,7 @@ namespace Invader {
         auto errors = this->get_errors();
         if(errors) {
             auto warnings = this->get_warnings();
-            if(this->verbose) {
+            if(this->parameters->verbosity) {
                 if(warnings) {
                     oprintf_fail("Build failed with %zu error%s and %zu warning%s", errors, errors == 1 ? "" : "s", warnings, warnings == 1 ? "" : "s");
                 }
@@ -402,17 +234,17 @@ namespace Invader {
         }
 
         // Dedupe structs
-        if(this->optimize_space) {
+        if(this->parameters->optimize_space) {
             this->dedupe_structs();
         }
 
         // Get the tag data
-        if(this->verbose) {
+        if(this->parameters->verbosity) {
             oprintf("Building tag data...");
             oflush();
         }
         std::size_t end_of_bsps = this->generate_tag_data();
-        if(this->verbose) {
+        if(this->parameters->verbosity) {
             oprintf(" done\n");
         }
 
@@ -421,11 +253,11 @@ namespace Invader {
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
-        bool bsp_size_affects_tag_space = this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+        bool bsp_size_affects_tag_space = this->parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE;
 
         // Calculate total BSP size (pointless on native maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
-        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 // Determine the index.
                 auto &this_bsp_size = bsp_sizes[i - 1];
@@ -448,13 +280,13 @@ namespace Invader {
         }
 
         // Get the bitmap and sound data in there
-        if(this->raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
-            if(this->verbose) {
+        if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
+            if(this->parameters->verbosity) {
                 oprintf("Building raw data...");
                 oflush();
             }
             this->generate_bitmap_sound_data(end_of_bsps);
-            if(this->verbose) {
+            if(this->parameters->verbosity) {
                 oprintf(" done\n");
             }
         }
@@ -463,11 +295,11 @@ namespace Invader {
         auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header, auto max_size) {
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
-            header.engine = workload.engine_target;
+            header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
 
-            if(workload.verbose) {
+            if(workload.parameters->verbosity) {
                 oprintf("Building cache file data...");
                 oflush();
             }
@@ -476,7 +308,7 @@ namespace Invader {
             final_data.resize(sizeof(HEK::CacheFileHeader));
 
             // Go through each BSP and add that stuff
-            if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -507,7 +339,7 @@ namespace Invader {
             // Add tag data
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
-            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::NativeCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
@@ -531,7 +363,7 @@ namespace Invader {
             // Lastly, do the header
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
-            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
                 header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
@@ -542,7 +374,7 @@ namespace Invader {
                 std::memcpy(final_data.data(), &header, sizeof(header));
             }
 
-            if(workload.verbose) {
+            if(workload.parameters->verbosity) {
                 oprintf(" done\n");
             }
 
@@ -558,8 +390,8 @@ namespace Invader {
             if(bsp_size_affects_tag_space) {
                 tag_space_usage += largest_bsp_size;
             }
-            if(tag_space_usage > workload.tag_data_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size));
+            if(tag_space_usage > workload.parameters->details.build_maximum_tag_space) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Maximum tag space exceeded (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.parameters->details.build_maximum_tag_space));
                 throw MaximumFileSizeException();
             }
 
@@ -569,17 +401,17 @@ namespace Invader {
             
             // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
-            bool can_calculate_crc = workload.engine_target != CacheFileEngine::CACHE_FILE_XBOX;
+            bool can_calculate_crc = workload.parameters->details.build_cache_file_engine != CacheFileEngine::CACHE_FILE_XBOX;
             if(can_calculate_crc) {
-                if(workload.verbose) {
+                if(workload.parameters->verbosity) {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
                 
                 // Calculate the CRC32 and/or forge one if we must
-                if(workload.forge_crc.has_value()) {
+                if(workload.parameters->forge_crc.has_value()) {
                     std::uint32_t checksum_delta = 0;
-                    new_crc = calculate_map_crc(final_data.data(), final_data.size(), &workload.forge_crc.value(), &checksum_delta);
+                    new_crc = calculate_map_crc(final_data.data(), final_data.size(), &workload.parameters->forge_crc.value(), &checksum_delta);
                     tag_file_checksums = checksum_delta;
                 }
                 else {
@@ -587,13 +419,13 @@ namespace Invader {
                 }
                 
                 header.crc32 = new_crc;
-                if(workload.verbose) {
+                if(workload.parameters->verbosity) {
                     oprintf(" done\n");
                 }
             }
 
             // Copy it again, this time with the new CRC32
-            if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
             }
             else {
@@ -601,23 +433,23 @@ namespace Invader {
             }
 
             // Compress if needed
-            if(workload.compress) {
-                if(workload.verbose) {
+            if(workload.parameters->details.build_compress) {
+                if(workload.parameters->verbosity) {
                     oprintf("Compressing...");
                     oflush();
                 }
                 final_data = Compression::compress_map_data(final_data.data(), final_data.size());
-                if(workload.verbose) {
+                if(workload.parameters->verbosity) {
                     oprintf(" done\n");
                 }
             }
             // Set the file size in the header if needed
-            else if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            else if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 header.decompressed_file_size = final_data.size();
             }
 
             // Display the scenario name and information
-            if(workload.verbose) {
+            if(workload.parameters->verbosity) {
                 auto warnings = workload.get_warnings();
                 if(warnings) {
                     oprintf_success_warn("Built successfully with %zu warning%s", warnings, warnings == 1 ? "" : "s");
@@ -641,7 +473,7 @@ namespace Invader {
 
                 // Show some useful metadata
                 oprintf("Scenario:          %s\n", workload.scenario_name.string);
-                oprintf("Engine:            %s\n", HEK::engine_name(workload.engine_target));
+                oprintf("Engine:            %s\n", HEK::engine_name(workload.parameters->details.build_cache_file_engine));
                 oprintf("Map type:          %s\n", HEK::type_name(*workload.cache_file_type));
                 oprintf("Tags:              %zu / %zu (%.02f MiB)", workload.tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(workload.map_data_structs[0].size()));
                 if(workload.stubbed_tag_count) {
@@ -651,7 +483,7 @@ namespace Invader {
 
                 // Show the BSP count and/or size
                 oprintf("BSPs:              %zu", workload.bsp_count);
-                if(workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("\n");
                 }
                 else {
@@ -670,7 +502,7 @@ namespace Invader {
                         oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
 
                         // If we're not on a native map, print the size (native maps don't have any meaningful way to get BSP size)
-                        if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                        if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             auto &bss = bsp_sizes[b];
                             oprintf(
                                 " (%.02f MiB)%s",
@@ -682,14 +514,14 @@ namespace Invader {
                     }
 
                     // And, if we're not on native maps and we have different BSP sizes, indicate the largest BSP
-                    if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE && largest_bsp_count < workload.bsp_count) {
+                    if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && largest_bsp_count < workload.bsp_count) {
                         oprintf("                   * = Largest BSP%s%s\n", largest_bsp_count == 1 ? "" : "s", bsp_size_affects_tag_space ? " (affects final tag space usage)" : "");
                     }
                 }
 
                 // Show the total tag space (if applicable)
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.tag_data_size), 100.0 * tag_space_usage / workload.tag_data_size);
+                if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.parameters->details.build_maximum_tag_space), 100.0 * tag_space_usage / workload.parameters->details.build_maximum_tag_space);
                 }
 
                 // Show some other data that might be useful
@@ -702,7 +534,7 @@ namespace Invader {
                 }
 
                 // If we compressed it, how small did we get it?
-                if(workload.compress) {
+                if(workload.parameters->details.build_compress) {
                     std::size_t compressed_size = final_data.size();
                     oprintf("Compressed size:   %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(compressed_size), 100.0 * compressed_size / uncompressed_size);
                 }
@@ -711,7 +543,7 @@ namespace Invader {
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
 
                 // If we have a 32-bit limit, show the limit
-                if(workload.engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * uncompressed_size / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
                 }
                 else {
@@ -734,7 +566,7 @@ namespace Invader {
             return final_data;
         };
 
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             HEK::NativeCacheFileHeader header = {};
             
             // Store the timestamp
@@ -818,6 +650,8 @@ namespace Invader {
             COMPILE_TAG_CLASS(HUDMessageText, TAG_CLASS_HUD_MESSAGE_TEXT)
             COMPILE_TAG_CLASS(HUDNumber, TAG_CLASS_HUD_NUMBER)
             COMPILE_TAG_CLASS(HUDGlobals, TAG_CLASS_HUD_GLOBALS)
+            COMPILE_TAG_CLASS(InvaderBitmap, TAG_CLASS_INVADER_BITMAP)
+            COMPILE_TAG_CLASS(InvaderSound, TAG_CLASS_INVADER_SOUND)
             COMPILE_TAG_CLASS(ItemCollection, TAG_CLASS_ITEM_COLLECTION)
             COMPILE_TAG_CLASS(DamageEffect, TAG_CLASS_DAMAGE_EFFECT)
             COMPILE_TAG_CLASS(LensFlare, TAG_CLASS_LENS_FLARE)
@@ -875,32 +709,6 @@ namespace Invader {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%s tags are not real tags and are therefore unimplemented", tag_class_to_extension(*tag_class_int));
                 throw UnimplementedTagClassException();
 
-            // For invader sounds and bitmaps, downgrade if necessary
-            case TagClassInt::TAG_CLASS_INVADER_BITMAP: {
-                auto tag_data_parsed = Parser::InvaderBitmap::parse_hek_tag_file(tag_data, tag_data_size, true);
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    do_compile_tag(std::move(tag_data_parsed));
-                }
-                else {
-                    this->tags[tag_index].alias = *tag_class_int;
-                    this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_BITMAP;
-                    do_compile_tag(downgrade_invader_bitmap(tag_data_parsed));
-                }
-                break;
-            }
-            case TagClassInt::TAG_CLASS_INVADER_SOUND: {
-                auto tag_data_parsed = Parser::InvaderSound::parse_hek_tag_file(tag_data, tag_data_size, true);
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    do_compile_tag(std::move(tag_data_parsed));
-                }
-                else {
-                    this->tags[tag_index].alias = *tag_class_int;
-                    this->tags[tag_index].tag_class_int = TagClassInt::TAG_CLASS_SOUND;
-                    do_compile_tag(downgrade_invader_sound(tag_data_parsed));
-                }
-                break;
-            }
-
             // And, of course, BSP tags
             case TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP: {
                 // First thing's first - parse the tag data
@@ -908,7 +716,7 @@ namespace Invader {
                 std::size_t bsp = this->bsp_count++;
 
                 // Next, if we're making a native map, we need to only do this
-                if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     do_compile_tag(std::move(tag_data_parsed));
                 }
 
@@ -1210,8 +1018,10 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
-        workload.tags.emplace_back();
-        workload.hide_pedantic_warnings = true;
+        
+        BuildParameters parameters;
+        workload.parameters = &parameters;
+        
         workload.compile_tag_data_recursively(tag_data, tag_data_size, 0);
         return workload;
     }
@@ -1222,7 +1032,6 @@ namespace Invader {
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.tags_directories = &tags_directories;
-        workload.hide_pedantic_warnings = true;
         workload.compile_tag_recursively(tag, tag_class_int);
         return workload;
     }
@@ -1334,7 +1143,7 @@ namespace Invader {
     }
 
     void BuildWorkload::generate_tag_array() {
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             do_generate_tag_array<HEK::NativeCacheFileTagDataTag, HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE, true>(this->tags.size(), this->tags, this->structs);
         }
         else {
@@ -1351,14 +1160,14 @@ namespace Invader {
         using PointerInternal = std::pair<std::size_t, std::size_t>;
         std::vector<PointerInternal> pointers;
         std::vector<PointerInternal> pointers_64_bit;
-        auto name_tag_data_pointer = this->tag_data_address;
+        auto name_tag_data_pointer = this->parameters->details.build_tag_data_address;
         auto &tag_array_struct = TAG_ARRAY_STRUCT;
 
         auto pointer_of_tag_path = [&tags, &name_tag_data_pointer, &tag_array_struct](std::size_t tag_index) -> HEK::Pointer64 {
             return static_cast<HEK::Pointer64>(name_tag_data_pointer + *tag_array_struct.offset + tags[tag_index].path_offset);
         };
 
-        auto &engine_target = this->engine_target;
+        auto &engine_target = this->parameters->details.build_cache_file_engine;
 
         auto recursively_generate_data = [&structs, &tags, &pointers, &pointers_64_bit, &pointer_of_tag_path, &engine_target](std::vector<std::byte> &data, std::size_t struct_index, auto &recursively_generate_data) {
             auto &s = structs[struct_index];
@@ -1432,11 +1241,11 @@ namespace Invader {
         std::size_t bsp_end = sizeof(HEK::CacheFileHeader);
 
         // Get the scenario tag (if we're not on a native map)
-        if(this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             auto &scenario_tag = tags[this->scenario_index];
             auto &scenario_tag_data = *reinterpret_cast<const Parser::Scenario::struct_little *>(structs[*scenario_tag.base_struct].data.data());
             std::size_t bsp_count = scenario_tag_data.structure_bsps.count.read();
-            std::size_t max_bsp_size = this->tag_data_size;
+            std::size_t max_bsp_size = this->parameters->details.build_maximum_tag_space;
 
             if(bsp_count != this->bsp_count) {
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
@@ -1449,7 +1258,7 @@ namespace Invader {
                 // Go through each BSP tag
                 for(std::size_t i = 0; i < tag_count; i++) {
                     auto &t = tags[i];
-                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && this->engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(t.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP) {
                         continue;
                     }
 
@@ -1470,7 +1279,7 @@ namespace Invader {
 
                     HEK::Pointer64 tag_data_base;
                     if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                        tag_data_base = this->tag_data_address + this->tag_data_size - bsp_size;
+                        tag_data_base = this->parameters->details.build_tag_data_address + this->parameters->details.build_maximum_tag_space - bsp_size;
                     }
                     else {
                         tag_data_base = 0;
@@ -1561,7 +1370,7 @@ namespace Invader {
 
                     // Put it in its place
                     auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
-                    if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         bitmap_data.pixel_data_offset = resource_index;
                     }
                     else {
@@ -1588,7 +1397,7 @@ namespace Invader {
 
                         // Put it in its place
                         auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
-                        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             permutation.samples.file_offset = resource_index;
                         }
                         else {
@@ -1600,7 +1409,7 @@ namespace Invader {
         }
 
         // Put the offsets in an array
-        if(this->engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             std::vector<LittleEndian<std::uint64_t>> offsets;
             for(auto &i : all_assets) {
                 offsets.emplace_back(i.first + file_offset);
@@ -1626,9 +1435,9 @@ namespace Invader {
     }
 
     void BuildWorkload::externalize_tags() noexcept {
-        bool always_index_tags = this->raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+        bool always_index_tags = this->parameters->details.build_raw_data_handling == BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
 
-        switch(this->engine_target) {
+        switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 for(auto &t : this->tags) {
                     // Find the tag

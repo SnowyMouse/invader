@@ -52,11 +52,13 @@ namespace Invader::Parser {
         // Basically, a 4-bit signed integer's range is -8 to 7. So, if you have more than 7, you get underflowed to -8, and you can't throw grenades if you have 0 or fewer grenades.
         // I have no idea why they thought that their netcode needed this to be optimized down to four bits SIGNED (so effectively three bits can actually be used) for grenades, but it's a massive meme.
         static constexpr const std::size_t max_grenades_mp_gbx = 7;
+        auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
+        
         if(
             workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
-            (workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
-            workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-            workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
+            (engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
+            engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+            engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
         ) {
             #define CHECK_NADE_ON_MP_COUNT(what) if(static_cast<std::size_t>(this->what) > max_grenades_mp_gbx) { \
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
@@ -69,10 +71,10 @@ namespace Invader::Parser {
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
 
-        // See if we have the thing sound
+        // See if we have the ting sound. If so, make it louder on custom edition.
         const std::size_t SOUND_COUNT = globals_multiplayer_information_data.sounds.count;
         if(SOUND_COUNT > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
-            const float TING_VOLUME = workload.engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
+            const float TING_VOLUME = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
             const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
             if(!sound_id.is_null()) {
                 reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
@@ -80,7 +82,7 @@ namespace Invader::Parser {
         }
 
         // See if we have all sounds, too
-        if(SOUND_COUNT < HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT && !workload.hide_pedantic_warnings) {
+        if(SOUND_COUNT < HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", SOUND_COUNT, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT), offset / sizeof(struct_little));
         }
     }

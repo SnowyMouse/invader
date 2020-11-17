@@ -16,54 +16,158 @@
 namespace Invader {
     class BuildWorkload : public ErrorHandler {
     public:
-        /**
-         * Select how raw data is handled
-         */
-        enum RawDataHandling {
-            /** Do it based on the engine */
-            RAW_DATA_HANDLING_DEFAULT = 0,
+        struct BuildParameters {
+            /**
+            * Select how much is output
+            */
+            enum BuildVerbosity {
+                /** Everything is hidden */
+                BUILD_VERBOSITY_QUIET,
+                
+                /** All warnings are hidden */
+                BUILD_VERBOSITY_HIDE_WARNINGS,
+                
+                /** Pedantic warnings are hidden */
+                BUILD_VERBOSITY_HIDE_PEDANTIC,
+                
+                /** Everything is output */
+                BUILD_VERBOSITY_SHOW_ALL
+            };
             
-            /** Remove all raw data from the map (raw data will not be valid for extraction) */
-            RAW_DATA_HANDLING_REMOVE_ALL,
+            /**
+             * Scenario tag path with extension
+             */
+            std::string scenario;
             
-            /** Retain all raw data in the map */
-            RAW_DATA_HANDLING_RETAIN_ALL,
+            /**
+             * New scenario name?
+             */
+            std::optional<std::string> rename_scenario;
             
-            /** (Custom Edition only) Always assume resource files' assets match */
-            RAW_DATA_HANDLING_ALWAYS_INDEX
+            /**
+             * Tags directories to use
+             */
+            std::vector<std::filesystem::path> tags_directories;
+            
+            /**
+             * Index to use
+             */
+            std::optional<std::vector<std::string>> index;
+            
+            /**
+             * Bitmap data
+             */
+            std::optional<std::vector<std::byte>> bitmap_data;
+            
+            /**
+             * Sound data
+             */
+            std::optional<std::vector<std::byte>> sound_data;
+            
+            /**
+             * Loc data
+             */
+            std::optional<std::vector<std::byte>> loc_data;
+            
+            /**
+             * How verbose to make the output
+             */
+            BuildVerbosity verbosity = BuildVerbosity::BUILD_VERBOSITY_SHOW_ALL;
+            
+            /**
+             * Forge the CRC32?
+             */
+            std::optional<std::uint32_t> forge_crc;
+        
+            /**
+             * Optimize for space?
+             */
+            bool optimize_space = false;
+            
+            /**
+             * Control how cache files are built. Changing these may result in an incompatible cache file
+             */
+            struct BuildParametersDetails {
+                /**
+                * Select how raw data is handled
+                */
+                enum RawDataHandling {
+                    /** Retain only if it isn't found in the resource maps (or no resource maps are given) */
+                    RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
+                    
+                    /** Remove all raw data from the map (raw data will not be valid for extraction) */
+                    RAW_DATA_HANDLING_REMOVE_ALL,
+                    
+                    /** Retain all raw data in the map */
+                    RAW_DATA_HANDLING_RETAIN_ALL,
+                    
+                    /** (Custom Edition only) Always assume resource files' assets match */
+                    RAW_DATA_HANDLING_ALWAYS_INDEX
+                };
+                
+                /**
+                 * Cache file engine to put in the header
+                 */
+                HEK::CacheFileEngine build_cache_file_engine;
+                 
+                /**
+                 * Tag data address to use
+                 */
+                std::uint64_t build_tag_data_address;
+                
+                /**
+                 * Maximum tag space to use
+                 */
+                std::uint64_t build_maximum_tag_space;
+                
+                /**
+                 * Maximum cache file size to use
+                 */
+                std::uint64_t build_maximum_cache_file_size;
+                
+                /**
+                 * Compress?
+                 */
+                bool build_compress;
+            
+                /**
+                * How to handle raw data handling
+                */
+                RawDataHandling build_raw_data_handling;
+                
+                /**
+                 * Instantiate some default, working parameters for the target engine
+                 * @param engine engine
+                 */
+                BuildParametersDetails(HEK::CacheFileEngine engine) noexcept;
+                
+                BuildParametersDetails(const BuildParametersDetails &) = default;
+                BuildParametersDetails(BuildParametersDetails &&) = default;
+            } details;
+                
+            /**
+             * Instantiate some default, working parameters for the target engine
+             * @param scenario scenario tag path to use
+             * @param tags     tags directories to use
+             * @param engine   engine target to use
+             */
+            BuildParameters(const std::string &scenario, const std::vector<std::filesystem::path> &tags_directories, HEK::CacheFileEngine engine);
+                
+            /**
+             * Instantiate a simple set of parameters
+             * @param engine engine target to use
+             */
+            BuildParameters(HEK::CacheFileEngine engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE) noexcept;
+            
+            BuildParameters(const BuildParameters &) = default;
+            BuildParameters(BuildParameters &&) = default;
         };
         
         /**
          * Compile a map
-         * @param scenario               scenario tag to use
-         * @param tags_directories       tags directories to use
-         * @param engine_target          target a specific engine
-         * @param maps_directory         maps directory to use; ignored if building a Dark Circlet map
-         * @param with_index             tag index to use
-         * @param raw_data_handling      select how to handle raw data
-         * @param verbose                output non-error messages to console
-         * @param forge_crc              forge the CRC32 of the map
-         * @param tag_data_address       address the tag data will be loaded to
-         * @param rename_scenario        rename the scenario's base name (preserving the root path)
-         * @param optimize_space         should dedupe structs
-         * @param compress               Zstd-compress the resulting map file
-         * @param hide_pedantic_warnings hide pedantic warnings
+         * @param parameters build parameters to use
          */
-        static std::vector<std::byte> compile_map (
-            const char *scenario,
-            const std::vector<std::string> &tags_directories,
-            HEK::CacheFileEngine engine_target = HEK::CacheFileEngine::CACHE_FILE_NATIVE,
-            std::string maps_directory = std::string(),
-            RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT,
-            bool verbose = false,
-            const std::optional<std::vector<std::pair<TagClassInt, std::string>>> &with_index = std::nullopt,
-            const std::optional<std::uint32_t> &forge_crc = std::nullopt,
-            const std::optional<std::uint32_t> &tag_data_address = std::nullopt,
-            const std::optional<std::string> &rename_scenario = std::nullopt,
-            bool optimize_space = false,
-            bool compress = false,
-            bool hide_pedantic_warnings = false
-        );
+        static std::vector<std::byte> compile_map(const BuildParameters &parameters);
 
         /**
          * Compile a single tag
@@ -244,17 +348,19 @@ namespace Invader {
         /** Recursion is disabled - also disables showing most errors as well as various tags using other tags' data */
         bool disable_recursion = false;
 
-        /** Hide pedantic warnings */
-        bool hide_pedantic_warnings = false;
-
         /** Are we building a stock map? */
         bool building_stock_map = false;
 
-        /** Engine target */
-        HEK::CacheFileEngine engine_target;
-
         /** Part count */
         std::size_t part_count = 0;
+        
+        /** 
+         * Get the build parameters
+         * @return build parameters
+         */
+        const BuildParameters *get_build_parameters() const noexcept {
+            return this->parameters;
+        }
 
         /**
          * Add the tag
@@ -281,12 +387,9 @@ namespace Invader {
         std::chrono::steady_clock::time_point start;
         const char *scenario;
         std::size_t scenario_index;
-        std::uint32_t tag_data_address;
-        std::size_t tag_data_size;
         std::vector<std::byte> build_cache_file();
         void add_tags();
         void generate_tag_array();
-        bool optimize_space;
         void dedupe_structs();
         std::vector<std::vector<std::byte>> map_data_structs;
         std::vector<std::byte> all_raw_data;
@@ -294,18 +397,15 @@ namespace Invader {
         void generate_bitmap_sound_data(std::size_t file_offset);
         HEK::TagString scenario_name = {};
         void set_scenario_name(const char *name);
-        std::optional<std::uint32_t> forge_crc;
-        bool verbose = false;
         std::size_t raw_bitmap_size = 0;
         std::size_t raw_sound_size = 0;
-        bool compress = false;
         void externalize_tags() noexcept;
         void delete_raw_data(std::size_t index);
         std::size_t stubbed_tag_count = 0;
         std::size_t indexed_data_amount = 0;
         std::size_t raw_data_indices_offset;
         std::uint32_t tag_file_checksums = 0;
-        RawDataHandling raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
+        const BuildParameters *parameters = nullptr;
     };
 }
 
