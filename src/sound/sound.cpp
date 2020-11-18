@@ -336,7 +336,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     oprintf("Processing sounds... ");
     oflush();
     std::size_t total_sound_count = 0;
-    std::atomic<std::size_t> thread_count;
+    std::atomic<std::size_t> thread_count = 0;
     
     // Wait until we have 0 threads working
     auto wait_until_threads_are_done = [&thread_count]() {

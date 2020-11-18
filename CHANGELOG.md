@@ -30,6 +30,7 @@ This is used for recording Invader's changes. This changelog is based on
   detail_object_collection tags
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
+- invader-sound: Fixed "Processing sounds" hang on some systems
 
 ## [0.38.1] - 2020-10-27
 ### Changed
