@@ -720,7 +720,7 @@
             {
                 "name": "magnification range",
                 "bounds": true,
-                "unit": "world units",
+                "comment": "Minimum is the magnification amount for the first zoom level, and maximum is the magnification amount for the final zoom level",
                 "type": "float"
             },
             {
