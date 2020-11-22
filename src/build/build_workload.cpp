@@ -782,7 +782,7 @@ namespace Invader {
             }
             else {
                 std::uint8_t latin1 = static_cast<std::uint8_t>(c);
-                if((latin1 >= 0 && latin1 < ' ') || (latin1 >= 0x7F && latin1 < 0xA0)) {
+                if(latin1 < ' ' || (latin1 >= 0x7F && latin1 < 0xA0)) {
                     invalid_path = true;
                     control = true;
                     c = '?';

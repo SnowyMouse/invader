@@ -356,6 +356,12 @@ namespace Invader {
                     for(auto *path_test = path; path < tag_data_end; path_test++) {
                         if(*path_test == 0) {
                             null_terminated = true;
+                            
+                            // Did we even start?
+                            if(path_test == path) {
+                                throw InvalidTagPathException();
+                            }
+                            
                             break;
                         }
                         else if(*path_test == '/') {
@@ -384,7 +390,10 @@ namespace Invader {
                     }
                 }
                 catch (std::exception &) {
-                    tag.path = "";
+                    char new_path[64];
+                    std::snprintf(new_path, sizeof(new_path), "corrupted\\tag_%zu", i);
+                    map.invalid_paths_detected = true;
+                    tag.path = new_path;
                 }
 
                 if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -528,6 +537,11 @@ namespace Invader {
 
     bool Map::is_protected() const noexcept {
         using namespace HEK;
+        
+        // Invalid paths?
+        if(this->invalid_paths_detected) {
+            return true;
+        }
 
         // We can get this right off the bat
         if(this->get_tag(this->get_scenario_tag_id()).get_tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO) {
