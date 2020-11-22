@@ -16,8 +16,9 @@ This is used for recording Invader's changes. This changelog is based on
   when doing a no-move refactor.
 
 ### Fixed
-- invader: Fixed treating Latin-1 characters as protected. It is valid for
-  tag extraction, but it is unsupported for building.
+- invader: Fixed treating Latin-1 characters as protected
+- invader-build: Fixed allowing null scenario palettes (this actually crashes
+  Halo!)
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
 - invader-build: Fixed an issue where the wrong death animation would play
