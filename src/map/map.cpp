@@ -377,6 +377,11 @@ namespace Invader {
                     else {
                         throw InvalidTagPathException();
                     }
+                    
+                    // Lowercase everything
+                    for(char &c : tag.path) {
+                        c = std::tolower(c);
+                    }
                 }
                 catch (std::exception &) {
                     tag.path = "";
