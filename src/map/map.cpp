@@ -349,7 +349,7 @@ namespace Invader {
                 tag.tag_index = i;
 
                 try {
-                    auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
+                    const auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
 
                     // Make sure the path is null-terminated and it doesn't contain whitespace that isn't an ASCII space (0x20) or forward slash characters
                     bool null_terminated = false;
@@ -358,11 +358,15 @@ namespace Invader {
                             null_terminated = true;
                             break;
                         }
-                        else if(*path_test < ' ') {
-                            throw InvalidTagPathException();
-                        }
                         else if(*path_test == '/') {
                             throw InvalidTagPathException();
+                        }
+                        else {
+                            // Control characters?
+                            auto latin1 = static_cast<std::uint8_t>(*path_test);
+                            if(latin1 < 0x20 || (latin1 > 0x7E && latin1 < 0xA0)) {
+                                throw InvalidTagPathException();
+                            }
                         }
                     }
 
