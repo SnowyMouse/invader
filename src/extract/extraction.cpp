@@ -96,7 +96,7 @@ namespace Invader {
 
                 // If we're recursive, we want to also get that stuff, too
                 if(recursive) {
-                    auto tag_compiled = BuildWorkload::compile_single_tag(new_tag.data(), new_tag.size(), std::vector<std::string>(), false);
+                    auto tag_compiled = BuildWorkload::compile_single_tag(new_tag.data(), new_tag.size(), std::vector<std::filesystem::path>(), false);
                     std::vector<std::pair<const std::string *, Invader::TagClassInt>> dependencies;
                     for(auto &s : tag_compiled.structs) {
                         for(auto &d : s.dependencies) {

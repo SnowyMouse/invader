@@ -52,7 +52,7 @@ namespace Invader {
             /**
              * Index to use
              */
-            std::optional<std::vector<std::string>> index;
+            std::optional<std::vector<File::TagFilePath>> index;
             
             /**
              * Bitmap data
@@ -92,14 +92,14 @@ namespace Invader {
                 * Select how raw data is handled
                 */
                 enum RawDataHandling {
-                    /** Retain only if it isn't found in the resource maps (or no resource maps are given) */
-                    RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
+                    /** Retain all raw data in the map */
+                    RAW_DATA_HANDLING_RETAIN_ALL,
                     
                     /** Remove all raw data from the map (raw data will not be valid for extraction) */
                     RAW_DATA_HANDLING_REMOVE_ALL,
                     
-                    /** Retain all raw data in the map */
-                    RAW_DATA_HANDLING_RETAIN_ALL,
+                    /** Retain only if it isn't found in the resource maps */
+                    RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
                     
                     /** (Custom Edition only) Always assume resource files' assets match */
                     RAW_DATA_HANDLING_ALWAYS_INDEX
@@ -176,7 +176,7 @@ namespace Invader {
          * @param tags_directories  tags directories to use
          * @param recursion         should use recursion
          */
-        static BuildWorkload compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::string> &tags_directories, bool recursion = false);
+        static BuildWorkload compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false);
 
         /**
          * Compile a single tag
@@ -185,7 +185,7 @@ namespace Invader {
          * @param tags_directories  tags directories to use
          * @param recursion         should use recursion
          */
-        static BuildWorkload compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::string> &tags_directories = std::vector<std::string>(), bool recursion = false);
+        static BuildWorkload compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories = std::vector<std::filesystem::path>(), bool recursion = false);
 
         /** Denotes an individual tag dependency */
         struct BuildWorkloadDependency {
@@ -341,9 +341,6 @@ namespace Invader {
 
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
-        
-        /** Tag directories */
-        const std::vector<std::string> *tags_directories = nullptr;
 
         /** Recursion is disabled - also disables showing most errors as well as various tags using other tags' data */
         bool disable_recursion = false;

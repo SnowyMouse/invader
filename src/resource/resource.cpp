@@ -35,7 +35,7 @@ int main(int argc, const char **argv) {
 
     struct ResourceOption {
         // Tags directory
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
 
         // Maps directory
         const char *maps = "maps";

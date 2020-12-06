@@ -1052,26 +1052,30 @@ namespace Invader {
         oprintf(" done; reduced tag space usage by %.02f MiB\n", BYTES_TO_MiB(total_savings));
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::string> &tags_directories, bool recursion) {
+    BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
         workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
-        workload.tags_directories = &tags_directories;
         
         BuildParameters parameters;
+        parameters.tags_directories = tags_directories;
         workload.parameters = &parameters;
         
         workload.compile_tag_data_recursively(tag_data, tag_data_size, 0);
         return workload;
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::string> &tags_directories, bool recursion) {
+    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion) {
         BuildWorkload workload = {};
+        
+        BuildParameters parameters;
+        parameters.tags_directories = tags_directories;
+        workload.parameters = &parameters;
+        
         workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
-        workload.tags_directories = &tags_directories;
         workload.compile_tag_recursively(tag, tag_class_int);
         return workload;
     }

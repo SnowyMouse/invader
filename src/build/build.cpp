@@ -42,18 +42,20 @@ static std::uint32_t read_str32(const char *err, const char *s) {
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
+    
+    using RawDataHandling = BuildWorkload::BuildParameters::BuildParametersDetails::RawDataHandling;
 
     // Parameters
     struct BuildOptions {
-        std::string maps = "maps";
-        std::vector<std::string> tags;
+        std::filesystem::path maps = "maps";
+        std::vector<std::filesystem::path> tags;
         std::string output;
         std::string last_argument;
         std::string index;
         std::optional<HEK::CacheFileEngine> engine;
         bool handled = true;
         bool quiet = false;
-        BuildWorkload::RawDataHandling raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_DEFAULT;
+        std::optional<RawDataHandling> raw_data_handling;
         std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
         const char *rename_scenario = nullptr;
@@ -65,7 +67,6 @@ int main(int argc, const char **argv) {
     std::vector<CommandLineOption> options;
     options.emplace_back("no-external-tags", 'n', 0, "Do not use external tags. This can speed up build time at a cost of a much larger file size.");
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
-    options.emplace_back("discard", 'd', 0, "Discard all raw data. This will result in a map that is invalid for use with game clients (except MCC) and tag extractors.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail", "<id>");
@@ -87,13 +88,13 @@ int main(int argc, const char **argv) {
     auto remaining_arguments = CommandLineOption::parse_arguments<BuildOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, build_options, [](char opt, const auto &arguments, auto &build_options) {
         switch(opt) {
             case 'n':
-                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                 break;
             case 'a':
-                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
                 break;
             case 'd':
-                build_options.raw_data_handling = BuildWorkload::RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL;
+                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL;
                 break;
             case 'q':
                 build_options.quiet = true;
@@ -179,9 +180,9 @@ int main(int argc, const char **argv) {
 
     try {
         // Get the index
-        std::optional<std::vector<std::pair<TagClassInt, std::string>>> with_index;
+        std::optional<std::vector<File::TagFilePath>> with_index;
         if(build_options.index.size()) {
-            with_index = std::vector<std::pair<TagClassInt, std::string>>();
+            with_index = std::vector<File::TagFilePath>();
             
             std::fstream index_file(build_options.index, std::ios_base::in);
             std::string tag;
@@ -214,7 +215,7 @@ int main(int argc, const char **argv) {
                     c = std::tolower(c);
                 }
 
-                with_index->emplace_back(extension_to_tag_class(extension), substr_v.data());
+                with_index->emplace_back(substr_v.data(), extension_to_tag_class(extension));
             }
         }
 
@@ -223,40 +224,56 @@ int main(int argc, const char **argv) {
             eprintf_error("No engine target specified. Use -h for more information.");
             return 1;
         }
-    
-        // Default compress value
-        if(!build_options.compress.has_value()) {
-            switch(*build_options.engine) {
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                    build_options.compress = false;
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    build_options.compress = true;
-                    break;
-                default:
-                    break;
+        
+        BuildWorkload::BuildParameters parameters(*build_options.engine);
+        parameters.tags_directories = build_options.tags;
+        parameters.scenario = scenario;
+        parameters.rename_scenario = build_options.rename_scenario;
+        parameters.optimize_space = build_options.optimize_space;
+        parameters.forge_crc = build_options.forged_crc;
+        parameters.index = with_index;
+        
+        if(build_options.compress.has_value()) {
+            parameters.details.build_compress = *build_options.compress;
+        }
+        
+        // Do we need resource maps?
+        bool require_resource_maps;
+        switch(*build_options.engine) {
+            case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                require_resource_maps = false;
+                break;
+            default:
+                require_resource_maps = true;
+        }
+        
+        // Handle raw data handling
+        if(build_options.raw_data_handling.has_value()) {
+            // Don't allow resource maps if we can't use them!
+            if(!require_resource_maps && parameters.details.build_raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+                eprintf_error("Resource maps are not used for the target engine");
+                return EXIT_FAILURE;
             }
+            
+            // Set this to false
+            if(require_resource_maps && parameters.details.build_raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+                require_resource_maps = false;
+            }
+            
+            parameters.details.build_raw_data_handling = *build_options.raw_data_handling;
+        }
+        
+        if(build_options.hide_pedantic_warnings) {
+            parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC;
+        }
+        
+        if(build_options.quiet) {
+            parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET;
         }
 
         // Build!
-        auto map = Invader::BuildWorkload::compile_map(
-            scenario.c_str(),
-            build_options.tags,
-            build_options.engine.value(),
-            build_options.maps,
-            build_options.raw_data_handling,
-            !build_options.quiet,
-            with_index,
-            build_options.forged_crc,
-            std::nullopt,
-            build_options.rename_scenario == nullptr ? std::nullopt : std::optional<std::string>(std::string(build_options.rename_scenario)),
-            build_options.optimize_space,
-            *build_options.compress,
-            build_options.hide_pedantic_warnings
-        );
+        auto map = Invader::BuildWorkload::compile_map(parameters);
 
         // Set the map name
         const char *map_name;
