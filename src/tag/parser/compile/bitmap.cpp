@@ -187,7 +187,7 @@ namespace Invader::Parser {
         std::size_t bitmap_data_count = bitmap->bitmap_data.size();
         std::size_t swizzle_count = 0;
         const char *swizzle_verb = "";
-        auto engine_target = build_parameters->details.build_cache_file_engine;
+        auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
         
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
