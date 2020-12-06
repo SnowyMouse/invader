@@ -58,7 +58,7 @@ int main(int argc, const char **argv) {
         std::optional<RawDataHandling> raw_data_handling;
         std::optional<std::uint32_t> forged_crc;
         bool use_filesystem_path = false;
-        const char *rename_scenario = nullptr;
+        std::optional<std::string> rename_scenario;
         std::optional<bool> compress;
         bool optimize_space = false;
         bool hide_pedantic_warnings = false;
@@ -223,6 +223,7 @@ int main(int argc, const char **argv) {
         }
         
         BuildWorkload::BuildParameters parameters(*build_options.engine);
+        
         parameters.tags_directories = build_options.tags;
         parameters.scenario = scenario;
         parameters.rename_scenario = build_options.rename_scenario;
@@ -273,12 +274,12 @@ int main(int argc, const char **argv) {
         auto map = Invader::BuildWorkload::compile_map(parameters);
 
         // Set the map name
-        const char *map_name;
+        std::string map_name;
         if(build_options.rename_scenario) {
-            map_name = build_options.rename_scenario;
+            map_name = *build_options.rename_scenario;
         }
         else {
-            map_name = File::base_name_chars(scenario.c_str());
+            map_name = File::base_name(scenario.c_str());
         }
         
         static const char MAP_EXTENSION[] = ".map"; 
@@ -302,7 +303,7 @@ int main(int argc, const char **argv) {
             
             // If we are not building for MCC and the scenario name is mismatched, warn
             if(final_file_name_no_extension_string != map_name) {
-                eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name);
+                eprintf_warn("The base name (%s) does not match the scenario (%s)", final_file_name_no_extension_string.c_str(), map_name.c_str());
                 eprintf_warn("The map will fail to load correctly in the target engine with this file name.");
                 
                 bool incorrect_case = false;
