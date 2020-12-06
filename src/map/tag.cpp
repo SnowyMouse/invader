@@ -49,9 +49,11 @@ namespace Invader {
     
     std::byte *Tag::data(HEK::Pointer64 pointer, std::size_t minimum) {
         using namespace HEK;
+        
+        auto engine = this->get_map().get_engine();
 
         // Limit the pointer to 32-bit
-        if(this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             pointer &= UINT32_MAX;
         }
 
@@ -64,8 +66,17 @@ namespace Invader {
                 return this->map.get_data_at_offset(pointer + this->base_struct_offset, minimum, Map::DataMapType::DATA_MAP_SOUND);
             }
         }
+        
+        // Handle BSP data that partially exists in the main tag data
+        bool bsp_data_partially_in_main_tag_data = false;
+        if(!this->indexed && engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer) {
+            // NOTE: This is technically possible in Halo Custom Edition and retail Halo PC, but because of how MCC works, the functionality is disabled for this. Which does mean this can be used as a form of map protection to protect the BSPs. Oh well.
+            
+            bsp_data_partially_in_main_tag_data = engine != HEK::CacheFileEngine::CACHE_FILE_RETAIL && engine != HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+        }
+            
 
-        if(this->indexed || (this->get_map().get_engine() != HEK::CacheFileEngine::CACHE_FILE_NATIVE && this->tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && pointer >= this->base_struct_pointer)) {
+        if(this->indexed || bsp_data_partially_in_main_tag_data) {
             auto edge = this->base_struct_offset + this->tag_data_size;
             auto offset = this->base_struct_offset + pointer - this->base_struct_pointer;
 
