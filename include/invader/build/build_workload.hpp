@@ -95,9 +95,6 @@ namespace Invader {
                     /** Retain all raw data in the map */
                     RAW_DATA_HANDLING_RETAIN_ALL,
                     
-                    /** Remove all raw data from the map (raw data will not be valid for extraction) */
-                    RAW_DATA_HANDLING_REMOVE_ALL,
-                    
                     /** Retain only if it isn't found in the resource maps */
                     RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY,
                     

@@ -93,9 +93,6 @@ int main(int argc, const char **argv) {
             case 'a':
                 build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
                 break;
-            case 'd':
-                build_options.raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL;
-                break;
             case 'q':
                 build_options.quiet = true;
                 break;
