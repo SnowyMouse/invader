@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
 
     // Options struct
     struct FontOptions {
-        const char *data = "data/";
-        std::optional<const char *>tags;
+        std::filesystem::path data = "data/";
+        std::optional<std::filesystem::path> tags;
         int pixel_size = 14;
         bool use_filesystem_path = false;
         bool use_latin1 = false;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
     std::string font_tag;
     FontExtension found_format = static_cast<FontExtension>(0);
     if(font_options.use_filesystem_path) {
-        std::vector<std::string> data(&font_options.data, &font_options.data + 1);
+        std::vector<std::filesystem::path> data(&font_options.data, &font_options.data + 1);
         for(FontExtension i = found_format; i < FontExtension::FONT_EXTENSION_COUNT; i = static_cast<FontExtension>(i + 1)) {
             auto font_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, FONT_EXTENSION_STR[i]);
             if(font_tag_maybe.has_value()) {
@@ -135,12 +135,7 @@ int main(int argc, char *argv[]) {
     // Font tag path
     std::filesystem::path tags_path(*font_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*font_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *font_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", font_options.tags->string().c_str());
         return EXIT_FAILURE;
     }
     auto tag_path = tags_path / font_tag;

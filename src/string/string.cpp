@@ -105,8 +105,8 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag>";
 
     struct StringOptions {
-        const char *data = "data";
-        std::optional<const char *> tags;
+        std::filesystem::path data = "data";
+        std::optional<std::filesystem::path> tags;
         std::optional<Format> format;
         bool use_filesystem_path = false;
     } string_options;
@@ -151,7 +151,7 @@ int main(int argc, char * const *argv) {
     // Check if there's a string tag
     std::string string_tag;
     if(string_options.use_filesystem_path) {
-        std::vector<std::string> data(&string_options.data, &string_options.data + 1);
+        std::vector<std::filesystem::path> data(&string_options.data, &string_options.data + 1);
         auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, string_options.format == Format::STRING_LIST_FORMAT_HMT ? ".hmt" : ".txt");
         if(string_tag_maybe.has_value()) {
             string_tag = string_tag_maybe.value();
@@ -176,12 +176,7 @@ int main(int argc, char * const *argv) {
     // Make sure we have a tags directory
     std::filesystem::path tags_path(*string_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*string_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *string_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", string_options.tags->string().c_str());
         return EXIT_FAILURE;
     }
     

@@ -13,9 +13,9 @@
 #include <climits>
 
 namespace Invader::File {
-    std::optional<std::vector<std::byte>> open_file(const char *path) {
+    std::optional<std::vector<std::byte>> open_file(const std::filesystem::path &path) {
         // Attempt to open it
-        std::FILE *file = std::fopen(path, "rb");
+        std::FILE *file = std::fopen(path.string().c_str(), "rb");
         if(!file) {
             return std::nullopt;
         }
@@ -36,7 +36,7 @@ namespace Invader::File {
 
         // Get the size normally
         #else
-        auto size = std::filesystem::file_size(std::filesystem::path(path));
+        auto size = std::filesystem::file_size(path);
         #endif
 
         // Get the size and make sure we can use it
@@ -67,9 +67,9 @@ namespace Invader::File {
         return file_data;
     }
 
-    bool save_file(const char *path, const std::vector<std::byte> &data) {
+    bool save_file(const std::filesystem::path &path, const std::vector<std::byte> &data) {
         // Open the file
-        std::FILE *f = std::fopen(path, "wb");
+        std::FILE *f = std::fopen(path.string().c_str(), "wb");
         if(!f) {
             return false;
         }
@@ -84,7 +84,7 @@ namespace Invader::File {
         return true;
     }
 
-    std::optional<std::string> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::string> &tags, bool must_exist) {
+    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, bool must_exist) {
         // if it's an absolute path, we can't do anything about this
         std::filesystem::path tag_path_path(tag_path);
         if(tag_path_path.is_absolute()) {
@@ -101,36 +101,30 @@ namespace Invader::File {
         return std::nullopt;
     }
 
-    std::optional<std::string> file_path_to_tag_path(const std::string &file_path, const std::vector<std::string> &tags, bool must_exist) {
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags, bool must_exist) {
         // Get the absolute file path. It doesn't matter if it exists.
         auto absolute_file_path = std::filesystem::absolute(file_path);
         if(must_exist && !std::filesystem::exists(absolute_file_path)) {
             return std::nullopt;
         }
-        auto absolute_file_path_str = absolute_file_path.string();
-        auto root_path_str = absolute_file_path.root_path();
-
-        for(auto &tags_directory_string : tags) {
-            // Get the absolute path
-            bool ends_with_separator = tags_directory_string[tags_directory_string.size() - 1] == '/' || tags_directory_string[tags_directory_string.size() - 1] == '\\' || tags_directory_string[tags_directory_string.size() - 1] == INVADER_PREFERRED_PATH_SEPARATOR;
-            auto tags_directory = std::filesystem::absolute(ends_with_separator ? tags_directory_string.substr(0,tags_directory_string.size() - 1) : tags_directory_string);
-
-            // Go back until we get something that's the same
-            auto path_check = absolute_file_path;
-            while(path_check.has_parent_path() && path_check != root_path_str) {
-                path_check = path_check.parent_path();
-                if(path_check == tags_directory) {
-                    auto path_check_str = path_check.string();
-                    auto path_check_size = path_check_str.size();
-                    auto converted_path = absolute_file_path_str.substr(path_check_size + 1, absolute_file_path_str.size() - path_check_size - 1);
-                    return converted_path;
-                }
+        
+        // Find it
+        for(auto &tags_directory : tags) {
+            auto absolute_path = std::filesystem::absolute(tags_directory);
+            try {
+                auto relative = std::filesystem::relative(absolute_file_path, absolute_path);
+                return relative.string();
+            }
+            catch(std::exception &) {
+                continue;
             }
         }
+        
+        // Done
         return std::nullopt;
     }
 
-    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension) {
+    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, const std::string &expected_extension) {
         std::size_t EXTENSION_LENGTH = expected_extension.size();
         std::size_t TAG_PATH_LENGTH = tag_path.size();
 
@@ -273,7 +267,7 @@ namespace Invader::File {
         }
     }
 
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status, std::size_t *errors) {
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::filesystem::path> &tags, std::pair<std::mutex, std::size_t> *status, std::size_t *errors) {
         std::vector<TagFile> all_tags;
         
         std::size_t new_errors = 0;
@@ -294,7 +288,7 @@ namespace Invader::File {
             new_errors++; \
         }
 
-        auto iterate_directories = [&all_tags, &status, &new_errors](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::string> &main_dir) -> void {
+        auto iterate_directories = [&all_tags, &status, &new_errors](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::filesystem::path> &main_dir) -> void {
             if(++depth == 256) {
                 return;
             }
@@ -334,7 +328,7 @@ namespace Invader::File {
         for(std::size_t i = 0; i < dir_count; i++) {
             auto &d = tags[i];
             auto dir_str = d.c_str();
-            maybe_iterate_directories(dir_str, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::string>(&dir_str, &dir_str + 1));
+            maybe_iterate_directories(dir_str, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
         }
         
         // Change error count if errors was specified

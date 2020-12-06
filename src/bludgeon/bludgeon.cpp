@@ -79,7 +79,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define BROKEN_STRINGS_FIX "invalid-strings"
 #define EVERYTHING_FIX "everything"
 
-static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludgeoned) {
+static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fixes, bool &bludgeoned) {
     using namespace Invader::Bludgeoner;
     using namespace Invader::HEK;
     using namespace Invader::File;
@@ -89,7 +89,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
-        eprintf_error("Failed to open %s", file_path);
+        eprintf_error("Failed to open %s", file_path.string().c_str());
         return EXIT_FAILURE;
     }
 
@@ -104,7 +104,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         bool issues_present = false;
         if(fixes == WaysToFuckUpTheTag::NO_FIXES) {
             #define check_fix(fix, fix_message) if(fix(parsed_data.get(), false)) { \
-                oprintf_success_warn("%s: " fix_message, file_path); \
+                oprintf_success_warn("%s: " fix_message, file_path.string().c_str()); \
                 issues_present = true; \
             }
             
@@ -123,7 +123,7 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         }
         else {
             #define apply_fix(fix, fix_enum, fix_name) if((fixes & fix_enum) && fix(parsed_data.get(), true)) { \
-                oprintf_success("%s: Fixed " fix_name, file_path); \
+                oprintf_success("%s: Fixed " fix_name, file_path.string().c_str()); \
                 issues_present = true; \
             }
             
@@ -156,14 +156,14 @@ static int bludgeon_tag(const char *file_path, std::uint64_t fixes, bool &bludge
         // Do it!
         file_data = parsed_data->generate_hek_tag_data(header->tag_class_int, true);
         if(!Invader::File::save_file(file_path, file_data)) {
-            eprintf_error("Error: Failed to write to %s.", file_path);
+            eprintf_error("Error: Failed to write to %s.", file_path.string().c_str());
             return EXIT_FAILURE;
         }
 
         return EXIT_SUCCESS;
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to bludgeon %s: %s", file_path, e.what());
+        eprintf_error("Error: Failed to bludgeon %s: %s", file_path.string().c_str(), e.what());
         return EXIT_FAILURE;
     }
 }
@@ -182,7 +182,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
 
     struct BludgeonOptions {
-        std::optional<const char *> tags;
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
         bool all = false;
         std::uint64_t fixes = WaysToFuckUpTheTag::NO_FIXES;
@@ -294,7 +294,7 @@ int main(int argc, char * const *argv) {
             }
         };
 
-        recursively_bludgeon_dir(std::filesystem::path(*bludgeon_options.tags), recursively_bludgeon_dir);
+        recursively_bludgeon_dir(*bludgeon_options.tags, recursively_bludgeon_dir);
 
         oprintf("Bludgeoned %zu out of %zu tag%s\n", success, total, total == 1 ? "" : "s");
 

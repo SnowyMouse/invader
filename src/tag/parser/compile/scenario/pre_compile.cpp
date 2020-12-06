@@ -612,17 +612,16 @@ namespace Invader::Parser {
                     // Find it
                     char file_path_cstr[1024];
                     std::snprintf(file_path_cstr, sizeof(file_path_cstr), "%s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
-                    auto file_path = File::tag_path_to_file_path(file_path_cstr, *workload.tags_directories, true);
+                    auto file_path = File::tag_path_to_file_path(file_path_cstr, workload.get_build_parameters()->tags_directories, true);
                     if(!file_path.has_value()) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Child scenario %s not found", file_path_cstr);
                         throw InvalidTagDataException();
                     }
                     
                     // Open it
-                    const auto *found_path = file_path->c_str();
-                    auto data = File::open_file(found_path);
+                    auto data = File::open_file(*file_path);
                     if(!data.has_value()) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", found_path);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to open %s", file_path->string().c_str());
                         throw InvalidTagDataException();
                     }
                     

@@ -25,8 +25,8 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "[options] <tag>";
 
     struct CollectionOptions {
-        const char *data = "data";
-        std::optional<const char *> tags;
+        std::filesystem::path data = "data";
+        std::optional<std::filesystem::path> tags;
         bool use_filesystem_path = false;
     } collection_options;
 
@@ -58,7 +58,7 @@ int main(int argc, char * const *argv) {
     // Check if there's a string tag
     std::string string_tag;
     if(collection_options.use_filesystem_path) {
-        std::vector<std::string> data(&collection_options.data, &collection_options.data + 1);
+        std::vector<std::filesystem::path> data(&collection_options.data, &collection_options.data + 1);
         auto string_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(remaining_arguments[0], data, INDEX_EXTENSION);
         if(string_tag_maybe.has_value()) {
             string_tag = string_tag_maybe.value();
@@ -82,12 +82,7 @@ int main(int argc, char * const *argv) {
 
     std::filesystem::path tags_path(*collection_options.tags);
     if(!std::filesystem::is_directory(tags_path)) {
-        if(std::strcmp(*collection_options.tags, "tags") == 0) {
-            eprintf_error("No tags directory was given, and \"tags\" was not found or is not a directory.");
-        }
-        else {
-            eprintf_error("Directory %s was not found or is not a directory", *collection_options.tags);
-        }
+        eprintf_error("Directory %s was not found or is not a directory", collection_options.tags->string().c_str());
         return EXIT_FAILURE;
     }
     std::filesystem::path data_path(collection_options.data);

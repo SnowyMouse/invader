@@ -16,7 +16,7 @@
 int main(int argc, const char **argv) {
     struct ArchiveOptions {
         bool single_tag = false;
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
@@ -90,7 +90,7 @@ int main(int argc, const char **argv) {
     base_tag.emplace_back();
 
     // Variables to hold this
-    std::vector<std::pair<std::string, std::string>> archive_list;
+    std::vector<std::pair<std::filesystem::path, std::string>> archive_list;
 
     // If no output filename was given, make one
     static const char extension[] = ".tar.xz";
@@ -126,7 +126,11 @@ int main(int argc, const char **argv) {
         std::vector<std::byte> map;
 
         try {
-            map = Invader::BuildWorkload::compile_map(base_tag.data(), archive_options.tags);
+            Invader::BuildWorkload::BuildParameters parameters;
+            parameters.scenario = base_tag.data();
+            parameters.tags_directories = archive_options.tags;
+            
+            map = Invader::BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
             eprintf_error("Failed to compile scenario %s into a map\n", base_tag.data());
@@ -211,7 +215,7 @@ int main(int argc, const char **argv) {
             }
 
             std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
-            archive_list.emplace_back(dependency.file_path, path_copy);
+            archive_list.emplace_back(*dependency.file_path, path_copy);
         }
     }
     
@@ -225,7 +229,8 @@ int main(int argc, const char **argv) {
 
         // Go through each tag path we got
         for(std::size_t i = 0; i < archive_list.size(); i++) {
-            const char *path = archive_list[i].first.c_str();
+            auto str_path = archive_list[i].first.string();
+            const char *path = str_path.c_str();
 
             // Begin
             auto *entry = archive_entry_new();

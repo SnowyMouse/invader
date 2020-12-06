@@ -45,7 +45,7 @@ namespace Invader::EditQt {
         // If we're loading an existing tag, open it and parse it
         if(tag_file.tag_path.size() != 0) {
             this->make_dirty(false);
-            auto open_file = File::open_file(tag_file.full_path.string().c_str());
+            auto open_file = File::open_file(tag_file.full_path);
             if(!open_file.has_value()) {
                 char formatted_error[1024];
                 std::snprintf(formatted_error, sizeof(formatted_error), "Failed to open %s.\n\nMake sure it exists and you have permission to open it.", tag_file.full_path.string().c_str());

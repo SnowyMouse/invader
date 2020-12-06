@@ -95,7 +95,7 @@ struct BitmapOptions {
     bool regenerate = false;
 };
 
-template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::string &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
+template <typename T> static int perform_the_ritual(const std::string &bitmap_tag, const std::filesystem::path &tag_path, const std::filesystem::path &final_path, BitmapOptions &bitmap_options, SupportedFormatsInt found_format, TagClassInt tag_class_int) {
     // Let's begin
     std::filesystem::path data_path = bitmap_options.data;
 
@@ -105,7 +105,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
 
     // See if we can get anything out of this
     if(!bitmap_options.ignore_tag_data && std::filesystem::exists(final_path)) {
-        auto tag_data = Invader::File::open_file(final_path.c_str()).value();
+        auto tag_data = Invader::File::open_file(final_path).value();
         bitmap_tag_data = T::parse_hek_tag_file(tag_data.data(), tag_data.size());
 
         // Set some default values
@@ -689,7 +689,7 @@ int main(int argc, char *argv[]) {
     if(bitmap_options.filesystem_path) {
         // Check for a ".bitmap" and ".extended_bitmap"
         if(bitmap_options.regenerate) {
-            std::vector<std::string> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
+            std::vector<std::filesystem::path> tags_v(&*bitmap_options.tags, &*bitmap_options.tags + 1);
             auto try_it_and_buy_it = [&tags_v, &bitmap_tag, &tag_class_to_use](HEK::TagClassInt tag_class_int) -> bool {
                 auto p = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, tags_v, std::string(".") + HEK::tag_class_to_extension(tag_class_int));
                 if(!p.has_value()) {
@@ -708,7 +708,7 @@ int main(int argc, char *argv[]) {
         
         // Iterate through all the possible extensions
         else {
-            std::vector<std::string> data_v(&bitmap_options.data, &bitmap_options.data + 1);
+            std::vector<std::filesystem::path> data_v(&bitmap_options.data, &bitmap_options.data + 1);
             SupportedFormatsInt i;
             for(i = found_format; i < SupportedFormatsInt::SUPPORTED_FORMATS_INT_COUNT; i = static_cast<SupportedFormatsInt>(i + 1)) {
                 auto bitmap_tag_maybe = Invader::File::file_path_to_tag_path_with_extension(bitmap_tag, data_v, SUPPORTED_FORMATS[i]);
@@ -747,8 +747,8 @@ int main(int argc, char *argv[]) {
 
     auto tag_path = tags_path / bitmap_tag;
 
-    auto final_path_bitmap = tag_path.string() + ".bitmap";
-    auto final_path_invader_bitmap = tag_path.string() + ".invader_bitmap";
+    auto final_path_bitmap = tags_path / (bitmap_tag + ".bitmap");
+    auto final_path_invader_bitmap = tags_path / (bitmap_tag + ".invader_bitmap");
     
     // Determine if we're using extended or not
     if(tag_class_to_use.has_value()) { // if -P and -R is used

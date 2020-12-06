@@ -284,8 +284,8 @@ int main(int argc, const char **argv) {
         }
 
         for(auto &tags_folder : resource_options.tags) {
-            auto tag_path_str = (std::filesystem::path(tags_folder) / tag_path).string();
-            tag_data = Invader::File::open_file(tag_path_str.c_str()).value_or(std::vector<std::byte>());
+            auto tag_path_path = std::filesystem::path(tags_folder) / tag_path;
+            tag_data = Invader::File::open_file(tag_path_path).value_or(std::vector<std::byte>());
             if(tag_data.size()) {
                 break;
             }

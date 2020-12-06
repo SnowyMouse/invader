@@ -23,9 +23,9 @@ enum Show : std::uint8_t {
 };
 
 struct Input {
-    std::optional<const char *> map;
+    std::optional<std::filesystem::path> map;
     std::optional<std::filesystem::path> maps;
-    std::vector<std::string> tags;
+    std::vector<std::filesystem::path> tags;
     bool ignore_resource_maps = false;
     
     std::vector<File::TagFilePath> tag_paths;
@@ -229,21 +229,21 @@ int main(int argc, const char **argv) {
     // Automatically make up maps directories for any map when necessary, then open their respective resources
     for(auto &i : compare_options.inputs) {
         if(i.map.has_value() && !i.maps.has_value()) {
-            i.maps = std::filesystem::absolute(std::filesystem::path(*i.map)).parent_path();
+            i.maps = std::filesystem::absolute(*i.map).parent_path();
         }
             
         if(i.map.has_value()) {
             // Load resource maps
             std::vector<std::byte> loc, bitmaps, sounds;
             if(i.maps.has_value() && !i.ignore_resource_maps) {
-                loc = File::open_file((*i.maps / "loc.map").string().c_str()).value_or(std::vector<std::byte>());
-                bitmaps = File::open_file((*i.maps / "bitmaps.map").string().c_str()).value_or(std::vector<std::byte>());
-                sounds = File::open_file((*i.maps / "sounds.map").string().c_str()).value_or(std::vector<std::byte>());
+                loc = File::open_file(*i.maps / "loc.map").value_or(std::vector<std::byte>());
+                bitmaps = File::open_file(*i.maps / "bitmaps.map").value_or(std::vector<std::byte>());
+                sounds = File::open_file(*i.maps / "sounds.map").value_or(std::vector<std::byte>());
             }
         
             auto data = File::open_file(*i.map);
             if(!data.has_value()) {
-                eprintf_error("Failed to read %s", *i.map);
+                eprintf_error("Failed to read %s", i.map->string().c_str());
                 return EXIT_FAILURE;
             }
             
@@ -449,7 +449,7 @@ static void regular_comparison(const std::vector<Input> &inputs, bool precision,
                     auto other_path = File::split_tag_class_extension(File::preferred_path_to_halo_path(vd.tag_path)).value().path;
                     if(vd.tag_class_int == tag.class_int && CAN_COMPARE(by_path_copy, tag.path, other_path)) {
                         // Open it
-                        auto file = Invader::File::open_file(vd.full_path.string().c_str()).value();
+                        auto file = Invader::File::open_file(vd.full_path).value();
                         
                         // Parse it
                         structs.emplace_back(Parser::ParserStruct::parse_hek_tag_file(file.data(), file.size(), true));

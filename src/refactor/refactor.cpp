@@ -13,11 +13,11 @@
 
 using namespace Invader::File;
 
-std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
+std::size_t refactor_tags(const std::filesystem::path &file_path, const std::vector<std::pair<TagFilePath, TagFilePath>> &replacements, bool check_only, bool dry_run) {
     // Open the tag
     auto tag = open_file(file_path);
     if(!tag.has_value()) {
-        eprintf_error("Failed to open %s", file_path);
+        eprintf_error("Failed to open %s", file_path.string().c_str());
         std::exit(EXIT_FAILURE);
     }
 
@@ -39,16 +39,16 @@ std::size_t refactor_tags(const char *file_path, const std::vector<std::pair<Tag
         }
     }
     catch(std::exception &e) {
-        eprintf_error("Error: Failed to refactor in %s", file_path);
+        eprintf_error("Error: Failed to refactor in %s", file_path.string().c_str());
         std::exit(EXIT_FAILURE);
     }
 
     if(!check_only) {
         if(!dry_run && !save_file(file_path, file_data)) {
-            eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path);
+            eprintf_error("Error: Failed to write to %s. This tag will need to be manually edited.", file_path.string().c_str());
             return 0;
         }
-        oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path);
+        oprintf_success("Replaced %zu reference%s in %s", count, count == 1 ? "" : "s", file_path.string().c_str());
     }
 
     return count;
@@ -78,7 +78,7 @@ int main(int argc, char * const *argv) {
     static constexpr char USAGE[] = "<-M <mode>> [options]";
 
     struct RefactorOptions {
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
         bool dry_run = false;
         std::optional<RefactorMode> mode;
         const char *single_tag = nullptr;

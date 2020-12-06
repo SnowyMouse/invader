@@ -116,7 +116,7 @@ namespace Invader::SoundReader {
         return result;
     }
 
-    Sound sound_from_wav_file(const char *path) {
+    Sound sound_from_wav_file(const std::filesystem::path &path) {
         auto sound_data = Invader::File::open_file(path);
         if(sound_data.has_value()) {
             auto &sound_data_v = *sound_data;

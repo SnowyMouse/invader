@@ -47,7 +47,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             eprintf_error("A directory exists at %s where a file was expected", tag_path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
-        auto sound_file = File::open_file(tag_path.string().c_str());
+        auto sound_file = File::open_file(tag_path);
         if(sound_file.has_value()) {
             auto &sound_data = *sound_file;
             try {
@@ -859,8 +859,8 @@ int main(int argc, const char **argv) {
     // Get our paths and make sure a data directory exists
     std::string halo_tag_path;
     if(sound_options.fs_path) {
-        std::vector<std::string> data;
-        data.emplace_back(std::string(sound_options.data));
+        std::vector<std::filesystem::path> data;
+        data.emplace_back(sound_options.data);
         try {
             halo_tag_path = Invader::File::file_path_to_tag_path(remaining_arguments[0], data, false).value();
         }
@@ -932,10 +932,8 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
     for(auto &wav : std::filesystem::directory_iterator(directory)) {
         // Skip directories
         auto path = wav.path();
-        auto path_str = path.string();
-        auto *path_str_cstr = path_str.c_str();
         if(wav.is_directory()) {
-            eprintf_error("Unexpected directory %s", path_str_cstr);
+            eprintf_error("Unexpected directory %s", path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
         auto extension = path.extension().string();
@@ -944,18 +942,18 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         SoundReader::Sound sound = {};
         try {
             if(extension == ".wav") {
-                sound = SoundReader::sound_from_wav_file(path_str_cstr);
+                sound = SoundReader::sound_from_wav_file(path);
             }
             else if(extension == ".flac") {
-                sound = SoundReader::sound_from_flac_file(path_str_cstr);
+                sound = SoundReader::sound_from_flac_file(path);
             }
             else {
-                eprintf_error("Unknown file format for %s", path_str_cstr);
+                eprintf_error("Unknown file format for %s", path.string().c_str());
                 std::exit(EXIT_FAILURE);
             }
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to load %s: %s", path_str_cstr, e.what());
+            eprintf_error("Failed to load %s: %s", path.string().c_str(), e.what());
             std::exit(EXIT_FAILURE);
         }
 
@@ -978,7 +976,7 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
             std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
             std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
             if(extension == ".flac") {
-                source.compressed_audio_data = *File::open_file(path_str_cstr);
+                source.compressed_audio_data = *File::open_file(path);
             }
             else {
                 source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
@@ -996,11 +994,11 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
 
         // Make sure we can actually work with this
         if(sound.channel_count > 2 || sound.channel_count < 1) {
-            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path_str.c_str());
+            eprintf_error("Unsupported channel count %u in %s", static_cast<unsigned int>(sound.channel_count), path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
         if(sound.bits_per_sample % 8 != 0 || sound.bits_per_sample < 8 || sound.bits_per_sample > 24) {
-            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path_str.data());
+            eprintf_error("Bits per sample (%u) is not divisible by 8 in %s (or is too small or too big)", static_cast<unsigned int>(sound.bits_per_sample), path.string().c_str());
             std::exit(EXIT_FAILURE);
         }
 

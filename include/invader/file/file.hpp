@@ -23,7 +23,7 @@ namespace Invader::File {
      * @param path path to the file
      * @return     a buffer holding the file or std::nullopt if failed
      */
-    std::optional<std::vector<std::byte>> open_file(const char *path);
+    std::optional<std::vector<std::byte>> open_file(const std::filesystem::path &path);
 
     /**
      * Attempt to save the file
@@ -31,7 +31,7 @@ namespace Invader::File {
      * @param  data data to write
      * @return      true on success; false on failure
      */
-    bool save_file(const char *path, const std::vector<std::byte> &data);
+    bool save_file(const std::filesystem::path &path, const std::vector<std::byte> &data);
 
     /**
      * Convert a tag path to a file path
@@ -40,7 +40,7 @@ namespace Invader::File {
      * @param  must_exist ensure the path exists
      * @return            file path to use if exists, or std::nullopt on failure
      */
-    std::optional<std::string> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::string> &tags, bool must_exist);
+    std::optional<std::filesystem::path> tag_path_to_file_path(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, bool must_exist);
 
     /**
      * Convert a file path to a tag path
@@ -49,7 +49,7 @@ namespace Invader::File {
      * @param  must_exist ensure the path exists
      * @return            tag path to use if exists, or std::nullopt on failure
      */
-    std::optional<std::string> file_path_to_tag_path(const std::string &file_path, const std::vector<std::string> &tags, bool must_exist);
+    std::optional<std::string> file_path_to_tag_path(const std::filesystem::path &file_path, const std::vector<std::filesystem::path> &tags, bool must_exist);
 
     /**
      * Attempt to resolve a file path to a tag path using an extension
@@ -57,7 +57,7 @@ namespace Invader::File {
      * @param tags               tags directory to use
      * @param expected_extension extension to use and remove from the path, if found
      */
-    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::string> &tags, const std::string &expected_extension);
+    std::optional<std::string> file_path_to_tag_path_with_extension(const std::string &tag_path, const std::vector<std::filesystem::path> &tags, const std::string &expected_extension);
 
     /**
      * File path holder
@@ -125,7 +125,7 @@ namespace Invader::File {
      * @param  errors optional pointer to hold the number of errors
      * @return        all tags in the folder
      */
-    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::string> &tags, std::pair<std::mutex, std::size_t> *status = nullptr, std::size_t *errors = nullptr);
+    std::vector<TagFile> load_virtual_tag_folder(const std::vector<std::filesystem::path> &tags, std::pair<std::mutex, std::size_t> *status = nullptr, std::size_t *errors = nullptr);
 
     /**
      * Convert the tag path to a path using the system's preferred separators

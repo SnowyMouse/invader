@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace Invader::SoundReader {
     struct Sound {
@@ -43,7 +44,7 @@ namespace Invader::SoundReader {
      * @param  path path to the file
      * @return      sound
      */
-    Sound sound_from_wav_file(const char *path);
+    Sound sound_from_wav_file(const std::filesystem::path &path);
 
     /**
      * Get the sound from WAV data
@@ -58,7 +59,7 @@ namespace Invader::SoundReader {
      * @param  path path to the file
      * @return      sound
      */
-    Sound sound_from_ogg_file(const char *path);
+    Sound sound_from_ogg_file(const std::filesystem::path &path);
 
     /**
      * Get the sound from Ogg data
@@ -73,7 +74,7 @@ namespace Invader::SoundReader {
      * @param  path path to the file
      * @return      sound
      */
-    Sound sound_from_flac_file(const char *path);
+    Sound sound_from_flac_file(const std::filesystem::path &path);
 
     /**
      * Get the sound from FLAC data

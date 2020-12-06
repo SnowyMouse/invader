@@ -25,7 +25,7 @@ namespace Invader {
         return dependencies;
     }
 
-    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::string> tags, bool reverse, bool recursive, bool &success) {
+    std::vector<FoundTagDependency> FoundTagDependency::find_dependencies(const char *tag_path_to_find_2, Invader::TagClassInt tag_int_to_find, std::vector<std::filesystem::path> tags, bool reverse, bool recursive, bool &success) {
         std::vector<FoundTagDependency> found_tags;
         success = true;
 
@@ -74,14 +74,14 @@ namespace Invader {
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.first, class_to_use, false, complete_tag_path.string());
+                                    found_tags.emplace_back(dependency.first, class_to_use, false, complete_tag_path);
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.first, class_to_use, true, "");
+                                found_tags.emplace_back(dependency.first, class_to_use, true, std::nullopt);
                             }
                             else if(recursive) {
                                 recursion(dependency.first.c_str(), class_to_use, recursion);
@@ -170,7 +170,7 @@ namespace Invader {
                                 auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
                                 for(auto &dependency : dependencies) {
                                     if(dependency.first == tag_path_to_find && dependency.second == tag_int_to_find) {
-                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path().string());
+                                        found_tags.emplace_back(dir_tag_path, class_int, false, file.path());
                                         break;
                                     }
                                 }

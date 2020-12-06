@@ -109,8 +109,7 @@ int main(int argc, const char **argv) {
     if(extract_options.maps_directory.has_value() && !extract_options.ignore_resource_maps) {
         std::filesystem::path maps_directory(*extract_options.maps_directory);
         auto open_map_possibly = [&maps_directory](const char *map, const char *map_alt, auto &open_map_possibly) -> std::vector<std::byte> {
-            auto potential_map_path = (maps_directory / map).string();
-            auto potential_map = Invader::File::open_file(potential_map_path.c_str());
+            auto potential_map = Invader::File::open_file(maps_directory / map);
             if(potential_map.has_value()) {
                 return *potential_map;
             }

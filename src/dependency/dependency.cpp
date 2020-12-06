@@ -25,7 +25,7 @@ int main(int argc, char * const *argv) {
     struct DependencyOption {
         bool reverse = false;
         bool recursive = false;
-        std::vector<std::string> tags;
+        std::vector<std::filesystem::path> tags;
         std::string output;
         bool use_filesystem_path = false;
     } dependency_options;
