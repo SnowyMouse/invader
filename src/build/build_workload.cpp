@@ -964,17 +964,6 @@ namespace Invader {
         bool found_something = true;
         std::size_t total_savings = 0;
         std::size_t struct_count = this->structs.size();
-        
-        // MCC workaround, since these are no longer cache files and everything is assumed to be contiguous
-        bool do_not_dedupe_across_bsps;
-        switch(this->parameters->details.build_cache_file_engine) {
-            case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-            case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                do_not_dedupe_across_bsps = true;
-                break;
-            default:
-                do_not_dedupe_across_bsps = false;
-        }
 
         oprintf("Optimizing tag space...");
         oflush();
@@ -987,11 +976,6 @@ namespace Invader {
                 }
                 for(std::size_t j = i + 1; j < struct_count; j++) {
                     if(this->structs[j].unsafe_to_dedupe) {
-                        continue;
-                    }
-                    
-                    // Check if they're different BSPs, if we have to
-                    if(do_not_dedupe_across_bsps && this->structs[i].bsp != this->structs[j].bsp) {
                         continue;
                     }
 
