@@ -370,6 +370,9 @@ namespace Invader {
 
         /** Base memory address */
         std::uint32_t base_memory_address = HEK::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
+        
+        /** Invalid paths? */
+        bool invalid_paths_detected = false;
 
         /** Map is compressed */
         bool compressed = false;

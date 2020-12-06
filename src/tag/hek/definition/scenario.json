@@ -846,6 +846,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -907,6 +908,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -982,6 +984,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1022,6 +1025,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1087,6 +1091,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1106,6 +1111,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagString",
                 "endian": null
             },
@@ -1170,6 +1176,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1234,6 +1241,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1309,6 +1317,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1341,6 +1350,7 @@
         "fields": [
             {
                 "name": "name",
+                "non_null": true,
                 "type": "TagDependency",
                 "compound": true,
                 "classes": [
@@ -1502,10 +1512,40 @@
                 "endian": null
             },
             {
-                "name": "unknown values",
-                "type": "float",
-                "hidden": true,
-                "count": 9
+                "name": "float 1",
+                "type": "float"
+            },
+            {
+                "name": "float 2",
+                "type": "float"
+            },
+            {
+                "name": "float 3",
+                "type": "float"
+            },
+            {
+                "name": "float 4",
+                "type": "float"
+            },
+            {
+                "name": "float 5",
+                "type": "float"
+            },
+            {
+                "name": "float 6",
+                "type": "float"
+            },
+            {
+                "name": "float 7",
+                "type": "float"
+            },
+            {
+                "name": "float 8",
+                "type": "float"
+            },
+            {
+                "name": "float 9",
+                "type": "float"
             },
             {
                 "name": "starting corner",

@@ -16,6 +16,9 @@ This is used for recording Invader's changes. This changelog is based on
   when doing a no-move refactor.
 
 ### Fixed
+- invader: Fixed treating Latin-1 characters as protected
+- invader-build: Fixed allowing null scenario palettes (this actually crashes
+  Halo!)
 - invader-build: Fixed an ellipsis when too many squad positions are shown that
   aren't in the BSP
 - invader-build: Fixed an issue where the wrong death animation would play
@@ -30,6 +33,7 @@ This is used for recording Invader's changes. This changelog is based on
   detail_object_collection tags
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
+- invader-sound: Fixed "Processing sounds" hang on some systems
 
 ## [0.38.1] - 2020-10-27
 ### Changed

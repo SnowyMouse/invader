@@ -77,11 +77,6 @@ namespace Invader {
                 return false;
             }
 
-            // Lowercase everything
-            for(char &c : path) {
-                c = std::tolower(c);
-            }
-
             // Figure out the path we're writing to
             auto tag_path_to_write_to = tags / (path + "." + tag_extension);
             if(!overwrite && std::filesystem::exists(tag_path_to_write_to)) {

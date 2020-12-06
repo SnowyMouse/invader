@@ -349,20 +349,30 @@ namespace Invader {
                 tag.tag_index = i;
 
                 try {
-                    auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
+                    const auto *path = reinterpret_cast<const char *>(map.resolve_tag_data_pointer(tags[i].tag_path));
 
                     // Make sure the path is null-terminated and it doesn't contain whitespace that isn't an ASCII space (0x20) or forward slash characters
                     bool null_terminated = false;
                     for(auto *path_test = path; path < tag_data_end; path_test++) {
                         if(*path_test == 0) {
                             null_terminated = true;
+                            
+                            // Did we even start?
+                            if(path_test == path) {
+                                throw InvalidTagPathException();
+                            }
+                            
                             break;
-                        }
-                        else if(*path_test < ' ') {
-                            throw InvalidTagPathException();
                         }
                         else if(*path_test == '/') {
                             throw InvalidTagPathException();
+                        }
+                        else {
+                            // Control characters?
+                            auto latin1 = static_cast<std::uint8_t>(*path_test);
+                            if(latin1 < 0x20 || (latin1 > 0x7E && latin1 < 0xA0)) {
+                                throw InvalidTagPathException();
+                            }
                         }
                     }
 
@@ -373,9 +383,17 @@ namespace Invader {
                     else {
                         throw InvalidTagPathException();
                     }
+                    
+                    // Lowercase everything
+                    for(char &c : tag.path) {
+                        c = std::tolower(c);
+                    }
                 }
                 catch (std::exception &) {
-                    tag.path = "";
+                    char new_path[64];
+                    std::snprintf(new_path, sizeof(new_path), "corrupted\\tag_%zu", i);
+                    map.invalid_paths_detected = true;
+                    tag.path = new_path;
                 }
 
                 if(tag.tag_class_int == TagClassInt::TAG_CLASS_SCENARIO_STRUCTURE_BSP && map.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
@@ -519,6 +537,11 @@ namespace Invader {
 
     bool Map::is_protected() const noexcept {
         using namespace HEK;
+        
+        // Invalid paths?
+        if(this->invalid_paths_detected) {
+            return true;
+        }
 
         // We can get this right off the bat
         if(this->get_tag(this->get_scenario_tag_id()).get_tag_class_int() != TagClassInt::TAG_CLASS_SCENARIO) {

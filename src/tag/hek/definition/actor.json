@@ -271,8 +271,7 @@
             },
             {
                 "name": "begin moving angle",
-                "type": "Angle",
-                "default": 3.14159274101257
+                "type": "Angle"
             },
             {
                 "name": "cosine begin moving angle",

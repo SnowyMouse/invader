@@ -597,6 +597,46 @@ namespace Invader {
 
         // Set this in case it's not set yet
         this->tags[tag_index].tag_class_int = *tag_class_int;
+        
+        // Make sure the path isn't bullshit
+        bool invalid_path = false;
+        bool uppercase = false;
+        bool forward_slash = false;
+        bool control = false;
+        for(auto &c : this->tags[tag_index].path) {
+            if(c == '/') {
+                invalid_path = true;
+                forward_slash = true;
+            }
+            else if(c >= 'A' && c <= 'Z') {
+                invalid_path = true;
+                uppercase = true;
+            }
+            else {
+                std::uint8_t latin1 = static_cast<std::uint8_t>(c);
+                if(latin1 < ' ' || (latin1 >= 0x7F && latin1 < 0xA0)) {
+                    invalid_path = true;
+                    control = true;
+                    c = '?';
+                }
+            }
+        }
+        
+        if(invalid_path) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, tag_index, "Tag path contains invalid characters");
+            
+            if(uppercase) {
+                eprintf_warn("Tags may not have uppercase characters");
+            }
+            if(forward_slash) {
+                eprintf_warn("Tags may not have forward slashes internally");
+            }
+            if(control) {
+                eprintf_warn("Tags may not have control characters");
+            }
+            
+            throw InvalidTagPathException();
+        }
 
         // Check header and CRC32
         HEK::TagFileHeader::validate_header(header, tag_data_size, tag_class_int);
