@@ -23,7 +23,7 @@ namespace Invader::EditQt {
     class TagFetcherThread : public QThread {
         Q_OBJECT
     public:
-        TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths);
+        TagFetcherThread(QObject *parent, const std::vector<std::filesystem::path> &all_paths);
 
     signals:
         void tag_count_changed(std::pair<std::mutex, std::size_t> *new_count);
@@ -31,7 +31,7 @@ namespace Invader::EditQt {
 
     private:
         void run() override;
-        std::vector<std::string> all_paths;
+        std::vector<std::filesystem::path> all_paths;
         std::vector<File::TagFile> all_tags;
         std::pair<std::mutex, std::size_t> statuser;
         std::size_t last_tag_count;

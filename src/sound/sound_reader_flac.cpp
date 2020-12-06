@@ -38,12 +38,13 @@ namespace Invader::SoundReader {
         reinterpret_cast<SoundReader::Sound *>(client_data)->pcm.clear();
     }
 
-    Sound sound_from_flac_file(const char *path) {
+    Sound sound_from_flac_file(const std::filesystem::path &path) {
         Sound result = {};
+        auto path_str = path.string();
 
         FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
         try {
-            if(FLAC__stream_decoder_init_file(decoder, path, write_flac_data, on_flac_metadata, on_flac_error, &result) != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+            if(FLAC__stream_decoder_init_file(decoder, path_str.c_str(), write_flac_data, on_flac_metadata, on_flac_error, &result) != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
                 eprintf_error("Failed to init FLAC stream");
                 throw InvalidInputSoundException();
             }

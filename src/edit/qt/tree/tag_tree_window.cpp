@@ -238,7 +238,7 @@ namespace Invader::EditQt {
     void TagFetcherThread::run() {
         // Function for loading it
         std::size_t error_count;
-        auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::string> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
+        auto load_it = [&error_count](std::vector<File::TagFile> *to, std::vector<std::filesystem::path> *all_paths, std::pair<std::mutex, std::size_t> *statuser) {
             *to = Invader::File::load_virtual_tag_folder(*all_paths, statuser, &error_count);
         };
 
@@ -260,7 +260,7 @@ namespace Invader::EditQt {
         emit fetch_finished(&this->all_tags, static_cast<int>(error_count));
     }
 
-    TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::string> &all_paths) : QThread(parent), all_paths(all_paths) {}
+    TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::filesystem::path> &all_paths) : QThread(parent), all_paths(all_paths) {}
 
     void TagTreeWindow::reload_tags() {
         // Ensure we only reload once
@@ -276,14 +276,8 @@ namespace Invader::EditQt {
         this->all_tags.clear();
         emit tags_reloaded(this);
 
-        // Load 'em
-        std::vector<std::string> all_paths;
-        for(auto &p : this->paths) {
-            all_paths.emplace_back(p.string());
-        }
-
         // Now... let's do this
-        this->fetcher_thread = new TagFetcherThread(this, all_paths);
+        this->fetcher_thread = new TagFetcherThread(this, this->paths);
         connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
         connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
         connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);

@@ -230,15 +230,13 @@ namespace Invader {
         }
 
         // Get the bitmap and sound data in there
-        if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_REMOVE_ALL) {
-            if(this->parameters->verbosity) {
-                oprintf("Building raw data...");
-                oflush();
-            }
-            this->generate_bitmap_sound_data(end_of_bsps);
-            if(this->parameters->verbosity) {
-                oprintf(" done\n");
-            }
+        if(this->parameters->verbosity) {
+            oprintf("Building raw data...");
+            oflush();
+        }
+        this->generate_bitmap_sound_data(end_of_bsps);
+        if(this->parameters->verbosity) {
+            oprintf(" done\n");
         }
 
         auto &workload = *this;
@@ -771,20 +769,22 @@ namespace Invader {
                 break;
             }
         }
+        
+        auto &tags_directories = this->parameters->tags_directories;
 
         // Find it
         char formatted_path[256];
-        std::optional<std::string> new_path;
+        std::optional<std::filesystem::path> new_path;
         if(tag_class_int != TagClassInt::TAG_CLASS_OBJECT) {
             std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(tag_class_int));
             Invader::File::halo_path_to_preferred_path_chars(formatted_path);
-            new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true);
+            new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories, true);
         }
         else {
             #define TRY_THIS(new_int) if(!new_path.has_value()) { \
                 std::snprintf(formatted_path, sizeof(formatted_path), "%s.%s", tag_path, tag_class_to_extension(new_int)); \
                 Invader::File::halo_path_to_preferred_path_chars(formatted_path); \
-                new_path = Invader::File::tag_path_to_file_path(formatted_path, *this->tags_directories, true); \
+                new_path = Invader::File::tag_path_to_file_path(formatted_path, tags_directories, true); \
                 tag_class_int = new_int; \
             }
             TRY_THIS(TagClassInt::TAG_CLASS_BIPED);
@@ -839,7 +839,7 @@ namespace Invader {
         }
 
         // Open it
-        auto tag_file = Invader::File::open_file(new_path->data());
+        auto tag_file = Invader::File::open_file(*new_path);
         if(!tag_file.has_value()) {
             eprintf_error("Failed to open %s\n", formatted_path);
             throw FailedToOpenFileException();
