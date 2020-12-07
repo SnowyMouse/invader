@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.39.0] - 2020-12-07
 ### Added
 - invader-build: Added `-g mcc-custom` which builds a Custom Edition map but
   compressed and indexed for MCC while generating a .fmeta file alongside it
