@@ -113,17 +113,6 @@ namespace Invader {
                 break;
         }
 
-        auto scenario_name_fixed = File::preferred_path_to_halo_path(parameters.scenario);
-        workload.scenario = scenario_name_fixed.c_str();
-
-        // Set the scenario name too
-        if(parameters.rename_scenario.has_value()) {
-            workload.set_scenario_name((*parameters.rename_scenario).c_str());
-        }
-        else {
-            workload.set_scenario_name(scenario_name_fixed.c_str());
-        }
-
         return workload.build_cache_file();
     }
 
@@ -132,6 +121,33 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // Yay
         File::check_working_directory("./toolbeta.map");
+        
+        // Update scenario name if needed
+        auto scenario_name_fixed = File::preferred_path_to_halo_path(this->parameters->scenario);
+        this->scenario = scenario_name_fixed.c_str();
+
+        // Set the scenario name too
+        if(this->parameters->rename_scenario.has_value()) {
+            this->set_scenario_name((*this->parameters->rename_scenario).c_str());
+        }
+        else {
+            this->set_scenario_name(scenario_name_fixed.c_str());
+        }
+        
+        // Reserve indexed tags
+        if(this->parameters->index.has_value()) {
+            auto &index = *this->parameters->index;
+            auto &tag_paths = this->get_tag_paths();
+            this->tags.reserve(index.size());
+            tag_paths.reserve(index.size());
+            for(auto &i : index) {
+                auto &tag = this->tags.emplace_back();
+                tag_paths.emplace_back(i);
+                tag.path = i.path;
+                tag.tag_class_int = i.class_int;
+                tag.stubbed = true;
+            }
+        }
 
         // First, make our tag data header and array
         this->structs.resize(2);
