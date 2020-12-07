@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include <invader/build/build_workload.hpp>
+#include <invader/compress/compression.hpp>
 #include <invader/map/map.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
@@ -14,27 +15,17 @@
 #include <invader/file/file.hpp>
 #include <invader/tag/index/index.hpp>
 
-enum ReturnValue : int {
-    RETURN_OK = 0,
-    RETURN_FAILED_NOTHING_TO_DO = 1,
-    RETURN_FAILED_UNKNOWN_ARGUMENT = 2,
-    RETURN_FAILED_UNHANDLED_ARGUMENT = 3,
-    RETURN_FAILED_FILE_SAVE_ERROR = 4,
-    RETURN_FAILED_EXCEPTION_ERROR = 5,
-    RETURN_FAILED_INVALID_ARGUMENT = 6
-};
-
 static std::uint32_t read_str32(const char *err, const char *s) {
     std::size_t given_crc32_length = std::strlen(s);
     if(given_crc32_length > 8 || given_crc32_length < 1) {
         eprintf_error("%s %s (must be 1-8 digits)", err, s);
-        std::exit(RETURN_FAILED_INVALID_ARGUMENT);
+        std::exit(EXIT_FAILURE);
     }
     for(std::size_t i = 0; i < given_crc32_length; i++) {
         char c = std::tolower(s[i]);
         if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
             eprintf_error("%s %s (must be hexadecimal)", err, s);
-            std::exit(RETURN_FAILED_INVALID_ARGUMENT);
+            std::exit(EXIT_FAILURE);
         }
     }
     return static_cast<std::uint32_t>(std::strtoul(s, nullptr, 16));
@@ -50,7 +41,7 @@ int main(int argc, const char **argv) {
     struct BuildOptions {
         std::filesystem::path maps = "maps";
         std::vector<std::filesystem::path> tags;
-        std::string output;
+        std::optional<std::filesystem::path> output;
         std::string last_argument;
         std::string index;
         std::optional<HEK::CacheFileEngine> engine;
@@ -129,8 +120,8 @@ int main(int argc, const char **argv) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
                 }
                 else {
-                    eprintf_error("Unknown engine type %s.", arguments[0]);
-                    std::exit(RETURN_FAILED_INVALID_ARGUMENT);
+                    eprintf_error("Unknown engine type: %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
                 }
                 break;
             case 'C':
@@ -147,7 +138,7 @@ int main(int argc, const char **argv) {
                 break;
             case 'i':
                 show_version_info();
-                std::exit(RETURN_OK);
+                std::exit(EXIT_SUCCESS);
                 break;
             case 'N':
                 build_options.rename_scenario = arguments[0];
@@ -175,7 +166,7 @@ int main(int argc, const char **argv) {
         }
         else {
             eprintf_error("Failed to find a valid tag %s in the tags directory", remaining_arguments[0]);
-            return RETURN_FAILED_UNHANDLED_ARGUMENT;
+            return EXIT_FAILURE;
         }
     }
     else {
@@ -452,19 +443,26 @@ int main(int argc, const char **argv) {
         auto map_name_with_extension = std::string(map_name) + MAP_EXTENSION;
 
         // Format path to maps/map_name.map if output not specified
-        std::string final_file;
-        if(!build_options.output.size()) {
-            final_file = (std::filesystem::path(build_options.maps) / map_name_with_extension).string();
+        std::filesystem::path final_file;
+        if(!build_options.output.has_value()) {
+            final_file = std::filesystem::path(build_options.maps) / map_name_with_extension;
         }
         else {
-            final_file = build_options.output;
-            auto final_file_path = std::filesystem::path(final_file);
-            auto final_file_name_no_extension = final_file_path.filename().replace_extension();
+            final_file = *build_options.output;
+            auto final_file_name_no_extension = final_file.filename().replace_extension();
             auto final_file_name_no_extension_string = final_file_name_no_extension.string();
             
             // If it's not a .map, warn
-            if(final_file_path.extension() != MAP_EXTENSION) {
+            if(final_file.extension() != MAP_EXTENSION) {
                 eprintf_warn("The base file extension is not \"%s\" which is required by the target engine", MAP_EXTENSION);
+            }
+            
+            // Memes
+            if(build_options.mcc && final_file.extension() == ".fmeta") {
+                eprintf_error("FATAL ERROR: You have committed crimes against Skyrim and her people.\nWhat say you in your defense?\n");
+                eprintf_error(" > I submit. Take me to jail.");
+                eprintf_error("   I'd rather die than go to prison!\n");
+                return EXIT_FAILURE;
             }
             
             // If we are not building for MCC and the scenario name is mismatched, warn
@@ -484,28 +482,48 @@ int main(int argc, const char **argv) {
                 }
             }
         }
-
-        std::FILE *file = std::fopen(final_file.c_str(), "wb");
-
-        // Check if file is open
-        if(!file) {
-            eprintf_error("Failed to open %s for writing.", final_file.c_str());
-            return RETURN_FAILED_FILE_SAVE_ERROR;
+        
+        // Save the file
+        if(!File::save_file(final_file, map)) {
+            eprintf_error("Failed to save %s", final_file.string().c_str());
+            return EXIT_FAILURE;
+        }
+        
+        // Make an fmeta?
+        if(build_options.mcc) {
+            auto fmeta_path = final_file.replace_extension(".fmeta");
+            
+            std::vector<std::byte> new_fmeta(0x4408);
+            
+            // Get the uncompressed size
+            std::uint64_t uncompressed_file_size;
+            if(parameters.details.build_compress) {
+                uncompressed_file_size = *Compression::ceaflate_compression_size(map.data(), map.size());
+            }
+            else {
+                uncompressed_file_size = map.size();
+            }
+            
+            // Set these ints
+            *reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(new_fmeta.data() + 0x0) = 2;
+            *reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(new_fmeta.data() + 0x110) = UINT64_MAX;
+            *reinterpret_cast<HEK::LittleEndian<std::uint32_t> *>(new_fmeta.data() + 0x21C) = 1;
+            *reinterpret_cast<HEK::LittleEndian<std::uint64_t> *>(new_fmeta.data() + 0x220) = uncompressed_file_size;
+            
+            // Set this... or bad things happen
+            std::snprintf(reinterpret_cast<char *>(new_fmeta.data() + 0x118), 37, "%s.map", map_name.c_str());
+            
+            if(!File::save_file(fmeta_path, new_fmeta)) {
+                eprintf_error("Failed to save %s", fmeta_path.string().c_str());
+                return EXIT_FAILURE;
+            }
         }
 
-        // Write to file
-        if(std::fwrite(map.data(), map.size(), 1, file) == 0) {
-            eprintf_error("Failed to save.");
-            return RETURN_FAILED_FILE_SAVE_ERROR;
-        }
-
-        std::fclose(file);
-
-        return RETURN_OK;
+        return EXIT_SUCCESS;
     }
     catch(std::exception &exception) {
         eprintf_error("Failed to compile the map.");
         eprintf_error("%s", exception.what());
-        return RETURN_FAILED_EXCEPTION_ERROR;
+        return EXIT_FAILURE;
     }
 }
