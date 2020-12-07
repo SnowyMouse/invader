@@ -18,7 +18,7 @@
 namespace Invader {
     using namespace HEK;
     
-    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine) {
+    BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine), build_compress_mcc(false) {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
@@ -26,6 +26,7 @@ namespace Invader {
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                this->build_bsps_occupy_tag_space = true;
                 break;
             case CacheFileEngine::CACHE_FILE_RETAIL:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
@@ -33,6 +34,7 @@ namespace Invader {
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                this->build_bsps_occupy_tag_space = true;
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
@@ -40,6 +42,7 @@ namespace Invader {
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
+                this->build_bsps_occupy_tag_space = true;
                 break;
             case CacheFileEngine::CACHE_FILE_XBOX:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
@@ -47,6 +50,7 @@ namespace Invader {
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                 this->build_compress = true;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                this->build_bsps_occupy_tag_space = true;
                 break;
             case CacheFileEngine::CACHE_FILE_NATIVE:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
@@ -54,6 +58,7 @@ namespace Invader {
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
                 this->build_compress = true;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
+                this->build_bsps_occupy_tag_space = false; // technically they do, but they are treated as regular tags
                 break;
             default: std::terminate(); // unimplemented
         }
@@ -203,7 +208,7 @@ namespace Invader {
         std::size_t largest_bsp_size = 0;
         std::size_t largest_bsp_count = 0;
 
-        bool bsp_size_affects_tag_space = this->parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+        bool bsp_size_affects_tag_space = this->parameters->details.build_bsps_occupy_tag_space;
 
         // Calculate total BSP size (pointless on native maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
@@ -386,7 +391,12 @@ namespace Invader {
                     oprintf("Compressing...");
                     oflush();
                 }
-                final_data = Compression::compress_map_data(final_data.data(), final_data.size());
+                if(!workload.parameters->details.build_compress_mcc) {
+                    final_data = Compression::compress_map_data(final_data.data(), final_data.size());
+                }
+                else {
+                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size());
+                }
                 if(workload.parameters->verbosity) {
                     oprintf(" done\n");
                 }
@@ -450,7 +460,7 @@ namespace Invader {
                         oprintf("                   %s", File::halo_path_to_preferred_path(workload.tags[bsp.structure_bsp.tag_id.read().index].path).c_str());
 
                         // If we're not on a native map, print the size (native maps don't have any meaningful way to get BSP size)
-                        if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                        if(workload.parameters->details.build_bsps_occupy_tag_space ) {
                             auto &bss = bsp_sizes[b];
                             oprintf(
                                 " (%.02f MiB)%s",
@@ -462,7 +472,7 @@ namespace Invader {
                     }
 
                     // And, if we're not on native maps and we have different BSP sizes, indicate the largest BSP
-                    if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE && largest_bsp_count < workload.bsp_count) {
+                    if(workload.parameters->details.build_bsps_occupy_tag_space && largest_bsp_count < workload.bsp_count) {
                         oprintf("                   * = Largest BSP%s%s\n", largest_bsp_count == 1 ? "" : "s", bsp_size_affects_tag_space ? " (affects final tag space usage)" : "");
                     }
                 }

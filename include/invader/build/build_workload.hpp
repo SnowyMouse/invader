@@ -126,6 +126,16 @@ namespace Invader {
                  * Compress?
                  */
                 bool build_compress;
+                
+                /**
+                 * Use MCC-style compression?
+                 */
+                bool build_compress_mcc;
+                
+                /**
+                 * Do BSPs occupy tag space?
+                 */
+                bool build_bsps_occupy_tag_space;
             
                 /**
                 * How to handle raw data handling

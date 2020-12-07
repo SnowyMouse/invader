@@ -62,6 +62,7 @@ int main(int argc, const char **argv) {
         std::optional<bool> compress;
         bool optimize_space = false;
         bool hide_pedantic_warnings = false;
+        bool mcc = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -69,7 +70,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, mcc-custom", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -109,8 +110,13 @@ int main(int argc, const char **argv) {
                 build_options.maps = std::string(arguments[0]);
                 break;
             case 'g':
+                build_options.mcc = false;
                 if(std::strcmp(arguments[0], "custom") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                }
+                else if(std::strcmp(arguments[0], "mcc-custom") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    build_options.mcc = true;
                 }
                 else if(std::strcmp(arguments[0], "retail") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
@@ -230,6 +236,14 @@ int main(int argc, const char **argv) {
         parameters.optimize_space = build_options.optimize_space;
         parameters.forge_crc = build_options.forged_crc;
         parameters.index = with_index;
+        
+        // MCC stuff
+        if(build_options.mcc) {
+            parameters.details.build_compress = true;
+            parameters.details.build_compress_mcc = true;
+            parameters.details.build_maximum_tag_space = 31 * 1024 * 1024;
+            parameters.details.build_bsps_occupy_tag_space = true;
+        }
         
         if(build_options.compress.has_value()) {
             parameters.details.build_compress = *build_options.compress;
