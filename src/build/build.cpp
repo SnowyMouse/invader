@@ -12,6 +12,7 @@
 #include <invader/printf.hpp>
 #include <invader/command_line_option.hpp>
 #include <invader/file/file.hpp>
+#include <invader/tag/index/index.hpp>
 
 enum ReturnValue : int {
     RETURN_OK = 0,
@@ -351,9 +352,6 @@ int main(int argc, const char **argv) {
             parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET;
         }
 
-        // Build!
-        auto map = Invader::BuildWorkload::compile_map(parameters);
-
         // Set the map name
         std::string map_name;
         if(build_options.rename_scenario) {
@@ -362,6 +360,93 @@ int main(int argc, const char **argv) {
         else {
             map_name = File::base_name(scenario.c_str());
         }
+        
+        // CRC32 spoofing, indices, etc.
+        if(!build_options.mcc) {
+            if(!parameters.index.has_value()) {
+                switch(*build_options.engine) {
+                    case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
+                        parameters.index = retail_indices(map_name.c_str());
+                        break;
+                    case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                        parameters.index = custom_edition_indices(map_name.c_str());
+                        break;
+                    case HEK::CacheFileEngine::CACHE_FILE_DEMO:
+                        parameters.index = demo_indices(map_name.c_str());
+                        break;
+                    default: break;
+                }
+            }
+            if(!parameters.forge_crc.has_value()) {
+                if(*build_options.engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                    if(map_name == "beavercreek") {
+                        parameters.forge_crc = 0x07B3876A;
+                    }
+                    else if(map_name == "bloodgulch") {
+                        parameters.forge_crc = 0x7B309554;
+                    }
+                    else if(map_name == "boardingaction") {
+                        parameters.forge_crc = 0xF4DEEF94;
+                    }
+                    else if(map_name == "carousel") {
+                        parameters.forge_crc = 0x9C301A08;
+                    }
+                    else if(map_name == "chillout") {
+                        parameters.forge_crc = 0x93C53C27;
+                    }
+                    else if(map_name == "damnation") {
+                        parameters.forge_crc = 0x0FBA059D;
+                    }
+                    else if(map_name == "dangercanyon") {
+                        parameters.forge_crc = 0xC410CD74;
+                    }
+                    else if(map_name == "deathisland") {
+                        parameters.forge_crc = 0x1DF8C97F;
+                    }
+                    else if(map_name == "gephyrophobia") {
+                        parameters.forge_crc = 0xD2872165;
+                    }
+                    else if(map_name == "hangemhigh") {
+                        parameters.forge_crc = 0xA7C8B9C6;
+                    }
+                    else if(map_name == "icefields") {
+                        parameters.forge_crc = 0x5EC1DEB7;
+                    }
+                    else if(map_name == "infinity") {
+                        parameters.forge_crc = 0x0E7F7FE7;
+                    }
+                    else if(map_name == "longest") {
+                        parameters.forge_crc = 0xC8F48FF6;
+                    }
+                    else if(map_name == "prisoner") {
+                        parameters.forge_crc = 0x43B81A8B;
+                    }
+                    else if(map_name == "putput") {
+                        parameters.forge_crc = 0xAF2F0B84;
+                    }
+                    else if(map_name == "ratrace") {
+                        parameters.forge_crc = 0xF7F8E14C;
+                    }
+                    else if(map_name == "sidewinder") {
+                        parameters.forge_crc = 0xBD95CF55;
+                    }
+                    else if(map_name == "timberland") {
+                        parameters.forge_crc = 0x54446470;
+                    }
+                    else if(map_name == "wizard") {
+                        parameters.forge_crc = 0xCF3359B1;
+                    }
+                }
+            }
+        }
+        else {
+            if(!parameters.index.has_value()) {
+                parameters.index = demo_indices(map_name.c_str());
+            }
+        }
+
+        // Build!
+        auto map = Invader::BuildWorkload::compile_map(parameters);
         
         static const char MAP_EXTENSION[] = ".map"; 
         auto map_name_with_extension = std::string(map_name) + MAP_EXTENSION;

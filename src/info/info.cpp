@@ -150,7 +150,7 @@ namespace Invader::Info {
         // Compressed?
         Map::CompressionType compression_type;
         if((compression_type = map.get_compression_algorithm())) {
-            const char *compression_algorithm;
+            const char *compression_algorithm = "";
             
             switch(compression_type) {
                 case Map::CompressionType::COMPRESSION_TYPE_NONE:

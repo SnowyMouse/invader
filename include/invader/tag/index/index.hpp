@@ -7,25 +7,29 @@
 #include <vector>
 #include <string>
 #include "../../hek/class_int.hpp"
+#include "../../file/file.hpp"
 
 namespace Invader {
     /**
      * Get the stock indices for the given map for demo
      * @param map_name scenario name
+     * @return         indices, if present
      */
-    std::vector<std::pair<HEK::TagClassInt, std::string>> demo_indices(const char *map_name);
+    std::optional<std::vector<File::TagFilePath>> demo_indices(const char *map_name);
 
     /**
      * Get the stock indices for the given map for retail
      * @param map_name scenario name
+     * @return         indices, if present
      */
-    std::vector<std::pair<HEK::TagClassInt, std::string>> retail_indices(const char *map_name);
+    std::optional<std::vector<File::TagFilePath>> retail_indices(const char *map_name);
 
     /**
      * Get the stock indices for the given map for custom edition
      * @param map_name scenario name
+     * @return         indices, if present
      */
-    std::vector<std::pair<HEK::TagClassInt, std::string>> custom_edition_indices(const char *map_name);
+    std::optional<std::vector<File::TagFilePath>> custom_edition_indices(const char *map_name);
 }
 
 #endif
