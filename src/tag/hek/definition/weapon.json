@@ -314,7 +314,7 @@
                 "name": "maximum rate of fire",
                 "bounds": true,
                 "type": "float",
-                "unit": "per second",
+                "unit": "shots per second",
                 "comment": "This determines the maximum number of times this trigger can be fired per second.\nThe first value is initial rate of fire and the second value is the final rate of fire.\nWeapons cannot fire faster than once per tick, and non-positive (0 or less) rate of fire results in firing once per tick.\nBecause weapons cannot fire in between ticks, fire rate is also effectively rounded down to the nearest tickrate/n for any positive integer n (so at 30 ticks per second: 30, 15, 10, 7.5, 6, 5, 4.288, 3.75, 3.333, 3, etc.)"
             },
             {
@@ -634,9 +634,9 @@
                 "type": "Fraction"
             },
             {
-                "name": "heat loss per second",
+                "name": "heat loss rate",
                 "minimum": 0.0,
-                "maximum": 1.0,
+                "unit": "per second",
                 "type": "Fraction"
             },
             {
