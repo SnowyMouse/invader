@@ -241,8 +241,6 @@ int main(int argc, const char **argv) {
         if(build_options.mcc) {
             parameters.details.build_compress = true;
             parameters.details.build_compress_mcc = true;
-            parameters.details.build_maximum_tag_space = 31 * 1024 * 1024;
-            parameters.details.build_bsps_occupy_tag_space = true;
         }
         
         if(build_options.compress.has_value()) {
