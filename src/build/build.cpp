@@ -274,6 +274,75 @@ int main(int argc, const char **argv) {
             parameters.details.build_raw_data_handling = *build_options.raw_data_handling;
         }
         
+        // Load resource maps
+        if(require_resource_maps) {
+            // Check if we have a custom_* resource maps or not (Custom Edition only)
+            bool error = false;
+            
+            auto try_open = [](const std::filesystem::path &path) {
+                auto file = File::open_file(path);
+                if(!file.has_value()) {
+                    eprintf_error("Failed to open %s", path.string().c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+                try {
+                    return load_resource_map(file->data(), file->size());
+                }
+                catch(std::exception &e) {
+                    eprintf_error("Failed to read %s: %s", path.string().c_str(), e.what());
+                    std::exit(EXIT_FAILURE);
+                }
+            };
+            
+            if(parameters.details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION) {
+                // Try custom_*
+                auto bitmaps = build_options.maps / "custom_bitmaps.map";
+                auto sounds = build_options.maps / "custom_sounds.map";
+                auto loc = build_options.maps / "custom_loc.map";
+                
+                // No? Okay, try regular
+                if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds) || !std::filesystem::is_regular_file(loc)) {
+                    bitmaps = build_options.maps / "bitmaps.map";
+                    sounds = build_options.maps / "sounds.map";
+                    loc = build_options.maps / "loc.map";
+                }
+                
+                // Well, guess that's that
+                if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds) || !std::filesystem::is_regular_file(loc)) {
+                    eprintf_error("Maps folder does not contain either set of files:");
+                    eprintf_error("- custom_bitmaps.map, custom_sounds.map, AND custom_loc.map");
+                    eprintf_error("- bitmaps.map, sounds.map, AND loc.map");
+                    error = true;
+                    goto show_me_the_spaghetti_code_error;
+                }
+                
+                parameters.bitmap_data = try_open(bitmaps);
+                parameters.sound_data = try_open(sounds);
+                parameters.loc_data = try_open(loc);
+            }
+            else {
+                // Do it!
+                auto bitmaps = build_options.maps / "bitmaps.map";
+                auto sounds = build_options.maps / "sounds.map";
+                
+                // Well, guess that's that
+                if(!std::filesystem::is_regular_file(bitmaps) || !std::filesystem::is_regular_file(sounds)) {
+                    eprintf_error("Maps folder is missing a bitmaps.map OR sounds.map");
+                    error = true;
+                    goto show_me_the_spaghetti_code_error;
+                }
+                
+                parameters.bitmap_data = try_open(bitmaps);
+                parameters.sound_data = try_open(sounds);
+            }
+            
+            show_me_the_spaghetti_code_error:
+            if(error) {
+                eprintf_error("Use -n if no resource maps are required.");
+                return EXIT_FAILURE;
+            }
+        }
+        
         if(build_options.hide_pedantic_warnings) {
             parameters.verbosity = BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC;
         }

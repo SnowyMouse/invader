@@ -145,9 +145,7 @@ namespace Invader {
         this->add_tags();
 
         // If we have resource maps to check, check them
-        if(this->bitmaps.size() != 0) {
-            this->externalize_tags();
-        }
+        this->externalize_tags();
 
         // Generate the tag array
         this->generate_tag_array();
@@ -1440,13 +1438,21 @@ namespace Invader {
 
     void BuildWorkload::externalize_tags() noexcept {
         bool always_index_tags = this->parameters->details.build_raw_data_handling == BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_ALWAYS_INDEX;
+        
+        auto &bitmaps = this->parameters->bitmap_data;
+        auto &sounds = this->parameters->sound_data;
+        auto &loc = this->parameters->loc_data;
 
         switch(this->parameters->details.build_cache_file_engine) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 for(auto &t : this->tags) {
                     // Find the tag
-                    auto find_tag_index = [](const std::string &path, const std::vector<Resource> &resources, bool every_other) -> std::optional<std::size_t> {
-                        std::size_t count = resources.size();
+                    auto find_tag_index = [](const std::string &path, const std::optional<std::vector<Resource>> &resources, bool every_other) -> std::optional<std::size_t> {
+                        if(!resources.has_value()) {
+                            return std::nullopt;
+                        }
+                        
+                        std::size_t count = resources->size();
                         std::size_t iterate_count, iterate_start;
                         if(every_other) {
                             iterate_count = 2;
@@ -1457,7 +1463,7 @@ namespace Invader {
                             iterate_start = 0;
                         }
                         for(std::size_t i = iterate_start; i < count; i += iterate_count) {
-                            if(resources[i].path == path) {
+                            if((*resources)[i].path == path) {
                                 return i;
                             }
                         }
@@ -1466,7 +1472,7 @@ namespace Invader {
 
                     switch(t.tag_class_int) {
                         case TagClassInt::TAG_CLASS_BITMAP: {
-                            auto index = find_tag_index(t.path, this->bitmaps, true);
+                            auto index = find_tag_index(t.path, bitmaps, true);
                             if(index.has_value()) {
                                 if((*index % 2) == 0) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in bitmaps.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
@@ -1477,7 +1483,7 @@ namespace Invader {
                                 if(!always_index_tags) {
                                     const auto &bitmap_tag_struct = this->structs[*t.base_struct];
                                     const auto &bitmap_tag = *reinterpret_cast<const Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
-                                    const auto &bitmap_tag_struct_other = this->bitmaps[*index];
+                                    const auto &bitmap_tag_struct_other = (*bitmaps)[*index];
                                     const auto *bitmap_tag_struct_other_data = bitmap_tag_struct_other.data.data();
                                     std::size_t bitmap_tag_struct_other_size = bitmap_tag_struct_other.data.size();
 
@@ -1487,7 +1493,7 @@ namespace Invader {
                                         break;
                                     }
 
-                                    const auto &bitmap_tag_struct_other_raw = this->bitmaps[*index - 1];
+                                    const auto &bitmap_tag_struct_other_raw = (*bitmaps)[*index - 1];
                                     const auto *bitmap_tag_struct_other_raw_data = bitmap_tag_struct_other_raw.data.data();
                                     std::size_t bitmap_tag_struct_other_raw_data_size = bitmap_tag_struct_other_raw.data.size();
 
@@ -1635,7 +1641,7 @@ namespace Invader {
 
                                 if(match) {
                                     t.resource_index = index;
-                                    this->indexed_data_amount += this->bitmaps[*index].data.size();
+                                    this->indexed_data_amount += (*bitmaps)[*index].data.size();
                                     t.base_struct = std::nullopt;
                                     break;
                                 }
@@ -1646,7 +1652,7 @@ namespace Invader {
                             break;
                         }
                         case TagClassInt::TAG_CLASS_SOUND: {
-                            auto index = find_tag_index(t.path, this->sounds, true);
+                            auto index = find_tag_index(t.path, sounds, true);
                             if(index.has_value()) {
                                 if((*index % 2) == 0) {
                                     REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, std::nullopt, "%s in sounds.map appears to be corrupt (tag is on an even index)", File::halo_path_to_preferred_path(t.path).c_str());
@@ -1657,7 +1663,7 @@ namespace Invader {
                                 if(!always_index_tags) {
                                     const auto &sound_tag_struct = this->structs[*t.base_struct];
                                     const auto &sound_tag = *reinterpret_cast<const Parser::Sound::struct_little *>(sound_tag_struct.data.data());
-                                    const auto &sound_tag_struct_other = this->sounds[*index];
+                                    const auto &sound_tag_struct_other = (*sounds)[*index];
                                     const auto *sound_tag_struct_other_data = sound_tag_struct_other.data.data();
                                     std::size_t sound_tag_struct_other_size = sound_tag_struct_other.data.size();
 
@@ -1667,7 +1673,7 @@ namespace Invader {
                                         break;
                                     }
 
-                                    const auto &sound_tag_struct_other_raw = this->sounds[*index - 1];
+                                    const auto &sound_tag_struct_other_raw = (*sounds)[*index - 1];
                                     const auto *sound_tag_struct_other_raw_data = sound_tag_struct_other_raw.data.data();
                                     std::size_t sound_tag_struct_raw_data_size = sound_tag_struct_other_raw.data.size();
                                     std::size_t sound_tag_struct_raw_data_translation = sound_tag_struct_other_raw.data_offset;
@@ -1781,7 +1787,7 @@ namespace Invader {
                                 if(match) {
                                     // Index it. Unlike other indexed tags, the header remains (probably for the promotion sound dependencies?)
                                     t.resource_index = index;
-                                    this->indexed_data_amount += this->sounds[*index].data.size() - sizeof(Sound<LittleEndian>);
+                                    this->indexed_data_amount += (*sounds)[*index].data.size() - sizeof(Sound<LittleEndian>);
                                     
                                     // Strip these values since they'll be replaced on load anyway
                                     auto &sound_tag_struct = this->structs[*t.base_struct];
@@ -1805,11 +1811,11 @@ namespace Invader {
                         case TagClassInt::TAG_CLASS_FONT:
                         case TagClassInt::TAG_CLASS_UNICODE_STRING_LIST:
                         case TagClassInt::TAG_CLASS_HUD_MESSAGE_TEXT: {
-                            auto index = find_tag_index(t.path, this->loc, false);
+                            auto index = find_tag_index(t.path, loc, false);
                             if(index.has_value()) {
                                 bool match = true;
 
-                                const auto &loc_tag_struct_other = this->loc[*index];
+                                const auto &loc_tag_struct_other = (*loc)[*index];
                                 const auto *loc_tag_struct_other_data = loc_tag_struct_other.data.data();
                                 std::size_t loc_tag_struct_other_size = loc_tag_struct_other.data.size();
 
@@ -2043,7 +2049,7 @@ namespace Invader {
                                 }
                                 if(match) {
                                     t.resource_index = index;
-                                    this->indexed_data_amount += this->loc[*index].data.size();
+                                    this->indexed_data_amount += (*loc)[*index].data.size();
                                     t.base_struct = std::nullopt;
                                     break;
                                 }
@@ -2084,7 +2090,7 @@ namespace Invader {
                                     std::size_t raw_data_size = raw_data.size();
 
                                     // Find bitmaps
-                                    for(auto &ab : this->bitmaps) {
+                                    for(auto &ab : *bitmaps) {
                                         if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
                                             this->delete_raw_data(raw_data_index);
                                             bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
@@ -2121,7 +2127,7 @@ namespace Invader {
                                             std::size_t raw_data_size = raw_data.size();
 
                                             // Find sounds
-                                            for(auto &ab : this->sounds) {
+                                            for(auto &ab : *sounds) {
                                                 if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
                                                     this->delete_raw_data(raw_data_index);
                                                     permutation.samples.file_offset = static_cast<std::uint32_t>(ab.data_offset);

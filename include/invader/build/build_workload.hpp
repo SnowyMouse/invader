@@ -57,17 +57,17 @@ namespace Invader {
             /**
              * Bitmap data
              */
-            std::optional<std::vector<std::byte>> bitmap_data;
+            std::optional<std::vector<Resource>> bitmap_data;
             
             /**
              * Sound data
              */
-            std::optional<std::vector<std::byte>> sound_data;
+            std::optional<std::vector<Resource>> sound_data;
             
             /**
              * Loc data
              */
-            std::optional<std::vector<std::byte>> loc_data;
+            std::optional<std::vector<Resource>> loc_data;
             
             /**
              * How verbose to make the output
@@ -315,15 +315,6 @@ namespace Invader {
             /** Tag path offset of the tag */
             std::size_t path_offset;
         };
-
-        /** Bitmaps resources */
-        std::vector<Resource> bitmaps;
-
-        /** Sounds resources */
-        std::vector<Resource> sounds;
-
-        /** Loc resources */
-        std::vector<Resource> loc;
 
         /** Structs being worked with */
         std::vector<BuildWorkloadStruct> structs;
