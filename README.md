@@ -231,6 +231,9 @@ Options:
   -a --all                     Bludgeon all tags in the tags directory.
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
+  -j --threads                 Set the number of threads to use for parallel
+                               bludgeoning when using --all. Default: CPU
+                               thread count
   -P --fs-path                 Use a filesystem path for the tag path if
                                specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
@@ -626,8 +629,9 @@ Options:
                                16-bit-pcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -j --threads                 Set the number of threads to use for resampling.
-                               Default: 1
+  -j --threads                 Set the number of threads to use for parallel
+                               resampling and encoding. Default: CPU thread
+                               count
   -l --compress-level <lvl>    Set the compression level. This can be between
                                0.0 and 1.0. For Ogg Vorbis, higher levels
                                result in better quality but worse sizes. For

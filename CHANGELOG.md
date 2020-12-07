@@ -2,6 +2,19 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Added
+- invader-bludgeon: Added `-j` for specifying thread count when using `--all`.
+  On an AMD Ryzen 5 2600 with a tags directory of over 10000 tags, this reduced
+  the bludgeon time from 29 seconds to 4 seconds, making it over 7x faster.
+
+### Changed
+- invader-sound: Now uses CPU thread count by default instead of 1
+
+### Fixed
+- invader: Removed the upper bound from heat loss per second in weapon triggers.
+  This will allow weapons that take less than a second to cool down to build.
+
 ## [0.39.0] - 2020-12-07
 ### Added
 - invader-build: Added `-g mcc-custom` which builds a Custom Edition map but
