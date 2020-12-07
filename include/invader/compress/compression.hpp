@@ -4,6 +4,7 @@
 #define INVADER__COMPRESS__COMPRESSION_HPP
 
 #include <vector>
+#include <optional>
 
 namespace Invader::Compression {
     /**
@@ -48,7 +49,7 @@ namespace Invader::Compression {
      * Decompress one file to another file, using significantly less memory but also significantly more disk I/O
      * @param input  path to the compressed file
      * @param output path to the decompressed file
-     * @param             size of output in bytes
+     * @return             size of output in bytes
      */
     std::size_t decompress_map_file(const char *input, const char *output);
 
@@ -57,8 +58,33 @@ namespace Invader::Compression {
      * @param input       path to the compressed file
      * @param output      buffer to output to
      * @param output_size size of buffer
-     * @param             size of output in bytes     */
+     * @return            size of output in bytes
+     */
     std::size_t decompress_map_file(const char *input, std::byte *output, std::size_t output_size);
+    
+    /**
+     * Compress the file using ceaflate
+     * @param input      input buffer
+     * @param input_size input buffer size
+     * @return           compressed data
+     */
+    std::vector<std::byte> ceaflate_compress(const std::byte *input, std::size_t input_size, int compression_level = 9);
+    
+    /**
+     * Decompress the file using ceaflate
+     * @param input      input buffer
+     * @param input_size input buffer size
+     * @return           decompressed data
+     */
+    std::vector<std::byte> ceaflate_decompress(const std::byte *input, std::size_t input_size);
+    
+    /**
+     * Query the decompressed size of the file
+     * @param input      input buffer
+     * @param input_size input buffer size
+     * @return           compressed size, if valid, or std::nullopt if not
+     */
+    std::optional<std::size_t> ceaflate_compression_size(const std::byte *input, std::size_t input_size) noexcept;
 }
 
 #endif
