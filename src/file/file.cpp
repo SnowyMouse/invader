@@ -284,7 +284,7 @@ namespace Invader::File {
             iterate_directories(__VA_ARGS__); \
         } \
         catch(std::exception &e) { \
-            eprintf_error("Error listing %s: %s", file_path, e.what()); \
+            eprintf_error("Error listing %s: %s", file_path.string().c_str(), e.what()); \
             new_errors++; \
         }
 
@@ -298,7 +298,7 @@ namespace Invader::File {
                 auto file_path = d.path();
                 add_dir.emplace_back(file_path.filename().string());
                 if(d.is_directory()) {
-                    maybe_iterate_directories(file_path.string().c_str(), add_dir, d, iterate_directories, depth, priority, main_dir);
+                    maybe_iterate_directories(file_path, add_dir, d, iterate_directories, depth, priority, main_dir);
                 }
                 else if(file_path.has_extension()) {
                     auto extension = file_path.extension().string();
@@ -327,8 +327,7 @@ namespace Invader::File {
         std::size_t dir_count = tags.size();
         for(std::size_t i = 0; i < dir_count; i++) {
             auto &d = tags[i];
-            auto dir_str = d.c_str();
-            maybe_iterate_directories(dir_str, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
+            maybe_iterate_directories(d, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
         }
         
         // Change error count if errors was specified
