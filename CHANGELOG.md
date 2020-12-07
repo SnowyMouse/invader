@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## [Unreleased]
 ### Added
+- invader-build: Added `-g mcc-custom` which builds a Custom Edition map but
+  compressed and indexed for MCC while generating a .fmeta file alongside it
 - invader-refactor: Added --unsafe (-U) which can be used to do a no-move
   refactor where the destination tags do not exist. This does not affect class
   refactoring.
@@ -34,6 +36,10 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Leading width is now automatically calculated when previewing
   font tags
 - invader-sound: Fixed "Processing sounds" hang on some systems
+
+### Removed
+- invader-build: Removed `-d` as it isn't necessary, and it produces invalid
+  files anyway
 
 ## [0.38.1] - 2020-10-27
 ### Changed

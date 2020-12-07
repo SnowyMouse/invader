@@ -257,12 +257,9 @@ Options:
   -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
-  -d --discard                 Discard all raw data. This will result in a map
-                               that is invalid for use with game clients and
-                               tag extractors.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               retail, dark
+                               native, retail, mcc-custom
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
