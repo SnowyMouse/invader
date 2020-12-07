@@ -909,6 +909,13 @@ namespace Invader::Parser {
         virtual bool check_for_invalid_references(bool null_references) = 0;
 
         /**
+         * Check for uppercase references
+         * @param  fix_references attempt to fix the references by lowercasing
+         * @return                true if uppercase references were found; false if not
+         */
+        virtual bool check_for_uppercase_references(bool fix_references) = 0;
+
+        /**
          * Check for nonnormal vectors
          * @param  normalize normalize vectors if they aren't normalized
          * @return           true if nonnormal vectors were found

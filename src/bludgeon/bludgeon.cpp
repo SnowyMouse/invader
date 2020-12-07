@@ -58,8 +58,11 @@ enum WaysToFuckUpTheTag : std::uint64_t {
     /** Regenerate missing compressed/uncompressed vertices (not having these fucks up lightmap generation) */
     INVALID_VERTICES                    = 1ull << 11,
 
-    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled) */
+    /** Fix sound permutations not being valid (caused by old versions of Refinery when safe mode is enabled; this cannot be fixed, but it can at least be turned into something technically valid) */
     INVALID_SOUND_PERMUTATIONS          = 1ull << 12,
+    
+    /** Fix uppercase references */
+    INVALID_UPPERCASE_REFERENCES        = 1ull << 13,
     
     /** Attempt to unfuck anything that can be unfucked (CAUTION: you can unscrew a lightbulb; you can't unscrew a Halo tag) */
     EVERYTHING                          = ~0ull
@@ -69,6 +72,7 @@ enum WaysToFuckUpTheTag : std::uint64_t {
 #define INVALID_COLOR_CHANGE_FIX "broken-color-change"
 #define BROKEN_ENUMS_FIX "invalid-enums"
 #define BROKEN_REFERENCE_CLASSES_FIX "invalid-reference-classes"
+#define INVALID_UPPERCASE_REFERENCES_FIX "invalid-uppercase-references"
 #define BROKEN_SOUND_FORMAT_FIX "invalid-sound-format"
 #define INVALID_MODEL_MARKERS_FIX "invalid-model-markers"
 #define INVALID_VERTICES_FIX "missing-vertices"
@@ -126,6 +130,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             check_fix(broken_indices_fix, "indices are out of bounds; fix with " INVALID_INDICES_FIX);
             check_fix(broken_normals, "problematic nonnormal vectors detected; fix with " INVALID_NORMALS_FIX);
             check_fix(broken_strings, "problematic strings detected; fix with " BROKEN_STRINGS_FIX);
+            check_fix(uppercase_references, "uppercase references detected; fix with " INVALID_UPPERCASE_REFERENCES_FIX);
             
             #undef check_fix
         }
@@ -145,6 +150,7 @@ static int bludgeon_tag(const std::filesystem::path &file_path, std::uint64_t fi
             apply_fix(broken_indices_fix, INVALID_INDICES, INVALID_INDICES_FIX);
             apply_fix(broken_normals, INVALID_NORMALS, INVALID_NORMALS_FIX);
             apply_fix(broken_strings, BROKEN_STRINGS, BROKEN_STRINGS_FIX);
+            apply_fix(uppercase_references, INVALID_UPPERCASE_REFERENCES, INVALID_UPPERCASE_REFERENCES_FIX);
             
             #undef apply_fix
         }
@@ -185,7 +191,7 @@ int main(int argc, char * const *argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
     options.emplace_back("all", 'a', 0, "Bludgeon all tags in the tags directory.");
     options.emplace_back("threads", 'j', 1, "Set the number of threads to use for parallel bludgeoning when using --all. Default: CPU thread count");
-    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
+    options.emplace_back("type", 'T', 1, "Type of bludgeoning. Can be: " BROKEN_ENUMS_FIX ", " BROKEN_RANGE_FIX ", " BROKEN_STRINGS_FIX ", " BROKEN_REFERENCE_CLASSES_FIX ", " INVALID_MODEL_MARKERS_FIX ", " MISSING_SCRIPTS_FIX ", " INVALID_SOUND_BUFFER_FIX ", " INVALID_VERTICES_FIX ", " INVALID_NORMALS_FIX ", " INVALID_UPPERCASE_REFERENCES_FIX ", " NO_FIXES_FIX ", " EVERYTHING_FIX " (default: " NO_FIXES_FIX ")");
 
     static constexpr char DESCRIPTION[] = "Convinces tags to work with Invader.";
     static constexpr char USAGE[] = "[options] <-a | tag.class>";
@@ -276,6 +282,9 @@ int main(int argc, char * const *argv) {
                 }
                 else if(std::strcmp(arguments[0], BROKEN_STRINGS_FIX) == 0) {
                     bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::BROKEN_STRINGS;
+                }
+                else if(std::strcmp(arguments[0], INVALID_UPPERCASE_REFERENCES_FIX) == 0) {
+                    bludgeon_options.fixes = bludgeon_options.fixes | WaysToFuckUpTheTag::INVALID_UPPERCASE_REFERENCES;
                 }
                 else if(std::strcmp(arguments[0], EVERYTHING_FIX) == 0) {
                     bludgeon_options.fixes = WaysToFuckUpTheTag::EVERYTHING;

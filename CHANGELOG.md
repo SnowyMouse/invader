@@ -7,6 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Added `-j` for specifying thread count when using `--all`.
   On an AMD Ryzen 5 2600 with a tags directory of over 10000 tags, this reduced
   the bludgeon time from 29 seconds to 4 seconds, making it over 7x faster.
+- invader-bludgeon: Added `-T invalid-uppercase-references` which detects and
+  lowercases all references that contain uppercase characters
 
 ### Changed
 - invader-sound: Now uses CPU thread count by default instead of 1

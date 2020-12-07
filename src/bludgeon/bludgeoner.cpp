@@ -162,4 +162,8 @@ namespace Invader::Bludgeoner {
     bool broken_strings(Parser::ParserStruct *s, bool fix) {
         return broken_strings(dynamic_cast<Parser::StringList *>(s), fix) || broken_strings(dynamic_cast<Parser::UnicodeStringList *>(s), fix);
     }
+    
+    bool uppercase_references(Parser::ParserStruct *s, bool fix) {
+        return s->check_for_uppercase_references(fix);
+    }
 }

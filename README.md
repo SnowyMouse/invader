@@ -242,8 +242,8 @@ Options:
                                invalid-reference-classes,
                                invalid-model-markers, missing-script-source,
                                incorrect-sound-buffer, missing-vertices,
-                               nonnormal-vectors, none, everything (default:
-                               none)
+                               nonnormal-vectors, invalid-uppercase-references,
+                               none, everything (default: none)
 ```
 
 ### invader-build
