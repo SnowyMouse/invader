@@ -27,7 +27,7 @@ namespace Invader::Compression {
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                if(map.is_compressed()) {
+                if(map.get_compression_algorithm()) {
                     throw MapNeedsDecompressedException();
                 }
                 break;
@@ -643,7 +643,7 @@ namespace Invader::Compression {
                 chunk_start += sizeof(uncompressed_chunk_size);
                 
                 // Increment chunk count
-                std::uint32_t current = (*current_chunk)++;
+                (*current_chunk)++;
                 
                 // Get the end
                 const std::byte *chunk_end = input + input_size;

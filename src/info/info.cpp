@@ -8,6 +8,7 @@
 #include <invader/version.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/hek/map.hpp>
+#include <invader/compress/compression.hpp>
 
 #include "language/language.hpp"
 #include "info_def.hpp"
@@ -147,8 +148,25 @@ namespace Invader::Info {
         }
         
         // Compressed?
-        if(map.is_compressed()) {
-            PRINT_LINE(oprintf, "Compressed:", "Yes (%.02f %%)\n", calculate_compression_ratio(map) * 100.0);
+        Map::CompressionType compression_type;
+        if((compression_type = map.get_compression_algorithm())) {
+            const char *compression_algorithm;
+            
+            switch(compression_type) {
+                case Map::CompressionType::COMPRESSION_TYPE_NONE:
+                    std::terminate();
+                case Map::CompressionType::COMPRESSION_TYPE_DEFLATE:
+                    compression_algorithm = "Deflate";
+                    break;
+                case Map::CompressionType::COMPRESSION_TYPE_ZSTANDARD:
+                    compression_algorithm = "Zstandard";
+                    break;
+                case Map::CompressionType::COMPRESSION_TYPE_MCC_DEFLATE:
+                    compression_algorithm = "MCC-Deflate";
+                    break;
+            }
+            
+            PRINT_LINE(oprintf, "Compressed:", "Yes (%.02f %%) via %s\n", calculate_compression_ratio(map) * 100.0, compression_algorithm);
         }
         else {
             PRINT_LINE(oprintf, "Compressed:", "%s\n", "No");

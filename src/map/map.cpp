@@ -83,16 +83,25 @@ namespace Invader {
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
         using namespace Invader::HEK;
         const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);
-        bool needs_decompressed = false;
+        CompressionType compression_type = CompressionType::COMPRESSION_TYPE_NONE;
+        
         if(data_size > sizeof(*potential_header)) {
             // Check if it needs decompressed based on header
             if(potential_header->valid()) {
                 switch(potential_header->engine.read()) {
                     case CacheFileEngine::CACHE_FILE_NATIVE: {
                         auto *header = reinterpret_cast<const NativeCacheFileHeader *>(&potential_header);
-                        needs_decompressed = header->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED;
+                        switch(header->compression_type) {
+                            case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED:
+                                compression_type = CompressionType::COMPRESSION_TYPE_NONE;
+                                break;
+                            case NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD:
+                                compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
+                                break;
+                        }
                         
-                        if(!needs_decompressed && header->decompressed_file_size.read() != data_size) {
+                        // If we aren't compressed, then the file size in the header *must* match for native maps.
+                        if(!compression_type && header->decompressed_file_size.read() != data_size) {
                             eprintf_error("decompressed file size in the header is wrong");
                             throw InvalidMapException();
                         }
@@ -101,26 +110,58 @@ namespace Invader {
                     }
                     case CacheFileEngine::CACHE_FILE_XBOX:
                         if(potential_header->decompressed_file_size != 0) {
-                            needs_decompressed = true;
+                            compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
                         }
                         break;
                     case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
                     case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
                     case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                        needs_decompressed = true;
+                        compression_type = CompressionType::COMPRESSION_TYPE_ZSTANDARD;
                     default:
                         break;
                 }
+                
+                // If so, decompress it
+                if(compression_type) {
+                    // Uh... deja vu?
+                    if(this->get_compression_algorithm()) {
+                        eprintf_error("map was double-compressed");
+                        throw InvalidMapException();
+                    }
+                    
+                    // Okay we're good
+                    this->data_m = Compression::decompress_map_data(data, data_size);
+                    this->compressed = compression_type;
+                }
             }
-
-            // If so, decompress it
-            if(needs_decompressed) {
-                this->data_m = Compression::decompress_map_data(data, data_size);
-                this->compressed = true;
+            
+            // If not, maybe it's MCC?
+            else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
+                this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
+                this->data_m = Compression::ceaflate_decompress(data, data_size);
+                
+                // Okay... check the header
+                const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(this->data_m.data());
+                if(this->data_m.size() < sizeof(*potential_header) || !potential_header->valid()) {
+                    eprintf_error("mcc-compressed map did not have a valid retail/custom edition header");
+                    throw InvalidMapException();
+                }
+                
+                // Don't support it if we can't
+                switch(potential_header->engine) {
+                    case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                    case CacheFileEngine::CACHE_FILE_RETAIL:
+                        break;
+                    default:
+                        eprintf_error("mcc-compressed map has an unsupported engine");
+                        throw InvalidMapException();
+                }
+                
+                return this->decompress_if_needed(this->data_m.data(), this->data_m.size()) || true;
             }
         }
 
-        return needs_decompressed;
+        return compression_type;
     }
 
     std::byte *Map::get_data_at_offset(std::size_t offset, std::size_t minimum_size, DataMapType map_type) {
@@ -531,7 +572,7 @@ namespace Invader {
         }
     }
 
-    bool Map::is_compressed() const noexcept {
+    Map::CompressionType Map::get_compression_algorithm() const noexcept {
         return this->compressed;
     }
 

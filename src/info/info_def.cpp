@@ -210,7 +210,7 @@ namespace Invader::Info {
     }
     
     void compressed(const Invader::Map &map) {
-        oprintf("%i\n", map.is_compressed());
+        oprintf("%i\n", map.get_compression_algorithm());
     }
     
     void crc32(const Invader::Map &map) {

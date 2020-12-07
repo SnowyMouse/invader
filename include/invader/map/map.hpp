@@ -26,6 +26,13 @@ namespace Invader {
             DATA_MAP_SOUND,
             DATA_MAP_LOC
         };
+    
+        enum CompressionType {
+            COMPRESSION_TYPE_NONE,
+            COMPRESSION_TYPE_ZSTANDARD,
+            COMPRESSION_TYPE_DEFLATE,
+            COMPRESSION_TYPE_MCC_DEFLATE
+        };
 
         /**
          * Get the internal bitmap or sound asset
@@ -287,10 +294,10 @@ namespace Invader {
         std::size_t get_scenario_tag_id() const noexcept;
 
         /**
-         * Get whether the map was originally compressed
-         * @return true if the map was compressed
+         * Get whether the map was originally compressed and, if so, the compression algorithm
+         * @return compression algorithm
          */
-        bool is_compressed() const noexcept;
+        CompressionType get_compression_algorithm() const noexcept;
 
         /**
          * Get whether the map is obviously protected
@@ -375,7 +382,7 @@ namespace Invader {
         bool invalid_paths_detected = false;
 
         /** Map is compressed */
-        bool compressed = false;
+        CompressionType compressed = CompressionType::COMPRESSION_TYPE_NONE;
 
         /** Engine */
         HEK::CacheFileEngine engine;
@@ -397,6 +404,7 @@ namespace Invader {
 
         /** Asset indices offset */
         std::uint64_t asset_indices_offset;
+        
 
         /** Load the map now */
         void load_map();
