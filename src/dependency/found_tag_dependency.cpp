@@ -8,8 +8,8 @@
 #include <filesystem>
 
 namespace Invader {
-    static std::vector<std::pair<std::string, TagClassInt>> get_dependencies(const BuildWorkload &tag_compiled) {
-        std::vector<std::pair<std::string, TagClassInt>> dependencies;
+    static std::vector<File::TagFilePath> get_dependencies(const BuildWorkload &tag_compiled) {
+        std::vector<File::TagFilePath> dependencies;
         for(auto &s : tag_compiled.structs) {
             for(auto &d : s.dependencies) {
                 // Skip anything referencing ourselves
@@ -49,7 +49,7 @@ namespace Invader {
                             // Make sure it's not in found_tags
                             bool dupe = false;
                             for(auto &tag : found_tags) {
-                                if(tag.path == dependency.first && tag.class_int == dependency.second) {
+                                if(tag.path == dependency.path && tag.class_int == dependency.class_int) {
                                     dupe = true;
                                     break;
                                 }
@@ -58,24 +58,24 @@ namespace Invader {
                                 continue;
                             }
 
-                            auto class_to_use = dependency.second;
-                            std::string path_copy = File::halo_path_to_preferred_path(dependency.first + "." + tag_class_to_extension(class_to_use));
+                            auto class_to_use = dependency.class_int;
+                            std::string path_copy = File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(class_to_use));
 
                             bool found = false;
                             for(auto &tags_directory : tags) {
                                 auto complete_tag_path = std::filesystem::path(tags_directory) / path_copy;
                                 if(std::filesystem::is_regular_file(complete_tag_path)) {
-                                    found_tags.emplace_back(dependency.first, class_to_use, false, complete_tag_path);
+                                    found_tags.emplace_back(dependency.path, class_to_use, false, complete_tag_path);
                                     found = true;
                                     break;
                                 }
                             }
 
                             if(!found) {
-                                found_tags.emplace_back(dependency.first, class_to_use, true, std::nullopt);
+                                found_tags.emplace_back(dependency.path, class_to_use, true, std::nullopt);
                             }
                             else if(recursive) {
-                                recursion(dependency.first.c_str(), class_to_use, recursion);
+                                recursion(dependency.path.c_str(), class_to_use, recursion);
                             }
                         }
                         found = true;
@@ -150,7 +150,7 @@ namespace Invader {
                             try {
                                 auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                                 for(auto &dependency : dependencies) {
-                                    if(dependency.first == tag_path_to_find && dependency.second == tag_int_to_find) {
+                                    if(dependency.path == tag_path_to_find && dependency.class_int == tag_int_to_find) {
                                         found_tags.emplace_back(dir_tag_path, class_int, false, file.path());
                                         break;
                                     }
