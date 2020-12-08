@@ -623,7 +623,7 @@ namespace Invader {
         // Also, unlike tool.exe, we're actually recalculating the CRC32 rather than just taking the CRC32 in the header (in case the tag is improperly modified).
         //
         // TODO: Although it accomplishes the same task, this is NOT the algorithm tool.exe uses.
-        this->tag_file_checksums = crc32(this->tag_file_checksums, &expected_crc, sizeof(expected_crc)); 
+        this->tag_file_checksums = crc32(this->tag_file_checksums, &expected_crc, sizeof(expected_crc));
 
         auto &structs = this->structs;
         auto &tags = this->tags;
@@ -1036,6 +1036,8 @@ namespace Invader {
         parameters.tags_directories = tags_directories;
         workload.parameters = &parameters;
         
+        auto &tag = workload.tags.emplace_back();
+        tag.path = "unknown";
         workload.compile_tag_data_recursively(tag_data, tag_data_size, 0);
         return workload;
     }
