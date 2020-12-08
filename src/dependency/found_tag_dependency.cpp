@@ -37,23 +37,14 @@ namespace Invader {
                 bool found = false;
                 for(auto &tags_directory : tags) {
                     std::filesystem::path tag_path = std::filesystem::path(tags_directory) / (tag_path_to_find + "." + tag_class_to_extension(tag_int_to_find));
-                    std::FILE *f = std::fopen(tag_path.string().c_str(), "rb");
-                    if(!f) {
+                    auto tag_data = File::open_file(tag_path);
+                    if(!tag_data.has_value()) {
+                        eprintf_error("Failed to read tag %s", tag_path.string().c_str());
                         continue;
                     }
-                    std::fseek(f, 0, SEEK_END);
-                    long file_size = std::ftell(f);
-                    std::fseek(f, 0, SEEK_SET);
-                    auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                    if(!std::fread(tag_data.get(), file_size, 1, f)) {
-                        std::fclose(f);
-                        eprintf_error("Failed to read file %s", tag_path.string().c_str());
-                        continue;
-                    }
-                    std::fclose(f);
 
                     try {
-                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                        auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                         for(auto &dependency : dependencies) {
                             // Make sure it's not in found_tags
                             bool dupe = false;
@@ -146,28 +137,18 @@ namespace Invader {
                             if(skip) {
                                 break;
                             }
-
-                            // Attempt to open and read the tag
-                            std::FILE *f = std::fopen(file.path().string().c_str(), "rb");
-                            if(!f) {
-                                eprintf_error("Failed to open tag %s.", file.path().string().c_str());
+                            
+                            // Open it
+                            auto fp = file.path();
+                            auto tag_data = File::open_file(fp);
+                            if(!tag_data.has_value()) {
+                                eprintf_error("Failed to read tag %s", fp.string().c_str());
                                 continue;
                             }
-
-                            std::fseek(f, 0, SEEK_END);
-                            long file_size = std::ftell(f);
-                            std::fseek(f, 0, SEEK_SET);
-                            auto tag_data = std::make_unique<std::byte []>(static_cast<std::size_t>(file_size));
-                            if(!std::fread(tag_data.get(), file_size, 1, f)) {
-                                std::fclose(f);
-                                eprintf_error("Failed to read file %s", file.path().string().c_str());
-                                continue;
-                            }
-                            std::fclose(f);
 
                             // Attempt to parse
                             try {
-                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data.get(), file_size));
+                                auto dependencies = get_dependencies(BuildWorkload::compile_single_tag(tag_data->data(), tag_data->size()));
                                 for(auto &dependency : dependencies) {
                                     if(dependency.first == tag_path_to_find && dependency.second == tag_int_to_find) {
                                         found_tags.emplace_back(dir_tag_path, class_int, false, file.path());
