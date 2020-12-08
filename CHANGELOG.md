@@ -11,6 +11,7 @@ This is used for recording Invader's changes. This changelog is based on
   lowercases all references that contain uppercase characters
 
 ### Changed
+- invader: Fixed segfault when querying dependencies for various tools
 - invader-sound: Now uses CPU thread count by default instead of 1
 
 ### Fixed
