@@ -1860,6 +1860,10 @@ namespace Invader {
                                         // Next, compare the data
                                         match = font_tag_other.ascending_height == font_tag.ascending_height &&
                                                 font_tag_other.descending_height == font_tag.descending_height &&
+                                                font_tag.bold.tag_id.read().is_null() &&
+                                                font_tag.italic.tag_id.read().is_null() &&
+                                                font_tag.underline.tag_id.read().is_null() &&
+                                                font_tag.condense.tag_id.read().is_null() &&
                                                 std::memcmp(font_tag_other.flags.value, font_tag.flags.value, sizeof(font_tag.flags.value)) == 0 &&
                                                 font_tag_other.leading_height == font_tag.leading_height &&
                                                 font_tag_other.leading_width == font_tag.leading_width &&

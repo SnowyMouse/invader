@@ -12,6 +12,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader: Fixed segfault when querying dependencies for various tools
+- invader-build: Font tags with alternative styles references will no longer be
+  indexed
 - invader-sound: Now uses CPU thread count by default instead of 1
 
 ### Fixed
