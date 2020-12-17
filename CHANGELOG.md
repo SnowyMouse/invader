@@ -19,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
 ### Fixed
 - invader: Removed the upper bound from heat loss per second in weapon triggers;
   this will allow weapons that take less than a second to cool down to build
+- invader-archive: Fixed errors regarding maps not being able to be read when
+  not using single tag archival
 - invader-build: Fixed `-n` not working as expected
 
 ## [0.39.0] - 2020-12-07

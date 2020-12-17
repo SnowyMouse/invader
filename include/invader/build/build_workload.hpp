@@ -24,6 +24,9 @@ namespace Invader {
                 /** Everything is hidden */
                 BUILD_VERBOSITY_QUIET,
                 
+                /** Errors are hidden */
+                BUILD_VERBOSITY_HIDE_ERRORS,
+                
                 /** All warnings are hidden */
                 BUILD_VERBOSITY_HIDE_WARNINGS,
                 

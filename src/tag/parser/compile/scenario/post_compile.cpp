@@ -16,8 +16,8 @@ namespace Invader::Parser {
     
     // Functions for finding stuff
     static std::vector<BSPData> get_bsp_data(const Scenario &scenario, BuildWorkload &workload);
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings);
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings);
     static void find_decals(Scenario &scenario, BuildWorkload &workload, const std::vector<BSPData> &bsp_data);
     static void find_conversations(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data);
 
@@ -25,6 +25,8 @@ namespace Invader::Parser {
         if(workload.disable_recursion) {
             return; // if recursion is disabled, doing any of this will be a meme
         }
+        
+        bool show_warnings = workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_WARNINGS;
 
         // Get the struct information here
         auto &scenario_struct = workload.structs[struct_index];
@@ -94,8 +96,8 @@ namespace Invader::Parser {
 
         // Find what we need
         std::size_t bsp_find_warnings = 0;
-        find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
-        find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings);
+        find_encounters(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
+        find_command_lists(*this, workload, tag_index, bsp_data, scenario_struct, scenario_data, bsp_find_warnings, show_warnings);
         find_decals(*this, workload, bsp_data);
         find_conversations(*this, workload, tag_index, scenario_struct, scenario_data);
         
@@ -174,7 +176,7 @@ namespace Invader::Parser {
     
     
     
-    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
+    static void find_encounters(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         // Determine which BSP the encounters fall in
         std::size_t encounter_list_count = scenario.encounters.size();
         if(encounter_list_count != 0) {
@@ -358,7 +360,7 @@ namespace Invader::Parser {
                     
                     // Show the firing positions and squad positions that are missing
                     auto missing_firing_positions = firing_position_count - best_bsp_firing_position_hits;
-                    if(missing_firing_positions) {
+                    if(missing_firing_positions && show_warnings) {
                         int offset = 0;
                         char missing_firing_positions_list[256] = {};
                         unsigned int listed = 0;
@@ -381,7 +383,7 @@ namespace Invader::Parser {
                     }
                     
                     auto missing_squad_positions = squad_position_count - best_bsp_squad_hits;
-                    if(missing_squad_positions) {
+                    if(missing_squad_positions && show_warnings) {
                         int offset = 0;
                         char missing_squad_positions_list[256] = {};
                         unsigned int listed = 0;
@@ -482,7 +484,7 @@ namespace Invader::Parser {
                         }
                     }
                     
-                    if(out_of_bounds) {
+                    if(out_of_bounds && show_warnings) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) has %zu squad move position%s that fall out of BSP #%zu", i, encounter.name.string, out_of_bounds, out_of_bounds == 1 ? "" : "s", best_bsp);
                         
                         int offset = 0;
@@ -512,7 +514,7 @@ namespace Invader::Parser {
         }
     }
     
-    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings) {
+    static void find_command_lists(Scenario &scenario, BuildWorkload &workload, std::size_t tag_index, const std::vector<BSPData> &bsp_data, BuildWorkload::BuildWorkloadStruct &scenario_struct, const Scenario::struct_little &scenario_data, std::size_t &bsp_find_warnings, bool show_warnings) {
         std::size_t command_list_count = scenario.command_lists.size();
         if(command_list_count != 0) {
             auto &command_list_struct = workload.structs[*scenario_struct.resolve_pointer(&scenario_data.command_lists.pointer)];
@@ -604,37 +606,39 @@ namespace Invader::Parser {
                 }
                 
                 // Show warnings if needed
-                if(total_best_bsps == 0) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
-                }
-                else if(best_bsp_hits != max_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
-                    
-                    auto missing_points = max_hits - best_bsp_hits;
-                    int offset = 0;
-                    char missing_points_list[256] = {};
-                    unsigned int listed = 0;
-                    for(std::size_t p = 0; p < point_count; p++) {
-                        // Look for anything we didn't find
-                        if(!best_surface_indices[p].has_value()) {
-                            offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
-                            
-                            // If we're going past 7, we shouldn't list anymore as it's a bit spammy
-                            if(++listed == 7) {
-                                if(missing_points > listed) {
-                                    std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
+                if(show_warnings) {
+                    if(total_best_bsps == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
+                    }
+                    else if(best_bsp_hits != max_hits) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                        
+                        auto missing_points = max_hits - best_bsp_hits;
+                        int offset = 0;
+                        char missing_points_list[256] = {};
+                        unsigned int listed = 0;
+                        for(std::size_t p = 0; p < point_count; p++) {
+                            // Look for anything we didn't find
+                            if(!best_surface_indices[p].has_value()) {
+                                offset += std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, "%s%zu", listed == 0 ? "" : " ", p);
+                                
+                                // If we're going past 7, we shouldn't list anymore as it's a bit spammy
+                                if(++listed == 7) {
+                                    if(missing_points > listed) {
+                                        std::snprintf(missing_points_list + offset, sizeof(missing_points_list) - offset, " ...");
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
+                        
+                        eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
+                        
                     }
-                    
-                    eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
-                    
-                }
-                else if(total_best_bsps > 1) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
-                    bsp_find_warnings++;
+                    else if(total_best_bsps > 1) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
+                        bsp_find_warnings++;
+                    }
                 }
             }
         }

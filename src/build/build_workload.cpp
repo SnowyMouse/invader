@@ -108,6 +108,7 @@ namespace Invader {
             case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_WARNINGS:
                 workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_WARNINGS);
                 break;
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_ERRORS:
             case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET:
                 workload.set_reporting_level(REPORTING_LEVEL_HIDE_EVERYTHING);
                 break;

@@ -129,6 +129,8 @@ int main(int argc, const char **argv) {
             Invader::BuildWorkload::BuildParameters parameters;
             parameters.scenario = base_tag.data();
             parameters.tags_directories = archive_options.tags;
+            parameters.details.build_compress = false;
+            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
             
             map = Invader::BuildWorkload::compile_map(parameters);
         }
