@@ -161,7 +161,9 @@ namespace Invader {
         this->add_tags();
 
         // If we have resource maps to check, check them
-        this->externalize_tags();
+        if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+            this->externalize_tags();
+        }
 
         // Generate the tag array
         this->generate_tag_array();
