@@ -63,6 +63,8 @@ namespace Invader::Parser {
         }
     }
     
+    static constexpr const std::size_t MAX_SCRIPT_NODE_COUNT = 19001;
+    
     static void fix_script_data(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, Scenario &scenario) {
         // If we don't have any string data, allocate 512 bytes
         if(scenario.script_string_data.size() == 0) {
@@ -105,9 +107,8 @@ namespace Invader::Parser {
             t.first_element_ptr = 0;
             
             // Maximum node count exceeded?
-            std::size_t max_count = 19001;
-            if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_RETAIL && t.maximum_count > 19001) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), max_count);
+            if(t.maximum_count > MAX_SCRIPT_NODE_COUNT) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), MAX_SCRIPT_NODE_COUNT);
                 throw InvalidTagDataException();
             }
 
@@ -664,5 +665,29 @@ namespace Invader::Parser {
     void ScenarioFiringPosition::pre_compile(BuildWorkload &, std::size_t, std::size_t, std::size_t) {
         this->cluster_index = NULL_INDEX;
         this->surface_index = NULL_INDEX;
+    }
+    
+    bool fix_excessive_script_nodes(Scenario &scenario, bool fix) {
+        if(scenario.script_syntax_data.size() == 0) {
+            return false;
+        }
+        else {
+            ScenarioScriptNodeTable::struct_big *t;
+            if(scenario.script_syntax_data.size() < sizeof(*t)) {
+                return false; // invalid
+            }
+            t = reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
+            
+            // Maximum node count exceeded? And can we safely resize it?
+            if(t->maximum_count > MAX_SCRIPT_NODE_COUNT && static_cast<std::size_t>(t->size) + 128 < MAX_SCRIPT_NODE_COUNT) {
+                if(fix) {
+                    t->maximum_count = MAX_SCRIPT_NODE_COUNT;
+                    scenario.script_syntax_data.resize(sizeof(*t) + sizeof(ScenarioScriptNode::struct_big) * t->maximum_count);
+                }
+                return true;
+            }
+            
+            return false;
+        }
     }
 }

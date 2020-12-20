@@ -9,6 +9,9 @@ This is used for recording Invader's changes. This changelog is based on
   the bludgeon time from 29 seconds to 4 seconds, making it over 7x faster.
 - invader-bludgeon: Added `-T invalid-uppercase-references` which detects and
   lowercases all references that contain uppercase characters
+- invader-bludgeon: Added `-T excessive-script-nodes` which detects and removes
+  script node tables that exceed 19001 (tags that do this potentially crash
+  stock Halo PC)
 
 ### Changed
 - invader: Fixed segfault when querying dependencies for various tools

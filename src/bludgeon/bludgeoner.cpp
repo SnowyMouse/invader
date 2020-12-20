@@ -166,4 +166,14 @@ namespace Invader::Bludgeoner {
     bool uppercase_references(Parser::ParserStruct *s, bool fix) {
         return s->check_for_uppercase_references(fix);
     }
+    
+    bool excessive_script_nodes(Parser::ParserStruct *s, bool fix) {
+        auto attempt_fix = [&fix](auto *s) -> bool {
+            if(s) {
+                return fix_excessive_script_nodes(*s, fix);
+            }
+            return false;
+        };
+        return attempt_fix(dynamic_cast<Invader::Parser::Scenario *>(s));
+    }
 }
