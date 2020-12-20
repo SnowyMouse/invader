@@ -103,6 +103,13 @@ namespace Invader::Parser {
             t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
             *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
             t.first_element_ptr = 0;
+            
+            // Maximum node count exceeded?
+            std::size_t max_count = 19001;
+            if(workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_RETAIL && t.maximum_count > 19001) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), max_count);
+                throw InvalidTagDataException();
+            }
 
             auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
             auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);

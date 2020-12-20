@@ -32,6 +32,7 @@ This is used for recording Invader's changes. This changelog is based on
   refactoring.
 
 ### Changed
+- invader-build: Script node count is now limited to 19001
 - invader-compare: Reverted the fix from 0.38.1 because it actually broke things
 - invader-edit-qt: Surface indices are now marked as `cache_only` (hidden) for
   move positions since these are calculated at build time
