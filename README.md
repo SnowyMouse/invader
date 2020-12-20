@@ -232,19 +232,19 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show license and credits.
   -j --threads                 Set the number of threads to use for parallel
-                               bludgeoning when using --all. Default: CPU thread
-                               count
-  -P --fs-path                 Use a filesystem path for the tag path if specifying
-                               a tag.
+                               bludgeoning when using --all. Default: CPU
+                               thread count
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
   -t --tags <dir>              Use the specified tags directory.
   -T --type                    Type of bludgeoning. Can be: invalid-enums,
                                out-of-range, invalid-strings,
-                               invalid-reference-classes, invalid-model-markers,
-                               missing-script-source, incorrect-sound-buffer,
-                               missing-vertices, nonnormal-vectors,
-                               invalid-uppercase-references,
-                               excessive-script-nodes, none, everything (default:
-                               none)
+                               invalid-reference-classes,
+                               invalid-model-markers, missing-script-source,
+                               incorrect-sound-buffer, missing-vertices,
+                               nonnormal-vectors, invalid-uppercase-references,
+                               excessive-script-nodes, none, everything
+                               (default: none)
 ```
 
 ### invader-build
