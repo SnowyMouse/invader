@@ -74,7 +74,7 @@ namespace Invader::Parser {
         static constexpr std::size_t SCRIPT_ELEMENT_SIZE = sizeof(ScenarioScriptNode::struct_little);
         if(scenario.script_syntax_data.size() == 0) {
             ScenarioScriptNodeTable::struct_little t = {};
-            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 32;
+            static constexpr std::size_t DEFAULT_SCRIPT_NODE_COUNT = 128;
             t.count = 0;
             t.data = 0x64407440;
             t.element_size = SCRIPT_ELEMENT_SIZE;
