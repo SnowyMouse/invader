@@ -135,6 +135,11 @@ namespace Invader {
                 }
             }
             
+            // If not, is it demo?
+            else if(reinterpret_cast<const CacheFileDemoHeader *>(potential_header)->valid()) {
+                return false;
+            }
+            
             // If not, maybe it's MCC?
             else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
                 this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
