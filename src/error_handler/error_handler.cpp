@@ -72,14 +72,14 @@ namespace Invader {
                     std::size_t word_len = (word_end - word_offset) + 1; \
                      \
                     /* if we have characters in the line, and we're at the end of the line, empty the line */ \
-                    if(word_len + line_offset > terminal_width && line_offset > 0) { \
+                    if(word_len + line_offset >= terminal_width && line_offset > 0) { \
                         call("%s", line); \
                         line_offset = 0; \
                         line[0] = 0; \
                     } \
                      \
                     /* if the length is longer than the terminal width, just print it */ \
-                    if(word_len > terminal_width) { \
+                    if(word_len >= terminal_width) { \
                         std::snprintf(line, sizeof(line) > word_len ? word_len : sizeof(line), "%s", text_to_output + offset); \
                         call("%s", line); \
                         line[0] = 0; \
