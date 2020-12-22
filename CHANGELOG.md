@@ -26,6 +26,7 @@ This is used for recording Invader's changes. This changelog is based on
   not using single tag archival
 - invader-build: Fixed `-n` not working as expected
 - invader-build: Fixed word wrapping using the wrong length
+- invader-info: Fixed `-h` not listing every option correctly
 
 ## [0.39.0] - 2020-12-07
 ### Added

@@ -250,6 +250,7 @@ int main(int argc, const char **argv) {
     for(auto &i : all_values) {
         if(!overview_added) {
             options_list += "Set the type of data to show. Can be overview (default)";
+            overview_added = true;
         }
         else {
             options_list += ", ";
