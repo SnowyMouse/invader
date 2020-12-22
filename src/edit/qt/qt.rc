@@ -11,14 +11,14 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "Comments",         "Halo: Combat Evolved tag editor"
-            VALUE "CompanyName",      "Snowy"
+            VALUE "CompanyName",      "Snowy Mouse"
             VALUE "FileDescription",  "Halo: Combat Evolved tag editor"
             VALUE "FileVersion",      INVADER_FULL_VERSION_STRING
             VALUE "InternalName",     "invader-edit-qt"
             VALUE "OriginalFilename", "invader-edit-qt.exe"
             VALUE "ProductName",      "invader-edit-qt"
             VALUE "ProductVersion",   INVADER_FULL_VERSION_STRING
-            VALUE "LegalCopyright",   "'20 Snowy"
+            VALUE "LegalCopyright",   "'20 Snowy Mouse"
         END
     END
     BLOCK "VarFileInfo"

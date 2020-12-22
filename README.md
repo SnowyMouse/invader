@@ -832,9 +832,9 @@ General Public License. We will not provide exception to anyone - not even
 Bungie, Microsoft, or our own mothers.
 
 In order to get Invader under a different license, you will need to write to
-*both* [Snowy] and [Vaporeon], and you will need *unanimous* approval.
+*both* [Snowy Mouse] and [Vaporeon], and you will need *unanimous* approval.
 
-[Snowy]: https://github.com/SnowyMouse
+[Snowy Mouse]: https://github.com/SnowyMouse
 [Vaporeon]: https://github.com/Vaporeon
 
 ### Are there any GUI tools?
