@@ -167,7 +167,7 @@ namespace Invader::EditQt {
             QHBoxLayout *extra_layout = new QHBoxLayout();
             extra_widget_panel->setLayout(extra_layout);
             extra_layout->addWidget(extra_widget);
-            extra_layout->setMargin(4);
+            extra_layout->setContentsMargins(4, 4, 4, 4);
             connect(extra_widget, &QPushButton::clicked, this, &TagEditorWindow::show_subwindow);
         }
 

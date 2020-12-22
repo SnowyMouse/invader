@@ -21,7 +21,7 @@ namespace Invader::EditQt {
     TagTreeDialog::TagTreeDialog(QWidget *parent, TagTreeWindow *parent_window, const std::optional<std::vector<HEK::TagClassInt>> &classes, std::optional<HEK::TagClassInt> save_class) : QDialog(parent), save_class(save_class) {
         // Make a layout and set our flags
         auto *vbox_layout = new QVBoxLayout();
-        vbox_layout->setMargin(4);
+        vbox_layout->setContentsMargins(4, 4, 4, 4);
         this->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
         // Handle refreshing

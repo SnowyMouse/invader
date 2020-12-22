@@ -36,7 +36,7 @@ namespace Invader::EditQt {
     
     TagEditorArrayWidget::TagEditorArrayWidget(QWidget *parent, Parser::ParserStructValue *value, TagEditorWindow *editor_window) : TagEditorWidget(parent, value, editor_window) {
         this->vbox_layout = new QVBoxLayout();
-        this->vbox_layout->setMargin(8);
+        this->vbox_layout->setContentsMargins(8, 8, 8, 8);
         this->vbox_layout->setSpacing(2);
         this->reflexive_index = new QComboBox(this);
         this->spin_box = new QSpinBox(this);
@@ -58,7 +58,7 @@ namespace Invader::EditQt {
         header_layout->addWidget(this->spin_box);
         header->setFrameStyle(QFrame::Panel | QFrame::Raised);
         header->setLineWidth(2);
-        header_layout->setMargin(8);
+        header_layout->setContentsMargins(8, 8, 8, 8);
 
         QPalette palette;
         header->setAutoFillBackground(true);

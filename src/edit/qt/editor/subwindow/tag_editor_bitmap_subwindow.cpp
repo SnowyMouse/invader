@@ -46,7 +46,7 @@ namespace Invader::EditQt {
         // Create the widget
         QWidget *w = new QWidget();
         QHBoxLayout *l = new QHBoxLayout();
-        l->setMargin(0);
+        l->setContentsMargins(0, 0, 0, 0);
         l->setSpacing(0);
         w->setLayout(l);
 
@@ -105,7 +105,7 @@ namespace Invader::EditQt {
         // Add the header
         QComboBox *bitmaps, *mipmaps, *colors, *scale, *sequence = nullptr, *sprite = nullptr;
         main_layout->setSpacing(4);
-        main_layout->setMargin(4);
+        main_layout->setContentsMargins(4, 4, 4, 4);
         main_layout->addWidget(generate_text_widget("Bitmap:", &bitmaps));
         main_layout->addWidget(generate_text_widget("Mipmap:", &mipmaps));
         main_layout->addWidget(generate_text_widget("Channels:", &colors));
@@ -715,7 +715,7 @@ namespace Invader::EditQt {
                 row_layout->addWidget(widget);
             }
             row_layout->addStretch();
-            row_layout->setMargin(4);
+            row_layout->setContentsMargins(4, 4, 4, 4);
             row_layout->setSpacing(4);
             layout->addWidget(row);
         };
@@ -731,7 +731,7 @@ namespace Invader::EditQt {
         }
 
         layout->addStretch();
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
         scroll_widget->setLayout(layout);
 

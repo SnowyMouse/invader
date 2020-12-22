@@ -587,7 +587,7 @@ namespace Invader::EditQt {
         if(value->get_type() != Parser::ParserStructValue::VALUE_TYPE_DEPENDENCY) {
             layout->addStretch(1);
         }
-        layout->setMargin(6);
+        layout->setContentsMargins(6, 6, 6, 6);
     }
 
     void TagEditorEditWidget::update_auxiliary_widget() {
