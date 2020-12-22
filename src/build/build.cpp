@@ -16,19 +16,29 @@
 #include <invader/tag/index/index.hpp>
 
 static std::uint32_t read_str32(const char *err, const char *s) {
+    // Make sure it starts with '0x'
+    if(std::strncmp(s, "0x", 2) != 0) {
+        eprintf_error("%s %s (must be hexadecimal)", err, s);
+        std::exit(EXIT_FAILURE);
+    }
+    
+    // Check the string length
     std::size_t given_crc32_length = std::strlen(s);
-    if(given_crc32_length > 8 || given_crc32_length < 1) {
+    if(given_crc32_length > 10 || given_crc32_length < 3) {
         eprintf_error("%s %s (must be 1-8 digits)", err, s);
         std::exit(EXIT_FAILURE);
     }
-    for(std::size_t i = 0; i < given_crc32_length; i++) {
+    
+    // Now, make sure it's all valid
+    for(std::size_t i = 2; i < given_crc32_length; i++) {
         char c = std::tolower(s[i]);
         if(!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f')) {
             eprintf_error("%s %s (must be hexadecimal)", err, s);
             std::exit(EXIT_FAILURE);
         }
     }
-    return static_cast<std::uint32_t>(std::strtoul(s, nullptr, 16));
+    
+    return static_cast<std::uint32_t>(std::strtoul(s + 2, nullptr, 16));
 }
 
 int main(int argc, const char **argv) {

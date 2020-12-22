@@ -214,7 +214,7 @@ namespace Invader::Info {
     }
     
     void crc32(const Invader::Map &map) {
-        oprintf("%08X\n", map.get_crc32());
+        oprintf("0x%08X\n", map.get_crc32());
     }
     void crc32_mismatched(const Invader::Map &map) {
         oprintf("%i\n", map.get_crc32() != map.get_header_crc32());
