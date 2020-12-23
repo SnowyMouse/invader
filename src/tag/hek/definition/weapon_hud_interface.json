@@ -51,7 +51,7 @@
         "name": "WeaponHUDInterfaceCrosshairTypeFlags",
         "fields": [
             "aim",
-            "zoom",
+            "zoom level",
             "charge",
             "should reload",
             "flash heat",
@@ -156,8 +156,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -279,8 +279,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -408,8 +408,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -618,8 +618,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
@@ -765,8 +765,8 @@
                 "size": 2
             },
             {
-                "name": "can use on map type",
-                "type": "WeaponHUDInterfaceCanUseOnMapType"
+                "name": "allowed view type",
+                "type": "WeaponHUDInterfaceViewType"
             },
             {
                 "type": "pad",
