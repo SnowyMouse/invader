@@ -39,6 +39,12 @@ if(${INVADER_EDIT_QT})
         src/edit/qt/qtres.qrc
         ${INVADER_EDIT_QT_RC}
     )
+
+    if(WIN32)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows")
+        target_sources(six-shooter PRIVATE src/edit/qt/theme.cpp)
+    endif()
+
     target_link_libraries(invader-edit-qt invader Qt5::Widgets Qt5::Multimedia)
     target_include_directories(invader-edit-qt PUBLIC ${Qt5Widgets_INCLUDE_DIRS})
 

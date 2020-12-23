@@ -23,8 +23,16 @@
 #include <invader/tag/parser/parser.hpp>
 #include <QScreen>
 
+#ifdef _WIN32
+#include "../theme.hpp"
+#endif
+
 namespace Invader::EditQt {
     TagTreeWindow::TagTreeWindow() {
+        #ifdef _WIN32
+        Theme::set_win32_theme();
+        #endif
+        
         // Set some window stuff
         this->setWindowTitle("invader-edit-qt");
         this->setMinimumSize(800, 600);
