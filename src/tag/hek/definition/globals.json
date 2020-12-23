@@ -1670,28 +1670,32 @@
                 "type": "TagReflexive",
                 "struct": "GlobalsSound",
                 "compound": true,
-                "minimum": 1
+                "minimum": 2,
+                "hek_maximum": 2
             },
             {
                 "name": "camera",
                 "type": "TagReflexive",
                 "struct": "GlobalsCamera",
                 "compound": true,
-                "minimum": 1
+                "minimum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "player control",
                 "type": "TagReflexive",
                 "struct": "GlobalsPlayerControl",
                 "compound": true,
-                "minimum": 1
+                "minimum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "difficulty",
                 "type": "TagReflexive",
                 "struct": "GlobalsDifficulty",
                 "compound": true,
-                "minimum": 1
+                "minimum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "grenades",
@@ -1699,27 +1703,31 @@
                 "struct": "GlobalsGrenade",
                 "compound": true,
                 "minimum": 2,
-                "maximum": 2
+                "maximum": 2,
+                "hek_maximum": 1
             },
             {
                 "name": "rasterizer data",
                 "type": "TagReflexive",
                 "struct": "GlobalsRasterizerData",
                 "compound": true,
-                "minimum": 1
+                "minimum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "interface bitmaps",
                 "type": "TagReflexive",
                 "struct": "GlobalsInterfaceBitmaps",
                 "compound": true,
-                "minimum": 1
+                "minimum": 1,
+                "hek_maximum": 1
             },
             {
                 "name": "weapon list",
                 "type": "TagReflexive",
                 "struct": "GlobalsWeapon",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 1
             },
             {
                 "name": "cheat powerups",

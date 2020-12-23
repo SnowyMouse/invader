@@ -57,7 +57,8 @@
                 "name": "parts",
                 "type": "TagReflexive",
                 "struct": "GBXModelGeometryPart",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",
@@ -166,34 +167,39 @@
                 "struct": "ModelMarker",
                 "compound": true,
                 "maximum": 0,
-                "hidden": true
+                "hidden": true,
+                "hek_maximum": 256
             },
             {
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelNode",
                 "compound": true,
-                "maximum": 255
+                "maximum": 255,
+                "hek_maximum": 64
             },
             {
                 "name": "regions",
                 "type": "TagReflexive",
                 "struct": "ModelRegion",
                 "compound": true,
-                "maximum": 255
+                "maximum": 255,
+                "hek_maximum": 32
             },
             {
                 "name": "geometries",
                 "type": "TagReflexive",
                 "struct": "GBXModelGeometry",
                 "compound": true,
-                "maximum": 65535
+                "maximum": 65535,
+                "hek_maximum": 256
             },
             {
                 "name": "shaders",
                 "type": "TagReflexive",
                 "struct": "ModelShaderReference",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 32
             }
         ],
         "type": "struct",

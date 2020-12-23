@@ -2160,12 +2160,14 @@
                 "name": "move positions",
                 "type": "TagReflexive",
                 "struct": "ScenarioMovePosition",
+                "hek_maximum": 64,
                 "compound": true
             },
             {
                 "name": "starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioActorStartingLocation",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -2327,24 +2329,28 @@
                 "name": "squads",
                 "type": "TagReflexive",
                 "struct": "ScenarioSquad",
+                "hek_maximum": 64,
                 "compound": true
             },
             {
                 "name": "platoons",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlatoon",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
                 "name": "firing positions",
                 "type": "TagReflexive",
                 "struct": "ScenarioFiringPosition",
+                "hek_maximum": 512,
                 "compound": true
             },
             {
                 "name": "player starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
+                "hek_maximum": 256,
                 "compound": true
             }
         ],
@@ -2476,6 +2482,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioCommand",
                 "maximum": 65534,
+                "hek_maximum": 64,
                 "compound": true
             },
             {
@@ -2483,6 +2490,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioCommandPoint",
                 "maximum": 65534,
+                "hek_maximum": 64,
                 "compound": true
             },
             {
@@ -2737,12 +2745,14 @@
                 "name": "participants",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversationParticipant",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "lines",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversationLine",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -3167,6 +3177,7 @@
                 "name": "skies",
                 "type": "TagReflexive",
                 "struct": "ScenarioSky",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
@@ -3181,6 +3192,7 @@
                 "name": "child scenarios",
                 "type": "TagReflexive",
                 "struct": "ScenarioChildScenario",
+                "hek_maximum": 16,
                 "compound": true,
                 "ignore_cached": true
             },
@@ -3200,6 +3212,7 @@
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "hek_maximum": 1024,
                 "cache_only": true,
                 "compound": true
             },
@@ -3207,6 +3220,7 @@
                 "name": "functions",
                 "type": "TagReflexive",
                 "struct": "ScenarioFunction",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -3218,6 +3232,7 @@
                 "name": "comments",
                 "type": "TagReflexive",
                 "struct": "ScenarioEditorComment",
+                "hek_maximum": 1024,
                 "compound": true
             },
             {
@@ -3229,6 +3244,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioObjectName",
                 "compound": true,
+                "hek_maximum": 512,
                 "read_only": true,
                 "maximum": 65534
             },
@@ -3237,6 +3253,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioScenery",
                 "compound": true,
+                "hek_maximum": 2000,
                 "maximum": 65535
             },
             {
@@ -3244,6 +3261,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioSceneryPalette",
                 "compound": true,
+                "hek_maximum": 100,
                 "maximum": 65534
             },
             {
@@ -3251,6 +3269,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioBiped",
                 "compound": true,
+                "hek_maximum": 128,
                 "maximum": 65535
             },
             {
@@ -3258,6 +3277,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioBipedPalette",
                 "compound": true,
+                "hek_maximum": 100,
                 "maximum": 65534
             },
             {
@@ -3265,6 +3285,7 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioVehicle",
                 "compound": true,
+                "hek_maximum": 80,
                 "maximum": 65535
             },
             {
@@ -3272,12 +3293,14 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioVehiclePalette",
                 "compound": true,
+                "hek_maximum": 100,
                 "maximum": 65534
             },
             {
                 "name": "equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
+                "hek_maximum": 128,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3286,12 +3309,14 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipmentPalette",
                 "compound": true,
+                "hek_maximum": 100,
                 "maximum": 65534
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ScenarioWeapon",
+                "hek_maximum": 128,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3299,6 +3324,7 @@
                 "name": "weapon palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioWeaponPalette",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3306,6 +3332,7 @@
                 "name": "device groups",
                 "type": "TagReflexive",
                 "struct": "ScenarioDeviceGroup",
+                "hek_maximum": 128,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3313,6 +3340,7 @@
                 "name": "machines",
                 "type": "TagReflexive",
                 "struct": "ScenarioMachine",
+                "hek_maximum": 400,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3320,6 +3348,7 @@
                 "name": "machine palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioMachinePalette",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3327,6 +3356,7 @@
                 "name": "controls",
                 "type": "TagReflexive",
                 "struct": "ScenarioControl",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3334,6 +3364,7 @@
                 "name": "control palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioControlPalette",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3341,6 +3372,7 @@
                 "name": "light fixtures",
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixture",
+                "hek_maximum": 500,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3348,6 +3380,7 @@
                 "name": "light fixture palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioLightFixturePalette",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3355,6 +3388,7 @@
                 "name": "sound scenery",
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundScenery",
+                "hek_maximum": 256,
                 "compound": true,
                 "maximum": 65535
             },
@@ -3362,6 +3396,7 @@
                 "name": "sound scenery palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioSoundSceneryPalette",
+                "hek_maximum": 100,
                 "compound": true,
                 "maximum": 65534
             },
@@ -3373,12 +3408,14 @@
                 "name": "player starting profile",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingProfile",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
                 "name": "player starting locations",
                 "type": "TagReflexive",
                 "struct": "ScenarioPlayerStartingLocation",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
@@ -3386,36 +3423,42 @@
                 "type": "TagReflexive",
                 "struct": "ScenarioTriggerVolume",
                 "compound": true,
+                "hek_maximum": 256,
                 "maximum": 65534
             },
             {
                 "name": "recorded animations",
                 "type": "TagReflexive",
                 "struct": "ScenarioRecordedAnimation",
+                "hek_maximum": 1024,
                 "compound": true
             },
             {
                 "name": "netgame flags",
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameFlags",
+                "hek_maximum": 200,
                 "compound": true
             },
             {
                 "name": "netgame equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioNetgameEquipment",
+                "hek_maximum": 200,
                 "compound": true
             },
             {
                 "name": "starting equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioStartingEquipment",
+                "hek_maximum": 200,
                 "compound": true
             },
             {
                 "name": "bsp switch trigger volumes",
                 "type": "TagReflexive",
                 "struct": "ScenarioBSPSwitchTriggerVolume",
+                "hek_maximum": 256,
                 "compound": true,
                 "cache_only": true
             },
@@ -3423,18 +3466,21 @@
                 "name": "decals",
                 "type": "TagReflexive",
                 "struct": "ScenarioDecal",
+                "hek_maximum": 65536,
                 "compound": true
             },
             {
                 "name": "decal palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioDecalPalette",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
                 "name": "detail object collection palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioDetailObjectCollectionPalette",
+                "hek_maximum": 32,
                 "compound": true
             },
             {
@@ -3445,42 +3491,49 @@
                 "name": "actor palette",
                 "type": "TagReflexive",
                 "struct": "ScenarioActorPalette",
+                "hek_maximum": 64,
                 "compound": true
             },
             {
                 "name": "encounters",
                 "type": "TagReflexive",
                 "struct": "ScenarioEncounter",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
                 "name": "command lists",
                 "type": "TagReflexive",
                 "struct": "ScenarioCommandList",
+                "hek_maximum": 256,
                 "compound": true
             },
             {
                 "name": "ai animation references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIAnimationReference",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
                 "name": "ai script references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIScriptReference",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
                 "name": "ai recording references",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIRecordingReference",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
                 "name": "ai conversations",
                 "type": "TagReflexive",
                 "struct": "ScenarioAIConversation",
+                "hek_maximum": 128,
                 "compound": true
             },
             {
@@ -3498,6 +3551,7 @@
                 "name": "scripts",
                 "type": "TagReflexive",
                 "struct": "ScenarioScript",
+                "hek_maximum": 512,
                 "compound": true,
                 "read_only": true
             },
@@ -3505,6 +3559,7 @@
                 "name": "globals",
                 "type": "TagReflexive",
                 "struct": "ScenarioGlobal",
+                "hek_maximum": 128,
                 "compound": true,
                 "read_only": true
             },
@@ -3512,6 +3567,7 @@
                 "name": "references",
                 "type": "TagReflexive",
                 "struct": "ScenarioReference",
+                "hek_maximum": 256,
                 "compound": true,
                 "read_only": true
             },
@@ -3519,6 +3575,7 @@
                 "name": "source files",
                 "type": "TagReflexive",
                 "struct": "ScenarioSourceFile",
+                "hek_maximum": 8,
                 "compound": true,
                 "non_cached": true,
                 "read_only": true,
@@ -3532,17 +3589,20 @@
                 "name": "cutscene flags",
                 "type": "TagReflexive",
                 "struct": "ScenarioCutsceneFlag",
+                "hek_maximum": 512,
                 "compound": true
             },
             {
                 "name": "cutscene camera points",
                 "type": "TagReflexive",
                 "struct": "ScenarioCutsceneCameraPoint",
+                "hek_maximum": 512,
                 "compound": true
             },
             {
                 "name": "cutscene titles",
                 "type": "TagReflexive",
+                "hek_maximum": 64,
                 "struct": "ScenarioCutsceneTitle",
                 "compound": true
             },
@@ -3578,6 +3638,7 @@
                 "name": "structure bsps",
                 "type": "TagReflexive",
                 "struct": "ScenarioBSP",
+                "hek_maximum": 32,
                 "compound": true,
                 "maximum": 16
             }

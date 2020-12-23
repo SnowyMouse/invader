@@ -266,6 +266,7 @@
                 "name": "reflections",
                 "type": "TagReflexive",
                 "struct": "LensFlareReflection",
+                "hek_maximum": 32,
                 "compound": true
             },
             {

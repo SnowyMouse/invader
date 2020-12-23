@@ -208,6 +208,7 @@
                 "name": "button icons",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsButtonIcon",
+                "hek_maximum": 18,
                 "compound": true
             },
             {
@@ -326,6 +327,7 @@
                 "name": "waypoint arrows",
                 "type": "TagReflexive",
                 "struct": "HUDGlobalsWaypointArrow",
+                "hek_maximum": 16,
                 "compound": true
             },
             {

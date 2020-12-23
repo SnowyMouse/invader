@@ -211,18 +211,21 @@
                 "name": "shader functions",
                 "type": "TagReflexive",
                 "struct": "SkyFunction",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "SkyAnimation",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "lights",
                 "type": "TagReflexive",
                 "struct": "SkyLight",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],

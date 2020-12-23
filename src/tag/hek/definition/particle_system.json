@@ -137,6 +137,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "hek_maximum": 16,
                 "compound": true
             }
         ],
@@ -361,6 +362,7 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "hek_maximum": 16,
                 "compound": true
             }
         ],
@@ -422,18 +424,21 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeStates",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "particle states",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemTypeParticleState",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -476,12 +481,14 @@
                 "name": "physics constants",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemPhysicsConstant",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "particle types",
                 "type": "TagReflexive",
                 "struct": "ParticleSystemType",
+                "hek_maximum": 4,
                 "compound": true
             }
         ],

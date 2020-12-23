@@ -224,6 +224,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
@@ -231,6 +232,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentChicagoMap",
                 "compound": true,
+                "hek_maximum": 4,
                 "maximum": 4
             },
             {

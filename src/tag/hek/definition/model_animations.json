@@ -258,6 +258,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponTypeAnimation",
+                "hek_maximum": 16,
                 "compound": true
             }
         ],
@@ -322,18 +323,21 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponClassAnimation",
+                "hek_maximum": 55,
                 "compound": true
             },
             {
                 "name": "ik point",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
                 "name": "weapon types",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponType",
+                "hek_maximum": 10,
                 "compound": true
             }
         ],
@@ -389,18 +393,21 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationWeaponClassAnimation",
+                "hek_maximum": 33,
                 "compound": true
             },
             {
                 "name": "ik points",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeatikPoint",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeapon",
+                "hek_maximum": 16,
                 "compound": true
             }
         ],
@@ -431,6 +438,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsWeaponAnimation",
+                "hek_maximum": 11,
                 "compound": true
             }
         ],
@@ -451,7 +459,7 @@
         "size": 2
     },
     {
-        "name": "ModelAnimationsuspensionAnimation",
+        "name": "ModelAnimationSuspensionAnimation",
         "fields": [
             {
                 "name": "mass point index",
@@ -522,12 +530,14 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsVehicleAnimation",
+                "hek_maximum": 8,
                 "compound": true
             },
             {
                 "name": "suspension animations",
                 "type": "TagReflexive",
-                "struct": "ModelAnimationsuspensionAnimation",
+                "struct": "ModelAnimationSuspensionAnimation",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -558,6 +568,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsDeviceAnimation",
+                "hek_maximum": 2,
                 "compound": true
             }
         ],
@@ -584,6 +595,7 @@
                 "name": "animation",
                 "type": "Index",
                 "reflexive": "animations",
+                "hek_maximum": 176,
                 "struct": "ModelAnimations"
             }
         ],
@@ -601,6 +613,7 @@
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsFirstPersonWeapon",
+                "hek_maximum": 28,
                 "compound": true
             }
         ],
@@ -849,48 +862,56 @@
                 "name": "objects",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphObjectOverlay",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
                 "name": "units",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphUnitSeat",
+                "hek_maximum": 33,
                 "compound": true
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphWeaponAnimations",
+                "hek_maximum": 16,
                 "compound": true
             },
             {
                 "name": "vehicles",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphVehicleAnimations",
+                "hek_maximum": 1,
                 "compound": true
             },
             {
                 "name": "devices",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsDeviceAnimations",
+                "hek_maximum": 2,
                 "compound": true
             },
             {
                 "name": "unit damage",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsUnitDamageAnimations",
+                "hek_maximum": 176,
                 "compound": true
             },
             {
                 "name": "first person weapons",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphFirstPersonWeaponAnimations",
+                "hek_maximum": 28,
                 "compound": true
             },
             {
                 "name": "sound references",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphSoundReference",
+                "hek_maximum": 514,
                 "compound": true
             },
             {
@@ -909,12 +930,14 @@
                 "name": "nodes",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimationGraphNode",
+                "hek_maximum": 64,
                 "compound": true
             },
             {
                 "name": "animations",
                 "type": "TagReflexive",
                 "struct": "ModelAnimationsAnimation",
+                "hek_maximum": 2048,
                 "compound": true
             }
         ],

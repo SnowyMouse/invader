@@ -345,7 +345,8 @@
                 "name": "contact point",
                 "type": "TagReflexive",
                 "struct": "BipedContactPoint",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 2
             }
         ],
         "type": "struct",

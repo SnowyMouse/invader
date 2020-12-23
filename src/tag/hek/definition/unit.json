@@ -217,13 +217,15 @@
                 "name": "camera tracks",
                 "type": "TagReflexive",
                 "struct": "UnitCameraTrack",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 2
             },
             {
                 "name": "unit hud interface",
                 "type": "TagReflexive",
                 "struct": "UnitUnitHudInterface",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 2
             },
             {
                 "type": "pad",
@@ -553,13 +555,15 @@
                 "name": "new hud interfaces",
                 "type": "TagReflexive",
                 "struct": "UnitUnitHudInterface",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 2
             },
             {
                 "name": "dialogue variants",
                 "type": "TagReflexive",
                 "struct": "UnitDialogueVariant",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 16
             },
             {
                 "name": "grenade velocity",
@@ -590,19 +594,22 @@
                 "name": "powered seats",
                 "type": "TagReflexive",
                 "struct": "UnitPoweredSeat",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 2
             },
             {
                 "name": "weapons",
                 "type": "TagReflexive",
                 "struct": "UnitWeapon",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             },
             {
                 "name": "seats",
                 "type": "TagReflexive",
                 "struct": "UnitSeat",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 16
             }
         ],
         "type": "struct",

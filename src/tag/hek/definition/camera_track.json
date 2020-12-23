@@ -31,7 +31,8 @@
                 "name": "control points",
                 "type": "TagReflexive",
                 "struct": "CameraTrackControlPoint",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 16
             },
             {
                 "type": "pad",

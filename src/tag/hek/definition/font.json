@@ -19,6 +19,8 @@
                 "name": "character table",
                 "type": "TagReflexive",
                 "struct": "FontCharacterIndex",
+                "maximum": 256,
+                "hek_maximum": 4,
                 "compound": true
             }
         ],
@@ -104,7 +106,9 @@
                 "type": "TagReflexive",
                 "struct": "FontCharacterTables",
                 "compound": true,
-                "cache_only": true
+                "cache_only": true,
+                "maximum": 256,
+                "hek_maximum": 256
             },
             {
                 "name": "bold",
@@ -143,7 +147,8 @@
                 "type": "TagReflexive",
                 "struct": "FontCharacter",
                 "compound": true,
-                "read_only": true
+                "read_only": true,
+                "hek_maximum": 32000
             },
             {
                 "name": "pixels",

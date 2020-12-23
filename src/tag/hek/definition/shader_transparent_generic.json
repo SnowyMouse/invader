@@ -480,6 +480,7 @@
                 "name": "extra layers",
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentExtraLayer",
+                "hek_maximum": 4,
                 "compound": true
             },
             {
@@ -487,6 +488,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericMap",
                 "compound": true,
+                "hek_maximum": 4,
                 "maximum": 4
             },
             {
@@ -494,6 +496,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentGenericStage",
                 "compound": true,
+                "hek_maximum": 7,
                 "maximum": 7
             }
         ],

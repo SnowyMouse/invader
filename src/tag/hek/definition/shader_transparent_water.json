@@ -183,6 +183,7 @@
                 "type": "TagReflexive",
                 "struct": "ShaderTransparentWaterRipple",
                 "compound": true,
+                "hek_maximum": 4,
                 "maximum": 4
             },
             {

@@ -350,6 +350,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ObjectChangeColorsPermutation",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -499,32 +500,37 @@
                 "name": "attachments",
                 "type": "TagReflexive",
                 "struct": "ObjectAttachment",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 8
             },
             {
                 "name": "widgets",
                 "type": "TagReflexive",
                 "struct": "ObjectWidget",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             },
             {
                 "name": "functions",
                 "type": "TagReflexive",
                 "struct": "ObjectFunction",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             },
             {
                 "name": "change colors",
                 "type": "TagReflexive",
                 "struct": "ObjectChangeColors",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 4
             },
             {
                 "name": "predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
                 "cache_only": true,
-                "compound": true
+                "compound": true,
+                "hek_maximum": 1024
             }
         ],
         "type": "struct",

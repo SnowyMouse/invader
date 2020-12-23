@@ -227,6 +227,7 @@
                 "name": "magazine objects",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazineObject",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -546,6 +547,7 @@
                 "name": "firing effects",
                 "type": "TagReflexive",
                 "struct": "WeaponTriggerFiringEffect",
+                "hek_maximum": 8,
                 "compound": true
             }
         ],
@@ -913,6 +915,7 @@
                 "name": "more predicted resources",
                 "type": "TagReflexive",
                 "struct": "PredictedResource",
+                "hek_maximum": 1024,
                 "cache_only": true,
                 "compound": true
             },
@@ -920,12 +923,14 @@
                 "name": "magazines",
                 "type": "TagReflexive",
                 "struct": "WeaponMagazine",
+                "hek_maximum": 2,
                 "compound": true
             },
             {
                 "name": "triggers",
                 "type": "TagReflexive",
                 "struct": "WeaponTrigger",
+                "hek_maximum": 2,
                 "compound": true
             }
         ],

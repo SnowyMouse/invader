@@ -135,7 +135,8 @@
                 "name": "types",
                 "type": "TagReflexive",
                 "struct": "DetailObjectCollectionObjectType",
-                "compound": true
+                "compound": true,
+                "hek_maximum": 16
             },
             {
                 "type": "pad",

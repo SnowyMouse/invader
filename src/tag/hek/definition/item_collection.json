@@ -35,6 +35,7 @@
                 "name": "permutations",
                 "type": "TagReflexive",
                 "struct": "ItemCollectionPermutation",
+                "hek_maximum": 32,
                 "compound": true
             },
             {

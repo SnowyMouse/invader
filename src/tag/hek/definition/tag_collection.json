@@ -22,6 +22,7 @@
                 "name": "tags",
                 "type": "TagReflexive",
                 "struct": "TagCollectionTag",
+                "hek_maximum": 200,
                 "compound": true
             }
         ],
