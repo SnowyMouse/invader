@@ -54,6 +54,6 @@ namespace SixShooter {
         }
     }
     #else
-    void Theme::set_theme() {}
+    void Theme::set_win32_theme() {}
     #endif
 }
