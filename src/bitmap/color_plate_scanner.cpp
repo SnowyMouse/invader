@@ -616,7 +616,7 @@ namespace Invader {
                 auto *pixel_data = bitmap.pixels.data();
                 std::vector<ColorPlatePixel> unblurred(pixel_data, pixel_data + mipmap_width * mipmap_height);
 
-                std::uint32_t blur_size = blur_pixels * 2 + 1;
+                std::uint32_t blur_size = (blur_pixels * 2);
 
                 // Allocate a filter of the correct size
                 std::vector<ColorPlatePixel *> pixel_filter(blur_size * blur_size);
