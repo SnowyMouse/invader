@@ -18,7 +18,7 @@ namespace Invader::Parser {
         this->crosshair_types = crosshair_types.flaggy;
 
         // Check for zoom flags if we don't have any zoom crosshairs
-        if(!(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM)) {
+        if(!(this->crosshair_types & HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM_LEVEL)) {
             auto &crosshair_types = this->crosshair_types;
             
             // If any zoom flags are set, pretend we do have zoom crosshairs
@@ -30,7 +30,7 @@ namespace Invader::Parser {
                             (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_SHOW_ONLY_WHEN_ZOOMED) ||
                             (o.flags & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_ONE_ZOOM_LEVEL)
                         ) {
-                            crosshair_types |= HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM;
+                            crosshair_types |= HEK::WeaponHUDInterfaceCrosshairTypeFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_FLAGS_FLAG_ZOOM_LEVEL;
                             return true;
                         }
                     }

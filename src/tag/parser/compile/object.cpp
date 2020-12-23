@@ -499,7 +499,7 @@ namespace Invader::Parser {
                 auto *crosshairs = reinterpret_cast<const WeaponHUDInterfaceCrosshair::struct_little *>(crosshairs_struct.data.data());
                 for(std::size_t c = 0; c < crosshair_count; c++) {
                     auto &crosshair = crosshairs[c];
-                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM) {
+                    if(crosshair.crosshair_type != HEK::WeaponHUDInterfaceCrosshairType::WEAPON_HUD_INTERFACE_CROSSHAIR_TYPE_ZOOM_LEVEL) {
                         continue;
                     }
 
@@ -532,7 +532,7 @@ namespace Invader::Parser {
                                     else {
                                         noun = "sprite";
                                     }
-                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu zoom level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu zoom level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->zoom_levels), this->zoom_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
                                     throw InvalidTagDataException();
                                 }
                             }
