@@ -489,7 +489,7 @@ namespace Invader::Parser {
     }
     void Weapon::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         // Make sure zoom levels aren't too high for the HUD interface
-        if(this->magnification_levels && !this->hud_interface.tag_id.is_null()) {
+        if(this->zoom_levels && !this->hud_interface.tag_id.is_null()) {
             auto &weapon_hud_interface_tag = workload.tags[this->hud_interface.tag_id.index];
             auto &weapon_hud_interface_struct = workload.structs[*weapon_hud_interface_tag.base_struct];
             auto &weapon_hud_interface = *reinterpret_cast<const WeaponHUDInterface::struct_little *>(weapon_hud_interface_struct.data.data());
@@ -524,7 +524,7 @@ namespace Invader::Parser {
                                 auto &sequence = sequences[overlay.sequence_index];
                                 bool not_a_sprite = overlay.flags.read() & HEK::WeaponHUDInterfaceCrosshairOverlayFlagsFlag::WEAPON_HUD_INTERFACE_CROSSHAIR_OVERLAY_FLAGS_FLAG_NOT_A_SPRITE;
                                 std::size_t max_zoom_levels = not_a_sprite ? sequence.bitmap_count.read() : sequence.sprites.count.read();
-                                if(this->magnification_levels > max_zoom_levels) {
+                                if(this->zoom_levels > max_zoom_levels) {
                                     const char *noun;
                                     if(not_a_sprite) {
                                         noun = "bitmap";
@@ -532,7 +532,7 @@ namespace Invader::Parser {
                                     else {
                                         noun = "sprite";
                                     }
-                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu magnification level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu zoom level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
                                     throw InvalidTagDataException();
                                 }
                             }

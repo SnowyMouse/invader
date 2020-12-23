@@ -14,7 +14,7 @@
         "type": "enum"
     },
     {
-        "name": "WeaponHUDInterfaceCanUseOnMapType",
+        "name": "WeaponHUDInterfaceViewType",
         "options": [
             "any",
             "solo",

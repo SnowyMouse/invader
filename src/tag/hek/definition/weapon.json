@@ -714,11 +714,11 @@
                 "size": 2
             },
             {
-                "name": "magnification levels",
+                "name": "zoom levels",
                 "type": "uint16"
             },
             {
-                "name": "magnification range",
+                "name": "zoom magnification range",
                 "bounds": true,
                 "comment": "Minimum is the magnification amount for the first zoom level, and maximum is the magnification amount for the final zoom level",
                 "type": "float"
