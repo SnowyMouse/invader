@@ -840,7 +840,7 @@ In order to get Invader under a different license, you will need to write to
 ### Are there any GUI tools?
 Officially, only one of these tools has a graphical user interface,
 invader-edit-qt. However, there is a program you can optionally download called
-[six-shooter](https://github.com/Kavawuvi/six-shooter) which provides a
+[six-shooter](https://github.com/SnowyMouse/six-shooter) which provides a
 graphical interface for some of Invader's other tools.
 
 ### Are 32-bit Windows builds available?
