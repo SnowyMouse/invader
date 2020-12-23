@@ -439,7 +439,8 @@ namespace Invader::Parser {
             
             // Do we have anything?
             if(positions.size() == 0) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Unable to blend shared normals due to missing uncompressed vertices");
+                throw InvalidTagDataException();
             }
             else {
                 // Add all the stuff (idk why it does this but lol)
@@ -623,11 +624,11 @@ namespace Invader::Parser {
             for(auto &i : m.instances) {
                 if(i.node_index >= node_count) {
                     if(++errors_given != MAX_ERRORS) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - what.markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Instance #%zu of marker #%zu has an invalid node index (%zu >= %zu)", &m - what.markers.data(), &i - m.instances.data(), static_cast<std::size_t>(i.node_index), node_count);
                         errors_given++;
                     }
                     else {
-                        eprintf_error("... and more errors. Suffice it to say, the model needs recompiled");
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "... and more errors");
                         break;
                     }
                 }
@@ -636,8 +637,9 @@ namespace Invader::Parser {
                 break;
             }
         }
-        if(errors_given > 0 && errors_given < MAX_ERRORS) {
+        if(errors_given > 0) {
             eprintf("This can be fixed by recompiling the model");
+            throw InvalidTagDataException();
         }
 
         // Set node stuff
@@ -724,7 +726,8 @@ namespace Invader::Parser {
 
     void GBXModel::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Gearbox model tags do not exist on the target engine", tag_index);
+            throw InvalidTagDataException();
         }
         
         pre_compile_model(*this, workload, tag_index);
@@ -735,8 +738,8 @@ namespace Invader::Parser {
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
-                break;
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Non-Gearbox model tags do not work on the target engine", tag_index);
+                throw InvalidTagDataException();
             default: break;
         }
         

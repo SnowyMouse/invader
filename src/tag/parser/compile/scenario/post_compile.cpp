@@ -758,7 +758,8 @@ namespace Invader::Parser {
                                 }
                             }
                             if(!encounter_index.has_value()) {
-                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a nonexistent encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Participant #%zu of conversation #%zu (%s) references a nonexistent encounter (%s)", p, aic, convo.name.string, participant.encounter_name.string);
+                                throw InvalidTagDataException();
                             }
                         }
                         participant.encounter_index = encounter_index.value_or(0xFFFFFFFF);

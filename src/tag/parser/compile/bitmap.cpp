@@ -171,15 +171,16 @@ namespace Invader::Parser {
         }
         bool errored_on_sprites = false;
         if(has_sprites && bitmap->type != HEK::BitmapType::BITMAP_TYPE_SPRITES) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Bitmap has sprites but is not a sprites bitmap type", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap has sprites but is not a sprites bitmap type", tag_index);
             errored_on_sprites = true;
         }
         else if(!has_sprites && bitmap->type == HEK::BitmapType::BITMAP_TYPE_SPRITES && bitmap->bitmap_data.size() > 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Bitmap with bitmap data is marked as sprites, but no sprites are present", tag_index);
             errored_on_sprites = true;
         }
         if(errored_on_sprites) {
             eprintf_warn("To fix this, recompile the bitmap");
+            throw InvalidTagDataException();
         }
         
         auto max_size = bitmap->processed_pixel_data.size();
@@ -314,7 +315,8 @@ namespace Invader::Parser {
             }
 
             if(depth != 1 && type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu is not a 3D texture but has depth (%zu != 1)", data_index, depth);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is not a 3D texture but has depth (%zu != 1)", data_index, depth);
+                throw InvalidTagDataException();
             }
 
             // Make sure these are equal
@@ -322,10 +324,12 @@ namespace Invader::Parser {
                 const char *format_name = HEK::bitmap_data_format_name(format);
                 data.flags ^= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED; // invert the flag in case we need to do any math on it (though it's screwed up either way)
                 if(compressed) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu (format: %s) is incorrectly marked as compressed", data_index, format_name);
+                    throw InvalidTagDataException();
                 }
                 else {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Bitmap data #%zu (format: %s) is not marked as compressed", data_index, format_name);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu (format: %s) is not marked as compressed", data_index, format_name);
+                    throw InvalidTagDataException();
                 }
             }
 

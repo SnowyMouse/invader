@@ -186,20 +186,20 @@ namespace Invader::Parser {
             case STRING_ERROR_OK:
                 break;
             case STRING_ERROR_EMPTY:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu is empty", index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "String #%zu is empty", index);
+                throw InvalidTagDataException();
             case STRING_ERROR_INVALID_SIZE:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu's size (%zu) is not divisible by its character size (%zu)", index, what->string.size(), sizeof(CHAR));
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "String #%zu's size (%zu) is not divisible by its character size (%zu)", index, what->string.size(), sizeof(CHAR));
+                throw InvalidTagDataException();
             case STRING_ERROR_MISSING_NULL_TERMINATOR:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu is not null terminated", index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "String #%zu is not null terminated", index);
+                throw InvalidTagDataException();
             case STRING_ERROR_EXTRA_NULL_TERMINATOR:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu contains an extraneous null terminator", index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "String #%zu contains an extraneous null terminator", index);
+                throw InvalidTagDataException();
             case STRING_ERROR_IMPROPER_LINE_ENDINGS:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "String #%zu contains a non-CRLF line ending", index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "String #%zu contains a non-CRLF line ending", index);
+                throw InvalidTagDataException();
         }
     }
     

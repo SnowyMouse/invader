@@ -51,7 +51,8 @@ namespace Invader::Parser {
 
             // Save it
             if(bsp_from >= scenario.structure_bsps.size() || bsp_to >= scenario.structure_bsps.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+                throw InvalidTagDataException();
             }
             else {
                 auto &bsp_switch_trigger_volume = scenario.bsp_switch_trigger_volumes.emplace_back();
@@ -228,9 +229,9 @@ namespace Invader::Parser {
                         break;
                     }
                     else {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Script node #%zu has an invalid string offset", static_cast<std::size_t>(i));
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node #%zu has an invalid string offset", static_cast<std::size_t>(i));
+                        throw InvalidTagDataException();
                     }
-                    continue;
                 }
 
                 // Add it to the list
@@ -289,7 +290,8 @@ namespace Invader::Parser {
                 if(name_index != NULL_INDEX) { \
                     /* Check the name to see if it's valid */ \
                     if(name_index >= name_count) { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
+                        throw InvalidTagDataException(); \
                     } \
                     /* If it is, increment the used counter and assign everything */ \
                     else { \
@@ -304,7 +306,8 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " spawn #%zu has no object type, so it will be unused", i); \
                 } \
                 else if(type_index >= type_count) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
+                    throw InvalidTagDataException(); \
                 } \
                 else { \
                     used[type_index]++; \
@@ -362,7 +365,7 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Object name #%zu (%s) is unused", i, name_str);
             }
             else if(used > 1) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
                 
                 // Put together a list to help the user track everything down
                 char found[1024] = {};
@@ -385,6 +388,7 @@ namespace Invader::Parser {
                 
                 // List everything off
                 eprintf_warn_lesser("    - objects with this name: [%s]", found);
+                throw InvalidTagDataException();
             }
         }
     }

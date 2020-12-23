@@ -49,17 +49,19 @@ namespace Invader::Parser {
         switch(this->format) {
             case HEK::SoundFormat::SOUND_FORMAT_FLAC:
                 if(workload.cache_file_type != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses FLAC which does not exist on the target engine", permutation_index);
+                    throw InvalidTagDataException();
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_OGG_VORBIS:
                 if(workload.cache_file_type == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses Ogg Vorbis which does not exist on the target engine", permutation_index);
+                    throw InvalidTagDataException();
                 }
                 break;
             case HEK::SoundFormat::SOUND_FORMAT_IMA_ADPCM:
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Sound permutation #%zu uses IMA ADPCM is unsupported on the target engine", permutation_index);
-                break;
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound permutation #%zu uses IMA ADPCM is unsupported on the target engine", permutation_index);
+                throw InvalidTagDataException();
             case HEK::SoundFormat::SOUND_FORMAT_16_BIT_PCM:
                 if(workload.cache_file_type != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Sound permutation #%zu uses 16-bit PCM will not play on the target engine without a mod", permutation_index);
@@ -157,8 +159,8 @@ namespace Invader::Parser {
             // Keep going until we hit a null index or we loop forever
             while(permutation_index != NULL_INDEX) {
                 if(referenced[permutation_index]) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end", a, this->permutations[a].name.string, struct_offset / sizeof(struct_little));
-                    break;
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Actual permutation #%zu (%s) in pitch range #%zu will never end", a, this->permutations[a].name.string, struct_offset / sizeof(struct_little));
+                    throw InvalidTagDataException();
                 }
                 referenced[permutation_index] = true;
                 permutation_index = this->permutations[permutation_index].next_permutation_index;
@@ -180,7 +182,8 @@ namespace Invader::Parser {
             }
         }
         if(errors) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Sound format does not match %zu permutation%s.", errors, errors == 1 ? "" : "s");
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Sound format does not match %zu permutation%s.", errors, errors == 1 ? "" : "s");
+            throw InvalidTagDataException();
         }
 
         if(sound->channel_count == HEK::SoundChannelCount::SOUND_CHANNEL_COUNT_MONO && sound->sample_rate == HEK::SoundSampleRate::SOUND_SAMPLE_RATE_44100_HZ && workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {

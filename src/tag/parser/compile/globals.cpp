@@ -16,7 +16,8 @@ namespace Invader::Parser {
             this->unit.tag_class_int = TagClassInt::TAG_CLASS_NONE;
         }
         else if(this->unit.path.size() == 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag player information is missing a player unit which is required for the map type", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag player information is missing a player unit which is required for the map type", tag_index);
+            throw InvalidTagDataException();
         }
     }
     void Globals::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
@@ -27,10 +28,12 @@ namespace Invader::Parser {
         }
         else {
             if(this->multiplayer_information.size() != 1) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
+                throw InvalidTagDataException();
             }
             if(this->weapon_list.size() < 16) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have at least 16 weapons blocks which is required for the map type", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have at least 16 weapons blocks which is required for the map type", tag_index);
+                throw InvalidTagDataException();
             }
         }
 
@@ -40,10 +43,12 @@ namespace Invader::Parser {
         }
         else {
             if(this->falling_damage.size() != 1) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
+                throw InvalidTagDataException();
             }
             if(this->materials.size() != 32) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Globals tag does not have exactly 32 material blocks which is required for the map type", tag_index);
+                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 32 material blocks which is required for the map type", tag_index);
+                throw InvalidTagDataException();
             }
         }
     }
@@ -61,7 +66,8 @@ namespace Invader::Parser {
             engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
         ) {
             #define CHECK_NADE_ON_MP_COUNT(what) if(static_cast<std::size_t>(this->what) > max_grenades_mp_gbx) { \
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
+                throw InvalidTagDataException(); \
             }
             CHECK_NADE_ON_MP_COUNT(maximum_count);
             CHECK_NADE_ON_MP_COUNT(mp_spawn_default);

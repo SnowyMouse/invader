@@ -22,7 +22,8 @@ namespace Invader::Parser {
 
         // Animate what?
         if(tag.model.path.size() == 0 && tag.animation_graph.path.size() != 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_ERROR, "Object tag has a model tag but no animation graph", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Object tag has an animation graph but no model tag", tag_index);
+            throw InvalidTagDataException();
         }
     }
 
@@ -531,7 +532,8 @@ namespace Invader::Parser {
                                     else {
                                         noun = "sprite";
                                     }
-                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Weapon has %zu magnification level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Weapon has %zu magnification level%s, but the sequence referenced in crosshair overlay #%zu of crosshair #%zu only has %zu %s%s", static_cast<std::size_t>(this->magnification_levels), this->magnification_levels == 1 ? "" : "s", o, c, max_zoom_levels, noun, max_zoom_levels == 1 ? "" : "s");
+                                    throw InvalidTagDataException();
                                 }
                             }
                         }
