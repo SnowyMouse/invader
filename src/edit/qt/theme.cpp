@@ -11,7 +11,7 @@ namespace SixShooter {
     void Theme::set_win32_theme() {
         QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
         auto setting = settings.value("AppsUseLightTheme");
-        if((!setting.isNull() && setting == 0) || true) {
+        if(!setting.isNull() && setting == 0) {
             qApp->setStyle(QStyleFactory::create("Fusion"));
             QPalette dark_palette;
             
