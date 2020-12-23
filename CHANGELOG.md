@@ -18,6 +18,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Font tags with alternative styles references will no longer be
   indexed
 - invader-build: CRC32s must now start with `0x`
+- invader-build: All errors with tag data are reported as fatal errors now
 - invader-info: CRC32s are now output starting with `0x`
 - invader-sound: Now uses CPU thread count by default instead of 1
 
