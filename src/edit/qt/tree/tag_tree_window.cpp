@@ -30,7 +30,7 @@
 namespace Invader::EditQt {
     TagTreeWindow::TagTreeWindow() {
         #ifdef _WIN32
-        Theme::set_win32_theme();
+        SixShooter::Theme::set_win32_theme();
         #endif
         
         // Set some window stuff
