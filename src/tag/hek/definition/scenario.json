@@ -3300,7 +3300,7 @@
                 "name": "equipment",
                 "type": "TagReflexive",
                 "struct": "ScenarioEquipment",
-                "hek_maximum": 128,
+                "hek_maximum": 256,
                 "compound": true,
                 "maximum": 65535
             },
