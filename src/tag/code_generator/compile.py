@@ -17,6 +17,9 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
     ## Add our struct to the stack
     cpp_cache_format_data.write("        stack->push_front(this);\n")
     
+    # Check if we're on the native engine. if not, check against stock limits (but don't strictly error)
+    cpp_cache_format_data.write("        [[maybe_unused]] auto check_stock_limits = workload.get_build_parameters()->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE;\n")
+    
     # Zero out the base struct
     cpp_cache_format_data.write("        auto *start = workload.structs[struct_index].data.data();\n")
     cpp_cache_format_data.write("        workload.structs[struct_index].bsp = bsp;\n")
@@ -95,6 +98,12 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                 cpp_cache_format_data.write("        if(t_{}_count > {}) {{\n".format(name, maximum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must have no more than {} block{}\", tag_index);\n".format(struct_name, name, maximum, "" if maximum == 1 else "s"))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
+                cpp_cache_format_data.write("        }\n")
+                
+            # If there's a limited defined by the HEK, warn
+            if "hek_maximum" in struct:
+                cpp_cache_format_data.write("        if(check_stock_limits && t_{}_count > {}) {{\n".format(name, struct["hek_maximum"]))
+                cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_WARNING, \"{}::{} exceeds the stock limit of {} block{} and may not work as intended on the target engine\", tag_index);\n".format(struct_name, name, struct["hek_maximum"], "" if struct["hek_maximum"] == 1 else "s"))
                 cpp_cache_format_data.write("        }\n")
                 
             # Now actually work
