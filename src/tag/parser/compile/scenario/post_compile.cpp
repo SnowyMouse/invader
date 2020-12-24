@@ -616,8 +616,8 @@ namespace Invader::Parser {
                     command_list_data.precomputed_bsp_index = NULL_INDEX;
                 }
                 
-                // Show warnings if needed
-                if(show_warnings) {
+                // Show warnings if needed (only warn if we have more than 0 points, since 0 point encounters can't technically be in any BSP)
+                if(show_warnings && point_count > 0) {
                     if(total_best_bsps == 0) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
                     }
