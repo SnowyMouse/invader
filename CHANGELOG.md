@@ -33,6 +33,8 @@ This is used for recording Invader's changes. This changelog is based on
   not using single tag archival
 - invader-build: Fixed `-n` not working as expected
 - invader-build: Fixed word wrapping using the wrong length
+- invader-build: Fixed manually specified BSPs for command lists and encounters
+  being warned as BSP #65535 if they are completely outside of the BSP
 - invader-info: Fixed `-h` not listing every option correctly
 
 ## [0.39.0] - 2020-12-07

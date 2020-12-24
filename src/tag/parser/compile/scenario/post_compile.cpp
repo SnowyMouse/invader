@@ -193,14 +193,18 @@ namespace Invader::Parser {
 
                 // If we have a manual BSP index, set this stuff here
                 std::size_t start_bsp = 0;
+                std::size_t best_bsp;
                 bool manual_bsp_index_specified = encounter.flags & HEK::ScenarioEncounterFlagsFlag::SCENARIO_ENCOUNTER_FLAGS_FLAG_MANUAL_BSP_INDEX_SPECIFIED;
                 if(manual_bsp_index_specified) {
                     encounter_data.precomputed_bsp_index = encounter_data.manual_bsp_index;
                     start_bsp = encounter_data.manual_bsp_index;
+                    best_bsp = start_bsp;
+                }
+                else {
+                    best_bsp = NULL_INDEX;
                 }
 
                 // Otherwise, we need to look for the best BSP
-                std::size_t best_bsp = NULL_INDEX;
                 std::size_t best_bsp_firing_position_hits = 0;
                 std::size_t best_bsp_squad_hits = 0;
                 std::size_t best_bsp_total_hits = 0;
@@ -327,6 +331,8 @@ namespace Invader::Parser {
                         best_bsp = b;
                         total_best_bsps = 1;
                     }
+                    
+                    // It's tied with some other BSP?
                     else if(total_hits && total_hits == best_bsp_total_hits) {
                         total_best_bsps++;
                     }
@@ -338,10 +344,8 @@ namespace Invader::Parser {
                     }
                 }
 
-                // Are we doing the thing?
-                if(!manual_bsp_index_specified) {
-                    encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
-                }
+                // Set our best BSP
+                encounter_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 
                 auto best_possible_hits = squad_position_count + firing_position_count;
                 
@@ -356,7 +360,12 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) was found in 0 BSPs", i, encounter.name.string);
                 }
                 else if(best_bsp_total_hits != best_possible_hits) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    if(best_bsp_total_hits == 0) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is completely outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    }
+                    else {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Encounter #%zu (%s) is partially outside of BSP #%zu", i, encounter.name.string, best_bsp);
+                    }
                     
                     // Show the firing positions and squad positions that are missing
                     auto missing_firing_positions = firing_position_count - best_bsp_firing_position_hits;
@@ -531,7 +540,7 @@ namespace Invader::Parser {
                 }
 
                 // Go through each BSP
-                std::size_t best_bsp = NULL_INDEX;
+                std::size_t best_bsp;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
                 std::size_t max_hits = 0;
@@ -541,6 +550,10 @@ namespace Invader::Parser {
                 // If manually specifying a BSP, don't bother checking every BSP
                 if(manual_bsp_index_specified) {
                     start = command_list.manual_bsp_index;
+                    best_bsp = start;
+                }
+                else {
+                    best_bsp = NULL_INDEX;
                 }
                 
                 auto point_count = command_list.points.size();
@@ -611,8 +624,13 @@ namespace Invader::Parser {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
                     }
                     else if(best_bsp_hits != max_hits) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
-                        
+                        if(best_bsp_hits == 0) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is completely outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                        }
+                        else {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                        }
+                            
                         auto missing_points = max_hits - best_bsp_hits;
                         int offset = 0;
                         char missing_points_list[256] = {};
@@ -633,7 +651,6 @@ namespace Invader::Parser {
                         }
                         
                         eprintf_warn_lesser("    - %zu point%s fell out: [%s]", missing_points, missing_points == 1 ? "" : "s", missing_points_list);
-                        
                     }
                     else if(total_best_bsps > 1) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in %zu BSP%s (will place in BSP #%zu)", i, command_list.name.string, total_best_bsps, total_best_bsps == 1 ? "" : "s", best_bsp);
