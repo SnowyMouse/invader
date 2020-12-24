@@ -20,11 +20,13 @@ namespace Invader {
         
         // Resize based on console width
         #ifdef __linux__
-        struct winsize w;
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);   
-        std::size_t new_width = static_cast<std::size_t>(w.ws_col);
-        if(terminal_width < new_width) {
-            terminal_width = new_width;
+        struct winsize w = {};
+        if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+            std::size_t new_width = static_cast<std::size_t>(w.ws_col);
+            std::printf("%zu\n", new_width);
+            if(terminal_width < new_width) {
+                terminal_width = new_width;
+            }
         }
         #endif
         
