@@ -565,7 +565,7 @@ namespace Invader {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
         
-        bool warn_on_zero_alpha = usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND;
+        bool warn_on_zero_alpha = false;
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
@@ -722,6 +722,8 @@ namespace Invader {
                 bitmap.pixels.insert(bitmap.pixels.end(), mipmap_height * mipmap_width, ColorPlatePixel {});
                 auto *last_mipmap_data = bitmap.pixels.data() + last_mipmap_offset;
                 auto *this_mipmap_data = bitmap.pixels.data() + next_mipmap.first_pixel;
+                
+                bool has_zero_alpha_and_alpha_blend_usage = usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND;
 
                 // Combine each 2x2 block based on the given algorithm
                 for(std::uint32_t y = 0; y < mipmap_height; y++) {
@@ -771,7 +773,7 @@ namespace Invader {
                         pixel = last_a;
 
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
-                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; } else { warn_on_zero_alpha = false; }
+                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; } else { has_zero_alpha_and_alpha_blend_usage = false; }
                         
                         // If alpha blend, discard anything with 0 alpha
                         if(usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND) {
@@ -813,6 +815,8 @@ namespace Invader {
                 mipmap_height = std::max(static_cast<std::size_t>(mipmap_height / 2), static_cast<std::size_t>(1));
                 mipmap_width = std::max(static_cast<std::size_t>(mipmap_width / 2), static_cast<std::size_t>(1));
                 last_mipmap_offset = this_mipmap_offset;
+                
+                warn_on_zero_alpha = warn_on_zero_alpha || has_zero_alpha_and_alpha_blend_usage;
             }
 
             // Do fade-to-gray for each mipmap
