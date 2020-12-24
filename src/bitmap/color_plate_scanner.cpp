@@ -564,6 +564,8 @@ namespace Invader {
     void ColorPlateScanner::generate_mipmaps(GeneratedBitmapData &generated_bitmap, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, const std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::optional<float> sharpen, std::optional<float> blur, BitmapUsage usage) {
         auto mipmaps_unsigned = static_cast<std::uint32_t>(mipmaps);
         float fade = mipmap_fade_factor.value_or(0.0F);
+        
+        bool warn_on_zero_alpha = usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND;
 
         for(auto &bitmap : generated_bitmap.bitmaps) {
             std::uint32_t mipmap_width = bitmap.width;
@@ -769,7 +771,7 @@ namespace Invader {
                         pixel = last_a;
 
                         #define INTERPOLATE_CHANNEL(channel) pixel.channel = static_cast<std::uint8_t>((static_cast<std::uint16_t>(last_a.channel) + static_cast<std::uint16_t>(last_b.channel) + static_cast<std::uint16_t>(last_c.channel) + static_cast<std::uint16_t>(last_d.channel)) / 4)
-                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; }
+                        #define ZERO_OUT_IF_NO_ALPHA(what) if(what.alpha == 0) { what = {}; pixel_count--; } else { warn_on_zero_alpha = false; }
                         
                         // If alpha blend, discard anything with 0 alpha
                         if(usage == BitmapUsage::BITMAP_USAGE_ALPHA_BLEND) {
@@ -860,6 +862,10 @@ namespace Invader {
                     }
                 }
             }
+        }
+        
+        if(warn_on_zero_alpha) {
+            eprintf_warn("Usage is alpha blend, and a bitmap has zero alpha; its mipmaps will be black.");
         }
     }
 
