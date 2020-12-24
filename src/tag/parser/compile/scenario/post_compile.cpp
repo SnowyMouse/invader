@@ -543,7 +543,6 @@ namespace Invader::Parser {
                 std::size_t best_bsp;
                 std::size_t best_bsp_hits = 0;
                 std::size_t total_best_bsps = 0;
-                std::size_t max_hits = 0;
                 std::size_t start = 0;
                 bool manual_bsp_index_specified = command_list.flags & HEK::ScenarioCommandListFlagsFlag::SCENARIO_COMMAND_LIST_FLAGS_FLAG_MANUAL_BSP_INDEX;
 
@@ -587,7 +586,6 @@ namespace Invader::Parser {
                         best_bsp_hits = hits;
                         best_bsp = b;
                         total_best_bsps = 1;
-                        max_hits = total_hits;
                         best_surface_indices = surface_indices;
                     }
                     else if(hits && hits == best_bsp_hits) {
@@ -611,7 +609,7 @@ namespace Invader::Parser {
                 }
                 
                 // Command lists are all-or-nothing here
-                if(manual_bsp_index_specified || max_hits == best_bsp_hits) {
+                if(manual_bsp_index_specified || point_count == best_bsp_hits) {
                     command_list_data.precomputed_bsp_index = static_cast<HEK::Index>(best_bsp);
                 }
                 else {
@@ -623,15 +621,15 @@ namespace Invader::Parser {
                     if(total_best_bsps == 0) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) was found in 0 BSPs", i, command_list.name.string);
                     }
-                    else if(best_bsp_hits != max_hits) {
+                    else if(best_bsp_hits != point_count) {
                         if(best_bsp_hits == 0) {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is completely outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is completely outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, point_count, point_count == 1 ? "" : "s");
                         }
                         else {
-                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, max_hits, max_hits == 1 ? "" : "s");
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Command list #%zu (%s) is partially outside of BSP #%zu (%zu / %zu hit%s)", i, command_list.name.string, best_bsp, best_bsp_hits, point_count, point_count == 1 ? "" : "s");
                         }
                             
-                        auto missing_points = max_hits - best_bsp_hits;
+                        auto missing_points = point_count - best_bsp_hits;
                         int offset = 0;
                         char missing_points_list[256] = {};
                         unsigned int listed = 0;
