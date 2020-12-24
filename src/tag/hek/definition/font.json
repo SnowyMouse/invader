@@ -20,7 +20,7 @@
                 "type": "TagReflexive",
                 "struct": "FontCharacterIndex",
                 "maximum": 256,
-                "hek_maximum": 4,
+                "hek_maximum": 256,
                 "compound": true
             }
         ],

@@ -1704,7 +1704,7 @@
                 "compound": true,
                 "minimum": 2,
                 "maximum": 2,
-                "hek_maximum": 1
+                "hek_maximum": 2
             },
             {
                 "name": "rasterizer data",
