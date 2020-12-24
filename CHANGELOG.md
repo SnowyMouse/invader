@@ -19,6 +19,8 @@ This is used for recording Invader's changes. This changelog is based on
   indexed
 - invader-build: CRC32s must now start with `0x`
 - invader-build: All errors with tag data are reported as fatal errors now
+- invader-build: All stock HEK limits are checked when building for all PC
+  versions of Halo
 - invader-info: CRC32s are now output starting with `0x`
 - invader-sound: Now uses CPU thread count by default instead of 1
 
