@@ -42,6 +42,9 @@ This is used for recording Invader's changes. This changelog is based on
   outside of the BSP
 - invader-info: Fixed `-h` not listing every option correctly
 
+### Removed
+- invader-sound: Removed `-x`
+
 ## [0.39.0] - 2020-12-07
 ### Added
 - invader-build: Added `-g mcc-custom` which builds a Custom Edition map but
