@@ -244,6 +244,7 @@ namespace Invader::Parser {
                 case HEK::CacheFileEngine::CACHE_FILE_DEMO:
                 case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
                 case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
+                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                     if(swizzled) {
                         do_swizzle(true);
                     }
