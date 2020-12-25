@@ -41,7 +41,6 @@ if(${INVADER_EDIT_QT})
     )
 
     if(WIN32)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows")
         target_sources(invader-edit-qt PRIVATE src/edit/qt/theme.cpp)
     endif()
 
