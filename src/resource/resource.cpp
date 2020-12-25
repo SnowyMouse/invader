@@ -526,4 +526,6 @@ int main(int argc, const char **argv) {
 
     // Done!
     std::fclose(f);
+    
+    oprintf("Created a resource map file at %s\n", map_path.string().c_str());
 }

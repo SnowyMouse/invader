@@ -12,12 +12,6 @@
 #include <invader/resource/hek/resource_map.hpp>
 #include <invader/command_line_option.hpp>
 
-enum ReturnValue : int {
-    RETURN_OK = 0,
-    RETURN_FAILED_NOTHING_TO_DO = 1,
-    RETURN_FAILED_ERROR = 2
-};
-
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
@@ -44,7 +38,7 @@ int main(int argc, const char **argv) {
     // Open input map
     if(!input_map_data.has_value()) {
         eprintf_error("Failed to read %s", input);
-        return RETURN_FAILED_ERROR;
+        return EXIT_FAILURE;
     }
 
     auto input_map = std::move(*input_map_data);
@@ -86,13 +80,13 @@ int main(int argc, const char **argv) {
             }
             catch(std::exception &) {
                 std::fclose(f);
-                return RETURN_FAILED_ERROR;
+                return EXIT_FAILURE;
             }
             std::fclose(f);
         }
         catch(std::exception &e) {
             eprintf_error("Exception %s", e.what());
-            return RETURN_FAILED_ERROR;
+            return EXIT_FAILURE;
         }
     }
 
@@ -105,7 +99,7 @@ int main(int argc, const char **argv) {
             std::FILE *f = std::fopen(output, "wb");
             if(!f) {
                 eprintf_error("Failed to open %s", output);
-                return RETURN_FAILED_ERROR;
+                return EXIT_FAILURE;
             }
 
             try {
@@ -117,13 +111,15 @@ int main(int argc, const char **argv) {
             }
             catch(std::exception &) {
                 std::fclose(f);
-                return RETURN_FAILED_ERROR;
+                return EXIT_FAILURE;
             }
             std::fclose(f);
         }
         catch(std::exception &e) {
             eprintf_error("Exception: %s", e.what());
-            return RETURN_FAILED_ERROR;
+            return EXIT_FAILURE;
         }
     }
+    
+    oprintf("Created an index file at %s\n", output);
 }
