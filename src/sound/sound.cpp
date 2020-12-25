@@ -30,7 +30,7 @@ struct SoundOptions {
     std::size_t max_threads = std::thread::hardware_concurrency() < 1 ? 1 : std::thread::hardware_concurrency();
 };
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound);
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count);
 static void process_permutation_thread(SoundReader::Sound *permutation, std::uint16_t highest_sample_rate, SoundFormat format, std::uint16_t highest_channel_count, std::atomic<std::size_t> *thread_count, bool fit_adpcm_block_size);
 
 template<typename T> static std::vector<std::byte> make_sound_tag(const std::filesystem::path &tag_path, const std::filesystem::path &data_path, SoundOptions &sound_options) {
@@ -161,8 +161,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
         else {
             sound_options.compression_level = invader_sound->compression_level;
         }
-
-        invader_sound->source_FLACs.clear();
     }
 
     // Hold onto this
@@ -209,9 +207,6 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
             permutation.samples = std::vector<std::byte>();
         }
     }
-    if(invader_sound) {
-        invader_sound->source_FLACs.clear();
-    }
 
     // Same with whether to split
     if(sound_options.split.has_value()) {
@@ -256,7 +251,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
     // Load the sounds
     if(contains_files) {
         auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), "default");
-        populate_pitch_range(pitch_range.first, data_path, highest_sample_rate, highest_channel_count, 0, invader_sound);
+        populate_pitch_range(pitch_range.first, data_path, highest_sample_rate, highest_channel_count);
     }
     else if(contains_directories) {
         std::size_t i = 0;
@@ -267,7 +262,7 @@ template<typename T> static std::vector<std::byte> make_sound_tag(const std::fil
                 std::exit(EXIT_FAILURE);
             }
             auto &pitch_range = pitch_ranges.emplace_back(std::vector<SoundReader::Sound>(), path.filename().string());
-            populate_pitch_range(pitch_range.first, path, highest_sample_rate, highest_channel_count, i++, invader_sound);
+            populate_pitch_range(pitch_range.first, path, highest_sample_rate, highest_channel_count);
             if(i == NULL_INDEX) {
                 eprintf_error("%u or more pitch ranges are present", NULL_INDEX);
                 std::exit(EXIT_FAILURE);
@@ -906,7 +901,7 @@ int main(int argc, const char **argv) {
     }
 }
 
-static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count, std::size_t pitch_range_index, Parser::InvaderSound *invader_sound) {
+static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, const std::filesystem::path &directory, std::uint32_t &highest_sample_rate, std::uint16_t &highest_channel_count) {
     for(auto &wav : std::filesystem::directory_iterator(directory)) {
         // Skip directories
         auto path = wav.path();
@@ -946,20 +941,6 @@ static void populate_pitch_range(std::vector<SoundReader::Sound> &permutations, 
         // Lowercase it
         for(char &c : sound.name) {
             c = std::tolower(c);
-        }
-
-        // Add it to the source list
-        if(invader_sound) {
-            auto &source = invader_sound->source_FLACs.emplace_back();
-            std::memset(source.file_name.string, 0, sizeof(source.file_name.string));
-            std::strncpy(source.file_name.string, sound.name.c_str(), sizeof(source.file_name) - 1);
-            if(extension == ".flac") {
-                source.compressed_audio_data = *File::open_file(path);
-            }
-            else {
-                source.compressed_audio_data = SoundEncoder::encode_to_flac(sound.pcm, sound.bits_per_sample, sound.channel_count, sound.sample_rate, 5);
-            }
-            source.pitch_range = pitch_range_index;
         }
 
         // Use the highest channel count and sample rate

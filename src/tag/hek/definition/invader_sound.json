@@ -27,33 +27,6 @@
         "type": "enum"
     },
     {
-        "name": "InvaderSoundSourceFLAC",
-        "type": "struct",
-        "fields": [
-            {
-                "name": "file name",
-                "endian": null,
-                "type": "TagString"
-            },
-            {
-                "name": "compressed audio data",
-                "type": "TagDataOffset",
-                "compound": true
-            },
-            {
-                "type": "Index",
-                "name": "pitch range"
-            },
-            {
-                "type": "pad",
-                "size": 10
-            }
-        ],
-        "size": 64,
-        "title": "file name",
-        "read_only": true
-    },
-    {
         "name": "InvaderSound",
         "groups": [
             {
@@ -97,21 +70,7 @@
             },
             {
                 "type": "pad",
-                "size": 66
-            },
-            {
-                "type": "TagReflexive",
-                "struct": "InvaderSoundSourceFLAC",
-                "name": "source FLACs",
-                "compound": true,
-                "comment": "This is a collection of all of the source audio used for each actual permutation, re-encoded as FLAC",
-                "non_cached": true,
-                "read_only": true,
-                "volatile": true
-            },
-            {
-                "type": "pad",
-                "size": 96
+                "size": 174
             }
         ],
         "type": "struct",
