@@ -15,6 +15,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ### Changed
 - invader: Fixed segfault when querying dependencies for various tools
+- invader-bitmap: Dithering can now be used on regular bitmap tags, and so can
+  sprite budgets above 512x512, but you will be warned that they will not save.
 - invader-build: Font tags with alternative styles references will no longer be
   indexed
 - invader-build: CRC32s must now start with `0x`
@@ -43,6 +45,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-info: Fixed `-h` not listing every option correctly
 
 ### Removed
+- invader-bitmap: Removed `-x`
 - invader-sound: Removed `-x`
 
 ## [0.39.0] - 2020-12-07
