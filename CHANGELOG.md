@@ -44,6 +44,7 @@ This is used for recording Invader's changes. This changelog is based on
   being warned as BSP #65535 if they are completely outside of the BSP
 - invader-build: Fixed warning on command lists that have zero points being
   outside of the BSP
+- invader-edit-qt: Fixed subwindows always being above of the main window
 - invader-info: Fixed `-h` not listing every option correctly
 
 ### Removed
