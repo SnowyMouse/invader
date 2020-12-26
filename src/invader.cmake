@@ -135,10 +135,6 @@ set(INVADER_SOURCE_FILES
     src/version.cpp
 )
 
-if(NOT DEFINED ${INVADER_STATIC_BUILD})
-    set(INVADER_STATIC_BUILD false CACHE BOOL "Create a static build of libinvader.a (NOTE: Does not remove external dependencies)")
-endif()
-
 # If static build, build as static
 if(${INVADER_STATIC_BUILD})
     add_library(invader STATIC
