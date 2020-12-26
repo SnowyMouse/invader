@@ -94,7 +94,17 @@ namespace Invader::Parser {
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
 
-                // TODO: Deal with cubemaps and stuff
+                // Bad!
+                if(should_be_compressed != compressed) {
+                    if(compressed) {
+                        eprintf_error("Bitmap is incorrectly marked as compressed but is NOT DXT; tag is corrupt");
+                    }
+                    else {
+                        eprintf_error("Bitmap is incorrectly NOT marked as compressed but is DXT; tag is corrupt");
+                    }
+                    throw InvalidTagDataException();
+                }
+
                 if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
                     eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
                     throw InvalidTagDataException();
