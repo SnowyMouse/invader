@@ -93,7 +93,16 @@ namespace Invader::Parser {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
                 bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-
+                bool should_be_compressed = false;
+                switch(bitmap_data_le.format) {
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                    case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+                        should_be_compressed = true;
+                    default:
+                        should_be_compressed = false;
+                }
+                
                 // Bad!
                 if(should_be_compressed != compressed) {
                     if(compressed) {
