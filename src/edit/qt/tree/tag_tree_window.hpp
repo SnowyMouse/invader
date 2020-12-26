@@ -107,7 +107,7 @@ namespace Invader::EditQt {
 
     private:
         /** Reload the tags in the tag array */
-        void reload_tags();
+        void reload_tags(bool reiterate_directories);
 
         /** Show the about window */
         void show_about_window();

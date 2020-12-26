@@ -168,7 +168,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::refresh_view() {
-        this->reload_tags();
+        this->reload_tags(true);
     }
 
     void TagTreeWindow::show_about_window() {
@@ -270,7 +270,7 @@ namespace Invader::EditQt {
 
     TagFetcherThread::TagFetcherThread(QObject *parent, const std::vector<std::filesystem::path> &all_paths) : QThread(parent), all_paths(all_paths) {}
 
-    void TagTreeWindow::reload_tags() {
+    void TagTreeWindow::reload_tags(bool reiterate_directories) {
         // Ensure we only reload once
         if(this->tags_reloading_queued) {
             return;
@@ -281,15 +281,23 @@ namespace Invader::EditQt {
         this->tag_loading_label->show();
 
         // Clear all tags
-        this->all_tags.clear();
-        emit tags_reloaded(this);
+        if(reiterate_directories) {
+            this->all_tags.clear();
+            emit tags_reloaded(this);
 
-        // Now... let's do this
-        this->fetcher_thread = new TagFetcherThread(this, this->paths);
-        connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
-        connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
-        connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);
-        this->fetcher_thread->start();
+            // Now... let's do this
+            this->fetcher_thread = new TagFetcherThread(this, this->paths);
+            connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
+            connect(this->fetcher_thread, &TagFetcherThread::fetch_finished, this, &TagTreeWindow::tags_reloaded_finished);
+            connect(this->fetcher_thread, &TagFetcherThread::finished, this->fetcher_thread, &TagFetcherThread::deleteLater);
+            this->fetcher_thread->start();
+        }
+        
+        // Just a simple refresh
+        else {
+            auto all_tags_copy = this->all_tags;
+            this->tags_reloaded_finished(&all_tags_copy, 0);
+        }
     }
 
     void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result, int error_count) {
@@ -511,8 +519,19 @@ namespace Invader::EditQt {
         QMessageBox are_you_sure(QMessageBox::Icon::Warning, "Delete tag", message_entire_text, QMessageBox::Yes | QMessageBox::Cancel);
         switch(are_you_sure.exec()) {
             case QMessageBox::Yes:
+                // Remove from file system
                 std::filesystem::remove(tag->full_path);
-                this->reload_tags();
+                
+                // Remove from array
+                for(auto &i : this->all_tags) {
+                    if(i.full_path == tag->full_path) {
+                        this->all_tags.erase(this->all_tags.begin() + (&i - this->all_tags.data()));
+                        break;
+                    }
+                }
+                
+                // Quickly refresh
+                this->reload_tags(false);
                 return true;
             case QMessageBox::Cancel:
                 return false;

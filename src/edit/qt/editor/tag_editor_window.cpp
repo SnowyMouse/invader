@@ -314,8 +314,13 @@ namespace Invader::EditQt {
             catch(std::exception &e) {
                 eprintf_error("Failed to create directories: %s", e.what());
             }
+            
+            // Save it!
             auto result = this->perform_save();
-            this->parent_window->reload_tags();
+            this->file = this->parent_window->all_tags.emplace_back(this->file);
+            this->parent_window->reload_tags(false);
+            
+            // Done
             return result;
         }
 
