@@ -1,11 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#ifdef INVADER_WIN32_EXE_STATIC_LINK
+#include <QtPlugin>
+#endif
+
 #include <QApplication>
 #include <QMessageBox>
 #include <invader/command_line_option.hpp>
 #include <invader/version.hpp>
 #include <invader/printf.hpp>
 #include "tree/tag_tree_window.hpp"
+
+#ifdef INVADER_WIN32_EXE_STATIC_LINK
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
+Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
+#endif
 
 int main(int argc, char **argv) {
     EXIT_IF_INVADER_EXTRACT_HIDDEN_VALUES

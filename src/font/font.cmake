@@ -20,6 +20,11 @@ if(${INVADER_FONT})
     )
 
     target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES})
+    
+    # Yes, putting FREETYPE_LIBRARIES there a SECOND time is intentional. harfbuzz/graphite2/freetype is a cyclical dependency, so we get wrecked
+    if(${INVADER_WIN32_EXE_STATIC_LINK})
+        target_link_libraries(invader-font png bz2 harfbuzz graphite2 ${FREETYPE_LIBRARIES})
+    endif()
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-font)
 

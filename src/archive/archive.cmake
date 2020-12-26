@@ -17,5 +17,10 @@ if(${INVADER_ARCHIVE})
     target_include_directories(invader-archive PUBLIC ${LibArchive_INCLUDE_DIRS})
     target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES})
 
+    # You may need to build libarchive without the other stuff enabled, since we really just need lzma
+    if(${INVADER_WIN32_EXE_STATIC_LINK})
+        target_link_libraries(invader-archive invader ${LibArchive_LIBRARIES} lzma)
+    endif()
+
     set(TARGETS_LIST ${TARGETS_LIST} invader-archive)
 endif()
