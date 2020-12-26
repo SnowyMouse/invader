@@ -455,7 +455,7 @@ namespace Invader::EditQt {
         this->tag_opening_label->setText(open_label);
         this->opening_tag = true;
         QCoreApplication::processEvents();
-        auto document = std::make_unique<TagEditorWindow>(this, this, tag);
+        auto document = std::make_unique<TagEditorWindow>(nullptr, this, tag);
         this->opening_tag = false;
         this->tag_opening_label->setText("");
         auto *window = document.get();
