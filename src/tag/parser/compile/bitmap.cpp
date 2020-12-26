@@ -99,6 +99,7 @@ namespace Invader::Parser {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
                         should_be_compressed = true;
+                        break;
                     default:
                         should_be_compressed = false;
                 }
