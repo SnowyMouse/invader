@@ -92,9 +92,12 @@ namespace Invader::Parser {
             for(std::size_t bd = 0; bd < bd_count; bd++) {
                 auto &bitmap_data = bitmap->bitmap_data[bd];
                 auto &bitmap_data_le = bitmap_data_le_array[bd];
+                std::size_t size = bitmap_data.pixel_data_size;
+                
                 bool compressed = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
                 bool should_be_compressed = false;
-                switch(bitmap_data_le.format) {
+                
+                switch(bitmap_data.format) {
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                     case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
@@ -114,56 +117,131 @@ namespace Invader::Parser {
                     }
                     throw InvalidTagDataException();
                 }
-
-                if(xbox && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE) {
-                    eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
-                    throw InvalidTagDataException();
-                }
                 
-                // If it's an Xbox bitmap and it's compressed, the mipmap count *may* be memed
-                if(xbox && compressed) {
-                    std::size_t width = bitmap_data.width;
-                    std::size_t height = bitmap_data.height;
-                    std::size_t old_mipmap_count_value = bitmap_data.mipmap_count;
-                    std::size_t new_mipmap_count_value;
-                    for(new_mipmap_count_value = 0; new_mipmap_count_value <= old_mipmap_count_value; new_mipmap_count_value++) {
-                        width /= 2;
-                        height /= 2;
-                        
-                        // If we're less than 4, break
-                        if(width < 4 || height < 4) {
-                            break;
-                        }
+                // Also check if it needs deswizzled (don't do it yet)
+                bool swizzled = bitmap_data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                if(swizzled) {
+                    if(compressed) {
+                        eprintf_error("Bitmap is incorrectly marked as compressed AND swizzled; tag is corrupt");
+                        throw InvalidTagDataException();
                     }
-                    bitmap_data.mipmap_count = new_mipmap_count_value;
-                    bitmap_data.pixel_data_size = size_of_bitmap(bitmap_data);
                 }
                 
-                // Make sure the size is correct, too
-                auto bitmap_size = size_of_bitmap(bitmap_data);
-                if(bitmap_size < bitmap_data.pixel_data_size) {
-                    bitmap_data.pixel_data_size = bitmap_size;
-                }
-                
-                // Did someone screw up?
-                if(bitmap_size > bitmap_data.pixel_data_size) {
-                    oprintf("Failed to extract %s: size is too small %zu expected > %zu actual\n", tag.get_path().c_str(), bitmap_size, static_cast<std::size_t>(bitmap_data.pixel_data_size));
-                    throw InvalidTagDataException();
-                }
-
+                // Get it!
                 const std::byte *bitmap_data_ptr;
                 if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
-                    bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size, Map::DATA_MAP_BITMAP);
+                    bitmap_data_ptr = map.get_data_at_offset(bitmap_data.pixel_data_offset, size, Map::DATA_MAP_BITMAP);
                 }
                 else {
-                    bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, bitmap_data.pixel_data_size);
+                    bitmap_data_ptr = map.get_internal_asset(bitmap_data.pixel_data_offset, size);
+                }
+                
+                // Xbox buffer (for Xbox bitmaps), since the size will always be a multiple of 128 and thus won't be the same size as a PC bitmap
+                std::vector<std::byte> xbox_to_pc_buffer;
+                
+                if(xbox) {
+                    // We don't support these yet
+                    if(bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE) {
+                        eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
+                        throw InvalidTagDataException();
+                    }
+                
+                    // Set flag as unswizzled
+                    bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                    
+                    // Set our buffer up
+                    xbox_to_pc_buffer.resize(size_of_bitmap(bitmap_data));
+                    
+                    auto copy_2d_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data]() {
+                        std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
+                        std::size_t real_mipmap_count = bitmap_data.mipmap_count;
+                        std::size_t height = bitmap_data.height;
+                        std::size_t width = bitmap_data.width;
+                        auto *input = bitmap_data_ptr;
+                        auto *output = xbox_to_pc_buffer.data();
+                        
+                        if(swizzled) {
+                            // Deswizzle
+                            std::size_t minimum_dimension = 1;
+                            for(std::size_t m = 0; m <= real_mipmap_count; m++) {
+                                auto deswizzled = Invader::Swizzle::swizzle(input, bits_per_pixel, std::max(width >> m, minimum_dimension), std::max(height >> m, minimum_dimension), true);
+                                std::memcpy(output, deswizzled.data(), deswizzled.size());
+                                input += deswizzled.size();
+                                output += deswizzled.size();
+                            }
+                        }
+                        else if(compressed) {
+                            // Resolution the bitmap is stored as
+                            if(height % 4) {
+                                height += 4 - (height % 4);
+                            }
+                            if(width % 4) {
+                                width += 4 - (width % 4);
+                            }
+                            
+                            // Mipmaps less than 4x4 don't exist in Xbox maps
+                            while((height >> real_mipmap_count) < 4 && (width >> real_mipmap_count) < 4 && real_mipmap_count > 0) {
+                                real_mipmap_count--;
+                            }
+                            
+                            // Begin
+                            auto *input = bitmap_data_ptr;
+                            auto *output = xbox_to_pc_buffer.data();
+                            std::size_t minimum_dimension = 4;
+                            
+                            // Copy this stuff
+                            for(std::size_t m = 0; m <= real_mipmap_count; m++) {
+                                auto mipmap_height = height >> m;
+                                auto mipmap_width = width >> m;
+                                auto copy_size = (std::max(mipmap_height, minimum_dimension) * std::max(mipmap_width, minimum_dimension) * bits_per_pixel) / 8;
+                                std::memcpy(output, input, copy_size);
+                                input += copy_size;
+                                output += copy_size;
+                            }
+                            
+                            // Get the block size
+                            auto block_size = (minimum_dimension * minimum_dimension * bits_per_pixel) / 8;
+                            input -= block_size;
+                            
+                            // Lastly, copy the missing mipmaps if necessary
+                            for(std::size_t m = real_mipmap_count; m < bitmap_data.mipmap_count; m++) {
+                                std::memcpy(output, input, block_size);
+                                output += block_size;
+                            }
+                        }
+                        else {
+                            // Simple copy
+                            std::memcpy(xbox_to_pc_buffer.data(), bitmap_data_ptr, size);
+                        }
+                    };
+                    
+                    switch(bitmap_data_le.type) {
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                            throw std::exception();
+                            break;
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                            throw std::exception();
+                            break;
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
+                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
+                            copy_2d_texture();
+                            break;
+                        default:
+                            throw std::exception();
+                            break;
+                    }
+                    
+                    
+                    bitmap_data_ptr = xbox_to_pc_buffer.data();
+                    size = xbox_to_pc_buffer.size();
+                    bitmap_data.pixel_data_size = size;
                 }
 
                 // Calculate our offset
                 bitmap_data.pixel_data_offset = static_cast<std::size_t>(bitmap->processed_pixel_data.size());
                 
                 // Insert this
-                bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + bitmap_data.pixel_data_size);
+                bitmap->processed_pixel_data.insert(bitmap->processed_pixel_data.end(), bitmap_data_ptr, bitmap_data_ptr + size);
             }
         }
     }
