@@ -282,9 +282,6 @@ namespace Invader::EditQt {
 
         // Clear all tags
         if(reiterate_directories) {
-            this->all_tags.clear();
-            emit tags_reloaded(this);
-
             // Now... let's do this
             this->fetcher_thread = new TagFetcherThread(this, this->paths);
             connect(this->fetcher_thread, &TagFetcherThread::tag_count_changed, this, &TagTreeWindow::tag_count_changed);
