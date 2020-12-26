@@ -258,7 +258,8 @@ namespace Invader::EditQt {
             this->statuser.first.lock();
             std::size_t new_count = this->statuser.second;
             this->statuser.first.unlock();
-            if(new_count > last_tag_count) {
+            if(new_count > last_tag_count + 100) {
+                last_tag_count = new_count;
                 emit tag_count_changed(&this->statuser);
             }
         }
