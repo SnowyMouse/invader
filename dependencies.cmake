@@ -11,7 +11,7 @@ find_package(Git)
 option(INVADER_USE_ZLIB "set whether or not to use zlib - required for invader-bitmap and MCC map compatibility" ${ZLIB_FOUND})
 
 if(WIN32)
-    option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" ON)
+    option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" OFF)
 endif()
 
 if(${INVADER_WIN32_EXE_STATIC_LINK})
