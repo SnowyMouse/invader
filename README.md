@@ -184,9 +184,9 @@ Options:
                                this to 0 disables budgeting. Default (new tag):
                                0
   -d --data <dir>              Use the specified data directory.
-  -D --dithering <channels>    [REQUIRES --extended] Apply dithering to 16-bit,
-                               dxtn, or p8 bitmaps. Can be: a, rgb, or argb.
-                               Default: none
+  -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
+                               This does not save in .bitmap tags. Can be: a,
+                               rgb, or argb. Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
@@ -200,10 +200,11 @@ Options:
   -p --bump-palettize <val>    Set the bumpmap palettization setting. Can be:
                                off or on. Default (new tag): off
   -P --fs-path                 Use a filesystem path for the data.
-  -R --regenerate              Use the bitmap tag's color plate as data.
-  -s --mipmap-scale <type>     [REQUIRES --extended] Mipmap scale type. Can be:
-                               linear, nearest-alpha, nearest. Default (new
-                               tag): linear
+  -R --regenerate              Use the bitmap tag's compressed color plate data
+                               as data.
+  -s --mipmap-scale <type>     Mipmap scale type. This does not save in .bitmap
+                               tags. Can be: linear, nearest-alpha, nearest.
+                               Default (new tag): linear
   -t --tags <dir>              Use the specified tags directory.
   -T --type <type>             Set the type of bitmap. Can be: 2d-textures,
                                3d-textures, cube-maps, interface-bitmaps, or
@@ -211,8 +212,6 @@ Options:
   -u --usage <usage>           Set the bitmap usage. Can be: alpha-blend,
                                default, height-map, detail-map, light-map,
                                vector-map. Default: default
-  -x --extended                Create an invader_bitmap tag (required for some
-                               features).
 ```
 
 Refer to [Creating a bitmap] for information on how to create bitmap tags.
@@ -619,15 +618,12 @@ Options:
                                vehicle-engine, weapon-charge, weapon-empty,
                                weapon-fire, weapon-idle, weapon-overheat,
                                weapon-ready, weapon-reload
-  -C --channel-count <#>       [REQUIRES --extended] Set the channel count. Can
-                               be: mono, stereo. By default, this is determined
-                               based on the input audio.
+  -C --channel-count <#>       Set the channel count. Can be: mono, stereo. By
+                               default, this is determined based on the input
+                               audio.
   -d --data <dir>              Use the specified data directory.
   -F --format <fmt>            Set the format. Can be: 16-bit-pcm, ogg-vorbis,
-                               or xbox-adpcm. Using flac requires --extended.
-                               Setting this is required unless creating an
-                               extended tag, in which case it defaults to
-                               16-bit-pcm.
+                               or xbox-adpcm.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -j --threads                 Set the number of threads to use for parallel
@@ -640,9 +636,9 @@ Options:
                                longer compression time, clamping from 0.0 to
                                0.8 (FLAC 0 to FLAC 8). Default: 1.0
   -P --fs-path                 Use a filesystem path for the data.
-  -r --sample-rate <Hz>        [REQUIRES --extended] Set the sample rate in Hz.
-                               Halo supports 22050 and 44100. By default, this
-                               is determined based on the input audio.
+  -r --sample-rate <Hz>        Set the sample rate in Hz. Halo supports 22050
+                               and 44100. By default, this is determined based
+                               on the input audio.
   -s --split                   Split permutations into 227.5 KiB chunks. This
                                is necessary for longer sounds (e.g. music) when
                                being played in the original Halo engine.
@@ -650,8 +646,6 @@ Options:
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
-  -x --extended                Create an invader_sound tag (required for some
-                               features).
 ```
 
 Refer to [Creating a sound] for a guide on how to create sound tags.
