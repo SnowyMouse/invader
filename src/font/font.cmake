@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-# Check if we can build invader-bitmap
-if(${FREETYPE_FOUND})
-    set(INVADER_FONT true)
-else()
+# Check if we can build invader-font
+if(NOT ${FREETYPE_FOUND})
     set(INVADER_FONT false)
-    message(WARNING "Unable to automatically find freetype; invader-archive will be disabled")
+    message(WARNING "Unable to automatically find freetype; invader-font will be disabled")
 endif()
 
 set(INVADER_FONT ${INVADER_FONT} CACHE BOOL "Build invader-font (requires freetype)")
@@ -20,11 +18,6 @@ if(${INVADER_FONT})
     )
 
     target_link_libraries(invader-font invader ${FREETYPE_LIBRARIES})
-    
-    # Yes, putting FREETYPE_LIBRARIES there a SECOND time is intentional. harfbuzz/graphite2/freetype is a cyclical dependency, so we get wrecked
-    if(${INVADER_WIN32_EXE_STATIC_LINK})
-        target_link_libraries(invader-font png bz2 harfbuzz graphite2 ${FREETYPE_LIBRARIES})
-    endif()
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-font)
 

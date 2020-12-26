@@ -5,17 +5,22 @@ find_package(Python3 REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ZLIB)
 find_package(LibArchive)
+find_package(TIFF)
 find_package(Freetype)
 find_package(Git)
 
 option(INVADER_USE_ZLIB "set whether or not to use zlib - required for invader-bitmap and MCC map compatibility" ${ZLIB_FOUND})
 
 if(WIN32)
-    option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" OFF)
+    option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" ON)
 endif()
 
 if(${INVADER_WIN32_EXE_STATIC_LINK})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -lwinpthread -static-libgcc -static-libstdc++")
+    set(ZLIB_LIBRARIES z)
+    set(TIFF_LIBRARIES tiff jpeg lzma)
+    set(FREETYPE_LIBRARIES freetype png bz2 harfbuzz graphite2 freetype)
+    set(LibArchive_LIBRARIES archive bcrypt bz2 lzma iconv)
 endif()
 
 if(${ZLIB_FOUND} AND ${INVADER_USE_ZLIB})

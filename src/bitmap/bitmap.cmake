@@ -1,6 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 # Check if we can build invader-bitmap
+if(NOT ${TIFF_FOUND})
+    set(INVADER_BITMAP false)
+    message(WARNING "Unable to automatically find libtiff; invader-bitmap will be disabled")
+endif()
+
 if(NOT DEFINED ${INVADER_BITMAP})
     set(INVADER_BITMAP true CACHE BOOL "Build invader-bitmap (creates bitmap tags)")
 endif()
@@ -9,8 +14,6 @@ if(${INVADER_BITMAP})
     if((NOT ${INVADER_USE_ZLIB}) OR (NOT ${ZLIB_FOUND}))
         message(FATAL_ERROR "invader-bitmap requires zlib")
     endif()
-
-    find_package(TIFF REQUIRED)
 
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
