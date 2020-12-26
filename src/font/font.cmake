@@ -27,5 +27,7 @@ if(${INVADER_FONT})
             PROPERTIES COMPILE_FLAGS -Wno-old-style-cast
         )
     endif()
+    
+    do_windows_rc(invader-font invader-font.exe "Invader font tag generation tool")
 
 endif()

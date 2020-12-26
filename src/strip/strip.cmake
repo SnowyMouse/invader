@@ -11,4 +11,5 @@ if(${INVADER_STRIP})
     target_link_libraries(invader-strip invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-strip)
+    do_windows_rc(invader-strip invader-strip.exe "Invader tag stripping tool")
 endif()

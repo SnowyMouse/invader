@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "../../version.h"
+#include "version.h"
 
 1 VERSIONINFO
 FILEVERSION      INVADER_VERSION_MAJOR,INVADER_VERSION_MINOR,INVADER_VERSION_PATCH,INVADER_VERSION_COMMIT_COUNT
@@ -10,13 +10,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "Comments",         "Invader tag editing tool"
+            VALUE "Comments",         INVADER_BINARY_DESCRIPTION
             VALUE "CompanyName",      "Snowy Mouse"
-            VALUE "FileDescription",  "Invader tag editing tool"
+            VALUE "FileDescription",  INVADER_BINARY_DESCRIPTION
             VALUE "FileVersion",      INVADER_FULL_VERSION_STRING
-            VALUE "InternalName",     "invader-edit-qt"
-            VALUE "OriginalFilename", "invader-edit-qt.exe"
-            VALUE "ProductName",      "invader-edit-qt"
+            VALUE "InternalName",     INVADER_BINARY_NAME
+            VALUE "OriginalFilename", INVADER_BINARY_FILE_NAME
+            VALUE "ProductName",      INVADER_BINARY_NAME
             VALUE "ProductVersion",   INVADER_FULL_VERSION_STRING
             VALUE "LegalCopyright",   "'20 Snowy Mouse"
         END
@@ -26,4 +26,3 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
-IDI_ICON1 ICON DISCARDABLE "../../../icon/invader-edit-qt.ico"

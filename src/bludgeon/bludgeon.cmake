@@ -12,4 +12,6 @@ if(${INVADER_BLUDGEON})
     target_link_libraries(invader-bludgeon invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-bludgeon)
+    
+    do_windows_rc(invader-bludgeon invader-bludgeon.exe "Invader tag bludgeoning tool")
 endif()

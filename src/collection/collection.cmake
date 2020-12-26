@@ -11,4 +11,6 @@ if(${INVADER_COLLECTION})
     target_link_libraries(invader-collection invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-collection)
+    
+    do_windows_rc(invader-collection invader-collection.exe "Invader tag_collection tag generation tool")
 endif()

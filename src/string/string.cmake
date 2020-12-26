@@ -11,4 +11,5 @@ if(${INVADER_STRING})
     target_link_libraries(invader-string invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-string)
+    do_windows_rc(invader-string invader-string.exe "Invader string tag generation tool")
 endif()

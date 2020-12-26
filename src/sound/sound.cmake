@@ -15,4 +15,5 @@ if(${INVADER_SOUND})
     target_link_libraries(invader-sound invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-sound)
+    do_windows_rc(invader-sound invader-sound.exe "Invader sound tag generation tool")
 endif()

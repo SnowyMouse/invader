@@ -11,4 +11,6 @@ if(${INVADER_COMPRESS})
     target_link_libraries(invader-compress invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-compress)
+    
+    do_windows_rc(invader-compress invader-compress.exe "Invader map compression tool")
 endif()
