@@ -288,19 +288,18 @@ namespace Invader::File {
             new_errors++; \
         }
 
-        auto iterate_directories = [&all_tags, &status, &new_errors](const std::vector<std::string> &the_story_thus_far, const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::filesystem::path> &main_dir) -> void {
+        auto iterate_directories = [&all_tags, &status, &new_errors](const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::filesystem::path> &main_dir) -> void {
             if(++depth == 256) {
                 return;
             }
 
             for(auto &d : std::filesystem::directory_iterator(dir)) {
-                std::vector<std::string> add_dir = the_story_thus_far;
                 auto file_path = d.path();
-                add_dir.emplace_back(file_path.filename().string());
+                
                 if(d.is_directory()) {
-                    maybe_iterate_directories(file_path, add_dir, d, iterate_directories, depth, priority, main_dir);
+                    maybe_iterate_directories(file_path, d, iterate_directories, depth, priority, main_dir);
                 }
-                else if(file_path.has_extension()) {
+                else if(file_path.has_extension() && std::filesystem::is_regular_file(file_path)) {
                     auto extension = file_path.extension().string();
                     auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
 
@@ -327,7 +326,8 @@ namespace Invader::File {
         std::size_t dir_count = tags.size();
         for(std::size_t i = 0; i < dir_count; i++) {
             auto &d = tags[i];
-            maybe_iterate_directories(d, std::vector<std::string>(), d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
+            
+            maybe_iterate_directories(d, d, iterate_directories, 0, i, std::vector<std::filesystem::path>(&tags[i], &tags[i] + 1));
         }
         
         // Change error count if errors was specified
