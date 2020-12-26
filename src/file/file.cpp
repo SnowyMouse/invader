@@ -287,11 +287,64 @@ namespace Invader::File {
             eprintf_error("Error listing %s: %s", file_path.string().c_str(), e.what()); \
             new_errors++; \
         }
-
+        
+        // win32 implementation because Windows I/O is AWFUL
+        #ifdef _WIN32
         auto iterate_directories = [&all_tags, &status, &new_errors](const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::filesystem::path> &main_dir) -> void {
             if(++depth == 256) {
                 return;
             }
+            
+            WIN32_FIND_DATA find_data;
+            HANDLE file = FindFirstFileA((dir / "*").string().c_str(), &find_data);
+            bool found = file != nullptr;
+            
+            std::size_t tags_found = 0;
+            
+            while(found) {
+                if(std::strcmp(find_data.cFileName, ".") != 0 && std::strcmp(find_data.cFileName, "..") != 0) {
+                    auto file_path = dir / find_data.cFileName;
+                    if(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                        maybe_iterate_directories(file_path, file_path, iterate_directories, depth, priority, main_dir);
+                    }
+                    else {
+                        auto extension = file_path.extension().string();
+                        auto tag_class_int = HEK::extension_to_tag_class(extension.c_str() + 1);
+
+                        // First, make sure it's valid
+                        if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
+                            continue;
+                        }
+
+                        // Next, add it
+                        TagFile file;
+                        file.full_path = file_path;
+                        file.tag_class_int = tag_class_int;
+                        file.tag_directory = priority;
+                        file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
+                        all_tags.emplace_back(std::move(file));
+                        
+                        tags_found++;
+                    }
+                }
+                
+                found = FindNextFileA(file, &find_data);
+            }
+            
+            // Update the find count
+            if(tags_found) {
+                status->first.lock();
+                status->second += tags_found;
+                status->first.unlock();
+            }
+        };
+        #else
+        auto iterate_directories = [&all_tags, &status, &new_errors](const std::filesystem::path &dir, auto &iterate_directories, int depth, std::size_t priority, const std::vector<std::filesystem::path> &main_dir) -> void {
+            if(++depth == 256) {
+                return;
+            }
+            
+            std::size_t tags_found = 0;
 
             for(auto &d : std::filesystem::directory_iterator(dir)) {
                 auto file_path = d.path();
@@ -315,12 +368,18 @@ namespace Invader::File {
                     file.tag_directory = priority;
                     file.tag_path = Invader::File::file_path_to_tag_path(file_path.string(), main_dir, false).value();
                     all_tags.emplace_back(std::move(file));
-                    status->first.lock();
-                    status->second++;
-                    status->first.unlock();
+                    tags_found++;
                 }
             }
+            
+            // Update the find count
+            if(tags_found) {
+                status->first.lock();
+                status->second += tags_found;
+                status->first.unlock();
+            }
         };
+        #endif
 
         // Go through each directory
         std::size_t dir_count = tags.size();
