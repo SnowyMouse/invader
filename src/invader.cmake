@@ -149,6 +149,7 @@ else()
     add_library(invader SHARED
         ${INVADER_SOURCE_FILES}
     )
+    do_windows_rc(invader libinvader.dll "Invader library")
 endif()
 
 # Set our alternative Invader library (the one we aren't linking)

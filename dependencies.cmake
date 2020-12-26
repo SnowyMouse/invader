@@ -17,6 +17,7 @@ endif()
 
 if(${INVADER_WIN32_EXE_STATIC_LINK})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -lwinpthread -static-libgcc -static-libstdc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static -lwinpthread -static-libgcc -static-libstdc++")
     set(ZLIB_LIBRARIES z)
     set(TIFF_LIBRARIES tiff jpeg lzma)
     set(FREETYPE_LIBRARIES freetype png bz2 harfbuzz graphite2 freetype)
