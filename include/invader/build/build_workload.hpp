@@ -327,11 +327,17 @@ namespace Invader {
         /** Structs being worked with */
         std::vector<BuildWorkloadStruct> structs;
 
-        /** Vertices for models */
-        std::vector<Parser::ModelVertexUncompressed::struct_little> model_vertices;
+        /** Uncompressed vertices for models */
+        std::vector<Parser::ModelVertexUncompressed::struct_little> uncompressed_model_vertices;
+
+        /** Compressed vertices for models */
+        std::vector<Parser::ModelVertexCompressed::struct_little> compressed_model_vertices;
 
         /** Indices for models */
         std::vector<HEK::LittleEndian<HEK::Index>> model_indices;
+        
+        /** Model data parts' struct indices */
+        std::vector<std::size_t> model_parts;
 
         /** Raw data for bitmaps and sounds */
         std::vector<std::vector<std::byte>> raw_data;

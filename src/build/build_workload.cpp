@@ -308,12 +308,12 @@ namespace Invader {
                 // Let's get the model data there
                 model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
                 final_data.resize(model_offset, std::byte());
-                final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_vertices.data()), reinterpret_cast<std::byte *>(workload.model_vertices.data() + workload.model_vertices.size()));
+                final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.uncompressed_model_vertices.data()), reinterpret_cast<std::byte *>(workload.uncompressed_model_vertices.data() + workload.uncompressed_model_vertices.size()));
 
                 // Now add model indices
-                vertex_size = workload.model_vertices.size() * sizeof(*workload.model_vertices.data());
+                vertex_size = workload.uncompressed_model_vertices.size() * sizeof(*workload.uncompressed_model_vertices.data());
                 final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
-                workload.model_vertices = decltype(workload.model_vertices)();
+                workload.uncompressed_model_vertices = decltype(workload.uncompressed_model_vertices)();
                 workload.model_indices = decltype(workload.model_indices)();
                 
                 tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());

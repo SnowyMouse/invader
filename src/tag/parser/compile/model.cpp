@@ -746,7 +746,9 @@ namespace Invader::Parser {
         pre_compile_model(*this, workload, tag_index);
     }
     
-    template<class P> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index) {
+    template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
+        auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(Parser::ModelVertexUncompressed::struct_little);
+        
         std::vector<HEK::Index> triangle_indices;
 
         // Add 1 to this
@@ -784,10 +786,10 @@ namespace Invader::Parser {
         what.triangle_count = triangle_indices_size - 2;
 
         // Make sure every triangle is valid
-        std::size_t uncompressed_vertices_count = what.uncompressed_vertices.size();
+        std::size_t part_vertices_count = part_vertices.size();
         for(auto &t : triangle_indices) {
-            if(t >= uncompressed_vertices_count) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), uncompressed_vertices_count);
+            if(t >= part_vertices_count) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Index #%zu in triangle indices is invalid (%zu >= %zu)", &t - triangle_indices.data(), static_cast<std::size_t>(t), part_vertices_count);
                 throw InvalidTagDataException();
             }
         }
@@ -825,11 +827,12 @@ namespace Invader::Parser {
         }
         what.triangle_offset_2 = what.triangle_offset;
 
-        // Add the vertices, next
+        // Add the vertices next
         what.vertex_count = what.uncompressed_vertices.size();
-        std::vector<ModelVertexUncompressed::struct_little> vertices_of_fun;
+        std::vector<CacheVertex> vertices_of_fun;
         vertices_of_fun.reserve(what.vertex_count);
-        for(auto &v : what.uncompressed_vertices) {
+        
+        for(auto &v : part_vertices) {
             auto &mv = vertices_of_fun.emplace_back();
             mv.binormal = v.binormal;
             mv.node0_index = v.node0_index;
@@ -840,45 +843,58 @@ namespace Invader::Parser {
                 mv.node1_index = v.node1_index;
             }
             mv.node0_weight = v.node0_weight;
-            mv.node1_weight = v.node1_weight;
             mv.normal = v.normal;
             mv.position = v.position;
             mv.tangent = v.tangent;
-            mv.texture_coords = v.texture_coords;
+            
+            if(uncompressed_vertices) {
+                auto &uncompressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexUncompressed::struct_little *>(&mv);
+                const auto &uncompressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexUncompressed *>(&v);
+                uncompressed_cache_vertex.node1_weight = uncompressed_parser_vertex.node1_weight;
+                uncompressed_cache_vertex.texture_coords = uncompressed_parser_vertex.texture_coords;
+            }
         }
+        
+        // Part thingy
+        workload.model_parts.emplace_back(struct_index);
 
         // Let's see if we can also dedupe this
         std::size_t this_vertices_count = vertices_of_fun.size();
-        std::size_t vertices_count = workload.model_vertices.size();
+        std::size_t vertices_count = workload_vertices.size();
         found = false;
 
         if(vertices_count >= this_vertices_count) {
             for(std::size_t i = 0; i <= vertices_count - this_vertices_count; i++) {
                 // If vertices match, set the vertices offset to this instead
-                if(std::memcmp(workload.model_vertices.data() + i, vertices_of_fun.data(), sizeof(workload.model_vertices[0]) * this_vertices_count) == 0) {
+                if(std::memcmp(workload_vertices.data() + i, vertices_of_fun.data(), sizeof(CacheVertex) * this_vertices_count) == 0) {
                     found = true;
-                    what.vertex_offset = i * sizeof(workload.model_vertices[0]);
+                    what.vertex_offset = i * sizeof(workload.uncompressed_model_vertices[0]);
                     break;
                 }
             }
         }
 
         if(!found) {
-            what.vertex_offset = vertices_count * sizeof(workload.model_vertices[0]);
-            workload.model_vertices.insert(workload.model_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
+            what.vertex_offset = vertices_count * sizeof(CacheVertex);
+            workload_vertices.insert(workload_vertices.end(), vertices_of_fun.begin(), vertices_of_fun.end());
         }
 
         // Don't forget to set these memes
         what.do_not_crash_the_game = 1;
-        what.do_not_screw_up_the_model = 4;
+        what.do_not_screw_up_the_model = uncompressed_vertices ? 4 : 5;
     }
 
-    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_geometry_part(*this, workload, tag_index);
+    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->uncompressed_vertices, workload.uncompressed_model_vertices);
     }
 
-    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        pre_compile_model_geometry_part(*this, workload, tag_index);
+    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->compressed_vertices, workload.compressed_model_vertices);
+        }
+        else {
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->uncompressed_vertices, workload.uncompressed_model_vertices);
+        }
     }
 
     void ModelRegionPermutation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
