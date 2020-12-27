@@ -41,11 +41,20 @@ namespace Invader::Swizzle {
             for(std::size_t y = 0; y < height; y++) {
                 for(std::size_t x = 0; x < width; x++) {
                     std::uint64_t m;
+                    std::size_t tmp_x = x;
+                    std::size_t tmp_y = y;
+                    
+                    // Swizzled textures are a meme, but apparently this is how it's stored -.-
+                    while(tmp_x >= height * 2) {
+                        tmp_x -= height * 2;
+                        tmp_y += height;
+                    }
+                    
                     if(depth == 1) {
-                        m = morton_encode_2d(x,y) % size;
+                        m = morton_encode_2d(tmp_x,tmp_y) % size;
                     }
                     else {
-                        m = morton_encode_3d(x,y,z) % size;
+                        m = morton_encode_3d(tmp_x,tmp_y,z) % size;
                     }
                     
                     auto offset = x + y * width + z * width * height;
