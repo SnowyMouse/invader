@@ -12,6 +12,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-bludgeon: Added `-T excessive-script-nodes` which detects and removes
   script node tables that exceed 19001 (tags that do this potentially crash
   stock Halo PC)
+- invader-extract: Added support for 3D and cube map Xbox bitmap tag extraction
 - invader-index: Added feedback for if the command was successful
 - invader-resource: Added feedback for if the command was successful
 
