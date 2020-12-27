@@ -191,6 +191,9 @@ namespace Invader {
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::NativeCacheFileTagDataHeader));
                 break;
+            case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::CacheFileTagDataHeaderXbox));
+                break;
             default:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::CacheFileTagDataHeaderPC));
                 break;
@@ -294,21 +297,38 @@ namespace Invader {
             final_data.insert(final_data.end(), workload.all_raw_data.begin(), workload.all_raw_data.end());
             auto raw_data_size = workload.all_raw_data.size();
             workload.all_raw_data = std::vector<std::byte>();
+            
+            std::size_t model_data_size;
+            std::size_t vertex_size;
+            std::size_t model_offset;
+            std::size_t tag_data_offset;
+            
+            // If we're not on Xbox, we put the model data here
+            if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                // Let's get the model data there
+                model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+                final_data.resize(model_offset, std::byte());
+                final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_vertices.data()), reinterpret_cast<std::byte *>(workload.model_vertices.data() + workload.model_vertices.size()));
 
-            // Let's get the model data there
-            std::size_t model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
-            final_data.resize(model_offset, std::byte());
-            final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_vertices.data()), reinterpret_cast<std::byte *>(workload.model_vertices.data() + workload.model_vertices.size()));
-
-            // Now add model indices
-            std::size_t vertex_size = workload.model_vertices.size() * sizeof(*workload.model_vertices.data());
-            final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
-            workload.model_vertices = decltype(workload.model_vertices)();
-            workload.model_indices = decltype(workload.model_indices)();
-
+                // Now add model indices
+                vertex_size = workload.model_vertices.size() * sizeof(*workload.model_vertices.data());
+                final_data.insert(final_data.end(), reinterpret_cast<std::byte *>(workload.model_indices.data()), reinterpret_cast<std::byte *>(workload.model_indices.data() + workload.model_indices.size()));
+                workload.model_vertices = decltype(workload.model_vertices)();
+                workload.model_indices = decltype(workload.model_indices)();
+                
+                tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
+                model_data_size = tag_data_offset - model_offset;
+            }
+            
+            // If we ARE on Xbox, then we go straight to the tag data
+            else {
+                model_data_size = 0;
+                vertex_size = 0;
+                model_offset = 0;
+                tag_data_offset = final_data.size() + REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+            }
+            
             // We're almost there
-            std::size_t tag_data_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
-            std::size_t model_data_size = tag_data_offset - model_offset;
             final_data.resize(tag_data_offset, std::byte());
 
             // Add tag data
@@ -323,6 +343,15 @@ namespace Invader {
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
                 tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
+            }
+            else if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(final_data.data() + tag_data_offset);
+                tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
+                tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(workload.part_count);
+                
+                // TODODILE: Add vertices/indices stuff here
             }
             else {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
