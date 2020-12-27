@@ -127,6 +127,16 @@ namespace Invader::Parser {
                     }
                 }
                 
+                // Nope
+                if(bitmap_data.depth != 1 && bitmap_data.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+                    eprintf_error("Bitmap has depth but is not a 3D texture");
+                    throw InvalidTagDataException();
+                }
+                if(!power_of_two(bitmap_data.depth)) {
+                    eprintf_error("Bitmap depth is non-power-of-two");
+                    throw InvalidTagDataException();
+                }
+                
                 // Get it!
                 const std::byte *bitmap_data_ptr;
                 if(bitmap_data_le.flags.read() & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL) {
@@ -140,31 +150,37 @@ namespace Invader::Parser {
                 std::vector<std::byte> xbox_to_pc_buffer;
                 
                 if(xbox) {
-                    // We don't support these yet
-                    if(bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE && bitmap_data_le.type != HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE) {
-                        eprintf_error("Non-2D bitmaps from Xbox maps are not currently supported");
+                    if(bitmap_data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
+                        eprintf_error("Xbox 3D textures are not yet supported");
                         throw InvalidTagDataException();
                     }
-                
+                    
                     // Set flag as unswizzled
                     bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                     
                     // Set our buffer up
                     xbox_to_pc_buffer.resize(size_of_bitmap(bitmap_data));
                     
-                    auto copy_2d_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data]() {
+                    auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data]() {
                         std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
                         std::size_t real_mipmap_count = bitmap_data.mipmap_count;
                         std::size_t height = bitmap_data.height;
                         std::size_t width = bitmap_data.width;
+                        std::size_t depth = bitmap_data.depth;
                         auto *input = bitmap_data_ptr;
                         auto *output = xbox_to_pc_buffer.data();
                         
                         if(swizzled) {
                             // Deswizzle
                             std::size_t minimum_dimension = 1;
+                            
+                            // Bitmap data is out of bounds?
+                            if(xbox_to_pc_buffer.size() > size) {
+                                throw OutOfBoundsException();
+                            }
+                            
                             for(std::size_t m = 0; m <= real_mipmap_count; m++) {
-                                auto deswizzled = Invader::Swizzle::swizzle(input, bits_per_pixel, std::max(width >> m, minimum_dimension), std::max(height >> m, minimum_dimension), true);
+                                auto deswizzled = Invader::Swizzle::swizzle(input, bits_per_pixel, std::max(width >> m, minimum_dimension), std::max(height >> m, minimum_dimension), std::max(depth >> m, minimum_dimension), true);
                                 std::memcpy(output, deswizzled.data(), deswizzled.size());
                                 input += deswizzled.size();
                                 output += deswizzled.size();
@@ -194,6 +210,12 @@ namespace Invader::Parser {
                                 auto mipmap_height = height >> m;
                                 auto mipmap_width = width >> m;
                                 auto copy_size = (std::max(mipmap_height, minimum_dimension) * std::max(mipmap_width, minimum_dimension) * bits_per_pixel) / 8;
+                                
+                                // Bitmap data is out of bounds?
+                                if((input - bitmap_data_ptr) + copy_size > size) {
+                                    throw OutOfBoundsException();
+                                }
+                                
                                 std::memcpy(output, input, copy_size);
                                 input += copy_size;
                                 output += copy_size;
@@ -210,21 +232,114 @@ namespace Invader::Parser {
                             }
                         }
                         else {
+                            // Bitmap data is out of bounds?
+                            if(xbox_to_pc_buffer.size() > size) {
+                                throw OutOfBoundsException();
+                            }
+                            
                             // Simple copy
-                            std::memcpy(xbox_to_pc_buffer.data(), bitmap_data_ptr, size);
+                            std::memcpy(xbox_to_pc_buffer.data(), bitmap_data_ptr, xbox_to_pc_buffer.size());
                         }
                     };
                     
-                    switch(bitmap_data_le.type) {
+                    auto copy_cube_map = [&xbox_to_pc_buffer, &bitmap_data, &bitmap_data_ptr, &size, &compressed, &swizzled]() -> void {
+                        std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
+                        std::size_t bytes_per_block;
+                        
+                        // Get width/height
+                        std::size_t width = bitmap_data.width;
+                        std::size_t height = bitmap_data.height;
+                        
+                        // DXT is 4x4, and we're accessing it block-by-block
+                        if(compressed) {
+                            bytes_per_block = bits_per_pixel * ((4 * 4) / 8);
+                            width = std::max(width / 4, static_cast<std::size_t>(1));
+                            height = std::max(height / 4, static_cast<std::size_t>(1));
+                        }
+                        
+                        // Each block is a pixel if uncompressed. Nice.
+                        else {
+                            bytes_per_block = bits_per_pixel / 8;
+                        }
+                        
+                        // Let's begin
+                        const auto *input = bitmap_data_ptr;
+                        
+                        // Allocate a new buffer
+                        std::vector<std::byte> new_buffer(size_of_bitmap(bitmap_data));
+                        auto *output_ptr = new_buffer.data();
+                        
+                        for(std::size_t z = 0; z < 6; z++) {
+                            std::size_t z_to_use = z;
+                            
+                            // Swap cubemap faces 2 and 3
+                            if(z == 1) {
+                                z_to_use = 2;
+                            }
+                            else if(z == 2) {
+                                z_to_use = 1;
+                            }
+                            else {
+                                z_to_use = z;
+                            }
+                            
+                            // Get width/height
+                            auto mipmap_width = width;
+                            auto mipmap_height = height;
+                            
+                            // This is where the first bitmap of this will go
+                            auto *output = output_ptr + z_to_use * mipmap_width * mipmap_height * bytes_per_block;
+                            
+                            for(std::size_t m = 0; m <= bitmap_data.mipmap_count; m++) {
+                                // Copy it over
+                                auto move_size = bytes_per_block * (mipmap_width * mipmap_height);
+                                auto *input_buffer = input;
+                                
+                                // Bitmap data is out of bounds?
+                                if((input_buffer - bitmap_data_ptr) + move_size > size) {
+                                    throw OutOfBoundsException();
+                                }
+                                
+                                std::vector<std::byte> deswizzled_maybe;
+                                if(swizzled) {
+                                    deswizzled_maybe = Invader::Swizzle::swizzle(input_buffer, bits_per_pixel, mipmap_width, mipmap_height, 1, true);
+                                    input_buffer = deswizzled_maybe.data();
+                                }
+                                
+                                std::memcpy(output, input_buffer, move_size);
+                                
+                                // Skip other bitmaps from this mipmap
+                                output += move_size * (6 - z_to_use);
+                                
+                                mipmap_width = std::max(mipmap_width / 2, static_cast<std::size_t>(1));
+                                mipmap_height = std::max(mipmap_height / 2, static_cast<std::size_t>(1));
+                                
+                                // Skip other bitmaps from the next mipmap
+                                output += (mipmap_width * mipmap_height) * bytes_per_block * z_to_use;
+                                
+                                input += move_size;
+                            }
+                            
+                            // Move to a 128-byte boundary
+                            auto input_offset = (input - bitmap_data_ptr);
+                            input += (128 - (input_offset % 128)) % 128;
+                        }
+                        
+                        xbox_to_pc_buffer = std::move(new_buffer);
+                        bitmap_data_ptr = xbox_to_pc_buffer.data();
+                        size = xbox_to_pc_buffer.size();
+                    };
+                    
+                    switch(bitmap_data.type) {
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                            throw std::exception();
+                            copy_cube_map();
                             break;
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                            throw std::exception();
+                            copy_texture();
                             break;
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
                         case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
-                            copy_2d_texture();
+                            copy_texture();
                             break;
                         default:
                             throw std::exception();
@@ -311,7 +426,7 @@ namespace Invader::Parser {
                 // Go through each mipmap and insert them deswizzled
                 for(std::size_t m = 0; m <= mipmap_count; m++) {
                     // Do it!
-                    auto deswizzled = Invader::Swizzle::swizzle(this_bitmap_data, bits_per_pixel, width, height, true);
+                    auto deswizzled = Invader::Swizzle::swizzle(this_bitmap_data, bits_per_pixel, width, height, depth, true);
                     auto deswizzled_size = deswizzled.size();
                     std::memcpy(this_bitmap_data, deswizzled.data(), deswizzled_size);
                     this_bitmap_data += deswizzled_size;

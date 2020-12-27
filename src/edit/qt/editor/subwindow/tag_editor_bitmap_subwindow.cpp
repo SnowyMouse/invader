@@ -349,12 +349,6 @@ namespace Invader::EditQt {
         std::vector<std::uint32_t> data(real_width * real_height);
         std::fill(data.begin(), data.end(), 0xFFFF00FF);
         BitmapEncode::encode_bitmap(bytes, bitmap_data->format, reinterpret_cast<std::byte *>(data.data()), HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_A8R8G8B8, real_width, real_height);
-        
-        // Deswizzle if necessary
-        if(bitmap_data->flags & Invader::HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
-            auto deswizzled = Invader::Swizzle::swizzle(reinterpret_cast<std::byte *>(data.data()), 32, real_width, real_height, true);
-            std::memcpy(data.data(), deswizzled.data(), deswizzled.size());
-        }
 
         // Scale if needed
         if(scale != 0) {
