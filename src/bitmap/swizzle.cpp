@@ -49,7 +49,7 @@ namespace Invader::Swizzle {
         return counter;
     }
 
-    template <typename Pixel> static void swizzle(const Pixel *values_in, Pixel *values_out, std::size_t width, std::size_t height, std::size_t depth, bool deswizzle) {
+    template <typename Pixel> static void swizzle(const Pixel *values_in, Pixel *values_out, std::size_t width, std::size_t height, bool deswizzle) {
         // If height is <= 1 or width is <= 2, it's just a straight copy
         if(width <= 2 || height <= 1) {
             std::memcpy(values_out, values_in, width * height * sizeof(*values_in));
@@ -59,7 +59,7 @@ namespace Invader::Swizzle {
         // Also, if width is less than the height, we can subdivide
         if(width < height) {
             for(std::size_t y = 0; y < height; y += width) {
-                swizzle(values_in + y * width, values_out + y * width, width, width, depth, deswizzle);
+                swizzle(values_in + y * width, values_out + y * width, width, width, deswizzle);
             }
             return;
         }
@@ -80,16 +80,16 @@ namespace Invader::Swizzle {
 
         switch(bits_per_pixel) {
             case 8:
-                swizzle(reinterpret_cast<const std::uint8_t *>(data), reinterpret_cast<std::uint8_t *>(output.data()), width, height, depth, deswizzle);
+                swizzle(reinterpret_cast<const std::uint8_t *>(data), reinterpret_cast<std::uint8_t *>(output.data()), width, height, deswizzle);
                 break;
             case 16:
-                swizzle(reinterpret_cast<const std::uint16_t *>(data), reinterpret_cast<std::uint16_t *>(output.data()), width, height, depth, deswizzle);
+                swizzle(reinterpret_cast<const std::uint16_t *>(data), reinterpret_cast<std::uint16_t *>(output.data()), width, height, deswizzle);
                 break;
             case 32:
-                swizzle(reinterpret_cast<const std::uint32_t *>(data), reinterpret_cast<std::uint32_t *>(output.data()), width, height, depth, deswizzle);
+                swizzle(reinterpret_cast<const std::uint32_t *>(data), reinterpret_cast<std::uint32_t *>(output.data()), width, height, deswizzle);
                 break;
             case 64:
-                swizzle(reinterpret_cast<const std::uint64_t *>(data), reinterpret_cast<std::uint64_t *>(output.data()), width, height, depth, deswizzle);
+                swizzle(reinterpret_cast<const std::uint64_t *>(data), reinterpret_cast<std::uint64_t *>(output.data()), width, height, deswizzle);
                 break;
         }
         return output;
