@@ -151,6 +151,30 @@ namespace Invader::HEK {
         LittleEndian<CacheFileLiteral> tags_literal;
     };
     static_assert(sizeof(CacheFileTagDataHeaderPC) == 0x28);
+    
+    // The Xbox version accesses vertices indirectly for some reason. Not 100% sure what for yet.
+    struct CacheFileModelPartVerticesXbox {
+        LittleEndian<std::uint32_t> unknown1;
+        LittleEndian<Pointer> vertices;
+        LittleEndian<std::uint32_t> unknown2;
+    };
+    static_assert(sizeof(CacheFileModelPartVerticesXbox) == 0xC);
+    
+    // I don't know what this is used for. It uses indices directly unlike with vertices.
+    struct CacheFileModelPartIndicesXbox {
+        LittleEndian<std::uint32_t> unknown1;
+        LittleEndian<Pointer> indices;
+        LittleEndian<std::uint32_t> unknown2;
+    };
+    static_assert(sizeof(CacheFileModelPartIndicesXbox) == 0xC);
+
+    struct CacheFileTagDataHeaderXbox : CacheFileTagDataHeader {
+        LittleEndian<Pointer> model_part_vertices_address;
+        LittleEndian<std::uint32_t> model_part_count_again;
+        LittleEndian<Pointer> model_part_indices_address;
+        LittleEndian<CacheFileLiteral> tags_literal;
+    };
+    static_assert(sizeof(CacheFileTagDataHeaderXbox) == 0x24);
 
     struct NativeCacheFileTagDataHeader : CacheFileTagDataHeader {
         LittleEndian<std::uint64_t> model_data_file_offset;
