@@ -43,6 +43,11 @@ namespace Invader::HEK {
         CACHE_FILE_STUB_MEMORY_ADDRESS = 0xFFFFFFFF,
         CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE = 0xFFFFFFFFFFFFFFFF
     };
+    
+    enum CacheFileXboxConstants : std::uint32_t {
+        CACHE_FILE_XBOX_SECTOR_SIZE = 512,
+        CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY = 128
+    };
 
     enum CacheFileLimits : Pointer64 {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
