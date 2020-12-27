@@ -150,11 +150,6 @@ namespace Invader::Parser {
                 std::vector<std::byte> xbox_to_pc_buffer;
                 
                 if(xbox) {
-                    if(bitmap_data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE) {
-                        eprintf_error("Xbox 3D textures are not yet supported");
-                        throw InvalidTagDataException();
-                    }
-                    
                     // Set flag as unswizzled
                     bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                     
