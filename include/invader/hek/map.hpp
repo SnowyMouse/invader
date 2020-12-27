@@ -33,7 +33,7 @@ namespace Invader::HEK {
         CACHE_FILE_FOOT_DEMO = 0x47666F74
     };
 
-    enum CacheFileTagDataBaseMemoryAddress : HEK::Pointer64 {
+    enum CacheFileTagDataBaseMemoryAddress : Pointer64 {
         CACHE_FILE_PC_BASE_MEMORY_ADDRESS = 0x40440000,
         CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS = 0x4BF10000,
         CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS = 0x00000000,
@@ -44,7 +44,7 @@ namespace Invader::HEK {
         CACHE_FILE_STUB_MEMORY_ADDRESS_NATIVE = 0xFFFFFFFFFFFFFFFF
     };
 
-    enum CacheFileLimits : HEK::Pointer64 {
+    enum CacheFileLimits : Pointer64 {
         CACHE_FILE_MEMORY_LENGTH = 0x1700000,
         CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
         CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX = 0x18000000,
@@ -135,7 +135,7 @@ namespace Invader::HEK {
     static_assert(sizeof(CacheFileDemoHeader) == 0x800);
 
     struct CacheFileTagDataHeader {
-        LittleEndian<HEK::Pointer> tag_array_address;
+        LittleEndian<Pointer> tag_array_address;
         LittleEndian<TagID> scenario_tag;
         LittleEndian<std::uint32_t> tag_file_checksums;
         LittleEndian<std::uint32_t> tag_count;
@@ -190,8 +190,8 @@ namespace Invader::HEK {
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
         LittleEndian<TagID> tag_id;
-        LittleEndian<HEK::Pointer> tag_path;
-        LittleEndian<HEK::Pointer> tag_data;
+        LittleEndian<Pointer> tag_path;
+        LittleEndian<Pointer> tag_data;
         LittleEndian<std::uint32_t> indexed;
         PAD(0x4);
     };
@@ -202,8 +202,8 @@ namespace Invader::HEK {
         LittleEndian<TagClassInt> secondary_class;
         LittleEndian<TagClassInt> tertiary_class;
         LittleEndian<TagID> tag_id;
-        LittleEndian<HEK::Pointer64> tag_path;
-        LittleEndian<HEK::Pointer64> tag_data;
+        LittleEndian<Pointer64> tag_path;
+        LittleEndian<Pointer64> tag_data;
     };
     static_assert(sizeof(NativeCacheFileTagDataTag) == 0x20);
 }
