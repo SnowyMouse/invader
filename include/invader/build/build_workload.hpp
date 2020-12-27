@@ -228,9 +228,12 @@ namespace Invader {
 
             /** We're only limited to 32-bit pointers */
             bool limit_to_32_bits = false;
+            
+            /** Data offset of the depended struct */
+            std::size_t struct_data_offset = 0;
 
             bool operator==(const BuildWorkloadStructPointer &other) const noexcept {
-                return this->struct_index == other.struct_index && this->offset == other.offset;
+                return this->struct_index == other.struct_index && this->offset == other.offset && this->struct_data_offset == other.struct_data_offset;
             }
         };
 
@@ -359,9 +362,6 @@ namespace Invader {
 
         /** Are we building a stock map? */
         bool building_stock_map = false;
-
-        /** Part count */
-        std::size_t part_count = 0;
         
         /** 
          * Get the build parameters
@@ -415,6 +415,7 @@ namespace Invader {
         std::size_t raw_data_indices_offset;
         std::uint32_t tag_file_checksums = 0;
         const BuildParameters *parameters = nullptr;
+        void generate_compressed_model_tag_array();
     };
 }
 

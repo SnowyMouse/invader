@@ -1214,7 +1214,12 @@ namespace Invader {
         std::size_t tag_count = tags.size();
 
         // Pointer offset to what struct
-        using PointerInternal = std::pair<std::size_t, std::size_t>;
+        struct PointerInternal {
+            std::size_t from_offset;
+            std::size_t to_struct;
+            std::size_t to_offset;
+        };
+        
         std::vector<PointerInternal> pointers;
         std::vector<PointerInternal> pointers_64_bit;
         auto name_tag_data_pointer = this->parameters->details.build_tag_data_address;
@@ -1242,7 +1247,7 @@ namespace Invader {
             // Get the pointers
             for(auto &pointer : s.pointers) {
                 recursively_generate_data(data, pointer.struct_index, recursively_generate_data);
-                PointerInternal pointer_internal(pointer.offset + offset, pointer.struct_index);
+                PointerInternal pointer_internal { pointer.offset + offset, pointer.struct_index, pointer.struct_data_offset };
                 if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE || pointer.limit_to_32_bits) {
                     pointers.emplace_back(pointer_internal);
                 }
@@ -1281,11 +1286,11 @@ namespace Invader {
 
         // Adjust the pointers
         for(auto &p : pointers) {
-            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(name_tag_data_pointer + *this->structs[p.second].offset);
+            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.from_offset) = static_cast<HEK::Pointer>(name_tag_data_pointer + *this->structs[p.to_struct].offset + p.to_offset);
         }
 
         for(auto &p : pointers_64_bit) {
-            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(name_tag_data_pointer + *this->structs[p.second].offset);
+            *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.from_offset) = static_cast<HEK::Pointer64>(name_tag_data_pointer + *this->structs[p.to_struct].offset + p.to_offset);
         }
 
         // Get the tag path pointers working
@@ -1349,14 +1354,14 @@ namespace Invader {
 
                     // Chu
                     for(auto &p : pointers) {
-                        auto &struct_pointed_to = this->structs[p.second];
+                        auto &struct_pointed_to = this->structs[p.to_struct];
                         auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
-                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.first) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset);
+                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer> *>(tag_data_b + p.from_offset) = static_cast<HEK::Pointer>(base + *struct_pointed_to.offset + p.to_offset);
                     }
                     for(auto &p : pointers_64_bit) {
-                        auto &struct_pointed_to = this->structs[p.second];
+                        auto &struct_pointed_to = this->structs[p.to_struct];
                         auto base = struct_pointed_to.bsp.has_value() ? tag_data_base : name_tag_data_pointer;
-                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.first) = static_cast<HEK::Pointer64>(base + *struct_pointed_to.offset);
+                        *reinterpret_cast<HEK::LittleEndian<HEK::Pointer64> *>(tag_data_b + p.from_offset) = static_cast<HEK::Pointer64>(base + *struct_pointed_to.offset + p.to_offset);
                     }
 
                     // Find the BSP in the scenario array thingy
