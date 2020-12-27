@@ -15,11 +15,18 @@
 #include "../printf.hpp"
 
 /**
+ * Calculate the required amount of padding to make a size divisible by a set number of bytes
+ * @param  size size
+ * @return      padding required
+ */
+#define REQUIRED_PADDING_N_BYTES(size, n) static_cast<std::size_t>((~(size - 1)) & (n - 1))
+
+/**
  * Calculate the required amount of padding to make a size divisible by 32 bits
  * @param  size size
  * @return      padding required
  */
-#define REQUIRED_PADDING_32_BIT(size) static_cast<std::size_t>((~(size - 1)) & 3)
+#define REQUIRED_PADDING_32_BIT(size) REQUIRED_PADDING_N_BYTES(size, 4)
 
 /**
  * Convert degrees to radians

@@ -317,7 +317,7 @@ namespace Invader::Parser {
                             
                             // Move to a 128-byte boundary
                             auto input_offset = (input - bitmap_data_ptr);
-                            input += (HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY - (input_offset % HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY)) % HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY;
+                            input += REQUIRED_PADDING_N_BYTES(input_offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
                         }
                         
                         xbox_to_pc_buffer = std::move(new_buffer);
