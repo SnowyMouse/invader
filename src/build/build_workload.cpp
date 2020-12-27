@@ -1386,11 +1386,12 @@ namespace Invader {
         }
         auto &all_raw_data = this->all_raw_data;
         all_raw_data.reserve(total_raw_data_size);
+        auto engine_target = this->parameters->details.build_cache_file_engine;
 
         // Offset followed by size
         std::vector<std::pair<std::size_t, std::size_t>> all_assets;
 
-        auto add_or_dedupe_asset = [&all_assets, &all_raw_data](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
+        auto add_or_dedupe_asset = [&all_assets, &all_raw_data, &engine_target](const std::vector<std::byte> &raw_data, std::size_t &counter) -> std::uint32_t {
             std::size_t raw_data_size = raw_data.size();
             for(auto &a : all_assets) {
                 if(a.second == raw_data_size && std::memcmp(raw_data.data(), all_raw_data.data() + a.first, raw_data_size) == 0) {
@@ -1398,8 +1399,16 @@ namespace Invader {
                 }
             }
 
+            // Pad to 512 bytes if Xbox
+            auto all_raw_data_offset = all_raw_data.size();
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                all_raw_data_offset += REQUIRED_PADDING_N_BYTES(all_raw_data_offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+                all_raw_data.resize(all_raw_data_offset);
+            }
+            
+            // Add the new asset
             auto &new_asset = all_assets.emplace_back();
-            new_asset.first = all_raw_data.size();
+            new_asset.first = all_raw_data_offset;
             new_asset.second = raw_data_size;
             counter += raw_data_size;
             all_raw_data.insert(all_raw_data.end(), raw_data.begin(), raw_data.end());
@@ -1427,11 +1436,16 @@ namespace Invader {
 
                     // Put it in its place
                     auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_bitmap_size);
-                    if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         bitmap_data.pixel_data_offset = resource_index;
                     }
                     else {
                         bitmap_data.pixel_data_offset = all_assets[resource_index].first + file_offset;
+                    }
+                    
+                    // Set this size to be correct
+                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                        bitmap_data.pixel_data_size = bitmap_data.pixel_data_size + REQUIRED_PADDING_N_BYTES(bitmap_data.pixel_data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
                     }
                 }
             }
@@ -1454,7 +1468,7 @@ namespace Invader {
 
                         // Put it in its place
                         auto resource_index = add_or_dedupe_asset(this->raw_data[index], this->raw_sound_size);
-                        if(this->parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                             permutation.samples.file_offset = resource_index;
                         }
                         else {
