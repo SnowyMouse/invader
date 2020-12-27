@@ -28,9 +28,9 @@ namespace Invader::Swizzle {
     
     template <typename Pixel> static void perform_swizzle(const Pixel *values_in, Pixel *values_out, std::size_t width, std::size_t height, std::size_t depth, bool deswizzle) {
         if(height > width) {
-            auto stride = width * width * depth;
+            auto size = width * width * depth;
             for(std::size_t i = 0; i < height / width; i++) {
-                perform_swizzle(values_in + stride * i, values_out + stride * i, width, width, depth, deswizzle);
+                perform_swizzle(values_in + size * i, values_out + size * i, width, width, depth, deswizzle);
             }
             return;
         }
@@ -41,13 +41,24 @@ namespace Invader::Swizzle {
             for(std::size_t y = 0; y < height; y++) {
                 for(std::size_t x = 0; x < width; x++) {
                     std::uint64_t m;
+                    
                     std::size_t tmp_x = x;
                     std::size_t tmp_y = y;
                     
                     // Swizzled textures are a meme, but apparently this is how it's stored -.-
-                    while(tmp_x >= height * 2) {
+                    if(tmp_x >= height * 2 && tmp_x < height * 4) {
                         tmp_x -= height * 2;
                         tmp_y += height;
+                    }
+                    
+                    else if(tmp_x >= height * 4 && tmp_x < height * 6) {
+                        tmp_x -= height * 2;
+                        tmp_y += height * 2;
+                    }
+                    
+                    else if(tmp_x >= height * 6 && tmp_x < height * 8) {
+                        tmp_x -= height * 4;
+                        tmp_y += height * 3;
                     }
                     
                     if(depth == 1) {
