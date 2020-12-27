@@ -27,6 +27,7 @@ namespace Invader {
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
                 this->build_bsps_occupy_tag_space = true;
+                this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_RETAIL:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
@@ -35,6 +36,7 @@ namespace Invader {
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
                 this->build_bsps_occupy_tag_space = true;
+                this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
@@ -43,6 +45,7 @@ namespace Invader {
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
                 this->build_bsps_occupy_tag_space = true;
+                this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_XBOX:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
@@ -51,6 +54,7 @@ namespace Invader {
                 this->build_compress = true;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                 this->build_bsps_occupy_tag_space = true;
+                this->build_version = "01.10.12.2276"; // NTSC
                 break;
             case CacheFileEngine::CACHE_FILE_NATIVE:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
@@ -59,6 +63,7 @@ namespace Invader {
                 this->build_compress = true;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
                 this->build_bsps_occupy_tag_space = false; // technically they do, but they are treated as regular tags
+                this->build_version = full_version();
                 break;
             default: std::terminate(); // unimplemented
         }
@@ -264,7 +269,7 @@ namespace Invader {
         auto &workload = *this;
         auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header, auto max_size) {
             std::vector<std::byte> final_data;
-            std::strncpy(header.build.string, full_version(), sizeof(header.build.string) - 1);
+            std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
             header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;

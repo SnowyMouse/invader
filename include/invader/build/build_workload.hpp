@@ -141,9 +141,14 @@ namespace Invader {
                 bool build_bsps_occupy_tag_space;
             
                 /**
-                * How to handle raw data handling
-                */
+                 * How to handle raw data handling
+                 */
                 RawDataHandling build_raw_data_handling;
+                
+                /**
+                 * Version to use. This generally only impacts Xbox maps as it's unread in all of the official PC releases.
+                 */
+                std::string build_version;
                 
                 /**
                  * Instantiate some default, working parameters for the target engine
