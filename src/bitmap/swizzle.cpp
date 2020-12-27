@@ -27,6 +27,7 @@ namespace Invader::Swizzle {
     }
     
     template <typename Pixel> static void perform_swizzle(const Pixel *values_in, Pixel *values_out, std::size_t width, std::size_t height, std::size_t depth, bool deswizzle) {
+        // Subdivide
         if(height > width) {
             auto size = width * width * depth;
             for(std::size_t i = 0; i < height / width; i++) {
@@ -46,19 +47,31 @@ namespace Invader::Swizzle {
                     std::size_t tmp_y = y;
                     
                     // Swizzled textures are a meme, but apparently this is how it's stored -.-
-                    if(tmp_x >= height * 2 && tmp_x < height * 4) {
-                        tmp_x -= height * 2;
-                        tmp_y += height;
-                    }
                     
-                    else if(tmp_x >= height * 4 && tmp_x < height * 6) {
-                        tmp_x -= height * 2;
-                        tmp_y += height * 2;
-                    }
+                    // TODODILE: refactor this into something that makes more sense
+                    /* 
+                        if(tmp_x >= height * 2 && tmp_x < height * 4) {
+                            tmp_x -= height * 2;
+                            tmp_y += height;
+                        }
+                        else if(tmp_x >= height * 4 && tmp_x < height * 6) {
+                            tmp_x -= height * 2;
+                            tmp_y += height * 2;
+                        }
+                        else if(tmp_x >= height * 6 && tmp_x < height * 8) {
+                            tmp_x -= height * 4;
+                            tmp_y += height * 3;
+                        }
+                    */
                     
-                    else if(tmp_x >= height * 6 && tmp_x < height * 8) {
-                        tmp_x -= height * 4;
-                        tmp_y += height * 3;
+                    if(tmp_x >= height * 2) {
+                        for(std::size_t f = 1; f < 1024; f++) {
+                            if(tmp_x >= height * (f * 2) && tmp_x < height * ((f + 1) * 2)) {
+                                tmp_x -= height * (((f - 1) / 2 + 1) * 2);
+                                tmp_y += height * f;
+                                break;
+                            }
+                        }
                     }
                     
                     if(depth == 1) {
