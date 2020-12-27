@@ -1321,13 +1321,17 @@ namespace Invader {
 
                     // Do it!
                     auto &base_struct = *t.base_struct;
-
                     // Build the tag data for the BSP data now
                     pointers.clear();
                     pointers_64_bit.clear();
                     auto &bsp_data_struct = this->map_data_structs.emplace_back();
                     recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
                     std::size_t bsp_size = bsp_data_struct.size();
+                    
+                    // Resize the BSP to 512 bytes alignment if on Xbox
+                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                        bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+                    }
 
                     if(bsp_size > max_bsp_size) {
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
