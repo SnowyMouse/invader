@@ -263,13 +263,13 @@ int main(int argc, const char **argv) {
         // Handle raw data handling
         if(build_options.raw_data_handling.has_value()) {
             // Don't allow resource maps if we can't use them!
-            if(!require_resource_maps && parameters.details.build_raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+            if(!require_resource_maps && build_options.raw_data_handling != RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
                 eprintf_error("Resource maps are not used for the target engine");
                 return EXIT_FAILURE;
             }
             
             // Set this to false
-            if(require_resource_maps && parameters.details.build_raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
+            if(require_resource_maps && build_options.raw_data_handling == RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
                 require_resource_maps = false;
             }
             
