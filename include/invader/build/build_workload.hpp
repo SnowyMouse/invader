@@ -339,8 +339,16 @@ namespace Invader {
         /** Indices for models */
         std::vector<HEK::LittleEndian<HEK::Index>> model_indices;
         
-        /** Model data parts' struct indices */
-        std::vector<std::size_t> model_parts;
+        struct BuildWorkloadModelPart {
+            /** index of the struct the part is in */
+            std::size_t struct_index;
+            
+            /** offset of the part */
+            std::size_t offset;
+        };
+        
+        /** Model data parts' struct indices and their offsets */
+        std::vector<BuildWorkloadModelPart> model_parts;
 
         /** Raw data for bitmaps and sounds */
         std::vector<std::vector<std::byte>> raw_data;

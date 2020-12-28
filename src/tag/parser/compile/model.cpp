@@ -746,7 +746,7 @@ namespace Invader::Parser {
         pre_compile_model(*this, workload, tag_index);
     }
     
-    template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
+    template<class P, class PartVertex, class CacheVertex> static void pre_compile_model_geometry_part(P &what, BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t struct_offset, const std::vector<PartVertex> &part_vertices, std::vector<CacheVertex> &workload_vertices) {
         auto uncompressed_vertices = sizeof(CacheVertex) == sizeof(Parser::ModelVertexUncompressed::struct_little);
         
         std::vector<HEK::Index> triangle_indices;
@@ -853,7 +853,7 @@ namespace Invader::Parser {
         }
         
         // Part thingy
-        workload.model_parts.emplace_back(struct_index);
+        workload.model_parts.emplace_back(BuildWorkload::BuildWorkloadModelPart { struct_index, struct_offset });
 
         // Let's see if we can also dedupe this
         std::size_t this_vertices_count = vertices_of_fun.size();
@@ -865,7 +865,7 @@ namespace Invader::Parser {
                 // If vertices match, set the vertices offset to this instead
                 if(std::memcmp(workload_vertices.data() + i, vertices_of_fun.data(), sizeof(CacheVertex) * this_vertices_count) == 0) {
                     found = true;
-                    what.vertex_offset = i * sizeof(workload.uncompressed_model_vertices[0]);
+                    what.vertex_offset = i * sizeof(workload_vertices[0]);
                     break;
                 }
             }
@@ -881,16 +881,16 @@ namespace Invader::Parser {
         what.do_not_screw_up_the_model = uncompressed_vertices ? 4 : 5;
     }
 
-    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
-        pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->uncompressed_vertices, workload.uncompressed_model_vertices);
+    void GBXModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
+        pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->uncompressed_vertices, workload.uncompressed_model_vertices);
     }
 
-    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
+    void ModelGeometryPart::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->compressed_vertices, workload.compressed_model_vertices);
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->compressed_vertices, workload.compressed_model_vertices);
         }
         else {
-            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, this->uncompressed_vertices, workload.uncompressed_model_vertices);
+            pre_compile_model_geometry_part(*this, workload, tag_index, struct_index, offset, this->uncompressed_vertices, workload.uncompressed_model_vertices);
         }
     }
 

@@ -2320,24 +2320,26 @@ namespace Invader {
         for(std::size_t p = 0; p < part_count; p++) {
             auto &indices = indices_array_data[p];
             auto &vertices = vertices_array_data[p];
-            auto &part_struct = this->structs[this->model_parts[p]];
-            auto &part_data = *reinterpret_cast<Parser::ModelGeometryPart::struct_little *>(part_struct.data.data());
+            auto &part = this->model_parts[p];
+            auto &part_struct = this->structs[part.struct_index];
+            auto *part_struct_bytes = part_struct.data.data();
+            auto &part_data = *reinterpret_cast<Parser::ModelGeometryPart::struct_little *>(part_struct_bytes + part.offset);
             
             // Add three pointers - one for vertices; two for indices
             auto &vertex_ptr = part_struct.pointers.emplace_back();
-            vertex_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.vertex_offset) - reinterpret_cast<const std::byte *>(&part_data);
+            vertex_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.vertex_offset) - part_struct_bytes;
             vertex_ptr.struct_index = vertices_array_struct_index;
             vertex_ptr.struct_data_offset = p * sizeof(vertices);
             vertex_ptr.limit_to_32_bits = true;
             
             auto &index_ptr = part_struct.pointers.emplace_back();
-            index_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset) - reinterpret_cast<const std::byte *>(&part_data);
+            index_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset) - part_struct_bytes;
             index_ptr.struct_index = indices_data_struct_index;
             index_ptr.struct_data_offset = part_data.triangle_offset;
             index_ptr.limit_to_32_bits = true;
             
             auto &index_ptr2 = part_struct.pointers.emplace_back();
-            index_ptr2.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset_2) - reinterpret_cast<const std::byte *>(&part_data);
+            index_ptr2.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset_2) - part_struct_bytes;
             index_ptr2.struct_index = indices_array_struct_index;
             index_ptr2.struct_data_offset = p * sizeof(indices);
             index_ptr2.limit_to_32_bits = true;
