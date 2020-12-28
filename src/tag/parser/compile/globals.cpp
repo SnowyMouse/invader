@@ -31,8 +31,11 @@ namespace Invader::Parser {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
             }
-            if(this->weapon_list.size() < 16) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have at least 16 weapons blocks which is required for the map type", tag_index);
+            
+            std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
+            
+            if(this->weapon_list.size() < required_weapons) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Globals tag does not have at least %zu weapons blocks which is required for the map type", required_weapons);
                 throw InvalidTagDataException();
             }
         }
