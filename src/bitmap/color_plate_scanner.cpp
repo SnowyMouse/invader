@@ -40,6 +40,12 @@ namespace Invader {
     #define GET_PIXEL(x,y) (pixels[y * width + x])
 
     GeneratedBitmapData ColorPlateScanner::scan_color_plate(const ColorPlatePixel *pixels, std::uint32_t width, std::uint32_t height, BitmapType type, BitmapUsage usage, float bump_height, std::optional<ColorPlateScannerSpriteParameters> &sprite_parameters, std::int16_t mipmaps, HEK::InvaderBitmapMipmapScaling mipmap_type, std::optional<float> mipmap_fade_factor, std::optional<float> sharpen, std::optional<float> blur) {
+        // We don't support this yet
+        if(usage == BitmapUsage::BITMAP_USAGE_VECTOR_MAP) {
+            eprintf_error("Vector maps are not supported at this time");
+            throw std::exception();
+        }
+        
         ColorPlateScanner scanner;
         GeneratedBitmapData generated_bitmap;
 
