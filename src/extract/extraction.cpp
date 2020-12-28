@@ -55,8 +55,9 @@ namespace Invader {
         std::vector<bool> extracted_tags(tag_count);
         std::deque<std::size_t> all_tags_to_extract;
         auto &workload = *this;
+        auto engine = map->get_engine();
 
-        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload](std::size_t tag_index) -> bool {
+        auto extract_tag = [&extracted_tags, &map, &tags, &all_tags_to_extract, &type, &recursive, &overwrite, &non_mp_globals, &workload, &engine](std::size_t tag_index) -> bool {
             // Do it
             extracted_tags[tag_index] = true;
 
@@ -160,7 +161,37 @@ namespace Invader {
                 }
                 
                 if(changed) {
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%s.%s was changed due to being altered in singleplayer", Invader::File::halo_path_to_preferred_path(tag.get_path()).c_str(), tag_extension);
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Weapon tag was changed due to being altered in singleplayer");
+                }
+            }
+
+            // Warn if we had to generate mipmaps
+            if(engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX && tag_class_int == Invader::HEK::TagClassInt::TAG_CLASS_BITMAP) {
+                auto bitmap_tag = Invader::Parser::Bitmap::parse_hek_tag_file(new_tag.data(), new_tag.size());
+                for(auto &data : bitmap_tag.bitmap_data) {
+                    // Skip uncompressed bitmaps
+                    if(!(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED)) {
+                        continue;
+                    }
+                    
+                    std::size_t height = data.height;
+                    std::size_t width = data.width;
+                    std::size_t depth = data.depth;
+                    std::size_t mipmap_count = data.mipmap_count;
+                    std::size_t min_dimension = 1;
+                    
+                    while(mipmap_count > 0) {
+                        if(height < 4 && width < 4) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap was missing mipmaps which had to be generated");
+                            break;
+                        }
+                        
+                        height = std::max(height / 2, min_dimension);
+                        width = std::max(width / 2, min_dimension);
+                        depth = std::max(depth / 2, min_dimension);
+                        
+                        mipmap_count--;
+                    }
                 }
             }
 
