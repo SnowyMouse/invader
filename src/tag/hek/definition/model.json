@@ -526,6 +526,7 @@
                 "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
+                "comment": "On Xbox: pointer to the triangle indices. On PC: offset to triangles relative to the end of the map's vertex data.",
                 "drop_on_extract_hidden": true
             },
             {
@@ -533,6 +534,7 @@
                 "endian": "little",
                 "type": "uint32",
                 "cache_only": true,
+                "comment": "On Xbox: pointer to the entry in the second parts list which points to the triangle indices. On PC: same value as the first triangle offset",
                 "drop_on_extract_hidden": true
             },
             {
@@ -561,6 +563,7 @@
             {
                 "name": "vertex offset",
                 "type": "uint32",
+                "comment": "On Xbox: pointer to the entry in the second parts list which points to the triangle indices. On PC: offset to first vertex relative to the map's vertex data.",
                 "drop_on_extract_hidden": true
             }
         ],

@@ -165,6 +165,7 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
+        this->generate_compressed_model_tag_array();
 
         // If we have resource maps to check, check them
         if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
@@ -334,11 +335,12 @@ namespace Invader {
             // Add tag data
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
+            auto part_count = workload.model_parts.size();
             if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::NativeCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
-                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(part_count);
                 tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
@@ -348,8 +350,8 @@ namespace Invader {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
-                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
-                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(part_count);
+                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(part_count);
                 
                 // TODODILE: Add vertices/indices stuff here
             }
@@ -357,8 +359,8 @@ namespace Invader {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
-                tag_data_struct.model_part_count = static_cast<std::uint32_t>(workload.part_count);
-                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(workload.part_count);
+                tag_data_struct.model_part_count = static_cast<std::uint32_t>(part_count);
+                tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(part_count);
                 tag_data_struct.model_data_file_offset = static_cast<std::uint32_t>(model_offset);
                 tag_data_struct.vertex_size = static_cast<std::uint32_t>(vertex_size);
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
@@ -534,7 +536,7 @@ namespace Invader {
                 }
 
                 // Show some other data that might be useful
-                oprintf("Models:            %zu (%.02f MiB)\n", workload.part_count, BYTES_TO_MiB(model_data_size));
+                oprintf("Models:            %zu (%.02f MiB)\n", part_count, BYTES_TO_MiB(model_data_size));
                 oprintf("Raw data:          %.02f MiB (%.02f MiB bitmaps, %.02f MiB sounds)\n", BYTES_TO_MiB(raw_data_size), BYTES_TO_MiB(workload.raw_bitmap_size), BYTES_TO_MiB(workload.raw_sound_size));
 
                 // Show our CRC32
@@ -2245,5 +2247,71 @@ namespace Invader {
             }
         }
         this->raw_data.erase(this->raw_data.begin() + index);
+    }
+    
+    void BuildWorkload::generate_compressed_model_tag_array() {
+        auto part_count = this->model_parts.size();
+        auto struct_count = this->structs.size();
+        
+        // Add four structs; two for vertices and two for indices
+        this->structs.resize(struct_count + 4);
+        
+        auto indices_array_struct_index = struct_count;
+        auto indices_data_struct_index = struct_count + 1;
+        auto vertices_array_struct_index = struct_count + 2;
+        auto vertices_data_struct_index = struct_count + 3;
+        
+        auto &indices_array_struct = this->structs[indices_array_struct_index];
+        auto &vertices_array_struct = this->structs[vertices_array_struct_index];
+        
+        // Add an entry for each part
+        auto *indices_array_data = reinterpret_cast<HEK::CacheFileModelPartIndicesXbox *>((indices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartIndicesXbox))).data());
+        auto *vertices_array_data = reinterpret_cast<HEK::CacheFileModelPartVerticesXbox *>((vertices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartVerticesXbox))).data());
+        
+        // Fill it up with the vertices
+        auto *indices_data = this->model_indices.data();
+        indices_array_struct.data.insert(indices_array_struct.data.end(), reinterpret_cast<const std::byte *>(indices_data), reinterpret_cast<const std::byte *>(indices_data + this->model_indices.size()));
+        auto *vertices_data = this->compressed_model_vertices.data();
+        vertices_array_struct.data.insert(vertices_array_struct.data.end(), reinterpret_cast<const std::byte *>(vertices_data), reinterpret_cast<const std::byte *>(vertices_data + this->compressed_model_vertices.size()));
+        
+        // Set up pointers
+        for(std::size_t p = 0; p < part_count; p++) {
+            auto &indices = indices_array_data[p];
+            auto &vertices = vertices_array_data[p];
+            auto &part_struct = this->structs[this->model_parts[p]];
+            auto &part_data = *reinterpret_cast<Parser::ModelGeometryPart::struct_little *>(part_struct.data.data());
+            
+            // Add three pointers - one for vertices; two for indices
+            auto &vertex_ptr = part_struct.pointers.emplace_back();
+            vertex_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.vertex_offset) - reinterpret_cast<const std::byte *>(&part_data);
+            vertex_ptr.struct_index = vertices_array_struct_index;
+            vertex_ptr.struct_data_offset = p * sizeof(vertices);
+            vertex_ptr.limit_to_32_bits = true;
+            
+            auto &index_ptr = part_struct.pointers.emplace_back();
+            index_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset) - reinterpret_cast<const std::byte *>(&part_data);
+            index_ptr.struct_index = indices_data_struct_index;
+            index_ptr.struct_data_offset = part_data.triangle_offset;
+            vertex_ptr.limit_to_32_bits = true;
+            
+            auto &index_ptr2 = part_struct.pointers.emplace_back();
+            index_ptr2.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset_2) - reinterpret_cast<const std::byte *>(&part_data);
+            index_ptr2.struct_index = indices_array_struct_index;
+            index_ptr2.struct_data_offset = p * sizeof(indices);
+            index_ptr2.limit_to_32_bits = true;
+            
+            // Add two more pointers - one for vertices and one for indices
+            auto &part_vertex_ptr = vertices_array_struct.pointers.emplace_back();
+            part_vertex_ptr.offset = reinterpret_cast<const std::byte *>(&vertices.vertices) - reinterpret_cast<const std::byte *>(vertices_array_data);
+            part_vertex_ptr.struct_index = vertices_data_struct_index;
+            part_vertex_ptr.struct_data_offset = part_data.vertex_offset;
+            part_vertex_ptr.limit_to_32_bits = true;
+            
+            auto &part_index_ptr = indices_array_struct.pointers.emplace_back();
+            part_index_ptr.offset = reinterpret_cast<const std::byte *>(&indices.indices) - reinterpret_cast<const std::byte *>(indices_array_data);
+            part_index_ptr.struct_index = indices_data_struct_index;
+            part_index_ptr.struct_data_offset = part_data.triangle_offset;
+            part_index_ptr.limit_to_32_bits = true;
+        }
     }
 }

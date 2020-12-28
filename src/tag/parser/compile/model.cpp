@@ -751,9 +751,6 @@ namespace Invader::Parser {
         
         std::vector<HEK::Index> triangle_indices;
 
-        // Add 1 to this
-        workload.part_count++;
-
         // Add it all
         triangle_indices.reserve(what.triangles.size() * 3);
         for(auto &t : what.triangles) {
