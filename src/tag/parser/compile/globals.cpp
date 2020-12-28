@@ -92,7 +92,7 @@ namespace Invader::Parser {
         const std::size_t sound_count = globals_multiplayer_information_data.sounds.count;
         std::size_t required_sounds;
         
-        // Xbox doesn't have ting (required_sounds is exclusive, so this effectively sets the required number of sounds to be the ting minus one)
+        // Xbox doesn't have ting (required_sounds is exclusive)
         if(target_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING;
         }
