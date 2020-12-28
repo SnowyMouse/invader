@@ -31,7 +31,13 @@ namespace Invader::Parser {
     void ShaderTransparentChicagoExtended::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         // Error if the target engine can't use it
         if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_chicago_extended tags do not exist on the target engine", tag_index);
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "shader_transparent_chicago_extended tags do not exist on the target engine. Use shader_transparent_chicago, instead.", tag_index);
+            throw InvalidTagDataException();
+        }
+        
+        // Why would you use shader_transparent_chicago_extended if you don't use two stage maps?
+        if(this->maps_2_stage.size() == 0) {
+            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "There are no 2-stage maps. If you do not want 2-stage maps, use shader_transparent_chicago, instead.", tag_index);
             throw InvalidTagDataException();
         }
         
