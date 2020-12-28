@@ -379,7 +379,6 @@
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true,
                 "ignore_cached": true
             }
         ],

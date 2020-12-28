@@ -55,23 +55,33 @@ namespace Invader::Parser {
         this->material = reinterpret_cast<Shader::struct_little *>(workload.structs[(*workload.tags[this->shader.tag_id.index].base_struct)].data.data())->material_type;
         material.material = this->material;
     }
+    
+    template <typename RenderedVertex, typename LightmapVertex> static void check_bsp_vertices(const std::byte *vertices, std::size_t vertices_size, std::size_t rendered_vertex_count, std::size_t lightmap_vertex_count, BuildWorkload &workload, std::size_t tag_index) {
+        const auto *lightmap_rendered_vertices = reinterpret_cast<const RenderedVertex *>(vertices);
+        const auto *lightmap_lightmap_vertices = reinterpret_cast<const LightmapVertex *>(lightmap_rendered_vertices + rendered_vertex_count);
+        auto *lightmap_vertices_end = lightmap_lightmap_vertices + lightmap_vertex_count;
+        
+        std::size_t expected_size = reinterpret_cast<const std::byte *>(lightmap_vertices_end) - vertices;
+        if(expected_size != vertices_size) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, vertices_size);
+            throw InvalidTagDataException();
+        }
+    }
+    
     void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
         if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
             throw InvalidTagDataException();
         }
 
-        auto *vertices = this->uncompressed_vertices.data();
-        auto uncompressed_vertices_size = this->uncompressed_vertices.size();
-
-        auto *lightmap_rendered_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little *>(vertices);
-        auto *lightmap_lightmap_vertices = reinterpret_cast<ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little *>(lightmap_rendered_vertices + this->rendered_vertices_count);
-
-        auto *lightmap_vertices_end = lightmap_lightmap_vertices + this->lightmap_vertices_count;
-        std::size_t expected_size = reinterpret_cast<std::byte *>(lightmap_vertices_end) - vertices;
-        if(expected_size != uncompressed_vertices_size) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material lightmap vertices size is wrong (%zu gotten, %zu expected)", expected_size, uncompressed_vertices_size);
-            throw InvalidTagDataException();
+        // Xbox uses compressed vertices
+        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little>(this->compressed_vertices.data(), this->compressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+            this->uncompressed_vertices.clear();
+        }
+        else {
+            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little>(this->uncompressed_vertices.data(), this->uncompressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+            this->compressed_vertices.clear();
         }
     }
 
