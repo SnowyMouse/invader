@@ -257,10 +257,13 @@ namespace Invader::Parser {
                         }
                     };
                     
+                    // Cubemaps store each face as individual bitmaps rather than by mipmap, swapping the second and third faces.
                     auto copy_cube_map = [&copy_texture]() -> void {
                         std::size_t offset = 0;
                         for(std::size_t i = 0; i < 6; i++) {
                             int to_i;
+                            
+                            // Swap the second and third faces
                             if(i == 1) {
                                 to_i = 2;
                             }
@@ -270,7 +273,10 @@ namespace Invader::Parser {
                             else {
                                 to_i = i;
                             }
+                            
                             offset += copy_texture(offset, to_i);
+                            
+                            // Add some padding since bitmaps are stored with sizes module 128
                             offset += REQUIRED_PADDING_N_BYTES(offset, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY);
                         }
                     };
