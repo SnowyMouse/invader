@@ -2292,7 +2292,7 @@ namespace Invader {
             index_ptr.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset) - reinterpret_cast<const std::byte *>(&part_data);
             index_ptr.struct_index = indices_data_struct_index;
             index_ptr.struct_data_offset = part_data.triangle_offset;
-            vertex_ptr.limit_to_32_bits = true;
+            index_ptr.limit_to_32_bits = true;
             
             auto &index_ptr2 = part_struct.pointers.emplace_back();
             index_ptr2.offset = reinterpret_cast<const std::byte *>(&part_data.triangle_offset_2) - reinterpret_cast<const std::byte *>(&part_data);
