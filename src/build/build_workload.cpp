@@ -964,31 +964,70 @@ namespace Invader {
         this->tags[this->scenario_index].path = std::string(first_char, last_slash - first_char) + this->scenario_name.string;
 
         this->compile_tag_recursively("globals\\globals", TagClassInt::TAG_CLASS_GLOBALS);
-        this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
-
-        // Load the correct tag collection tag
-        switch(*this->cache_file_type) {
-            case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
-                this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
-                break;
-            case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
-                this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
-                break;
-            case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
-                this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
-                break;
-            case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
-                std::terminate();
+        
+        auto engine_target = this->parameters->details.build_cache_file_engine;
+        
+        // Xbox maps don't have tag collection tags, so we have to add each tag individual
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagClassInt::TAG_CLASS_BITMAP);
+            this->compile_tag_recursively("ui\\multiplayer_game_text", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
+            
+            switch(*this->cache_file_type) {
+                case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
+                    this->compile_tag_recursively("ui\\shell\\multiplayer", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
+                    this->compile_tag_recursively("ui\\shell\\solo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
+                    this->compile_tag_recursively("ui\\default_multiplayer_game_setting_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\saved_game_file_strings", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\multiplayer_scenarios", TagClassInt::TAG_CLASS_MULTIPLAYER_SCENARIO_DESCRIPTION);
+                    this->compile_tag_recursively("ui\\random_player_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\english", TagClassInt::TAG_CLASS_VIRTUAL_KEYBOARD);
+                    this->compile_tag_recursively("ui\\shell\\strings\\default_player_profile_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\strings\\game_variant_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+                    this->compile_tag_recursively("ui\\shell\\main_menu", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    this->compile_tag_recursively("sound\\music\\title1\\title1", TagClassInt::TAG_CLASS_SOUND_LOOPING);
+                    this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
+                    this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
+                    std::terminate();
+            }
         }
+        
+        // Use tag collection tags if we aren't on Xbox
+        else {
+            this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
 
-        // These are required for UI elements and other things
-        this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
-        this->compile_tag_recursively("sound\\sfx\\ui\\back", TagClassInt::TAG_CLASS_SOUND);
-        this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
-        this->compile_tag_recursively("ui\\shell\\main_menu\\mp_map_list", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-        this->compile_tag_recursively("ui\\shell\\strings\\loading", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-        this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagClassInt::TAG_CLASS_BITMAP);
-        this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
+            // Load the correct tag collection tag
+            switch(*this->cache_file_type) {
+                case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_solo_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_multiplayer_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
+                    this->compile_tag_recursively("ui\\ui_tags_loaded_mainmenu_scenario_type", TagClassInt::TAG_CLASS_TAG_COLLECTION);
+                    break;
+                case ScenarioType::SCENARIO_TYPE_ENUM_COUNT:
+                    std::terminate();
+            }
+
+            // These are required for UI elements and other things
+            this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
+            this->compile_tag_recursively("sound\\sfx\\ui\\back", TagClassInt::TAG_CLASS_SOUND);
+            this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
+            this->compile_tag_recursively("ui\\shell\\main_menu\\mp_map_list", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+            this->compile_tag_recursively("ui\\shell\\strings\\loading", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\trouble_brewing", TagClassInt::TAG_CLASS_BITMAP);
+            this->compile_tag_recursively("ui\\shell\\bitmaps\\background", TagClassInt::TAG_CLASS_BITMAP);
+        }
 
         // Mark stubs
         std::size_t warned = 0;
