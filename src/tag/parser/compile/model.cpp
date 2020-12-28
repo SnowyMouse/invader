@@ -825,7 +825,7 @@ namespace Invader::Parser {
         what.triangle_offset_2 = what.triangle_offset;
 
         // Add the vertices next
-        what.vertex_count = what.uncompressed_vertices.size();
+        what.vertex_count = part_vertices.size();
         std::vector<CacheVertex> vertices_of_fun;
         vertices_of_fun.reserve(what.vertex_count);
         
