@@ -353,8 +353,6 @@ namespace Invader {
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
                 tag_data_struct.model_part_count = static_cast<std::uint32_t>(part_count);
                 tag_data_struct.model_part_count_again = static_cast<std::uint32_t>(part_count);
-                
-                // TODODILE: Add vertices/indices stuff here
             }
             else {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderPC *>(final_data.data() + tag_data_offset);
@@ -1375,11 +1373,13 @@ namespace Invader {
                     pointers_64_bit.clear();
                     auto &bsp_data_struct = this->map_data_structs.emplace_back();
                     recursively_generate_data(bsp_data_struct, base_struct, recursively_generate_data);
+                    
                     std::size_t bsp_size = bsp_data_struct.size();
                     
                     // Resize the BSP to 512 bytes alignment if on Xbox
                     if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                         bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+                        bsp_data_struct.resize(bsp_size);
                     }
 
                     if(bsp_size > max_bsp_size) {
