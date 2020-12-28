@@ -271,7 +271,8 @@ namespace Invader {
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header, auto max_size) {
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header) {
+            auto max_size = workload.parameters->details.build_maximum_cache_file_size;
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
             header.engine = workload.parameters->details.build_cache_file_engine;
@@ -387,7 +388,7 @@ namespace Invader {
             // Check to make sure we aren't too big
             std::size_t uncompressed_size = final_data.size();
             if(static_cast<std::uint64_t>(uncompressed_size) > max_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds maximum size when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(static_cast<std::size_t>(max_size)));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds maximum size when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(max_size), BYTES_TO_MiB(static_cast<std::size_t>(max_size)));
                 throw MaximumFileSizeException();
             }
 
@@ -555,7 +556,7 @@ namespace Invader {
 
                 // If we have a 32-bit limit, show the limit
                 if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH), 100.0 * uncompressed_size / HEK::CACHE_FILE_MAXIMUM_FILE_LENGTH);
+                    oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_size), 100.0 * uncompressed_size / max_size);
                 }
                 else {
                     oprintf("MiB\n");
@@ -586,11 +587,11 @@ namespace Invader {
             std::snprintf(header.timestamp.string, sizeof(header.timestamp.string), "%04u-%02u-%02uT%02u:%02u:%02uZ", gmt->tm_year + 1900, gmt->tm_mon + 1, gmt->tm_mday, gmt->tm_hour, gmt->tm_min, gmt->tm_sec);
             
             // Done
-            return generate_final_data(header, UINT64_MAX);
+            return generate_final_data(header);
         }
         else {
             HEK::CacheFileHeader header = {};
-            return generate_final_data(header, UINT32_MAX);
+            return generate_final_data(header);
         }
     }
 
