@@ -2305,16 +2305,18 @@ namespace Invader {
         
         auto &indices_array_struct = this->structs[indices_array_struct_index];
         auto &vertices_array_struct = this->structs[vertices_array_struct_index];
+        auto &indices_data_struct = this->structs[indices_data_struct_index];
+        auto &vertices_data_struct = this->structs[vertices_data_struct_index];
         
         // Add an entry for each part
         auto *indices_array_data = reinterpret_cast<HEK::CacheFileModelPartIndicesXbox *>((indices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartIndicesXbox))).data());
         auto *vertices_array_data = reinterpret_cast<HEK::CacheFileModelPartVerticesXbox *>((vertices_array_struct.data = std::vector<std::byte>(part_count * sizeof(HEK::CacheFileModelPartVerticesXbox))).data());
         
-        // Fill it up with the vertices
+        // Fill it up with the vertices/indices
         auto *indices_data = this->model_indices.data();
-        indices_array_struct.data.insert(indices_array_struct.data.end(), reinterpret_cast<const std::byte *>(indices_data), reinterpret_cast<const std::byte *>(indices_data + this->model_indices.size()));
+        indices_data_struct.data.insert(indices_data_struct.data.end(), reinterpret_cast<const std::byte *>(indices_data), reinterpret_cast<const std::byte *>(indices_data + this->model_indices.size()));
         auto *vertices_data = this->compressed_model_vertices.data();
-        vertices_array_struct.data.insert(vertices_array_struct.data.end(), reinterpret_cast<const std::byte *>(vertices_data), reinterpret_cast<const std::byte *>(vertices_data + this->compressed_model_vertices.size()));
+        vertices_data_struct.data.insert(vertices_data_struct.data.end(), reinterpret_cast<const std::byte *>(vertices_data), reinterpret_cast<const std::byte *>(vertices_data + this->compressed_model_vertices.size()));
         
         // Set up pointers
         for(std::size_t p = 0; p < part_count; p++) {

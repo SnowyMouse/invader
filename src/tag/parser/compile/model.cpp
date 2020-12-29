@@ -3,7 +3,6 @@
 #include <invader/build/build_workload.hpp>
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/parser/compile/model.hpp>
-#include <map>
 
 namespace Invader::Parser {
     template<typename M> static void postprocess_hek_data_model(M &what) {
