@@ -127,6 +127,7 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // Yay
         File::check_working_directory("./toolbeta.map");
+        auto engine_target = workload.parameters->details.build_cache_file_engine;
         
         // Update scenario name if needed
         auto scenario_name_fixed = File::preferred_path_to_halo_path(this->parameters->scenario);
@@ -165,7 +166,11 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
-        this->generate_compressed_model_tag_array();
+        
+        // Generate memes on Xbox
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            this->generate_compressed_model_tag_array();
+        }
 
         // If we have resource maps to check, check them
         if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
@@ -188,7 +193,7 @@ namespace Invader {
             tag_data_ptr.struct_index = 1;
             tag_data_ptr.limit_to_32_bits = true;
         };
-        switch(this->parameters->details.build_cache_file_engine) {
+        switch(engine_target) {
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 make_tag_data_header_struct(this->scenario_index, this->structs, sizeof(HEK::NativeCacheFileTagDataHeader));
                 break;
@@ -238,7 +243,7 @@ namespace Invader {
 
         // Calculate total BSP size (pointless on native maps)
         std::vector<std::size_t> bsp_sizes(this->bsp_count);
-        if(this->parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+        if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             for(std::size_t i = 1; i <= this->bsp_count; i++) {
                 // Determine the index.
                 auto &this_bsp_size = bsp_sizes[i - 1];
@@ -271,11 +276,10 @@ namespace Invader {
         }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header) {
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header) {
             auto max_size = workload.parameters->details.build_maximum_cache_file_size;
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
-            auto engine_target = workload.parameters->details.build_cache_file_engine;
             header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
