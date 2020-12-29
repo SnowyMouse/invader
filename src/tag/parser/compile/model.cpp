@@ -849,6 +849,12 @@ namespace Invader::Parser {
                 uncompressed_cache_vertex.node1_weight = uncompressed_parser_vertex.node1_weight;
                 uncompressed_cache_vertex.texture_coords = uncompressed_parser_vertex.texture_coords;
             }
+            else {
+                auto &compressed_cache_vertex = *reinterpret_cast<Parser::ModelVertexCompressed::struct_little *>(&mv);
+                const auto &compressed_parser_vertex = *reinterpret_cast<const Parser::ModelVertexCompressed *>(&v);
+                compressed_cache_vertex.texture_coordinate_u = compressed_parser_vertex.texture_coordinate_u;
+                compressed_cache_vertex.texture_coordinate_v = compressed_parser_vertex.texture_coordinate_v;
+            }
         }
         
         // Part thingy
