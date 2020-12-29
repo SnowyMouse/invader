@@ -199,7 +199,7 @@ namespace Invader::Parser {
                 auto bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
                 
                 // Next, write it
-                auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &size, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
+                auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
                     std::size_t mipmap_width = width;
                     std::size_t mipmap_height = height;
                     std::size_t mipmap_depth = depth;
