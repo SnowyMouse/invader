@@ -160,18 +160,9 @@ namespace Invader::Parser {
                 throw InvalidTagDataException();
             }
             
-            // If we're linear, mark it as such. Or don't if we're not.
-            bool is_linear = !compressed && bitmap->type == HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
-            if(is_linear) {
-                data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
-            }
-            else {
-                data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
-            }
-            
             // If we're compiling for Xbox, we have to do this in a fun way (swizzling, cubemap memes, etc.). Otherwise, it's a straight copy
             if(xbox) {
-                bool needs_swizzled = !compressed && !is_linear;
+                bool needs_swizzled = !compressed && bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
                 
                 // We're going to be doing naughty things to this bitmap ;-;
                 if(needs_swizzled) {
@@ -303,6 +294,17 @@ namespace Invader::Parser {
         if(bitmap->compressed_color_plate_data.size() == 0) {
             bitmap->color_plate_height = 0;
             bitmap->color_plate_width = 0;
+        }
+        
+        for(auto &i : bitmap->bitmap_data) {
+            if(bitmap->type == HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS) {
+                i.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
+                i.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS; // this flag is misleading
+            }
+            else {
+                i.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
+                i.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_POWER_OF_TWO_DIMENSIONS;
+            }
         }
     }
 
