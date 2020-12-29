@@ -208,37 +208,36 @@ namespace Invader::Parser {
                 auto bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
                 
                 // Next, write it
-                auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
+                auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &size, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
                     std::size_t mipmap_width = width;
                     std::size_t mipmap_height = height;
                     std::size_t mipmap_depth = depth;
                     std::size_t bytes_per_block;
+                    std::size_t minimum_dimension = 1;
                     
                     // If DXT, convert to blocks
                     if(compressed) {
-                        std::size_t minimum_dimension_dxt = 4;
-                    
                         // Resolution it's stored as
-                        if(height % 4) {
-                            height += 4 - (height % 4);
+                        if(mipmap_height % 4) {
+                            mipmap_height += 4 - (mipmap_height % 4);
                         }
-                        if(width % 4) {
-                            width += 4 - (width % 4);
+                        if(mipmap_width % 4) {
+                            mipmap_width += 4 - (mipmap_width % 4);
                         }
                     
-                        mipmap_width = std::max(mipmap_width / 4, minimum_dimension_dxt);
-                        mipmap_height = std::max(mipmap_height / 4, minimum_dimension_dxt);
+                        mipmap_width = std::max(mipmap_width / 4, minimum_dimension);
+                        mipmap_height = std::max(mipmap_height / 4, minimum_dimension);
                         bytes_per_block = bits_per_pixel * 4 * 4 / 8;
                     }
                     else {
                         bytes_per_block = bits_per_pixel / 8;
                     }
                     
-                    std::size_t minimum_dimension = 1;
-                    auto *input = pixel_data + start;
+                    auto *input_start = pixel_data + start;
+                    auto *input = input_start;
                     
                     for(std::size_t i = 0; i <= copied_mipmap_count; i++) {
-                        auto mipmap_size = mipmap_width * mipmap_depth * mipmap_height * bytes_per_block;
+                        auto mipmap_size = mipmap_width * mipmap_height * mipmap_depth * bytes_per_block;
                         
                         // Skip to this cubemap face if needed
                         if(input_cubemap_face.has_value()) {
