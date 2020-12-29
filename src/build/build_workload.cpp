@@ -127,7 +127,7 @@ namespace Invader {
     std::vector<std::byte> BuildWorkload::build_cache_file() {
         // Yay
         File::check_working_directory("./toolbeta.map");
-        auto engine_target = workload.parameters->details.build_cache_file_engine;
+        auto engine_target = this->parameters->details.build_cache_file_engine;
         
         // Update scenario name if needed
         auto scenario_name_fixed = File::preferred_path_to_halo_path(this->parameters->scenario);
