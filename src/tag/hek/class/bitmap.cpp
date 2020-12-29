@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <invader/tag/hek/definition.hpp>
+#include <invader/tag/parser/parser.hpp>
 
 namespace Invader::HEK {
     const char *BITMAP_DATA_FORMAT_NAMES[] = {
@@ -50,5 +51,35 @@ namespace Invader::HEK {
             default:
                 return 0; // unknown
         }
+    }
+    
+    std::size_t size_of_bitmap(std::size_t width, std::size_t height, std::size_t depth, std::size_t mipmap_count, HEK::BitmapDataFormat format, HEK::BitmapDataType type) noexcept {
+        std::size_t size = 0;
+        std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(format);
+
+        // Is this a meme?
+        if(bits_per_pixel == 0) {
+            return 0;
+        }
+
+        bool should_be_compressed = format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3 || format == HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
+        std::size_t multiplier = type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
+        std::size_t block_length = should_be_compressed ? 4 : 1;
+
+        // Do it
+        for(std::size_t i = 0; i <= mipmap_count; i++) {
+            size += width * height * depth * multiplier * bits_per_pixel / 8;
+            
+            // Divide by 2, resetting back to 1 when needed, but make sure we don't go below the block length (4x4 if DXT, else 1x1)
+            width = std::max(width / 2, block_length);
+            height = std::max(height / 2, block_length);
+            depth = std::max(depth / 2, static_cast<std::size_t>(1));
+        }
+
+        return size;
+    }
+
+    std::size_t size_of_bitmap(const Parser::BitmapData &data) noexcept {
+        return size_of_bitmap(data.width, data.height, data.depth, data.mipmap_count, data.format, data.type);
     }
 }
