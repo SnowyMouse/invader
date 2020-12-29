@@ -58,76 +58,16 @@ namespace Invader::Parser {
         auto max_size = bitmap->processed_pixel_data.size();
         auto *pixel_data = bitmap->processed_pixel_data.data();
         std::size_t bitmap_data_count = bitmap->bitmap_data.size();
-        std::size_t swizzle_count = 0;
-        const char *swizzle_verb = "";
         auto engine_target = workload.get_build_parameters()->details.build_cache_file_engine;
+        auto xbox = engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX;
         
         for(std::size_t b = 0; b < bitmap_data_count; b++) {
             auto &data = bitmap->bitmap_data[b];
-            bool swizzled = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
             bool compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
             
-            // DXTn bitmaps cannot be swizzled
-            if(swizzled && compressed) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as compressed and swizzled which is not allowed", b);
+            if(data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is marked as swizzled which is unsupported for compiling maps", b);
                 throw InvalidTagDataException();
-            }
-            
-            // Should we (de)swizzle?
-            auto do_swizzle = [&data, &pixel_data, &swizzled, &swizzle_verb, &swizzle_count](bool deswizzle) {
-                std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
-                std::size_t mipmap_count = data.mipmap_count;
-                std::size_t width = data.width;
-                std::size_t height = data.height;
-                std::size_t depth = data.depth;
-                auto *this_bitmap_data = pixel_data + data.pixel_data_offset;
-                
-                // Go through each mipmap and insert them deswizzled
-                for(std::size_t m = 0; m <= mipmap_count; m++) {
-                    // Do it!
-                    auto deswizzled = Invader::Swizzle::swizzle(this_bitmap_data, bits_per_pixel, width, height, depth, true);
-                    auto deswizzled_size = deswizzled.size();
-                    std::memcpy(this_bitmap_data, deswizzled.data(), deswizzled_size);
-                    this_bitmap_data += deswizzled_size;
-                    
-                    // Make sure we don't go below 1x1
-                    width = std::max(width / 2, static_cast<std::size_t>(1));
-                    height = std::max(height / 2, static_cast<std::size_t>(1));
-                    depth = std::max(depth / 2, static_cast<std::size_t>(1));
-                }
-                
-                // Mark as (un)swizzled
-                if(deswizzle) {
-                    data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
-                    swizzled = false;
-                    swizzle_verb = "deswizzled";
-                }
-                else {
-                    data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
-                    swizzled = true;
-                    swizzle_verb = "swizzled";
-                }
-                
-                swizzle_count++;
-            };
-
-            // Check if we can or must use swizzled stuff
-            switch(engine_target) {
-                case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
-                case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                    if(swizzled) {
-                        do_swizzle(true);
-                    }
-                    break;
-                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    if(!compressed && !swizzled) {
-                        do_swizzle(false);
-                    }
-                    break;
-                default:
-                    break;
             }
 
             std::size_t data_index = &data - bitmap->bitmap_data.data();
@@ -143,45 +83,50 @@ namespace Invader::Parser {
             auto *build_parameters = workload.get_build_parameters();
 
             // Warn for stuff
-            if(build_parameters->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
-                bool exceeded = false;
-                bool non_power_of_two = (!HEK::is_power_of_two(height) || !HEK::is_power_of_two(width) || !HEK::is_power_of_two(depth));
-
-                if(
-                    engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
-                    engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-                    engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO
-                ) {
-                    if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
-                        exceeded = true;
-                    }
+            bool exceeded = false;
+            bool non_power_of_two = (!HEK::is_power_of_two(height) || !HEK::is_power_of_two(width) || !HEK::is_power_of_two(depth));
+            
+            if(
+                engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ||
+                engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
+                engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO ||
+                engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX // TODODILE: tentative
+            ) {
+                if(bitmap->type != HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS && non_power_of_two) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Non-interface bitmap data #%zu is non-power-of-two (%zux%zux%zu)", data_index, width, height, depth);
+                    exceeded = true;
+                }
+            
+                switch(type) {
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
+                        if(width > 2048 || height > 2048) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 2048x2048 (%zux%zu)", data_index, width, height);
+                            exceeded = true;
+                        }
+                        break;
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                        if(width > 256 || height > 256 || depth > 256) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 256x256x256 (%zux%zu)", data_index, width, height);
+                            exceeded = true;
+                        }
+                        break;
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                        if(width > 512 || height > 512) {
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 512x512 (%zux%zu)", data_index, width, height);
+                            exceeded = true;
+                        }
+                        break;
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_ENUM_COUNT:
+                        break;
+                }
                 
-                    switch(type) {
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
-                            if(width > 2048 || height > 2048) {
-                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 2048x2048 (%zux%zu)", data_index, width, height);
-                                 exceeded = true;
-                            }
-                            break;
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
-                            if(width > 256 || height > 256 || depth > 256) {
-                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 256x256x256 (%zux%zu)", data_index, width, height);
-                                 exceeded = true;
-                            }
-                            break;
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
-                            if(width > 512 || height > 512) {
-                                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Bitmap data #%zu exceeds 512x512 (%zux%zu)", data_index, width, height);
-                                 exceeded = true;
-                            }
-                            break;
-                        case HEK::BitmapDataType::BITMAP_DATA_TYPE_ENUM_COUNT:
-                            break;
+                if(exceeded) {
+                    if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                        eprintf_error("Target engine runs on a system that does not support these bitmaps");
+                        throw InvalidTagDataException();
                     }
-                    
-                    if(exceeded) {
+                    else if(build_parameters->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
                         eprintf_warn("Target engine uses D3D9; some D3D9 compliant hardware may not render this bitmap");
                     }
                 }
@@ -214,17 +159,144 @@ namespace Invader::Parser {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu range (0x%08zX - 0x%08zX) exceeds the processed pixel data size (0x%08zX)", data_index, start, end, max_size);
                 throw InvalidTagDataException();
             }
-
-            // Add it all
-            std::size_t raw_data_index = workload.raw_data.size();
-            workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
-            workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
-            data.pixel_data_size = static_cast<std::uint32_t>(size);
-        }
             
-        // Indicate if we had to swizzle or deswizzle
-        if(swizzle_count > 0) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "%zu bitmap%s needed to be %s for the target engine", swizzle_count, swizzle_count == 1 ? "" : "s", swizzle_verb);
+            // If we're linear, mark it as such. Or don't if we're not.
+            bool is_linear = !compressed && bitmap->type == HEK::BitmapType::BITMAP_TYPE_INTERFACE_BITMAPS;
+            if(is_linear) {
+                data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
+            }
+            else {
+                data.flags &= ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_LINEAR;
+            }
+            
+            // If we're compiling for Xbox, we have to do this in a fun way (swizzling, cubemap memes, etc.). Otherwise, it's a straight copy
+            if(xbox) {
+                bool needs_swizzled = !compressed && !is_linear;
+                
+                // We're going to be doing naughty things to this bitmap ;-;
+                if(needs_swizzled) {
+                    data.flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
+                }
+                
+                // The Xbox version, in compressed bitmaps, for some reason, discards all mipmaps where the width and height are less than 4 (i.e. 2x2, 1x2, 2x1, and 1x1 are discarded, so 4x2 is fine).
+                std::size_t copied_mipmap_count = data.mipmap_count;
+                if(compressed) {
+                    // If it's already sub 4x4, we can't do anything anyway -.-
+                    if(width < 4 && height < 4) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu is DXT compressed and is less than 4 pixels in both width and height, which is unsupported by the target engine", data_index);
+                        throw InvalidTagDataException();
+                    }
+                    
+                    std::size_t mipmap_width = width;
+                    std::size_t mipmap_height = height;
+                    std::size_t minimum_dimension = 1;
+                    
+                    for(copied_mipmap_count = 0; copied_mipmap_count < data.mipmap_count; copied_mipmap_count++) {
+                        mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
+                        mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
+                        
+                        if(mipmap_width < 4 && mipmap_height < 4) {
+                            break;
+                        }
+                    }
+                }
+                
+                // First, add our raw data entry
+                std::size_t raw_data_index = workload.raw_data.size();
+                auto &raw_data = workload.raw_data.emplace_back();
+                workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
+                auto bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
+                
+                // Next, write it
+                auto write_bitmap = [&raw_data, &needs_swizzled, &copied_mipmap_count, &width, &depth, &height, &compressed, &pixel_data, &start, &bits_per_pixel](std::optional<std::size_t> input_cubemap_face = std::nullopt) {
+                    std::size_t mipmap_width = width;
+                    std::size_t mipmap_height = height;
+                    std::size_t mipmap_depth = depth;
+                    std::size_t bytes_per_block;
+                    
+                    // If DXT, convert to blocks
+                    if(compressed) {
+                        std::size_t minimum_dimension_dxt = 4;
+                    
+                        // Resolution it's stored as
+                        if(height % 4) {
+                            height += 4 - (height % 4);
+                        }
+                        if(width % 4) {
+                            width += 4 - (width % 4);
+                        }
+                    
+                        mipmap_width = std::max(mipmap_width / 4, minimum_dimension_dxt);
+                        mipmap_height = std::max(mipmap_height / 4, minimum_dimension_dxt);
+                        bytes_per_block = bits_per_pixel * 4 * 4 / 8;
+                    }
+                    else {
+                        bytes_per_block = bits_per_pixel / 8;
+                    }
+                    
+                    std::size_t minimum_dimension = 1;
+                    auto *input = pixel_data + start;
+                    
+                    for(std::size_t i = 0; i <= copied_mipmap_count; i++) {
+                        auto mipmap_size = mipmap_width * mipmap_depth * mipmap_height * bytes_per_block;
+                        
+                        // Skip to this cubemap face if needed
+                        if(input_cubemap_face.has_value()) {
+                            input += (*input_cubemap_face) * mipmap_size;
+                        }
+                        
+                        // Insert it
+                        if(needs_swizzled) {
+                            auto swizzled = Invader::Swizzle::swizzle(input, bits_per_pixel, mipmap_width, mipmap_height, mipmap_depth, false);
+                            raw_data.insert(raw_data.end(), swizzled.begin(), swizzled.end());
+                        }
+                        else {
+                            raw_data.insert(raw_data.end(), input, input + mipmap_size);
+                        }
+                        
+                        // Next one
+                        input += (input_cubemap_face.has_value() ? (6 - *input_cubemap_face) : 1) * mipmap_width * mipmap_depth * mipmap_height * bytes_per_block;
+                        
+                        // Halve dimensions
+                        mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
+                        mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
+                        mipmap_depth = std::max(mipmap_depth / 2, minimum_dimension);
+                    }
+                    
+                    // Align to 128 bytes
+                    raw_data.insert(raw_data.end(), REQUIRED_PADDING_N_BYTES(raw_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_BITMAP_SIZE_GRANULARITY), std::byte());
+                };
+                
+                switch(type) {
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_2D_TEXTURE:
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_3D_TEXTURE:
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_WHITE:
+                        write_bitmap();
+                        break;
+                    // If we're a cubemap, we have to separate each face into its own bitmap in sequential order, swapping the second and third faces
+                    case HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP:
+                        write_bitmap(0);
+                        write_bitmap(2);
+                        write_bitmap(1);
+                        write_bitmap(3);
+                        write_bitmap(4);
+                        write_bitmap(5);
+                        break;
+                    default:
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Bitmap data #%zu has an invalid data type", data_index);
+                        throw InvalidTagDataException();
+                };
+                
+                // Lastly, set the size
+                data.pixel_data_size = static_cast<std::uint32_t>(raw_data.size());
+            }
+            else {
+                // Add it all
+                std::size_t raw_data_index = workload.raw_data.size();
+                workload.raw_data.emplace_back(pixel_data + start, pixel_data + end);
+                workload.tags[tag_index].asset_data.emplace_back(raw_data_index);
+                data.pixel_data_size = static_cast<std::uint32_t>(size);
+            }
         }
     }
 
