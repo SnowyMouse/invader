@@ -275,6 +275,7 @@ namespace Invader {
             auto max_size = workload.parameters->details.build_maximum_cache_file_size;
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
+            auto engine_target = workload.parameters->details.build_cache_file_engine;
             header.engine = workload.parameters->details.build_cache_file_engine;
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
@@ -288,7 +289,7 @@ namespace Invader {
             final_data.resize(sizeof(HEK::CacheFileHeader));
 
             // Go through each BSP and add that stuff
-            if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 for(std::size_t b = 0; b < workload.bsp_count; b++) {
                     final_data.insert(final_data.end(), workload.map_data_structs[b + 1].begin(), workload.map_data_structs[b + 1].end());
                 }
@@ -306,7 +307,7 @@ namespace Invader {
             std::size_t tag_data_offset;
             
             // If we're not on Xbox, we put the model data here
-            if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            if(engine_target != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 // Let's get the model data there
                 model_offset = final_data.size() + REQUIRED_PADDING_32_BIT(final_data.size());
                 final_data.resize(model_offset, std::byte());
@@ -337,7 +338,7 @@ namespace Invader {
             std::size_t tag_data_size = workload.map_data_structs[0].size();
             final_data.insert(final_data.end(), workload.map_data_structs[0].begin(), workload.map_data_structs[0].end());
             auto part_count = workload.model_parts.size();
-            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::NativeCacheFileTagDataHeader *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
@@ -347,7 +348,7 @@ namespace Invader {
                 tag_data_struct.model_data_size = static_cast<std::uint32_t>(model_data_size);
                 tag_data_struct.raw_data_indices = workload.raw_data_indices_offset;
             }
-            else if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
                 auto &tag_data_struct = *reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(final_data.data() + tag_data_offset);
                 tag_data_struct.tag_count = static_cast<std::uint32_t>(workload.tags.size());
                 tag_data_struct.tags_literal = CacheFileLiteral::CACHE_FILE_TAGS;
@@ -368,7 +369,7 @@ namespace Invader {
             // Lastly, do the header
             header.tag_data_size = static_cast<std::uint32_t>(tag_data_size);
             header.tag_data_offset = static_cast<std::uint32_t>(tag_data_offset);
-            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 header.head_literal = CacheFileLiteral::CACHE_FILE_HEAD_DEMO;
                 header.foot_literal = CacheFileLiteral::CACHE_FILE_FOOT_DEMO;
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
@@ -381,6 +382,11 @@ namespace Invader {
 
             if(workload.parameters->verbosity) {
                 oprintf(" done\n");
+            }
+            
+            // Resize to ye ol' sector
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                final_data.insert(final_data.end(), REQUIRED_PADDING_N_BYTES(final_data.size(), HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE), std::byte());
             }
 
             // Check to make sure we aren't too big
@@ -406,7 +412,7 @@ namespace Invader {
             
             // If we can calculate the CRC32, do it
             std::uint32_t new_crc = 0;
-            bool can_calculate_crc = workload.parameters->details.build_cache_file_engine != CacheFileEngine::CACHE_FILE_XBOX;
+            bool can_calculate_crc = engine_target != CacheFileEngine::CACHE_FILE_XBOX;
             if(can_calculate_crc) {
                 if(workload.parameters->verbosity) {
                     oprintf("Calculating CRC32...");
@@ -430,7 +436,7 @@ namespace Invader {
             }
 
             // Copy it again, this time with the new CRC32
-            if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
+            if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
                 *reinterpret_cast<HEK::CacheFileDemoHeader *>(final_data.data()) = *reinterpret_cast<HEK::CacheFileHeader *>(&header);
             }
             else {
@@ -454,7 +460,7 @@ namespace Invader {
                 }
             }
             // Set the file size in the header if needed
-            else if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 header.decompressed_file_size = final_data.size();
             }
 
@@ -483,7 +489,7 @@ namespace Invader {
 
                 // Show some useful metadata
                 oprintf("Scenario:          %s\n", workload.scenario_name.string);
-                oprintf("Engine:            %s\n", HEK::engine_name(workload.parameters->details.build_cache_file_engine));
+                oprintf("Engine:            %s\n", HEK::engine_name(engine_target));
                 oprintf("Map type:          %s\n", HEK::type_name(*workload.cache_file_type));
                 oprintf("Tags:              %zu / %zu (%.02f MiB)", workload.tags.size(), static_cast<std::size_t>(UINT16_MAX), BYTES_TO_MiB(workload.map_data_structs[0].size()));
                 if(workload.stubbed_tag_count) {
@@ -493,7 +499,7 @@ namespace Invader {
 
                 // Show the BSP count and/or size
                 oprintf("BSPs:              %zu", workload.bsp_count);
-                if(workload.parameters->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("\n");
                 }
                 else {
@@ -530,7 +536,7 @@ namespace Invader {
                 }
 
                 // Show the total tag space (if applicable)
-                if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("Tag space:         %.02f / %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(tag_space_usage), BYTES_TO_MiB(workload.parameters->details.build_maximum_tag_space), 100.0 * tag_space_usage / workload.parameters->details.build_maximum_tag_space);
                 }
 
@@ -553,7 +559,7 @@ namespace Invader {
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
 
                 // If we have a 32-bit limit, show the limit
-                if(workload.parameters->details.build_cache_file_engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_size), 100.0 * uncompressed_size / max_size);
                 }
                 else {
