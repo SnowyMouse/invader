@@ -5,36 +5,6 @@
 #include <invader/bitmap/swizzle.hpp>
 
 namespace Invader::Parser {
-    static std::size_t size_of_bitmap(const BitmapData &data) {
-        std::size_t size = 0;
-        std::size_t bits_per_pixel = HEK::calculate_bits_per_pixel(data.format);
-
-        // Is this a meme?
-        if(bits_per_pixel == 0) {
-            eprintf_error("Unknown format %u", static_cast<unsigned int>(data.format));
-            throw std::exception();
-        }
-
-        std::size_t height = data.height;
-        std::size_t width = data.width;
-        std::size_t depth = data.depth;
-        bool should_be_compressed = data.flags & HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_COMPRESSED;
-        std::size_t multiplier = data.type == HEK::BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP ? 6 : 1;
-        std::size_t block_length = should_be_compressed ? 4 : 1;
-
-        // Do it
-        for(std::size_t i = 0; i <= data.mipmap_count; i++) {
-            size += width * height * depth * multiplier * bits_per_pixel / 8;
-            
-            // Divide by 2, resetting back to 1 when needed, but make sure we don't go below the block length (4x4 if DXT, else 1x1)
-            width = std::max(width / 2, block_length);
-            height = std::max(height / 2, block_length);
-            depth = std::max(depth / 2, static_cast<std::size_t>(1));
-        }
-
-        return size;
-    }
-
     template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
         bitmap->postprocess_hek_data();
 
@@ -129,7 +99,7 @@ namespace Invader::Parser {
                     bitmap_data.flags = bitmap_data.flags & ~HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_SWIZZLED;
                     
                     // Set our buffer up
-                    xbox_to_pc_buffer.resize(size_of_bitmap(bitmap_data));
+                    xbox_to_pc_buffer.resize(HEK::size_of_bitmap(bitmap_data));
                     
                     auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data](std::optional<std::size_t> input_offset = std::nullopt, std::optional<std::size_t> output_cubemap_face = std::nullopt) -> std::size_t {
                         std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
