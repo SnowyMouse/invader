@@ -292,7 +292,7 @@
             },
             {
                 "name": "color0 animation function",
-                "type": "FunctionOut"
+                "type": "WaveFunction"
             },
             {
                 "name": "color0 animation period",
