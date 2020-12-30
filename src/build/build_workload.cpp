@@ -49,7 +49,7 @@ namespace Invader {
                 break;
             case CacheFileEngine::CACHE_FILE_XBOX:
                 this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_XBOX;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                 this->build_compress = true;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL;
@@ -1501,9 +1501,9 @@ namespace Invader {
                     
                     std::size_t bsp_size = bsp_data_struct.size();
                     
-                    // Resize the BSP to 512 bytes alignment if on Xbox
+                    // Resize the BSP to 2048 bytes alignment if on Xbox
                     if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                        bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+                        bsp_size = bsp_size + REQUIRED_PADDING_N_BYTES(bsp_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE * 4);
                         bsp_data_struct.resize(bsp_size);
                     }
 
