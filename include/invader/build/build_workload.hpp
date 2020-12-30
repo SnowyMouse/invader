@@ -356,9 +356,6 @@ namespace Invader {
         /** Tags being worked with */
         std::vector<BuildWorkloadTag> tags;
 
-        /** BSP struct */
-        std::optional<std::size_t> bsp_struct;
-
         /** BSP count */
         std::size_t bsp_count = 0;
 

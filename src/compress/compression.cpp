@@ -150,9 +150,19 @@ namespace Invader::Compression {
             auto input_padding_required = REQUIRED_PADDING_N_BYTES(data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
             if(input_padding_required) {
                 eprintf_error("map size is not divisible by sector size (%zu)", static_cast<std::size_t>(HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE));
-                throw CompressionFailureException();
+                //throw CompressionFailureException();
             }
             
+            // Resize input (Arsenic workaround - do not commit to main repo because this is completely dumb)
+            std::vector<std::byte> new_data;
+            if(input_padding_required) {
+                new_data.insert(new_data.end(), data, data + data_size);
+                new_data.insert(new_data.end(), input_padding_required, std::byte());
+                data = new_data.data();
+                data_size = new_data.size();
+                eprintf_warn("WARNING: MAP IS COMPLETE AND TOTAL BULLSHIT. RESIZING BULLSHIT MAP...");
+            }
+                
             compress_header<HEK::CacheFileHeader>(map, output, data_size);
 
             // Compress that!
