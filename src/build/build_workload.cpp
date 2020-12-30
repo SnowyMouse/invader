@@ -2443,6 +2443,18 @@ namespace Invader {
         auto *vertices_data = this->compressed_model_vertices.data();
         vertices_data_struct.data.insert(vertices_data_struct.data.end(), reinterpret_cast<const std::byte *>(vertices_data), reinterpret_cast<const std::byte *>(vertices_data + this->compressed_model_vertices.size()));
         
+        auto *header = reinterpret_cast<HEK::CacheFileTagDataHeaderXbox *>(TAG_DATA_HEADER_STRUCT.data.data());
+        
+        auto &ptr_to_vertices = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
+        ptr_to_vertices.offset = reinterpret_cast<std::byte *>(&header->model_part_vertices_address) - reinterpret_cast<std::byte *>(header);
+        ptr_to_vertices.limit_to_32_bits = true;
+        ptr_to_vertices.struct_index = vertices_array_struct_index;
+        
+        auto &ptr_to_indices = TAG_DATA_HEADER_STRUCT.pointers.emplace_back();
+        ptr_to_indices.offset = reinterpret_cast<std::byte *>(&header->model_part_indices_address) - reinterpret_cast<std::byte *>(header);
+        ptr_to_indices.limit_to_32_bits = true;
+        ptr_to_indices.struct_index = indices_array_struct_index;
+        
         // Set up pointers
         for(std::size_t p = 0; p < part_count; p++) {
             auto &indices = indices_array_data[p];
