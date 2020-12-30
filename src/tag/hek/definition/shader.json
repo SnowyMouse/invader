@@ -142,7 +142,7 @@
             },
             {
                 "name": "shader type",
-                "type": "ShaderType",
+                "type": "uint16",
                 "endian": "little",
                 "volatile": true
             },
