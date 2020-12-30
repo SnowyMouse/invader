@@ -131,6 +131,11 @@ namespace Invader {
                 bool build_compress;
                 
                 /**
+                 * Compression level to use if compressing
+                 */
+                std::optional<int> compression_level;
+                
+                /**
                  * Use MCC-style compression?
                  */
                 bool build_compress_mcc;

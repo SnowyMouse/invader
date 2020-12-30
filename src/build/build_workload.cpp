@@ -454,10 +454,10 @@ namespace Invader {
                     oflush();
                 }
                 if(!workload.parameters->details.build_compress_mcc) {
-                    final_data = Compression::compress_map_data(final_data.data(), final_data.size());
+                    final_data = Compression::compress_map_data(final_data.data(), final_data.size(), workload.parameters->details.compression_level.value_or(19));
                 }
                 else {
-                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size());
+                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size(), workload.parameters->details.compression_level.value_or(9));
                 }
                 if(workload.parameters->verbosity) {
                     oprintf(" done\n");
