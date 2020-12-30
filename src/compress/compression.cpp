@@ -179,7 +179,7 @@ namespace Invader::Compression {
             }
             
             // Align to 4096 bytes
-            std::size_t padding_required = 4096 - ((deflate_stream.total_out + HEADER_SIZE) % 4096);
+            std::size_t padding_required = REQUIRED_PADDING_N_BYTES(deflate_stream.total_out + HEADER_SIZE, 4096);
             if(padding_required) {
                 reinterpret_cast<HEK::CacheFileHeader *>(output)->compressed_padding = static_cast<std::uint32_t>(padding_required);
             }
