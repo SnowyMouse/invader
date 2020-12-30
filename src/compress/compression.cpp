@@ -147,6 +147,12 @@ namespace Invader::Compression {
         auto engine = map.get_engine();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             #ifndef DISABLE_ZLIB
+            auto padding_required = REQUIRED_PADDING_N_BYTES(data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
+            if(padding_required) {
+                eprintf_error("map size is not divisible by sector size (%zu)", static_cast<std::size_t>(HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE));
+                throw CompressionFailureException();
+            }
+            
             compress_header<HEK::CacheFileHeader>(map, output, data_size);
 
             // Compress that!
