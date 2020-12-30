@@ -313,7 +313,7 @@ namespace Invader::File {
 
                         // First, make sure it's valid
                         if(tag_class_int == HEK::TagClassInt::TAG_CLASS_NULL || tag_class_int == HEK::TagClassInt::TAG_CLASS_NONE) {
-                            continue;
+                            goto spaghetti_next_tag;
                         }
 
                         // Next, add it
@@ -328,6 +328,7 @@ namespace Invader::File {
                     }
                 }
                 
+                spaghetti_next_tag:
                 found = FindNextFileA(file, &find_data);
             }
             
