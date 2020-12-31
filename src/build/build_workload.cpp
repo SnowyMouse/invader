@@ -167,11 +167,6 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
-        
-        // Generate memes on Xbox
-        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            this->generate_compressed_model_tag_array();
-        }
 
         // If we have resource maps to check, check them
         if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
@@ -218,6 +213,11 @@ namespace Invader {
                 }
             }
             throw InvalidTagDataException();
+        }
+        
+        // Generate memes on Xbox
+        if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            this->generate_compressed_model_tag_array();
         }
 
         // Dedupe structs
