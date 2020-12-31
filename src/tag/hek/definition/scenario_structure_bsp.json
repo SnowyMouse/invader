@@ -333,8 +333,11 @@
                 "size": 2
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "do not screw up the model",
+                "type": "uint32",
+                "comment": "(Xbox only) if this isn't set to 1, then the world ends",
+                "endian": "little",
+                "cache_only": true
             },
             {
                 "name": "rendered vertices count",
@@ -347,15 +350,21 @@
             {
                 "type": "pad",
                 "size": 4,
-                "comment": "this gets changed to a pointer to something when the BSP is loaded in-game; otherwise it's something unused (probably used as a pointer when tool.exe made the tag)"
+                "comment": "on PC, this gets changed to a pointer to something when the BSP is loaded in-game"
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "rendered vertices index pointer",
+                "type": "Pointer",
+                "cache_only": true,
+                "comment": "(Xbox only) an indirect pointer to the rendered vertices",
+                "endian": "little"
             },
             {
-                "type": "pad",
-                "size": 4
+                "name": "set this or die",
+                "type": "uint32",
+                "endian": "little",
+                "comment": "(Xbox only) if this isn't set to 3, then the visible lightmap UVs do not work",
+                "cache_only": true
             },
             {
                 "name": "lightmap vertices count",
@@ -367,7 +376,14 @@
             },
             {
                 "type": "pad",
-                "size": 8
+                "size": 4
+            },
+            {
+                "name": "lightmap vertices index pointer",
+                "type": "Pointer",
+                "cache_only": true,
+                "comment": "(Xbox only) an indirect pointer to the lightmap vertices",
+                "endian": "little"
             },
             {
                 "name": "uncompressed vertices",
@@ -379,7 +395,6 @@
                 "name": "compressed vertices",
                 "type": "TagDataOffset",
                 "compound": true,
-                "non_cached": true,
                 "ignore_cached": true
             }
         ],
@@ -1702,8 +1717,28 @@
                 "endian": "little"
             },
             {
-                "type": "pad",
-                "size": 16
+                "name": "lightmap material count",
+                "type": "uint32",
+                "comment": "(Xbox only): number of lightmap materials",
+                "cache_only": true
+            },
+            {
+                "name": "rendered vertices",
+                "type": "Pointer",
+                "comment": "(Xbox only): pointer to array of rendered vertices",
+                "cache_only": true
+            },
+            {
+                "name": "lightmap material count again",
+                "type": "uint32",
+                "comment": "(Xbox only): number of lightmap materials (again)",
+                "cache_only": true
+            },
+            {
+                "name": "lightmap vertices",
+                "type": "Pointer",
+                "comment": "(Xbox only): pointer to array of lightmap vertices",
+                "cache_only": true
             },
             {
                 "name": "signature",

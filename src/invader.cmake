@@ -97,7 +97,8 @@ set(INVADER_SOURCE_FILES
     src/tag/parser/post_cache_deformat.cpp
     src/tag/parser/compile/actor.cpp
     src/tag/parser/compile/antenna.cpp
-    src/tag/parser/compile/bitmap.cpp
+    src/tag/parser/compile/bitmap/compile.cpp
+    src/tag/parser/compile/bitmap/decompile.cpp
     src/tag/parser/compile/contrail.cpp
     src/tag/parser/compile/damage_effect.cpp
     src/tag/parser/compile/decal.cpp

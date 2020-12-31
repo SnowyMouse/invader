@@ -18,7 +18,7 @@ int main(int argc, const char **argv) {
 
     struct CompressOptions {
         const char *output = nullptr;
-        long compression_level = 19;
+        int compression_level = 19;
         bool decompress = false;
         bool ceaflate = false;
     } compress_options;
@@ -27,7 +27,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("mcc", 'M', 0, "Use MCC-style (de)compression");
     options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
-    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 1 and 19. If compressing an Xbox or MCC map, this will be clamped from 1 to 9. Default: 19", "<level>");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an Xbox or MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
     options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
 
     static constexpr char DESCRIPTION[] = "Compress cache files.";
@@ -39,9 +39,15 @@ int main(int argc, const char **argv) {
                 compress_options.decompress = true;
                 break;
             case 'l':
-                compress_options.compression_level = std::strtol(arguments[0], nullptr, 10);
-                if(compress_options.compression_level < 1 || compress_options.compression_level > 19) {
-                    eprintf_error("Compression level must be between 1 and 19");
+                try {
+                    compress_options.compression_level = std::stol(arguments[0]);
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid compression level %i\n", compress_options.compression_level);
+                    std::exit(EXIT_FAILURE);
+                }
+                if(compress_options.compression_level < 0 || compress_options.compression_level > 19) {
+                    eprintf_error("Compression level must be between 0 and 19");
                     std::exit(EXIT_FAILURE);
                 }
                 break;

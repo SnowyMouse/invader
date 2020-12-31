@@ -49,6 +49,21 @@ namespace Invader::HEK {
     using Angle = float;
     using Fraction = float;
     using Index = std::uint16_t;
+    
+    /**
+     * Check if the number is power-of-two
+     * @param value value to check
+     * @return      true if the value is power-of-two; false if not
+     */
+    template <typename T> [[maybe_unused]] static inline bool is_power_of_two(T value) {
+        while(value > 1) {
+            if(value & 1) {
+                return false;
+            }
+            value >>= 1;
+        }
+        return value & 1;
+    }
 
     #define NULL_INDEX (0xFFFF)
 

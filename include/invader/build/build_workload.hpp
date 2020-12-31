@@ -121,14 +121,19 @@ namespace Invader {
                 std::uint64_t build_maximum_tag_space;
                 
                 /**
-                 * Maximum cache file size to use
+                 * Maximum cache file size to use. If null, it will determine it based on the map type on Xbox or the maximum allowed file size on other versions (without modding).
                  */
-                std::uint64_t build_maximum_cache_file_size;
+                std::optional<std::uint64_t> build_maximum_cache_file_size;
                 
                 /**
                  * Compress?
                  */
                 bool build_compress;
+                
+                /**
+                 * Compression level to use if compressing
+                 */
+                std::optional<int> compression_level;
                 
                 /**
                  * Use MCC-style compression?
@@ -230,9 +235,12 @@ namespace Invader {
 
             /** We're only limited to 32-bit pointers */
             bool limit_to_32_bits = false;
+            
+            /** Data offset of the depended struct */
+            std::size_t struct_data_offset = 0;
 
             bool operator==(const BuildWorkloadStructPointer &other) const noexcept {
-                return this->struct_index == other.struct_index && this->offset == other.offset;
+                return this->struct_index == other.struct_index && this->offset == other.offset && this->struct_data_offset == other.struct_data_offset;
             }
         };
 
@@ -329,20 +337,31 @@ namespace Invader {
         /** Structs being worked with */
         std::vector<BuildWorkloadStruct> structs;
 
-        /** Vertices for models */
-        std::vector<Parser::ModelVertexUncompressed::struct_little> model_vertices;
+        /** Uncompressed vertices for models */
+        std::vector<Parser::ModelVertexUncompressed::struct_little> uncompressed_model_vertices;
+
+        /** Compressed vertices for models */
+        std::vector<Parser::ModelVertexCompressed::struct_little> compressed_model_vertices;
 
         /** Indices for models */
         std::vector<HEK::LittleEndian<HEK::Index>> model_indices;
+        
+        struct BuildWorkloadModelPart {
+            /** index of the struct the part is in */
+            std::size_t struct_index;
+            
+            /** offset of the part */
+            std::size_t offset;
+        };
+        
+        /** Model data parts' struct indices and their offsets */
+        std::vector<BuildWorkloadModelPart> model_parts;
 
         /** Raw data for bitmaps and sounds */
         std::vector<std::vector<std::byte>> raw_data;
 
         /** Tags being worked with */
         std::vector<BuildWorkloadTag> tags;
-
-        /** BSP struct */
-        std::optional<std::size_t> bsp_struct;
 
         /** BSP count */
         std::size_t bsp_count = 0;
@@ -358,9 +377,6 @@ namespace Invader {
 
         /** Are we building a stock map? */
         bool building_stock_map = false;
-
-        /** Part count */
-        std::size_t part_count = 0;
         
         /** 
          * Get the build parameters
@@ -414,6 +430,7 @@ namespace Invader {
         std::size_t raw_data_indices_offset;
         std::uint32_t tag_file_checksums = 0;
         const BuildParameters *parameters = nullptr;
+        void generate_compressed_model_tag_array();
     };
 }
 

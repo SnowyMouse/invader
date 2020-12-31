@@ -64,6 +64,7 @@ int main(int argc, const char **argv) {
         std::optional<bool> compress;
         bool optimize_space = false;
         bool hide_pedantic_warnings = false;
+        std::optional<int> compression_level;
         bool mcc = false;
     } build_options;
 
@@ -72,7 +73,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, mcc-custom", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, xbox, mcc-custom", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -81,6 +82,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("rename-scenario", 'N', 1, "Rename the scenario.", "<name>");
     options.emplace_back("compress", 'c', 0, "Compress the cache file.");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an Xbox or MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
     options.emplace_back("uncompressed", 'u', 0, "Do not compress the cache file. This is default for demo, retail, and custom engines.");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
@@ -111,6 +113,19 @@ int main(int argc, const char **argv) {
             case 'm':
                 build_options.maps = std::string(arguments[0]);
                 break;
+            case 'l':
+                try {
+                    build_options.compression_level = std::stoi(arguments[0]);
+                    if(build_options.compression_level < 0 || build_options.compression_level > 19) {
+                        eprintf_error("Compression level must be between 0 and 19");
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                catch(std::exception &) {
+                    eprintf_error("Invalid compression level %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
+                break;
             case 'g':
                 build_options.mcc = false;
                 if(std::strcmp(arguments[0], "custom") == 0) {
@@ -125,6 +140,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(arguments[0], "demo") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                }
+                else if(std::strcmp(arguments[0], "xbox") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
@@ -247,6 +265,10 @@ int main(int argc, const char **argv) {
         
         if(build_options.compress.has_value()) {
             parameters.details.build_compress = *build_options.compress;
+        }
+        
+        if(build_options.compression_level.has_value()) {
+            parameters.details.compression_level = build_options.compression_level;
         }
         
         // Do we need resource maps?

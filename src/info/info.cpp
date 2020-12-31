@@ -56,7 +56,8 @@ namespace Invader::Info {
             PRINT_LINE(oprintf, "Timestamp:", "%s\n", reinterpret_cast<Invader::HEK::NativeCacheFileHeader *>(header_cache)->timestamp.string);
         }
         
-        PRINT_LINE(oprintf, "Map type:", "%s\n", type_name(map.get_type()));
+        auto map_type = map.get_type();
+        PRINT_LINE(oprintf, "Map type:", "%s\n", type_name(map_type));
         PRINT_LINE(oprintf, "Tags:", "%zu / %zu (%.02f MiB)\n", map.get_tag_count(), HEK::CacheFileLimits::CACHE_FILE_MAX_TAG_COUNT, BYTES_TO_MiB(map.get_tag_data_length()));
         
         auto crc = map.get_crc32();
@@ -178,10 +179,22 @@ namespace Invader::Info {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
             case HEK::CacheFileEngine::CACHE_FILE_RETAIL:
             case HEK::CacheFileEngine::CACHE_FILE_DEMO:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
+                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
+                switch(map_type) {
+                    case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
+                        break;
+                    case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
+                        break;
+                    case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                        max_uncompressed_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
                 // pretty much useless to show max file size

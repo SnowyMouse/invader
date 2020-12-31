@@ -10,6 +10,10 @@ namespace Invader::Parser {
         this->harmful_falling_velocity.to = static_cast<float>(std::sqrt(this->harmful_falling_distance.to * GRAVITY * 2.0f));
     }
     void GlobalsPlayerInformation::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         if(*workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE) {
             this->unit.path.clear();
             this->unit.tag_id = HEK::TagID::null_tag_id();
@@ -21,6 +25,10 @@ namespace Invader::Parser {
         }
     }
     void Globals::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        if(workload.disable_recursion) {
+            return;
+        }
+        
         if(*workload.cache_file_type != HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER) {
             this->multiplayer_information.clear();
             this->cheat_powerups.clear();
@@ -31,8 +39,11 @@ namespace Invader::Parser {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
             }
-            if(this->weapon_list.size() < 16) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have at least 16 weapons blocks which is required for the map type", tag_index);
+            
+            std::size_t required_weapons = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX ? 14 : 16;
+            
+            if(this->weapon_list.size() < required_weapons) {
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Globals tag does not have at least %zu weapons blocks which is required for the map type", required_weapons);
                 throw InvalidTagDataException();
             }
         }
@@ -77,20 +88,31 @@ namespace Invader::Parser {
     void GlobalsMultiplayerInformation::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         const auto &globals_multiplayer_information_struct = workload.structs[struct_index];
         const auto &globals_multiplayer_information_data = *reinterpret_cast<const struct_little *>(globals_multiplayer_information_struct.data.data() + offset);
-
-        // See if we have the ting sound. If so, make it louder on custom edition.
-        const std::size_t SOUND_COUNT = globals_multiplayer_information_data.sounds.count;
-        if(SOUND_COUNT > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
-            const float TING_VOLUME = workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
-            const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
-            if(!sound_id.is_null()) {
-                reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
+        
+        auto target_engine = workload.get_build_parameters()->details.build_cache_file_engine;
+        const std::size_t sound_count = globals_multiplayer_information_data.sounds.count;
+        std::size_t required_sounds;
+        
+        // Xbox doesn't have ting (required_sounds is exclusive)
+        if(target_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING;
+        }
+        else {
+            required_sounds = HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT;
+            
+            // See if we have the ting sound. If so, make it louder on custom edition.
+            if(sound_count > HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING) {
+                const float TING_VOLUME = target_engine == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION ? 1.0F : 0.2F;
+                const auto sound_id = reinterpret_cast<const GlobalsSound::struct_little *>(workload.structs[*globals_multiplayer_information_struct.resolve_pointer(&globals_multiplayer_information_data.sounds.pointer)].data.data())[HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_TING].sound.tag_id.read();
+                if(!sound_id.is_null()) {
+                    reinterpret_cast<Sound::struct_little *>(workload.structs[*workload.tags[sound_id.index].base_struct].data.data())->random_gain_modifier = TING_VOLUME;
+                }
             }
         }
 
         // See if we have all sounds, too
-        if(SOUND_COUNT < HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", SOUND_COUNT, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT), offset / sizeof(struct_little));
+        if(sound_count < required_sounds && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, "Some sounds are missing from multiplayer information #%zu (%zu / %zu sounds present)", offset / sizeof(struct_little), sound_count, static_cast<std::size_t>(HEK::MultiplayerInformationSound::MULTIPLAYER_INFORMATION_SOUND_ENUM_COUNT));
         }
     }
 }
