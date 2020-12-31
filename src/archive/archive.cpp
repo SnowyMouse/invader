@@ -20,7 +20,7 @@ int main(int argc, const char **argv) {
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
-        Invader::HEK::CacheFileEngine engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+        std::optional<Invader::HEK::CacheFileEngine> engine;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
@@ -33,7 +33,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, xbox, native", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required if -s is not specified. Valid engines are: custom, demo, retail, xbox, native", "<id>");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -74,6 +74,12 @@ int main(int argc, const char **argv) {
                 break;
         }
     });
+
+    // Figure out our engine target
+    if(!archive_options.engine.has_value() && !archive_options.single_tag) {
+        eprintf_error("No engine target specified for map archival. Use -h for more information.");
+        return EXIT_FAILURE;
+    }
 
     // No tags folder? Use tags in current directory
     if(archive_options.tags.size() == 0) {
@@ -145,7 +151,7 @@ int main(int argc, const char **argv) {
         std::vector<std::byte> map;
 
         try {
-            Invader::BuildWorkload::BuildParameters parameters(archive_options.engine);
+            Invader::BuildWorkload::BuildParameters parameters(*archive_options.engine);
             parameters.scenario = base_tag.data();
             parameters.tags_directories = archive_options.tags;
             if(archive_options.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX) {

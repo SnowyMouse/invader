@@ -4,6 +4,8 @@ This is used for recording Invader's changes. This changelog is based on
 
 ## Unreleased
 ### Added
+- invader-archive: Added `-g` to specify game target (now required if not
+  archiving single tags)
 - invader-build: Added `-g xbox` engine target
 - invader-build: Added `-E` to use the maximum theoretical size for the given
   cache file (4 GiB for PC, 278 MiB for Xbox due to cache partition sizes).
