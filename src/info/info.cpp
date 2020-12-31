@@ -206,7 +206,16 @@ namespace Invader::Info {
         if(max_uncompressed_size.has_value()) {
             auto num = BYTES_TO_MiB(map.get_data_length());
             auto den = BYTES_TO_MiB(*max_uncompressed_size);
-            PRINT_LINE(oprintf, "Uncompressed size:", "%.02f / %.02f MiB (%.02f %%)\n", num, den, 100.0 * num / den);
+            
+            char uncompressed_size[128];
+            std::snprintf(uncompressed_size, sizeof(uncompressed_size), "%.02f / %.02f MiB (%.02f %%)", num, den, 100.0 * num / den);
+            
+            if(num > den) {
+                PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%s", uncompressed_size);
+            }
+            else {
+                PRINT_LINE(oprintf, "Uncompressed size:", "%s", uncompressed_size);
+            }
         }
         else {
             PRINT_LINE(oprintf, "Uncompressed size:", "%.02f MiB\n", BYTES_TO_MiB(map.get_data_length()));
