@@ -66,6 +66,7 @@ int main(int argc, const char **argv) {
         bool hide_pedantic_warnings = false;
         std::optional<int> compression_level;
         bool mcc = false;
+        bool increased_file_size_limits = false;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -86,6 +87,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("uncompressed", 'u', 0, "Do not compress the cache file. This is default for demo, retail, and custom engines.");
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
+    options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
 
     static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
@@ -112,6 +114,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'm':
                 build_options.maps = std::string(arguments[0]);
+                break;
+            case 'E':
+                build_options.increased_file_size_limits = true;
                 break;
             case 'l':
                 try {
@@ -261,6 +266,16 @@ int main(int argc, const char **argv) {
         if(build_options.mcc) {
             parameters.details.build_compress = true;
             parameters.details.build_compress_mcc = true;
+            build_options.increased_file_size_limits = true;
+        }
+        
+        if(build_options.increased_file_size_limits) {
+            if(build_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                parameters.details.build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER; // use the single player limit since that's as large as the cache partition allows
+            }
+            else if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                parameters.details.build_maximum_cache_file_size = UINT32_MAX;
+            }
         }
         
         if(build_options.compress.has_value()) {

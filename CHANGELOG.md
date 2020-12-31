@@ -5,6 +5,9 @@ This is used for recording Invader's changes. This changelog is based on
 ## Unreleased
 ### Added
 - invader-build: Added `-g xbox` engine target
+- invader-build: Added `-E` to use the maximum theoretical size for the given
+  cache file (4 GiB for PC, 278 MiB for Xbox due to cache partition sizes).
+  Doing so may result in the cache file requiring a mod to be loaded.
 - invader-bludgeon: Added `-j` for specifying thread count when using `--all`.
   On an AMD Ryzen 5 2600 with a tags directory of over 10000 tags, this reduced
   the bludgeon time from 29 seconds to 4 seconds, making it over 7x faster.
@@ -29,7 +32,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: All stock HEK limits are checked when building for all PC
   versions of Halo
 - invader-build: All original file size limits are now checked when building for
-  all PC versions of Halo (except MCC).
+  all PC versions of Halo (except MCC). Use `-E` to use the old behavior's
+  higher limits.
 - invader-compress: Changed compression level minimum to 0. On Deflate, this
   effectively stores the original data uncompressed and simply adds a zlib
   header, so it will always be larger than the original size, but it's nearly
