@@ -20,6 +20,7 @@ int main(int argc, const char **argv) {
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
+        Invader::HEK::CacheFileEngine engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
     } archive_options;
 
     static constexpr char DESCRIPTION[] = "Generate .tar.xz archives of the tags required to build a cache file.";
@@ -32,6 +33,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail", "<id>");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -49,6 +51,20 @@ int main(int argc, const char **argv) {
                 break;
             case 'P':
                 archive_options.use_filesystem_path = true;
+                break;
+            case 'g':
+                if(std::strcmp(arguments[0], "custom") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                }
+                else if(std::strcmp(arguments[0], "retail") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_RETAIL;
+                }
+                else if(std::strcmp(arguments[0], "demo") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_DEMO;
+                }
+                else if(std::strcmp(arguments[0], "native") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+                }
                 break;
             case 'C':
                 archive_options.copy = true;
@@ -126,11 +142,11 @@ int main(int argc, const char **argv) {
         std::vector<std::byte> map;
 
         try {
-            Invader::BuildWorkload::BuildParameters parameters;
+            Invader::BuildWorkload::BuildParameters parameters(archive_options.engine);
             parameters.scenario = base_tag.data();
             parameters.tags_directories = archive_options.tags;
             parameters.details.build_compress = false;
-            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
+            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_PEDANTIC;
             
             map = Invader::BuildWorkload::compile_map(parameters);
         }
