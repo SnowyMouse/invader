@@ -333,8 +333,9 @@
                 "size": 2
             },
             {
-                "name": "unknown1",
+                "name": "do not screw up the model",
                 "type": "uint32",
+                "comment": "(Xbox only) if this isn't set to 1, then the world ends",
                 "endian": "little",
                 "cache_only": true
             },
@@ -359,9 +360,10 @@
                 "endian": "little"
             },
             {
-                "name": "unknown4",
+                "name": "set this or die",
                 "type": "uint32",
                 "endian": "little",
+                "comment": "(Xbox only) if this isn't set to 3, then the visible lightmap UVs do not work",
                 "cache_only": true
             },
             {

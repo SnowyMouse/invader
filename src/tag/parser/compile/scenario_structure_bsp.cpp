@@ -67,34 +67,6 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
     }
-    
-    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
-        if(workload.disable_error_checking) {
-            return;
-        }
-        
-        if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
-            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
-            throw InvalidTagDataException();
-        }
-
-        // Xbox uses compressed vertices
-        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little>(this->compressed_vertices.data(), this->compressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
-            this->uncompressed_vertices.clear();
-            this->rendered_vertices_offset = 0;
-            this->lightmap_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
-        }
-        else {
-            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little>(this->uncompressed_vertices.data(), this->uncompressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
-            this->compressed_vertices.clear();
-            this->rendered_vertices_offset = 0;
-            this->lightmap_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
-        }
-        
-        this->unknown1 = 1;
-        this->unknown4 = 4;
-    }
 
     void ScenarioStructureBSP::post_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t offset) {
         auto lightmap_count = this->lightmaps.size();
@@ -338,6 +310,31 @@ namespace Invader::Parser {
         }
     }
     
+    void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        if(workload.disable_error_checking) {
+            return;
+        }
+        
+        if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
+            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
+            throw InvalidTagDataException();
+        }
+
+        // Xbox uses compressed vertices
+        if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little>(this->compressed_vertices.data(), this->compressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+            this->uncompressed_vertices.clear();
+            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
+            this->do_not_screw_up_the_model = 1;
+            this->set_this_or_die = 3;
+        }
+        else {
+            check_bsp_vertices<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little>(this->uncompressed_vertices.data(), this->uncompressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
+            this->rendered_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
+            this->compressed_vertices.clear();
+        }
+    }
+    
     void set_up_xbox_cache_bsp_data(BuildWorkload &workload, std::size_t bsp_header_struct_index, std::size_t bsp_struct_index, std::size_t bsp) {
         // Add two structs
         auto struct_count = workload.structs.size();
@@ -426,7 +423,7 @@ namespace Invader::Parser {
             lmp.limit_to_32_bits = true;
             lmp.offset = reinterpret_cast<std::byte *>(&lm.pointer) - reinterpret_cast<std::byte *>(lightmap_pointers);
             lmp.struct_index = cv;
-            lmp.struct_data_offset = mat.material->lightmap_vertices_offset;
+            lmp.struct_data_offset = mat.material->rendered_vertices_offset;
             
             auto &rvp_from_material = mat.material_struct->pointers.emplace_back();
             rvp_from_material.limit_to_32_bits = true;
