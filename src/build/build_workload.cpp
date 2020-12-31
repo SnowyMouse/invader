@@ -22,7 +22,7 @@ namespace Invader {
     BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine), build_compress_mcc(false) {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
@@ -30,7 +30,7 @@ namespace Invader {
                 this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_RETAIL:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;
@@ -38,7 +38,7 @@ namespace Invader {
                 this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
-                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
+                this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_PC;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
                 this->build_raw_data_handling = RawDataHandling::RAW_DATA_HANDLING_RETAIN_AUTOMATICALLY;

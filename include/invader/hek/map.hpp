@@ -50,7 +50,7 @@ namespace Invader::HEK {
     };
 
     enum CacheFileLimits : Pointer64 {
-        CACHE_FILE_MEMORY_LENGTH = 0x1700000,
+        CACHE_FILE_MEMORY_LENGTH_PC = 0x1700000,
         CACHE_FILE_MEMORY_LENGTH_XBOX = 0x1600000,
         
         CACHE_FILE_MAXIMUM_FILE_LENGTH = 0xFFFFFFFF,
