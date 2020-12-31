@@ -307,6 +307,8 @@ int main(int argc, const char **argv) {
         // Save and close
         archive_write_close(archive);
         archive_write_free(archive);
+        
+        oprintf("Saved %s\n", archive_options.output.c_str());
     }
     // Copy
     else {
