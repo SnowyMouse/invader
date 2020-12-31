@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
+#include <invader/printf.hpp>
+#include <invader/hek/data_type.hpp>
 
 namespace Invader::Swizzle {
     template<typename Pixel> static std::size_t swizzle_block_2x2(const Pixel *values_in, Pixel *values_out, std::size_t stride, std::size_t counter, bool deswizzle) {
@@ -131,8 +133,18 @@ namespace Invader::Swizzle {
 
     std::vector<std::byte> swizzle(const std::byte *data, std::size_t bits_per_pixel, std::size_t width, std::size_t height, std::size_t depth, bool deswizzle) {
         std::vector<std::byte> output(width*height*depth*(bits_per_pixel/8));
+        
+        if(!HEK::is_power_of_two(width) || !HEK::is_power_of_two(height) || !HEK::is_power_of_two(depth)) {
+            eprintf_error("Cannot (de)swizzle non-power-of-two texture");
+            throw std::exception();
+        }
 
         if(depth > 1) {
+            if(height != width || height != depth) {
+                eprintf_error("Cannot (de)swizzle a 3D texture that isn't 1x1x1");
+                throw std::exception();
+            }
+            
             switch(bits_per_pixel) {
                 case 8:
                     perform_swizzle_3d(reinterpret_cast<const std::uint8_t *>(data), reinterpret_cast<std::uint8_t *>(output.data()), width, height, depth, deswizzle);
