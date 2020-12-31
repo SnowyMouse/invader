@@ -164,7 +164,7 @@ int main(int argc, const char **argv) {
             if(archive_options.engine != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
-            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_PEDANTIC;
+            parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_QUIET;
             
             map = Invader::BuildWorkload::compile_map(parameters);
         }

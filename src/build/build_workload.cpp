@@ -106,11 +106,11 @@ namespace Invader {
             case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_PEDANTIC:
                 workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_PEDANTIC_WARNINGS);
                 break;
+            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET:
             case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_WARNINGS:
                 workload.set_reporting_level(REPORTING_LEVEL_HIDE_ALL_WARNINGS);
                 break;
             case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_HIDE_ERRORS:
-            case BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET:
                 workload.set_reporting_level(REPORTING_LEVEL_HIDE_EVERYTHING);
                 break;
         }
@@ -158,7 +158,7 @@ namespace Invader {
         TAG_ARRAY_STRUCT.unsafe_to_dedupe = true;
 
         // Add all of the tags
-        if(this->parameters->verbosity) {
+        if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
@@ -199,7 +199,7 @@ namespace Invader {
         auto errors = this->get_errors();
         if(errors) {
             auto warnings = this->get_warnings();
-            if(this->parameters->verbosity) {
+            if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 if(warnings) {
                     oprintf_fail("Build failed with %zu error%s and %zu warning%s", errors, errors == 1 ? "" : "s", warnings, warnings == 1 ? "" : "s");
                 }
@@ -221,12 +221,12 @@ namespace Invader {
         }
 
         // Get the tag data
-        if(this->parameters->verbosity) {
+        if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf("Building tag data...");
             oflush();
         }
         std::size_t end_of_bsps = this->generate_tag_data();
-        if(this->parameters->verbosity) {
+        if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf(" done\n");
         }
 
@@ -262,12 +262,12 @@ namespace Invader {
         }
 
         // Get the bitmap and sound data in there
-        if(this->parameters->verbosity) {
+        if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf("Building raw data...");
             oflush();
         }
         this->generate_bitmap_sound_data(end_of_bsps);
-        if(this->parameters->verbosity) {
+        if(this->parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
             oprintf(" done\n");
         }
         
@@ -308,7 +308,7 @@ namespace Invader {
             header.map_type = *workload.cache_file_type;
             header.name = workload.scenario_name;
 
-            if(workload.parameters->verbosity) {
+            if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 oprintf("Building cache file data...");
                 oflush();
             }
@@ -408,7 +408,7 @@ namespace Invader {
                 std::memcpy(final_data.data(), &header, sizeof(header));
             }
 
-            if(workload.parameters->verbosity) {
+            if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 oprintf(" done\n");
             }
             
@@ -442,7 +442,7 @@ namespace Invader {
             std::uint32_t new_crc = 0;
             bool can_calculate_crc = engine_target != CacheFileEngine::CACHE_FILE_XBOX;
             if(can_calculate_crc) {
-                if(workload.parameters->verbosity) {
+                if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf("Calculating CRC32...");
                     oflush();
                 }
@@ -458,7 +458,7 @@ namespace Invader {
                 }
                 
                 header.crc32 = new_crc;
-                if(workload.parameters->verbosity) {
+                if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf(" done\n");
                 }
             }
@@ -475,7 +475,7 @@ namespace Invader {
 
             // Compress if needed
             if(workload.parameters->details.build_compress) {
-                if(workload.parameters->verbosity) {
+                if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf("Compressing...");
                     oflush();
                 }
@@ -485,13 +485,13 @@ namespace Invader {
                 else {
                     final_data = Compression::ceaflate_compress(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(9));
                 }
-                if(workload.parameters->verbosity) {
+                if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                     oprintf(" done\n");
                 }
             }
 
             // Display the scenario name and information
-            if(workload.parameters->verbosity) {
+            if(workload.parameters->verbosity > BuildParameters::BuildVerbosity::BUILD_VERBOSITY_QUIET) {
                 auto warnings = workload.get_warnings();
                 if(warnings) {
                     oprintf_success_warn("Built successfully with %zu warning%s", warnings, warnings == 1 ? "" : "s");

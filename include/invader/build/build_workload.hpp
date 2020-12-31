@@ -21,11 +21,11 @@ namespace Invader {
             * Select how much is output
             */
             enum BuildVerbosity {
-                /** Everything is hidden */
-                BUILD_VERBOSITY_QUIET,
-                
                 /** Errors are hidden */
                 BUILD_VERBOSITY_HIDE_ERRORS,
+                
+                /** Everything except errors is hidden */
+                BUILD_VERBOSITY_QUIET,
                 
                 /** All warnings are hidden */
                 BUILD_VERBOSITY_HIDE_WARNINGS,
