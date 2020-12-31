@@ -33,7 +33,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, retail, xbox, native", "<id>");
 
     auto remaining_arguments = Invader::CommandLineOption::parse_arguments<ArchiveOptions &>(argc, argv, options, USAGE, DESCRIPTION, 1, 1, archive_options, [](char opt, const auto &arguments, auto &archive_options) {
         switch(opt) {
@@ -64,6 +64,9 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE;
+                }
+                else if(std::strcmp(arguments[0], "xbox") == 0) {
+                    archive_options.engine = Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX;
                 }
                 break;
             case 'C':
