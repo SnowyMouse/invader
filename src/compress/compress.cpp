@@ -124,8 +124,8 @@ int main(int argc, const char **argv) {
             auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(decompressed_data.data());
             switch(header.engine) {
                 case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    compression_format = COMPRESSION_FORMAT_DEFLATE;
-                    break;
+                    eprintf_error("Uncompressed maps are not supported by the target engine");
+                    return EXIT_FAILURE;
                 default:
                     compression_format = COMPRESSION_FORMAT_ZSTANDARD;
             }
@@ -164,8 +164,8 @@ int main(int argc, const char **argv) {
             auto &header = *reinterpret_cast<HEK::CacheFileHeader *>(input_file_data.data());
             switch(header.engine) {
                 case HEK::CacheFileEngine::CACHE_FILE_XBOX:
-                    compression_format = COMPRESSION_FORMAT_DEFLATE;
-                    break;
+                    eprintf_error("Uncompressed maps are not supported by the target engine");
+                    return EXIT_FAILURE;
                 default:
                     compression_format = COMPRESSION_FORMAT_ZSTANDARD;
             }

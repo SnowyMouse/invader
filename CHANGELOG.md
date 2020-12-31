@@ -47,6 +47,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader: Fixed error reporting not checking the result on ioctl on Linux-based
   operating systems (this resulted in the line length being undefined if it
   failed)
+- invader: Dropped support for uncompressed Xbox maps
 - invader-bitmap: Fixed the sharpening filter being twice as powerful
 - invader-bitmap: Fixed blurring being slightly more powerful than it should be
 - invader-archive: Fixed errors regarding maps not being able to be read when

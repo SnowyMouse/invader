@@ -470,6 +470,8 @@ namespace Invader {
             else {
                 std::memcpy(final_data.data(), &header, sizeof(header));
             }
+            
+            header.decompressed_file_size = final_data.size();
 
             // Compress if needed
             if(workload.parameters->details.build_compress) {
@@ -478,18 +480,14 @@ namespace Invader {
                     oflush();
                 }
                 if(!workload.parameters->details.build_compress_mcc) {
-                    final_data = Compression::compress_map_data(final_data.data(), final_data.size(), workload.parameters->details.compression_level.value_or(19));
+                    final_data = Compression::compress_map_data(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(19));
                 }
                 else {
-                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size(), workload.parameters->details.compression_level.value_or(9));
+                    final_data = Compression::ceaflate_compress(final_data.data(), final_data.size(), workload.parameters->details.build_compression_level.value_or(9));
                 }
                 if(workload.parameters->verbosity) {
                     oprintf(" done\n");
                 }
-            }
-            // Set the file size in the header if needed
-            else if(engine_target == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                header.decompressed_file_size = final_data.size();
             }
 
             // Display the scenario name and information

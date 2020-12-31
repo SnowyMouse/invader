@@ -148,7 +148,13 @@ int main(int argc, const char **argv) {
             Invader::BuildWorkload::BuildParameters parameters(archive_options.engine);
             parameters.scenario = base_tag.data();
             parameters.tags_directories = archive_options.tags;
-            parameters.details.build_compress = false;
+            if(archive_options.engine == Invader::HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+                parameters.details.build_compress = true;
+                parameters.details.build_compression_level = 0;
+            }
+            else {
+                parameters.details.build_compress = false;
+            }
             if(archive_options.engine != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }

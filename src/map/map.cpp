@@ -109,9 +109,7 @@ namespace Invader {
                         break;
                     }
                     case CacheFileEngine::CACHE_FILE_XBOX:
-                        if(potential_header->decompressed_file_size != 0) {
-                            compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
-                        }
+                        compression_type = CompressionType::COMPRESSION_TYPE_DEFLATE;
                         break;
                     case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
                     case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
@@ -288,9 +286,6 @@ namespace Invader {
                     break;
                 }
                 case CacheFileEngine::CACHE_FILE_XBOX:
-                    if(header.decompressed_file_size != 0) {
-                        throw MapNeedsDecompressedException();
-                    }
                     break;
                 case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:

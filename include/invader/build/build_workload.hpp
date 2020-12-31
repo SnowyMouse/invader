@@ -133,7 +133,7 @@ namespace Invader {
                 /**
                  * Compression level to use if compressing
                  */
-                std::optional<int> compression_level;
+                std::optional<int> build_compression_level;
                 
                 /**
                  * Use MCC-style compression?

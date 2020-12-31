@@ -214,7 +214,7 @@ namespace Invader::Info {
                 PRINT_LINE(oprintf_success_warn, "Uncompressed size:", "%s", uncompressed_size);
             }
             else {
-                PRINT_LINE(oprintf, "Uncompressed size:", "%s", uncompressed_size);
+                PRINT_LINE(oprintf, "Uncompressed size:", "%s\n", uncompressed_size);
             }
         }
         else {

@@ -250,7 +250,7 @@ int main(int argc, const char **argv) {
         // Figure out our engine target
         if(!build_options.engine.has_value()) {
             eprintf_error("No engine target specified. Use -h for more information.");
-            return 1;
+            return EXIT_FAILURE;
         }
         
         BuildWorkload::BuildParameters parameters(*build_options.engine);
@@ -261,6 +261,12 @@ int main(int argc, const char **argv) {
         parameters.optimize_space = build_options.optimize_space;
         parameters.forge_crc = build_options.forged_crc;
         parameters.index = with_index;
+        
+        // Block this
+        if((build_options.mcc || build_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) && !build_options.compress.value_or(true)) {
+            eprintf_error("Uncompressed maps are not supported by the target engine.");
+            return EXIT_FAILURE;
+        }
         
         // MCC stuff
         if(build_options.mcc) {
@@ -283,7 +289,7 @@ int main(int argc, const char **argv) {
         }
         
         if(build_options.compression_level.has_value()) {
-            parameters.details.compression_level = build_options.compression_level;
+            parameters.details.build_compression_level = build_options.compression_level;
         }
         
         // Do we need resource maps?
