@@ -56,6 +56,10 @@ namespace Invader::Parser {
         material.material = this->material;
     }
     void ScenarioStructureBSPMaterial::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t) {
+        if(workload.disable_error_checking) {
+            return;
+        }
+        
         if(this->lightmap_vertices_count != 0 && this->lightmap_vertices_count != this->rendered_vertices_count) {
             REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "BSP lightmap material doesn't have equal # of lightmap and rendered vertices");
             throw InvalidTagDataException();

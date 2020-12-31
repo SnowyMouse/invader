@@ -1034,10 +1034,11 @@ namespace Invader {
         oprintf(" done; reduced tag space usage by %.02f MiB\n", BYTES_TO_MiB(total_savings));
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories, bool recursion) {
+    BuildWorkload BuildWorkload::compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
         BuildWorkload workload = {};
         workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
+        workload.disable_error_checking = !error_checking;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         
         BuildParameters parameters;
@@ -1050,7 +1051,7 @@ namespace Invader {
         return workload;
     }
 
-    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion) {
+    BuildWorkload BuildWorkload::compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion, bool error_checking) {
         BuildWorkload workload = {};
         
         BuildParameters parameters;
@@ -1059,6 +1060,7 @@ namespace Invader {
         
         workload.set_reporting_level(ErrorHandler::ReportingLevel::REPORTING_LEVEL_HIDE_EVERYTHING);
         workload.disable_recursion = !recursion;
+        workload.disable_error_checking = !error_checking;
         workload.cache_file_type = HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER;
         workload.compile_tag_recursively(tag, tag_class_int);
         return workload;
