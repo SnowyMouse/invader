@@ -78,10 +78,14 @@ namespace Invader::Parser {
         if(workload.get_build_parameters()->details.build_cache_file_engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             check_bsp_vertices<Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialCompressedLightmapVertex::struct_little>(this->compressed_vertices.data(), this->compressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
             this->uncompressed_vertices.clear();
+            this->rendered_vertices_offset = 0;
+            this->lightmap_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialCompressedRenderedVertex::struct_little);
         }
         else {
             check_bsp_vertices<Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little, Parser::ScenarioStructureBSPMaterialUncompressedLightmapVertex::struct_little>(this->uncompressed_vertices.data(), this->uncompressed_vertices.size(), this->rendered_vertices_count, this->lightmap_vertices_count, workload, tag_index);
             this->compressed_vertices.clear();
+            this->rendered_vertices_offset = 0;
+            this->lightmap_vertices_offset = this->rendered_vertices_count * sizeof(Parser::ScenarioStructureBSPMaterialUncompressedRenderedVertex::struct_little);
         }
         
         this->unknown1 = 1;
@@ -327,6 +331,110 @@ namespace Invader::Parser {
                 eprintf_error("Failed to compress vertices");
                 throw InvalidTagDataException();
             }
+        }
+    }
+    
+    void set_up_xbox_cache_bsp_data(BuildWorkload &workload, std::size_t bsp_header_struct_index, std::size_t bsp_struct_index, std::size_t bsp) {
+        // Add two structs
+        auto struct_count = workload.structs.size();
+        workload.structs.resize(struct_count + 2);
+        auto rendered_vertices_struct_index = struct_count;
+        auto lightmap_vertices_struct_index = struct_count + 1;
+        
+        // Let's get the header and base struct
+        auto &bsp_header_struct = workload.structs[bsp_header_struct_index];
+        auto &bsp_header = *reinterpret_cast<Parser::ScenarioStructureBSPCompiledHeader::struct_little *>(bsp_header_struct.data.data());
+        auto &bsp_struct = workload.structs[bsp_struct_index];
+        auto &bsp_data = *reinterpret_cast<Parser::ScenarioStructureBSP::struct_little *>(bsp_struct.data.data());
+        
+        // Go through all of the lightmap materials now?
+        std::size_t lightmap_count = bsp_data.lightmaps.count;
+        
+        struct LightmapMaterialTemp {
+            BuildWorkload::BuildWorkloadStruct *material_struct;
+            Parser::ScenarioStructureBSPMaterial::struct_little *material;
+        };
+        std::vector<LightmapMaterialTemp> lightmap_materials; // hold the struct index and an offset
+        
+        if(lightmap_count > 0) {
+            auto &lightmap_struct = workload.structs[*bsp_struct.resolve_pointer(&bsp_data.lightmaps.pointer)];
+            auto *lightmap_data = reinterpret_cast<Parser::ScenarioStructureBSPLightmap::struct_little *>(lightmap_struct.data.data());
+            for(std::size_t lm = 0; lm < lightmap_count; lm++) {
+                auto &lightmap = lightmap_data[lm];
+                std::size_t material_count = lightmap.materials.count;
+                
+                if(material_count > 0) {
+                    auto &materials_struct = workload.structs[*lightmap_struct.resolve_pointer(&lightmap.materials.pointer)];
+                    auto *materials = reinterpret_cast<Parser::ScenarioStructureBSPMaterial::struct_little *>(materials_struct.data.data());
+                    
+                    for(std::size_t mat = 0; mat < material_count; mat++) {
+                        lightmap_materials.emplace_back(LightmapMaterialTemp { &materials_struct, materials + mat });
+                    }
+                }
+            }
+        }
+        
+        // Add these things
+        struct MemeBSPPointer {
+            PAD(4);
+            HEK::LittleEndian<HEK::Pointer> pointer;
+            PAD(4);
+        };
+        
+        // Add vertices/indices pointers
+        auto &rendered_vertices_ptr = bsp_header_struct.pointers.emplace_back();
+        rendered_vertices_ptr.limit_to_32_bits = true;
+        rendered_vertices_ptr.struct_index = rendered_vertices_struct_index;
+        rendered_vertices_ptr.offset = reinterpret_cast<std::byte *>(&bsp_header.rendered_vertices) - reinterpret_cast<std::byte *>(&bsp_header);
+        
+        auto &lightmap_vertices_ptr = bsp_header_struct.pointers.emplace_back();
+        lightmap_vertices_ptr.limit_to_32_bits = true;
+        lightmap_vertices_ptr.struct_index = lightmap_vertices_struct_index;
+        lightmap_vertices_ptr.offset = reinterpret_cast<std::byte *>(&bsp_header.lightmap_vertices) - reinterpret_cast<std::byte *>(&bsp_header);
+        
+        auto &rendered_vertices_struct = workload.structs[rendered_vertices_struct_index];
+        rendered_vertices_struct.bsp = bsp;
+        
+        auto &lightmap_vertices_struct = workload.structs[lightmap_vertices_struct_index];
+        lightmap_vertices_struct.bsp = bsp;
+        
+        std::size_t material_count = lightmap_materials.size();
+        bsp_header.lightmap_material_count = material_count;
+        bsp_header.lightmap_material_count_again = material_count;
+        
+        rendered_vertices_struct.data.resize(sizeof(MemeBSPPointer) * material_count);
+        auto *rendered_pointers = reinterpret_cast<MemeBSPPointer *>(rendered_vertices_struct.data.data());
+        lightmap_vertices_struct.data.resize(sizeof(MemeBSPPointer) * material_count);
+        auto *lightmap_pointers = reinterpret_cast<MemeBSPPointer *>(lightmap_vertices_struct.data.data());
+        
+        for(std::size_t m = 0; m < material_count; m++) {
+            auto &rv = rendered_pointers[m];
+            auto &lm = lightmap_pointers[m];
+            auto &mat = lightmap_materials[m];
+            auto cv = mat.material_struct->resolve_pointer(&mat.material->compressed_vertices.pointer).value();
+            
+            auto &rvp = rendered_vertices_struct.pointers.emplace_back();
+            rvp.limit_to_32_bits = true;
+            rvp.offset = reinterpret_cast<std::byte *>(&rv.pointer) - reinterpret_cast<std::byte *>(rendered_pointers);
+            rvp.struct_index = cv;
+            
+            auto &lmp = lightmap_vertices_struct.pointers.emplace_back();
+            lmp.limit_to_32_bits = true;
+            lmp.offset = reinterpret_cast<std::byte *>(&lm.pointer) - reinterpret_cast<std::byte *>(lightmap_pointers);
+            lmp.struct_index = cv;
+            lmp.struct_data_offset = mat.material->lightmap_vertices_offset;
+            
+            auto &rvp_from_material = mat.material_struct->pointers.emplace_back();
+            rvp_from_material.limit_to_32_bits = true;
+            rvp_from_material.offset = reinterpret_cast<std::byte *>(&mat.material->rendered_vertices_index_pointer) - mat.material_struct->data.data();
+            rvp_from_material.struct_index = rendered_vertices_struct_index;
+            rvp_from_material.struct_data_offset = reinterpret_cast<std::byte *>(&rv) - reinterpret_cast<std::byte *>(rendered_pointers);
+            
+            auto &lmp_from_material = mat.material_struct->pointers.emplace_back();
+            lmp_from_material.limit_to_32_bits = true;
+            lmp_from_material.offset = reinterpret_cast<std::byte *>(&mat.material->lightmap_vertices_index_pointer) - mat.material_struct->data.data();
+            lmp_from_material.struct_index = lightmap_vertices_struct_index;
+            lmp_from_material.struct_data_offset = reinterpret_cast<std::byte *>(&lm) - reinterpret_cast<std::byte *>(lightmap_pointers);
         }
     }
 }
