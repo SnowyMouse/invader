@@ -84,7 +84,7 @@ namespace Invader::Parser {
         auto lightmap_bitmap = this->lightmaps_bitmap.tag_id;
         
         // If we need to, handle lightmap bitmap stuff
-        if(!workload.disable_recursion) {
+        if(!workload.disable_recursion && !workload.disable_error_checking) {
             // How many lightmap bitmaps do we have
             std::size_t lightmap_bitmap_count;
             if(!lightmap_bitmap.is_null()) {
