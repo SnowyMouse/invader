@@ -121,9 +121,9 @@ namespace Invader {
                 std::uint64_t build_maximum_tag_space;
                 
                 /**
-                 * Maximum cache file size to use
+                 * Maximum cache file size to use. If null, it will determine it based on the map type on Xbox or the maximum allowed file size on other versions (without modding).
                  */
-                std::uint64_t build_maximum_cache_file_size;
+                std::optional<std::uint64_t> build_maximum_cache_file_size;
                 
                 /**
                  * Compress?

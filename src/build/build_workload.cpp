@@ -22,7 +22,6 @@ namespace Invader {
     BuildWorkload::BuildParameters::BuildParametersDetails::BuildParametersDetails(CacheFileEngine engine) noexcept : build_cache_file_engine(engine), build_compress_mcc(false) {
         switch(engine) {
             case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
-                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
@@ -31,7 +30,6 @@ namespace Invader {
                 this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_RETAIL:
-                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_PC_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
@@ -40,7 +38,6 @@ namespace Invader {
                 this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_DEMO:
-                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH;
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_DEMO_BASE_MEMORY_ADDRESS;
                 this->build_compress = false;
@@ -49,7 +46,6 @@ namespace Invader {
                 this->build_version = full_version();
                 break;
             case CacheFileEngine::CACHE_FILE_XBOX:
-                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX;
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_XBOX;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_XBOX_BASE_MEMORY_ADDRESS;
                 this->build_compress = true;
@@ -58,7 +54,6 @@ namespace Invader {
                 this->build_version = "01.10.12.2276"; // NTSC
                 break;
             case CacheFileEngine::CACHE_FILE_NATIVE:
-                this->build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
                 this->build_maximum_tag_space = HEK::CacheFileLimits::CACHE_FILE_MEMORY_LENGTH_NATIVE;
                 this->build_tag_data_address = HEK::CacheFileTagDataBaseMemoryAddress::CACHE_FILE_NATIVE_BASE_MEMORY_ADDRESS;
                 this->build_compress = true;
@@ -275,10 +270,38 @@ namespace Invader {
         if(this->parameters->verbosity) {
             oprintf(" done\n");
         }
+        
+        auto max_size_ref = this->parameters->details.build_maximum_cache_file_size;
+        if(!max_size_ref.has_value()) {
+            switch(engine_target) {
+                case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                    switch(*this->cache_file_type) {
+                        case HEK::CacheFileType::SCENARIO_TYPE_SINGLEPLAYER:
+                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER;
+                            break;
+                        case HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER:
+                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_MULTIPLAYER;
+                            break;
+                        case HEK::CacheFileType::SCENARIO_TYPE_USER_INTERFACE:
+                            max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_USER_INTERFACE;
+                            break;
+                        default:
+                            throw std::exception();
+                            break;
+                    }
+                    break;
+                case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
+                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_NATIVE;
+                    break;
+                default:
+                    max_size_ref = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_PC;
+                    break;
+            }
+        }
 
         auto &workload = *this;
-        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes](auto &header) {
-            auto max_size = workload.parameters->details.build_maximum_cache_file_size;
+        auto generate_final_data = [&workload, &bsp_size_affects_tag_space, &bsp_size, &engine_target, &largest_bsp_size, &largest_bsp_count, &bsp_sizes, &max_size_ref](auto &header) {
+            auto max_size = *max_size_ref;
             std::vector<std::byte> final_data;
             std::strncpy(header.build.string, workload.parameters->details.build_version.c_str(), sizeof(header.build.string) - 1);
             header.engine = workload.parameters->details.build_cache_file_engine;
@@ -397,7 +420,7 @@ namespace Invader {
             // Check to make sure we aren't too big
             std::size_t uncompressed_size = final_data.size();
             if(static_cast<std::uint64_t>(uncompressed_size) > max_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds maximum size when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(max_size), BYTES_TO_MiB(static_cast<std::size_t>(max_size)));
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, std::nullopt, "Map file exceeds maximum size for the target engine when uncompressed (%.04f MiB > %.04f MiB)", BYTES_TO_MiB(uncompressed_size), BYTES_TO_MiB(static_cast<std::size_t>(max_size)));
                 throw MaximumFileSizeException();
             }
 
@@ -564,7 +587,7 @@ namespace Invader {
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
 
                 // If we have a 32-bit limit, show the limit
-                if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                if(max_size <= UINT32_MAX) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_size), 100.0 * uncompressed_size / max_size);
                 }
                 else {
