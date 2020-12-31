@@ -176,10 +176,10 @@ int main(int argc, const char **argv) {
         // Parse the map
         std::unique_ptr<Invader::Map> parsed_map;
         try {
-            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_pointer(map.data(), map.size()));
+            parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_move(std::move(map)));
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to parse the map file generated with scenario %s", base_tag.data());
+            eprintf_error("Failed to parse the map file generated with scenario %s: %s", base_tag.data(), e.what());
             return EXIT_FAILURE;
         }
         auto tag_count = parsed_map->get_tag_count();
