@@ -149,6 +149,9 @@ int main(int argc, const char **argv) {
             parameters.scenario = base_tag.data();
             parameters.tags_directories = archive_options.tags;
             parameters.details.build_compress = false;
+            if(archive_options.engine != Invader::HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                parameters.details.build_maximum_cache_file_size = UINT32_MAX;
+            }
             parameters.verbosity = Invader::BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_PEDANTIC;
             
             map = Invader::BuildWorkload::compile_map(parameters);
