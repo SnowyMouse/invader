@@ -139,12 +139,12 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
         elif "bounds" in struct and struct["bounds"]:
             # Make sure the value is within bounds
             if minimum != None:
-                cpp_cache_format_data.write("        if(!workload.disable_recursion && (this->{}.from < {} || this->{}.to < {})) {{\n".format(name, minimum, name, minimum))
+                cpp_cache_format_data.write("        if(!workload.disable_error_checking && (this->{}.from < {} || this->{}.to < {})) {{\n".format(name, minimum, name, minimum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must be at least {}\", tag_index);\n".format(struct_name, name, minimum))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             if maximum != None:
-                cpp_cache_format_data.write("        if(!workload.disable_recursion && (this->{}.from > {} || this->{}.to > {})) {{\n".format(name, maximum, name, maximum))
+                cpp_cache_format_data.write("        if(!workload.disable_error_checking && (this->{}.from > {} || this->{}.to > {})) {{\n".format(name, maximum, name, maximum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must no more than {}\", tag_index);\n".format(struct_name, name, minimum))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
@@ -169,7 +169,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     print("Cannot resolve {} in {}".format(reflexive_to_check, struct_to_check), file=sys.stderr)
                     sys.exit(1)
                 
-                cpp_cache_format_data.write("        if(!workload.disable_recursion && this->{} != NULL_INDEX) {{\n".format(name))
+                cpp_cache_format_data.write("        if(!workload.disable_error_checking && this->{} != NULL_INDEX) {{\n".format(name))
                 cpp_cache_format_data.write("            [[maybe_unused]] bool found = false;\n")
                 
                 def do_it_for_sam(struct_to_check):
@@ -227,7 +227,7 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
             for e in all_enums:
                 if e["name"] == struct["type"]:
                     shifted_by_one = "+ 1" if ("shifted_by_one" in struct and struct["shifted_by_one"]) else ""
-                    cpp_cache_format_data.write("        if(!workload.disable_recursion && static_cast<std::uint16_t>(this->{}{}) >= {}) {{\n".format(name, shifted_by_one, len(e["options_formatted"])))
+                    cpp_cache_format_data.write("        if(!workload.disable_error_checking && static_cast<std::uint16_t>(this->{}{}) >= {}) {{\n".format(name, shifted_by_one, len(e["options_formatted"])))
                     cpp_cache_format_data.write("            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, \"{}::{} is out of range (%zu >= {})\", static_cast<std::size_t>(this->{}{}));\n".format(struct_name, name, len(e["options_formatted"]), name, shifted_by_one))
                     cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                     cpp_cache_format_data.write("        }\n")
@@ -240,12 +240,12 @@ def make_cache_format_data(struct_name, s, pre_compile, post_compile, all_used_s
                     break
             # Make sure the value is within bounds
             if minimum != None:
-                cpp_cache_format_data.write("        if(!workload.disable_recursion && this->{} < {}) {{\n".format(name, minimum))
+                cpp_cache_format_data.write("        if(!workload.disable_error_checking && this->{} < {}) {{\n".format(name, minimum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must be at least {}\", tag_index);\n".format(struct_name, name, minimum))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")
             if maximum != None:
-                cpp_cache_format_data.write("        if(!workload.disable_recursion && this->{} > {}) {{\n".format(name, maximum))
+                cpp_cache_format_data.write("        if(!workload.disable_error_checking && this->{} > {}) {{\n".format(name, maximum))
                 cpp_cache_format_data.write("            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, \"{}::{} must no more than {}\", tag_index);\n".format(struct_name, name, maximum))
                 cpp_cache_format_data.write("            throw InvalidTagDataException();\n")
                 cpp_cache_format_data.write("        }\n")

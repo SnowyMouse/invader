@@ -135,7 +135,7 @@ int main(int argc, const char **argv) {
             map = Invader::BuildWorkload::compile_map(parameters);
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to compile scenario %s into a map\n", base_tag.data());
+            eprintf_error("Failed to compile scenario %s into a map", base_tag.data());
             return EXIT_FAILURE;
         }
 
@@ -145,7 +145,7 @@ int main(int argc, const char **argv) {
             parsed_map = std::make_unique<Invader::Map>(Invader::Map::map_with_pointer(map.data(), map.size()));
         }
         catch(std::exception &e) {
-            eprintf_error("Failed to parse the map file generated with scenario %s\n", base_tag.data());
+            eprintf_error("Failed to parse the map file generated with scenario %s", base_tag.data());
             return EXIT_FAILURE;
         }
         auto tag_count = parsed_map->get_tag_count();
@@ -169,7 +169,7 @@ int main(int argc, const char **argv) {
             }
 
             if(!exists) {
-                eprintf_error("Failed to find %s. Archive could not be made.\n", full_tag_path.c_str());
+                eprintf_error("Failed to find %s. Archive could not be made.", full_tag_path.c_str());
                 return EXIT_FAILURE;
             }
         }
@@ -180,7 +180,7 @@ int main(int argc, const char **argv) {
 
         // Split the extension
         if(!base_tag_split_maybe.has_value()) {
-            eprintf_error("%s is not a valid tag. Archive could not be made.\n", base_tag.data());
+            eprintf_error("%s is not a valid tag. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
@@ -196,7 +196,7 @@ int main(int argc, const char **argv) {
         }
 
         if(!exists) {
-            eprintf_error("Failed to find %s. Archive could not be made.\n", base_tag.data());
+            eprintf_error("Failed to find %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
@@ -205,14 +205,14 @@ int main(int argc, const char **argv) {
         auto &base_tag_split = base_tag_split_maybe.value();
         auto dependencies = Invader::FoundTagDependency::find_dependencies(base_tag_split.path.c_str(), base_tag_split.class_int, archive_options.tags, false, true, success);
         if(!success) {
-            eprintf_error("Failed to find dependencies for %s. Archive could not be made.\n", base_tag.data());
+            eprintf_error("Failed to find dependencies for %s. Archive could not be made.", base_tag.data());
             return EXIT_FAILURE;
         }
 
         // Make sure there aren't any broken dependencies
         for(auto &dependency : dependencies) {
             if(dependency.broken) {
-                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.\n", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
+                eprintf_error("%s.%s is missing (broken dependency). Archive could not be made.", dependency.path.c_str(), tag_class_to_extension(dependency.class_int));
                 return EXIT_FAILURE;
             }
 

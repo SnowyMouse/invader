@@ -14,16 +14,8 @@ namespace Invader::Parser {
     void Scenario::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t struct_index, std::size_t) {
         merge_child_scenarios(workload, tag_index, *this);
 
-        if(workload.disable_recursion) {
-            return; // if recursion is disabled, doing any of this will be a meme
-        }
-
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
-        }
-        else {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Multiple scenario tags are used", tag_index);
-            throw InvalidTagDataException();
         }
 
         // Check some things
@@ -51,8 +43,10 @@ namespace Invader::Parser {
 
             // Save it
             if(bsp_from >= scenario.structure_bsps.size() || bsp_to >= scenario.structure_bsps.size()) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
-                throw InvalidTagDataException();
+                if(!workload.disable_error_checking) {
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Trigger volume #%zu (%s) references an invalid BSP index", tv, trigger_volume.name.string);
+                    throw InvalidTagDataException();
+                }
             }
             else {
                 auto &bsp_switch_trigger_volume = scenario.bsp_switch_trigger_volumes.emplace_back();
@@ -100,44 +94,59 @@ namespace Invader::Parser {
         else {
             ScenarioScriptNodeTable::struct_little t;
             if(scenario.script_syntax_data.size() < sizeof(t)) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script syntax data is invalid", tag_index);
-                throw InvalidTagDataException();
+                if(!workload.disable_error_checking) {
+                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script syntax data is invalid", tag_index);
+                    throw InvalidTagDataException();
+                }
             }
-            t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
-            *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
-            t.first_element_ptr = 0;
+            else {
+                t = *reinterpret_cast<ScenarioScriptNodeTable::struct_big *>(scenario.script_syntax_data.data());
+                *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(scenario.script_syntax_data.data()) = t;
+                t.first_element_ptr = 0;
             
-            // Maximum node count exceeded?
-            if(t.maximum_count > MAX_SCRIPT_NODE_COUNT) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), MAX_SCRIPT_NODE_COUNT);
-                throw InvalidTagDataException();
-            }
-
-            auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
-            auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
-            if(t.element_size != SCRIPT_ELEMENT_SIZE) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
-                throw InvalidTagDataException();
-            }
-
-            std::size_t element_count = t.maximum_count;
-            std::size_t expected_table_size = element_count * SCRIPT_ELEMENT_SIZE + sizeof(t);
-            if(scenario.script_syntax_data.size() != expected_table_size) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, scenario.script_syntax_data.size());
-                throw InvalidTagDataException();
-            }
-
-            for(std::size_t i = 0; i < element_count; i++) {
-                start_little[i] = start_big[i];
+                // Maximum node count exceeded?
+                if(t.maximum_count > MAX_SCRIPT_NODE_COUNT) {
+                    if(!workload.disable_error_checking) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node table contains too many script nodes for the target engine (%zu > %zu)", static_cast<std::size_t>(t.maximum_count), MAX_SCRIPT_NODE_COUNT);
+                        throw InvalidTagDataException();
+                    }
+                }
+                else {
+                    auto *start_big = reinterpret_cast<ScenarioScriptNode::struct_big *>(scenario.script_syntax_data.data() + sizeof(t));
+                    auto *start_little = reinterpret_cast<ScenarioScriptNode::struct_little *>(start_big);
+                    if(t.element_size != SCRIPT_ELEMENT_SIZE) {
+                        if(!workload.disable_error_checking) {
+                            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Script node table header is invalid", tag_index);
+                            throw InvalidTagDataException();
+                        }
+                    }
+                    else {
+                        std::size_t element_count = t.maximum_count;
+                        std::size_t expected_table_size = element_count * SCRIPT_ELEMENT_SIZE + sizeof(t);
+                        if(scenario.script_syntax_data.size() != expected_table_size) {
+                            if(!workload.disable_error_checking) {
+                                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script syntax data is the wrong size (%zu expected, %zu gotten)", expected_table_size, scenario.script_syntax_data.size());
+                                throw InvalidTagDataException();
+                            }
+                        }
+                        else {
+                            for(std::size_t i = 0; i < element_count; i++) {
+                                start_little[i] = start_big[i];
+                            }
+                        }
+                    }
+                }
             }
         }
         
         // If we have scripts, do stuff
         if(scenario.scripts.size() > 0 || scenario.globals.size() > 0) {
             if(scenario.source_files.size() == 0) {
-                workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
-                eprintf_warn("To fix this, recompile the scripts");
-                throw InvalidTagDataException();
+                if(!workload.disable_error_checking) {
+                    workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Scenario tag has script data but no source file data", tag_index);
+                    eprintf_warn("To fix this, recompile the scripts");
+                    throw InvalidTagDataException();
+                }
             }
             else {
                 // TODO: Recompile scripts
@@ -166,7 +175,6 @@ namespace Invader::Parser {
         auto &table_header = *reinterpret_cast<ScenarioScriptNodeTable::struct_little *>(syntax_data);
         std::uint16_t element_count = table_header.size.read();
         auto *nodes = reinterpret_cast<ScenarioScriptNode::struct_little *>(&table_header + 1);
-        std::size_t errors = 0;
 
         for(std::uint16_t i = 0; i < element_count; i++) {
             // Check if we know the class
@@ -224,14 +232,10 @@ namespace Invader::Parser {
                 // Get the string
                 const char *string = string_data + node.string_offset.read();
                 if(string >= string_data_end) {
-                    if(++errors == 5) {
-                        eprintf_error("... and more errors. Suffice it to say, the script node table needs recompiled");
-                        break;
+                    if(!workload.disable_error_checking) {
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node #%zu has an invalid string offset. The scripts need recompiled.", static_cast<std::size_t>(i));
                     }
-                    else {
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Script node #%zu has an invalid string offset", static_cast<std::size_t>(i));
-                        throw InvalidTagDataException();
-                    }
+                    break;
                 }
 
                 // Add it to the list
@@ -261,10 +265,6 @@ namespace Invader::Parser {
             }
         }
 
-        if(errors > 0 && errors < 5) {
-            eprintf_error("The scripts need recompiled");
-        }
-
         // Add the new structs
         auto &new_ptr = workload.structs[struct_index].pointers.emplace_back();
         auto &scenario_struct = *reinterpret_cast<Scenario::struct_little *>(workload.structs[struct_index].data.data());
@@ -290,8 +290,10 @@ namespace Invader::Parser {
                 if(name_index != NULL_INDEX) { \
                     /* Check the name to see if it's valid */ \
                     if(name_index >= name_count) { \
-                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
-                        throw InvalidTagDataException(); \
+                        if(!workload.disable_error_checking) { \
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid name index (%zu >= %zu)", i, name_index, name_count); \
+                            throw InvalidTagDataException(); \
+                        } \
                     } \
                     /* If it is, increment the used counter and assign everything */ \
                     else { \
@@ -306,8 +308,10 @@ namespace Invader::Parser {
                     REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING_PEDANTIC, tag_index, object_type_str " spawn #%zu has no object type, so it will be unused", i); \
                 } \
                 else if(type_index >= type_count) { \
-                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
-                    throw InvalidTagDataException(); \
+                    if(!workload.disable_error_checking) { \
+                        REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, object_type_str " spawn #%zu has an invalid type index (%zu >= %zu)", i, type_index, type_count); \
+                        throw InvalidTagDataException(); \
+                    } \
                 } \
                 else { \
                     used[type_index]++; \
@@ -364,7 +368,7 @@ namespace Invader::Parser {
             if(used == 0) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_WARNING, tag_index, "Object name #%zu (%s) is unused", i, name_str);
             }
-            else if(used > 1) {
+            else if(used > 1 && !workload.disable_error_checking) {
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Object name #%zu (%s) is used multiple times (found %zu times)", i, name_str, used);
                 
                 // Put together a list to help the user track everything down
@@ -393,7 +397,7 @@ namespace Invader::Parser {
         }
     }
     
-    static void merge_child_scenario(Scenario &base_scenario, const Scenario &scenario_to_merge) {
+    static void merge_child_scenario(Scenario &base_scenario, const Scenario &scenario_to_merge, BuildWorkload &workload, std::size_t tag_index, const char *child_scenario_path) {
         #define MERGE_ARRAY(what, condition) for(auto &merge : scenario_to_merge.what) { \
             bool can_merge = true; \
             for([[maybe_unused]] auto &base : base_scenario.what) { \
@@ -444,7 +448,7 @@ namespace Invader::Parser {
         MERGE_PALETTE(sound_scenery_palette);
         
         // Make some lambdas for finding stuff quickly
-        #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge](HEK::Index old_index) -> HEK::Index { \
+        #define TRANSLATE_PALETTE(what, match_comparison) [&base_scenario, &scenario_to_merge, &workload, &tag_index, &child_scenario_path](HEK::Index old_index) -> HEK::Index { \
             /* If we're null, return null */ \
             if(old_index == NULL_INDEX) { \
                 return NULL_INDEX; \
@@ -453,8 +457,11 @@ namespace Invader::Parser {
             /* if we're out of bounds, fail */ \
             auto old_count = scenario_to_merge.what.size(); \
             if(old_index >= old_count) { \
-                eprintf_error(# what " index is out of bounds (%zu >= %zu)", static_cast<std::size_t>(old_index), old_count); \
-                throw OutOfBoundsException(); \
+                if(!workload.disable_error_checking) { \
+                    REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " index in child scenario %s is out of bounds (%zu >= %zu)", child_scenario_path, static_cast<std::size_t>(old_index), old_count); \
+                    throw OutOfBoundsException(); \
+                } \
+                return NULL_INDEX; \
             } \
 \
             /* Find it */ \
@@ -464,14 +471,20 @@ namespace Invader::Parser {
                 auto &base = base_scenario.what[name]; \
                 if((match_comparison)) { \
                     if(name >= NULL_INDEX) { \
-                        eprintf_error(# what " exceeded %zu when merging", static_cast<std::size_t>(NULL_INDEX - 1)); \
-                        throw InvalidTagDataException(); \
+                        if(!workload.disable_error_checking) { \
+                            REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " in child scenario %s exceeded %zu when merging", child_scenario_path, static_cast<std::size_t>(NULL_INDEX - 1)); \
+                            throw InvalidTagDataException(); \
+                        } \
+                        return NULL_INDEX; \
                     } \
                     return name; \
                 } \
             } \
-            eprintf_error("Failed to find an entry in " # what); \
-            throw OutOfBoundsException(); \
+            if(!workload.disable_error_checking) { \
+                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to find an entry in " # what " for child scenario %s", child_scenario_path); \
+                throw OutOfBoundsException(); \
+            } \
+            return NULL_INDEX; \
         }
         auto translate_object_name = TRANSLATE_PALETTE(object_names, (merge.name == base.name));
         auto translate_device_group = TRANSLATE_PALETTE(device_groups, (merge.name == base.name));
@@ -605,12 +618,14 @@ namespace Invader::Parser {
                 if(!first_scenario.path.empty()) {
                     // If this isn't even a scenario tag... what
                     if(first_scenario.tag_class_int != TagClassInt::TAG_CLASS_SCENARIO) {
+                        // This should fail even if we aren't checking for errors because this is invalid
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Non-scenario %s.%s referenced in child scenarios", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
                         throw InvalidTagDataException();
                     }
                     
                     // Make sure we haven't done it already
                     for(auto &m : merged_scenarios) {
+                        // This should fail even if we aren't checking for errors because this is invalid
                         if(m == first_scenario.path) {
                             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Duplicate or cyclical child scenario references are present", tag_index);
                             eprintf_warn("First duplicate scenario: %s.%s", File::halo_path_to_preferred_path(first_scenario.path).c_str(), HEK::tag_class_to_extension(first_scenario.tag_class_int));
@@ -641,7 +656,7 @@ namespace Invader::Parser {
                     try {
                         auto child = Scenario::parse_hek_tag_file(data->data(), data->size());
                         data.reset(); // clear it
-                        merge_child_scenario(scenario, child);
+                        merge_child_scenario(scenario, child, workload, tag_index, (File::halo_path_to_preferred_path(first_scenario.path) + "." + HEK::tag_class_to_extension(first_scenario.tag_class_int)).c_str());
                     }
                     catch(std::exception &) {
                         REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, "Failed to merge %s%s into %s.%s",

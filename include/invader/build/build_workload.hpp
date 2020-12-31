@@ -195,8 +195,9 @@ namespace Invader {
          * @param tag_class_int     tag class
          * @param tags_directories  tags directories to use
          * @param recursion         should use recursion
+         * @param error_checking    have error checking besides completely invalid tags
          */
-        static BuildWorkload compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false);
+        static BuildWorkload compile_single_tag(const char *tag, TagClassInt tag_class_int, const std::vector<std::filesystem::path> &tags_directories, bool recursion = false, bool error_checking = false);
 
         /**
          * Compile a single tag
@@ -204,8 +205,9 @@ namespace Invader {
          * @param tag_data_size     tag class
          * @param tags_directories  tags directories to use
          * @param recursion         should use recursion
+         * @param error_checking    have error checking besides completely invalid tags
          */
-        static BuildWorkload compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories = std::vector<std::filesystem::path>(), bool recursion = false);
+        static BuildWorkload compile_single_tag(const std::byte *tag_data, std::size_t tag_data_size, const std::vector<std::filesystem::path> &tags_directories = std::vector<std::filesystem::path>(), bool recursion = false, bool error_checking = false);
 
         /** Denotes an individual tag dependency */
         struct BuildWorkloadDependency {
@@ -367,8 +369,11 @@ namespace Invader {
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
 
-        /** Recursion is disabled - also disables showing most errors as well as various tags using other tags' data */
+        /** Recursion is disabled - also disables showing various tags using other tags' data */
         bool disable_recursion = false;
+
+        /** Disabling error checking (besides completely invalid tag data) */
+        bool disable_error_checking = false;
 
         /** Are we building a stock map? */
         bool building_stock_map = false;

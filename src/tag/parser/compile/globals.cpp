@@ -19,7 +19,7 @@ namespace Invader::Parser {
             this->unit.tag_id = HEK::TagID::null_tag_id();
             this->unit.tag_class_int = TagClassInt::TAG_CLASS_NONE;
         }
-        else if(this->unit.path.size() == 0) {
+        else if(this->unit.path.size() == 0 && !workload.disable_error_checking) {
             workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag player information is missing a player unit which is required for the map type", tag_index);
             throw InvalidTagDataException();
         }
@@ -34,7 +34,7 @@ namespace Invader::Parser {
             this->cheat_powerups.clear();
             this->weapon_list.clear();
         }
-        else {
+        else if(!workload.disable_error_checking) {
             if(this->multiplayer_information.size() != 1) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 multiplayer information block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
@@ -52,7 +52,7 @@ namespace Invader::Parser {
             this->falling_damage.clear();
             this->materials.clear();
         }
-        else {
+        else if(!workload.disable_error_checking) {
             if(this->falling_damage.size() != 1) {
                 workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "Globals tag does not have exactly 1 falling damage block which is required for the map type", tag_index);
                 throw InvalidTagDataException();
@@ -74,7 +74,8 @@ namespace Invader::Parser {
             workload.cache_file_type == HEK::CacheFileType::SCENARIO_TYPE_MULTIPLAYER &&
             (engine_target == HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION || 
             engine_target == HEK::CacheFileEngine::CACHE_FILE_RETAIL ||
-            engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO)
+            engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) &&
+            !workload.disable_error_checking
         ) {
             #define CHECK_NADE_ON_MP_COUNT(what) if(static_cast<std::size_t>(this->what) > max_grenades_mp_gbx) { \
                 REPORT_ERROR_PRINTF(workload, ERROR_TYPE_FATAL_ERROR, tag_index, # what " for grenade #%zu exceeds the maximum allowed for multiplayer for the target engine (%zu > %zu)", offset / sizeof(struct_little), static_cast<std::size_t>(this->what), max_grenades_mp_gbx); \
