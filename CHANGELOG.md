@@ -2,7 +2,7 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.40.0] - 2020-12-31
 ### Added
 - invader-archive: Added `-g` to specify game target (now required if not
   archiving single tags)
