@@ -368,6 +368,9 @@ namespace Invader {
 
         /** Cache file type */
         std::optional<HEK::CacheFileType> cache_file_type;
+        
+        /** Use the demo UI? */
+        bool demo_ui = false;
 
         /** Recursion is disabled - also disables showing various tags using other tags' data */
         bool disable_recursion = false;

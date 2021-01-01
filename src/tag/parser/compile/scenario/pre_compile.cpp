@@ -16,6 +16,7 @@ namespace Invader::Parser {
 
         if(!workload.cache_file_type.has_value()) {
             workload.cache_file_type = this->type;
+            workload.demo_ui = this->flags & HEK::ScenarioFlagsFlag::SCENARIO_FLAGS_FLAG_USE_DEMO_UI;
         }
 
         // Check some things

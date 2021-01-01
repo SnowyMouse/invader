@@ -1014,10 +1014,19 @@ namespace Invader {
             
             switch(*this->cache_file_type) {
                 case ScenarioType::SCENARIO_TYPE_MULTIPLAYER:
+                    if(this->demo_ui && !this->disable_error_checking) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine for multiplayer scenarios");
+                        throw InvalidTagDataException();
+                    }
                     this->compile_tag_recursively("ui\\shell\\multiplayer", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
                     break;
                 case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
-                    this->compile_tag_recursively("ui\\shell\\solo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    if(this->demo_ui) {
+                        this->compile_tag_recursively("ui\\shell\\solo_demo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    }
+                    else {
+                        this->compile_tag_recursively("ui\\shell\\solo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    }
                     break;
                 case ScenarioType::SCENARIO_TYPE_USER_INTERFACE:
                     this->compile_tag_recursively("ui\\default_multiplayer_game_setting_names", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
@@ -1030,7 +1039,12 @@ namespace Invader {
                     this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\joystick_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
                     this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_short_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
                     this->compile_tag_recursively("ui\\shell\\main_menu\\player_profiles_select\\button_set_long_descriptions", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
-                    this->compile_tag_recursively("ui\\shell\\main_menu", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    if(this->demo_ui) {
+                        this->compile_tag_recursively("ui\\shell\\main_menu_demo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    }
+                    else {
+                        this->compile_tag_recursively("ui\\shell\\main_menu", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                    }
                     this->compile_tag_recursively("sound\\music\\title1\\title1", TagClassInt::TAG_CLASS_SOUND_LOOPING);
                     this->compile_tag_recursively("sound\\sfx\\ui\\flag_failure", TagClassInt::TAG_CLASS_SOUND);
                     this->compile_tag_recursively("sound\\sfx\\ui\\cursor", TagClassInt::TAG_CLASS_SOUND);
@@ -1042,6 +1056,11 @@ namespace Invader {
         
         // Use tag collection tags if we aren't on Xbox
         else {
+            if(this->demo_ui && !this->disable_error_checking) {
+                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "No demo UI exists for the target engine");
+                throw InvalidTagDataException();
+            }
+            
             this->compile_tag_recursively("ui\\ui_tags_loaded_all_scenario_types", TagClassInt::TAG_CLASS_TAG_COLLECTION);
 
             // Load the correct tag collection tag
