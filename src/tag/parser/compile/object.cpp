@@ -236,6 +236,9 @@ namespace Invader::Parser {
             this->inverse_step = 1.0f / (this->step_count - 1);
         }
         this->inverse_period = 1.0f / this->period;
+        if(this->sawtooth_count > 1) {
+            this->inverse_sawtooth = 1.0f / (this->sawtooth_count - 1);
+        }
     }
 
     void WeaponTrigger::pre_compile(BuildWorkload &workload, std::size_t tag_index, std::size_t, std::size_t offset) {

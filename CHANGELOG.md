@@ -2,6 +2,14 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Added
+- invader-build: Added support for `uses demo ui`
+
+### Fixed
+- invader-build: Fixed sawtooth count (affects the strobing effect of the doors
+in the levels "Truth and Reconciliation" and "Keyes")
+
 ## [0.40.0] - 2020-12-31
 ### Added
 - invader-archive: Added `-g` to specify game target (now required if not
