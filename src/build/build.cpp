@@ -67,6 +67,7 @@ int main(int argc, const char **argv) {
         std::optional<int> compression_level;
         bool mcc = false;
         bool increased_file_size_limits = false;
+        std::optional<std::string> build_version;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -88,6 +89,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
+    options.emplace_back("build-version", 'b', 0, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
 
     static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
@@ -114,6 +116,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'm':
                 build_options.maps = std::string(arguments[0]);
+                break;
+            case 'b':
+                build_options.build_version = std::string(arguments[0]);
                 break;
             case 'E':
                 build_options.increased_file_size_limits = true;
@@ -261,6 +266,10 @@ int main(int argc, const char **argv) {
         parameters.optimize_space = build_options.optimize_space;
         parameters.forge_crc = build_options.forged_crc;
         parameters.index = with_index;
+        
+        if(build_options.build_version.has_value()) {
+            parameters.details.build_version = *build_options.build_version;
+        }
         
         // Block this
         if((build_options.mcc || build_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) && !build_options.compress.value_or(true)) {
