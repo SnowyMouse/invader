@@ -89,7 +89,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("optimize", 'O', 0, "Optimize tag space. This will drastically increase the amount of time required to build the cache file.");
     options.emplace_back("hide-pedantic-warnings", 'H', 0, "Don't show minor warnings.");
     options.emplace_back("extend-file-limits", 'E', 0, "Extend file size limits beyond what is allowed by the target engine to its theoretical maximum size. This may create a map that will not work without a mod.");
-    options.emplace_back("build-version", 'b', 0, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
+    options.emplace_back("build-version", 'b', 1, "Set the build version. This is used on the Xbox version of the game (by default it's 01.10.12.2276 on Xbox and the Invader version on other engines)");
 
     static constexpr char DESCRIPTION[] = "Build a cache file for a version of Halo: Combat Evolved.";
     static constexpr char USAGE[] = "[options] -g <target> <scenario>";
