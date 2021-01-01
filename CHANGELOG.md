@@ -2,6 +2,12 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Unreleased
+### Changed
+- invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
+  Take care that if your version of the game does not support your map's file
+  size, it will crash if you try to load it.
+
 ## [0.40.1] - 2020-12-31
 ### Added
 - invader-build: Added support for `uses demo ui`

@@ -285,10 +285,7 @@ int main(int argc, const char **argv) {
         }
         
         if(build_options.increased_file_size_limits) {
-            if(build_options.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-                parameters.details.build_maximum_cache_file_size = HEK::CacheFileLimits::CACHE_FILE_MAXIMUM_FILE_LENGTH_XBOX_SINGLEPLAYER; // use the single player limit since that's as large as the cache partition allows
-            }
-            else if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+            if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
         }
