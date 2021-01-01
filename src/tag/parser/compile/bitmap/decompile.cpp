@@ -3,6 +3,7 @@
 #include <invader/tag/parser/parser.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/swizzle.hpp>
+#include <invader/bitmap/color_plate_pixel.hpp>
 
 namespace Invader::Parser {
     template <typename T> static void do_post_cache_parse(T *bitmap, const Invader::Tag &tag) {
@@ -101,7 +102,7 @@ namespace Invader::Parser {
                     // Set our buffer up
                     xbox_to_pc_buffer.resize(HEK::size_of_bitmap(bitmap_data));
                     
-                    auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data](std::optional<std::size_t> input_offset = std::nullopt, std::optional<std::size_t> output_cubemap_face = std::nullopt) -> std::size_t {
+                    auto copy_texture = [&xbox_to_pc_buffer, &swizzled, &compressed, &bitmap_data_ptr, &size, &bitmap_data, &bitmap](std::optional<std::size_t> input_offset = std::nullopt, std::optional<std::size_t> output_cubemap_face = std::nullopt) -> std::size_t {
                         std::size_t bits_per_pixel = calculate_bits_per_pixel(bitmap_data.format);
                         std::size_t real_mipmap_count = bitmap_data.mipmap_count;
                         std::size_t height = bitmap_data.height;
@@ -188,8 +189,8 @@ namespace Invader::Parser {
                             std::byte dxt_block[16] = {};
                             std::byte *color_data = dxt_block + ((block_size == 16) ? 8 : 0);
                             
-                            //auto &first_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data);
-                            //auto &second_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
+                            auto &first_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data);
+                            auto &second_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
                             auto &color_interpolate = *reinterpret_cast<HEK::LittleEndian<std::uint32_t> *>(color_data + 4);
                             
                             std::memcpy(dxt_block, input - block_size, block_size);
@@ -207,7 +208,45 @@ namespace Invader::Parser {
                                 color = (color & 0b11) | ((color & 0b110000) >> 2) | ((color & 0b110000000000000000) >> 8) | ((color & 0b1100000000000000000000) >> 10);
                                 color_interpolate = color;
                                 
-                                
+                                // If usage is detail map, do fade-to-gray (copied from color_plate_scanner.cpp)
+                                // TODODILE: refactor this maybe?
+                                if(bitmap->usage == HEK::BitmapUsage::BITMAP_USAGE_DETAIL_MAP && bitmap->detail_fade_factor > 0.0F) {
+                                    auto color_a = ColorPlatePixel::convert_from_16_bit<0,5,6,5>(first_color);
+                                    auto color_b = ColorPlatePixel::convert_from_16_bit<0,5,6,5>(second_color);
+                                    
+                                    auto mipmap_count_plus_one = bitmap_data.mipmap_count + 1;
+                                    float overall_fade_factor = static_cast<float>(mipmap_count_plus_one) - static_cast<float>(bitmap->detail_fade_factor) * (mipmap_count_plus_one - 1.0F + (1.0F - bitmap->detail_fade_factor));
+                                    
+                                    std::uint8_t alpha_delta;
+
+                                    // If we're fading to gray instantly, do that so we don't divide by 0
+                                    if(bitmap->detail_fade_factor >= 1.0F) {
+                                        alpha_delta = UINT8_MAX;
+                                    }
+                                    else {
+                                        // Basically, a higher mipmap fade factor scales faster
+                                        float gray_multiplier = static_cast<float>(m + 1) / overall_fade_factor;
+
+                                        // If we go over 1, go to 1
+                                        if(gray_multiplier > 1.0F) {
+                                            gray_multiplier = 1.0F;
+                                        }
+
+                                        // Round
+                                        float gray_multiplied = std::floor(UINT8_MAX * gray_multiplier + 0.5F);
+                                        auto new_gray = static_cast<std::uint32_t>(gray_multiplied);
+                                        if(new_gray > UINT8_MAX) {
+                                            alpha_delta = UINT8_MAX;
+                                        }
+                                        else {
+                                            alpha_delta = static_cast<std::uint8_t>(new_gray);
+                                        }
+                                    }
+
+                                    ColorPlatePixel FADE_TO_GRAY = { 0x7F, 0x7F, 0x7F, static_cast<std::uint8_t>(alpha_delta) };
+                                    first_color = color_a.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
+                                    second_color = color_b.alpha_blend(FADE_TO_GRAY).convert_to_16_bit<0,5,6,5>();
+                                }
                                 
                                 std::memcpy(output, dxt_block, block_size);
                                 std::size_t stride_count = output_cubemap_face.has_value() ? 6 : 1; // since all mipmaps from here on out are the same in size, we just need to add this once this time
