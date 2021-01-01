@@ -584,8 +584,8 @@ namespace Invader {
                 // Show the original size
                 oprintf("Uncompressed size: %.02f ", BYTES_TO_MiB(uncompressed_size));
 
-                // If we have a 32-bit limit, show the limit
-                if(max_size <= UINT32_MAX) {
+                // If we have a limit, show it
+                if(max_size < UINT64_MAX) {
                     oprintf("/ %.02f MiB (%.02f %%)\n", BYTES_TO_MiB(max_size), 100.0 * uncompressed_size / max_size);
                 }
                 else {
