@@ -7,12 +7,19 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: Added support for `uses demo ui`
 
 ### Changed
+- invader-bitmap: Uses a new compression library for DXT compression, which adds
+  color key transparency for DXT1 bitmaps
 - invader-extract: Now generates mipmaps for dropped mipmaps from Xbox-extracted
   DXTn bitmap tags
 
 ### Fixed
+- invader-bitmap: Fixed sub-4x4 mipmaps not being generated
 - invader-build: Fixed sawtooth count (affects the strobing effect of the doors
 in the levels "Truth and Reconciliation" and "Keyes")
+
+### Removed
+- invader-bitmap: Removed dithering for DXTn bitmaps (the compression library
+  doesn't support it sadly!)
 
 ## [0.40.0] - 2020-12-31
 ### Added

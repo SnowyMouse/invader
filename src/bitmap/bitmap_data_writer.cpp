@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#define STB_DXT_USE_ROUNDING_BIAS
-#include "stb/stb_dxt.h"
+#include "libtxc_dxtn/txc_dxtn.h"
 
 #include "bitmap_data_writer.hpp"
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/printf.hpp>
+#include <algorithm>
 
 static inline bool is_power_of_two(std::uint32_t number) {
     std::uint32_t ones = 0;
@@ -363,88 +363,67 @@ namespace Invader {
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
-                    // Begin
-                    bool use_dxt1 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1;
-                    bool use_dxt3 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3;
-                    bool use_dxt5 = bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5;
-                    std::size_t pixel_size = (!use_dxt1) ? 2 : 1;
-                    std::vector<std::byte> new_bitmap_pixels(pixel_count * pixel_size / 2);
-                    auto *compressed_pixel = new_bitmap_pixels.data();
-
+                    CompressionFormat format;
+                    std::size_t block_size;
+                    static const constexpr std::size_t block_length = 4;
+                    
+                    switch(bitmap.format) {
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
+                            format = alpha_present ? CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : CompressionFormat::GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+                            block_size = sizeof(std::uint64_t);
+                            break;
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
+                            format = CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+                            block_size = sizeof(std::uint64_t) * 2;
+                            break;
+                        case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
+                            format = CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                            block_size = sizeof(std::uint64_t) * 2;
+                            break;
+                        default:
+                            std::terminate();
+                    }
+                    
+                    // Go through each 4x4 block and make them compressed
                     std::size_t mipmap_width = bitmap.width;
                     std::size_t mipmap_height = bitmap.height;
-
-                    auto *uncompressed_pixel = first_pixel;
-
-                    #define BLOCK_LENGTH 4
-
-                    std::size_t mipmaps_reduced = 0;
-
-                    std::size_t pixel_increment = BLOCK_LENGTH * (use_dxt3 ? 1 : pixel_size) * 2;
-
-                    // Go through each 4x4 block and make them compressed
+                    std::size_t minimum_dimension = 1;
+                    
+                    std::vector<std::byte> dxt_data;
+                    
                     for(std::size_t i = 0; i <= mipmap_count; i++) {
-                        std::uint32_t effective_mipmap_height = mipmap_height;
-                        if(bitmap.type == BitmapDataType::BITMAP_DATA_TYPE_CUBE_MAP) {
-                            effective_mipmap_height *= 6;
-                        }
-
-                        if(mipmap_width >= BLOCK_LENGTH && effective_mipmap_height >= BLOCK_LENGTH) {
-                            for(std::size_t y = 0; y < effective_mipmap_height; y += BLOCK_LENGTH) {
-                                for(std::size_t x = 0; x < mipmap_width; x += BLOCK_LENGTH) {
-                                    // Let's make the 4x4 block
-                                    ColorPlatePixel block[BLOCK_LENGTH * BLOCK_LENGTH];
-
-                                    // Get the block
-                                    for(int i = 0; i < BLOCK_LENGTH; i++) {
-                                        std::size_t offset = ((y + i) * mipmap_width + x);
-                                        auto *first_block_pixel = block + i * BLOCK_LENGTH;
-                                        auto *first_uncompressed_pixel = uncompressed_pixel + offset;
-
-                                        for(std::size_t j = 0; j < 4; j++) {
-                                            first_block_pixel[j].alpha = first_uncompressed_pixel[j].alpha;
-                                            first_block_pixel[j].red = first_uncompressed_pixel[j].blue;
-                                            first_block_pixel[j].green = first_uncompressed_pixel[j].green;
-                                            first_block_pixel[j].blue = first_uncompressed_pixel[j].red;
-                                        }
+                        for(std::size_t y = 0; y < mipmap_width; y+=block_length) {
+                            for(std::size_t x = 0; x < mipmap_height; x+=block_length) {
+                                dxt_data.insert(dxt_data.end(), block_size, std::byte());
+                                
+                                std::size_t block_width = 4 - (mipmap_width - x) % block_length;
+                                std::size_t block_height = 4 - (mipmap_height - y) % block_length;
+                                
+                                std::uint32_t block_to_compress[block_length*block_length];
+                                for(std::size_t yb = 0; yb < block_height; yb++) {
+                                    for(std::size_t xb = 0; xb < block_width; xb++) {
+                                        std::uint32_t color = first_pixel[x + xb + (y + yb) * mipmap_width].convert_to_32_bit();
+                                        
+                                        // Swap red and blue channels
+                                        color = (color & 0xFF00FF00) | ((color & 0xFF0000) >> 16) | ((color & 0xFF) << 16);
+                                        
+                                        block_to_compress[xb + yb * block_length] = color;
                                     }
-
-                                    // If we're using DXT3, put the alpha in here
-                                    if(use_dxt3) {
-                                        std::uint64_t dxt3_alpha = 0;
-
-                                        // Alpha is stored in order from the first ones being the least significant bytes, and the last ones being the most significant bytes
-                                        for(int i = 0; i < BLOCK_LENGTH * BLOCK_LENGTH; i++) {
-                                            dxt3_alpha = (dxt3_alpha << 4) | (block[BLOCK_LENGTH * BLOCK_LENGTH - i - 1].alpha >> 4);
-                                        }
-
-                                        auto &compressed_alpha = *reinterpret_cast<LittleEndian<std::uint64_t> *>(compressed_pixel);
-                                        compressed_alpha = dxt3_alpha;
-                                        compressed_pixel += sizeof(compressed_alpha);
-                                    }
-
-                                    // Compress
-                                    stb_compress_dxt_block(reinterpret_cast<unsigned char *>(compressed_pixel), reinterpret_cast<unsigned char *>(block), use_dxt5, STB_DXT_HIGHQUAL | (dithering ? STB_DXT_DITHER : 0));
-                                    compressed_pixel += pixel_increment;
                                 }
+                                
+                                
+                                auto *data = dxt_data.data() + dxt_data.size() - block_size;
+                                tx_compress_dxtn(4, block_width, block_height, reinterpret_cast<const std::uint8_t *>(block_to_compress), format, reinterpret_cast<std::uint8_t *>(data), block_length);
                             }
                         }
-                        else {
-                            mipmaps_reduced++;
-                        }
-
-                        uncompressed_pixel += mipmap_width * effective_mipmap_height;
-                        mipmap_width /= 2;
-                        mipmap_height /= 2;
+                        
+                        first_pixel += mipmap_width * mipmap_height;
+                        
+                        mipmap_width = std::max(mipmap_width / 2, minimum_dimension);
+                        mipmap_height = std::max(mipmap_height / 2, minimum_dimension);
                     }
-
-                    current_bitmap_pixels.clear();
-                    current_bitmap_pixels.insert(current_bitmap_pixels.end(), new_bitmap_pixels.data(), reinterpret_cast<std::byte *>(compressed_pixel));
-
-                    // If we had to cut out mipmaps due to them being less than 4x4, here we go
-                    mipmap_count -= mipmaps_reduced;
-
-                    #undef BLOCK_LENGTH
+                    
+                    current_bitmap_pixels = std::move(dxt_data);
 
                     break;
                 }

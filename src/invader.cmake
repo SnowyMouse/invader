@@ -83,6 +83,8 @@ set(INVADER_SOURCE_FILES
     src/bitmap/s3tc/s3tc.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
+    src/bitmap/libtxc_dxtn/txc_compress_dxtn.c
+    src/bitmap/libtxc_dxtn/txc_fetch_dxtn.c
     src/error_handler/error_handler.cpp
     src/script/compiler.cpp
     src/script/script_tree.cpp

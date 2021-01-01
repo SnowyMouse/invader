@@ -493,7 +493,7 @@ int main(int argc, char *argv[]) {
     std::vector<CommandLineOption> options;
     options.emplace_back("info", 'i', 0, "Show license and credits.");
     options.emplace_back("ignore-tag", 'I', 0, "Ignore the tag data if the tag exists.");
-    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit, dxtn, or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>");
+    options.emplace_back("dithering", 'D', 1, "Apply dithering to 16-bit or p8 bitmaps. This does not save in .bitmap tags. Can be: a, rgb, or argb. Default: none", "<channels>");
     options.emplace_back("data", 'd', 1, "Use the specified data directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory.", "<dir>");
     options.emplace_back("format", 'F', 1, "Pixel format. Can be: 32-bit, 16-bit, monochrome, dxt5, dxt3, or dxt1. Default (new tag): 32-bit", "<type>");
