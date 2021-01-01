@@ -2,9 +2,13 @@
 This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## Unreleased
+## [0.40.1] - 2020-12-31
 ### Added
 - invader-build: Added support for `uses demo ui`
+
+### Changed
+- invader-extract: Now generates mipmaps for dropped mipmaps from Xbox-extracted
+  DXTn bitmap tags
 
 ### Fixed
 - invader-build: Fixed sawtooth count (affects the strobing effect of the doors

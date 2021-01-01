@@ -184,22 +184,38 @@ namespace Invader::Parser {
                             // Get the block size
                             auto block_size = (minimum_dimension * minimum_dimension * bits_per_pixel) / 8;
                             
-                            // Go back a block and just copy that
-                            input -= block_size;
+                            // Copy the block
+                            std::byte dxt_block[16] = {};
+                            std::byte *color_data = dxt_block + ((block_size == 16) ? 8 : 0);
                             
-                            // Lastly, copy the missing mipmaps if necessary
+                            //auto &first_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data);
+                            //auto &second_color = *reinterpret_cast<HEK::LittleEndian<std::uint16_t> *>(color_data + sizeof(std::uint16_t));
+                            auto &color_interpolate = *reinterpret_cast<HEK::LittleEndian<std::uint32_t> *>(color_data + 4);
+                            
+                            std::memcpy(dxt_block, input - block_size, block_size);
+                            
+                            // Lastly, create mipmaps linearly
                             for(std::size_t m = real_mipmap_count; m < bitmap_data.mipmap_count; m++) {
-                                std::memcpy(output, input, block_size);
+                                // Make the mipmap
+                                //
+                                //     0 1 2 3
+                                //     4 5 6 7  -->  0 2
+                                //     8 9 A B  -->  8 A
+                                //     C D E F
+                                //
+                                std::uint32_t color = color_interpolate.read();
+                                color = (color & 0b11) | ((color & 0b110000) >> 2) | ((color & 0b110000000000000000) >> 8) | ((color & 0b1100000000000000000000) >> 10);
+                                color_interpolate = color;
+                                
+                                
+                                
+                                std::memcpy(output, dxt_block, block_size);
                                 std::size_t stride_count = output_cubemap_face.has_value() ? 6 : 1; // since all mipmaps from here on out are the same in size, we just need to add this once this time
                                 output += stride_count * block_size;
                             }
-                            
-                            return (input - base_input) + block_size;
                         }
                         
-                        else {
-                            return input - base_input;
-                        }
+                        return input - base_input;
                     };
                     
                     // Cubemaps store each face as individual bitmaps rather than by mipmap, swapping the second and third faces.
