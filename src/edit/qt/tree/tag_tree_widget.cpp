@@ -281,10 +281,48 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWidget::set_filter(const std::optional<std::vector<HEK::TagClassInt>> &classes, const std::optional<std::vector<std::size_t>> &tags_directories, const std::optional<std::vector<std::string>> &expression_filters) {
-        this->filter = classes;
-        this->tag_arrays_to_show = tags_directories;
-        this->expressions = expression_filters;
-        this->refresh_view(this->last_window);
+        bool change_made = false;
+        
+        // Did we change classes?
+        if(this->filter != classes) {
+            this->filter = classes;
+            change_made = true;
+        }
+        
+        // Tag arrays changed?
+        if(this->tag_arrays_to_show != tags_directories) {
+            this->tag_arrays_to_show = tags_directories;
+            change_made = true;
+        }
+        
+        auto showing_everything_array = [](auto &expression_filters) {
+            bool show_everything = true;
+            if(expression_filters.has_value()) {
+                for(auto &i : *expression_filters) {
+                    for(auto &c : i) {
+                        if(c != '*') {
+                            show_everything = false;
+                        }
+                    }
+                }
+            }
+            return show_everything;
+        };
+        
+        // Expression filters?
+        if(this->expressions != expression_filters) {
+            bool currently_showing_everything = showing_everything_array(this->expressions);
+            
+            if(!currently_showing_everything || currently_showing_everything != showing_everything_array(expression_filters)) {
+                this->expressions = expression_filters;
+                change_made = true;
+            }
+        }
+        
+        // It's yours, my friend, as long as you have enough rubies.
+        if(change_made) {
+            this->refresh_view(this->last_window);
+        }
     }
 
     const File::TagFile *TagTreeWidget::get_selected_tag() const noexcept {

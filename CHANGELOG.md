@@ -7,6 +7,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
   Take care that if your version of the game does not support your map's file
   size, it will crash if you try to load it.
+- invader-edit-qt: Optimized filtering a bit
 
 ## [0.40.1] - 2020-12-31
 ### Added
