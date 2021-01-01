@@ -392,8 +392,8 @@ namespace Invader {
                     std::vector<std::byte> dxt_data;
                     
                     for(std::size_t i = 0; i <= mipmap_count; i++) {
-                        for(std::size_t y = 0; y < mipmap_width; y+=block_length) {
-                            for(std::size_t x = 0; x < mipmap_height; x+=block_length) {
+                        for(std::size_t y = 0; y < mipmap_height; y+=block_length) {
+                            for(std::size_t x = 0; x < mipmap_width; x+=block_length) {
                                 dxt_data.insert(dxt_data.end(), block_size, std::byte());
                                 
                                 std::size_t block_width = 4 - (mipmap_width - x) % block_length;
