@@ -1023,6 +1023,7 @@ namespace Invader {
                 case ScenarioType::SCENARIO_TYPE_SINGLEPLAYER:
                     if(this->demo_ui) {
                         this->compile_tag_recursively("ui\\shell\\solo_demo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
+                        this->compile_tag_recursively("ui\\shell\\strings\\temp_strings", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST);
                     }
                     else {
                         this->compile_tag_recursively("ui\\shell\\solo", TagClassInt::TAG_CLASS_UI_WIDGET_COLLECTION);
