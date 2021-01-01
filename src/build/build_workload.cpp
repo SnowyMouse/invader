@@ -1007,7 +1007,7 @@ namespace Invader {
         
         auto engine_target = this->parameters->details.build_cache_file_engine;
         
-        // Xbox maps don't have tag collection tags, so we have to add each tag individual
+        // Xbox maps don't have tag collection tags, so we have to add each individual tag
         if(engine_target == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             this->compile_tag_recursively("ui\\shell\\bitmaps\\white", TagClassInt::TAG_CLASS_BITMAP);
             this->compile_tag_recursively("ui\\multiplayer_game_text", TagClassInt::TAG_CLASS_UNICODE_STRING_LIST); // yes, this tag is in all scenario types, even singleplayer. why? idk lol
