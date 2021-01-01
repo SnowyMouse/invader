@@ -673,7 +673,6 @@ namespace Invader {
                 // Apply a sharpen filter? https://en.wikipedia.org/wiki/Unsharp_masking
                 if(sharpen.has_value() && sharpen.value() > 0.0F) {
                     auto sharpen_value = sharpen.value() / (2.0F * (bitmap.mipmaps.size() + 1));
-                    auto brighten_amount = 1.06695 - 0.0739 * sharpen.value();
 
                     // Make a copy of the mipmap to work off of
                     std::vector<ColorPlatePixel> unsharpened_pixels(pixel_data, pixel_data + mipmap_width * mipmap_height);
@@ -689,7 +688,7 @@ namespace Invader {
                             auto &this_pixel = pixel_data[x + y * mipmap_width];
 
                             #define APPLY_SHARPEN(channel) { \
-                                std::int32_t modification = static_cast<std::int32_t>(static_cast<double>(center.channel * brighten_amount) * (1.0 + 4.0F * sharpen_value) - (static_cast<double>(top.channel) + left.channel + bottom.channel + right.channel) * sharpen_value); \
+                                std::int32_t modification = static_cast<std::int32_t>(center.channel) * (1.0 + 4.0F * sharpen_value) - (static_cast<std::int32_t>(top.channel) + left.channel + bottom.channel + right.channel) * sharpen_value; \
                                 if(modification > 0xFF) { \
                                     this_pixel.channel = 0xFF; \
                                 } \
