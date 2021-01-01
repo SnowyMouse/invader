@@ -462,6 +462,7 @@ namespace Invader::File {
     
     bool path_matches(const char *path, const char *pattern) {
         for(const char *p = pattern;; p++) {
+            // End of string
             if(*p == *path && *p == 0) {
                 return true;
             }
@@ -473,7 +474,10 @@ namespace Invader::File {
                 continue;
             }
             else if(*p == '*') {
-                p++;
+                // Skip duplicates
+                while(*p == '*') {
+                    p++;
+                }
                 if(*p == 0) {
                     return true;
                 }
