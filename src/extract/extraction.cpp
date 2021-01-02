@@ -196,15 +196,8 @@ namespace Invader {
             }
 
             // Create directories along the way
-            try {
-                if(!std::filesystem::exists(tag_path_to_write_to.parent_path())) {
-                    std::filesystem::create_directories(tag_path_to_write_to.parent_path());
-                }
-            }
-            catch(std::exception &e) {
-                REPORT_ERROR_PRINTF(workload, ERROR_TYPE_ERROR, tag_index, "Failed to create a directory: %s", e.what());
-                return false;
-            }
+            std::error_code ec;
+            std::filesystem::create_directories(tag_path_to_write_to.parent_path(), ec);
 
             // Save it
             auto tag_path_str = tag_path_to_write_to.string();

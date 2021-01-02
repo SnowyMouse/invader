@@ -352,10 +352,8 @@ int main(int argc, char * const *argv) {
                 auto new_path = std::filesystem::path(refactor_options.tags[file->tag_directory]) / (halo_path_to_preferred_path(replacement.second.path) + "." + tag_class_to_extension(replacement.second.class_int));
 
                 // Create directories. If this fails, it probably matters, but it's not critical in and of itself
-                try {
-                    std::filesystem::create_directories(new_path.parent_path());
-                }
-                catch(std::exception &) {}
+                std::error_code ec;
+                std::filesystem::create_directories(new_path.parent_path(), ec);
 
                 // Rename, copying as a last resort
                 bool renamed = false;

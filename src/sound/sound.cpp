@@ -884,15 +884,8 @@ int main(int argc, const char **argv) {
     }
 
     // Create missing directories if needed
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s\n", e.what());
-        return EXIT_FAILURE;
-    }
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
 
     // Save
     if(!Invader::File::save_file(tag_path.string().c_str(), sound_tag_data)) {

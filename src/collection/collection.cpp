@@ -118,15 +118,8 @@ int main(int argc, char * const *argv) {
     std::filesystem::path tag_path(output_path);
 
     // Create missing directories if needed
-    try {
-        if(!std::filesystem::exists(tag_path.parent_path())) {
-            std::filesystem::create_directories(tag_path.parent_path());
-        }
-    }
-    catch(std::exception &e) {
-        eprintf_error("Error: Failed to create a directory: %s", e.what());
-        return EXIT_FAILURE;
-    }
+    std::error_code ec;
+    std::filesystem::create_directories(tag_path.parent_path(), ec);
 
     if(!Invader::File::save_file(output_path.c_str(), final_data)) {
         eprintf_error("Error: Failed to write to %s.", output_path.c_str());

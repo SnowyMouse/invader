@@ -176,43 +176,50 @@ int main(int argc, const char **argv) {
         auto path_from = convert_options.tags / i.join();
         auto path_to = *convert_options.output_tags / File::TagFilePath(i.path, output_class).join();
         
-        auto tag_file = File::open_file(path_from);
-        if(!tag_file.has_value()) {
-            eprintf_error("Failed to read %s", path_from.string().c_str());
-        }
-        
-        auto input_struct = Parser::ParserStruct::parse_hek_tag_file(tag_file->data(), tag_file->size());
-        std::unique_ptr<Parser::ParserStruct> output_struct;
-        
-        if(!convert_options.overwrite && std::filesystem::exists(path_to)) {
-            eprintf_warn("Skipping %s...", i.join().c_str());
-            continue;
-        }
-        
-        switch(*convert_options.conversion) {
-            case GBXMODEL_TO_MODEL:
-                output_struct = std::make_unique<Parser::Model>(Parser::convert_gbxmodel_to_model(dynamic_cast<Parser::GBXModel &>(*input_struct)));
-                break;
-            case MODEL_TO_GBXMODEL:
-                output_struct = std::make_unique<Parser::GBXModel>(Parser::convert_model_to_gbxmodel(dynamic_cast<Parser::Model &>(*input_struct)));
-                break;
-            case CHICAGO_EXTENDED_TO_CHICAGO:
-                output_struct = std::make_unique<Parser::ShaderTransparentChicago>(Parser::convert_shader_transparent_chicago_extended_to_shader_transparent_chicago(dynamic_cast<Parser::ShaderTransparentChicagoExtended &>(*input_struct)));
-                break;
-        }
-        
-        auto final_data = output_struct->generate_hek_tag_data(output_class);
         try {
-            std::filesystem::create_directories(path_to.parent_path());
-        }
-        catch (std::exception &) {}
+            auto tag_file = File::open_file(path_from);
+            if(!tag_file.has_value()) {
+                eprintf_error("Failed to read %s", path_from.string().c_str());
+            }
+            
+            auto input_struct = Parser::ParserStruct::parse_hek_tag_file(tag_file->data(), tag_file->size());
+            std::unique_ptr<Parser::ParserStruct> output_struct;
+            
+            if(!convert_options.overwrite && std::filesystem::exists(path_to)) {
+                eprintf_warn("Skipping %s...", i.join().c_str());
+                continue;
+            }
+            
+            switch(*convert_options.conversion) {
+                case GBXMODEL_TO_MODEL:
+                    output_struct = std::make_unique<Parser::Model>(Parser::convert_gbxmodel_to_model(dynamic_cast<Parser::GBXModel &>(*input_struct)));
+                    break;
+                case MODEL_TO_GBXMODEL:
+                    output_struct = std::make_unique<Parser::GBXModel>(Parser::convert_model_to_gbxmodel(dynamic_cast<Parser::Model &>(*input_struct)));
+                    break;
+                case CHICAGO_EXTENDED_TO_CHICAGO:
+                    output_struct = std::make_unique<Parser::ShaderTransparentChicago>(Parser::convert_shader_transparent_chicago_extended_to_shader_transparent_chicago(dynamic_cast<Parser::ShaderTransparentChicagoExtended &>(*input_struct)));
+                    break;
+            }
+            
+            // Build
+            auto final_data = output_struct->generate_hek_tag_data(output_class);
+            
+            // Make directories
+            std::error_code ec;
+            std::filesystem::create_directories(path_to.parent_path(), ec);
 
-        if(File::save_file(path_to, final_data)) {
-            oprintf_success("Saved %s", path_to.string().c_str());
-            success++;
+            // Save
+            if(File::save_file(path_to, final_data)) {
+                oprintf_success("Saved %s", path_to.string().c_str());
+                success++;
+            }
+            else {
+                eprintf_error("Failed to write to %s", path_to.string().c_str());
+            }
         }
-        else {
-            eprintf_error("Failed to write to %s", path_to.string().c_str());
+        catch(std::exception &e) {
+            eprintf_error("Failed to convert %s: %s", i.join().c_str(), e.what());
         }
     }
     

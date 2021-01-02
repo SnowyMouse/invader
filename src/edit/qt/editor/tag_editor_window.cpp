@@ -306,14 +306,9 @@ namespace Invader::EditQt {
         TagTreeDialog d(nullptr, this->parent_window, this->file.tag_class_int);
         if(d.exec() == QMessageBox::Accepted) {
             this->file = *d.get_tag();
-            try {
-                if(!std::filesystem::exists(this->file.full_path.parent_path())) {
-                    std::filesystem::create_directories(this->file.full_path.parent_path());
-                }
-            }
-            catch(std::exception &e) {
-                eprintf_error("Failed to create directories: %s", e.what());
-            }
+            
+            std::error_code ec;
+            std::filesystem::create_directories(this->file.full_path.parent_path(), ec);
             
             // Save it!
             auto result = this->perform_save();
