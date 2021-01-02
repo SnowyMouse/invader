@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-set(INVADER_FONT ${INVADER_CONVERT} CACHE BOOL "Build invader-convert")
+set(INVADER_CONVERT ${INVADER_CONVERT} CACHE BOOL "Build invader-convert")
 
-if(${INVADER_FONT})
+if(${INVADER_CONVERT})
     add_executable(invader-convert
         src/convert/convert.cpp
     )
