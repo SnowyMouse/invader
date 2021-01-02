@@ -22,7 +22,7 @@ int main(int argc, const char **argv) {
     struct ConvertOptions {
         std::optional<Conversion> conversion;
         std::filesystem::path tags = "tags";
-        std::filesystem::path output_tags = tags;
+        std::optional<std::filesystem::path> output_tags;
         bool match_all = false;
         bool overwrite = false;
         bool use_filesystem_path = false;
@@ -103,6 +103,10 @@ int main(int argc, const char **argv) {
         return EXIT_FAILURE;
     }
     
+    if(!convert_options.output_tags.has_value()) {
+        convert_options.output_tags = convert_options.tags;
+    }
+    
     HEK::TagClassInt input_class, output_class;
     
     switch(*convert_options.conversion) {
@@ -170,7 +174,7 @@ int main(int argc, const char **argv) {
     std::size_t total = paths.size();
     for(auto &i : paths) {
         auto path_from = convert_options.tags / i.join();
-        auto path_to = convert_options.output_tags / File::TagFilePath(i.path, output_class).join();
+        auto path_to = *convert_options.output_tags / File::TagFilePath(i.path, output_class).join();
         
         auto tag_file = File::open_file(path_from);
         if(!tag_file.has_value()) {
