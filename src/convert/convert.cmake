@@ -7,7 +7,7 @@ if(${INVADER_CONVERT})
         src/convert/convert.cpp
     )
 
-    target_link_libraries(invader-convert invader ${FREETYPE_LIBRARIES})
+    target_link_libraries(invader-convert invader)
 
     set(TARGETS_LIST ${TARGETS_LIST} invader-convert)
 
