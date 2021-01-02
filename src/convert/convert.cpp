@@ -80,6 +80,10 @@ int main(int argc, const char **argv) {
                 compare_options.overwrite = true;
                 break;
                 
+            case 's':
+                compare_options.tags_to_convert.emplace_back(args[0]);
+                break;
+                
             case 't':
                 compare_options.tags = args[0];
                 break;
