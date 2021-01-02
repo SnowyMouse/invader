@@ -79,4 +79,27 @@ namespace Invader::Parser {
         
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_GENERIC);
     }
+    
+    ShaderTransparentChicago convert_shader_transparent_chicago_extended_to_shader_transparent_chicago(const ShaderTransparentChicagoExtended &shader) {
+        ShaderTransparentChicago tag;
+        tag.shader_flags = shader.shader_flags;
+        tag.detail_level = shader.detail_level;
+        tag.power = shader.power;
+        tag.color_of_emitted_light = shader.color_of_emitted_light;
+        tag.tint_color = shader.tint_color;
+        tag.physics_flags = shader.physics_flags;
+        tag.material_type = shader.material_type;
+        tag.numeric_counter_limit = shader.numeric_counter_limit;
+        tag.shader_transparent_chicago_flags = shader.shader_transparent_chicago_extended_flags;
+        tag.first_map_type = shader.first_map_type;
+        tag.framebuffer_blend_function = shader.framebuffer_blend_function;
+        tag.framebuffer_fade_mode = shader.framebuffer_fade_mode;
+        tag.framebuffer_fade_source = shader.framebuffer_fade_source;
+        tag.lens_flare_spacing = shader.lens_flare_spacing;
+        tag.lens_flare = shader.lens_flare;
+        tag.extra_layers = shader.extra_layers;
+        tag.maps = shader.maps_4_stage;
+        tag.extra_flags = shader.extra_flags;
+        return tag;
+    }
 }

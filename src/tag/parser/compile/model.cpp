@@ -1025,4 +1025,96 @@ namespace Invader::Parser {
     bool uncache_model_markers(Model &model, bool fix) {
         return uncache_model_markers_model(model, fix);
     }
+    
+    template <class MFrom, class MTo> static MTo begin_converting_model(const MFrom &model) {
+        MTo output = {};
+        
+        output.flags = model.flags;
+        output.node_list_checksum = model.node_list_checksum;
+        
+        output.super_high_detail_cutoff = model.super_high_detail_cutoff;
+        output.high_detail_cutoff = model.high_detail_cutoff;
+        output.medium_detail_cutoff = model.medium_detail_cutoff;
+        output.low_detail_cutoff = model.low_detail_cutoff;
+        output.super_low_detail_cutoff = model.super_low_detail_cutoff;
+        
+        output.super_high_detail_node_count = model.super_high_detail_node_count;
+        output.high_detail_node_count = model.high_detail_node_count;
+        output.medium_detail_node_count = model.medium_detail_node_count;
+        output.low_detail_node_count = model.low_detail_node_count;
+        output.super_low_detail_node_count = model.super_low_detail_node_count;
+        
+        output.base_map_u_scale = model.base_map_u_scale;
+        output.base_map_v_scale = model.base_map_v_scale;
+        output.markers = model.markers;
+        output.nodes = model.nodes;
+        output.regions = model.regions;
+        output.shaders = model.shaders;
+        
+        return output;
+    }
+    
+    template <class PFrom, class PTo> static PTo begin_converting_part(const PFrom &part) {
+        PTo output = {};
+        
+        output.flags = part.flags;
+        output.shader_index = part.shader_index;
+        output.prev_filthy_part_index = part.prev_filthy_part_index;
+        output.next_filthy_part_index = part.next_filthy_part_index;
+        output.centroid = part.centroid;
+        output.uncompressed_vertices = part.uncompressed_vertices;
+        output.compressed_vertices = part.compressed_vertices;
+        output.triangles = part.triangles;
+        
+        return output;
+    }
+    
+    GBXModel convert_model_to_gbxmodel(const Model &model) {
+        auto output = begin_converting_model<Model, GBXModel>(model);
+        
+        for(auto &gi : model.geometries) {
+            auto &go = output.geometries.emplace_back();
+            go.flags = gi.flags;
+            for(auto &pi : gi.parts) {
+                go.parts.emplace_back(begin_converting_part<ModelGeometryPart, GBXModelGeometryPart>(pi));
+            }
+        }
+        
+        return output;
+    }
+    
+    Model convert_gbxmodel_to_model(const GBXModel &model) {
+        auto output = begin_converting_model<GBXModel, Model>(model);
+        
+        // Check if we have local nodes
+        auto local_nodes = model.flags & HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        if(local_nodes) {
+            // Local nodes don't exist on model tags
+            output.flags = output.flags & ~HEK::ModelFlagsFlag::MODEL_FLAGS_FLAG_PARTS_HAVE_LOCAL_NODES;
+        }
+        
+        // Do this
+        for(auto &gi : model.geometries) {
+            auto &go = output.geometries.emplace_back();
+            go.flags = gi.flags;
+            for(auto &pi : gi.parts) {
+                auto &po = go.parts.emplace_back(begin_converting_part<GBXModelGeometryPart, ModelGeometryPart>(pi));
+                
+                auto node_count = sizeof(pi.local_node_indices) / sizeof(*pi.local_node_indices);
+                
+                if(local_nodes) {
+                    for(auto &v : po.uncompressed_vertices) {
+                        if(v.node0_index != NULL_INDEX) {
+                            v.node0_index = pi.local_node_indices[v.node0_index % node_count];
+                        }
+                        if(v.node1_index != NULL_INDEX) {
+                            v.node1_index = pi.local_node_indices[v.node1_index % node_count];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return output;
+    }
 }

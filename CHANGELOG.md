@@ -3,6 +3,11 @@ This is used for recording Invader's changes. This changelog is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## Unreleased
+### Added
+- New tool: invader-convert - Converts between various tag types (gbxmodel to
+  model, model to gbxmodel, shader_transparent_chicago_extended to
+  shader_transparent_chicago)
+
 ### Changed
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
   Take care that if your version of the game does not support your map's file
