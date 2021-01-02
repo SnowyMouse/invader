@@ -27,7 +27,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("mcc", 'M', 0, "Use MCC-style (de)compression");
     options.emplace_back("output", 'o', 1, "Emit the resulting map at the given path. By default, this is the map path (overwrite).", "<file>");
-    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an Xbox or MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
+    options.emplace_back("level", 'l', 1, "Set the compression level. Must be between 0 and 19. If compressing an MCC map, this will be clamped from 0 to 9. Default: 19", "<level>");
     options.emplace_back("decompress", 'd', 0, "Decompress instead of compress.");
 
     static constexpr char DESCRIPTION[] = "Compress cache files.";

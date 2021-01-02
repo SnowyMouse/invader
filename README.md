@@ -133,6 +133,7 @@ this project is split into different programs.
 - [invader-build]
 - [invader-compare]
 - [invader-compress]
+- [invader-convert]
 - [invader-dependency]
 - [invader-edit-qt]
 - [invader-extract]
@@ -168,8 +169,10 @@ Options:
 
 ### invader-bitmap
 This program generates bitmap tags from images. For source images, .tif, .tiff,
-.png, .tga, and .bmp extensions are
-supported.
+.png, .tga, and .bmp extensions are supported.
+
+Note that image sharpening and blurring, while supported, are not recommended,
+and output may not exactly match the Halo Editing Kit's output.
 
 ```
 Usage: invader-bitmap [options] <bitmap-tag>
@@ -184,9 +187,9 @@ Options:
                                this to 0 disables budgeting. Default (new tag):
                                0
   -d --data <dir>              Use the specified data directory.
-  -D --dithering <channels>    Apply dithering to 16-bit, dxtn, or p8 bitmaps.
-                               This does not save in .bitmap tags. Can be: a,
-                               rgb, or argb. Default: none
+  -D --dithering <channels>    Apply dithering to 16-bit or p8 bitmaps. This
+                               does not save in .bitmap tags. Can be: a, rgb,
+                               or argb. Default: none
   -f --detail-fade <factor>    Set detail fade factor. Default (new tag): 0.0
   -F --format <type>           Pixel format. Can be: 32-bit, 16-bit,
                                monochrome, dxt5, dxt3, or dxt1. Default (new
@@ -257,15 +260,26 @@ Build a cache file for a version of Halo: Combat Evolved.
 Options:
   -a --always-index-tags       Always index tags when possible. This can speed
                                up build time, but stock tags can't be modified.
+  -b --build-version           Set the build version. This is used on the Xbox
+                               version of the game (by default it's
+                               01.10.12.2276 on Xbox and the Invader version on
+                               other engines)
   -c --compress                Compress the cache file.
   -C --forge-crc <crc>         Forge the CRC32 value of the map after building
                                it.
+  -E --extend-file-limits      Extend file size limits beyond what is allowed
+                               by the target engine to its theoretical maximum
+                               size. This may create a map that will not work
+                               without a mod.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               native, retail, mcc-custom
+                               native, retail, xbox, mcc-custom
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
+  -l --level <level>           Set the compression level. Must be between 0 and
+                               19. If compressing an Xbox or MCC map, this will
+                               be clamped from 0 to 9. Default: 19
   -m --maps <dir>              Use the specified maps directory.
   -n --no-external-tags        Do not use external tags. This can speed up
                                build time at a cost of a much larger file size.
@@ -337,16 +351,19 @@ Compare tags against other tags.
 
 Options:
   -a --all                     Only match if tags are in all inputs
+  -B --by-path <path-type>     Set what tags get compared against other tags.
+                               By default, only tags with the same relative
+                               path are checked. Using "any" ignores paths
+                               completely (useful for finding duplicates when
+                               both inputs are different) while "different"
+                               only checks tags with different paths (useful
+                               for finding duplicates when both inputs are the
+                               same). Can be: any, different, or same (default)
   -c --class                   Add a tag class to check. If no tag classes are
                                specified, all tag classes will be checked.
-  -C --by-class <path-type>    Compare tags against tags of the same class
-                               rather than the same path. Using "any" ignores
-                               paths completely (useful when both inputs are
-                               different) while "different" only checks tags
-                               with different paths (useful when both inputs
-                               are the same). Can be: any or different
   -f --functional              Precompile the tags before comparison to check
                                for only functional differences.
+  -G --ignore-resources        Ignore resource maps for the current map input.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -I --input                   Add an input directory
@@ -377,11 +394,38 @@ Options:
   -d --decompress              Decompress instead of compress.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
-  -l --level <level>           Set the compression level. Must be between 1 and
-                               19. If compressing an Xbox map, this will be
-                               clamped from 1 to 9. Default: 19
+  -l --level <level>           Set the compression level. Must be between 0 and
+                               19. If compressing an MCC map, this will be
+                               clamped from 0 to 9. Default: 19
+  -M --mcc                     Use MCC-style (de)compression
   -o --output <file>           Emit the resulting map at the given path. By
                                default, this is the map path (overwrite).
+```
+
+### invader-convert
+This program converts tags from one type to another. This is especially useful
+in conjunction with [invader-refactor] for porting maps between different
+versions of the game.
+
+```
+Usage: invader-convert [options] <--all | -s <tag>>
+
+Convert from one tag type to another.
+
+Options:
+  -a --all                     Convert all tags. This cannot be used with -s.
+  -h --help                    Show this list of options.
+  -i --info                    Show credits, source info, and other info.
+  -o --output-tags             Set the output tags directory.
+  -O --overwrite               Overwrite any output tags if they exist.
+  -P --fs-path                 Use a filesystem path for the tag path if
+                               specifying a tag.
+  -s --single-tag              Convert a specific tag. This can be specified
+                               multiple times for multiple tags, but cannot be
+                               used with -a.
+  -t --tags                    Set the input tags directory.
+  -T --type                    Type of conversion. Can be: gbxmodel-to-model,
+                               model-to-gbxmodel, chicago-extended-to-chicago
 ```
 
 ### invader-dependency
@@ -432,15 +476,16 @@ Usage: invader-extract [options] <map>
 Extract data from cache files.
 
 Options:
+  -G --ignore-resources        Ignore resource maps.
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info
-  -m --maps <dir>              Set the maps directory
+  -m --maps <dir>              Use the specified maps directory.
   -n --non-mp-globals          Enable extraction of non-multiplayer .globals
   -O --overwrite               Overwrite tags if they already exist
   -r --recursive               Extract tag dependencies
   -s --search <expr>           Search for tags (* and ? are wildcards); use
                                multiple times for multiple queries
-  -t --tags <dir>              Set the tags directory
+  -t --tags <dir>              Use the specified tags directory.
 ```
 
 ### invader-font
@@ -486,19 +531,19 @@ Options:
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -T --type <type>             Set the type of data to show. Can be overview
-                               (default), build, compressed, compression-ratio,
-                               crc32, crc32-mismatched, dirty, engine,
-                               external-bitmap-indices, external-bitmaps,
-                               external-indices, external-loc,
-                               external-loc-indices, external-pointers,
-                               external-sound-indices, external-sounds,
-                               external-tags, language, map-types, protected,
-                               scenario, scenario-path, stub-count, tag-count,
-                               tags, tags-external-bitmap-indices,
-                               tags-external-indices,
-                               tags-external-loc-indices,
-                               tags-external-pointers,
-                               tags-external-sound-indices
+                               (default), build, compressed, compression_ratio,
+                               crc32, crc32_mismatched, dirty, engine,
+                               external_bitmap_indices, external_bitmaps,
+                               external_indices, external_loc_indices,
+                               external_pointers, external_sound_indices,
+                               external_sounds, external_tags, languages,
+                               map_type, protection, scenario, scenario_path,
+                               tag_count, stub_count, tags,
+                               tags_external_bitmap_indices,
+                               tags_external_loc_indices,
+                               tags_external_pointers,
+                               tags_external_sound_indices,
+                               tags_external_indices, uncompressed_size
 ```
 
 ### invader-refactor
@@ -525,26 +570,29 @@ Options:
                                must exist on the filesystem) while also
                                changing all references to the tag to the new
                                path. If using no-move, then the tag is not
-                               moved (the tag does not have to exist on the
-                               filesystem) while also changing all references
-                               to the tag to the new path. If using copy, then
-                               the tag is copied (the tag must exist on the
-                               filesystem) and references to the tag are not
-                               changed except for other tags copied by this
-                               command. Can be: copy, move, no-move
+                               moved (the destination tag must exist on the
+                               filesystem unless you use --unsafe) while also
+                               changing all references to the tag to the new
+                               path. If using copy, then the tag is copied (the
+                               tag must exist on the filesystem) and references
+                               to the tag are not changed except for other tags
+                               copied by this command. Can be: copy, move,
+                               no-move
   -r --recursive <f> <t>       Recursively move all tags in a directory. This
                                will fail if a tag is present in both the old
                                and new directories, it cannot be used with
                                no-move. This can only be specified once per
                                operation and cannot be used with --tag.
   -s --single-tag <path>       Make changes to a single tag, only, rather than
-                               the whole tag directory.
+                               the whole tags directory.
   -t --tags <dir>              Use the specified tags directory. Use multiple
                                times to add more directories, ordered by
                                precedence.
   -T --tag <f> <t>             Refactor an individual tag. This can be
                                specified multiple times but cannot be used with
                                --recursive.
+  -U --unsafe                  Do not require the destination tags to exist if
+                               using no-move
 ```
 
 ### invader-resource
@@ -724,9 +772,9 @@ tags instead of gbxmodel. The Halo Editing Kit automatically changes these on
 tag load, likely because Gearbox developers felt it would be better to just do
 this than fix their tags (since their engine only supports gbxmodel tags).
 
-Invader supports multiple engines, with Xbox support being planned, so we cannot
-just do this. Fortunately, there is a command you can run that will actually fix
-the tags for you:
+Invader supports multiple engines INCLUDING the Xbox version, so we cannot just
+do this. Fortunately, there is a command you can run that will actually fix the
+tags for you:
 
 ```
 invader-refactor -Nc model gbxmodel
@@ -929,6 +977,7 @@ to a point where it can be a solid replacement to tool.exe.
 [invader-build]: #invader-build
 [invader-compare]: #invader-compare
 [invader-compress]: #invader-compress
+[invader-convert]: #invader-convert
 [invader-dependency]: #invader-dependency
 [invader-edit-qt]: #invader-edit-qt
 [invader-extract]: #invader-extract

@@ -71,7 +71,9 @@ with the original Halo Editing Kit.
 
 Invader should not be expected to warn the user if such assets will not work
 with the original Halo Editing Kit (or anyone else's tools). Usage of the
-original Halo Editing Kit should be discouraged whenever possible.
+original Halo Editing Kit should be discouraged whenever possible. That said,
+Invader may warn if your tags exceed the Halo Editing Kit's limits since some of
+these limits are, in fact, engine limitations.
 
 - Invader may not allow some things that the original Halo Editing Kit allows
 
@@ -215,13 +217,13 @@ This applies to how markdown files are created and edited.
 - Markdown table cells must be spaced so they can also be easily read in a text
   editor. For example:
   ```markdown
-  Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes                
+  Format   | Storage  | Bits/px | Alpha   | Red   | Green | Blue  | Notes
   -------- | -------- | ------- | ------- | ----- | ----- | ----- | ----------
-  `32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |                      
+  `32-bit` | A8R8G8B8 | 32      | 8-bit   | 8-bit | 8-bit | 8-bit |
            | X8R8G8B8 | 32      | (8-bit) | 8-bit | 8-bit | 8-bit | 100% alpha
   `16-bit` | R5G6B5   | 16      |         | 5-bit | 6-bit | 5-bit | 100% alpha
-           | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |                      
-           | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |                      
+           | A1R5G5B5 | 16      | 1-bit   | 5-bit | 5-bit | 5-bit |
+           | A4R4G4B4 | 16      | 4-bit   | 4-bit | 4-bit | 4-bit |
   ```
 
 ### Coding conventions
