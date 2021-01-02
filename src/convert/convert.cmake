@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-set(INVADER_CONVERT ${INVADER_CONVERT} CACHE BOOL "Build invader-convert")
+if(NOT DEFINED ${INVADER_CONVERT})
+    set(INVADER_CONVERT ${INVADER_CONVERT} CACHE BOOL "Build invader-convert (converts tags)")
+endif()
 
 if(${INVADER_CONVERT})
     add_executable(invader-convert
