@@ -162,6 +162,9 @@ namespace Invader {
             oprintf("Reading tags...\n");
         }
         this->add_tags();
+        
+        // Check this stuff
+        this->check_hud_text_indices();
 
         // If we have resource maps to check, check them
         if(this->parameters->details.build_raw_data_handling != BuildParameters::BuildParametersDetails::RawDataHandling::RAW_DATA_HANDLING_RETAIN_ALL) {
@@ -2352,6 +2355,94 @@ namespace Invader {
             }
         }
         this->raw_data.erase(this->raw_data.begin() + index);
+    }
+    
+    void BuildWorkload::check_hud_text_indices() {
+        // This should effectively just get the tag
+        auto &globals_tag_struct = this->structs[this->tags[this->compile_tag_recursively("globals\\globals", HEK::TagClassInt::TAG_CLASS_GLOBALS)].base_struct.value()];
+        auto &globals_tag_data = *reinterpret_cast<Parser::Globals::struct_little *>(globals_tag_struct.data.data());
+        if(globals_tag_data.interface_bitmaps.count != 1) {
+            return;
+        }
+        auto &interface_bitmaps_data = *reinterpret_cast<Parser::GlobalsInterfaceBitmaps::struct_little *>(this->structs[globals_tag_struct.resolve_pointer(&globals_tag_data.interface_bitmaps.pointer).value()].data.data());
+        auto hud_globals_id = interface_bitmaps_data.hud_globals.tag_id.read();
+        if(hud_globals_id.is_null()) {
+            return;
+        }
+        auto &hud_globals_data = *reinterpret_cast<Parser::HUDGlobals::struct_little *>(this->structs[this->tags[hud_globals_id.index].base_struct.value()].data.data());
+        auto item_strings_id = hud_globals_data.item_message_text.tag_id.read();
+        auto icon_strings_id = hud_globals_data.alternate_icon_text.tag_id.read();
+        
+        // Get item/icon counts
+        std::size_t item_strings;
+        std::size_t icon_strings;
+        
+        if(!item_strings_id.is_null()) {
+            item_strings = reinterpret_cast<Parser::UnicodeStringList::struct_little *>(this->structs[this->tags[item_strings_id.index].base_struct.value()].data.data())->strings.count;
+        }
+        else {
+            item_strings = 0;
+        }
+        
+        if(!icon_strings_id.is_null()) {
+            icon_strings = reinterpret_cast<Parser::UnicodeStringList::struct_little *>(this->structs[this->tags[icon_strings_id.index].base_struct.value()].data.data())->strings.count;
+        }
+        else {
+            icon_strings = 0;
+        }
+        
+        std::size_t tag_count = this->tags.size();
+        std::size_t error_count = 0;
+        
+        for(std::size_t i = 0; i < tag_count; i++) {
+            auto &tag = this->tags[i];
+            
+            // Skip tags we don't have
+            if(!tag.base_struct.has_value()) {
+                continue;
+            }
+            
+            switch(tag.tag_class_int) {
+                case HEK::TagClassInt::TAG_CLASS_WEAPON:
+                case HEK::TagClassInt::TAG_CLASS_EQUIPMENT: {
+                    auto index = static_cast<std::size_t>(reinterpret_cast<Parser::Item::struct_little *>(this->structs[*tag.base_struct].data.data())->pickup_text_index);
+                    if(index >= item_strings && index != NULL_INDEX) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Pickup text index is not valid (%zu >= %zu)", index, item_strings);
+                        error_count++;
+                    }
+                    break;
+                }
+                case HEK::TagClassInt::TAG_CLASS_BIPED:
+                case HEK::TagClassInt::TAG_CLASS_VEHICLE: {
+                    auto &unit_struct = this->structs[*tag.base_struct];
+                    auto &unit_data = *reinterpret_cast<Parser::Unit::struct_little *>(unit_struct.data.data());
+                    auto index = static_cast<std::size_t>(unit_data.hud_text_message_index);
+                    if(index >= icon_strings && index != NULL_INDEX) {
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Message text index is not valid (%zu >= %zu)", index, icon_strings);
+                        error_count++;
+                    }
+                    std::size_t seat_count = unit_data.seats.count;
+                    if(seat_count > 0) {
+                        auto *seat_data = reinterpret_cast<Parser::UnitSeat::struct_little *>(this->structs[unit_struct.resolve_pointer(&unit_data.seats.pointer).value()].data.data());
+                        for(std::size_t s = 0; s < seat_count; s++) {
+                            auto seat_index = static_cast<std::size_t>(seat_data[s].hud_text_message_index);
+                            if(seat_index >= icon_strings && seat_index != NULL_INDEX) {
+                                REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, i, "Seat #%zu's message text index is not valid (%zu >= %zu)", s, seat_index, icon_strings);
+                                error_count++;
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        
+        if(error_count) {
+            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, std::nullopt, "%zu error%s found when checking message indices. %s should be set to NULL if %s to be unset.", error_count, error_count == 1 ? " was" : "s were", error_count == 1 ? "This index" : "These indices", error_count == 1 ? "it needs" : "they need");
+            throw InvalidTagDataException();
+        }
     }
     
     void BuildWorkload::generate_compressed_model_tag_array() {

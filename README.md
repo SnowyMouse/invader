@@ -903,14 +903,7 @@ this does not mean that you can't make a fork of Invader that supports it, and
 there are people who have said they were willing to do this.
 
 ### Can invader-build create Xbox maps?
-Xbox support is **planned** but not yet implemented.
-
-Previously, we decided to not do Xbox map compilation because there are enough
-differences to make supporting the Xbox version non-trivial. However, we have
-changed our stance as the Xbox version is an accurate baseline for reverse
-engineering Halo's graphics and sound engine compared to Halo PC which suffers
-from numerous regressions in both departments. Being able to build maps for Xbox
-would be extremely helpful for progress on this front.
+Yes. Pass `-g xbox` into invader-build. A guide for making Xbox maps is planned.
 
 ### The HEK says my bitmap tag is "too large" when opening.
 The HEK has a 16 MiB limitation for bitmap tags. Invader does not have this

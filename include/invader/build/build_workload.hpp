@@ -434,6 +434,7 @@ namespace Invader {
         std::uint32_t tag_file_checksums = 0;
         const BuildParameters *parameters = nullptr;
         void generate_compressed_model_tag_array();
+        void check_hud_text_indices();
     };
 }
 
