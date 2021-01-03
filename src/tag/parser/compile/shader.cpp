@@ -44,12 +44,6 @@ namespace Invader::Parser {
             throw InvalidTagDataException();
         }
         
-        // Why would you use shader_transparent_chicago_extended if you don't use two stage maps?
-        if(this->maps_2_stage.size() == 0) {
-            workload.report_error(BuildWorkload::ErrorType::ERROR_TYPE_FATAL_ERROR, "There are no 2-stage maps. If you do not want 2-stage maps, use shader_transparent_chicago, instead.", tag_index);
-            throw InvalidTagDataException();
-        }
-        
         this->shader_type = convert_shader_type(workload, HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED);
         this->shader_type = HEK::ShaderType::SHADER_TYPE_SHADER_TRANSPARENT_CHICAGO_EXTENDED;
     }
