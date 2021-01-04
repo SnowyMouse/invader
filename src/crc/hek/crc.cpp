@@ -26,7 +26,7 @@ namespace Invader {
         
         auto engine = map.get_engine();
         if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
-            return 0xFFFFFFFF;
+            return 0;
         }
 
         #define CRC_DATA(data_start, data_end) \

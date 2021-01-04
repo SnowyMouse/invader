@@ -465,6 +465,9 @@ namespace Invader {
                     oprintf(" done\n");
                 }
             }
+            else {
+                header.crc32 = UINT32_MAX;
+            }
 
             // Copy it again, this time with the new CRC32
             if(engine_target == HEK::CacheFileEngine::CACHE_FILE_DEMO) {
