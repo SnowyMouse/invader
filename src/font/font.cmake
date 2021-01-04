@@ -7,7 +7,7 @@ if(NOT ${FREETYPE_FOUND})
 endif()
 
 if(NOT DEFINED ${INVADER_FONT})
-    set(INVADER_FONT ${INVADER_FONT} CACHE BOOL "Build invader-font (requires freetype; makes font tags)")
+    set(INVADER_FONT ${INVADER_FONT} true CACHE BOOL "Build invader-font (requires freetype; makes font tags)")
 endif()
 
 if(${INVADER_FONT})
