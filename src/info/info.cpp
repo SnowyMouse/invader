@@ -63,20 +63,23 @@ namespace Invader::Info {
         auto crc = map.get_crc32();
         auto crc_matches = map.get_header_crc32() == crc;
         
-        // CRC32
-        if(crc_matches) {
-            PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches)", crc);
-        }
-        else {
-            PRINT_LINE(oprintf_success_warn, "CRC32:", "0x%08X (mismatched)", crc);
-        }
-        
-        // Dirty?
-        if(map.is_clean()) {
-            PRINT_LINE(oprintf_success, "Integrity:", "%s", "Clean");
-        }
-        else {
-            PRINT_LINE(oprintf_success_warn, "Integrity:", "%s", "Dirty (map may be corrupted or modified)");
+        // TODODILE: Figure out how to check an Xbox map's integrity
+        if(engine != HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+            // CRC32
+            if(crc_matches) {
+                PRINT_LINE(oprintf_success, "CRC32:", "0x%08X (matches)", crc);
+            }
+            else {
+                PRINT_LINE(oprintf_success_warn, "CRC32:", "0x%08X (mismatched)", crc);
+            }
+            
+            // Dirty?
+            if(map.is_clean()) {
+                PRINT_LINE(oprintf_success, "Integrity:", "%s", "Clean");
+            }
+            else {
+                PRINT_LINE(oprintf_success_warn, "Integrity:", "%s", "Dirty (map may be corrupted or modified)");
+            }
         }
         
         // Protected?
