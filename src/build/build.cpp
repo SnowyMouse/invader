@@ -41,61 +41,6 @@ static std::uint32_t read_str32(const char *err, const char *s) {
     return static_cast<std::uint32_t>(std::strtoul(s + 2, nullptr, 16));
 }
 
-static std::size_t convert_space_string_to_bytes(const char *space) {
-    if(*space == 0) {
-        eprintf_error("No tag space value given");
-        std::exit(EXIT_FAILURE);
-    }
-    std::size_t string_length = std::strlen(space);
-    std::size_t multiplier;
-    char space_val[64] = {};
-    
-    if(string_length >= sizeof(space_val)) {
-        eprintf_error("Invalid tag space value %s given", space);
-        std::exit(EXIT_FAILURE);
-    }
-    
-    if(space[string_length - 1] == 'G') {
-        string_length--;
-        multiplier = 1024*1024*1024;
-    }
-    else if(space[string_length - 1] == 'M') {
-        string_length--;
-        multiplier = 1024*1024;
-    }
-    else if(space[string_length - 1] == 'K') {
-        string_length--;
-        multiplier = 1024;
-    }
-    else {
-        multiplier = 1;
-    }
-    
-    std::strncpy(space_val, space, sizeof(space_val) - 1);
-    space_val[string_length] = 0;
-    
-    bool decimal = false;
-    for(char &i : space_val) {
-        if(i == '.') {
-            decimal = true;
-            break;
-        }
-    }
-    
-    try {
-        if(decimal) {
-            return static_cast<std::size_t>(std::stod(space_val) * multiplier);
-        }
-        else {
-            return static_cast<std::size_t>(std::stoull(space_val) * multiplier);
-        }
-    }
-    catch (std::exception &) {
-        eprintf_error("Invalid space value %s", space);
-        std::exit(EXIT_FAILURE);
-    }
-}
-
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
@@ -122,7 +67,6 @@ int main(int argc, const char **argv) {
         std::optional<int> compression_level;
         bool mcc = false;
         bool increased_file_size_limits = false;
-        std::optional<std::size_t> tag_space_limit;
         std::optional<std::string> build_version;
     } build_options;
 
@@ -131,11 +75,10 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, xbox, mcc-custom", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, xbox, mcc-custom, mcc-retail", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
-    options.emplace_back("tag-space", 'T', 1, "Override the maximum tag space. Suffix with M for MiB and G for GiB. This cannot be used with \"-g native\"", "<space>");
     options.emplace_back("output", 'o', 1, "Output to a specific file.", "<file>");
     options.emplace_back("forge-crc", 'C', 1, "Forge the CRC32 value of the map after building it.", "<crc>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
@@ -177,9 +120,6 @@ int main(int argc, const char **argv) {
             case 'b':
                 build_options.build_version = std::string(arguments[0]);
                 break;
-            case 'T':
-                build_options.tag_space_limit = convert_space_string_to_bytes(arguments[0]);
-                break;
             case 'E':
                 build_options.increased_file_size_limits = true;
                 break;
@@ -203,6 +143,10 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(arguments[0], "mcc-custom") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
+                    build_options.mcc = true;
+                }
+                else if(std::strcmp(arguments[0], "mcc-retail") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_RETAIL;
                     build_options.mcc = true;
                 }
                 else if(std::strcmp(arguments[0], "retail") == 0) {
@@ -341,6 +285,14 @@ int main(int argc, const char **argv) {
         if(build_options.mcc) {
             parameters.details.build_compress = true;
             parameters.details.build_compress_mcc = true;
+            parameters.details.build_maximum_tag_space = 31 * 1024 * 1024; // MCC's tag space is freaking huge
+            parameters.details.build_bsps_occupy_tag_space = false;
+            
+            if(parameters.optimize_space) {
+                eprintf_error("MCC does not support tag space optimization");
+                return EXIT_FAILURE;
+            }
+            
             build_options.increased_file_size_limits = true;
         }
         
@@ -348,14 +300,6 @@ int main(int argc, const char **argv) {
             if(build_options.engine != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                 parameters.details.build_maximum_cache_file_size = UINT32_MAX;
             }
-        }
-        
-        if(build_options.tag_space_limit.has_value()) {
-            if(build_options.engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
-                eprintf_error("-T and -g native cannot be used together");
-                return EXIT_FAILURE;
-            }
-            parameters.details.build_maximum_tag_space = *build_options.tag_space_limit;
         }
         
         if(build_options.compress.has_value()) {

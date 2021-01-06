@@ -7,8 +7,8 @@ This is used for recording Invader's changes. This changelog is based on
 - New tool: invader-convert - Converts between various tag types (gbxmodel to
   model, model to gbxmodel, shader_transparent_chicago_extended to
   shader_transparent_chicago)
-- invader-build: Added `-T` which lets you specify an arbitrary tag space for a
-  map regardless of the engine
+- invader-build: Added `-g mcc-retail` which targets retail MCC (intended for
+  CEA).
 
 ### Changed
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
@@ -16,6 +16,8 @@ This is used for recording Invader's changes. This changelog is based on
   size, it will crash if you try to load it.
 - invader-build: Invalid text indices for item pickups and unit names/seats are
   now checked and reported as an error if invalid.
+- invader-build: Using `-g mcc-retail` or `-g mcc-custom` targets 31 MiB of tag
+  space
 - invader-edit-qt: Optimized filtering a bit
 
 ## [0.40.1] - 2020-12-31
