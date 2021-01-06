@@ -273,7 +273,7 @@ Options:
                                without a mod.
   -g --game-engine <id>        Specify the game engine. This option is
                                required. Valid engines are: custom, demo,
-                               native, retail, xbox, mcc-custom
+                               native, retail, xbox, mcc-custom, mcc-retail
   -h --help                    Show this list of options.
   -H --hide-pedantic-warnings  Don't show minor warnings.
   -i --info                    Show credits, source info, and other info.
