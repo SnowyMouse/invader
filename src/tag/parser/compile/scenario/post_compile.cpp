@@ -579,11 +579,6 @@ namespace Invader::Parser {
                         else {
                             surface_indices.emplace_back(std::nullopt); // no surface underneath
                         }
-                        
-                        if(i == 0 && (&p - command_list.points.data()) == 1) {
-                            
-                            //std::exit(EXIT_FAILURE);
-                        }
                     }
 
                     // Did we have more matches for this BSP than past BSPs checked?

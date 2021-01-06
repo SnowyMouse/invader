@@ -32,8 +32,6 @@ namespace Invader::HEK {
     }
     
     bool BSPData::check_for_intersection(const Point3D<LittleEndian> &point, float range, Point3D<LittleEndian> *intersection_point, std::uint32_t *surface_index, std::uint32_t *leaf_index) const {
-        std::printf("Point: %f %f %f\n", point.x.read(), point.y.read(), point.z.read());
-        
         // Plus or minus distance it
         auto position_above = point;
         position_above.z = position_above.z + range;
@@ -74,10 +72,6 @@ namespace Invader::HEK {
             else {
                 break;
             }
-        }
-        
-        for(auto &i : positions_found) {
-            std::printf("%f %f %f, %zu\n", i.intersection_point_found.x.read(), i.intersection_point_found.y.read(), i.intersection_point_found.z.read(), static_cast<std::size_t>(i.surface_index_found));
         }
         
         // Find the closest intersection to our input point

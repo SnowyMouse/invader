@@ -131,7 +131,6 @@ namespace Invader::HEK {
             if(node_index_a == node_index_b) {
                 node_index = node_index_a;
             }
-            
             else {
                 // Calculate a point that's almost on the plane
                 auto &plane = planes[node.plane.read()].plane;
@@ -164,15 +163,13 @@ namespace Invader::HEK {
                     point_b_intersection,
                     node_index_b
                 );
-                
-                std::printf("- %u %u\n", surface_a_intersection, surface_b_intersection);
 
                 // If neither intersected, we don't have an intersection.
                 if(!point_a_intersected && !point_b_intersected) {
                     return false;
                 }
 
-                // If both intersected, invalidate the furthest one from point a
+                // If both intersected, invalidate the furthest one
                 if(point_a_intersected && point_b_intersected) {
                     float a_distance_squared = point_a_intersection.distance_from_point_squared(point_a);
                     float b_distance_squared = point_b_intersection.distance_from_point_squared(point_a);
