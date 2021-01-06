@@ -1421,6 +1421,7 @@ namespace Invader {
             std::size_t max_bsp_size = this->parameters->details.build_maximum_tag_space;
 
             if(bsp_count != this->bsp_count) {
+                oprintf("\n");
                 REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, this->scenario_index, "BSP count in scenario tag is wrong (%zu expected, %zu gotten)", bsp_count, this->bsp_count);
                 throw InvalidTagDataException();
             }
@@ -1452,6 +1453,7 @@ namespace Invader {
                     }
 
                     if(bsp_size > max_bsp_size) {
+                        oprintf("\n");
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
                         throw InvalidTagDataException();
                     }
@@ -1492,6 +1494,7 @@ namespace Invader {
                     bsp_end += bsp_size;
 
                     if(!found) {
+                        oprintf("\n");
                         REPORT_ERROR_PRINTF(*this, ERROR_TYPE_ERROR, this->scenario_index, "Scenario structure BSP array is missing %s.%s", File::halo_path_to_preferred_path(t.path).c_str(), HEK::tag_class_to_extension(t.tag_class_int));
                     }
                 }
