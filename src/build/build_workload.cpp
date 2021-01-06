@@ -1454,13 +1454,18 @@ namespace Invader {
 
                     if(bsp_size > max_bsp_size) {
                         oprintf("\n");
-                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)\n", bsp_size, max_bsp_size);
+                        REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "BSP size exceeds the maximum size for this engine (%zu > %zu)", bsp_size, max_bsp_size);
                         throw InvalidTagDataException();
                     }
 
                     HEK::Pointer64 tag_data_base;
                     if(engine_target != HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
                         tag_data_base = this->parameters->details.build_tag_data_address + this->parameters->details.build_maximum_tag_space - bsp_size;
+                        if(static_cast<std::uint32_t>(tag_data_base + bsp_size) != static_cast<std::uint64_t>(tag_data_base + bsp_size)) {
+                            oprintf("\n");
+                            REPORT_ERROR_PRINTF(*this, ERROR_TYPE_FATAL_ERROR, i, "Tag space overflows BSP past 0x00000000");
+                            throw InvalidTagDataException();
+                        }
                     }
                     else {
                         tag_data_base = 0;
