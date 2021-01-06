@@ -41,6 +41,11 @@ static std::uint32_t read_str32(const char *err, const char *s) {
     return static_cast<std::uint32_t>(std::strtoul(s + 2, nullptr, 16));
 }
 
+enum XboxVariation {
+    XBOX_JP,
+    XBOX_TW
+};
+
 int main(int argc, const char **argv) {
     using namespace Invader;
     using namespace Invader::HEK;
@@ -68,6 +73,8 @@ int main(int argc, const char **argv) {
         bool mcc = false;
         bool increased_file_size_limits = false;
         std::optional<std::string> build_version;
+        
+        std::optional<XboxVariation> variation;
     } build_options;
 
     std::vector<CommandLineOption> options;
@@ -75,7 +82,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("always-index-tags", 'a', 0, "Always index tags when possible. This can speed up build time, but stock tags can't be modified.");
     options.emplace_back("quiet", 'q', 0, "Only output error messages.");
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
-    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, xbox, mcc-custom, mcc-retail", "<id>");
+    options.emplace_back("game-engine", 'g', 1, "Specify the game engine. This option is required. Valid engines are: custom, demo, native, retail, xbox, xbox-tw, xbox-jp, mcc-custom, mcc-retail", "<id>");
     options.emplace_back("with-index", 'w', 1, "Use an index file for the tags, ensuring the map's tags are ordered in the same way.", "<file>");
     options.emplace_back("maps", 'm', 1, "Use the specified maps directory.", "<dir>");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
@@ -138,6 +145,7 @@ int main(int argc, const char **argv) {
                 break;
             case 'g':
                 build_options.mcc = false;
+                build_options.variation = std::nullopt;
                 if(std::strcmp(arguments[0], "custom") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION;
                 }
@@ -157,6 +165,14 @@ int main(int argc, const char **argv) {
                 }
                 else if(std::strcmp(arguments[0], "xbox") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                }
+                else if(std::strcmp(arguments[0], "xbox-jp") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    build_options.variation = XboxVariation::XBOX_JP;
+                }
+                else if(std::strcmp(arguments[0], "xbox-tw") == 0) {
+                    build_options.engine = HEK::CacheFileEngine::CACHE_FILE_XBOX;
+                    build_options.variation = XboxVariation::XBOX_TW;
                 }
                 else if(std::strcmp(arguments[0], "native") == 0) {
                     build_options.engine = HEK::CacheFileEngine::CACHE_FILE_NATIVE;
@@ -263,6 +279,19 @@ int main(int argc, const char **argv) {
         }
         
         BuildWorkload::BuildParameters parameters(*build_options.engine);
+        
+        if(build_options.variation.has_value()) {
+            switch(*build_options.variation) {
+                case XboxVariation::XBOX_JP:
+                    parameters.details.build_maximum_tag_space = 0x1648000;
+                    parameters.details.build_version = "01.03.14.0009";
+                    break;
+                case XboxVariation::XBOX_TW:
+                    parameters.details.build_maximum_tag_space = 0x167D000;
+                    parameters.details.build_version = "01.12.09.0135";
+                    break;
+            }
+        }
         
         parameters.tags_directories = build_options.tags;
         parameters.scenario = scenario;

@@ -9,6 +9,10 @@ This is used for recording Invader's changes. This changelog is based on
   shader_transparent_chicago)
 - invader-build: Added `-g mcc-retail` which targets retail MCC (intended for
   CEA).
+- invader-build: Added `-g xbox-tw` and `-g xbox-jp` which targets the Taiwanese
+  and Japanese versions, respectively. These have a slightly higher tag space
+  than the original English version and use a different build string by default.
+  They also use fewer hardcoded strings.
 
 ### Changed
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
