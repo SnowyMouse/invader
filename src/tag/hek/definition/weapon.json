@@ -667,12 +667,13 @@
                 "compound": true
             },
             {
-                "name": "detonation",
+                "name": "overheat detonation",
                 "type": "TagDependency",
                 "classes": [
                     "sound",
                     "effect"
                 ],
+                "comment": "This effect is played when the weapon overheats and is set to detonate as a result",
                 "compound": true
             },
             {
