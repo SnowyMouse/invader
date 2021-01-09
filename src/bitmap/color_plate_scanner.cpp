@@ -1102,7 +1102,7 @@ namespace Invader {
         }
     }
 
-    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t half_spacing, std::uint32_t maximum_sprite_sheets, bool horizontal) {
+    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t &half_spacing, std::uint32_t maximum_sprite_sheets, bool horizontal) {
         // Effectively, all sprites are this many pixels apart
         std::uint32_t effective_sprite_spacing = half_spacing * 2;
 
@@ -1115,6 +1115,22 @@ namespace Invader {
         std::size_t total_pixels = 0;
         for(auto &bitmap : generated_bitmap.bitmaps) {
             if(bitmap.height + effective_sprite_spacing > length || bitmap.width + effective_sprite_spacing > length) {
+                // Try with 0 spacing?
+                if(half_spacing != 0) {
+                    std::uint32_t attempted_half_spacing = 0;
+                    auto attempt = fit_sprites_into_sprite_sheet(length, generated_bitmap, attempted_half_spacing, maximum_sprite_sheets, horizontal);
+                    if(attempt.has_value()) {
+                        // Ensure we only have ONE sprite per bitmap then
+                        for(auto &i : *attempt) {
+                            if(i.sprites.size() != 1) {
+                                return std::nullopt;
+                            }
+                        }
+                        half_spacing = attempted_half_spacing;
+                        return attempt;
+                    }
+                }
+                
                 return std::nullopt;
             }
             total_pixels += (bitmap.height + effective_sprite_spacing) * (bitmap.width + effective_sprite_spacing);
@@ -1336,22 +1352,28 @@ namespace Invader {
         return new_sequences;
     }
 
-    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t half_spacing, std::uint32_t maximum_sprite_sheets) {
-        auto fit_sprites_vertical = fit_sprites_into_sprite_sheet(length, generated_bitmap, half_spacing, maximum_sprite_sheets, false);
-        auto fit_sprites_horizontal = fit_sprites_into_sprite_sheet(length, generated_bitmap, half_spacing, maximum_sprite_sheets, true);
+    static std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites_into_maximum_sprite_sheet(std::uint32_t length, const GeneratedBitmapData &generated_bitmap, std::uint32_t &half_spacing, std::uint32_t maximum_sprite_sheets) {
+        std::uint32_t vertical_half_spacing = half_spacing;
+        std::uint32_t horizontal_half_spacing = half_spacing;
+        
+        auto fit_sprites_vertical = fit_sprites_into_sprite_sheet(length, generated_bitmap, vertical_half_spacing, maximum_sprite_sheets, false);
+        auto fit_sprites_horizontal = fit_sprites_into_sprite_sheet(length, generated_bitmap, horizontal_half_spacing, maximum_sprite_sheets, true);
+        
         std::optional<std::vector<GeneratedBitmapDataSequence>> fit_sprites;
         if(fit_sprites_vertical.has_value()) {
             fit_sprites = fit_sprites_vertical;
+            half_spacing = horizontal_half_spacing;
         }
         else if(fit_sprites_horizontal.has_value()) {
             fit_sprites = fit_sprites_horizontal;
+            half_spacing = vertical_half_spacing;
         }
         else {
             return std::nullopt;
         }
 
         auto fit_sprites_half = fit_sprites_into_maximum_sprite_sheet(length / 2, generated_bitmap, half_spacing, maximum_sprite_sheets);
-        if(fit_sprites_half) {
+        if(fit_sprites_half.has_value()) {
             return fit_sprites_half;
         }
         else {

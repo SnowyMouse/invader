@@ -373,6 +373,7 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     oprintf("Total: %.03f MiB%s\n", BYTES_TO_MIB(bitmap_tag_data.processed_pixel_data.size()), (sizeof(T) == sizeof(Parser::InvaderBitmap)) ? "; --extended" : "");
 
     // Add all sequences
+    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
     for(auto &sequence : scanned_color_plate.sequences) {
         auto &bgs = bitmap_tag_data.bitmap_group_sequence.emplace_back();
 
@@ -398,6 +399,10 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
             bgss.left = static_cast<float>(sprite.left) / bitmap.width;
             bgss.right = static_cast<float>(sprite.right) / bitmap.width;
             bgss.registration_point.x = static_cast<float>(sprite.registration_point_x) / bitmap.width;
+            
+            if(bitmap_tag_data.sprite_spacing == 0) {
+                bgss.bottom -= 0.25F / bitmap.height;
+            }
         }
     }
 
@@ -418,7 +423,6 @@ template <typename T> static int perform_the_ritual(const std::string &bitmap_ta
     }
 
     // Set sprite stuff
-    bitmap_tag_data.sprite_spacing = sprite_parameters.value_or(ColorPlateScannerSpriteParameters{}).sprite_spacing;
     bitmap_tag_data.sprite_budget_count = bitmap_options.sprite_budget_count.value();
     bitmap_tag_data.sprite_usage = bitmap_options.sprite_usage.value();
     auto &sprite_budget_value = bitmap_options.sprite_budget.value();
