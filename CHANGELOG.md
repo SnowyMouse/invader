@@ -28,6 +28,10 @@ This is used for recording Invader's changes. This changelog is based on
   space
 - invader-edit-qt: Optimized filtering a bit
 
+### Fixed
+- invader-archived: Fixed a segmentation fault when passing either `-g retail`
+  or `-g demo`
+
 ## [0.40.1] - 2020-12-31
 ### Added
 - invader-build: Added support for `uses demo ui`

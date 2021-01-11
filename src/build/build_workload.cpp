@@ -2280,27 +2280,29 @@ namespace Invader {
                     switch(t.tag_class_int) {
                         // Iterate through each permutation in each pitch range to find the bitmap
                         case TagClassInt::TAG_CLASS_BITMAP: {
-                            auto &bitmap_tag_struct = this->structs[*t.base_struct];
-                            auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
-                            std::size_t bitmap_data_count = bitmap_tag.bitmap_data.count;
-                            if(bitmap_data_count) {
-                                auto *all_bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_data.pointer)].data.data());
-                                for(std::size_t b = 0; b < bitmap_data_count; b++) {
-                                    auto &bitmap_data = all_bitmap_data[b];
-                                    std::size_t raw_data_index = t.asset_data[b];
-                                    auto &raw_data = this->raw_data[raw_data_index];
-                                    auto *raw_data_data = raw_data.data();
-                                    std::size_t raw_data_size = raw_data.size();
+                            if(bitmaps.has_value()) {
+                                auto &bitmap_tag_struct = this->structs[*t.base_struct];
+                                auto &bitmap_tag = *reinterpret_cast<Parser::Bitmap::struct_little *>(bitmap_tag_struct.data.data());
+                                std::size_t bitmap_data_count = bitmap_tag.bitmap_data.count;
+                                if(bitmap_data_count) {
+                                    auto *all_bitmap_data = reinterpret_cast<Parser::BitmapData::struct_little *>(this->structs[*bitmap_tag_struct.resolve_pointer(&bitmap_tag.bitmap_data.pointer)].data.data());
+                                    for(std::size_t b = 0; b < bitmap_data_count; b++) {
+                                        auto &bitmap_data = all_bitmap_data[b];
+                                        std::size_t raw_data_index = t.asset_data[b];
+                                        auto &raw_data = this->raw_data[raw_data_index];
+                                        auto *raw_data_data = raw_data.data();
+                                        std::size_t raw_data_size = raw_data.size();
 
-                                    // Find bitmaps
-                                    for(auto &ab : *bitmaps) {
-                                        if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
-                                            this->delete_raw_data(raw_data_index);
-                                            bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
-                                            auto flags = bitmap_data.flags.read();
-                                            flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
-                                            bitmap_data.flags = flags;
-                                            break;
+                                        // Find bitmaps
+                                        for(auto &ab : *bitmaps) {
+                                            if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                                this->delete_raw_data(raw_data_index);
+                                                bitmap_data.pixel_data_offset = static_cast<std::uint32_t>(ab.data_offset);
+                                                auto flags = bitmap_data.flags.read();
+                                                flags |= HEK::BitmapDataFlagsFlag::BITMAP_DATA_FLAGS_FLAG_EXTERNAL;
+                                                bitmap_data.flags = flags;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -2310,32 +2312,34 @@ namespace Invader {
 
                         // Iterate through each permutation in each pitch range to find the sound
                         case TagClassInt::TAG_CLASS_SOUND: {
-                            auto &sound_tag_struct = this->structs[*t.base_struct];
-                            auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
-                            std::size_t sound_pitch_range_count = sound_tag.pitch_ranges.count;
-                            std::size_t resource_index = 0;
-                            if(sound_pitch_range_count) {
-                                auto &pitch_range_struct = this->structs[*sound_tag_struct.resolve_pointer(&sound_tag.pitch_ranges.pointer)];
-                                auto *all_pitch_ranges = reinterpret_cast<Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
-                                for(std::size_t pr = 0; pr < sound_pitch_range_count; pr++) {
-                                    auto &pitch_range = all_pitch_ranges[pr];
-                                    std::size_t permutation_count = pitch_range.permutations.count;
-                                    if(permutation_count) {
-                                        auto *all_permutations = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
-                                        for(std::size_t p = 0; p < permutation_count; p++) {
-                                            auto &permutation = all_permutations[p];
-                                            std::size_t raw_data_index = t.asset_data[resource_index++];
-                                            auto &raw_data = this->raw_data[raw_data_index];
-                                            auto *raw_data_data = raw_data.data();
-                                            std::size_t raw_data_size = raw_data.size();
+                            if(sounds.has_value()) {
+                                auto &sound_tag_struct = this->structs[*t.base_struct];
+                                auto &sound_tag = *reinterpret_cast<Parser::Sound::struct_little *>(sound_tag_struct.data.data());
+                                std::size_t sound_pitch_range_count = sound_tag.pitch_ranges.count;
+                                std::size_t resource_index = 0;
+                                if(sound_pitch_range_count) {
+                                    auto &pitch_range_struct = this->structs[*sound_tag_struct.resolve_pointer(&sound_tag.pitch_ranges.pointer)];
+                                    auto *all_pitch_ranges = reinterpret_cast<Parser::SoundPitchRange::struct_little *>(pitch_range_struct.data.data());
+                                    for(std::size_t pr = 0; pr < sound_pitch_range_count; pr++) {
+                                        auto &pitch_range = all_pitch_ranges[pr];
+                                        std::size_t permutation_count = pitch_range.permutations.count;
+                                        if(permutation_count) {
+                                            auto *all_permutations = reinterpret_cast<Parser::SoundPermutation::struct_little *>(this->structs[*pitch_range_struct.resolve_pointer(&pitch_range.permutations.pointer)].data.data());
+                                            for(std::size_t p = 0; p < permutation_count; p++) {
+                                                auto &permutation = all_permutations[p];
+                                                std::size_t raw_data_index = t.asset_data[resource_index++];
+                                                auto &raw_data = this->raw_data[raw_data_index];
+                                                auto *raw_data_data = raw_data.data();
+                                                std::size_t raw_data_size = raw_data.size();
 
-                                            // Find sounds
-                                            for(auto &ab : *sounds) {
-                                                if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
-                                                    this->delete_raw_data(raw_data_index);
-                                                    permutation.samples.file_offset = static_cast<std::uint32_t>(ab.data_offset);
-                                                    permutation.samples.external = 1;
-                                                    break;
+                                                // Find sounds
+                                                for(auto &ab : *sounds) {
+                                                    if(ab.data.size() >= raw_data_size && std::memcmp(ab.data.data(), raw_data_data, raw_data_size) == 0) {
+                                                        this->delete_raw_data(raw_data_index);
+                                                        permutation.samples.file_offset = static_cast<std::uint32_t>(ab.data_offset);
+                                                        permutation.samples.external = 1;
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
