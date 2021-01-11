@@ -13,8 +13,8 @@
 #endif
 
 namespace Invader::Compression {
-    template <typename T> static void compress_header(const Map &map, std::byte *header_output, std::size_t decompressed_size) {
-        auto new_engine_version = map.get_engine();
+    template <typename T> static void compress_header(const T &header_input, std::byte *header_output, std::size_t decompressed_size) {
+        auto new_engine_version = header_input.engine;
         switch(new_engine_version) {
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED;
@@ -26,9 +26,10 @@ namespace Invader::Compression {
                 new_engine_version = HEK::CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED;
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_XBOX:
+                break;
             case HEK::CacheFileEngine::CACHE_FILE_NATIVE:
-                if(map.get_compression_algorithm()) {
-                    throw MapNeedsDecompressedException();
+                if(reinterpret_cast<const HEK::NativeCacheFileHeader *>(&header_input)->compression_type.read() != HEK::NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED) {
+                    throw MapNeedsCompressedException();
                 }
                 break;
             case HEK::CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
@@ -42,15 +43,15 @@ namespace Invader::Compression {
         // Write the header
         auto &header_out = *reinterpret_cast<T *>(header_output);
         header_out = {};
-        header_out.crc32 = map.get_header_crc32();
-        std::strncpy(header_out.build.string, map.get_build(), sizeof(header_out.build));
-        std::strncpy(header_out.name.string, map.get_scenario_name(), sizeof(header_out.name));
-        header_out.map_type = map.get_type();
+        header_out.crc32 = header_input.crc32;
+        header_out.build = header_input.build;
+        header_out.name = header_input.name;
+        header_out.map_type = header_input.map_type;
         header_out.engine = new_engine_version;
         header_out.foot_literal = HEK::CacheFileLiteral::CACHE_FILE_FOOT;
         header_out.head_literal = HEK::CacheFileLiteral::CACHE_FILE_HEAD;
-        header_out.tag_data_size = map.get_tag_data_length();
-        header_out.tag_data_offset = map.get_tag_data_at_offset(0) - map.get_data_at_offset(0);
+        header_out.tag_data_size = header_input.tag_data_size;
+        header_out.tag_data_offset = header_input.tag_data_offset;
         if(new_engine_version == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
             reinterpret_cast<HEK::NativeCacheFileHeader *>(&header_out)->compression_type = HEK::NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_ZSTD;
         }
@@ -134,12 +135,12 @@ namespace Invader::Compression {
     constexpr std::size_t HEADER_SIZE = sizeof(HEK::CacheFileHeader);
 
     std::size_t compress_map_data(const std::byte *data, std::size_t data_size, std::byte *output, std::size_t output_size, int compression_level) {
-        // Load the data
-        auto map = Map::map_with_pointer(const_cast<std::byte *>(data), data_size);
-
+        const auto &header = *reinterpret_cast<const HEK::CacheFileHeader *>(data);
+        const auto &header_demo = *reinterpret_cast<const HEK::CacheFileDemoHeader *>(data);
+        const auto &header_native = *reinterpret_cast<const HEK::NativeCacheFileHeader *>(data);
+        
         // If we're Xbox, we use a DEFLATE stream
-        auto engine = map.get_engine();
-        if(engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
+        if(header.valid() && header.engine == HEK::CacheFileEngine::CACHE_FILE_XBOX) {
             #ifndef DISABLE_ZLIB
             auto input_padding_required = REQUIRED_PADDING_N_BYTES(data_size, HEK::CacheFileXboxConstants::CACHE_FILE_XBOX_SECTOR_SIZE);
             if(input_padding_required) {
@@ -147,7 +148,7 @@ namespace Invader::Compression {
                 throw CompressionFailureException();
             }
             
-            compress_header<HEK::CacheFileHeader>(map, output, data_size);
+            compress_header(header, output, data_size);
 
             // Compress that!
             z_stream deflate_stream = {};
@@ -186,12 +187,18 @@ namespace Invader::Compression {
         }
         // Otherwise, we use zstandard
         else {
-            if(engine == HEK::CACHE_FILE_NATIVE) {
-                compress_header<HEK::NativeCacheFileHeader>(map, output, data_size);
+            if(header_native.valid() && header_native.engine == HEK::CacheFileEngine::CACHE_FILE_NATIVE) {
+                compress_header(header_native, output, data_size);
                 reinterpret_cast<HEK::NativeCacheFileHeader *>(output)->timestamp = reinterpret_cast<const HEK::NativeCacheFileHeader *>(data)->timestamp;
             }
+            else if(header.valid()) {
+                compress_header(header, output, data_size);
+            }
+            else if(header_demo.valid()) {
+                compress_header(header_demo, output, data_size);
+            }
             else {
-                compress_header<HEK::CacheFileHeader>(map, output, data_size);
+                throw InvalidMapException();
             }
 
             // Immediately compress it
