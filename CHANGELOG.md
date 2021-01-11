@@ -10,6 +10,7 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-archive: Added `-e` and `-E` which check if a tag exists in a
   a specified directory (multiple directories can be specified). Using `-E`
   instead of `-e` does a functional comparison, too.
+- invader-archive: Added `-O` to overwrite existing tags if `--copy` is used
 - invader-build: Added `-g mcc-retail` which targets retail MCC (intended for
   CEA).
 - invader-build: Added `-g xbox-tw` and `-g xbox-jp` which targets the Taiwanese

@@ -22,6 +22,7 @@ int main(int argc, const char **argv) {
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
+        bool overwrite = false;
         std::optional<Invader::HEK::CacheFileEngine> engine;
     } archive_options;
 
@@ -33,6 +34,7 @@ int main(int argc, const char **argv) {
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("exclude-matched", 'E', 1, "Exclude copying any tags that are also located in the specified directory and are functionally the same. Use multiple times to exclude multiple directories.", "<dir>");
+    options.emplace_back("overwrite", 'O', 0, "Overwrite tags if they already exist if using --copy");
     options.emplace_back("exclude", 'e', 1, "Exclude copying any tags that share a path with a tag in specified directory. Use multiple times to exclude multiple directories.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
@@ -52,6 +54,9 @@ int main(int argc, const char **argv) {
                 break;
             case 'o':
                 archive_options.output = arguments[0];
+                break;
+            case 'O':
+                archive_options.overwrite = true;
                 break;
             case 'i':
                 Invader::show_version_info();
@@ -382,9 +387,9 @@ int main(int argc, const char **argv) {
             auto new_path = base_path / std::filesystem::path(archive_list[i].second.c_str());
             
             // Copy function
-            auto place_if_possible = [&new_path, &old_path]() -> bool {
+            auto place_if_possible = [&new_path, &old_path, &archive_options]() -> bool {
                 // If it exists, continue
-                if(std::filesystem::exists(new_path)) {
+                if(!archive_options.overwrite && std::filesystem::exists(new_path)) {
                     return false;
                 }
                 
@@ -402,7 +407,7 @@ int main(int argc, const char **argv) {
                 
                 // Now copy
                 try {
-                    std::filesystem::copy_file(old_path, new_path);
+                    std::filesystem::copy_file(old_path, new_path, std::filesystem::copy_options::overwrite_existing);
                 }
                 catch(std::exception &e) {
                     eprintf_error("Failed to create copy %s to %s: %s", old_path.string().c_str(), new_path.string().c_str(), e.what());
