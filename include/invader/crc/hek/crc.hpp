@@ -15,10 +15,9 @@ namespace Invader {
      * @param  new_crc          new CRC32 of the map
      * @param  new_random       new random number of the map (if forging a CRC32)
      * @param  check_dirty      optionally set to false if the cache file is not dirty or true if it is
-     * @param  allow_compressed allow compressed maps to be loaded (slower)
      * @return                  CRC32 of the map
      */
-    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc = nullptr, std::uint32_t *new_random = nullptr, bool *check_dirty = nullptr, bool allow_compressed = false);
+    std::uint32_t calculate_map_crc(const std::byte *data, std::size_t size, const std::uint32_t *new_crc = nullptr, std::uint32_t *new_random = nullptr, bool *check_dirty = nullptr);
     
     class Map;
     
@@ -30,7 +29,7 @@ namespace Invader {
      * @param  check_dirty      optionally set to false if the cache file is not dirty or true if it is
      * @return                  CRC32 of the map
      */
-    std::uint32_t calculate_map_crc(Invader::Map &map, const std::uint32_t *new_crc = nullptr, std::uint32_t *new_random = nullptr, bool *check_dirty = nullptr);
+    std::uint32_t calculate_map_crc(const Invader::Map &map, const std::uint32_t *new_crc = nullptr, std::uint32_t *new_random = nullptr, bool *check_dirty = nullptr);
 }
 
 #endif

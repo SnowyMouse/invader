@@ -154,7 +154,7 @@ int main(int argc, const char **argv) {
                 // Open the map first
                 auto map_file = File::open_file(index.first);
                 if(map_file.has_value()) {
-                    auto map = Map::map_with_pointer(map_file->data(), map_file->size());
+                    auto map = Map::map_with_move(std::move(*map_file));
                     auto tag_count = map.get_tag_count();
                     for(std::size_t t = 0; t < tag_count; t++) {
                         auto &tag = map.get_tag(t);
