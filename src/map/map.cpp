@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "../util/assert.hpp"
+
 #include <invader/hek/map.hpp>
 #include <invader/tag/hek/definition.hpp>
 #include <invader/resource/hek/resource_map.hpp>
@@ -262,10 +264,7 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION:
                     break;
                 case CacheFileEngine::CACHE_FILE_NATIVE: {
-                    auto *native_header = reinterpret_cast<const NativeCacheFileHeader *>(&header);
-                    if(native_header->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED) {
-                        throw MapNeedsDecompressedException();
-                    }
+                    invader_assert(reinterpret_cast<const NativeCacheFileHeader *>(&header)->compression_type != NativeCacheFileHeader::NativeCacheFileCompressionType::NATIVE_CACHE_FILE_COMPRESSION_UNCOMPRESSED);
                     break;
                 }
                 case CacheFileEngine::CACHE_FILE_XBOX:
@@ -273,7 +272,8 @@ namespace Invader {
                 case CacheFileEngine::CACHE_FILE_RETAIL_COMPRESSED:
                 case CacheFileEngine::CACHE_FILE_CUSTOM_EDITION_COMPRESSED:
                 case CacheFileEngine::CACHE_FILE_DEMO_COMPRESSED:
-                    throw MapNeedsDecompressedException();
+                    invader_assert_m(false, "this should not happen");
+                    break;
                 default:
                     throw UnsupportedMapEngineException();
             }
