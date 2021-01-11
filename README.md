@@ -156,10 +156,22 @@ Usage: invader-archive [options] <scenario | -s tag.class>
 Generate .tar.xz archives of the tags required to build a cache file.
 
 Options:
+  -C --copy                    Copy instead of making an archive.
+  -e --exclude <dir>           Exclude copying any tags that share a path with
+                               a tag in specified directory. Use multiple times
+                               to exclude multiple directories.
+  -E --exclude-matched <dir>   Exclude copying any tags that are also located
+                               in the specified directory and are functionally
+                               the same. Use multiple times to exclude multiple
+                               directories.
+  -g --game-engine <id>        Specify the game engine. This option is required
+                               if -s is not specified. Valid engines are:
+                               custom, demo, retail, xbox, native
   -h --help                    Show this list of options.
   -i --info                    Show credits, source info, and other info.
   -o --output <file>           Output to a specific file. Extension must be
-                               .tar.xz.
+                               .tar.xz unless using --copy which then it's a
+                               directory.
   -P --fs-path                 Use a filesystem path for the tag.
   -s --single-tag              Archive a tag tree instead of a cache file.
   -t --tags <dir>              Use the specified tags directory. Use multiple

@@ -17,6 +17,8 @@ int main(int argc, const char **argv) {
     struct ArchiveOptions {
         bool single_tag = false;
         std::vector<std::filesystem::path> tags;
+        std::vector<std::filesystem::path> tags_excluded;
+        std::vector<std::filesystem::path> tags_excluded_same;
         std::string output;
         bool use_filesystem_path = false;
         bool copy = false;
@@ -30,6 +32,8 @@ int main(int argc, const char **argv) {
     options.emplace_back("info", 'i', 0, "Show credits, source info, and other info.");
     options.emplace_back("single-tag", 's', 0, "Archive a tag tree instead of a cache file.");
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
+    options.emplace_back("exclude-matched", 'E', 1, "Exclude copying any tags that are also located in the specified directory and are functionally the same. Use multiple times to exclude multiple directories.", "<dir>");
+    options.emplace_back("exclude", 'e', 1, "Exclude copying any tags that share a path with a tag in specified directory. Use multiple times to exclude multiple directories.", "<dir>");
     options.emplace_back("output", 'o', 1, "Output to a specific file. Extension must be .tar.xz unless using --copy which then it's a directory.", "<file>");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag.");
     options.emplace_back("copy", 'C', 0, "Copy instead of making an archive.");
@@ -39,6 +43,12 @@ int main(int argc, const char **argv) {
         switch(opt) {
             case 't':
                 archive_options.tags.push_back(arguments[0]);
+                break;
+            case 'e':
+                archive_options.tags_excluded.push_back(arguments[0]);
+                break;
+            case 'E':
+                archive_options.tags_excluded_same.push_back(arguments[0]);
                 break;
             case 'o':
                 archive_options.output = arguments[0];
@@ -252,6 +262,48 @@ int main(int argc, const char **argv) {
 
             std::string path_copy = Invader::File::halo_path_to_preferred_path(dependency.path + "." + tag_class_to_extension(dependency.class_int));
             archive_list.emplace_back(*dependency.file_path, path_copy);
+        }
+    }
+    
+    // Don't archive anything that is in an excluded directory
+    for(auto &i : archive_options.tags_excluded) {
+        for(std::size_t t = 0; t < archive_list.size(); t++) {
+            // First check if it exists
+            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            if(std::filesystem::exists(path_to_test)) {
+                // Exclude
+                archive_list.erase(archive_list.begin() + t);
+                t--;
+            }
+        }
+    }
+    for(auto &i : archive_options.tags_excluded_same) {
+        for(std::size_t t = 0; t < archive_list.size(); t++) {
+            // First check if it exists
+            auto path_to_test = i / Invader::File::halo_path_to_preferred_path(archive_list[t].second);
+            if(std::filesystem::exists(path_to_test)) {
+                // Okay it exists. Open both then
+                try {
+                    auto tag_archive_data = Invader::File::open_file(archive_list[t].first).value();
+                    auto tag_archive = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_archive_data.data(), tag_archive_data.size(), true);
+                    
+                    auto tag_exclude_data = Invader::File::open_file(path_to_test).value();
+                    auto tag_exclude = Invader::Parser::ParserStruct::parse_hek_tag_file(tag_exclude_data.data(), tag_exclude_data.size(), true);
+                    
+                    // Do a functional comparison
+                    if(!tag_archive->compare(tag_exclude.get(), true, true)) {
+                        continue;
+                    }
+                }
+                catch (std::exception &) {
+                    eprintf_error("Failed to do a functional comparison of %s and %s\n", archive_list[t].first.string().c_str(), path_to_test.string().c_str());
+                    std::exit(EXIT_FAILURE);
+                }
+            
+                // Exclude
+                archive_list.erase(archive_list.begin() + t);
+                t--;
+            }
         }
     }
     
