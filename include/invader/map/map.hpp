@@ -294,43 +294,19 @@ namespace Invader {
         Map(Map &&);
     private:
         /** Map data if managed */
-        std::vector<std::byte> data_m;
-
-        /** Map data */
-        std::byte *data = nullptr;
-
-        /** Map data length */
-        std::size_t data_length = 0;
+        std::vector<std::byte> data;
 
 
         /** Bitmaps data if managed */
-        std::vector<std::byte> bitmap_data_m;
-
-        /** Bitmaps data */
-        std::byte *bitmap_data = nullptr;
-
-        /** Bitmaps data length */
-        std::size_t bitmap_data_length = 0;
+        std::vector<std::byte> bitmap_data;
 
 
         /** Loc data if managed */
-        std::vector<std::byte> loc_data_m;
-
-        /** Loc data */
-        std::byte *loc_data = nullptr;
-
-        /** Loc data length */
-        std::size_t loc_data_length = 0;
+        std::vector<std::byte> loc_data;
 
 
         /** Sounds data if managed */
-        std::vector<std::byte> sound_data_m;
-
-        /** Sounds data */
-        std::byte *sound_data = nullptr;
-
-        /** Sounds data length */
-        std::size_t sound_data_length = 0;
+        std::vector<std::byte> sound_data;
         
 
         /** Model data offset */

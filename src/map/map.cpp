@@ -18,19 +18,11 @@ namespace Invader {
                            const std::byte *sounds_data, std::size_t sounds_data_size) {
         Map map;
         if(!map.decompress_if_needed(data, data_size)) {
-            map.data_m.insert(map.data_m.end(), data, data + data_size);
+            map.data.insert(map.data.end(), data, data + data_size);
         }
-        map.data = map.data_m.data();
-        map.data_length = map.data_m.size();
-        map.bitmap_data_m.insert(map.bitmap_data_m.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
-        map.bitmap_data = map.bitmap_data_m.data();
-        map.bitmap_data_length = bitmaps_data_size;
-        map.sound_data_m.insert(map.sound_data_m.end(), sounds_data, sounds_data + sounds_data_size);
-        map.sound_data = map.sound_data_m.data();
-        map.sound_data_length = sounds_data_size;
-        map.loc_data_m.insert(map.loc_data_m.end(), loc_data, loc_data + loc_data_size);
-        map.loc_data = map.loc_data_m.data();
-        map.loc_data_length = loc_data_size;
+        map.bitmap_data.insert(map.bitmap_data.end(), bitmaps_data, bitmaps_data + bitmaps_data_size);
+        map.sound_data.insert(map.sound_data.end(), sounds_data, sounds_data + sounds_data_size);
+        map.loc_data.insert(map.loc_data.end(), loc_data, loc_data + loc_data_size);
         map.load_map();
         return map;
     }
@@ -44,23 +36,11 @@ namespace Invader {
             data.clear();
         }
         else {
-            map.data_m = data;
+            map.data = std::move(data);
         }
-        map.data = map.data_m.data();
-        map.data_length = map.data_m.size();
-
-        map.bitmap_data_m = bitmaps_data;
-        map.bitmap_data = map.bitmap_data_m.data();
-        map.bitmap_data_length = map.bitmap_data_m.size();
-
-        map.sound_data_m = sounds_data;
-        map.sound_data = map.sound_data_m.data();
-        map.sound_data_length = map.sound_data_m.size();
-
-        map.loc_data_m = loc_data;
-        map.loc_data = map.loc_data_m.data();
-        map.loc_data_length = map.loc_data_m.size();
-        
+        map.bitmap_data = std::move(bitmaps_data);
+        map.sound_data = std::move(sounds_data);
+        map.loc_data = std::move(loc_data);
         map.load_map();
         return map;
     }
@@ -113,7 +93,7 @@ namespace Invader {
                     }
                     
                     // Okay we're good
-                    this->data_m = Compression::decompress_map_data(data, data_size);
+                    this->data = Compression::decompress_map_data(data, data_size);
                     this->compressed = compression_type;
                 }
             }
@@ -126,11 +106,11 @@ namespace Invader {
             // If not, maybe it's MCC?
             else if(Compression::ceaflate_compression_size(data, data_size).has_value()) {
                 this->compressed = CompressionType::COMPRESSION_TYPE_MCC_DEFLATE;
-                this->data_m = Compression::ceaflate_decompress(data, data_size);
+                this->data = Compression::ceaflate_decompress(data, data_size);
                 
                 // Okay... check the header
-                const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(this->data_m.data());
-                if(this->data_m.size() < sizeof(*potential_header) || !potential_header->valid()) {
+                const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(this->data.data());
+                if(this->data.size() < sizeof(*potential_header) || !potential_header->valid()) {
                     eprintf_error("mcc-compressed map did not have a valid retail/custom edition header");
                     throw InvalidMapException();
                 }
@@ -145,7 +125,7 @@ namespace Invader {
                         throw InvalidMapException();
                 }
                 
-                return this->decompress_if_needed(this->data_m.data(), this->data_m.size()) || true;
+                return this->decompress_if_needed(this->data.data(), this->data.size()) || true;
             }
         }
 
@@ -170,15 +150,16 @@ namespace Invader {
         }
         switch(map_type) {
             case DATA_MAP_CACHE:
-                return this->data;
+                return this->data.data();
             case DATA_MAP_BITMAP:
-                return this->bitmap_data;
+                return this->bitmap_data.data();
             case DATA_MAP_SOUND:
-                return this->sound_data;
+                return this->sound_data.data();
             case DATA_MAP_LOC:
-                return this->loc_data;
+                return this->loc_data.data();
+            default:
+                std::terminate();
         }
-        std::terminate();
     }
 
     const std::byte *Map::get_data(DataMapType map_type) const {
@@ -188,13 +169,13 @@ namespace Invader {
     std::size_t Map::get_data_length(DataMapType map_type) const noexcept {
         switch(map_type) {
             case DATA_MAP_CACHE:
-                return this->data_length;
+                return this->data.size();
             case DATA_MAP_BITMAP:
-                return this->bitmap_data_length;
+                return this->bitmap_data.size();
             case DATA_MAP_SOUND:
-                return this->sound_data_length;
+                return this->sound_data.size();
             case DATA_MAP_LOC:
-                return this->loc_data_length;
+                return this->loc_data.size();
         }
         std::terminate();
     }
@@ -250,7 +231,7 @@ namespace Invader {
 
         // Get header
         auto *header_maybe = reinterpret_cast<const CacheFileHeader *>(this->get_data_at_offset(0, sizeof(CacheFileHeader)));
-        auto &data_length = this->data_length;
+        auto data_length = this->data.size();
 
         auto continue_loading_map = [&data_length](Map &map, auto &header) {
             // Set the engine and type
@@ -450,13 +431,13 @@ namespace Invader {
                     }
 
                     // Next, check if we have that
-                    if(type == DataMapType::DATA_MAP_BITMAP && map.bitmap_data_length == 0) {
+                    if(type == DataMapType::DATA_MAP_BITMAP && map.bitmap_data.size() == 0) {
                         continue;
                     }
-                    else if(type == DataMapType::DATA_MAP_SOUND && map.sound_data_length == 0) {
+                    else if(type == DataMapType::DATA_MAP_SOUND && map.sound_data.size() == 0) {
                         continue;
                     }
-                    else if(type == DataMapType::DATA_MAP_LOC && map.loc_data_length == 0) {
+                    else if(type == DataMapType::DATA_MAP_LOC && map.loc_data.size() == 0) {
                         continue;
                     }
 
@@ -618,42 +599,21 @@ namespace Invader {
     }
 
     Map::Map(Map &&move) {
-        this->data_m = std::move(move.data_m);
-        this->data = move.data;
-        this->data_length = move.data_length;
-        this->bitmap_data_m = std::move(move.bitmap_data_m);
-        this->bitmap_data = move.bitmap_data;
-        this->bitmap_data_length = move.bitmap_data_length;
-        this->loc_data_m = std::move(move.loc_data_m);
-        this->loc_data = move.loc_data;
-        this->loc_data_length = move.loc_data_length;
-        this->sound_data_m = std::move(move.sound_data_m);
-        this->sound_data = move.sound_data;
-        this->sound_data_length = move.sound_data_length;
+        this->data = std::move(move.data);
+        this->bitmap_data = std::move(move.bitmap_data);
+        this->loc_data = std::move(move.loc_data);
+        this->sound_data = std::move(move.sound_data);
         this->engine = move.engine;
         this->type = move.type;
         this->model_data_offset = move.model_data_offset;
         this->model_index_offset = move.model_index_offset;
         this->model_data_size = move.model_data_size;
         this->asset_indices_offset = move.asset_indices_offset;
-
-        if(this->data_m.size()) {
-            this->data = this->data_m.data();
-        }
-        if(this->loc_data_m.size()) {
-            this->loc_data = this->loc_data_m.data();
-        }
-        if(this->sound_data_m.size()) {
-            this->sound_data = this->sound_data_m.data();
-        }
-        if(this->bitmap_data_m.size()) {
-            this->bitmap_data = this->bitmap_data_m.data();
-        }
-
-        move.tags.clear();
-
         this->load_map();
         this->compressed = move.compressed;
+        
+        // Clear tags from old version
+        move.tags.clear();
     }
 
     std::byte *Map::get_internal_asset(std::size_t offset, std::size_t minimum_size) {
