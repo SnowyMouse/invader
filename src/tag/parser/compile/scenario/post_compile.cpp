@@ -101,7 +101,7 @@ namespace Invader::Parser {
         find_decals(*this, workload, bsp_data);
         find_conversations(*this, workload, tag_index, scenario_struct, scenario_data);
         
-        if(bsp_find_warnings) {
+        if(bsp_find_warnings && workload.get_build_parameters()->verbosity > BuildWorkload::BuildParameters::BUILD_VERBOSITY_HIDE_WARNINGS) {
             eprintf_warn_lesser("Use manual BSP indices to silence %s.", bsp_find_warnings == 1 ? "this warning" : "these warnings");
         }
     }
