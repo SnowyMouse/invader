@@ -63,23 +63,6 @@ namespace Invader {
         return map;
     }
 
-    Map Map::map_with_pointer(std::byte *data, std::size_t data_size,
-                              std::byte *bitmaps_data, std::size_t bitmaps_data_size,
-                              std::byte *loc_data, std::size_t loc_data_size,
-                              std::byte *sounds_data, std::size_t sounds_data_size) {
-        Map map;
-        map.data = data;
-        map.data_length = data_size;
-        map.bitmap_data = bitmaps_data;
-        map.bitmap_data_length = bitmaps_data_size;
-        map.loc_data = loc_data;
-        map.loc_data_length = loc_data_size;
-        map.sound_data = sounds_data;
-        map.sound_data_length = sounds_data_size;
-        map.load_map();
-        return map;
-    }
-
     bool Map::decompress_if_needed(const std::byte *data, std::size_t data_size) {
         using namespace Invader::HEK;
         const auto *potential_header = reinterpret_cast<const CacheFileHeader *>(data);

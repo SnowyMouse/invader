@@ -163,26 +163,6 @@ namespace Invader {
                                  std::vector<std::byte> &&sounds_data = std::vector<std::byte>());
 
         /**
-         * Create a Map by using the pointers to the given data, bitmaps, loc, and sound data. The caller is
-         * responsible for ensuring that these pointers are valid for the lifespan of the Map. Compressed maps cannot
-         * be loaded this way.
-         *
-         * @param data              pointer to map data
-         * @param data_size         length of map data
-         * @param bitmaps_data      pointer to bitmaps data
-         * @param bitmaps_data_size length of bitmaps data
-         * @param loc_data          pointer to loc data
-         * @param loc_data_size     length of loc data
-         * @param sounds_data       pointer to sounds data
-         * @param sounds_data_size  length of sounds data
-         * @return                  map
-         */
-        static Map map_with_pointer(std::byte *data, std::size_t data_size,
-                                    std::byte *bitmaps_data = nullptr, std::size_t bitmaps_data_size = 0,
-                                    std::byte *loc_data = nullptr, std::size_t loc_data_size = 0,
-                                    std::byte *sounds_data = nullptr, std::size_t sounds_data_size = 0);
-
-        /**
          * Get the data at the specified offset
          * @param  offset       offset
          * @param  minimum_size minimum number of bytes to guarantee
