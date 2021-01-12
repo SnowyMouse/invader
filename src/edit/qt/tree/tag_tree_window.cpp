@@ -422,22 +422,46 @@ namespace Invader::EditQt {
         // See if we can figure out this path
         File::TagFile tag;
         bool found = false;
-        if(full_path) {
-            for(auto &t : this->get_all_tags()) {
-                if(t.full_path == path) {
-                    tag = t;
-                    found = true;
-                    break;
+        
+        // If fast listing mode is disabled (which is default), we don't need to query the filesystem since we already did that
+        if(!this->fast_listing) {
+            if(full_path) {
+                for(auto &t : this->get_all_tags()) {
+                    if(t.full_path == path) {
+                        tag = t;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                auto preferred_path = File::halo_path_to_preferred_path(path);
+                for(auto &t : this->get_all_tags()) {
+                    if(File::halo_path_to_preferred_path(t.tag_path) == path) {
+                        tag = t;
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
+        
+        // But if fast listing mode is enabled, we have to do that
         else {
             auto preferred_path = File::halo_path_to_preferred_path(path);
-            for(auto &t : this->get_all_tags()) {
-                if(File::halo_path_to_preferred_path(t.tag_path) == path) {
-                    tag = t;
-                    found = true;
-                    break;
+            auto split = File::split_tag_class_extension(preferred_path);
+            
+            if(split.has_value()) {
+                for(auto &i : paths) {
+                    auto full_path = i / preferred_path;
+                    if(std::filesystem::exists(full_path)) {
+                        tag.full_path = full_path;
+                        tag.tag_directory = &i - paths.data();
+                        tag.tag_class_int = split->class_int;
+                        tag.tag_path = split->path;
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
