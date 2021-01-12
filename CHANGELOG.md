@@ -17,6 +17,11 @@ This is used for recording Invader's changes. This changelog is based on
   and Japanese versions, respectively. These have a slightly higher tag space
   than the original English version and use a different build string by default.
   They also use fewer hardcoded strings.
+- invader-edit-qt: Added `-f` which enables fast listing. This results in the
+  tag tree not recursively iterating through each directory. For systems with
+  slow i/o, this can greatly increase startup times, but it also disables all
+  filtering features. Using filtering while this is enabled will result in a
+  dialog popup asking if you want to disable fast listing.
 
 ### Changed
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
