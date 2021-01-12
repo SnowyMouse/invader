@@ -276,6 +276,13 @@ namespace Invader::EditQt {
         if(this->tags_reloading_queued) {
             return;
         }
+        
+        // If we have fast listing mode, we don't need to do much
+        if(this->fast_listing) {
+            this->tags_reloaded_finished(nullptr, 0);
+            return;
+        }
+        
         this->tags_reloading_queued = true;
         this->tag_loading_label->setText("Listing tags...");
         this->tag_loading_label->setStyleSheet("");
@@ -300,8 +307,16 @@ namespace Invader::EditQt {
 
     void TagTreeWindow::tags_reloaded_finished(const std::vector<File::TagFile> *result, int error_count) {
         this->tags_reloading_queued = false;
-        this->set_count_label(result->size());
-        all_tags = *result;
+        
+        if(result) {
+            this->set_count_label(result->size());
+            all_tags = *result;
+        }
+        else {
+            this->set_count_label(0);
+            all_tags.clear();
+        }
+        
         if(error_count) {
             char error_message[256];
             std::snprintf(error_message,sizeof(error_message),"Failed to list %i subdirector%s. Check stderr for more information.", error_count, error_count == 1 ? "y" : "ies");
@@ -312,12 +327,16 @@ namespace Invader::EditQt {
         else {
             this->tag_loading_label->hide();
         }
+        
+        // If we have to open some tags, do it
         if(this->tags_to_open.size()) {
             for(auto &t : this->tags_to_open) {
                 this->open_tag(t.c_str(), this->tags_to_open_full_path);
             }
             this->tags_to_open.clear();
         }
+        
+        // Done
         emit tags_reloaded(this);
     }
 
@@ -628,10 +647,29 @@ namespace Invader::EditQt {
     }
     
     void TagTreeWindow::toggle_filter_visible() {
+        if(this->fast_listing) {
+            QMessageBox mb;
+            mb.setWindowTitle("Fast listing mode is enabled");
+            mb.setText("Filtering cannot be used while fast listing mode is on, and disabling it may take some time. Are you sure you want to do this?");
+            mb.setIcon(QMessageBox::Icon::Question);
+            mb.addButton(QMessageBox::Button::Yes);
+            mb.addButton(QMessageBox::Button::Cancel);
+            if(mb.exec() == QMessageBox::Button::Cancel) {
+                return;
+            }
+            this->set_fast_listing_mode(false);
+        }
+        
         this->filter_widget->setVisible(!this->filter_widget->isVisible());
         this->filter_textbox->setText("");
         if(this->filter_widget->isVisible()) {
             this->filter_textbox->setFocus();
         }
+    }
+    
+    void TagTreeWindow::set_fast_listing_mode(bool mode) {
+        this->fast_listing = mode;
+        this->tag_count_label->setVisible(!mode);
+        this->reload_tags(true);
     }
 }
