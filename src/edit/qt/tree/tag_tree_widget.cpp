@@ -449,7 +449,7 @@ namespace Invader::EditQt {
                 File::TagFile file;
                 auto path_str = path.toStdString();
                 auto split = File::split_tag_class_extension(path_str).value();
-                file.tag_path = split.path;
+                file.tag_path = path_str;
                 file.tag_class_int = split.class_int;
                 file.full_path = path_str;
                 
