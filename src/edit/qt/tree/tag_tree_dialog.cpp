@@ -78,9 +78,14 @@ namespace Invader::EditQt {
         }
         
         // This looks like a find dialogue, so provide a filter option
-        else {
+        else if(!parent_window->fast_listing_mode()) {
             this->path_to_enter->setPlaceholderText("Filter (e.g. *test* matches all tags with \"test\")");
             connect(this->path_to_enter, &QLineEdit::textChanged, this, &TagTreeDialog::match_find_filter);
+        }
+        
+        // Unless we have fast listing mode enabled
+        else {
+            this->path_to_enter->setVisible(false);
         }
 
         // Add our thing
