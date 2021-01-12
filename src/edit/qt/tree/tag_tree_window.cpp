@@ -448,14 +448,34 @@ namespace Invader::EditQt {
         
         // But if fast listing mode is enabled, we have to do that
         else {
-            auto preferred_path = File::halo_path_to_preferred_path(path);
-            auto split = File::split_tag_class_extension(preferred_path);
-            
-            if(split.has_value()) {
+            if(full_path) {
                 for(auto &i : paths) {
-                    auto full_path = i / preferred_path;
-                    if(std::filesystem::exists(full_path)) {
-                        tag.full_path = full_path;
+                    // Find a relative path
+                    std::error_code ec;
+                    auto relative = std::filesystem::relative(path, i, ec);
+                    if(ec) {
+                        continue;
+                    }
+                    
+                    auto split = File::split_tag_class_extension(relative.string());
+                    if(std::filesystem::exists(path)) {
+                        tag.full_path = path;
+                        tag.tag_directory = &i - paths.data();
+                        tag.tag_class_int = split->class_int;
+                        tag.tag_path = split->path;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                auto preferred_path = File::halo_path_to_preferred_path(path);
+                auto split = File::split_tag_class_extension(preferred_path);
+                
+                for(auto &i : paths) {
+                    auto test_full_path = i / preferred_path;
+                    if(std::filesystem::exists(test_full_path)) {
+                        tag.full_path = test_full_path;
                         tag.tag_directory = &i - paths.data();
                         tag.tag_class_int = split->class_int;
                         tag.tag_path = split->path;

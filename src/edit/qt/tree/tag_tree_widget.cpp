@@ -451,7 +451,6 @@ namespace Invader::EditQt {
                 auto split = File::split_tag_class_extension(path_str).value();
                 file.tag_path = path_str;
                 file.tag_class_int = split.class_int;
-                file.full_path = path_str;
                 
                 std::optional<std::filesystem::path> full_path_maybe;
                 std::size_t directory = 0;
@@ -474,6 +473,7 @@ namespace Invader::EditQt {
                 }
                 
                 file.tag_directory = directory;
+                file.full_path = *full_path_maybe;
                 return file;
             }
             return std::nullopt;
