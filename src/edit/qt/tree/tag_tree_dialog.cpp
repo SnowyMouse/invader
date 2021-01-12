@@ -282,13 +282,7 @@ namespace Invader::EditQt {
         // If we're done, do it!
         if(!this->save_class.has_value()) {
             if(r == QDialog::Accepted) {
-                auto *tag = this->tree_widget->get_selected_tag();
-                if(tag) {
-                    this->tag = *tag;
-                }
-                else {
-                    this->tag = std::nullopt;
-                }
+                this->tag = this->tree_widget->get_selected_tag();
             }
             else {
                 this->tag = std::nullopt;
@@ -300,8 +294,8 @@ namespace Invader::EditQt {
 
     void TagTreeDialog::on_double_click(QTreeWidgetItem *, int) {
         // Double clicked a tag
-        auto *selected_tag = this->tree_widget->get_selected_tag();
-        if(selected_tag) {
+        auto selected_tag = this->tree_widget->get_selected_tag();
+        if(selected_tag.has_value()) {
             if(save_class.has_value()) {
                 this->path_to_enter->setText(Invader::File::split_tag_class_extension(selected_tag->tag_path.c_str())->path.c_str());
                 this->do_save_as();
@@ -314,8 +308,8 @@ namespace Invader::EditQt {
 
     void TagTreeDialog::on_click(QTreeWidgetItem *item, int) {
         // Clicked a tag
-        auto *selected_tag = this->tree_widget->get_selected_tag();
-        if(selected_tag) {
+        auto selected_tag = this->tree_widget->get_selected_tag();
+        if(selected_tag.has_value()) {
             this->path_to_enter->setText(Invader::File::split_tag_class_extension(selected_tag->tag_path.c_str())->path.c_str());
         }
 

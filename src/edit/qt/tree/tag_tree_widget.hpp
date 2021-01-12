@@ -39,9 +39,9 @@ namespace Invader::EditQt {
 
         /**
          * Get the tag file
-         * @return pointer to tag file if one is selected or nullptr
+         * @return tag file if one is selected or nullopt
          */
-        const File::TagFile *get_selected_tag() const noexcept;
+        std::optional<File::TagFile> get_selected_tag() const noexcept;
         
         /**
          * If a directory is selected, get it
@@ -61,6 +61,8 @@ namespace Invader::EditQt {
         TagTreeWindow *last_window;
         bool show_directories;
         void refresh_view(TagTreeWindow *window);
+        
+        void load_directories(QTreeWidgetItem *item);
     };
 }
 

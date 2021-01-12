@@ -384,22 +384,22 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::perform_open() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             this->open_tag(tag->full_path.string().c_str(), true);
         }
     }
 
     void TagTreeWindow::perform_copy_virtual_path() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(Invader::File::halo_path_to_preferred_path(tag->tag_path).c_str());
         }
     }
 
     void TagTreeWindow::perform_copy_virtual_path_without_extension() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(Invader::File::split_tag_class_extension(File::halo_path_to_preferred_path(tag->tag_path).c_str()).value().path.c_str());
         }
     }
@@ -412,8 +412,8 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::perform_copy_file_path() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             QGuiApplication::clipboard()->setText(std::filesystem::absolute(tag->full_path).string().c_str());
         }
     }
@@ -549,8 +549,8 @@ namespace Invader::EditQt {
     }
 
     bool TagTreeWindow::perform_delete() {
-        const auto *tag = this->tag_view->get_selected_tag();
-        if(!tag) {
+        const auto tag = this->tag_view->get_selected_tag();
+        if(tag.has_value()) {
             return false;
         }
 
@@ -593,7 +593,7 @@ namespace Invader::EditQt {
     }
 
     void TagTreeWindow::show_context_menu(const QPoint &point) {
-        if(this->tag_view->get_selected_tag()) {
+        if(this->tag_view->get_selected_tag().has_value()) {
             QMenu right_click_menu;
 
             auto *copy_virtual_path = right_click_menu.addAction("Copy virtual path");

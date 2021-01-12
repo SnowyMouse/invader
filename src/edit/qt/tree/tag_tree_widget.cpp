@@ -22,198 +22,280 @@ namespace Invader::EditQt {
     void TagTreeWidget::refresh_view(TagTreeWindow *window) {
         this->clear();
         this->last_window = window;
-
-        // Get the tags we have
-        const auto &all_tags = window->get_all_tags();
-        std::size_t all_tags_size = all_tags.size();
-        std::vector<bool> all_tags_ignored(all_tags_size, false);
-
-        // Next, go through each tag and filter out anything we don't need (i.e. lower-priority tags, non-matching extensions)
-        for(std::size_t i = 0; i < all_tags_size; i++) {
-            bool remove = false;
-            auto &tag = all_tags[i];
-
-            // First, can we drop it simply because it's out of our current scope?
-            if(this->tag_arrays_to_show.has_value()) {
-                remove = true;
-                for(auto t : *this->tag_arrays_to_show) {
-                    if(tag.tag_directory == t) {
-                        remove = false;
-                        break;
-                    }
-                }
-            }
-
-            // Next, can we filter it out based on tag class alone?
-            if(!remove && this->filter.has_value() && this->filter->size() > 0) {
-                remove = true;
-                for(auto f : *this->filter) {
-                    if(tag.tag_class_int == f) {
-                        remove = false;
-                        break;
-                    }
-                }
-            }
-            
-            // Also, do we have this in our filters list?
-            if(!remove && this->expressions.has_value()) {
-                remove = true;
-                for(auto &f : *this->expressions) {
-                    if(File::path_matches(tag.tag_path.c_str(), f.c_str())) {
-                        remove = false;
-                        break;
-                    }
-                }
-            }
-
-            // Lastly, is this superceded by anything?
-            if(!remove && tag.tag_directory > 0) {
-                for(std::size_t j = 0; j < all_tags_size; j++) {
-                    // If we're the same, continue
-                    if(j == i) {
-                        continue;
-                    }
-
-                    // If we're a lower priority, or the class isn't the same, continue too
-                    auto &other_tag = all_tags[j];
-                    if(other_tag.tag_directory > tag.tag_directory || other_tag.tag_class_int != tag.tag_class_int) {
-                        continue;
-                    }
-
-                    // It all comes down to this. Do we have the same tag path?
-                    if(other_tag.tag_path == tag.tag_path) {
-                        remove = true;
-                        break;
-                    }
-                }
-            }
-
-            if(remove) {
-                all_tags_ignored[i] = true;
-            }
-        }
-
-        // Add the tags to the view
-        this->total_tags = all_tags.size();
+        
         QIcon dir_icon = QFileIconProvider().icon(QFileIconProvider::Folder);
         QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
+        
+        // If fast listing mode is enabled
+        if(!window->fast_listing_mode()) {
+            // Get the tags we have
+            const auto &all_tags = window->get_all_tags();
+            std::size_t all_tags_size = all_tags.size();
+            std::vector<bool> all_tags_ignored(all_tags_size, false);
 
-        for(std::size_t i = 0; i < all_tags_size; i++) {
-            bool hide = all_tags_ignored[i];
-            if(hide && !show_directories) {
-                continue;
-            }
+            // Next, go through each tag and filter out anything we don't need (i.e. lower-priority tags, non-matching extensions)
+            for(std::size_t i = 0; i < all_tags_size; i++) {
+                bool remove = false;
+                auto &tag = all_tags[i];
 
-            auto &t = all_tags[i];
-            QTreeWidgetItem *dir_item = nullptr;
+                // First, can we drop it simply because it's out of our current scope?
+                if(this->tag_arrays_to_show.has_value()) {
+                    remove = true;
+                    for(auto t : *this->tag_arrays_to_show) {
+                        if(tag.tag_directory == t) {
+                            remove = false;
+                            break;
+                        }
+                    }
+                }
 
-            std::vector<std::string> separate_tag_path;
-            auto prep = File::preferred_path_to_halo_path(t.tag_path);
-            std::size_t last_separator = 0;
-            std::size_t length = prep.size();
+                // Next, can we filter it out based on tag class alone?
+                if(!remove && this->filter.has_value() && this->filter->size() > 0) {
+                    remove = true;
+                    for(auto f : *this->filter) {
+                        if(tag.tag_class_int == f) {
+                            remove = false;
+                            break;
+                        }
+                    }
+                }
+                
+                // Also, do we have this in our filters list?
+                if(!remove && this->expressions.has_value()) {
+                    remove = true;
+                    for(auto &f : *this->expressions) {
+                        if(File::path_matches(tag.tag_path.c_str(), f.c_str())) {
+                            remove = false;
+                            break;
+                        }
+                    }
+                }
 
-            for(std::size_t i = 0; i < length; i++) {
-                if(prep[i] == '\\') {
-                    separate_tag_path.emplace_back(prep.c_str() + last_separator, (i - last_separator));
-                    last_separator = ++i;
+                // Lastly, is this superceded by anything?
+                if(!remove && tag.tag_directory > 0) {
+                    for(std::size_t j = 0; j < all_tags_size; j++) {
+                        // If we're the same, continue
+                        if(j == i) {
+                            continue;
+                        }
+
+                        // If we're a lower priority, or the class isn't the same, continue too
+                        auto &other_tag = all_tags[j];
+                        if(other_tag.tag_directory > tag.tag_directory || other_tag.tag_class_int != tag.tag_class_int) {
+                            continue;
+                        }
+
+                        // It all comes down to this. Do we have the same tag path?
+                        if(other_tag.tag_path == tag.tag_path) {
+                            remove = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(remove) {
+                    all_tags_ignored[i] = true;
                 }
             }
-            separate_tag_path.emplace_back(prep.c_str() + last_separator, (length - last_separator));
 
-            std::size_t element_count = separate_tag_path.size();
-            for(std::size_t e = 0; e < element_count; e++) {
-                auto &element = separate_tag_path[e];
-                bool found = false;
+            // Add the tags to the view
+            this->total_tags = all_tags.size();
 
-                // See if we have it
-                if(dir_item == nullptr) {
-                    int count = this->topLevelItemCount();
-                    for(int i = 0; i < count; i++) {
-                        auto *item = this->topLevelItem(i);
-                        if(item->text(0) == element.c_str()) {
-                            found = true;
-                            dir_item = item;
-                            break;
+            for(std::size_t i = 0; i < all_tags_size; i++) {
+                bool hide = all_tags_ignored[i];
+                if(hide && !show_directories) {
+                    continue;
+                }
+
+                auto &t = all_tags[i];
+                QTreeWidgetItem *dir_item = nullptr;
+
+                std::vector<std::string> separate_tag_path;
+                auto prep = File::preferred_path_to_halo_path(t.tag_path);
+                std::size_t last_separator = 0;
+                std::size_t length = prep.size();
+
+                for(std::size_t i = 0; i < length; i++) {
+                    if(prep[i] == '\\') {
+                        separate_tag_path.emplace_back(prep.c_str() + last_separator, (i - last_separator));
+                        last_separator = ++i;
+                    }
+                }
+                separate_tag_path.emplace_back(prep.c_str() + last_separator, (length - last_separator));
+
+                std::size_t element_count = separate_tag_path.size();
+                for(std::size_t e = 0; e < element_count; e++) {
+                    auto &element = separate_tag_path[e];
+                    bool found = false;
+
+                    // See if we have it
+                    if(dir_item == nullptr) {
+                        int count = this->topLevelItemCount();
+                        for(int i = 0; i < count; i++) {
+                            auto *item = this->topLevelItem(i);
+                            if(item->text(0) == element.c_str()) {
+                                found = true;
+                                dir_item = item;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        int count = dir_item->childCount();
+                        for(int i = 0; i < count; i++) {
+                            auto *item = dir_item->child(i);
+                            if(item->text(0) == element.c_str()) {
+                                found = true;
+                                dir_item = item;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Bail early if we're hiding this
+                    if(e + 1 == element_count && hide) {
+                        break;
+                    }
+
+                    // If we don't have it, make it
+                    if(!found) {
+                        auto *new_dir_item = new QTreeWidgetItem(QStringList(element.c_str()));
+                        this->setContentsMargins(0, 0, 0, 0);
+                        if(dir_item == nullptr) {
+                            this->addTopLevelItem(new_dir_item);
+                        }
+                        else {
+                            dir_item->addChild(new_dir_item);
+                        }
+                        dir_item = new_dir_item;
+                    }
+
+                    // If it's the last one, all is well then
+                    if(e + 1 == element_count) {
+                        dir_item->setData(0, Qt::UserRole, QVariant::fromValue(reinterpret_cast<std::uintptr_t>(&t)));
+                        if(!found) {
+                            dir_item->setIcon(0, file_icon);
+                        }
+                        
+                        // Make size text
+                        char size[12];
+                        std::uint64_t file_size;
+                        try {
+                            file_size = std::filesystem::file_size(t.full_path);
+                        }
+                        catch(std::exception &e) {
+                            eprintf_error("Failed to get file size for %s: %s", t.full_path.string().c_str(), e.what());
+                            file_size = 0;
+                        }
+                        if(file_size > 1024 * 1024) {
+                            std::snprintf(size, sizeof(size), "%.02f MiB", file_size / 1024.0 / 1024.0);
+                        }
+                        else if(file_size > 1024) {
+                            std::snprintf(size, sizeof(size), "%.02f KiB", file_size / 1024.0);
+                        }
+                        else if(file_size > 0) {
+                            std::snprintf(size, sizeof(size), "%zu byte%s", file_size, file_size == 1 ? "" : "s");
+                        }
+                        else {
+                            std::strcpy(size, "Unknown");
+                        }
+                        
+                        // Make hover text
+                        char text[1024];
+                        std::snprintf(text, sizeof(text),
+                            "Virtual path: %s\n"
+                            "File path: %s\n"
+                            "File size: %s"
+                        , t.tag_path.c_str(),  t.full_path.string().c_str(), size);
+                        dir_item->setToolTip(0, text);
+                        dir_item->setToolTip(1, text);
+                        dir_item->setText(1, size);
+                    }
+                    else if(!found) {
+                        dir_item->setIcon(0, dir_icon);
+                    }
+                }
+            }
+        }
+        
+        // Otherwise, show the top level first, and we'll worry about the rest later
+        else {
+            this->load_directories(nullptr);
+            connect(this, &TagTreeWidget::itemExpanded, this, &TagTreeWidget::load_directories);
+        }
+
+        this->resort_elements();
+    }
+    
+    void TagTreeWidget::load_directories(QTreeWidgetItem *item) {
+        std::filesystem::path start;
+        auto recursive_backwards_memery = [&start](QTreeWidgetItem *item, auto &recursion) -> void {
+            if(item) {
+                recursion(item->parent(), recursion);
+                start = start / item->text(0).toStdString();
+            }
+        };
+        recursive_backwards_memery(item, recursive_backwards_memery);
+        
+        // Remove anything deemed unsatisfactory to the state
+        if(item) {
+            while(item->childCount()) {
+                item->removeChild(item->child(0));
+            }
+        }
+        else {
+            this->clear();
+        }
+        
+        std::vector<std::string> top_level_directories;
+        std::vector<std::string> top_level_tags;
+        
+        QIcon dir_icon = QFileIconProvider().icon(QFileIconProvider::Folder);
+        QIcon file_icon = QFileIconProvider().icon(QFileIconProvider::File);
+        
+        // Go through each tag directory
+        for(auto &t : this->last_window->get_tag_directories()) {
+            for(auto &q : std::filesystem::directory_iterator(t / start)) {
+                QTreeWidgetItem *new_item;
+                bool directory = q.is_directory();
+                auto relative = std::filesystem::relative(q.path(), t);
+                if(!directory) {
+                    auto path_split = File::split_tag_class_extension(relative);
+                    
+                    // No valid extension? Don't show it then.
+                    if(!path_split.has_value()) {
+                        continue;
+                    }
+                    
+                    new_item = new QTreeWidgetItem(QStringList(relative.filename().string().c_str()));
+                    new_item->setIcon(0, file_icon);
+                    new_item->setData(0, Qt::UserRole, QVariant::fromValue(QString(relative.string().c_str())));
+                    
+                    if(this->filter.has_value()) {
+                        new_item->setDisabled(true);
+                        for(auto &i : *this->filter) {
+                            if(i == path_split->class_int) {
+                                new_item->setDisabled(false);
+                                break;
+                            }
                         }
                     }
                 }
                 else {
-                    int count = dir_item->childCount();
-                    for(int i = 0; i < count; i++) {
-                        auto *item = dir_item->child(i);
-                        if(item->text(0) == element.c_str()) {
-                            found = true;
-                            dir_item = item;
-                            break;
-                        }
-                    }
+                    new_item = new QTreeWidgetItem(QStringList(relative.filename().string().c_str()));
+                    new_item->setIcon(0, dir_icon);
+                    new_item->addChild(new QTreeWidgetItem());
                 }
-
-                // Bail early if we're hiding this
-                if(e + 1 == element_count && hide) {
-                    break;
+                
+                if(item) {
+                    item->addChild(new_item);
                 }
-
-                // If we don't have it, make it
-                if(!found) {
-                    auto *new_dir_item = new QTreeWidgetItem(QStringList(element.c_str()));
-                    this->setContentsMargins(0, 0, 0, 0);
-                    if(dir_item == nullptr) {
-                        this->addTopLevelItem(new_dir_item);
-                    }
-                    else {
-                        dir_item->addChild(new_dir_item);
-                    }
-                    dir_item = new_dir_item;
-                }
-
-                // If it's the last one, all is well then
-                if(e + 1 == element_count) {
-                    dir_item->setData(0, Qt::UserRole, QVariant::fromValue(reinterpret_cast<std::uintptr_t>(&t)));
-                    if(!found) {
-                        dir_item->setIcon(0, file_icon);
-                    }
-                    
-                    // Make size text
-                    char size[12];
-                    std::uint64_t file_size;
-                    try {
-                        file_size = std::filesystem::file_size(t.full_path);
-                    }
-                    catch(std::exception &e) {
-                        eprintf_error("Failed to get file size for %s: %s", t.full_path.string().c_str(), e.what());
-                        file_size = 0;
-                    }
-                    if(file_size > 1024 * 1024) {
-                        std::snprintf(size, sizeof(size), "%.02f MiB", file_size / 1024.0 / 1024.0);
-                    }
-                    else if(file_size > 1024) {
-                        std::snprintf(size, sizeof(size), "%.02f KiB", file_size / 1024.0);
-                    }
-                    else if(file_size > 0) {
-                        std::snprintf(size, sizeof(size), "%zu byte%s", file_size, file_size == 1 ? "" : "s");
-                    }
-                    else {
-                        std::strcpy(size, "Unknown");
-                    }
-                    
-                    // Make hover text
-                    char text[1024];
-                    std::snprintf(text, sizeof(text),
-                        "Virtual path: %s\n"
-                        "File path: %s\n"
-                        "File size: %s"
-                    , t.tag_path.c_str(),  t.full_path.string().c_str(), size);
-                    dir_item->setToolTip(0, text);
-                    dir_item->setToolTip(1, text);
-                    dir_item->setText(1, size);
-                }
-                else if(!found) {
-                    dir_item->setIcon(0, dir_icon);
+                else {
+                    this->addTopLevelItem(new_item);
                 }
             }
         }
-
+        
         this->resort_elements();
     }
 
@@ -325,20 +407,57 @@ namespace Invader::EditQt {
         }
     }
 
-    const File::TagFile *TagTreeWidget::get_selected_tag() const noexcept {
+    std::optional<File::TagFile> TagTreeWidget::get_selected_tag() const noexcept {
         auto selected_items = this->selectedItems();
+        
         if(selected_items.size()) {
             auto data = selected_items[0]->data(0, Qt::UserRole);
-            return reinterpret_cast<const File::TagFile *>(data.value<std::uintptr_t>());
+            auto ptr = data.value<std::uintptr_t>();
+            if(ptr) {
+                return *reinterpret_cast<const File::TagFile *>(ptr);
+            }
+            auto path = data.value<QString>();
+            if(!path.isEmpty()) {
+                File::TagFile file;
+                auto path_str = path.toStdString();
+                auto split = File::split_tag_class_extension(path_str).value();
+                file.tag_path = split.path;
+                file.tag_class_int = split.class_int;
+                file.full_path = path_str;
+                
+                std::optional<std::filesystem::path> full_path_maybe;
+                std::size_t directory = 0;
+                
+                // Find it... again
+                auto &dirs = this->last_window->get_tag_directories();
+                for(auto &t : dirs) {
+                    auto path = t / path_str;
+                    if(std::filesystem::exists(path)) {
+                        full_path_maybe = path;
+                        directory = &t - dirs.data();
+                        break;
+                    }
+                }
+                
+                // Not found? Guess it was removed lol
+                if(!full_path_maybe.has_value()) {
+                    delete selected_items[0];
+                    return std::nullopt;
+                }
+                
+                file.tag_directory = directory;
+                return file;
+            }
+            return std::nullopt;
         }
         else {
-            return nullptr;
+            return std::nullopt;
         }
     }
     
     std::optional<std::string> TagTreeWidget::get_selected_directory() const noexcept {
         // If we have a tag selected, do nothing
-        if(this->get_selected_tag()) {
+        if(!this->get_selected_tag().has_value()) {
             return std::nullopt;
         }
         
