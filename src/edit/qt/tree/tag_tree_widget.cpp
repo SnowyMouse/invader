@@ -288,10 +288,38 @@ namespace Invader::EditQt {
                 }
                 
                 if(item) {
-                    item->addChild(new_item);
+                    bool duplicate = false;
+                    for(int i = 0; i < item->childCount(); i++) {
+                        if(item->child(i)->text(0) == new_item->text(0)) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    // If it already exists, delete it. Otherwise add it.
+                    if(duplicate) {
+                        delete new_item;
+                    }
+                    else {
+                        item->addChild(new_item);
+                    }
                 }
                 else {
-                    this->addTopLevelItem(new_item);
+                    bool duplicate = false;
+                    for(int i = 0; i < this->topLevelItemCount(); i++) {
+                        if(this->topLevelItem(i)->text(0) == new_item->text(0)) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    
+                    // If it already exists, delete it. Otherwise add it.
+                    if(duplicate) {
+                        delete new_item;
+                    }
+                    else {
+                        this->addTopLevelItem(new_item);
+                    }
                 }
             }
         }
