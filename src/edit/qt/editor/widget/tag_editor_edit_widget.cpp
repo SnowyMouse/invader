@@ -905,9 +905,15 @@ namespace Invader::EditQt {
             }
         }
         
-        // If fast listing mode is enabled, we COULD check the filesystem, but that's slow, so we'll just assume it exists instead
+        // If fast listing mode is enabled, query the filesystem
         else {
-            found = true;
+            auto path_with_extension = preferred_path + "." + HEK::tag_class_to_extension(dependency.tag_class_int);
+            for(auto &i : this->get_editor_window()->get_parent_window()->get_tag_directories()) {
+                if(std::filesystem::exists(i / path_with_extension)) {
+                    found = true;
+                    break;
+                }
+            }
         }
 
         // Color based on if we found it or it's empty, or we didn't find it
