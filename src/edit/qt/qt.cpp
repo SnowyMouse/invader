@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     options.emplace_back("tags", 't', 1, "Use the specified tags directory. Use multiple times to add more directories, ordered by precedence.", "<dir>");
     options.emplace_back("no-safeguards", 'n', 0, "Allow all tag data to be edited (proceed at your own risk)");
     options.emplace_back("fs-path", 'P', 0, "Use a filesystem path for the tag path if specifying a tag.");
-    options.emplace_back("fast-listing", 'f', 0, "Use fast listing mode (disables filtering)");
+    options.emplace_back("listing-mode", 'L', 1, "Set the listing behavior. Can be: fast, recursive (default: fast on win32, recursive otherwise)");
 
     static constexpr char DESCRIPTION[] = "Edit tag files.";
     static constexpr char USAGE[] = "[options] [<tag1> [tag2] [...]]";
@@ -37,7 +37,11 @@ int main(int argc, char **argv) {
         bool void_warranty = false;
         bool disable_safeguards = false;
         bool fs_path = false;
+        #ifdef _WIN32
+        bool fast_listing = true;
+        #else
         bool fast_listing = false;
+        #endif
     } edit_qt_options;
 
     auto remaining_arguments = CommandLineOption::parse_arguments<EditQtOption &>(argc, argv, options, USAGE, DESCRIPTION, 0, 65535, edit_qt_options, [](char opt, const std::vector<const char *> &arguments, auto &edit_qt_options) {
@@ -58,8 +62,17 @@ int main(int argc, char **argv) {
                 edit_qt_options.fs_path = true;
                 break;
 
-            case 'f':
-                edit_qt_options.fast_listing = true;
+            case 'L':
+                if(std::strcmp(arguments[0], "fast") == 0) {
+                    edit_qt_options.fast_listing = true;
+                }
+                else if(std::strcmp(arguments[0], "recursive") == 0) {
+                    edit_qt_options.fast_listing = false;
+                }
+                else {
+                    eprintf_error("Unknown listing mode %s", arguments[0]);
+                    std::exit(EXIT_FAILURE);
+                }
                 break;
         }
     });

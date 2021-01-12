@@ -693,8 +693,8 @@ namespace Invader::EditQt {
     void TagTreeWindow::toggle_filter_visible() {
         if(this->fast_listing) {
             QMessageBox mb;
-            mb.setWindowTitle("Fast listing mode is enabled");
-            mb.setText("Filtering cannot be used while fast listing mode is on. Disable fast listing?");
+            mb.setWindowTitle("Recursive listing mode is currently disabled");
+            mb.setText("Recursive listing mode needs to be enabled in order to use filtering. Enable recursive listing mode?");
             mb.setIcon(QMessageBox::Icon::Question);
             mb.addButton(QMessageBox::Button::Yes);
             mb.addButton(QMessageBox::Button::Cancel);
