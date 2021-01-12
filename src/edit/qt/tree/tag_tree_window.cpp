@@ -570,7 +570,7 @@ namespace Invader::EditQt {
 
     bool TagTreeWindow::perform_delete() {
         const auto tag = this->tag_view->get_selected_tag();
-        if(tag.has_value()) {
+        if(!tag.has_value()) {
             return false;
         }
 
