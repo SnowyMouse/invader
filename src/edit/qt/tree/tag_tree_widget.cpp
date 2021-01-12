@@ -260,7 +260,7 @@ namespace Invader::EditQt {
                 bool directory = q.is_directory();
                 auto relative = std::filesystem::relative(q.path(), t);
                 if(!directory) {
-                    auto path_split = File::split_tag_class_extension(relative);
+                    auto path_split = File::split_tag_class_extension(relative.string());
                     
                     // No valid extension? Don't show it then.
                     if(!path_split.has_value()) {
