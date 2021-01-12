@@ -694,7 +694,7 @@ namespace Invader::EditQt {
         if(this->fast_listing) {
             QMessageBox mb;
             mb.setWindowTitle("Fast listing mode is enabled");
-            mb.setText("Filtering cannot be used while fast listing mode is on, and disabling it may take some time. Are you sure you want to do this?");
+            mb.setText("Filtering cannot be used while fast listing mode is on. Disable fast listing?");
             mb.setIcon(QMessageBox::Icon::Question);
             mb.addButton(QMessageBox::Button::Yes);
             mb.addButton(QMessageBox::Button::Cancel);
