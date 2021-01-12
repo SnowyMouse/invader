@@ -855,7 +855,9 @@ namespace Invader::EditQt {
         if(preferred_path == "") {
             found = true;
         }
-        else {
+        
+        // If fast listing mode is disabled, check if it exists
+        else if(!this->get_editor_window()->get_parent_window()->fast_listing_mode()) {
             // First pass: Check to see if the exact path exists
             for(auto &t : this->get_editor_window()->get_parent_window()->get_all_tags()) {
                 if(t.tag_class_int == dependency.tag_class_int && File::split_tag_class_extension(File::halo_path_to_preferred_path(t.tag_path)).value().path == preferred_path) {
@@ -901,6 +903,11 @@ namespace Invader::EditQt {
                     }
                 }
             }
+        }
+        
+        // If fast listing mode is enabled, we COULD check the filesystem, but that's slow, so we'll just assume it exists instead
+        else {
+            found = true;
         }
 
         // Color based on if we found it or it's empty, or we didn't find it
