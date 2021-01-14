@@ -221,13 +221,21 @@ namespace Invader::EditQt {
         // Otherwise, show the top level first, and we'll worry about the rest later
         else {
             this->load_directories(nullptr);
-            connect(this, &TagTreeWidget::itemExpanded, this, &TagTreeWidget::load_directories);
         }
 
+        // Connect this in case we expand any items while in fast mode
+        connect(this, &TagTreeWidget::itemExpanded, this, &TagTreeWidget::load_directories);
+        
+        // Done!
         this->resort_elements();
     }
     
     void TagTreeWidget::load_directories(QTreeWidgetItem *item) {
+        // If fast listing mode is disabled, do nothing
+        if(!this->last_window->fast_listing_mode()) {
+            return;
+        }
+        
         std::filesystem::path start;
         auto recursive_backwards_memery = [&start](QTreeWidgetItem *item, auto &recursion) -> void {
             if(item) {
