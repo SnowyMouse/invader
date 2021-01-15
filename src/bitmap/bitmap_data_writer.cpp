@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include "libtxc_dxtn/txc_dxtn.h"
-
 #include "bitmap_data_writer.hpp"
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/printf.hpp>
 #include <algorithm>
+#include <squish.h>
 
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
@@ -354,22 +353,22 @@ namespace Invader {
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
-                    CompressionFormat format;
                     std::size_t block_size;
                     static const constexpr std::size_t block_length = 4;
+                    int flags = squish::kColourIterativeClusterFit;
                     
                     switch(bitmap.format) {
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                            format = alpha_present ? CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : CompressionFormat::GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
                             block_size = sizeof(std::uint64_t);
+                            flags |= squish::kDxt1;
                             break;
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                            format = CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
                             block_size = sizeof(std::uint64_t) * 2;
+                            flags |= squish::kDxt3;
                             break;
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                            format = CompressionFormat::GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                             block_size = sizeof(std::uint64_t) * 2;
+                            flags |= squish::kDxt5;
                             break;
                         default:
                             std::terminate();
@@ -402,9 +401,8 @@ namespace Invader {
                                     }
                                 }
                                 
-                                
                                 auto *data = dxt_data.data() + dxt_data.size() - block_size;
-                                tx_compress_dxtn(4, block_width, block_height, reinterpret_cast<const std::uint8_t *>(block_to_compress), format, reinterpret_cast<std::uint8_t *>(data), block_length);
+                                squish::Compress(reinterpret_cast<const squish::u8 *>(block_to_compress), data, flags);
                             }
                         }
                         

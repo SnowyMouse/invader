@@ -26,6 +26,8 @@ This is used for recording Invader's changes. This changelog is based on
 - invader-edit-qt: Added alpha support to DXT1 decoding
 
 ### Changed
+- invader: Switched DXT compression/decompression to libsquish. DXTn quality
+  should be a bit better now!
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
   Take care that if your version of the game does not support your map's file
   size, it will crash if you try to load it.

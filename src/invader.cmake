@@ -82,8 +82,6 @@ set(INVADER_SOURCE_FILES
     src/build/build_workload.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
-    src/bitmap/libtxc_dxtn/txc_compress_dxtn.c
-    src/bitmap/libtxc_dxtn/txc_fetch_dxtn.c
     src/error_handler/error_handler.cpp
     src/script/compiler.cpp
     src/script/script_tree.cpp
@@ -250,4 +248,4 @@ set_source_files_properties(src/bitmap/stb/stb_impl.c PROPERTIES COMPILE_FLAGS -
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${ZLIB_INCLUDE_DIRS})
 
 # Link against everything
-target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES})
+target_link_libraries(invader invader-bitmap-p8-palette ${CMAKE_THREAD_LIBS_INIT} zstd ${ZLIB_LIBRARIES} ${DEP_AUDIO_LIBRARIES} squish)
