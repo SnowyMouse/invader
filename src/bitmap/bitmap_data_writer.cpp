@@ -448,7 +448,7 @@ namespace Invader {
 
             #define BYTES_TO_MIB(bytes) (bytes / 1024.0F / 1024.0F)
 
-            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s%s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), (bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 && alpha_present != AlphaType::ALPHA_TYPE_NONE) ? "a" : "", BYTES_TO_MIB(current_bitmap_pixels.size()));
+            oprintf("    Bitmap #%zu: %ux%u, %u mipmap%s, %s%s - %.03f MiB\n", i, scanned_color_plate.bitmaps[i].width, scanned_color_plate.bitmaps[i].height, mipmap_count, mipmap_count == 1 ? "" : "s", bitmap_data_format_name(bitmap.format), (bitmap.format == BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1 && alpha_present != AlphaType::ALPHA_TYPE_NONE) ? " with alpha" : "", BYTES_TO_MIB(current_bitmap_pixels.size()));
         }
     }
 }
