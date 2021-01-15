@@ -11,10 +11,6 @@ if(NOT DEFINED ${INVADER_BITMAP})
 endif()
 
 if(${INVADER_BITMAP})
-    if((NOT ${INVADER_USE_ZLIB}) OR (NOT ${ZLIB_FOUND}))
-        message(FATAL_ERROR "invader-bitmap requires zlib")
-    endif()
-
     add_executable(invader-bitmap
         src/bitmap/bitmap.cpp
         src/bitmap/stb/stb_impl.c

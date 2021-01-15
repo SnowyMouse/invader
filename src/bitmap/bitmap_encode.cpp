@@ -3,7 +3,6 @@
 #include <invader/bitmap/bitmap_encode.hpp>
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/color_plate_pixel.hpp>
-#include "s3tc/s3tc.hpp"
 #include "libtxc_dxtn/txc_dxtn.h"
 
 namespace Invader::BitmapEncode {

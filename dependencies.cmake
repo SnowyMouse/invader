@@ -9,8 +9,6 @@ find_package(TIFF)
 find_package(Freetype)
 find_package(Git)
 
-option(INVADER_USE_ZLIB "set whether or not to use zlib - required for invader-bitmap and MCC map compatibility" ${ZLIB_FOUND})
-
 if(WIN32)
     option(INVADER_WIN32_EXE_STATIC_LINK "set whether or not to make a completely static build of all of the Invader programs" ON)
 endif()
@@ -31,13 +29,6 @@ if(${INVADER_WIN32_EXE_STATIC_LINK})
     set(TIFF_LIBRARIES tiff jpeg lzma)
     set(FREETYPE_LIBRARIES freetype png bz2 harfbuzz graphite2 freetype)
     set(LibArchive_LIBRARIES archive bcrypt bz2 lzma iconv)
-endif()
-
-if(${ZLIB_FOUND} AND ${INVADER_USE_ZLIB})
-    set(DEP_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
-else()
-    set(DEP_ZLIB_LIBRARIES "")
-    add_definitions(-DDISABLE_ZLIB)
 endif()
 
 option(INVADER_USE_AUDIO "set whether or not to use ogg vorbis, FLAC, and secret rabbit code - required for invader-sound as well as certain features of invader-edit-qt and dark circlet" YES)
