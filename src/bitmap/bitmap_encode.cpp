@@ -4,6 +4,7 @@
 #include <invader/tag/hek/class/bitmap.hpp>
 #include <invader/bitmap/color_plate_pixel.hpp>
 #include "s3tc/s3tc.hpp"
+#include "libtxc_dxtn/txc_dxtn.h"
 
 namespace Invader::BitmapEncode {
     static std::vector<std::byte> decode_to_32_bit(const std::byte *input_data, HEK::BitmapDataFormat input_format, std::size_t width, std::size_t height);
@@ -120,51 +121,51 @@ namespace Invader::BitmapEncode {
                 }
             };
             
+            void (*function_to_use)(int, const uint8_t *, int, int, void *);
+            std::size_t block_size;
+            
             switch(input_format) {
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                    for(std::size_t y = 0; y < block_h; y++) {
-                        for(std::size_t x = 0; x < block_w; x++) {
-                            std::uint32_t output[4*4];
-                            S3TCH::DecompressBlockDXT1(0, 0, 4, block_input + x * 8 + y * 8 * block_w, output);
-                            copy_block(output, data.data(), x * 4, y * 4);
-                        }
-                    }
+                    function_to_use = fetch_2d_texel_rgba_dxt1;
+                    block_size = 8;
                     break;
 
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                    for(std::size_t y = 0; y < block_h; y++) {
-                        for(std::size_t x = 0; x < block_w; x++) {
-                            std::uint32_t output[4*4];
-                            // Decompress color
-                            auto *input = block_input + x * 16 + y * 16 * block_w;
-                            S3TCH::DecompressBlockDXT1(0, 0, 4, input + 8, output);
-
-                            // Decompress alpha
-                            auto input_alpha = *reinterpret_cast<const std::uint64_t *>(input);
-                            for(std::uint32_t ya = 0; ya < 4; ya++) {
-                                for(std::uint32_t xa = 0; xa < 4; xa++) {
-                                    auto &oa = output[xa + ya * 4];
-                                    oa &= 0xFFFFFF00;
-                                    oa |= static_cast<std::uint32_t>((input_alpha & 0b1111) / 15.0 * 0xFF);
-                                    input_alpha >>= 4;
-                                }
-                            }
-                            copy_block(output, data.data(), x * 4, y * 4);
-                        }
-                    }
+                    function_to_use = fetch_2d_texel_rgba_dxt3;
+                    block_size = 16;
                     break;
 
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                    for(std::size_t y = 0; y < block_h; y++) {
-                        for(std::size_t x = 0; x < block_w; x++) {
-                            std::uint32_t output[4*4];
-                            S3TCH::DecompressBlockDXT5(0, 0, 4, block_input + x * 16 + y * 16 * block_w, output);
-                            copy_block(output, data.data(), x * 4, y * 4);
-                        }
-                    }
+                    function_to_use = fetch_2d_texel_rgba_dxt5;
+                    block_size = 16;
                     break;
+                    
                 default:
                     std::terminate();
+            }
+            
+            
+            for(std::size_t y = 0; y < block_h; y++) {
+                for(std::size_t x = 0; x < block_w; x++) {
+                    std::uint32_t output[4*4];
+                    
+                    for(std::size_t j = 0; j < 4; j++) {
+                        for(std::size_t i = 0; i < 4; i++) {
+                            std::uint32_t color;
+                            function_to_use(0, block_input + x * block_size + y * block_size * block_w, i, j, &color);
+                            
+                            // Swap red and alpha
+                            color = (color & 0x00FFFF00) | ((color & 0xFF000000) >> 24) | ((color & 0xFF) << 24);
+                            
+                            // Swap green and blue
+                            color = (color & 0xFF0000FF) | ((color & 0xFF0000) >> 8) | ((color & 0xFF00) << 8);
+                            
+                            output[i + j * 4] = color;
+                        }
+                    }
+                    
+                    copy_block(output, data.data(), x * 4, y * 4);
+                }
             }
         };
         

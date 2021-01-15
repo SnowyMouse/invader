@@ -7,15 +7,6 @@
 #include <invader/printf.hpp>
 #include <algorithm>
 
-static inline bool is_power_of_two(std::uint32_t number) {
-    std::uint32_t ones = 0;
-    while(number > 0) {
-        ones += number & 1;
-        number >>= 1;
-    }
-    return ones <= 1;
-}
-
 namespace Invader {
     void write_bitmap_data(const GeneratedBitmapData &scanned_color_plate, std::vector<std::byte> &bitmap_data_pixels, std::vector<Parser::BitmapData> &bitmap_data, BitmapUsage usage, BitmapFormat format, BitmapType bitmap_type, bool palettize, bool dither_alpha, bool dither_red, bool dither_green, bool dither_blue) {
         using namespace Invader::HEK;

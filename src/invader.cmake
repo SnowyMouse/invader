@@ -80,7 +80,6 @@ set(INVADER_SOURCE_FILES
     src/map/tag.cpp
     src/file/file.cpp
     src/build/build_workload.cpp
-    src/bitmap/s3tc/s3tc.cpp
     src/bitmap/swizzle.cpp
     src/bitmap/bitmap_encode.cpp
     src/bitmap/libtxc_dxtn/txc_compress_dxtn.c

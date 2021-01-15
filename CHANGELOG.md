@@ -23,6 +23,7 @@ This is used for recording Invader's changes. This changelog is based on
   tags when a directory is opened. The default setting is `recursive` unless you
   are on win32, which then it is `fast`. Also, filtering is only enabled while
   recursive listing is enabled.
+- invader-edit-qt: Added alpha support to DXT1 decoding
 
 ### Changed
 - invader-build: `-E` now bumps the maximum file size of Xbox maps to 4 GiB.
