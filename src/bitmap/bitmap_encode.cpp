@@ -106,36 +106,18 @@ namespace Invader::BitmapEncode {
         };
         
         auto decode_dxt = [&width, &height, &input_format, &data, &input_data]() {
-            // Get the number of DXT blocks
-            std::size_t block_h = (height + 3) / 4;
-            std::size_t block_w = (width + 3) / 4;
-            const auto *block_input = reinterpret_cast<const std::uint8_t *>(input_data);
-            
-            auto copy_block = [&width, &height](const std::uint32_t *from, HEK::LittleEndian<std::uint32_t> *to, std::size_t to_x, std::size_t to_y) {
-                for(std::uint32_t y = 0; y < 4 && y < height && (y + to_y < height); y++) {
-                    for(std::uint32_t x = 0; x < 4 && x < width && (x + to_x < width); x++) {
-                        std::uint32_t color = from[x + 4 * y];
-                        to[to_x + x + width * (to_y + y)] = ((color & 0xFF) << 24) | (((color >> 24) & 0xFF) << 16) | (((color >> 16) & 0xFF) << 8) | (((color >> 8) & 0xFF));
-                    }
-                }
-            };
-            
-            int flags = squish::kColourIterativeClusterFit;
-            std::size_t block_size;
+            int flags = squish::kSourceBGRA;
             
             switch(input_format) {
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                    block_size = 8;
                     flags |= squish::kDxt1;
                     break;
 
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                    block_size = 16;
                     flags |= squish::kDxt3;
                     break;
 
                 case HEK::BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                    block_size = 16;
                     flags |= squish::kDxt5;
                     break;
                     
@@ -143,23 +125,11 @@ namespace Invader::BitmapEncode {
                     std::terminate();
             }
             
+            squish::DecompressImage(reinterpret_cast<squish::u8 *>(data.data()), width, height, input_data, flags);
             
-            for(std::size_t y = 0; y < block_h; y++) {
-                for(std::size_t x = 0; x < block_w; x++) {
-                    std::uint32_t output[4*4];
-                    
-                    squish::Decompress(reinterpret_cast<squish::u8 *>(output), reinterpret_cast<const void *>(block_input + x * block_size + y * block_size * block_w), flags);
-                    
-                    for(auto &color : output) {
-                        // Swap red and alpha
-                        color = (color & 0x00FFFF00) | ((color & 0xFF000000) >> 24) | ((color & 0xFF) << 24);
-                            
-                        // Swap green and blue
-                        color = (color & 0xFF0000FF) | ((color & 0xFF0000) >> 8) | ((color & 0xFF00) << 8);
-                    }
-                    
-                    copy_block(output, data.data(), x * 4, y * 4);
-                }
+            for(auto &color : data) {
+                // Swap red and blue
+                color = (color & 0xFF00FF00) | ((color & 0xFF0000) >> 16) | ((color & 0xFF) << 16);
             }
         };
         

@@ -354,20 +354,16 @@ namespace Invader {
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
                     std::size_t block_size;
-                    static const constexpr std::size_t block_length = 4;
                     int flags = squish::kColourIterativeClusterFit;
                     
                     switch(bitmap.format) {
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
-                            block_size = sizeof(std::uint64_t);
                             flags |= squish::kDxt1;
                             break;
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
-                            block_size = sizeof(std::uint64_t) * 2;
                             flags |= squish::kDxt3;
                             break;
                         case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5:
-                            block_size = sizeof(std::uint64_t) * 2;
                             flags |= squish::kDxt5;
                             break;
                         default:
@@ -382,29 +378,16 @@ namespace Invader {
                     std::vector<std::byte> dxt_data;
                     
                     for(std::size_t i = 0; i <= mipmap_count; i++) {
-                        for(std::size_t y = 0; y < mipmap_height; y+=block_length) {
-                            for(std::size_t x = 0; x < mipmap_width; x+=block_length) {
-                                dxt_data.insert(dxt_data.end(), block_size, std::byte());
-                                
-                                std::size_t block_width = 4 - (mipmap_width - x) % block_length;
-                                std::size_t block_height = 4 - (mipmap_height - y) % block_length;
-                                
-                                std::uint32_t block_to_compress[block_length*block_length];
-                                for(std::size_t yb = 0; yb < block_height; yb++) {
-                                    for(std::size_t xb = 0; xb < block_width; xb++) {
-                                        std::uint32_t color = first_pixel[x + xb + (y + yb) * mipmap_width].convert_to_32_bit();
-                                        
-                                        // Swap red and blue channels
-                                        color = (color & 0xFF00FF00) | ((color & 0xFF0000) >> 16) | ((color & 0xFF) << 16);
-                                        
-                                        block_to_compress[xb + yb * block_length] = color;
-                                    }
-                                }
-                                
-                                auto *data = dxt_data.data() + dxt_data.size() - block_size;
-                                squish::Compress(reinterpret_cast<const squish::u8 *>(block_to_compress), data, flags);
-                            }
+                        auto size = squish::GetStorageRequirements(mipmap_width, mipmap_height, flags);
+                        dxt_data.insert(dxt_data.end(), size, std::byte());
+                        auto *data = dxt_data.data() + dxt_data.size() - size;
+                        
+                        std::vector<ColorPlatePixel> data_to_compress(first_pixel, first_pixel + mipmap_width * mipmap_height);
+                        for(auto &i : data_to_compress) {
+                            std::swap(i.blue, i.red);
                         }
+                        
+                        squish::CompressImage(reinterpret_cast<const squish::u8 *>(data_to_compress.data()), mipmap_width, mipmap_height, data, flags);
                         
                         first_pixel += mipmap_width * mipmap_height;
                         
