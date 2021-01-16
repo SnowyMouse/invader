@@ -353,7 +353,6 @@ namespace Invader {
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT1:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT3:
                 case BitmapDataFormat::BITMAP_DATA_FORMAT_DXT5: {
-                    std::size_t block_size;
                     int flags = squish::kColourIterativeClusterFit;
                     
                     switch(bitmap.format) {
